@@ -1358,86 +1358,17 @@
           <input type="file" id="stockImportInput" accept="application/json" style="display:none">
           <button class="btn-ghost" onclick="reiniciarStock()">🗑 Reiniciar movimientos</button>
         </div>
-        <div class="hint">«Reiniciar movimientos» borra todo lo que registraste desde acá (entradas y salidas nuevas) y vuelve el stock a la foto original tomada de tu Excel el 15/08/2026. No borra el catálogo de productos ni los cambios que le hayas hecho.</div>
+        <div class="hint">«Reiniciar movimientos» borra todo lo que registraste desde acá (entradas y salidas nuevas) y vuelve el stock al punto de partida, que hoy es <b>cero en todos los productos</b>. No borra el catálogo de productos ni los cambios que le hayas hecho.</div>
       </div>
     </div>
 
     <div>
-      <div class="card">
-        <h2><span class="dot"></span>Inventario — pañol</h2>
-        <div class="summary-tiles" id="stockResumenTiles"></div>
-
-        <label style="margin-top:14px;">Buscar (código o descripción)</label>
-        <input type="text" id="stockBuscar" placeholder="Ej: cable, BPN, terminal...">
-        <div class="checkbox-line" style="margin-top:8px;">
-          <input type="checkbox" id="stockSoloFaltantes">
-          <label style="margin:0;" for="stockSoloFaltantes">Mostrar solo faltantes / poca cantidad (≤3)</label>
+      <div class="card no-print" id="cardStockMov">
+        <div class="card-header-row" id="stockMovCabecera" style="cursor:pointer;" title="Mostrar u ocultar los movimientos">
+          <h2 style="margin:0;"><span class="dot"></span>Movimientos del stock <span id="stockMovBadge" style="font-size:13px;font-weight:600;color:var(--text-soft);"></span></h2>
+          <button type="button" class="btn-ghost" id="stockMovToggleBtn" style="white-space:nowrap;">Ver movimientos ▾</button>
         </div>
-
-        <div style="overflow-x:auto; margin-top:10px;">
-        <table class="hist-table">
-          <thead>
-            <tr><th>Código</th><th>Descripción</th><th>Unidad</th><th>Stock actual</th><th>Estado</th><th>Costo unit.</th><th>Importe</th></tr>
-          </thead>
-          <tbody id="stockTablaBody"></tbody>
-        </table>
-        </div>
-        <div class="hint" id="stockTablaCount" style="margin-top:10px;"></div>
-      </div>
-
-      <div class="card no-print" style="margin-top:18px;">
-        <div class="card-header-row">
-          <h2><span class="dot"></span>Productos del catálogo</h2>
-        </div>
-        <div class="hint" style="margin-top:0;margin-bottom:10px;">Acá se <b>agregan productos nuevos</b>, se <b>corrige el nombre, la unidad o el costo</b> de los que ya están, y se dan de baja los que no se usan más. Los cambios se guardan en la <b>base compartida</b>: los ve todo el equipo al instante, sin necesidad de pasarse un archivo nuevo. Los 232 productos originales del Excel quedan como base y nunca se pierden — una corrección se puede deshacer.</div>
-
-        <div class="row2">
-          <div>
-            <label>Descripción del producto</label>
-            <input type="text" id="catDesc" placeholder="Ej: PRENSACABLE AL 1/2&quot; RE C/TUERCA">
-          </div>
-          <div>
-            <label>Unidad</label>
-            <input type="text" id="catUn" placeholder="c/a, m, Mtr..." value="c/a">
-          </div>
-        </div>
-        <div class="row2">
-          <div>
-            <label>Stock inicial</label>
-            <input type="number" id="catStock" step="0.01" value="0">
-          </div>
-          <div>
-            <label>Costo unitario</label>
-            <input type="number" id="catCosto" step="0.01" value="0">
-          </div>
-        </div>
-        <div class="hint" style="margin-top:2px;">El <b>stock inicial</b> es el punto de partida: los movimientos de entrada y salida se suman y restan sobre ese número. Si el producto es nuevo y todavía no llegó, dejalo en 0 y cargá la entrada cuando llegue.</div>
-        <input type="hidden" id="catEditandoCodigo" value="">
-        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
-          <button type="button" class="btn-primary" id="catGuardarBtn">Guardar producto</button>
-          <button type="button" class="btn-auto" id="catCancelarBtn" style="display:none;">Cancelar edición</button>
-        </div>
-        <div class="hint" id="catMsg" style="margin-top:8px;"></div>
-
-        <label style="margin-top:16px;">Buscar en el catálogo</label>
-        <input type="text" id="catBuscar" placeholder="Ej: prensacable, morseto...">
-        <div class="checkbox-line" style="margin-top:8px;">
-          <input type="checkbox" id="catVerBajas">
-          <label style="margin:0;" for="catVerBajas">Mostrar también los dados de baja</label>
-        </div>
-        <div style="overflow-x:auto; margin-top:10px;">
-        <table class="hist-table">
-          <thead>
-            <tr><th>Código</th><th>Descripción</th><th>Un.</th><th>Stock inicial</th><th>Costo</th><th>Origen</th><th></th></tr>
-          </thead>
-          <tbody id="catTablaBody"></tbody>
-        </table>
-        </div>
-        <div class="hint" id="catTablaCount" style="margin-top:10px;"></div>
-      </div>
-
-      <div class="card no-print" style="margin-top:18px;">
-        <h2><span class="dot"></span>Movimientos del stock compartido</h2>
+        <div id="stockMovCuerpo" style="display:none;">
         <div class="row2">
           <div>
             <label>Buscar (producto, destino, quién)</label>
@@ -1474,8 +1405,87 @@
         </table>
         </div>
         <div class="hint" id="stockMovCount" style="margin-top:10px;"></div>
-        <div class="hint" style="margin-top:4px;">Estos son solo los movimientos NUEVOS registrados desde esta herramienta, por cualquier persona del equipo (no el historial completo de tu Excel). El stock actual de arriba ya los tiene en cuenta. El botón <b>⊘</b> <b>anula</b> un movimiento: deja de contar para el stock pero queda guardado en el registro, con el motivo y quién lo anuló — se puede volver a activar con <b>↺</b>.</div>
+        <div class="hint" style="margin-top:4px;">Estos son solo los movimientos NUEVOS registrados desde esta herramienta, por cualquier persona del equipo (no el historial completo de tu Excel). El stock actual de arriba ya los tiene en cuenta. El botón <b>🖨</b> de cada renglón saca el <b>comprobante de ese movimiento solo</b> (vale de salida o remito de entrada, con lugar para las dos firmas); el <b>🖨 Imprimir / Guardar PDF</b> de arriba saca el listado completo de lo filtrado. El botón <b>⊘</b> <b>anula</b> un movimiento: deja de contar para el stock pero queda guardado en el registro, con el motivo y quién lo anuló — se puede volver a activar con <b>↺</b>.</div>
+        </div>
       </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>Inventario — pañol</h2>
+        <div class="summary-tiles" id="stockResumenTiles"></div>
+
+        <label style="margin-top:14px;">Buscar (código o descripción)</label>
+        <input type="text" id="stockBuscar" placeholder="Ej: cable, BPN, terminal...">
+        <div class="checkbox-line" style="margin-top:8px;">
+          <input type="checkbox" id="stockSoloFaltantes">
+          <label style="margin:0;" for="stockSoloFaltantes">Mostrar solo faltantes / poca cantidad (≤3)</label>
+        </div>
+
+        <div style="overflow-x:auto; margin-top:10px;">
+        <table class="hist-table">
+          <thead>
+            <tr><th>Código</th><th>Descripción</th><th>Unidad</th><th>Stock actual</th><th>Estado</th><th>Costo unit.</th><th>Importe</th></tr>
+          </thead>
+          <tbody id="stockTablaBody"></tbody>
+        </table>
+        </div>
+        <div class="hint" id="stockTablaCount" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="card no-print" style="margin-top:18px;">
+        <div class="card-header-row">
+          <h2><span class="dot"></span>Productos del catálogo</h2>
+        </div>
+        <div class="hint" style="margin-top:0;margin-bottom:10px;">Acá se <b>agregan productos nuevos</b>, se <b>corrige el nombre, la unidad o el costo</b> de los que ya están, y se dan de baja los que no se usan más. Los cambios se guardan en la <b>base compartida</b>: los ve todo el equipo al instante, sin necesidad de pasarse un archivo nuevo. Los 232 productos originales del Excel quedan como base y nunca se pierden — una corrección se puede deshacer.</div>
+        <div class="hint" style="margin-top:0;margin-bottom:10px;background:#f2f6ff;border:1px solid #cfdcf7;border-radius:8px;padding:8px 10px;"><b>El código dice de qué se trata.</b> Son 4 dígitos y el primero es la familia: <b>1</b>xxx cables · <b>2</b>xxx borneras y terminales · <b>3</b>xxx protección y comando · <b>4</b>xxx herrajes y morsetería · <b>5</b>xxx caños · <b>6</b>xxx columnas, vínculos y luminarias · <b>7</b>xxx puesta a tierra · <b>8</b>xxx obra civil · <b>9</b>xxx varios. Antes de dar de alta algo, <b>buscalo por su familia</b> — así no se carga dos veces el mismo producto con otro nombre.</div>
+
+        <div class="row2">
+          <div>
+            <label>Descripción del producto</label>
+            <input type="text" id="catDesc" placeholder="Ej: PRENSACABLE AL 1/2&quot; RE C/TUERCA">
+          </div>
+          <div>
+            <label>Unidad</label>
+            <input type="text" id="catUn" placeholder="Un., m, m², m³, bolsa..." value="Un.">
+          </div>
+        </div>
+        <label>Familia (define el código)</label>
+        <select id="catFamilia"></select>
+        <div class="hint" id="catFamiliaHint" style="margin-top:2px;"></div>
+        <div class="row2">
+          <div>
+            <label>Stock inicial</label>
+            <input type="number" id="catStock" step="0.01" value="0">
+          </div>
+          <div>
+            <label>Costo unitario</label>
+            <input type="number" id="catCosto" step="0.01" value="0">
+          </div>
+        </div>
+        <div class="hint" style="margin-top:2px;">El <b>stock inicial</b> es el punto de partida: los movimientos de entrada y salida se suman y restan sobre ese número. Si el producto es nuevo y todavía no llegó, dejalo en 0 y cargá la entrada cuando llegue.</div>
+        <input type="hidden" id="catEditandoCodigo" value="">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+          <button type="button" class="btn-primary" id="catGuardarBtn">Guardar producto</button>
+          <button type="button" class="btn-auto" id="catCancelarBtn" style="display:none;">Cancelar edición</button>
+        </div>
+        <div class="hint" id="catMsg" style="margin-top:8px;"></div>
+
+        <label style="margin-top:16px;">Buscar en el catálogo</label>
+        <input type="text" id="catBuscar" placeholder="Ej: prensacable, morseto...">
+        <div class="checkbox-line" style="margin-top:8px;">
+          <input type="checkbox" id="catVerBajas">
+          <label style="margin:0;" for="catVerBajas">Mostrar también los dados de baja</label>
+        </div>
+        <div style="overflow-x:auto; margin-top:10px;">
+        <table class="hist-table">
+          <thead>
+            <tr><th>Código</th><th>Descripción</th><th>Un.</th><th>Stock inicial</th><th>Costo</th><th>Origen</th><th></th></tr>
+          </thead>
+          <tbody id="catTablaBody"></tbody>
+        </table>
+        </div>
+        <div class="hint" id="catTablaCount" style="margin-top:10px;"></div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1535,7 +1545,7 @@
   <b>Grupos de vínculo — columnas mixtas en la misma plaza (agregado 2026-08-11):</b> el campo de vínculo/acople dejó de ser un único selector para toda la obra: ahora se cargan uno o más <b>grupos</b> (tipo de vínculo + cantidad de columnas), para plazas donde se combinan columnas triples, dobles, simples, etc. Luminarias, portafusibles y borneras BPN se calculan por grupo y se suman. Si además la sección Cableado tiene más de un tramo (calibre) a la vez que hay más de un grupo de vínculo, la calculadora no sabe qué columnas puntuales de cada tramo llevan cada vínculo — reparte el total de BPN proporcionalmente entre tramos (el total general es exacto, el desglose por calibre es una estimación) y lo marca en la descripción del ítem.<br>
   <b>Código de colores de conductores (fijado 2026-08-10):</b> Fase = <b>gris</b> · Neutro = <b>celeste</b> · Tierra = <b>verde</b>. El pliego (AEA 90364-7) exige respetar una codificación de colores sin fijar un color único por conductor en el texto disponible — este es el criterio fijo adoptado para esta obra/cuadrilla y debe mantenerse en todo el cableado interno de tablero, columna y luminaria.<br>
   <b>Tablero general — armado y adicionales (criterio de campo, 2026-08-10):</b> el tablero de medición, protección y comando se arma según el proyecto ejecutivo / unifilar de cada obra y por lo general se manda a armar y se compra ya ensamblado — por eso acá no se desglosan sus componentes internos (térmicas, contactor, borneras internas, etc.), solo el gabinete como unidad. Se detallan en cambio los materiales adicionales para instalarlo: poste/apoyo PRFV, abrazaderas de fijación, fotocontrol, prensacables (acometida + 1 por circuito) y espuma de poliuretano para sellado. La jabalina de puesta a tierra (dispersor) se nombra como "copperweld (CMC)" ya que es la marca/tipo habitual — mismo material que el dispersor de Cu con alma de acero IRAM 2309. Las cantidades de abrazaderas, prensacables y espuma son estimaciones de campo (sin ítem de pliego específico) — ajustalas según el diseño real del gabinete.<br>
-  <b>Nueva pestaña «Stock» (2026-08-15):</b> catálogo de 232 productos del pañol, tomado como foto fija del Excel de stock real el 15/08/2026 (código, descripción, stock y costo unitario). Desde acá se pueden registrar entradas y salidas nuevas — el stock actual de cada producto se calcula sumando/restando esos movimientos sobre la foto original. <b>Actualizado 2026-08-27:</b> tanto los <b>movimientos</b> como el <b>catálogo de productos</b> viven en la base compartida en la nube (Firestore) y se sincronizan en vivo entre todas las computadoras — agregar un producto, corregirle el nombre o darlo de baja se ve al instante en el resto del equipo, sin pasarse un archivo nuevo. Los 232 productos del Excel quedan como base fija y nunca se pisan: una corrección siempre se puede deshacer. Conviene igual exportar un respaldo (JSON) de vez en cuando. Todavía no descuenta stock automáticamente al cargar un parte diario o un avance de obra — es un sistema aparte, por ahora.<br>
+  <b>Nueva pestaña «Stock» (2026-08-15):</b> catálogo de 232 productos del pañol, tomado del Excel del pañol (código, descripción y unidad). <b>Las cantidades y los costos arrancan en CERO</b> (decisión del 27/08/2026: todavía no está hecho el recuento real ni cargada la lista de precios, así que era preferible partir de cero antes que arrastrar números viejos que nadie puede verificar). Desde acá se pueden registrar entradas y salidas nuevas — el stock actual de cada producto se calcula sumando/restando esos movimientos sobre la foto original. <b>Actualizado 2026-08-27:</b> tanto los <b>movimientos</b> como el <b>catálogo de productos</b> viven en la base compartida en la nube (Firestore) y se sincronizan en vivo entre todas las computadoras — agregar un producto, corregirle el nombre o darlo de baja se ve al instante en el resto del equipo, sin pasarse un archivo nuevo. Los 232 productos del Excel quedan como base fija y nunca se pisan: una corrección siempre se puede deshacer. Conviene igual exportar un respaldo (JSON) de vez en cuando. Todavía no descuenta stock automáticamente al cargar un parte diario o un avance de obra — es un sistema aparte, por ahora.<br>
   <b>Persistencia completa en este navegador (2026-08-15):</b> hasta acá, solo la pestaña Stock guardaba sus datos al recargar la página — el resto vivía únicamente en memoria de la sesión. Se extendió el mismo mecanismo (localStorage) al historial de obras/seguimiento, al historial de partes diarios, a la planificación semanal y al tablero de Avance de obra: ahora cerrar o recargar la página, o volver a abrir el archivo más tarde en la misma computadora, ya no borra ese trabajo. <b>Importante</b>: esto sigue siendo por navegador y por computadora — si abrís el mismo archivo HTML en otra máquina, esa computadora tiene su propio almacenamiento, separado del de esta. Para compartir información entre distintas computadoras seguí usando los botones «Exportar a CSV» de cada historial (o el respaldo JSON de Stock).
 </footer>
 
@@ -1672,6 +1682,13 @@ const ZANJA = {
 //
 // `brazoM` es el largo del brazo en metros, numérico — se usa para calcular el cable interno
 // (ver CABLE_SUBIDA_M más abajo). `brazo` sigue siendo el texto que se muestra.
+// Código de producto del catálogo del pañol para cada vínculo (2026-08-27). Solo los que existen
+// como producto real; las combinaciones sin ítem de pliego propio quedan sin código a propósito.
+const COD_VINCULO = {
+  simple_400:6019, doble_400:6020, triple_400:6021, cuadruple_400:6022,
+  simple_1000:6017, simple_1500:6018,
+  octogonal:6016, medio_octogonal:6013,
+};
 const VINCULOS = [
   // --- Brazo 400 mm (los itemizados en el pliego) ---
   {id:'simple_400',      label:'Simple — 1 artefacto (brazo 400 mm)',     lum:1, brazo:'0,400 m', brazoM:0.400, plano:'AP-C-008 (1/3)', item:'10.15'},
@@ -1753,16 +1770,16 @@ const VINCULOS = [
 // distintas, la medida del ojal se deriva del cable elegido en vez de fijarla en 16.
 const CABLES_ACOMETIDA = {
   aerea: [
-    {id:'pre_3x1x25_50', label:'Preensamblado Al-Al 3×1×25/50 mm² XLPE (IRAM 2263)',                        item:'11 ITEMIZADO', norma:'AP-T-019 ref. 12', ojales:[{sec:25,cant:3},{sec:50,cant:1}], diam:30.0, material:'Al', fases:{cant:3,sec:25}, neutro:{cant:1,sec:50}},
-    {id:'piloto_4x1x25', label:'Piloto aleación de aluminio 4×(1×25 mm²) XLPE (IRAM 63002)',                item:'11 ITEMIZADO', norma:'AP-T-019 ref. 12', ojales:[{sec:25,cant:4}],              diam:25.0, material:'Al', fases:{cant:3,sec:25}, neutro:{cant:1,sec:25}},
-    {id:'cu_auto_4x16',  label:'Tetrapolar autoportante de Cu 4×16 mm² XLPE (IRAM 2164 / 63002 / NBR 8182)', item:'11 ITEMIZADO', norma:'AP-T-019 ref. 12', ojales:[{sec:16,cant:4}],              diam:22.05, material:'Cu', fases:{cant:3,sec:16}, neutro:{cant:1,sec:16}},
-    {id:'cu_lszh_4x16',  label:'Tetrapolar de Cu 4×16 mm² XLPE/LSZH (IRAM 62266)',                          item:'11 ITEMIZADO', norma:'AP-T-019 ref. 12', ojales:[{sec:16,cant:4}],              diam:22.05, material:'Cu', fases:{cant:3,sec:16}, neutro:{cant:1,sec:16}},
+    {id:'pre_3x1x25_50', cod:1016, label:'Preensamblado Al-Al 3×1×25/50 mm² XLPE (IRAM 2263)',                        item:'11 ITEMIZADO', norma:'AP-T-019 ref. 12', ojales:[{sec:25,cant:3},{sec:50,cant:1}], diam:30.0, material:'Al', fases:{cant:3,sec:25}, neutro:{cant:1,sec:50}},
+    {id:'piloto_4x1x25', cod:1014, label:'Piloto aleación de aluminio 4×(1×25 mm²) XLPE (IRAM 63002)',                item:'11 ITEMIZADO', norma:'AP-T-019 ref. 12', ojales:[{sec:25,cant:4}],              diam:25.0, material:'Al', fases:{cant:3,sec:25}, neutro:{cant:1,sec:25}},
+    {id:'cu_auto_4x16',  cod:1027, label:'Tetrapolar autoportante de Cu 4×16 mm² XLPE (IRAM 2164 / 63002 / NBR 8182)', item:'11 ITEMIZADO', norma:'AP-T-019 ref. 12', ojales:[{sec:16,cant:4}],              diam:22.05, material:'Cu', fases:{cant:3,sec:16}, neutro:{cant:1,sec:16}},
+    {id:'cu_lszh_4x16',  cod:1028, label:'Tetrapolar de Cu 4×16 mm² XLPE/LSZH (IRAM 62266)',                          item:'11 ITEMIZADO', norma:'AP-T-019 ref. 12', ojales:[{sec:16,cant:4}],              diam:22.05, material:'Cu', fases:{cant:3,sec:16}, neutro:{cant:1,sec:16}},
   ],
   subterranea: [
-    {id:'cu_4x6',    label:'Cu 4×6 mm² XLPE + vaina PVC (IRAM 2178-1 / IEC 60502-1)',  item:'12 ITEMIZADO', norma:'AP-T-019 ref. 13', diam:16.13, ojales:[{sec:6,cant:4}]},
-    {id:'cu_4x10',   label:'Cu 4×10 mm² XLPE + vaina PVC (IRAM 2178-1 / IEC 60502-1)', item:'12 ITEMIZADO', norma:'AP-T-019 ref. 13', diam:18.75, ojales:[{sec:10,cant:4}]},
-    {id:'cu_4x16',   label:'Cu 4×16 mm² XLPE + vaina PVC (IRAM 2178-1 / IEC 60502-1)', item:'12 ITEMIZADO', norma:'AP-T-019 ref. 13', diam:22.05, ojales:[{sec:16,cant:4}]},
-    {id:'cu_3x25',   label:'Cu 3×25 + 1×16 mm² XLPE + vaina PVC (IRAM 2178-1)',        item:'12 ITEMIZADO', norma:'AP-T-019 ref. 13', diam:23.7, ojales:[{sec:25,cant:3},{sec:16,cant:1}]},
+    {id:'cu_4x6',    cod:1011, label:'Cu 4×6 mm² XLPE + vaina PVC (IRAM 2178-1 / IEC 60502-1)',  item:'12 ITEMIZADO', norma:'AP-T-019 ref. 13', diam:16.13, ojales:[{sec:6,cant:4}]},
+    {id:'cu_4x10',   cod:1007, label:'Cu 4×10 mm² XLPE + vaina PVC (IRAM 2178-1 / IEC 60502-1)', item:'12 ITEMIZADO', norma:'AP-T-019 ref. 13', diam:18.75, ojales:[{sec:10,cant:4}]},
+    {id:'cu_4x16',   cod:1008, label:'Cu 4×16 mm² XLPE + vaina PVC (IRAM 2178-1 / IEC 60502-1)', item:'12 ITEMIZADO', norma:'AP-T-019 ref. 13', diam:22.05, ojales:[{sec:16,cant:4}]},
+    {id:'cu_3x25',   cod:1006, label:'Cu 3×25 + 1×16 mm² XLPE + vaina PVC (IRAM 2178-1)',        item:'12 ITEMIZADO', norma:'AP-T-019 ref. 13', diam:23.7, ojales:[{sec:25,cant:3},{sec:16,cant:1}]},
   ]
 };
 
@@ -1771,7 +1788,7 @@ const CABLES_ACOMETIDA = {
 // calle aéreo sí se certifica por cuerda separada con el ítem 7 y "el cable deberá ser aprobado por
 // la Inspección" — así que para el cruce se ofrecen, marcados.
 const CABLES_CRUCE_EXCEPCIONALES = [
-  {id:'pre_2x16',  label:'Preensamblado Al-Al 2×16 mm² XLPE (IRAM 2263)',                        item:'7.10', excepcional:true, material:'Al', fases:{cant:1,sec:16}, neutro:{cant:1,sec:16}, ojales:[{sec:16,cant:2}]},
+  {id:'pre_2x16',  cod:null, label:'Preensamblado Al-Al 2×16 mm² XLPE (IRAM 2263)',                        item:'7.10', excepcional:true, material:'Al', fases:{cant:1,sec:16}, neutro:{cant:1,sec:16}, ojales:[{sec:16,cant:2}]},
   {id:'pre_2x25',  label:'Preensamblado Al-Al 2×25 mm² XLPE (IRAM 2263)',                        item:'7.11', excepcional:true, material:'Al', fases:{cant:1,sec:25}, neutro:{cant:1,sec:25}, ojales:[{sec:25,cant:2}]},
   {id:'pre_3x25',  label:'Al-Al 3×25 + 1×16 mm² XLPE (IRAM 2263)',                               item:'7.15', excepcional:true, material:'Al', fases:{cant:3,sec:25}, neutro:{cant:1,sec:16}, ojales:[{sec:25,cant:3},{sec:16,cant:1}]},
   {id:'alal_1x25', label:'Al-Al 1×25 mm² XLPE (IRAM 63002)',                                     item:'7.09', excepcional:true, material:'Al', fases:{cant:1,sec:25}, neutro:{cant:0,sec:25}, ojales:[{sec:25,cant:1}]},
@@ -1844,7 +1861,9 @@ function lineasMorseteria(cable, destinoTxt){
   partes.filter(p=>p.n > 0).forEach(p=>{
     const m = morsetoParaDerivacion(p.sec, LINEA_EPEC_MM2, false);
     if(m){
-      out.push({desc:`Morseto de derivación de ${p.rol} — ${m.modelo}${bimet} · línea ${LINEA_EPEC_MM2} mm² → derivación ${p.sec} mm² (1 por conductor, para ${destinoTxt})`,
+      const codMors = {'pkd16':4028, 'pkd14':4027, 'pkd14pf':4026}[m.id];
+      out.push({...(codMors ? M(codMors, `derivación de ${p.rol}${bimet} · línea ${LINEA_EPEC_MM2} mm² → derivación ${p.sec} mm² (1 por conductor, para ${destinoTxt})`)
+                            : {desc:`Morseto de derivación de ${p.rol} — ${m.modelo}`}),
                 cant:p.n, un:'Un.', ref:`Ítem ${m.item} · IRAM 2435`});
     } else {
       out.push({desc:`⚠ Morseto de derivación de ${p.rol} para ${p.sec} mm² — ninguno de los modelos del pliego (1995/3, 1995/4, 1995/6) cubre esa sección de derivación. Verificar con la Inspección`,
@@ -2095,10 +2114,17 @@ function agruparPrensacables(usos){
     porMedida[p.medida].cant += u.cant;
     porMedida[p.medida].detalles.push(`${u.cant}× ${u.uso} (Ø${fmt(u.diam,1)} mm)`);
   });
-  const out = Object.values(porMedida).map(g=>({
-    desc:`Prensacable ${g.p.medida} RE, con tuerca y arandela — rango Ø ${g.p.min}–${g.p.max} mm · ${g.detalles.join(' + ')}`,
-    cant:g.cant, un:'Un.', ref:'Medida según Ø del cable · rangos Pampaco'
-  }));
+  // Cada medida de prensacable es un producto distinto del pañol — se enlaza por código para que
+  // el balance sepa exactamente cuál salió (2026-08-27).
+  const COD_PRENSACABLE = {'1/2"':5020, '5/8"':5027, '3/4"':5029, '7/8"':5028, '1"':5026, '1 1/4"':5025, '1 1/2"':5019, '2"':5021};
+  const out = Object.values(porMedida).map(g=>{
+    const cod = COD_PRENSACABLE[g.p.medida];
+    const detalle = `rango Ø ${g.p.min}–${g.p.max} mm · ${g.detalles.join(' + ')}`;
+    return {
+      ...(cod ? M(cod, detalle) : {desc:`Prensacable ${g.p.medida} RE, con tuerca y arandela — ${detalle}`}),
+      cant:g.cant, un:'Un.', ref:'Medida según Ø del cable · rangos Pampaco'
+    };
+  });
   sinMedida.forEach(u=>out.push({
     desc:`⚠ Prensacable para ${u.uso} — Ø ${fmt(u.diam,1)} mm queda fuera de los rangos estándar, verificar`,
     cant:u.cant, un:'Un.', ref:'—'
@@ -2895,6 +2921,16 @@ const ACTIVIDADES_CATALOGO = [
 11) Cerrar con contrapiso y solado donde corresponda; reposición de vereda dentro de las 48 hs.
 12) Si la zanja queda abierta al finalizar la jornada, señalizarla correctamente.` },
 
+  { id:'cruce_calzada', label:'Cruce de calzada', pasos:
+`1) Pedir el permiso de rotura y señalizar/balizar el sector ANTES de romper. No dejar la calzada abierta al terminar la jornada.
+2) Zanja de 0,50 m de ancho. Profundidad de tapada: 1,00 m debajo de calzada y 0,50 m debajo de vereda (plano AP-TC-002).
+3) Colocar DOS caños de Ø110 mm separados 0,25 m entre ejes: uno lleva el cable y el otro queda de reserva, tapado en las dos puntas.
+4) Envainar los dos caños en hormigón pobre de 0,15 m de espesor (dosaje según decreto 247D del 15/07/92, art. 4.1.2).
+5) Cámara de inspección de 40 × 40 cm en cada extremo del cruce — DOS por cruce. Altura máxima 50 cm, profundidad máxima 0,60 m.
+6) Pasar el cable con guía, sin forzar. El cable de acometida subterránea es el que fija el plano AP-T-019 (ver actividad "Acometida EPEC → tablero").
+7) Reponer la calzada con hormigón H-21 de 0,20 m de espesor; la vereda, según el solado existente.
+8) Compactar el relleno por capas antes de hormigonar, para que la reposición no se hunda.` },
+
   { id:'tendido_cable', label:'Tendido de cable troncal', pasos:
 `1) Verificar el calibre de cable indicado para el tramo según proyecto (troncal típico de plaza: 4×2,5 mm² Cu XLPE/PVC, IRAM 2178-1).
 2) Desenrollar sin forzar torsiones ni dobleces bruscos.
@@ -2927,10 +2963,13 @@ const ACTIVIDADES_CATALOGO = [
 `1) Verificar el tipo de vínculo indicado en la planilla (simple/doble/triple/cuádruple/etc.).
 2) Fijar el vínculo a la columna según el plano correspondiente.
 3) Montar las luminarias LED en cada brazo.
-4) Verificar la fijación mecánica antes de conexionar.` },
+4) Perforar el artefacto y colocar el PRENSACABLE DE 3/4" para entrar el cable de 3×1,5 mm² — UNO POR LUMINARIA. Perforar antes de pasar el cable.
+5) Perforar entre el artefacto y el brazo y colocar el BULÓN PASANTE antivandálico — UNO POR ARTEFACTO.
+6) Verificar la fijación mecánica antes de conexionar.` },
 
   { id:'bpn', label:'Conexionado de bornera BPN', pasos:
 `1) Instalar el bloque BPN con sus 3 grupos: FASE (gris), NEUTRO (celeste), TIERRA (verde).
+1b) En columnas de PRFV — de 7 m, de 10 m, cualquiera sea la altura libre — las BPN de NEUTRO (celeste) y de TIERRA (verde) son SIEMPRE de 6 mm², sin importar el calibre del cable que llega (ítem 63). La de FASE (gris) sí acompaña el calibre del cable.
 2) Colocar el separador entre el grupo FASE y el grupo NEUTRO+TIERRA.
 3) Engarzar la puntera terminal TIFF correspondiente (mismo calibre que el cable) en cada punta antes de fijarla a la BPN o al portafusible (el cable entra primero a la BPN y de ahí sale hacia el portafusible). Si el circuito continúa a otra columna, usar puntera TIFF doble en ese punto.
 4) Verificar el esquema de conexión a tierra del proyecto antes de puentear: TN-C permite puentear NEUTRO+TIERRA juntos; TN-S los exige separados (no puentear en ese caso).
@@ -2938,10 +2977,22 @@ const ACTIVIDADES_CATALOGO = [
 6) Conectar cada portafusible con su fusible cerámico de 2A.
 7) Verificar el ajuste de todos los bornes antes de energizar.` },
 
+  { id:'base_tablero_nivel', label:'Base de tablero a nivel (mampostería)', pasos:
+`1) Confirmar el tipo de tablero antes de replantear: Tipo A (0,900 × 0,400 m) o Tipo B (0,635 × 0,400 m) — la base cambia según el tipo (plano AP-TC-007).
+2) Excavar y hormigonar la platea de apoyo: 0,50 m de ancho, 0,10 m de espesor.
+3) Levantar la base de mampostería hasta 0,60 m de altura, con pared de 0,072 m (ladrillo de canto) e hiladas de 0,075 m.
+4) Armar con 2 hierros de Ø 6 mm por nivel, entre hiladas.
+5) Dejar embutidos ANTES de cerrar: caño de INGRESO Ø 90 mm (acometida) y caño de SALIDA Ø 50 mm (circuitos).
+6) Colocar los 4 anclajes de 15 cm con rosca 1/2" en la posición exacta del tablero elegido — verificar la plantilla ANTES de que fragüe, después no se corrige.
+7) Losa/tapa de hormigón armado de 0,12 m, clase H-13, con malla SIMA 15 × 15.
+8) Revocar 1 cm de espesor.
+9) Montar el tablero sobre los anclajes recién con la base fraguada.` },
+
   { id:'tablero', label:'Armado y colocación de tablero de medición y comando', pasos:
 `1) Verificar que el tablero llegue armado según proyecto ejecutivo/unifilar, con abrazaderas incluidas.
-2) Si es posible, montar el tablero al poste ANTES de izar (subir todo junto).
-3) Fijar al poste/apoyo a la altura mínima correspondiente (5 m sobre nivel de piso) con las abrazaderas.
+2) Definir el tipo de montaje según proyecto: A POSTE (pasos 3 y 4) o A NIVEL sobre base de mampostería (ver la actividad "Base de tablero a nivel", que se hace antes).
+3) A POSTE: si es posible, montar el tablero al poste ANTES de izar (subir todo junto).
+4) A POSTE: fijar al poste/apoyo a la altura mínima correspondiente (5 m sobre nivel de piso) con las abrazaderas. En montaje A NIVEL esta altura no aplica: el tablero apoya sobre los 4 anclajes de la base.
 4) Verificar los agujeros para prensacables y su MEDIDA (sale del Ø exterior del cable, no de la cantidad de bocas): 1 por circuito (4×2,5 → 3/4" · 4×6 → 7/8" · 4×10 → 1") + 1 de alimentación (Cu 4×16 → 1 1/4" · Cu 4×6 → 7/8") + 1 de tierra (1×10 mm², Ø 6,35 → 1/2") + 1 de fotocélula (3×1,5 mm², Ø 11,1 → 3/4").
 5) Conectar acometida, fotocontrol completo (fotocélula + base + abrazadera) y colocar el apoya-escalera H12 con herrajes.
 6) Sellar con espuma de poliuretano la ventana de acometida.
@@ -2957,12 +3008,18 @@ const ACTIVIDADES_CATALOGO = [
 5) Verificar que el valor esté dentro de lo admitido antes de energizar.` },
 
   { id:'acometida', label:'Acometida EPEC → tablero', pasos:
-`1) Coordinar con EPEC el punto de conexión y verificar si hay cruce de calle o si el preensamblado pasa arriba del poste.
-2) Tender el cable de acometida (aérea o subterránea, según proyecto) — Al XLPE IRAM 2263/63002 o Cu XLPE/LSZH IRAM 2164/62266.
-3) Empalmar con la morsetería correspondiente: Metal-CE PKD-14 (bimetálica, Al→Cu) o PKD-16 (Al→Al, derivación de preensamblado).
-4) Si el cruce proyectado era subterráneo y se reemplaza por aéreo, puede hacer falta un tablero de transición — avisar a Inspección antes de instalarlo.
-5) Conectar en el tablero respetando el esquema de protecciones.
-6) No energizar hasta verificar toda la instalación aguas abajo.` },
+`1) Coordinar con EPEC el punto de conexión y confirmar si el cruce es aéreo o subterráneo. Si es subterráneo, ver la actividad "Cruce de calzada".
+2) El cable de acometida SOLO puede ser uno de los que fija el plano AP-T-019 (ref. 12) — no se reemplaza por otro sin autorización de Inspección.
+3) AÉREA, alternativas permitidas: preensamblado Al-Al 3×1×25/50 mm² XLPE (IRAM 2263) · preensamblado piloto 4×1×25 mm² · Cu autoportante 4×16 mm² · Cu LSZH 4×16 mm².
+4) SUBTERRÁNEA, alternativas permitidas: Cu 4×6 · 4×10 · 4×16 · 3×25 mm² XLPE.
+5) El poste de acometida se planta a 2,50 m del cordón (AP-T-019).
+6) Tiro flojo: vano máximo de 10 m. Si da más, hay que agregar poste — no estirar el vano.
+7) Derivar de la línea EPEC con morsetería Metal-CE, UNA POR CONDUCTOR (no dos por acometida), elegida por sección: 1995/3 (LCT PKD-16) para derivaciones de 25 a 95 mm²; 1995/6 (LCT PKD-14, bimetálica Al→Cu) para derivaciones de 4 a 16 mm².
+8) El morseto con portafusible 1995/4 (LCT PKD-14PF) va SOLO en acometida AÉREA. En plaza con instalación subterránea NO se usa.
+9) Engarzar terminal de OJAL en cada conductor que entra al portafusible NH del tablero, de la MISMA SECCIÓN del cable que se usó: 4×16 → 4 ojales de 16 mm²; 3×25/1×50 → 3 ojales de 25 + 1 de 50 mm².
+10) Si el cruce proyectado era subterráneo y se reemplaza por aéreo, puede hacer falta un tablero de transición — avisar a Inspección ANTES de instalarlo.
+11) Conectar en el tablero respetando el esquema de protecciones.
+12) No energizar hasta verificar toda la instalación aguas abajo.` },
 
   { id:'retiro_columna', label:'Retiro de columna existente', pasos:
 `1) Verificar que la columna esté desenergizada antes de intervenir.
@@ -3545,6 +3602,15 @@ function opcionesItemizadoHTML(selectedId){
 // 232 productos tomada el 15/08/2026 (código, descripción, unidad, stock actual a esa fecha y
 // costo unitario) — el punto de partida de este módulo, igual que ITEMIZADO_PLIEGO lo es para
 // la valorización de Avance de obra.
+//
+// ---- CANTIDADES Y COSTOS EN CERO (2026-08-27) ----
+// Decisión del usuario: *"no sabemos todavía la cantidad que tenemos, así que poné todo en cero.
+// Lo que sí sabemos son los materiales y los nombres, eso sí podemos dejar. Los precios de
+// materiales tampoco sabemos, así que dejalo en cero."*
+// Se vaciaron `stock` y `costo` de los 232 productos, conservando código, descripción, unidad y
+// sector. El criterio es sano: un número inventado o desactualizado en un inventario es PEOR que
+// un cero, porque el cero se nota y el número viejo se cree. A partir de acá el stock real se
+// construye con las ENTRADAS que cargue el pañol, que es justamente para lo que sirve el módulo.
 // A partir de acá, cada entrada/salida que se registre DESDE ESTE HTML se guarda aparte, en
 // stockMovimientos, y se suma/resta sobre esa foto para calcular el stock actual en vivo — el
 // catálogo en sí nunca se reescribe. Esto es intencional: "Reiniciar movimientos" siempre puede
@@ -3563,7 +3629,7 @@ function opcionesItemizadoHTML(selectedId){
 // historiales de la herramienta (obras, partes diarios, planificación) sigue persistiendo en
 // localStorage — por navegador, no compartido — ver guardarHistorial()
 // y guardarPlanEntries() en sus respectivas secciones.
-const STOCK_CATALOGO_BASE = [{"codigo":1,"desc":"ABRAZADERA C/1 escotes 140","un":"c/a","sector":"pañol","stock":20.0,"costo":0.05},{"codigo":2,"desc":"ABRAZADERA C/2 escotes HG 0200","un":"c/a","sector":"pañol","stock":20.0,"costo":1.7},{"codigo":3,"desc":"ABRAZADERA LISA H G 240 MM","un":"c/a","sector":"pañol","stock":14.0,"costo":2.6},{"codigo":4,"desc":"ABRAZADERA LISA H G 260 MM","un":"c/a","sector":"pañol","stock":11.0,"costo":5.5},{"codigo":5,"desc":"AISLADOR CERAMICO MN 17","un":"c/a","sector":"pañol","stock":128.0,"costo":6.9},{"codigo":6,"desc":"AISLADOR MN 16","un":"c/a","sector":"pañol","stock":49.0,"costo":5.9},{"codigo":7,"desc":"AISLADOR RIENDA 65 X 90 MN 20","un":"c/a","sector":"pañol","stock":14.0,"costo":3.7},{"codigo":8,"desc":"ALAMBRE P/ATADURA","un":"m","sector":"pañol","stock":31.72,"costo":7.8},{"codigo":9,"desc":"ALFARJÍA","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":10,"desc":"Apoya escalera","un":"c/a","sector":"pañol","stock":16.0,"costo":0.0},{"codigo":11,"desc":"ARANDELA ELÁSTICA PARTIDA 1/2","un":"c/a","sector":"pañol","stock":516.0,"costo":0.0},{"codigo":12,"desc":"ARANDELA plana 1/2 \"","un":"c/a","sector":"pañol","stock":76.0,"costo":0.0},{"codigo":13,"desc":"BASE PORTAFUSIBLE 10 X 38","un":"c/a","sector":"pañol","stock":68.0,"costo":0.0},{"codigo":14,"desc":"BLOQUETE (MN-1101a)  HIERRO","un":"c/a","sector":"pañol","stock":291.0,"costo":0.0},{"codigo":15,"desc":"BORNERA BPN -16 PARA CABLE HASTA 16MM2 (FASE + NEUTRO)","un":"c/a","sector":"pañol","stock":5.0,"costo":0.0},{"codigo":16,"desc":"BORNERA DE BAQUELITA FIJA T4 DE 4 ELEMENTOS","un":"c/a","sector":"pañol","stock":100.0,"costo":0.0},{"codigo":17,"desc":"BORNERA DIVISIBLE","un":"c/a","sector":"pañol","stock":52.0,"costo":0.0},{"codigo":18,"desc":"BULON  12 x 38  NO4-R 25 mm","un":"c/a","sector":"pañol","stock":26.0,"costo":0.0},{"codigo":19,"desc":"BULON  12 x 90 NO4 76 mm p/abrazaderas de 260","un":"c/a","sector":"pañol","stock":189.0,"costo":0.0},{"codigo":20,"desc":"BULON 1/2\" X 250 C/TUERCA H°G° MN52","un":"c/a","sector":"pañol","stock":196.0,"costo":0.0},{"codigo":21,"desc":"CABLE  V y A A 10 mm (PLAZA-MUNICIPALIDAD DE CBA)","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":22,"desc":"Cable acometida anti hurto 2.5/2.5  mm","un":"c/a","sector":"pañol","stock":4810.0,"costo":0.0},{"codigo":23,"desc":"Cable acometida de cobre XLPE 4 x 16 mm","un":"c/a","sector":"pañol","stock":165.0,"costo":0.0},{"codigo":24,"desc":"Cable acometida flexible de cobre XLPE 1 x 4 mm","un":"c/a","sector":"pañol","stock":9260.0,"costo":0.0},{"codigo":25,"desc":"Cable cobre 1 x 2.5 mm verde y amarillo","un":"c/a","sector":"pañol","stock":15.0,"costo":0.0},{"codigo":26,"desc":"Cable cobre 1 x 6 mm verde y amarillo","un":"c/a","sector":"pañol","stock":1114.5,"costo":0.0},{"codigo":27,"desc":"Cable pre ensamblado aluminio 2 x 25 mm","un":"c/a","sector":"pañol","stock":11500.0,"costo":0.0},{"codigo":28,"desc":"Cable preensamblado de 3 x 1 x 25 /50mm2 XLPE IRAM 2263","un":"c/a","sector":"pañol","stock":282.0,"costo":0.0},{"codigo":29,"desc":"Cable SUBTERRANEO 2 x 10 mm IRAM 2178","un":"c/a","sector":"pañol","stock":13.0,"costo":0.0},{"codigo":30,"desc":"Cable SUBTERRANEO 2x 4 mm2 IRAM 2178","un":"c/a","sector":"pañol","stock":37.0,"costo":0.0},{"codigo":31,"desc":"CABLE SUBTERRANEO 3 X 1.5 MM 22  (PLAZA-MUNICIPALIDAD DE CBA)","un":"c/a","sector":"pañol","stock":2370.0,"costo":0.0},{"codigo":32,"desc":"Cable SUBTERRANEO 3 x 2.5 mm2 IRAM 2178","un":"c/a","sector":"pañol","stock":121.0,"costo":0.0},{"codigo":33,"desc":"Cable SUBTERRANEO 3 x 25 mm2 /16 IRAM 2178","un":"c/a","sector":"pañol","stock":101.0,"costo":0.0},{"codigo":34,"desc":"Cable SUBTERRANEO de cobre 2 X 1.5 MM + T (tierra)","un":"c/a","sector":"pañol","stock":475.0,"costo":0.0},{"codigo":35,"desc":"Cable SUBTERRANEO de cobre 2 x 2.5  MM subterraneo  IRAM 2178","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":36,"desc":"Cable SUBTERRANEO de cobre 2 X 6 MM subterraneo  IRAM 2178","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":37,"desc":"Cable SUBTERRANEO de cobre 3 X 1.5 MM IRAM 2178","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":38,"desc":"Cable SUBTERRANEO de cobre 3 X 4 MM subterraneo  IRAM 2178","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":39,"desc":"Cable SUBTERRANEO de cobre 4 X 2.5 MM subterraneo  IRAM 2178","un":"c/a","sector":"pañol","stock":4652.0,"costo":0.0},{"codigo":40,"desc":"Cable SUBTERRANEO de cobre 4 X 4 MM subterraneo  IRAM 2178","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":41,"desc":"Cable SUBTERRANEO de cobre 4 X 6 MM subterraneo  IRAM 2178","un":"m","sector":"pañol","stock":500.0,"costo":0.0},{"codigo":42,"desc":"CAJA ESTANCA ALUMINIO INYECTADO 200 X 150 X 100 IP65 PARA TABLERO DE COLUMNA","un":"c/a","sector":"pañol","stock":-1.0,"costo":0.0},{"codigo":43,"desc":"CAÑO PLASTICO PEAD 50 MM","un":"c/a","sector":"pañol","stock":95.0,"costo":0.0},{"codigo":44,"desc":"CAÑO PVC CORRUGADO 3/4\" (PASAJE DE CABLE DE PAT)","un":"c/a","sector":"pañol","stock":100.0,"costo":0.0},{"codigo":45,"desc":"CHAPA FRENO 52 X 28 X 2","un":"c/a","sector":"pañol","stock":318.0,"costo":0.0},{"codigo":46,"desc":"COLUMNA . BLOQUETE DE BRONCE 1/2 50 mm (MN1101 b)","un":"c/a","sector":"pañol","stock":161.0,"costo":0.0},{"codigo":47,"desc":"CONECTOR C COMPRESION para PAT TIPO C CMC -7 (JAB5/8 CABLE 6-16)","un":"c/a","sector":"pañol","stock":71.0,"costo":0.0},{"codigo":48,"desc":"CONECTOR C COMPRESION para PAT TIPO C CMC -8 (JAB5/8 CABLE 25)","un":"c/a","sector":"pañol","stock":23.0,"costo":0.0},{"codigo":49,"desc":"CONECTOR DE CAJA PARA CAÑO RIGIDO PVC DIAMETRO 40MM","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":50,"desc":"CONTACTOR TRIP 25 A - 1NA + 1 NC 220V  50","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":51,"desc":"EMPALME derivación B T conj hasta 4 x 6 mm","un":"m","sector":"pañol","stock":8.0,"costo":0.0},{"codigo":52,"desc":"EMPALME SUBTERRANEO CON RESINA ER2","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":53,"desc":"ESPARRAGO M16 X 190","un":"m","sector":"pañol","stock":2.0,"costo":0.0},{"codigo":54,"desc":"FLEJE ACERO 3/4\" X ROLLO","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":55,"desc":"Fondo de tablero 220 x 75 x 2mm c / riel","un":"m","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":56,"desc":"Fondo de tablero 220 x 80 x 2 mm en chapa negra","un":"c/a","sector":"pañol","stock":76.0,"costo":0.0},{"codigo":57,"desc":"Fondo de tablero para columna de alumbrado 70 x 165","un":"c/a","sector":"pañol","stock":18.0,"costo":0.0},{"codigo":58,"desc":"FONDO TABLERO CHAP GALVAN P/ COLUM SUB 230X95X2 MM","un":"c/a","sector":"pañol","stock":14.0,"costo":0.0},{"codigo":59,"desc":"FUSIBLE CERAMICO 10 X 38","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":60,"desc":"FUSIBLE CERAMICO 8.5 X 31.5 4 A","un":"c/a","sector":"pañol","stock":206.0,"costo":0.0},{"codigo":61,"desc":"FUSIBLE CILINDRICO 10 X 38 1 AMP","un":"c/a","sector":"pañol","stock":10.0,"costo":0.0},{"codigo":62,"desc":"FUSIBLE NEOZED\t2A","un":"c/a","sector":"pañol","stock":19.0,"costo":0.0},{"codigo":63,"desc":"FUSIBLE NEOZED\t6A","un":"c/a","sector":"pañol","stock":50.0,"costo":0.0},{"codigo":64,"desc":"GABINETE PRFV 530 x 430 x 200","un":"c/a","sector":"pañol","stock":4.0,"costo":0.0},{"codigo":65,"desc":"Grampa terminal PAT    Cobre estañado          A184","un":"c/a","sector":"pañol","stock":25.0,"costo":0.0},{"codigo":66,"desc":"Jabalina  lisa 1.5mts x 5/8\"","un":"m","sector":"pañol","stock":63.0,"costo":0.0},{"codigo":67,"desc":"LUMINARIAS  (PLAZA- MUNICIPALIDAD DE CBA)","un":"m","sector":"pañol","stock":148.0,"costo":0.0},{"codigo":68,"desc":"Luminarias Led 200 W (Plaza Municipalidad de Cordoba)","un":"m","sector":"pañol","stock":20.0,"costo":0.0},{"codigo":69,"desc":"Luminarias Led Phillips Led 76 W /100 W","un":"m","sector":"pañol","stock":66.0,"costo":0.0},{"codigo":70,"desc":"MALLA PLASTICA SUBTERRANEA ADVERTENCIA 15 CM ANARANJADA","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":71,"desc":"MORSETO ACOMETIDA  DE derivación 1995/3","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":72,"desc":"MORSETO ACOMETIDA (NEUTRO) 1995/6 IRAM 2435","un":"m","sector":"pañol","stock":183.0,"costo":0.0},{"codigo":73,"desc":"MORSETO ACOMETIDA PORTA FUSIBLE 1995/4 \tIRAM 2435","un":"m","sector":"pañol","stock":265.0,"costo":0.0},{"codigo":74,"desc":"MORSETO DERIVACION (ACOMETIDA TMPC) 1995/1","un":"m","sector":"pañol","stock":100.0,"costo":0.0},{"codigo":75,"desc":"PLACA DE MONTEJE PAR GABINETE PRFV 530 x 430 x 200","un":"m","sector":"pañol","stock":4.0,"costo":0.0},{"codigo":76,"desc":"PORTAFUSIBLE 10 X 38","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":77,"desc":"Precinto 200 x 4.5 nylon 66","un":"m","sector":"pañol","stock":1800.0,"costo":0.0},{"codigo":78,"desc":"PROTECTOR R15 CAPUCHON PARA CABLE","un":"m","sector":"pañol","stock":266.0,"costo":0.0},{"codigo":79,"desc":"PUENTE FIJO 10 ELEMENTOS P/BPN 06","un":"m","sector":"pañol","stock":10.0,"costo":0.0},{"codigo":80,"desc":"PUENTE FIJO 10 ELEMENTOS P/BPN 16","un":"c/a","sector":"pañol","stock":27.0,"costo":0.0},{"codigo":81,"desc":"RACK REFORZADO P/ AIS MN 17 MN 482","un":"c/a","sector":"pañol","stock":148.0,"costo":0.0},{"codigo":82,"desc":"RIEL DIN NORMALIZADO NS35","un":"c/a","sector":"pañol","stock":24.0,"costo":0.0},{"codigo":83,"desc":"SEPARADOR DE BORNERA BPN","un":"c/a","sector":"pañol","stock":198.0,"costo":0.0},{"codigo":84,"desc":"Sunchos  Hebilla 3/8 \" P/fleje","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":85,"desc":"TABLERO  TNS PRFV 800x 600x 300  6 salidas 1 x 16 amp","un":"c/a","sector":"pañol","stock":2.0,"costo":0.0},{"codigo":86,"desc":"TABLERO TNS   TMPC acometida aerea 3 salidas de 1 x 25","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":87,"desc":"TABLEROS . Borne de puesta a tierra P/conductor 6 mm²AZUL","un":"c/a","sector":"pañol","stock":15.0,"costo":0.0},{"codigo":88,"desc":"TABLEROS . Borne de puesta a tierra para conductor 6 mm²VERDE","un":"c/a","sector":"pañol","stock":56.0,"costo":0.0},{"codigo":89,"desc":"TABLEROS . Borne de puesta a tierra para conductor 6 mm²GRIS","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":90,"desc":"TABLEROS . Cable DESNUDO Acero recubierto  CU 1 x 25","un":"c/a","sector":"pañol","stock":100.0,"costo":0.0},{"codigo":91,"desc":"TABLEROS . CABLE PAT 10 mm verde/amarillo  ROLLO X200MTS","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":92,"desc":"TABLEROS . Cable Unipolar  Verde / Amarillo 10 mm2","un":"c/a","sector":"pañol","stock":74.0,"costo":0.0},{"codigo":93,"desc":"TABLEROS . Cable Unipolar IRAM NM 247-3 Negro 6 mm2","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":94,"desc":"TABLEROS . Extremo bornera bajo para riel NS y NS-35","un":"c/a","sector":"pañol","stock":160.0,"costo":0.0},{"codigo":95,"desc":"TABLEROS . Punteras tubulares aisladas para Cable 1,5 mm2 (Negro)","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":96,"desc":"TABLEROS SIN PEDESTAL ( 3 salidas de 3 x 1 x 20A)","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":97,"desc":"TABLEROS SIN PEDESTAL ( 4 SALIDAS DE 3 x 1 x 16 AMP)","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":98,"desc":"TABLEROS. INT. TERMOMAGNETICO 4  x 16 A curva C 10KA","un":"c/a","sector":"pañol","stock":5.0,"costo":0.0},{"codigo":99,"desc":"TABLEROS. INT. TERMOMAGNETICO BIPOLAR 25 A CURVA","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":100,"desc":"TABLEROS. INT. TERMOMAGNETICO IK60N 3X16A CURVA C","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":101,"desc":"TABLEROS. INT. TERMOMAGNETICO UNIPOLAR 32 A CURVA","un":"c/a","sector":"pañol","stock":7.0,"costo":0.0},{"codigo":102,"desc":"TABLEROS. INTERRUPTOR DIFERENCIAL 1 X 32 A CURVA C IK60N","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":103,"desc":"TABLEROS. PRECINTO PRENSACABLE NEGRO 250X4,5 mm NYLON 66","un":"c/a","sector":"pañol","stock":400.0,"costo":0.0},{"codigo":104,"desc":"TABLEROS. PRENSACABLE AL  1 1/4 RE","un":"c/a","sector":"pañol","stock":10.0,"costo":0.0},{"codigo":105,"desc":"TABLEROS. PRENSACABLE AL  3/4\" RE  (SIN TUERCA)","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":106,"desc":"TABLEROS. PRENSACABLE AL  3/4\" RE C/TUERCA Y ARANDELA","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":107,"desc":"TABLEROS. PRENSACABLE AL  5/8\" RE  (SIN TUERCA)","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":108,"desc":"TABLEROS. PRENSACABLE AL  5/8\" RE C/TUERCA Y ARANDELA","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":109,"desc":"TABLEROS. PRENSACABLE AL  7/8\" RE C/TUERCA Y ARANDELA","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":110,"desc":"TABLEROS. PRENSACABLE PLASTICO  3/4\" RE C/TUERCA Y ARANDELA","un":"c/a","sector":"pañol","stock":438.0,"costo":0.0},{"codigo":111,"desc":"TABLEROS. TERMINAL A COMP ACC 10/3","un":"c/a","sector":"pañol","stock":90.0,"costo":0.0},{"codigo":112,"desc":"TABLEROS. TERMINAL OJAL C5 DIAM 8 MM","un":"c/a","sector":"pañol","stock":121.0,"costo":0.0},{"codigo":113,"desc":"TABLEROS. TERMINALES  C7 PREAISLADOS OJAL 12MM AMARILLO","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":114,"desc":"TABLEROS. TERMINALES B 6 preaislados 16-14 Ojal 800 azul","un":"c/a","sector":"pañol","stock":213.0,"costo":0.0},{"codigo":115,"desc":"TABLEROS. TERMINALES PREAISLADOS OJAL (D6 mm) AMARILLO (C4) S: 2,5/ 6 mm2","un":"c/a","sector":"pañol","stock":181.0,"costo":0.0},{"codigo":116,"desc":"TABLEROS. TERMINALES PREAISLADOS OJAL (D6 mm) AZUL (B5) S: 2,5/ 6 mm2","un":"c/a","sector":"pañol","stock":20.0,"costo":0.0},{"codigo":117,"desc":"TABLEROS. TUERCA PARA  PRENSACABLE AL  3/4\" RE","un":"c/a","sector":"pañol","stock":49.0,"costo":0.0},{"codigo":118,"desc":"TABLEROS. TUERCA PARA PRENSACABLE  5/8","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":119,"desc":"TABLEROS. TUERCA PARA PRENSACABLE AL  1 1/4 RE","un":"c/a","sector":"pañol","stock":10.0,"costo":0.0},{"codigo":120,"desc":"TERMICA EASY 9  2 X 16A  4 5KA","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":121,"desc":"TERMINAL BANDERITA (INFERIOR/SUPERIOR PAT COLUMNA)","un":"c/a","sector":"pañol","stock":303.0,"costo":0.0},{"codigo":122,"desc":"Terminal cobre estañado 16/3","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":123,"desc":"TERMINAL OJAL C6 AMARILLO DIAM 10 MM","un":"c/a","sector":"pañol","stock":421.0,"costo":0.0},{"codigo":124,"desc":"Terminal puntera TIF 2,5 mm2 DOBLE","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":125,"desc":"Terminal puntera Tip TIF 2,5 mm2","un":"c/a","sector":"pañol","stock":1249.0,"costo":0.0},{"codigo":126,"desc":"Terminal puntera Tipo TIF 1,5 mm2","un":"c/a","sector":"pañol","stock":1319.0,"costo":0.0},{"codigo":127,"desc":"Terminal puntera Tipo TIF 4 mm2","un":"c/a","sector":"pañol","stock":40.0,"costo":0.0},{"codigo":128,"desc":"Terminal puntera Tipo TIF 4 mm2 DOBLE","un":"c/a","sector":"pañol","stock":52.0,"costo":0.0},{"codigo":129,"desc":"Terminal puntera Tipo TIF 6 mm2","un":"c/a","sector":"pañol","stock":1172.0,"costo":0.0},{"codigo":130,"desc":"Terminal puntera Tipo TIF 6 mm2  DOBLE","un":"c/a","sector":"pañol","stock":140.0,"costo":0.0},{"codigo":131,"desc":"TERMOCONTRAIBLE PARED FINA S/ADH. 5.0/2.5 MM 3/16","un":"c/a","sector":"pañol","stock":52.0,"costo":0.0},{"codigo":132,"desc":"Termomagnetica 1 x 10 A","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":133,"desc":"Termomagnetica 4 x 25 A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":134,"desc":"TOPE DE BORNERA","un":"c/a","sector":"pañol","stock":200.0,"costo":0.0},{"codigo":135,"desc":"Tuerca   5/16","un":"c/a","sector":"pañol","stock":595.0,"costo":0.0},{"codigo":136,"desc":"Tuerca cuadrada galvanizada 1/2\"","un":"c/a","sector":"pañol","stock":151.0,"costo":0.0},{"codigo":137,"desc":"TUERCA METALICA PARA PRENSA CABLE 1\"","un":"c/a","sector":"pañol","stock":2.0,"costo":0.0},{"codigo":138,"desc":"Tuercas 3/4\"","un":"c/a","sector":"pañol","stock":186.0,"costo":0.0},{"codigo":139,"desc":"UNION A COMPRESION 10 MM/C X 100","un":"c/a","sector":"pañol","stock":200.0,"costo":0.0},{"codigo":140,"desc":"PRENSACABLE 1 PULGADA C/TUERCA ALUMINIO","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":141,"desc":"TIFF 2 X 1.5","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":143,"desc":"TERMICA TETRAPOLAR 40A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":144,"desc":"TERMICA UNIPOLAR 25A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":145,"desc":"PUENTE FIJO P/BPN 4MM","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":146,"desc":"CABLE CANAL RANURADO  40x30mm","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":147,"desc":"CABLE CANAL RANURADO  30x30mm","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":148,"desc":"MODULO TOMACORRIENTE ENCAPSULADO 2P+T,220 Vca, 10 A SEGÚN NORMA IRAM 2071","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":149,"desc":"Llave encapsulada de un punto (encendido/apagado de iluminación interna del tablero","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":150,"desc":"Portalámpara de aplicar - rosca E27 equipado con Lámpara LED de 5W","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":151,"desc":"Interruptor termomagnético tetrapolar, curva \"C\", 10 Ka -25A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":152,"desc":"Seccionador portafusible NH unipolar - T00 + fusible NH gL | 63 A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":153,"desc":"Barra de neutro","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":154,"desc":"Contactor tripolar, categoría AC1, bobina 220Vca - 1NA | 25 A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":155,"desc":"Interruptor termomagnético bipolar, curva \"C\" y 10kA | 20 A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":156,"desc":"Interruptor Diferencial bipolar y sensibilidad 30mA | 25 A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":157,"desc":"Llave encapsulada de un punto para accionamiento automático-manual","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":158,"desc":"Interruptor termomagnético unipolar, curva \"C\", 10kA | 6 A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":159,"desc":"Borneras BPN, apto para sección 4 mm², para distribución de conductor neutro","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":160,"desc":"Medidor Trifásico de energía eléctrica (a proveer por EPEC)","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":161,"desc":"Borneras BPN, apto para sección 4 mm², para salida de circuitos de Alumbrado Público","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":162,"desc":"Bornes tipo BPN, apto para sección de 2,5 mm², para circuito de comando (Celeste para cable de neutro y gris para las fases y retorno)","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":163,"desc":"Barra de puesta a tierra | 125 A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":164,"desc":"Interruptor fotoeléctrico según E.T.G, 220V, 10A e IP 65 (incluyendo la base de montaje) | 10 A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":165,"desc":"Bornes unipolar de neutro","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":166,"desc":"Pintura Gris","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":167,"desc":"Caño PVC 110","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":168,"desc":"Herrajes y  morseteria","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":169,"desc":"Borneras BPN, apto para sección 6 mm², para salida de circuitos de Alumbrado Público","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":170,"desc":"Borneras BPN, apto para sección 6 mm², para distribución de conductor neutro","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":171,"desc":"Poste de PRFV","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":172,"desc":"Interruptor termomagnético tetrapolar, curva \"C\", 10 Ka -50A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":173,"desc":"Interruptor termomagnético tripolar, curva \"C\", 10 Ka -25A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":174,"desc":"ladrillo","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":175,"desc":"Cable acometida anti hurto 4/4 mm","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":415,"desc":"ABRAZADERA LISA H G 220 MM","un":"c/a","sector":"pañol","stock":50.0,"costo":0.0},{"codigo":416,"desc":"ABRAZADERA LISA H G 300 MM","un":"c/a","sector":"pañol","stock":15.0,"costo":0.0},{"codigo":417,"desc":"ABRAZADERA LISA H G 340 MM","un":"c/a","sector":"pañol","stock":15.0,"costo":0.0},{"codigo":418,"desc":"BASE PORTAFUSIBLE 25 AMP  8 X 31 1 POLO DIN","un":"c/a","sector":"pañol","stock":255.0,"costo":0.0},{"codigo":419,"desc":"CAÑO PARA BAJADA 2\" DOBLE AISLACION","un":"c/a","sector":"pañol","stock":6.0,"costo":0.0},{"codigo":420,"desc":"CARTUCHO FUSIBLE NH 00 63 A","un":"c/a","sector":"pañol","stock":3.0,"costo":0.0},{"codigo":421,"desc":"CONECTOR c/rosca LSOH  CAJA/CAÑO 40 MM","un":"c/a","sector":"pañol","stock":9.0,"costo":0.0},{"codigo":422,"desc":"DISYUNTOR DIF 4 X 40 A 300 MA    SUPERINMUNIZADO","un":"c/a","sector":"pañol","stock":3.0,"costo":0.0},{"codigo":423,"desc":"Disyuntor Diferencial 2x25A 30 mA","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":424,"desc":"FUSIBLE CERAMICO 8.5 X 31.5 2 A","un":"c/a","sector":"pañol","stock":28.0,"costo":0.0},{"codigo":425,"desc":"FUSIBLE CILINDRICO 10 X 38 2 AMP","un":"c/a","sector":"pañol","stock":112.0,"costo":0.0},{"codigo":426,"desc":"INTERRUPTOR  TERMOMAG 1 X 10 A  CURVA C10 KA","un":"c/a","sector":"pañol","stock":15.0,"costo":0.0},{"codigo":427,"desc":"INTERRUPTOR  TERMOMAG 2 X 10 CURVA C 6KA/10 KA","un":"c/a","sector":"pañol","stock":5.0,"costo":0.0},{"codigo":428,"desc":"INTERRUPTOR  TERMOMAG 4 X 10 AMP CURVA C","un":"c/a","sector":"pañol","stock":2.0,"costo":0.0},{"codigo":429,"desc":"INTERRUPTOR  TERMOMAG 4 X 20 AMP CURVA C","un":"c/a","sector":"pañol","stock":2.0,"costo":0.0},{"codigo":430,"desc":"INTERRUPTOR  TERMOMAG 4 X 25 A  CURVA C 10 KA","un":"c/a","sector":"pañol","stock":7.0,"costo":0.0},{"codigo":431,"desc":"INTERRUPTOR  TERMOMAG 4 X 32 A  CURVA C","un":"c/a","sector":"pañol","stock":3.0,"costo":0.0},{"codigo":432,"desc":"INTERRUPTOR  TERMOMAG 4 X 6 A  CURVA C","un":"c/a","sector":"pañol","stock":5.0,"costo":0.0},{"codigo":433,"desc":"INTERRUPTOR  TERMOMAG 4 X 6AMP CURVA C","un":"c/a","sector":"pañol","stock":5.0,"costo":0.0},{"codigo":434,"desc":"INTERRUPTOR DIFERENCIAL 2 X 25 A 300 MA","un":"c/a","sector":"pañol","stock":5.0,"costo":0.0},{"codigo":435,"desc":"INTERRUPTOR TERMOMAGNETICO 1 x 6 AMPERES curva C","un":"c/a","sector":"pañol","stock":21.0,"costo":0.0},{"codigo":436,"desc":"INTERRUPTOR UNIPOLAR 6 A","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":437,"desc":"Jabalina  18 2.0   AC/CU   3/4 \"  X  2 METROS","un":"c/a","sector":"pañol","stock":24.0,"costo":0.0},{"codigo":438,"desc":"PRENSACABLE 1","un":"c/a","sector":"pañol","stock":2.0,"costo":0.0},{"codigo":439,"desc":"PUENTE FIJO 10 ELEMENTOS P/BPN 04","un":"c/a","sector":"pañol","stock":40.0,"costo":0.0},{"codigo":440,"desc":"SOPORTE ADAPTADOR P/ RIEL DIN DE 1 MODULO","un":"c/a","sector":"pañol","stock":2.0,"costo":0.0},{"codigo":441,"desc":"Sunchos acero 3/8 x 30 metros  (NO USAR)","un":"c/a","sector":"pañol","stock":3.0,"costo":0.0},{"codigo":442,"desc":"TABLERO (TT) PRFV POSTE 800 x 600 x300 C/ 2 SAL DE 4 X 25","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":443,"desc":"TABLEROS . Borne de puesta a tierra P/conductor 6 mm²GRIS","un":"c/a","sector":"pañol","stock":40.0,"costo":0.0},{"codigo":444,"desc":"TABLEROS . Cable desnudo cobre  35 mm","un":"c/a","sector":"pañol","stock":36.0,"costo":0.0},{"codigo":445,"desc":"TABLEROS . CABLE PAT 10 mm verde/amarillo  ROLLO","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":446,"desc":"TABLEROS . Cable Unipolar IRAM NM 247-3 Celeste 6 mm2","un":"c/a","sector":"pañol","stock":90.0,"costo":0.0},{"codigo":447,"desc":"TABLEROS . FOTOCONTROL 10 A -","un":"c/a","sector":"pañol","stock":26.0,"costo":0.0},{"codigo":448,"desc":"TABLEROS . SELECTORA 2 POS FIJAS 1NA+1NC","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":449,"desc":"TABLEROS .Borne de paso para conductor de 16mm²","un":"c/a","sector":"pañol","stock":5.0,"costo":0.0},{"codigo":450,"desc":"TABLEROS. BORNE PORTAFUSE SECCIONABLE F5X20mm - 4mm2","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":451,"desc":"TABLEROS. INT. TERMOMAGNETICO 4 X 40A CURVA C","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":452,"desc":"TABLEROS. INTERRUPTOR DIFERENCIAL 1 X 16 A CURVA C","un":"c/a","sector":"pañol","stock":36.0,"costo":0.0},{"codigo":453,"desc":"TABLEROS. INTERRUPTOR DIFERENCIAL 4 x 63 300 MA (S)","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":454,"desc":"TABLEROS. Seccionador bajo carga, tapa rebatible, In:160A, 1-polos p/NH T000/00","un":"c/a","sector":"pañol","stock":4.0,"costo":0.0},{"codigo":455,"desc":"TABLEROS. TERMINAL A COMP ACC 25/3  3/8","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":456,"desc":"TABLEROS. TERMINALES PREAISLADOS OJAL 012","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":457,"desc":"TERMICA EASY 9  1 X 32A   4 5KA","un":"c/a","sector":"pañol","stock":7.0,"costo":0.0},{"codigo":458,"desc":"Terminal puntera Tipo TIF 10 mm2","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":459,"desc":"Termomagnetica 1 x 6 A","un":"c/a","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":460,"desc":"Termomagnetica 2 x 20 A curva C","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":461,"desc":"TOMA 10 A C/ TIERRA","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0},{"codigo":462,"desc":"ZOCALO FOTOCONTROL","un":"c/a","sector":"pañol","stock":10.0,"costo":0.0},{"codigo":463,"desc":"BORNE BPN-35 UNIVERSAL A TORNILLO 35mm GRIS (TB 35 IMS)","un":"c/a","sector":"pañol","stock":100.0,"costo":4.48},{"codigo":464,"desc":"SCBI 10-12 PUENTE FIJO CENTRAL 10P P/TB 16 (JSSB-10-12/BPN)","un":"c/a","sector":"pañol","stock":3.0,"costo":7.09},{"codigo":465,"desc":"LY-16WF PINZA MANUAL C/CRIQUET P/TIF 6-16mm","un":"c/a","sector":"pañol","stock":0.0,"costo":45.27},{"codigo":466,"desc":"CABLE UNIPOLAR 1x16mm NEGRO (CF PLASTIX)","un":"Mtr","sector":"pañol","stock":100.0,"costo":3.37},{"codigo":467,"desc":"SCBI 5-15 PUENTE FIJO CENTRAL 5P P/TB 35","un":"c/a","sector":"pañol","stock":6.0,"costo":8.53},{"codigo":468,"desc":"SILICONA TRANSPARENTE 260ML 3M/FISCHER","un":"c/a","sector":"pañol","stock":1.0,"costo":4.07},{"codigo":469,"desc":"CINTA AISLADORA PVC SUPER 33 19mm x 20m","un":"c/a","sector":"pañol","stock":0.0,"costo":6.77},{"codigo":470,"desc":"TIFD-150/8 TERMINAL TIF DOBLE 2x1,5mm2 NEGRO (Pack x300)","un":"Pack","sector":"pañol","stock":0.0,"costo":9.93},{"codigo":471,"desc":"221-2411 CONECTOR EMPALME EN LINEA 1 POLO 4mm2 WAGO","un":"c/a","sector":"pañol","stock":8.0,"costo":0.51},{"codigo":472,"desc":"BORNE BPN-06 P/CAB. FLEX/RIG. 6mm POLIAMIDA","un":"c/a","sector":"pañol","stock":1.0,"costo":0.0}];
+const STOCK_CATALOGO_BASE = [{"codigo":1001,"desc":"Alambre para ataduras","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1002,"desc":"Cable acometida anti hurto 2.5/2.5 mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1003,"desc":"Cable acometida anti hurto 4/4 mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1004,"desc":"Cable acometida de cobre XLPE 4 x 16 mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1005,"desc":"Cable acometida flexible de cobre XLPE 1 x 4 mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1006,"desc":"Cable Cu 3×25 + 1×16 mm² XLPE + vaina PVC (IRAM 2178-1)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1007,"desc":"Cable Cu 4×10 mm² XLPE + vaina PVC (IRAM 2178-1)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1008,"desc":"Cable Cu 4×16 mm² XLPE + vaina PVC (IRAM 2178-1)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1009,"desc":"Cable Cu 4×2,5 mm² XLPE + vaina PVC (IRAM 2178-1)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1010,"desc":"Cable Cu 4×4 mm² XLPE + vaina PVC (IRAM 2178-1)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1011,"desc":"Cable Cu 4×6 mm² XLPE + vaina PVC (IRAM 2178-1)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1012,"desc":"Cable DESNUDO Acero recubierto CU 1 x 25","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1013,"desc":"Cable desnudo cobre 35 mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1014,"desc":"Cable piloto Al 4×(1×25 mm²) XLPE (IRAM 63002)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1015,"desc":"Cable pre ensamblado aluminio 2 x 25 mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1016,"desc":"Cable preensamblado Al-Al 3×1×25/50 mm² XLPE (IRAM 2263)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1017,"desc":"Cable SUBTERRANEO 2 x 10 mm IRAM 2178","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1018,"desc":"Cable SUBTERRANEO 2x 4 mm2 IRAM 2178","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1019,"desc":"CABLE SUBTERRANEO 3 X 1.5 MM 22 (PLAZA-MUNICIPALIDAD DE CBA)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1020,"desc":"Cable SUBTERRANEO 3 x 2.5 mm2 IRAM 2178","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1021,"desc":"Cable SUBTERRANEO 3 x 25 mm2 /16 IRAM 2178","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1022,"desc":"Cable SUBTERRANEO de cobre 2 X 1.5 MM + T (tierra)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1023,"desc":"Cable SUBTERRANEO de cobre 2 x 2.5 MM subterraneo IRAM 2178","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1024,"desc":"Cable SUBTERRANEO de cobre 2 X 6 MM subterraneo IRAM 2178","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1025,"desc":"Cable SUBTERRANEO de cobre 3 X 1.5 MM IRAM 2178","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1026,"desc":"Cable SUBTERRANEO de cobre 3 X 4 MM subterraneo IRAM 2178","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1027,"desc":"Cable tetrapolar autoportante Cu 4×16 mm² XLPE (IRAM 2164)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1028,"desc":"Cable tetrapolar Cu 4×16 mm² XLPE/LSZH (IRAM 62266)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1029,"desc":"CABLE UNIPOLAR 1x16mm NEGRO (CF PLASTIX)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1030,"desc":"Cable Unipolar IRAM NM 247-3 Celeste 6 mm2","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1031,"desc":"Cable Unipolar IRAM NM 247-3 Negro 6 mm2","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":1032,"desc":"CABLE V y A A 10 mm (PLAZA-MUNICIPALIDAD DE CBA)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2001,"desc":"221-2411 CONECTOR EMPALME EN LINEA 1 POLO 4mm2 WAGO","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2002,"desc":"Barra de neutro","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2003,"desc":"BORNE BPN-06 P/CAB. FLEX/RIG. 6mm POLIAMIDA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2004,"desc":"BORNE BPN-35 UNIVERSAL A TORNILLO 35mm GRIS (TB 35 IMS)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2005,"desc":"Borne de paso para conductor de 16mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2006,"desc":"BORNERA BPN -16 PARA CABLE HASTA 16MM2 (FASE + NEUTRO)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2007,"desc":"Bornera BPN 4 mm² gris — fase (RSTN+T)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2008,"desc":"Bornera BPN 6 mm² celeste — neutro (RSTN+T)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2009,"desc":"Bornera BPN 6 mm² gris — fase (RSTN+T)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2010,"desc":"Bornera BPN 6 mm² verde — tierra (RSTN+T)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2011,"desc":"BORNERA DE BAQUELITA FIJA T4 DE 4 ELEMENTOS","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2012,"desc":"BORNERA DIVISIBLE","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2013,"desc":"Borneras BPN, apto para sección 4 mm², para distribución de conductor neutro","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2014,"desc":"Borneras BPN, apto para sección 4 mm², para salida de circuitos de Alumbrado Público","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2015,"desc":"Borneras BPN, apto para sección 6 mm², para distribución de conductor neutro","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2016,"desc":"Borneras BPN, apto para sección 6 mm², para salida de circuitos de Alumbrado Público","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2017,"desc":"Bornes tipo BPN, apto para sección de 2,5 mm², para circuito de comando (Celeste para cable de neutro y gris para las fases y retorno)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2018,"desc":"Bornes unipolar de neutro","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2019,"desc":"EMPALME derivación B T conj hasta 4 x 6 mm","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2020,"desc":"EMPALME SUBTERRANEO CON RESINA ER2","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2021,"desc":"Extremo bornera bajo para riel NS y NS-35","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2022,"desc":"LY-16WF PINZA MANUAL C/CRIQUET P/TIF 6-16mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2023,"desc":"PUENTE FIJO 10 ELEMENTOS P/BPN 04","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2024,"desc":"PUENTE FIJO 10 ELEMENTOS P/BPN 06","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2025,"desc":"PUENTE FIJO 10 ELEMENTOS P/BPN 16","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2026,"desc":"PUENTE FIJO P/BPN 4MM","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2027,"desc":"Puente fijo tipo peine, 10 elementos, para borne BPN 6 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2028,"desc":"Puntera terminal TIF 1,5 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2029,"desc":"Puntera terminal TIF 10 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2030,"desc":"Puntera terminal TIF 2,5 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2031,"desc":"Puntera terminal TIF 4 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2032,"desc":"Puntera terminal TIF 6 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2033,"desc":"Puntera terminal TIF doble 1,5 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2034,"desc":"Puntera terminal TIF doble 2,5 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2035,"desc":"Puntera terminal TIF doble 4 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2036,"desc":"Puntera terminal TIF doble 6 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2037,"desc":"Punteras tubulares aisladas para Cable 1,5 mm2 (Negro)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2038,"desc":"RIEL DIN NORMALIZADO NS35","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2039,"desc":"SCBI 10-12 PUENTE FIJO CENTRAL 10P P/TB 16 (JSSB-10-12/BPN)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2040,"desc":"SCBI 5-15 PUENTE FIJO CENTRAL 5P P/TB 35","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2041,"desc":"Separador para borne BPN","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2042,"desc":"SOPORTE ADAPTADOR P/ RIEL DIN DE 1 MODULO","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2043,"desc":"TERMINAL A COMP ACC 10/3","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2044,"desc":"TERMINAL A COMP ACC 25/3 3/8","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2045,"desc":"Terminal de ojal de Cu estañado 10 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2046,"desc":"Terminal de ojal de Cu estañado 16 mm² (agujero 3/8\")","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2047,"desc":"Terminal de ojal de Cu estañado 25 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2048,"desc":"Terminal de ojal de Cu estañado 50 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2049,"desc":"Terminal de ojal de Cu estañado 6 mm²","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2050,"desc":"TERMINAL OJAL C5 DIAM 8 MM","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2051,"desc":"TERMINAL OJAL C6 AMARILLO DIAM 10 MM","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2052,"desc":"TERMINALES B 6 preaislados 16-14 Ojal 800 azul","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2053,"desc":"TERMINALES C7 PREAISLADOS OJAL 12MM AMARILLO","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2054,"desc":"TERMINALES PREAISLADOS OJAL (D6 mm) AMARILLO (C4) S: 2,5/ 6 mm2","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2055,"desc":"TERMINALES PREAISLADOS OJAL (D6 mm) AZUL (B5) S: 2,5/ 6 mm2","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2056,"desc":"TERMINALES PREAISLADOS OJAL 012","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2057,"desc":"Termocontraíble pared fina 5,0/2,5 mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2058,"desc":"TIFD-150/8 TERMINAL TIF DOBLE 2x1,5mm2 NEGRO (Pack x300)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2059,"desc":"TOPE DE BORNERA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":2060,"desc":"UNION A COMPRESION 10 MM/C X 100","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3001,"desc":"BASE PORTAFUSIBLE 10 X 38","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3002,"desc":"BASE PORTAFUSIBLE 25 AMP 8 X 31 1 POLO DIN","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3003,"desc":"BORNE PORTAFUSE SECCIONABLE F5X20mm - 4mm2","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3004,"desc":"CARTUCHO FUSIBLE NH 00 63 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3005,"desc":"CONTACTOR TRIP 25 A - 1NA + 1 NC 220V 50","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3006,"desc":"Contactor tripolar, categoría AC1, bobina 220Vca - 1NA | 25 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3007,"desc":"DISYUNTOR DIF 4 X 40 A 300 MA SUPERINMUNIZADO","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3008,"desc":"Disyuntor Diferencial 2x25A 30 mA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3009,"desc":"Fondo de tablero 220 x 75 x 2mm c / riel","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3010,"desc":"Fondo de tablero 220 x 80 x 2 mm en chapa negra","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3011,"desc":"FONDO TABLERO CHAP GALVAN P/ COLUM SUB 230X95X2 MM","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3012,"desc":"Fotocontrol / interruptor fotoeléctrico 220 V, 10 A, IP65 (IRAM AADL J20-24/25)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3013,"desc":"FUSIBLE CERAMICO 10 X 38","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3014,"desc":"Fusible cerámico 8,5 × 31,5 mm, 2 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3015,"desc":"FUSIBLE CERAMICO 8.5 X 31.5 4 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3016,"desc":"FUSIBLE CILINDRICO 10 X 38 1 AMP","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3017,"desc":"FUSIBLE CILINDRICO 10 X 38 2 AMP","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3018,"desc":"FUSIBLE NEOZED 2A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3019,"desc":"FUSIBLE NEOZED 6A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3020,"desc":"Gabinete PRFV 530 × 430 × 200 mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3021,"desc":"INT. TERMOMAGNETICO 4 x 16 A curva C 10KA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3022,"desc":"INT. TERMOMAGNETICO 4 X 40A CURVA C","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3023,"desc":"INT. TERMOMAGNETICO BIPOLAR 25 A CURVA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3024,"desc":"INT. TERMOMAGNETICO IK60N 3X16A CURVA C","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3025,"desc":"INT. TERMOMAGNETICO UNIPOLAR 32 A CURVA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3026,"desc":"INTERRUPTOR DIFERENCIAL 1 X 16 A CURVA C","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3027,"desc":"INTERRUPTOR DIFERENCIAL 1 X 32 A CURVA C IK60N","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3028,"desc":"INTERRUPTOR DIFERENCIAL 2 X 25 A 300 MA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3029,"desc":"INTERRUPTOR DIFERENCIAL 4 x 63 300 MA (S)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3030,"desc":"Interruptor Diferencial bipolar y sensibilidad 30mA | 25 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3031,"desc":"Interruptor fotoeléctrico según E.T.G, 220V, 10A e IP 65 (incluyendo la base de montaje) | 10 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3032,"desc":"INTERRUPTOR TERMOMAG 1 X 10 A CURVA C10 KA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3033,"desc":"INTERRUPTOR TERMOMAG 2 X 10 CURVA C 6KA/10 KA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3034,"desc":"INTERRUPTOR TERMOMAG 4 X 10 AMP CURVA C","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3035,"desc":"INTERRUPTOR TERMOMAG 4 X 20 AMP CURVA C","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3036,"desc":"INTERRUPTOR TERMOMAG 4 X 25 A CURVA C 10 KA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3037,"desc":"INTERRUPTOR TERMOMAG 4 X 32 A CURVA C","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3038,"desc":"INTERRUPTOR TERMOMAG 4 X 6 A CURVA C","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3039,"desc":"INTERRUPTOR TERMOMAG 4 X 6AMP CURVA C","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3040,"desc":"INTERRUPTOR TERMOMAGNETICO 1 x 6 AMPERES curva C","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3041,"desc":"Interruptor termomagnético bipolar, curva \"C\" y 10kA | 20 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3042,"desc":"Interruptor termomagnético tetrapolar, curva \"C\", 10 Ka -25A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3043,"desc":"Interruptor termomagnético tetrapolar, curva \"C\", 10 Ka -50A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3044,"desc":"Interruptor termomagnético tripolar, curva \"C\", 10 Ka -25A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3045,"desc":"Interruptor termomagnético unipolar, curva \"C\", 10kA | 6 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3046,"desc":"INTERRUPTOR UNIPOLAR 6 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3047,"desc":"Llave encapsulada de un punto (encendido/apagado de iluminación interna del tablero","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3048,"desc":"Llave encapsulada de un punto para accionamiento automático-manual","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3049,"desc":"Medidor Trifásico de energía eléctrica (a proveer por EPEC)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3050,"desc":"MODULO TOMACORRIENTE ENCAPSULADO 2P+T,220 Vca, 10 A SEGÚN NORMA IRAM 2071","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3051,"desc":"Morseto de derivación para acometida a tablero Metal-CE 1995/1","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3052,"desc":"PLACA DE MONTEJE PAR GABINETE PRFV 530 x 430 x 200","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3053,"desc":"Portafusible tabaquera 10 × 38 mm","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3054,"desc":"Seccionador bajo carga, tapa rebatible, In:160A, 1-polos p/NH T000/00","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3055,"desc":"Seccionador portafusible NH unipolar - T00 + fusible NH gL | 63 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3056,"desc":"SELECTORA 2 POS FIJAS 1NA+1NC","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3057,"desc":"TABLERO (TT) PRFV POSTE 800 x 600 x300 C/ 2 SAL DE 4 X 25","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3058,"desc":"Tablero de medición, protección y comando, gabinete PRFV IP65 (armado s/proyecto)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3059,"desc":"TABLERO TNS PRFV 800x 600x 300 6 salidas 1 x 16 amp","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3060,"desc":"TABLERO TNS TMPC acometida aerea 3 salidas de 1 x 25","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3061,"desc":"TABLEROS SIN PEDESTAL ( 3 salidas de 3 x 1 x 20A)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3062,"desc":"TABLEROS SIN PEDESTAL ( 4 SALIDAS DE 3 x 1 x 16 AMP)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3063,"desc":"TERMICA EASY 9 1 X 32A 4 5KA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3064,"desc":"TERMICA EASY 9 2 X 16A 4 5KA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3065,"desc":"TERMICA TETRAPOLAR 40A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3066,"desc":"TERMICA UNIPOLAR 25A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3067,"desc":"Termomagnetica 1 x 10 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3068,"desc":"Termomagnetica 1 x 6 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3069,"desc":"Termomagnetica 2 x 20 A curva C","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3070,"desc":"Termomagnetica 4 x 25 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3071,"desc":"TOMA 10 A C/ TIERRA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":3072,"desc":"ZOCALO FOTOCONTROL","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4001,"desc":"ABRAZADERA C/1 escotes 140","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4002,"desc":"ABRAZADERA C/2 escotes HG 0200","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4003,"desc":"Abrazadera de fijación de tablero a poste PRFV","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4004,"desc":"ABRAZADERA LISA H G 220 MM","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4005,"desc":"ABRAZADERA LISA H G 240 MM","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4006,"desc":"ABRAZADERA LISA H G 260 MM","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4007,"desc":"ABRAZADERA LISA H G 300 MM","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4008,"desc":"ABRAZADERA LISA H G 340 MM","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4009,"desc":"Aislador de porcelana MN 16","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4010,"desc":"Aislador de porcelana MN 17","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4011,"desc":"AISLADOR RIENDA 65 X 90 MN 20","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4012,"desc":"Apoya escalera H 12, con herrajes","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4013,"desc":"Arandela de presión (elástica partida) 1/2\"","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4014,"desc":"Arandela plana 1/2\"","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4015,"desc":"Babero de zinguería (o protección PVC apta UV) para tramo de cable expuesto","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4016,"desc":"Bulón 1/2\" × 250 mm con tuerca, H°G° MN 52","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4017,"desc":"BULON 12 x 38 NO4-R 25 mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4018,"desc":"BULON 12 x 90 NO4 76 mm p/abrazaderas de 260","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4019,"desc":"Bulón pasante para unión artefacto ↔ brazo del vínculo","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4020,"desc":"Chapa de retención 52 × 28 × 2 mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4021,"desc":"Cinta aisladora PVC 19 mm × 20 m","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4022,"desc":"Conjunto de semiabrazaderas MN 166 / Q 151/7 / Q 1501/07","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4023,"desc":"ESPARRAGO M16 X 190","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4024,"desc":"Fleje de acero inoxidable AISI 304, 3/4\"","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4025,"desc":"Hebilla de acero inoxidable AISI 304, 3/4\"","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4026,"desc":"Morseto de derivación de fase con portafusible Metal-CE 1995/4 (LCT PKD-14PF)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4027,"desc":"Morseto de derivación de neutro Metal-CE 1995/6 (LCT PKD-14)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4028,"desc":"Morseto de indentación múltiple Metal-CE 1995/3 (LCT PKD-16)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4029,"desc":"Precinto 200 x 4.5 nylon 66","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4030,"desc":"PRECINTO PRENSACABLE NEGRO 250X4,5 mm NYLON 66","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4031,"desc":"Protector capuchón R15 para cable","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4032,"desc":"Rack MN 4B2L para un aislador, con dos semiabrazaderas","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4033,"desc":"Soporte para caños, amurado con tornillo y fisher n° 8","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4034,"desc":"Sunchos acero 3/8 x 30 metros (NO USAR)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4035,"desc":"Tornillo con fisher n° 8","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4036,"desc":"Tuerca 5/16","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4037,"desc":"Tuerca cuadrada galvanizada 1/2\"","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4038,"desc":"Tuerca y arandela para bulón pasante de artefacto","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4039,"desc":"Tuercas 3/4\"","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":4040,"desc":"Varilla roscada para anclaje de gabinete","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5001,"desc":"CABLE CANAL RANURADO 30x30mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5002,"desc":"CABLE CANAL RANURADO 40x30mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5003,"desc":"Cámara de inspección de PVC 40 × 40 cm, tipo desagüe cloacal (AP-TC-002)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5004,"desc":"Caño de bajada doble aislación Ø2\", L = 4 m","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5005,"desc":"Caño PEAD Ø50 mm PN6","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5006,"desc":"CAÑO PVC CORRUGADO 3/4\" (PASAJE DE CABLE DE PAT)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5007,"desc":"Caño PVC rígido reforzado Ø110 mm (Ø100 mm interior)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5008,"desc":"Caño PVC rígido reforzado Ø160 mm","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5009,"desc":"Caño PVC rígido reforzado Ø50 mm (conducto de PAT)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5010,"desc":"Caño PVC rígido Ø90 mm (ingreso de acometida EPEC al tablero a nivel)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5011,"desc":"Caño PVC Ø25,4 mm (1\") para conducto de PAT / desagüe","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5012,"desc":"CONECTOR c/rosca LSOH CAJA/CAÑO 40 MM","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5013,"desc":"CONECTOR DE CAJA PARA CAÑO RIGIDO PVC DIAMETRO 40MM","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5014,"desc":"Cordón guía de nylon Ø10 mm para conducto de reserva","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5015,"desc":"Grampa de sujeción de caños","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5016,"desc":"Marco de bronce con tapa e inscripción «A.P.» a nivel de solado","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5017,"desc":"Masilla / espuma de obturación para boca de conducto","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5018,"desc":"PRENSACABLE 1","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5019,"desc":"Prensacable 1 1/2\" RE, con tuerca y arandela (Ø 25–30 mm)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5020,"desc":"Prensacable 1/2\" RE, con tuerca y arandela (Ø 5–8 mm)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5021,"desc":"Prensacable 2\" RE, con tuerca y arandela (Ø 30–40 mm)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5022,"desc":"PRENSACABLE AL 3/4\" RE (SIN TUERCA)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5023,"desc":"PRENSACABLE AL 3/4\" RE C/TUERCA Y ARANDELA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5024,"desc":"PRENSACABLE AL 5/8\" RE (SIN TUERCA)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5025,"desc":"Prensacable de aluminio 1 1/4\" RE, con tuerca y arandela","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5026,"desc":"Prensacable de aluminio 1\" RE, con tuerca","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5027,"desc":"Prensacable de aluminio 5/8\" RE, con tuerca y arandela","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5028,"desc":"Prensacable de aluminio 7/8\" RE, con tuerca y arandela","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5029,"desc":"Prensacable plástico 3/4\" RE, con tuerca y arandela","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5030,"desc":"Tapa de cierre para caño PVC Ø110 mm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5031,"desc":"TUERCA METALICA PARA PRENSA CABLE 1\"","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5032,"desc":"TUERCA PARA PRENSACABLE 5/8","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5033,"desc":"TUERCA PARA PRENSACABLE AL 1 1/4 RE","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":5034,"desc":"TUERCA PARA PRENSACABLE AL 3/4\" RE","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6001,"desc":"Cable Cu 3×1,5 mm² XLPE + vaina PVC (IRAM 2178-1) — columna a luminaria","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6002,"desc":"Caja de conexión de columna con señalización «Riesgo Eléctrico»","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6003,"desc":"CAJA ESTANCA ALUMINIO INYECTADO 200 X 150 X 100 IP65 PARA TABLERO DE COLUMNA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6004,"desc":"Caño PVC Ø75 mm para acometida subterránea de columna","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6005,"desc":"Columna metálica recta 10 m de altura libre (AP-C-005)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6006,"desc":"Columna metálica recta 7 m de altura libre (AP-C-005)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6007,"desc":"Columna PRFV recta 10 m de altura libre (AP-C-033 tipo B)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6008,"desc":"Columna PRFV recta 7 m de altura libre (AP-C-033 tipo A)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6009,"desc":"Fondo de tablero para columna de alumbrado 70 x 165","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6010,"desc":"Luminaria vial LED (provista por la Municipalidad)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6011,"desc":"Luminarias Led 200 W (Plaza Municipalidad de Cordoba)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6012,"desc":"Luminarias Led Phillips Led 76 W /100 W","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6013,"desc":"Medio vínculo octogonal (AP-C-011)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6014,"desc":"Portalámpara de aplicar - rosca E27 equipado con Lámpara LED de 5W","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6015,"desc":"Poste / apoyo de PRFV hl = 8 m, Ro 1050 daN (AP-T-018)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6016,"desc":"Vínculo octogonal (AP-C-011)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6017,"desc":"Vínculo tipo capuchón para 1 artefacto, brazo 1000 mm (AP-C-017-a)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6018,"desc":"Vínculo tipo capuchón para 1 artefacto, brazo 1500 mm (AP-C-017-b)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6019,"desc":"Vínculo tipo capuchón para 1 artefacto, brazo 400 mm (AP-C-008 1/3)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6020,"desc":"Vínculo tipo capuchón para 2 artefactos, brazos 400 mm (AP-C-008 2/3)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6021,"desc":"Vínculo tipo capuchón para 3 artefactos, brazos 425 mm (AP-C-008 3/3)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":6022,"desc":"Vínculo tipo capuchón para 4 artefactos, brazos 400 mm (AP-C-034)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7001,"desc":"Barra de puesta a tierra | 125 A","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7002,"desc":"BLOQUETE (MN-1101a) HIERRO","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7003,"desc":"BLOQUETE DE BRONCE 1/2 50 mm (MN1101 b)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7004,"desc":"Borne de puesta a tierra P/conductor 6 mm²AZUL","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7005,"desc":"Borne de puesta a tierra P/conductor 6 mm²GRIS","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7006,"desc":"Borne de puesta a tierra para conductor 6 mm²GRIS","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7007,"desc":"Borne de puesta a tierra para conductor 6 mm²VERDE","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7008,"desc":"Cable cobre 1 x 2.5 mm verde y amarillo","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7009,"desc":"Cable cobre 1 x 6 mm verde y amarillo","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7010,"desc":"Cable Cu 1×10 mm² verde-amarillo (IRAM NM 247-3)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7011,"desc":"CABLE PAT 10 mm verde/amarillo ROLLO","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7012,"desc":"CABLE PAT 10 mm verde/amarillo ROLLO X200MTS","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7013,"desc":"CONECTOR C COMPRESION para PAT TIPO C CMC -7 (JAB5/8 CABLE 6-16)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7014,"desc":"CONECTOR C COMPRESION para PAT TIPO C CMC -8 (JAB5/8 CABLE 25)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7015,"desc":"Dispersor (jabalina) de Cu con alma de acero Ø14,6 × 1500 mm (IRAM 2309)","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7016,"desc":"Grampa terminal PAT Cobre estañado A184","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7017,"desc":"Jabalina 18 2.0 AC/CU 3/4 \" X 2 METROS","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7018,"desc":"TERMINAL BANDERITA (INFERIOR/SUPERIOR PAT COLUMNA)","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":7019,"desc":"Tomacable WGC / TGC para conexión de jabalina","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8001,"desc":"ALFARJÍA","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8002,"desc":"Anclaje de expansión tipo Kwik Bolt 15 cm, con tuerca y arandela H°G° 1/2\"","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8003,"desc":"Arena para cama y cubrimiento de cable","un":"m³","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8004,"desc":"Baldosa de vereda para reposición","un":"m²","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8005,"desc":"Bloque de telgopor (poliestireno expandido) para ingreso de cable","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8006,"desc":"Cal hidratada","un":"bolsa","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8007,"desc":"Carpeta asfáltica para reconstrucción de calzada","un":"m²","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8008,"desc":"Cemento Portland CPN 40/50","un":"bolsa 50kg","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8009,"desc":"Elastómero de sellado para base de columna","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8010,"desc":"Espuma de poliuretano para sellado","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8011,"desc":"Hierro liso Ø4,2 mm","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8012,"desc":"Hierro redondo Ø6 mm para refuerzo de mampostería","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8013,"desc":"Hormigón H-13 para fundaciones","un":"m³","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8014,"desc":"Hormigón H-21 para reposición de calzada","un":"m³","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8015,"desc":"Hormigón pobre (pegotes de protección del tendido)","un":"m³","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8016,"desc":"Ladrillo común macizo 25 × 12 × 5 cm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8017,"desc":"Malla subterránea de advertencia «Peligro Eléctrico», ancho 30 cm","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8018,"desc":"Malla tipo SIMA 15 × 15 para refuerzo","un":"m²","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8019,"desc":"Mortero calcáreo de relleno","un":"m³","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8020,"desc":"Mortero cementicio para contrabase / torta de columna","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8021,"desc":"Mortero de junta cementicia reforzada 1:3","un":"m³","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8022,"desc":"Piedra partida 6–20 mm","un":"m³","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8023,"desc":"Pintura asfáltica fría","un":"m²","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8024,"desc":"Revoque grueso exterior","un":"m³","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8025,"desc":"Revoque ignífugo + revoque calcáreo","un":"m²","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":8026,"desc":"Sellador elástico de junta","un":"m","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":9001,"desc":"Herrajes y morseteria","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":9002,"desc":"Pintura Gris","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0},{"codigo":9003,"desc":"SILICONA TRANSPARENTE 260ML 3M/FISCHER","un":"Un.","sector":"pañol","stock":0.0,"costo":0.0}];
 
 // stockMovimientos ahora vive en window (no como "let" de este script) para que el bloque
 // Firebase, que corre como <script type="module"> con su propio scope, pueda leerlo y
@@ -3629,9 +3695,76 @@ function catalogoCompleto(){
   });
   return out.sort((a,b)=>a.codigo-b.codigo);
 }
-function proximoCodigoCatalogo(){
-  const todos = catalogoCompleto();
-  return todos.reduce((max,i)=>Math.max(max, i.codigo||0), 0) + 1;
+// ============================================================
+// NOMBRE ÚNICO POR MATERIAL (2026-08-27)
+// ============================================================
+// Pedido del usuario: *"unifiquemos nombres, pongámoslos de forma correcta como tiene que ser;
+// si es necesario investigá en internet, en los proyectos, en todo. Dejemos todo en forma correcta."*
+//
+// El problema medido antes de esto: la Calculadora escribía 72 materiales con sus propios nombres,
+// el pañol tenía otros 232 con los nombres del Excel, y el balance «calculado vs. entregado» los
+// cruzaba ADIVINANDO por parecido de texto. Resultado real del test: 29 no cruzaban con nada, y
+// varios cruzaban MAL con puntaje alto — «Vínculo/acople Triple» se cruzaba con «Tuercas 3/4"» con
+// puntaje 1,00. Un cruce equivocado con confianza alta es peor que no cruzar: el que no cruza se ve
+// y se corrige; el que cruza mal pasa desapercibido y ensucia el balance.
+//
+// Solución: UN SOLO NOMBRE por material, el del catálogo, y cada línea del cómputo lleva el CÓDIGO
+// del producto. El cruce deja de ser aproximado y pasa a ser exacto.
+// Criterio de nombre (aplicado a los 306 productos): **tipo de producto + medida/modelo + norma**.
+// Las fuentes, por orden de prioridad:
+//   1. Ítem 15 del pliego LP 21478, que nombra los materiales uno por uno (15.58 aislador MN 17,
+//      15.59 rack MN 4B2L, 15.67 dispersor Ø14,6×1500 IRAM 2309, 15.74/75 fleje y hebilla AISI 304…)
+//   2. Los planos tipo constructivos (AP-C-008 vínculos, AP-TC-001 zanja, AP-TC-002 cruce,
+//      AP-TC-007 base a nivel, AP-T-019 acometida)
+//   3. Las normas IRAM de cada cable y accesorio
+//   4. La designación del fabricante cuando el producto se pide por modelo (Metal-CE 1995/x = LCT PKD)
+//
+// `M(cod, detalle)` arma la descripción a partir del nombre canónico del catálogo, y le agrega el
+// detalle que explica POR QUÉ va ese material (que es lo que hace útil a la orden de trabajo).
+function M(cod, detalle){
+  const p = catalogoCompleto().find(i=>i.codigo===cod);
+  const nombre = p ? p.desc : `⚠ producto ${cod} no está en el catálogo`;
+  return { desc: nombre + (detalle ? ` — ${detalle}` : ''), cod };
+}
+// Materiales que la Calculadora computa pero NO salen del pañol: son TAREAS o servicios (zanjeo,
+// excavación, mediciones, reposición de vereda). Nunca deben cruzarse con stock — antes lo hacían
+// y contaminaban el balance.
+function esTarea(item){ return item && item.tarea === true; }
+const T = { tarea:true };
+
+// ---- Códigos por familia (2026-08-27) ----
+// El usuario pidió: *"creá códigos nuevos para todos, códigos que no sean difíciles, así va a ser
+// más fácil no repetir ningún producto."*
+// Los códigos del Excel original eran un correlativo 1..472 sin ningún orden: para saber si un
+// producto ya existía había que leer la lista entera, y por eso el pañol terminaba cargando dos
+// veces la misma cosa con nombres distintos.
+// Ahora el código tiene 4 dígitos y **el primero dice la familia**. Buscar antes de dar de alta
+// pasa a ser mirar 30 productos en vez de 308, y hay lugar para 999 por familia.
+const FAMILIAS_CATALOGO = [
+  {base:1000, nombre:'Cables y conductores'},
+  {base:2000, nombre:'Borneras, terminales y conexión'},
+  {base:3000, nombre:'Protección y comando'},
+  {base:4000, nombre:'Herrajes, morsetería y sujeción'},
+  {base:5000, nombre:'Caños, cañerías y accesorios'},
+  {base:6000, nombre:'Columnas, vínculos, postes y luminarias'},
+  {base:7000, nombre:'Puesta a tierra'},
+  {base:8000, nombre:'Obra civil y construcción'},
+  {base:9000, nombre:'Varios y consumibles'},
+];
+function familiaDeCodigo(cod){
+  const base = Math.floor((cod||0)/1000)*1000;
+  return FAMILIAS_CATALOGO.find(f=>f.base===base) || null;
+}
+// Devuelve el primer código LIBRE de esa familia (no el siguiente al último: si se dio de baja
+// alguno del medio, se reutiliza el hueco y los códigos no se disparan).
+function proximoCodigoCatalogo(base){
+  const usados = new Set(catalogoCompleto().map(i=>i.codigo));
+  if(!base){
+    // Sin familia elegida: se cae a «Varios», que es donde va lo que no encaja en ningún grupo.
+    base = 9000;
+  }
+  for(let n = base + 1; n <= base + 999; n++){ if(!usados.has(n)) return n; }
+  return null; // familia llena — 999 productos, no va a pasar
 }
 
 function stockBase(codigo){
@@ -3850,14 +3983,16 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
     }
   }
   btn.disabled = true;
+  let nuevoId = '';
   try{
-    await window.fbAddMovimiento(mov);
+    nuevoId = await window.fbAddMovimiento(mov);
   }catch(e){
     msg.textContent = '⚠ No se pudo guardar el movimiento (revisá tu conexión a internet). No se registró nada.';
     btn.disabled = false;
     return;
   }
   btn.disabled = false;
+  if(nuevoId) window.__ultimoMovLocal = Object.assign({id:nuevoId}, mov);
   document.getElementById('stockMovProducto').value = '';
   document.getElementById('stockMovCantidad').value = 1;
   document.getElementById('stockMovProveedor').value = '';
@@ -3867,13 +4002,47 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
   // la misma plaza, y volver a elegirla en cada renglón era un paso de más en el celular.
   actualizarStockMovProductoHint();
   msg.style.color = 'var(--teal-dark)';
-  msg.textContent = `✓ ${tipo==='entrada'?'Entrada':'Salida'} registrada — nuevo stock de "${item.desc}": ${fmt(stockActual(item.codigo),2)} ${item.un}.`;
+  // Además del aviso, se ofrece el comprobante del movimiento recién cargado: es el momento en que
+  // hace falta, con el que retira el material todavía parado en el pañol esperando su vale.
+  msg.innerHTML = `✓ ${tipo==='entrada'?'Entrada':'Salida'} registrada — nuevo stock de "${escHtml(item.desc)}": ${fmt(stockActual(item.codigo),2)} ${escHtml(item.un)}.`
+    + (nuevoId ? ` <button type="button" class="btn-ghost" onclick="verComprobanteMovimiento('${nuevoId}')" style="margin-left:6px; padding:3px 10px; font-size:12px;">🖨 Imprimir comprobante</button>` : '');
   // No hace falta llamar a renderStockTabla()/renderStockMovimientos()/actualizarStockResumen()
   // acá: el listener en vivo de Firestore (onSnapshot) ya los llama solo apenas confirma el
   // movimiento nuevo (típicamente en milisegundos, con reflejo optimista inmediato).
 });
 
 document.getElementById('stockBuscar').addEventListener('input', renderStockTabla);
+// ---- Movimientos: panel desplegable arriba de todo (2026-08-27) ----
+// El usuario lo pidió así: *"cuando vemos los movimientos del stock está muy atrás; si se puede
+// tener más arriba, que no sea invasivo, como apretar un botón y se despliegue"*.
+// Estaba al final de la pestaña, después del inventario de 308 productos y de la card de productos
+// — había que scrollear todo para llegar. Ahora está PRIMERO, pero PLEGADO: ocupa un renglón hasta
+// que se lo abre, así no le saca lugar al inventario, que es lo que se mira todos los días.
+let stockMovAbierto = false;
+function toggleStockMovimientos(forzar){
+  stockMovAbierto = (forzar === undefined) ? !stockMovAbierto : !!forzar;
+  const cuerpo = document.getElementById('stockMovCuerpo');
+  const btn = document.getElementById('stockMovToggleBtn');
+  if(cuerpo) cuerpo.style.display = stockMovAbierto ? '' : 'none';
+  if(btn) btn.textContent = stockMovAbierto ? 'Ocultar ▴' : 'Ver movimientos ▾';
+}
+function actualizarStockMovBadge(){
+  const el = document.getElementById('stockMovBadge');
+  if(!el) return;
+  const vig = (typeof stockMovimientosVigentes === 'function') ? stockMovimientosVigentes().length : 0;
+  const tot = (window.stockMovimientos || []).length;
+  const anulados = tot - vig;
+  el.textContent = tot ? `· ${vig} registrado(s)${anulados ? ` + ${anulados} anulado(s)` : ''}` : '· sin movimientos todavía';
+}
+document.getElementById('stockMovCabecera').addEventListener('click', (ev)=>{
+  // Se puede tocar toda la cabecera, no solo el botón — es más fácil desde el celular.
+  if(ev.target.closest('input, select, a')) return;
+  toggleStockMovimientos();
+});
+window.toggleStockMovimientos = toggleStockMovimientos;
+window.actualizarStockMovBadge = actualizarStockMovBadge;
+// Que el renglón diga algo desde el arranque, sin esperar a que conteste la base compartida.
+actualizarStockMovBadge();
 
 // ============================================================
 // Panel de productos del catálogo (2026-08-27)
@@ -3906,6 +4075,7 @@ function catLimpiarFormulario(){
   document.getElementById('catEditandoCodigo').value = '';
   document.getElementById('catCancelarBtn').style.display = 'none';
   document.getElementById('catGuardarBtn').textContent = 'Guardar producto';
+  if(typeof actualizarCatFamiliaHint === 'function') actualizarCatFamiliaHint();
 }
 function catEditarProducto(codigo){
   const it = catalogoCompleto().find(i=>i.codigo===codigo);
@@ -3915,6 +4085,9 @@ function catEditarProducto(codigo){
   document.getElementById('catStock').value = it.stock != null ? it.stock : 0;
   document.getElementById('catCosto').value = it.costo != null ? it.costo : 0;
   document.getElementById('catEditandoCodigo').value = String(codigo);
+  const selFam = document.getElementById('catFamilia');
+  if(selFam) selFam.value = String(Math.floor(codigo/1000)*1000);
+  if(typeof actualizarCatFamiliaHint === 'function') actualizarCatFamiliaHint();
   document.getElementById('catCancelarBtn').style.display = '';
   document.getElementById('catGuardarBtn').textContent = 'Guardar cambios';
   catMensaje(`Editando el producto <b>${codigo}</b>. Guardá para aplicar el cambio a todo el equipo.`, true);
@@ -3925,7 +4098,9 @@ async function catGuardarProducto(){
   const desc = (document.getElementById('catDesc').value||'').trim();
   if(!desc){ catMensaje('⚠ Poné una descripción para el producto.', false); return; }
   const editando = document.getElementById('catEditandoCodigo').value;
-  const codigo = editando ? parseInt(editando) : proximoCodigoCatalogo();
+  const baseFam = parseInt((document.getElementById('catFamilia')||{}).value) || 9000;
+  const codigo = editando ? parseInt(editando) : proximoCodigoCatalogo(baseFam);
+  if(!codigo){ catMensaje('⚠ Esa familia no tiene códigos libres.', false); return; }
   const datos = {
     codigo,
     desc,
@@ -4005,7 +4180,8 @@ function renderCatalogoTabla(){
       : `<button type="button" class="btn-ghost" style="padding:4px 9px;font-size:12px;" onclick="catEditarProducto(${i.codigo})" title="Editar nombre, unidad, stock inicial o costo">✏</button>`
         + `<button type="button" class="btn-ghost" style="padding:4px 9px;font-size:12px;color:var(--danger);" onclick="catDarDeBaja(${i.codigo})" title="Dar de baja (no borra el historial)">🚫</button>`
         + (i.origen && i.origen !== 'excel' ? `<button type="button" class="btn-ghost" style="padding:4px 9px;font-size:12px;" onclick="catDeshacerCambio(${i.codigo})" title="Deshacer: vuelve al Excel original (o elimina el producto si era nuevo)">↺</button>` : '');
-    return `<tr${baja?' style="opacity:.5;"':''}><td>${i.codigo}</td><td>${escHtml(i.desc||'')}</td><td>${escHtml(i.un||'')}</td>`
+    const fam = familiaDeCodigo(i.codigo);
+    return `<tr${baja?' style="opacity:.5;"':''}><td><b>${i.codigo}</b>${fam?`<br><span style="font-size:11px;color:var(--text-soft);">${escHtml(fam.nombre.split(',')[0])}</span>`:''}</td><td>${escHtml(i.desc||'')}</td><td>${escHtml(i.un||'')}</td>`
       + `<td>${fmt(i.stock||0,2)}</td><td>${fmt(i.costo||0,2)}</td><td>${org}</td><td style="white-space:nowrap;">${acciones}</td></tr>`;
   }).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--text-soft);padding:16px;">Sin resultados.</td></tr>`;
   const nuevos = catalogo().filter(i=>i.origen==='nuevo').length;
@@ -4014,6 +4190,26 @@ function renderCatalogoTabla(){
     `${rows.length} producto(s)${rows.length>400?' — se muestran los primeros 400':''}. `
     + `Base del Excel: ${STOCK_CATALOGO_BASE.length} · agregados: <b>${nuevos}</b> · corregidos: <b>${editados}</b>.`;
 }
+function poblarCatFamilias(){
+  const sel = document.getElementById('catFamilia');
+  if(!sel) return;
+  const previo = sel.value;
+  sel.innerHTML = FAMILIAS_CATALOGO.map(f=>`<option value="${f.base}">${f.base+1}–${f.base+999} · ${escHtml(f.nombre)}</option>`).join('');
+  if(previo) sel.value = previo;
+  actualizarCatFamiliaHint();
+}
+function actualizarCatFamiliaHint(){
+  const el = document.getElementById('catFamiliaHint');
+  const sel = document.getElementById('catFamilia');
+  if(!el || !sel) return;
+  const editando = document.getElementById('catEditandoCodigo').value;
+  if(editando){ el.innerHTML = `Editando el producto <b>${editando}</b> — el código no cambia.`; return; }
+  const base = parseInt(sel.value) || 9000;
+  const prox = proximoCodigoCatalogo(base);
+  const cuantos = catalogoCompleto().filter(i=>Math.floor(i.codigo/1000)*1000 === base).length;
+  el.innerHTML = `Esta familia tiene <b>${cuantos}</b> producto(s). Al guardar, este va a quedar con el código <b>${prox}</b>. <b>Buscá primero en la lista de abajo</b> para no cargar dos veces lo mismo.`;
+}
+document.getElementById('catFamilia').addEventListener('change', actualizarCatFamiliaHint);
 document.getElementById('catGuardarBtn').addEventListener('click', catGuardarProducto);
 document.getElementById('catCancelarBtn').addEventListener('click', ()=>{ catLimpiarFormulario(); catMensaje('', true); });
 document.getElementById('catBuscar').addEventListener('input', renderCatalogoTabla);
@@ -4022,8 +4218,10 @@ document.getElementById('catVerBajas').addEventListener('change', renderCatalogo
 window.invalidarCatalogo = invalidarCatalogo;
 window.poblarStockDatalist = poblarStockDatalist;
 window.renderCatalogoTabla = renderCatalogoTabla;
+window.poblarCatFamilias = poblarCatFamilias;
 window.catalogo = catalogo;
 window.catalogoCompleto = catalogoCompleto;
+poblarCatFamilias();
 renderCatalogoTabla();
 
 document.getElementById('stockSoloFaltantes').addEventListener('change', renderStockTabla);
@@ -4066,6 +4264,81 @@ function imprimirMovimientos(){
     `<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Cód.</th><th>Producto</th><th>Cantidad</th><th>Destino / proveedor</th><th>Retirado por</th><th>Cargó</th><th></th></tr></thead><tbody>${cuerpo}</tbody></table>`
   ].join(''));
 }
+
+// ============================================================
+// Comprobante de UN movimiento — vale de salida / remito de entrada (2026-08-27)
+// ============================================================
+// Pedido del usuario: *"cuando hago un movimiento necesito poder ver e imprimir ese movimiento"*.
+// El botón 🖨 de arriba imprime el LISTADO completo (el registro del período); esto es otra cosa:
+// la hoja de UN movimiento suelto, con firmas, para que el que retira el material se lleve su vale
+// y quede el respaldo en papel del pañol. Se puede sacar en el momento de cargarlo o después,
+// desde cualquier renglón del registro.
+
+// Número correlativo del comprobante. Se cuenta por tipo (las entradas y las salidas llevan su
+// propia numeración, como los remitos) ordenando por el momento en que se cargó. Debajo va también
+// el id interno de la base, que no cambia nunca: si alguna vez se borrara un movimiento viejo de
+// verdad (no anular, borrar), el correlativo de los siguientes se correría y el id sigue siendo la
+// referencia firme.
+function numeroComprobante(m){
+  const mismos = (window.stockMovimientos||[])
+    .filter(x=>x.tipo===m.tipo)
+    .sort((a,b)=> (a.ts||0)-(b.ts||0) || String(a.id||'').localeCompare(String(b.id||'')));
+  const pos = mismos.findIndex(x=>x.id===m.id);
+  const n = pos >= 0 ? pos+1 : mismos.length+1;
+  return `${m.tipo==='entrada'?'E':'S'}-${String(n).padStart(4,'0')}`;
+}
+
+function verComprobanteMovimiento(id){
+  // El respaldo `__ultimoMovLocal` cubre el caso de apretar "Imprimir comprobante" en el mismo
+  // segundo en que se guardó, antes de que la base compartida devuelva el movimiento al listado.
+  let m = (window.stockMovimientos||[]).find(x=>x.id===id);
+  if(!m && window.__ultimoMovLocal && window.__ultimoMovLocal.id===id) m = window.__ultimoMovLocal;
+  if(!m){ alert('No se encontró ese movimiento. Recargá la página y probá de nuevo.'); return; }
+  const esEntrada = m.tipo==='entrada';
+  const titulo = esEntrada ? 'Comprobante de entrada de material' : 'Vale de salida de material';
+  const nro = numeroComprobante(m);
+  const fila = (rot, val) => val ? `<tr><th style="width:34%; background:#eef5f2;">${escHtml(rot)}</th><td>${escHtml(val)}</td></tr>` : '';
+  const restante = (typeof stockActual === 'function') ? stockActual(m.codigo) : null;
+
+  const datos = [
+    fila('Comprobante N°', nro),
+    fila('Fecha del movimiento', formatFechaCorta(m.fecha) || m.fecha || '—'),
+    fila('Tipo', esEntrada ? 'ENTRADA — ingreso de material al pañol' : 'SALIDA — retiro de material del pañol'),
+    esEntrada ? fila('Proveedor / comprobante', m.proveedor || '—')
+              : fila('Destino (plaza / obra)', m.destino || '—'),
+    esEntrada ? '' : fila('Retirado por', m.retiradoPor || '—'),
+    fila('Cargado por', m.usuario || '—'),
+  ].join('');
+
+  const detalle = `<table style="margin-top:14px;">
+      <thead><tr><th style="width:14%;">Código</th><th>Producto</th><th style="width:16%; text-align:right;">Cantidad</th><th style="width:12%;">Unidad</th></tr></thead>
+      <tbody><tr>
+        <td>${escHtml(String(m.codigo))}</td>
+        <td>${escHtml(m.desc||'')}</td>
+        <td style="text-align:right; font-weight:700;">${fmt(m.cantidad,2)}</td>
+        <td>${escHtml(m.un||'')}</td>
+      </tr></tbody></table>`;
+
+  const anulado = m.anulado
+    ? `<div style="margin:14px 0; border:2px solid #b3261e; color:#b3261e; border-radius:6px; padding:10px 12px; font-weight:700;">
+         ⊘ ESTE MOVIMIENTO ESTÁ ANULADO — no cuenta para el stock.
+         ${m.anuladoMotivo?`<div style="font-weight:400; margin-top:4px;">Motivo: ${escHtml(m.anuladoMotivo)}</div>`:''}
+         ${m.anuladoPor?`<div style="font-weight:400;">Anulado por: ${escHtml(m.anuladoPor)}</div>`:''}
+       </div>` : '';
+
+  const firmas = `<table style="margin-top:26px; border:none;">
+      <tr>
+        <td style="border:none; width:50%; padding-top:34px;"><div style="border-top:1px solid #183028; padding-top:5px;">${esEntrada?'Recibió (pañol) — aclaración y firma':'Entregó (pañol) — aclaración y firma'}</div></td>
+        <td style="border:none; width:50%; padding-top:34px; padding-left:24px;"><div style="border-top:1px solid #183028; padding-top:5px;">${esEntrada?'Entregó (proveedor / transporte)':'Recibió el material — aclaración y firma'}</div></td>
+      </tr></table>`;
+
+  const pie = (restante !== null && isFinite(restante))
+    ? `<div class="sub" style="margin-top:12px;">Stock de este producto al día de hoy, ya contando este movimiento: <b>${fmt(restante,2)} ${escHtml(m.un||'')}</b>. &nbsp;·&nbsp; Referencia interna: ${escHtml(String(m.id||''))}</div>`
+    : `<div class="sub" style="margin-top:12px;">Referencia interna: ${escHtml(String(m.id||''))}</div>`;
+
+  abrirHojaImpresion(`${titulo} — N° ${nro}`, anulado + `<table>${datos}</table>` + detalle + pie + firmas);
+}
+window.verComprobanteMovimiento = verComprobanteMovimiento;
 
 // Abre una ventana nueva con una hoja lista para imprimir o guardar como PDF. Se usa para todos
 // los registros (movimientos, historial de avance, balance, órdenes de trabajo) para que salgan
@@ -4173,9 +4446,10 @@ function renderStockMovimientos(){
       ? `<br><span style="color:var(--danger); font-size:11px;">⊘ ANULADO${m.anuladoMotivo?`: ${escHtml(m.anuladoMotivo)}`:''}${m.anuladoPor?` — por ${escHtml(m.anuladoPor)}`:''}</span>`
       : '';
     const estiloFila = m.anulado ? ' style="opacity:.55; text-decoration:line-through;"' : '';
-    const btn = m.anulado
+    const btnImp = `<button class="btn-ghost" onclick="verComprobanteMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px;" title="Ver e imprimir el comprobante de este movimiento (vale con firmas)">🖨</button>`;
+    const btn = btnImp + ' ' + (m.anulado
       ? `<button class="btn-ghost" onclick="reactivarStockMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px;" title="Volver a contar este movimiento">↺</button>`
-      : `<button class="btn-ghost" onclick="anularStockMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px; color:var(--danger);" title="Anular este movimiento (queda en el registro pero deja de contar)">⊘</button>`;
+      : `<button class="btn-ghost" onclick="anularStockMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px; color:var(--danger);" title="Anular este movimiento (queda en el registro pero deja de contar)">⊘</button>`);
     return `<tr${estiloFila}>
       <td>${fechaFmt}</td>
       <td>${m.tipo==='entrada'?'➕ Entrada':'➖ Salida'}</td>
@@ -4183,7 +4457,7 @@ function renderStockMovimientos(){
       <td>${escHtml(m.desc)}</td>
       <td>${fmt(m.cantidad,2)} ${escHtml(m.un)}</td>
       <td>${detalle}${anuladoInfo}</td>
-      <td class="no-print">${btn}</td>
+      <td class="no-print" style="white-space:nowrap;">${btn}</td>
     </tr>`;
   }).join('');
 }
@@ -5491,13 +5765,25 @@ function puntajeCoincidencia(a, b){
 function calcularBalancePlaza(a){
   if(!a) return { filas: [], resumen: {calculados:0, entregados:0, cruzados:0, conDiferencia:0} };
 
-  // 1) Lo CALCULADO: todos los ítems del detalle de materiales de la plaza, sumados por nombre.
-  const calculado = new Map(); // clave normalizada -> { desc, un, cant }
+  // 1) Lo CALCULADO: los ítems del detalle de materiales de la plaza.
+  //    Desde 2026-08-27 cada material lleva el CÓDIGO del producto del catálogo, así que la clave
+  //    es el código y el cruce es exacto. Las líneas marcadas como TAREA (zanjeo, excavación,
+  //    mediciones, reposición de vereda) se saltean: no salen del pañol y antes ensuciaban el
+  //    balance cruzándose con productos cualesquiera.
+  const calculado = new Map(); // clave -> { desc, un, cant, cod }
   (a.secciones||[]).forEach(sec=>{
     (sec.items||[]).forEach(it=>{
-      const clave = normalizarNombreMaterial(it.desc);
+      if(it.tarea) return;                       // es una tarea, no un material de pañol
+      // Las líneas informativas del cómputo (las que empiezan con —, ℹ o ⚠ y no llevan cantidad)
+      // tampoco son materiales: explican un criterio. Antes entraban al balance con cantidad 0 y
+      // engordaban el conteo de «calculados» sin sentido (detectado en la prueba del 2026-08-27).
+      const cantNum = parseFloat(it.cantNecesaria);
+      if(!isFinite(cantNum)) return;
+      if(/^[—ℹ⚠]/.test(String(it.desc||'').trim())) return;
+      const cod = (it.cod != null) ? it.cod : null;
+      const clave = cod != null ? ('c'+cod) : normalizarNombreMaterial(it.desc);
       if(!clave) return;
-      const prev = calculado.get(clave) || { desc: it.desc, un: it.un||'', cant: 0 };
+      const prev = calculado.get(clave) || { desc: it.desc, un: it.un||'', cant: 0, cod };
       prev.cant += (parseFloat(it.cantNecesaria) || 0);
       calculado.set(clave, prev);
     });
@@ -5505,30 +5791,50 @@ function calcularBalancePlaza(a){
 
   // 2) Lo ENTREGADO: salidas de stock vigentes cuyo destino es esta plaza (menos las devoluciones,
   //    que se cargan como entradas con la plaza elegida — por eso se restan).
+  //    Los movimientos ya guardan el `codigo` del producto, así que la clave también es el código.
   const entregado = new Map();
   stockMovimientosVigentes().forEach(m=>{
     if(String(m.plazaId||'') !== a.id) return;
-    const clave = normalizarNombreMaterial(m.desc);
+    const cod = (m.codigo != null) ? m.codigo : null;
+    const clave = cod != null ? ('c'+cod) : normalizarNombreMaterial(m.desc);
     if(!clave) return;
-    const prev = entregado.get(clave) || { desc: m.desc, un: m.un||'', cant: 0, codigo: m.codigo };
+    const prev = entregado.get(clave) || { desc: m.desc, un: m.un||'', cant: 0, codigo: cod };
     prev.cant += (m.tipo==='salida' ? (parseFloat(m.cantidad)||0) : -(parseFloat(m.cantidad)||0));
     entregado.set(clave, prev);
   });
 
-  // 3) Cruce por nombre.
+  // 3) Cruce. Primero EXACTO por código; solo si alguno de los dos lados no tiene código se cae
+  //    al parecido de nombre, y esas filas se marcan como aproximadas.
+  //    Antes era todo por nombre y producía falsos positivos con puntaje alto: en la prueba del
+  //    2026-08-27, «Vínculo/acople Triple» cruzaba con «Tuercas 3/4"» con puntaje 1,00. Un cruce
+  //    equivocado con confianza alta es peor que no cruzar, porque nadie lo mira.
   const filas = [];
   const entregadoUsado = new Set();
   calculado.forEach((c, claveC)=>{
+    // (a) coincidencia exacta de código
+    if(entregado.has(claveC)){
+      entregadoUsado.add(claveC);
+      const e = entregado.get(claveC);
+      filas.push({ desc: c.desc, un: c.un || e.un, calc: c.cant, entr: e.cant, cruzado: true, aproximado: false, codigo: e.codigo });
+      return;
+    }
+    // (b) si el material calculado YA tiene código, no se busca por nombre: si el código no está
+    //     entregado, es que no se entregó. Adivinar acá es lo que rompía el balance.
+    if(c.cod != null){
+      filas.push({ desc: c.desc, un: c.un, calc: c.cant, entr: null, cruzado: false, aproximado: false, codigo: c.cod });
+      return;
+    }
+    // (c) sin código de ningún lado → último recurso, parecido de nombre, marcado como aproximado
     let mejorClave = null, mejorPuntaje = 0;
     entregado.forEach((e, claveE)=>{
-      if(entregadoUsado.has(claveE)) return;
-      const p = claveC === claveE ? 1 : puntajeCoincidencia(c.desc, e.desc);
+      if(entregadoUsado.has(claveE) || e.codigo != null) return;
+      const p = puntajeCoincidencia(c.desc, e.desc);
       if(p > mejorPuntaje){ mejorPuntaje = p; mejorClave = claveE; }
     });
     if(mejorClave && mejorPuntaje >= 0.6){
       entregadoUsado.add(mejorClave);
       const e = entregado.get(mejorClave);
-      filas.push({ desc: c.desc, un: c.un || e.un, calc: c.cant, entr: e.cant, cruzado: true, aproximado: mejorPuntaje < 1, codigo: e.codigo });
+      filas.push({ desc: c.desc, un: c.un || e.un, calc: c.cant, entr: e.cant, cruzado: true, aproximado: true, codigo: e.codigo });
     } else {
       filas.push({ desc: c.desc, un: c.un, calc: c.cant, entr: null, cruzado: false, aproximado: false });
     }
@@ -5643,7 +5949,7 @@ function renderBalance(){
     }
   });
   html += `</tbody></table></div>`;
-  html += `<div class="hint" style="margin-top:10px;">El cruce entre el detalle de materiales y las salidas del pañol se hace <b>por nombre</b> (no hay un código común entre los dos). Las filas marcadas con <b>≈</b> se cruzaron por nombre parecido — conviene mirarlas. Si un material aparece separado en dos filas («Sin entregar» + «Salió sin estar calculado»), es que se llaman distinto en cada lado.</div>`;
+  html += `<div class="hint" style="margin-top:10px;">El cruce entre el detalle de materiales y las salidas del pañol se hace <b>por código de producto</b> — es exacto, no adivina. Desde el 27/08/2026 cada material del cómputo lleva el código del producto del catálogo. Las filas marcadas con <b>≈</b> se cruzaron por nombre parecido — conviene mirarlas. Si un material aparece separado en dos filas («Sin entregar» + «Salió sin estar calculado»), es que se llaman distinto en cada lado.</div>`;
   cont.innerHTML = html;
 }
 
@@ -6424,7 +6730,14 @@ function calcular(){
       .slice().sort((a,b)=>a.altura-b.altura)
       .map(g=>{
         const alturaInfo = ALTURAS[tipoCol].find(a=>a.h===g.altura);
-        return {desc:`Columna ${tipoCol.toLowerCase()} recta, ${g.altura} m de altura libre — s/plano ${alturaInfo?alturaInfo.plano:'—'}`, cant:g.columnas, un:'Un.', ref:tipoCol==='Metálica' ? 'Pliego LP21478' : 'Proyecto ejecutivo'};
+        // Cada tipo y altura de columna es un producto distinto — enlace por código (2026-08-27).
+        const COD_COLUMNA = {'PRFV|7':6008, 'PRFV|10':6007, 'Metálica|7':6006, 'Metálica|10':6005};
+        const codCol = COD_COLUMNA[`${tipoCol}|${g.altura}`];
+        const detalleCol = `s/plano ${alturaInfo?alturaInfo.plano:'—'}`;
+        return {
+          ...(codCol ? M(codCol)   // el nombre canónico ya nombra el plano, no hace falta repetirlo
+                     : {desc:`Columna ${tipoCol.toLowerCase()} recta, ${g.altura} m de altura libre — ${detalleCol}`}),
+          cant:g.columnas, un:'Un.', ref:tipoCol==='Metálica' ? 'Pliego LP21478' : 'Proyecto ejecutivo'};
       });
     secciones.push({titulo:'COLUMNAS', items:itemsCol});
 
@@ -6478,8 +6791,14 @@ function calcular(){
       const v = VINCULOS.find(x=>x.id===g.tipo);
       if(!v) return;
       const sinItem = v.item === '—';
+      // Cada vínculo es un producto distinto del pañol — enlace por código (2026-08-27). Las
+      // combinaciones sin ítem de pliego propio (varios artefactos con brazo largo) no tienen
+      // producto de catálogo: salen con el nombre descriptivo y sin código, marcadas como tales.
+      const codVin = COD_VINCULO[v.id];
+      const detalleVin = `s/plano ${v.plano}${sinItem ? ' · sin ítem de pliego propio, confirmar con la Inspección' : ''}`;
       itemsVinculos.push({
-        desc:`Vínculo/acople ${v.label} — s/plano ${v.plano}${sinItem ? ' · sin ítem de pliego propio, confirmar con la Inspección' : ''}`,
+        ...(codVin ? M(codVin, sinItem ? 'sin ítem de pliego propio, confirmar con la Inspección' : '')
+                   : {desc:`Vínculo/acople ${v.label} — ${detalleVin}`}),
         cant:g.columnas, un:'Un.', ref: sinItem ? 'Criterio de obra' : 'Ítem '+v.item
       });
     });
@@ -6579,12 +6898,12 @@ function calcular(){
     }
 
     const itemsLum = [
-      {desc:'Luminaria vial LED — montaje, conexionado y energización', cant:totalLuminarias, un:'Un.', ref:'Provista por Municipalidad (s/ETG)'},
-      {desc: vincTipo==='PRFV'
-        ? `Tabaquera portafusible 10×38 (caja de conexión fija de 3 posiciones por columna PRFV)`
-        : 'Tabaquera portafusible 10×38 (protección individual, 1 por luminaria)',
-       cant:totalPortafusibles, un:'Un.', ref:'Ítem 69'},
-      {desc:`Fusible cerámico 2 A (1 por portafusible)`, cant:totalPortafusibles, un:'Un.', ref:'Ítem 68'},
+      {...M(6010,'montaje, conexionado y energización'), cant:totalLuminarias, un:'Un.', ref:'Provista por la Municipalidad (s/ETG)'},
+      {...M(3053, vincTipo==='PRFV'
+        ? 'en la caja de conexión fija de 3 posiciones de la columna PRFV'
+        : 'protección individual, 1 por luminaria'),
+       cant:totalPortafusibles, un:'Un.', ref:'Ítem 69 / 15.19'},
+      {...M(3014,'1 por portafusible'), cant:totalPortafusibles, un:'Un.', ref:'Ítem 68 / 15.18'},
       // Puntera terminal TIFF (nombre correcto confirmado por el usuario 2026-08-13 — no es un terminal
       // ojal/anillo, es la puntera/ferrule que se engarza en la punta del cable antes de fijarla bajo el
       // tornillo de la BPN o del portafusible). El cable entra primero a la BPN y de ahí sale hacia el
@@ -6594,7 +6913,7 @@ function calcular(){
       // Cableado troncal) — se usa esa misma sección de 1,5 mm² para las 2 puntas del portafusible, que
       // es la medida más chica de todo el circuito y la que entra en la tabaquera 10×38 (1,5 mm² es una
       // medida estándar de puntera TIFF).
-      {desc:'Puntera terminal TIFF 1,5 mm² para conexión a portafusible (entrada desde BPN + salida a luminaria)', cant:totalPortafusibles*2, un:'Un.', ref:'Criterio de campo'},
+      {...M(2028,'conexión a portafusible: entrada desde BPN + salida a luminaria'), cant:totalPortafusibles*2, un:'Un.', ref:'Criterio de campo'},
     ];
     // ---- Regla de compra en PRFV: neutro y tierra SIEMPRE de 6 mm² (2026-08-26) ----
     // El usuario la fijó: *"las BPN que pedimos para las columnas de PRFV, ya sean de 10 o 7 de
@@ -6607,30 +6926,30 @@ function calcular(){
     const ntAcum = { cant:0, tierra:0, columnas:0 };
     Object.entries(bpnPorCalibre).forEach(([ref, x])=>{
       const nota = !cableOn ? ' (calibre manual — activá Cableado para calcularlo por tramo real)' : (bpnEstimadoPorMezcla ? ' (repartido proporcionalmente entre tramos — hay más de un calibre y más de un vínculo a la vez)' : '');
-      itemsLum.push({desc:`Bornera BPN — juego FASE (gris), calibre ${x.calibre}${nota}`, cant:x.fase, un:'Un.', ref});
+      itemsLum.push({...M(x.calibre==='4 mm²'?2007:2009, `una por posición de fase${nota}`), cant:x.fase, un:'Un.', ref});
       if(estandarizaNT){
         // Se acumulan para sacar UNA línea de 6 mm² al final, no una por cada calibre de tramo.
         ntAcum.cant += x.neutro;
         ntAcum.tierra += x.tierra;
         ntAcum.columnas += x.columnas;
       } else {
-        itemsLum.push({desc:`Bornera BPN — juego NEUTRO (celeste), calibre ${x.calibre}${nota}`, cant:x.neutro, un:'Un.', ref});
-        itemsLum.push({desc:`Bornera BPN — juego TIERRA (verde), calibre ${x.calibre}${nota}`, cant:x.tierra, un:'Un.', ref});
+        itemsLum.push({...M(2008, `calibre ${x.calibre}${nota}`), cant:x.neutro, un:'Un.', ref});
+        itemsLum.push({...M(2010, `calibre ${x.calibre}${nota}`), cant:x.tierra, un:'Un.', ref});
         const elementosPuente = x.neutro + x.tierra;
         const puenteFijo = elementosPuente > 0 ? Math.ceil(elementosPuente / PUENTE_ELEMENTOS) : 0;
-        itemsLum.push({desc:`Puente fijo ZOLODA (peine de 10 elementos, se corta a medida) — une NEUTRO+TIERRA en un solo puente continuo (esquema TN-C), calibre ${x.calibre}${nota}`, cant:puenteFijo, un:'Un.', ref:'Criterio de campo'});
-        itemsLum.push({desc:`Separador para borne BPN, calibre ${x.calibre} — divide grupo FASE del grupo NEUTRO+TIERRA${nota}`, cant:x.columnas, un:'Un.', ref:'Criterio de campo'});
+        itemsLum.push({...M(2027, `se corta a medida · une NEUTRO+TIERRA en un solo puente continuo (esquema TN-C)${nota}`), cant:puenteFijo, un:'Un.', ref:'Criterio de campo'});
+        itemsLum.push({...M(2041, `divide grupo FASE del grupo NEUTRO+TIERRA${nota}`), cant:x.columnas, un:'Un.', ref:'Criterio de campo'});
       }
     });
     if(estandarizaNT && (ntAcum.cant + ntAcum.tierra) > 0){
       const nota = !cableOn ? ' (calibre manual — activá Cableado para calcularlo por tramo real)' : '';
-      itemsLum.push({desc:`Bornera BPN — juego NEUTRO (celeste), calibre ${BPN_PRFV_NT.calibre} — <b>fija en PRFV, no depende del calibre del cable</b>${nota}`, cant:ntAcum.cant, un:'Un.', ref:BPN_PRFV_NT.ref});
-      itemsLum.push({desc:`Bornera BPN — juego TIERRA (verde), calibre ${BPN_PRFV_NT.calibre} — <b>fija en PRFV, no depende del calibre del cable</b>${nota}`, cant:ntAcum.tierra, un:'Un.', ref:BPN_PRFV_NT.ref});
+      itemsLum.push({...M(2008, `<b>fija en PRFV, no depende del calibre del cable</b>${nota}`), cant:ntAcum.cant, un:'Un.', ref:BPN_PRFV_NT.ref});
+      itemsLum.push({...M(2010, `<b>fija en PRFV, no depende del calibre del cable</b>${nota}`), cant:ntAcum.tierra, un:'Un.', ref:BPN_PRFV_NT.ref});
       // El puente fijo une NEUTRO+TIERRA, así que también es de 6 mm².
       const elementosPuente = ntAcum.cant + ntAcum.tierra;
       const puenteFijo = elementosPuente > 0 ? Math.ceil(elementosPuente / PUENTE_ELEMENTOS) : 0;
-      itemsLum.push({desc:`Puente fijo ZOLODA de <b>6 mm²</b> (peine de 10 elementos, se corta a medida) — une NEUTRO+TIERRA en un solo puente continuo (esquema TN-C)${nota}`, cant:puenteFijo, un:'Un.', ref:'Criterio de campo'});
-      itemsLum.push({desc:`Separador para borne BPN — divide grupo FASE del grupo NEUTRO+TIERRA (1 por columna)${nota}`, cant:ntAcum.columnas, un:'Un.', ref:'Criterio de campo'});
+      itemsLum.push({...M(2027, `se corta a medida · une NEUTRO+TIERRA en un solo puente continuo (esquema TN-C)${nota}`), cant:puenteFijo, un:'Un.', ref:'Criterio de campo'});
+      itemsLum.push({...M(2041, `divide grupo FASE del grupo NEUTRO+TIERRA (1 por columna)${nota}`), cant:ntAcum.columnas, un:'Un.', ref:'Criterio de campo'});
       itemsLum.push({desc:`— En columnas <b>PRFV</b> (7 o 10 m) las borneras <b>celeste (neutro) y verde (tierra) se piden siempre de 6 mm²</b>, cualquiera sea el calibre del troncal. Solo la de <b>fase (gris)</b> sigue la sección del cable de ese tramo`, cant:'—', un:'—', ref:'Criterio de compra confirmado'});
     }
     // Punteras TIFF de BPN: 2 por cada BPN (fase+neutro+tierra) — la punta que entra desde el troncal y
@@ -6642,7 +6961,9 @@ function calcular(){
       .forEach(([gaugeLabel, cant])=>{
         if(cant <= 0) return;
         const nota = !cableOn ? ' (calibre manual — activá Cableado para calcularlo por tramo real)' : '';
-        itemsLum.push({desc:`Puntera terminal TIFF ${gaugeLabel} (simple) para conexión a bornera BPN (mismo calibre que el cable troncal de ese tramo)${nota}`, cant, un:'Un.', ref:'Criterio de campo'});
+        const codTif = {'1,5 mm²':2028, '2,5 mm²':2030, '4 mm²':2031, '6 mm²':2032, '10 mm²':2029}[gaugeLabel];
+        itemsLum.push({...(codTif ? M(codTif, `conexión a bornera BPN, mismo calibre que el cable troncal de ese tramo${nota}`)
+                                  : {desc:`Puntera terminal TIF ${gaugeLabel} — conexión a bornera BPN${nota}`}), cant, un:'Un.', ref:'Criterio de campo'});
       });
     // Punteras DOBLES: una por cada conductor del troncal que sigue de largo en una columna de paso
     // (entra y sale bajo el mismo tornillo). Reemplazan a 2 simples cada una — por eso ya se
@@ -6651,7 +6972,9 @@ function calcular(){
       .sort((a,b)=>parseFloat(a[0])-parseFloat(b[0]))
       .forEach(([gaugeLabel, cant])=>{
         if(cant <= 0) return;
-        itemsLum.push({desc:`Puntera terminal TIFF ${gaugeLabel} DOBLE — columnas de paso, donde el circuito continúa y entran dos cables bajo el mismo tornillo (reemplaza 2 simples)`, cant, un:'Un.', ref:'Criterio de campo'});
+        const codTifD = {'1,5 mm²':2033, '2,5 mm²':2034, '4 mm²':2035, '6 mm²':2036}[gaugeLabel];
+        itemsLum.push({...(codTifD ? M(codTifD, 'columnas de paso: el circuito continúa y entran dos cables bajo el mismo tornillo (reemplaza 2 simples)')
+                                   : {desc:`Puntera terminal TIF doble ${gaugeLabel} — columnas de paso`}), cant, un:'Un.', ref:'Criterio de campo'});
       });
     secciones.push({titulo:'LUMINARIAS Y PROTECCIONES', items:itemsLum, estimado:true});
 
@@ -6698,9 +7021,13 @@ function calcular(){
     });
     const itemsCable = Object.entries(mlPorCalibre).map(([label, ml])=>{
       const g = gananciaPorCalibre[label] || 0;
+      // Cada calibre de troncal es un producto distinto del pañol — enlace por código (2026-08-27).
+      const COD_TRONCAL = {'4×2,5 mm²':1009, '4×4 mm²':1010, '4×6 mm²':1011, '4×10 mm²':1007};
+      const cod = COD_TRONCAL[label];
+      const detalle = `troncal subterráneo · F: gris · N: celeste · T: verde`
+          + (g > 0 ? ` · ${fmt(ml,0)} m de zanja + ${fmt(g,0)} m de ganancia por subidas` : '');
       return {
-        desc:`Cable Cu XLPE/PVC, sección ${label} (troncal subterráneo) — F: gris · N: celeste · T: verde`
-          + (g > 0 ? ` · ${fmt(ml,0)} m de zanja + ${fmt(g,0)} m de ganancia por subidas` : ''),
+        ...(cod ? M(cod, detalle) : {desc:`Cable Cu XLPE/PVC ${label} — ${detalle}`}),
         cant: ml + g, un:'m', ref:'IRAM 2178-1 / IEC 60502-1'
       };
     });
@@ -6723,7 +7050,7 @@ function calcular(){
         detalleSubidas.push(`${subidas}×${fmt(mPorSubida,1)} m (${v.label.split('—')[0].trim()}, brazo ${v.brazo})`);
       });
       itemsCable.push({
-        desc:`Cable Cu, sección 3×1,5 mm² F-N-T (columna → luminaria) — F: gris · N: celeste · T: verde · ${subidasTotales} subida(s): ${detalleSubidas.join(' + ')}`,
+        ...M(6001, `F: gris · N: celeste · T: verde · ${subidasTotales} subida(s): ${detalleSubidas.join(' + ')}`),
         cant:cableInternoMl, un:'m', ref:`${CABLE_SUBIDA_M} m por artefacto (medida de campo, sobrante incluido)`
       });
       cableSubidaTotalMl = cableInternoMl;
@@ -6737,9 +7064,9 @@ function calcular(){
       //    hacemos una perforación entre el artefacto y el brazo para poner un bulón pasante; ahí
       //    hay que tener en cuenta el bulón: sería también un bulón pasante por artefacto."*
       // Los dos van UNO POR ARTEFACTO, no por columna — con un vínculo triple son 3 y 3.
-      itemsCable.push({desc:`Prensacable 3/4" — perforación del artefacto para el ingreso del cable de 3×1,5 mm² (1 por luminaria)`, cant:artefactosTotales, un:'Un.', ref:'Medida de obra confirmada'});
-      itemsCable.push({desc:`Bulón pasante — unión artefacto ↔ brazo del vínculo, en la perforación entre ambos (1 por artefacto)`, cant:artefactosTotales, un:'Un.', ref:'Medida de obra confirmada'});
-      itemsCable.push({desc:`Tuerca + arandela para el bulón pasante del artefacto`, cant:artefactosTotales, un:'Un.', ref:'Medida de obra'});
+      itemsCable.push({...M(5029,'perforación del artefacto para el ingreso del cable de 3×1,5 mm² (1 por luminaria)'), cant:artefactosTotales, un:'Un.', ref:'Medida de obra confirmada'});
+      itemsCable.push({...M(4019,'en la perforación entre artefacto y brazo, antivandálico (1 por artefacto)'), cant:artefactosTotales, un:'Un.', ref:'Medida de obra confirmada'});
+      itemsCable.push({...M(4038,'1 juego por artefacto'), cant:artefactosTotales, un:'Un.', ref:'Medida de obra'});
     } else {
       itemsCable.push({desc:'Cable columna → luminaria: no calculado (activá la sección «Vínculos de columnas» para incluirlo)', cant:'—', un:'—', ref:'—'});
     }
@@ -6814,7 +7141,7 @@ function calcular(){
       const terrenoLabel = {natural:'terreno natural', baldosa:'vereda de baldosas', hormigon:'piso de hormigón'}[civTerreno];
       const civAncho = anchoZanjaActual();
       const tendidoPead = (document.getElementById('civilTipoTendido')||{}).value === 'pead';
-      itemsCivil.push({desc:`Zanjeo en vía pública sobre ${terrenoLabel} (profundidad ${fmt(civProf,2)} m, ancho ${fmt(civAncho,2)} m) — ${tendidoPead?'cable en tubo de PEAD':'cable directamente enterrado'}`, cant:civZanjaMl, un:'m', ref:'Ítem 15-20 pliego / AP-TC-001'});
+      itemsCivil.push({...T, desc:`Zanjeo en vía pública sobre ${terrenoLabel} (profundidad ${fmt(civProf,2)} m, ancho ${fmt(civAncho,2)} m) — ${tendidoPead?'cable en tubo de PEAD':'cable directamente enterrado'}`, cant:civZanjaMl, un:'m', ref:'Ítem 15-20 pliego / AP-TC-001'});
       // El plano AP-TC-001 acota 150 mm de paquete arena+cable POR DEBAJO de la tapada nominal, así
       // que la excavación real es más profunda que el número del ítem. Sale como línea informativa
       // para que el volumen de tierra a sacar y a reponer no quede corto.
@@ -6827,7 +7154,7 @@ function calcular(){
       const espesorArena = esp.cama + esp.cubre;
       const arenaPorMetro = civAncho * espesorArena * ZANJA.desperdicioArena;
       const arenaM3 = civZanjaMl * arenaPorMetro;
-      itemsCivil.push({desc:`Arena para cama y cubrimiento del cable (${fmt(esp.cama*100,0)} cm debajo + ${fmt(esp.cubre*100,0)} cm encima, ancho ${fmt(civAncho,2)} m, +10% por compactación) — ${fmt(arenaPorMetro,3)} m³/m ≈ ${fmt(arenaPorMetro*ZANJA.densidadArena,0)} kg por metro · total ≈ ${fmt(arenaM3*ZANJA.densidadArena/1000,2)} t`, cant:arenaM3, un:'m³', ref:'Ítem 15 pliego / AP-TC-001 (espesores confirmados en obra)'});
+      itemsCivil.push({...M(8003,`${fmt(esp.cama*100,0)} cm debajo + ${fmt(esp.cubre*100,0)} cm encima, ancho ${fmt(civAncho,2)} m, +10% por compactación — ${fmt(arenaPorMetro,3)} m³/m ≈ ${fmt(arenaPorMetro*ZANJA.densidadArena,0)} kg por metro · total ≈ ${fmt(arenaM3*ZANJA.densidadArena/1000,2)} t`), cant:arenaM3, un:'m³', ref:'Ítem 15 pliego / AP-TC-001'});
 
       // Ladrillos: SOLO en el tendido directamente enterrado. En la variante con tubo de PEAD el
       // plano AP-TC-001 no dibuja ladrillo — el tubo es la protección mecánica. Antes se computaba
@@ -6840,15 +7167,15 @@ function calcular(){
         const hilerasAncho = Math.ceil(civAncho / ZANJA.ladrilloPaso);   // cuántos a lo ancho
         const ladrillosPorMetro = hilerasAncho / ZANJA.ladrilloLargo;    // ×4 por metro de avance
         const ladrillos = Math.ceil(civZanjaMl * ladrillosPorMetro * ZANJA.desperdicioLadrillo);
-        itemsCivil.push({desc:`Ladrillo común 25×12×5 cm — protección mecánica sobre el cable, tapa continua, colocado longitudinal a la generatriz del cable (${hilerasAncho} a lo ancho × ${fmt(1/ZANJA.ladrilloLargo,0)} por metro de avance = ${fmt(ladrillosPorMetro,1)} por metro, +5% roturas)`, cant:ladrillos, un:'Un.', ref:'AP-TC-001 (rótulo y nota)'});
+        itemsCivil.push({...M(8016,`protección mecánica sobre el cable, tapa continua, colocado longitudinal a la generatriz (${hilerasAncho} a lo ancho × ${fmt(1/ZANJA.ladrilloLargo,0)} por metro = ${fmt(ladrillosPorMetro,1)} por metro, +5% roturas)`), cant:ladrillos, un:'Un.', ref:'AP-TC-001 (rótulo y nota)'});
       } else {
-        itemsCivil.push({desc:`Tubo de PEAD Ø${ZANJA.peadDiam} mm ${ZANJA.peadPN} — protección del conductor en toda la zanja (reemplaza al ladrillo)`, cant:civZanjaMl, un:'m', ref:'AP-TC-001 · Ítem 8.01'});
+        itemsCivil.push({...M(5005,'protección del conductor en toda la zanja (reemplaza al ladrillo)'), cant:civZanjaMl, un:'m', ref:'AP-TC-001 · Ítem 8.01'});
       }
 
       // Malla de advertencia: va por encima, en todo el recorrido. El plano la rotula de 30 cm.
       const mallaMl = civZanjaMl * ZANJA.solapeMalla;
       const rollos = Math.ceil(mallaMl / ZANJA.mallaRollo);
-      itemsCivil.push({desc:`Malla subterránea de advertencia «Peligro Eléctrico», ancho ${fmt(ZANJA.mallaAncho*100,0)} cm (rollo de ${ZANJA.mallaRollo} m — ${rollos} rollo(s), +5% por solapes)`, cant:mallaMl, un:'m', ref:'AP-TC-001 (ancho: 30 cm) · EN 12613'});
+      itemsCivil.push({...M(8017,`rollo de ${ZANJA.mallaRollo} m — ${rollos} rollo(s), +5% por solapes`), cant:mallaMl, un:'m', ref:'AP-TC-001 (ancho: 30 cm) · EN 12613'});
 
       // --- Pegotes de hormigón pobre (CORREGIDO 2026-08-26 con AP-TC-001) ---
       // Enterrado: "al inicio, promedio y final del vano y con una longitud de 1 m" → 3 por vano,
@@ -6867,7 +7194,7 @@ function calcular(){
         desc: tendidoPead
           ? `Pegote de hormigón pobre de ${fmt(ZANJA.pegoteLargo,0)} m sobre el conductor — solo en los sectores de acometida a las columnas (${vanosZanja+1} acometidas × ${fmt(pegoteVolUnit,3)} m³ = ${fmt(pegotes*pegoteVolUnit,3)} m³)`
           : `Pegote de hormigón pobre de ${fmt(ZANJA.pegoteLargo,0)} m de largo sobre el tendido — al inicio, promedio y final de cada vano (${vanosZanja} vano(s) × ${pegotesPorVano} = ${pegotes} pegotes × ${fmt(pegoteVolUnit,3)} m³ = ${fmt(pegotes*pegoteVolUnit,3)} m³; espesor 5 cm estimado, el plano no lo acota)`,
-        cant: pegotes, un:'Un.', ref:'AP-TC-001 (nota de pegotes)'});
+        cod:8015, cant: pegotes, un:'Un.', ref:'AP-TC-001 (nota de pegotes)'});
 
       // Reposición según el terreno roto.
       if(civTerreno === 'baldosa'){
@@ -6882,7 +7209,7 @@ function calcular(){
     // Caño PEAD Ø50: obligatorio donde el cable pasa por debajo de hormigón, canales o veredas.
     const civPeadMl = parseFloat(document.getElementById('civilPeadMl').value) || 0;
     if(civPeadMl > 0){
-      itemsCivil.push({desc:'Caño PEAD Ø50 mm — protección del cable bajo estructuras de hormigón, canales o veredas', cant:civPeadMl, un:'m', ref:'Memoria del proyecto (7081) / Ítem 8.01 pliego'});
+      itemsCivil.push({...M(5005,'protección del cable bajo estructuras de hormigón, canales o veredas'), cant:civPeadMl, un:'m', ref:'Memoria del proyecto (7081) / Ítem 8.01 pliego'});
     }
     if(tableroTipoVal === 'nivel_prfv'){
       // ---- Base del tablero a nivel, desglosada s/PLANO AP-TC-007 (2026-08-26) ----
@@ -6960,21 +7287,21 @@ function calcular(){
     // materiales ADICIONALES que hacen falta para instalarlo (criterio de campo, 2026-08-10).
     const itemsTablero = [];
     if(tableroTipoVal === 'aereo_prfv'){
-      itemsTablero.push({desc:'Tablero de medición, protección y comando, aéreo, gabinete PRFV IP65 — armado según proyecto ejecutivo / unifilar (se compra ensamblado)', cant:1, un:'Un.', ref:'AP-T-007/008'});
-      itemsTablero.push({desc:'Poste / apoyo de PRFV, altura total 9,5 m (hl=8m) — Ro 1050 kg', cant:1, un:'Un.', ref:'AP-T-018'});
-      itemsTablero.push({desc:'Abrazaderas de fijación del tablero al poste PRFV', cant:2, un:'Un.', ref:'Criterio de campo'});
+      itemsTablero.push({...M(3058,'aéreo, armado según proyecto ejecutivo / unifilar (se compra ensamblado)'), cant:1, un:'Un.', ref:'AP-T-007/008'});
+      itemsTablero.push({...M(6015,'altura total 9,5 m, empotramiento ≈1,5 m'), cant:1, un:'Un.', ref:'AP-T-018'});
+      itemsTablero.push({...M(4003,'sujeción del gabinete al apoyo (s/AP-T-012)'), cant:2, un:'Un.', ref:'Criterio de campo'});
     } else {
-      itemsTablero.push({desc:'Tablero de medición, protección y comando, a nivel, gabinete PRFV IP65 — armado según proyecto ejecutivo / unifilar (se compra ensamblado)', cant:1, un:'Un.', ref:'AP-T-002/004'});
+      itemsTablero.push({...M(3058,'a nivel, armado según proyecto ejecutivo / unifilar (se compra ensamblado)'), cant:1, un:'Un.', ref:'AP-TC-007'});
       itemsTablero.push({desc:'Base del tablero a nivel s/AP-TC-007 — el desglose completo de materiales sale en la sección Obra civil', cant:'—', un:'—', ref:'AP-TC-007'});
     }
-    itemsTablero.push({desc:'Fotocontrol / interruptor fotoeléctrico electromecánico, 220V, 10A, IP65', cant:1, un:'Un.', ref:'IRAM-AADL J20-24/74'});
-    itemsTablero.push({desc:'Espuma de poliuretano — sellado del orificio de ingreso de los conductores al apoyo de PRFV', cant:1, un:'Un.', ref:'AP-T-019 nota 2 · AP-T-015'});
+    itemsTablero.push({...M(3012,'con su base de montaje'), cant:1, un:'Un.', ref:'Ítem 15.01 · IRAM AADL J20-24/25'});
+    itemsTablero.push({...M(8010,'sellado del orificio de ingreso de los conductores al apoyo de PRFV'), cant:1, un:'Un.', ref:'AP-T-019 nota 2 · AP-T-015'});
     // Nota 2 del plano AP-T-019: el orificio "deberá sellarse con espuma de poliuretano y
     // complementarse con una protección mecánica exterior que recubra el tramo de cable expuesto,
     // mediante babero de zinguería o protección equivalente en PVC apto para UV". Este material no
     // estaba en ningún lado del cómputo: se compraba de memoria o directamente no se ponía.
     if(tableroTipoVal === 'aereo_prfv'){
-      itemsTablero.push({desc:'Babero de zinguería (o protección equivalente en PVC apto UV) — protección mecánica exterior del tramo de cable expuesto en el apoyo', cant:1, un:'Un.', ref:'AP-T-019 nota 2'});
+      itemsTablero.push({...M(4015,'protección mecánica exterior del tramo de cable expuesto en el apoyo'), cant:1, un:'Un.', ref:'AP-T-019 nota 2'});
     }
     // ---- Acometida EPEC → tablero: cable elegido + su ferretería (2026-08-22) ----
     // Antes salía una sola línea genérica de "acometida", sin decir qué cable ni con qué se monta.
@@ -6984,7 +7311,8 @@ function calcular(){
     const cableAcom = (CABLES_ACOMETIDA[acometidaTipo]||[]).find(c=>c.id===document.getElementById('acometidaCable').value)
                     || (CABLES_ACOMETIDA[acometidaTipo]||[])[0];
     itemsTablero.push({
-      desc:`Acometida ${acometidaTipo==='aerea'?'aérea':'subterránea'} EPEC → tablero — ${cableAcom ? cableAcom.label : 'cable a definir'}`,
+      ...((cableAcom && cableAcom.cod) ? M(cableAcom.cod, `acometida ${acometidaTipo==='aerea'?'aérea':'subterránea'} EPEC → tablero`)
+                                       : {desc:`Acometida ${acometidaTipo==='aerea'?'aérea':'subterránea'} EPEC → tablero — ${cableAcom ? cableAcom.label : 'cable a definir'}`}),
       cant:acometidaMl, un:'m', ref: cableAcom ? 'Ítem '+cableAcom.item : '—'
     });
     // ---- Terminales de ojal de las puntas de acometida (2026-08-26) ----
@@ -6996,10 +7324,13 @@ function calcular(){
     // Por eso la medida NO está fijada en 16: sale del cable elegido, uno por conductor.
     if(cableAcom && cableAcom.ojales){
       cableAcom.ojales.forEach(o=>{
-        itemsTablero.push({desc:`Terminal de ojal ${o.sec} mm² de Cu estañado, a compresión — punta del cable de acometida que entra al portafusible NH que alimenta el tablero (1 por conductor)`, cant:o.cant, un:'Un.', ref:'Medida de obra · pañol «Terminal cobre estañado»'});
+        const codOjal = {6:2049, 10:2045, 16:2046, 25:2047, 50:2048}[o.sec];
+        itemsTablero.push({...(codOjal ? M(codOjal,'punta del cable de acometida que entra al portafusible NH (1 por conductor)')
+                                       : {desc:`Terminal de ojal ${o.sec} mm² de Cu estañado — punta del cable de acometida (1 por conductor)`}),
+                           cant:o.cant, un:'Un.', ref:'Medida de obra'});
       });
       const totalOjales = cableAcom.ojales.reduce((a,o)=>a+o.cant,0);
-      itemsTablero.push({desc:`Termocontraíble para aislar los ${totalOjales} terminales de ojal de la acometida`, cant:totalOjales, un:'Un.', ref:'Práctica de obra'});
+      itemsTablero.push({...M(2057,`aislación de los ${totalOjales} terminales de ojal de la acometida`), cant:totalOjales, un:'Un.', ref:'Práctica de obra'});
       itemsTablero.push({desc:`— El ojal se elige por la sección del cable de acometida, no es una medida fija: acá salen ${cableAcom.ojales.map(o=>`${o.cant}×${o.sec} mm²`).join(' + ')} porque el cable elegido es ${cableAcom.label.replace(/\s*\(.*$/,'')}. Si cambiás el cable, cambia el ojal`, cant:'—', un:'—', ref:'—'});
     }
     // ---- Prensacables del tablero, CON MEDIDA (2026-08-26) ----
@@ -7037,26 +7368,28 @@ function calcular(){
       // Ítem 6.04 «Tendido de conductor aéreo con herrajes y morsetería» — la lista es textual del
       // pliego. Se computa un juego de retención por punta (el poste de EPEC y el tablero): 2.
       const puntasAereas = 2;
-      itemsTablero.push({desc:'Rack MN4B2L para aislador de porcelana MN17 (en el pañol figura como «rack reforzado MN 482»)', cant:puntasAereas, un:'Un.', ref:'Ítem 6.04 / 15.59'});
-      itemsTablero.push({desc:'Aislador de porcelana MN17, con bulón cincado', cant:puntasAereas, un:'Un.', ref:'Ítem 6.04 / 15.58'});
-      itemsTablero.push({desc:'Abrazadera para sujeción del rack (semiabrazaderas MN 166 / Q 151/7 / Q 1501/07)', cant:puntasAereas, un:'Un.', ref:'Ítem 15.72'});
-      itemsTablero.push({desc:'Arandela plana + arandela de presión (por punta de retención)', cant:puntasAereas*2, un:'Un.', ref:'Ítem 6.04'});
-      itemsTablero.push({desc:'Chapa de retención', cant:puntasAereas, un:'Un.', ref:'Ítem 6.04'});
-      itemsTablero.push({desc:'Alambre para ataduras', cant:2*puntasAereas, un:'m', ref:'Ítem 6.04'});
-      itemsTablero.push({desc:'Cinta aisladora', cant:1, un:'Un.', ref:'Ítem 6.04'});
+      itemsTablero.push({...M(4032,'una por punta de retención'), cant:puntasAereas, un:'Un.', ref:'Ítem 6.04 / 15.59'});
+      itemsTablero.push({...M(4010,'con bulón cincado, uno por punta de retención'), cant:puntasAereas, un:'Un.', ref:'Ítem 6.04 / 15.58'});
+      itemsTablero.push({...M(4022,'sujeción del rack'), cant:puntasAereas, un:'Un.', ref:'Ítem 15.72'});
+      itemsTablero.push({...M(4014,'una por punta de retención'), cant:puntasAereas, un:'Un.', ref:'Ítem 6.04'});
+      itemsTablero.push({...M(4013,'una por punta de retención'), cant:puntasAereas, un:'Un.', ref:'Ítem 6.04'});
+      itemsTablero.push({...M(4020,'una por punta de retención'), cant:puntasAereas, un:'Un.', ref:'Ítem 6.04'});
+      itemsTablero.push({...M(1001,'2 m por punta de retención'), cant:2*puntasAereas, un:'m', ref:'Ítem 6.04'});
+      itemsTablero.push({...M(4021), cant:1, un:'Un.', ref:'Ítem 6.04'});
       // ---- Morsetería de derivación (reescrito 2026-08-26) ----
       // Antes: 2 del 1995/3 + 2 del 1995/6, fijos. Mal por dos motivos: el morseto va UNO POR
       // CONDUCTOR en el punto de derivación (no uno por punta de retención), y el modelo lo define
       // la SECCIÓN de la bajada — el 1995/3 (PKD-16) ni siquiera admite derivaciones de 16 mm².
       itemsTablero.push(...lineasMorseteria(cableAcom, 'la acometida al tablero'));
-      itemsTablero.push({desc:'Caño de bajada doble aislación Ø2" (L=4 m) — protección del conductor en el apoyo', cant:1, un:'Un.', ref:'Ítem 8.02'});
-      itemsTablero.push({desc:'Protector capuchón R15 para cable (entrada al caño de bajada)', cant:puntasAereas, un:'Un.', ref:'Criterio de campo'});
-      itemsTablero.push({desc:'Fleje de acero inoxidable AISI 304 3/4" + hebillas (sujeción del caño de bajada)', cant:3, un:'m', ref:'Ítem 15.74 / 15.75'});
+      itemsTablero.push({...M(5004,'protección del conductor en el apoyo'), cant:1, un:'Un.', ref:'Ítem 8.02 / ítem 76'});
+      itemsTablero.push({...M(4031,'entrada al caño de bajada'), cant:puntasAereas, un:'Un.', ref:'Criterio de campo'});
+      itemsTablero.push({...M(4024,'sujeción del caño de bajada'), cant:3, un:'m', ref:'Ítem 15.74 / ítem 71'});
+      itemsTablero.push({...M(4025,'una por vuelta de fleje'), cant:3, un:'Un.', ref:'Ítem 15.75 / ítem 72'});
     } else {
-      itemsTablero.push({desc:'Caño PEAD Ø50 mm — entubado de la acometida subterránea', cant:acometidaMl, un:'m', ref:'Ítem 8.01'});
-      itemsTablero.push({desc:'Reposición de vereda sobre el recorrido de la acometida (dentro de las 48 hs)', cant:acometidaMl, un:'m', ref:'Ítem 12 ITEMIZADO'});
+      itemsTablero.push({...M(5005,'entubado de la acometida subterránea'), cant:acometidaMl, un:'m', ref:'Ítem 8.01'});
+      itemsTablero.push({...T, desc:'Reposición de vereda sobre el recorrido de la acometida (dentro de las 48 hs)', cant:acometidaMl, un:'m', ref:'Ítem 12 ITEMIZADO'});
     }
-    itemsTablero.push({desc:'Apoya escalera H12 con herrajes', cant:1, un:'Un.', ref:'Ítem 73 · AP-T-019 ref. 11'});
+    itemsTablero.push({...M(4012), cant:1, un:'Un.', ref:'Ítem 73 / 15.73 · AP-T-019 ref. 11'});
     // Condiciones de montaje que fija el plano AP-T-019 y que no son material pero se olvidan en obra.
     if(tableroTipoVal === 'aereo_prfv'){
       itemsTablero.push({desc:`— Montaje s/AP-T-019: poste de PRFV a ${fmt(POSTE_PRFV_DIST_CORDON_M,1)} m de la línea de cordón · puerta del gabinete orientada al espacio verde · tiro flojo máx. ${TIRO_FLOJO_MAX_M} m · rack orientado lo más perpendicular posible al preensamblado · interior del tablero s/AP-T-007 (TT o TN-C) o AP-T-008 (TN-S)`, cant:'—', un:'—', ref:'AP-T-019 notas 3-8'});
@@ -7077,8 +7410,10 @@ function calcular(){
       const listaCable = window.cablesCrucePosibles(esAereo);
       const cableCruce = listaCable.find(c=>c.id===document.getElementById('cruceCable').value) || listaCable[0];
       const itemsCruce = [
-        {desc:`${tipoCruce.label}${tipoCruce.plano!=='—'?` — s/plano ${tipoCruce.plano}`:''}`, cant:cruceMl, un:'m', ref:'Ítem '+tipoCruce.item},
-        {desc:`Conductor del cruce — ${cableCruce ? cableCruce.label : 'a definir'}${cableCruce && cableCruce.excepcional ? ' ⚠ el pliego lo reserva para casos excepcionales: aprobarlo con la Inspección antes de comprarlo' : ''} (el cable del cruce lo aprueba la Inspección y se certifica por cuerda separada, ítem 7 del pliego)`, cant:cruceMl, un:'m', ref: cableCruce ? 'Ítem '+cableCruce.item : '—'},
+        {...T, desc:`${tipoCruce.label}${tipoCruce.plano!=='—'?` — s/plano ${tipoCruce.plano}`:''}`, cant:cruceMl, un:'m', ref:'Ítem '+tipoCruce.item},
+        {...((cableCruce && cableCruce.cod) ? M(cableCruce.cod, `conductor del cruce${cableCruce.excepcional ? ' ⚠ el pliego lo reserva para casos excepcionales: aprobarlo con la Inspección' : ''} · se certifica por cuerda separada (ítem 7 del pliego)`)
+                                            : {desc:`Conductor del cruce — ${cableCruce ? cableCruce.label : 'a definir'} · se certifica por cuerda separada (ítem 7 del pliego)`}),
+         cant:cruceMl, un:'m', ref: cableCruce ? 'Ítem '+cableCruce.item : '—'},
       ];
 
       if(esAereo){
@@ -7086,7 +7421,7 @@ function calcular(){
         const puntas = 2;
         itemsCruce.push({desc:'Rack MN4B2L para aislador de porcelana MN17 (en el pañol figura como «rack reforzado MN 482»)', cant:puntas, un:'Un.', ref:'Ítem 6.04 / 15.59'});
         itemsCruce.push({desc:'Aislador de porcelana MN17, con bulón cincado', cant:puntas, un:'Un.', ref:'Ítem 6.04 / 15.58'});
-        itemsCruce.push({desc:'Abrazadera para sujeción del rack (semiabrazaderas MN 166 / Q 151/7 / Q 1501/07)', cant:puntas, un:'Un.', ref:'Ítem 15.72'});
+        itemsCruce.push({...M(4022,'sujeción del rack'), cant:puntas, un:'Un.', ref:'Ítem 15.72'});
         itemsCruce.push({desc:'Arandela plana + arandela de presión (por punta de retención)', cant:puntas*2, un:'Un.', ref:'Ítem 6.04'});
         itemsCruce.push({desc:'Chapa de retención', cant:puntas, un:'Un.', ref:'Ítem 6.04'});
         itemsCruce.push({desc:'Alambre para ataduras', cant:2*puntas, un:'m', ref:'Ítem 6.04'});
@@ -7104,21 +7439,22 @@ function calcular(){
           const canos = parseInt(document.getElementById('cruceCanos').value) || CRUCE_TUNELERA.cañosPorDefecto;
           const volPozo = CRUCE_TUNELERA.pozoLargo * CRUCE_TUNELERA.pozoAncho * CRUCE_TUNELERA.pozoProf;
           const volPozos = volPozo * CRUCE_TUNELERA.pozos;
-          itemsCruce.push({desc:`Perforación con tunelera en seco, mecha Ø${CRUCE_TUNELERA.mechaMm} mm`, cant:cruceMl, un:'m', ref:'Ítem 5.01 / AP-TC-022'});
-          itemsCruce.push({desc:`Caño PVC rígido reforzado Ø${CRUCE_TUNELERA.cañoMm} mm (Ø100 mm interior) — ${canos} conducto(s): 1 de trabajo${canos>1?` + ${canos-1} de reserva`:''}`, cant:cruceMl*canos, un:'m', ref:'AP-TC-002 («Caños P.V.C. reforzado 2×110mm»)'});
-          itemsCruce.push({desc:`Excavación de pozos de ataque — ${CRUCE_TUNELERA.pozos} pozos de ${fmt(CRUCE_TUNELERA.pozoLargo,2)} × ${fmt(CRUCE_TUNELERA.pozoAncho,2)} × ${fmt(CRUCE_TUNELERA.pozoProf,2)} m (${fmt(volPozo,2)} m³ cada uno)`, cant:volPozos, un:'m³', ref:'Método de obra'});
-          itemsCruce.push({desc:'Relleno y compactación mecánica de los pozos de ataque, por capas de 20 cm', cant:volPozos, un:'m³', ref:'Ítem 5.01 · pliego'});
+          itemsCruce.push({...T, desc:`Perforación con tunelera en seco, mecha Ø${CRUCE_TUNELERA.mechaMm} mm`, cant:cruceMl, un:'m', ref:'Ítem 5.01 / AP-TC-022'});
+          itemsCruce.push({...M(5007,`${canos} conducto(s): 1 de trabajo${canos>1?` + ${canos-1} de reserva`:''}`), cant:cruceMl*canos, un:'m', ref:'AP-TC-002 («Caños P.V.C. reforzado 2×110mm»)'});
+          itemsCruce.push({...T, desc:`Excavación de pozos de ataque — ${CRUCE_TUNELERA.pozos} pozos de ${fmt(CRUCE_TUNELERA.pozoLargo,2)} × ${fmt(CRUCE_TUNELERA.pozoAncho,2)} × ${fmt(CRUCE_TUNELERA.pozoProf,2)} m (${fmt(volPozo,2)} m³ cada uno)`, cant:volPozos, un:'m³', ref:'Método de obra'});
+          itemsCruce.push({...T, desc:'Relleno y compactación mecánica de los pozos de ataque, por capas de 20 cm', cant:volPozos, un:'m³', ref:'Ítem 5.01 · pliego'});
           // Nota del AP-TC-002: el conducto CON conductor se sella; el de RESERVA lleva tapa y cordón guía.
-          itemsCruce.push({desc:'Sellado de ambas bocas del conducto CON conductor (espuma / masilla de obturación)', cant:2, un:'Un.', ref:'AP-TC-002, nota'});
+          itemsCruce.push({...M(5017,'sellado de ambas bocas del conducto CON conductor'), cant:2, un:'Un.', ref:'AP-TC-002, nota'});
           if(canos > 1){
-            itemsCruce.push({desc:`Tapa de cierre en ambas bocas de cada conducto de RESERVA (${canos-1} × 2)`, cant:(canos-1)*2, un:'Un.', ref:'AP-TC-002, nota'});
-            itemsCruce.push({desc:'Cordón guía (cuerda de nylon Ø10 mm) dentro del conducto de reserva, en toda su longitud — para poder pasar un cable después sin volver a abrir', cant:cruceMl*(canos-1), un:'m', ref:'AP-TC-002, nota · ETG secc. 11'});
+            itemsCruce.push({...M(5030,`ambas bocas de cada conducto de RESERVA (${canos-1} × 2)`), cant:(canos-1)*2, un:'Un.', ref:'AP-TC-002, nota'});
+            itemsCruce.push({...M(5014,'en toda la longitud del conducto de reserva — para pasar un cable después sin volver a abrir'), cant:cruceMl*(canos-1), un:'m', ref:'AP-TC-002, nota · ETG secc. 11'});
           }
-          itemsCruce.push({desc:`Cámara de inspección de PVC ${CRUCE_AP_TC_002.camaraMedida}, tipo desagüe cloacal, con marco de bronce y tapa «A.P.» — una a cada lado`, cant:CRUCE_AP_TC_002.camaras, un:'Un.', ref:'AP-TC-002, Detalle Nº3'});
-          itemsCruce.push({desc:'Malla subterránea de advertencia «Peligro Eléctrico» 30 cm sobre el tendido en los pozos de ataque', cant:(CRUCE_TUNELERA.pozoLargo*CRUCE_TUNELERA.pozos)*ZANJA.solapeMalla, un:'m', ref:'Manual AP Córdoba 4.4.3'});
-          itemsCruce.push({desc:'Reposición de vereda en los pozos de ataque (dentro de las 48 hs)', cant:CRUCE_TUNELERA.pozoLargo*CRUCE_TUNELERA.pozoAncho*CRUCE_TUNELERA.pozos, un:'m²', ref:'Ítem 12 · pliego'});
+          itemsCruce.push({...M(5003,'una a cada lado del cruce'), cant:CRUCE_AP_TC_002.camaras, un:'Un.', ref:'AP-TC-002, Detalle Nº3'});
+          itemsCruce.push({...M(5016,'una por cámara'), cant:CRUCE_AP_TC_002.camaras, un:'Un.', ref:'AP-TC-002, Detalle Nº3'});
+          itemsCruce.push({...M(8017,'sobre el tendido en los pozos de ataque'), cant:(CRUCE_TUNELERA.pozoLargo*CRUCE_TUNELERA.pozos)*ZANJA.solapeMalla, un:'m', ref:'AP-TC-001'});
+          itemsCruce.push({...T, desc:'Reposición de vereda en los pozos de ataque (dentro de las 48 hs)', cant:CRUCE_TUNELERA.pozoLargo*CRUCE_TUNELERA.pozoAncho*CRUCE_TUNELERA.pozos, un:'m²', ref:'Ítem 12 · pliego'});
           if(document.getElementById('crucePat').checked){
-            itemsCruce.push({desc:'Caño PVC rígido reforzado Ø50 mm interior — conducto exclusivo para el cable de puesta a tierra que cruza', cant:cruceMl, un:'m', ref:'ETG Alumbrado Público Córdoba, secc. 11'});
+            itemsCruce.push({...M(5009,'conducto exclusivo para el cable de puesta a tierra que cruza'), cant:cruceMl, un:'m', ref:'ETG Alumbrado Público Córdoba, secc. 11'});
           }
           itemsCruce.push({desc:`ℹ Los 2 conductos Ø110 y el cordón guía están rotulados en el plano AP-TC-002 («Caños P.V.C. reforzado 2×110mm»). El ítem de certificación 5.01 del pliego está redactado para 1 caño Ø160 — al certificar, aclararlo con la Inspección`, cant:'—', un:'—', ref:'AP-TC-002 vs. ítem 5.01'});
         } else {
@@ -7190,11 +7526,11 @@ function calcular(){
     const cablePATcircuitos = jabalinasCircuito * PAT_CABLE_CIRCUITO_M;
     const cablePATml = cablePATtablero + cablePATcircuitos;
     const itemsPAT = [
-      {desc:'Jabalina copperweld (CMC), Ø5/8" × 1500mm — dispersor de PAT (1 al final de cada circuito + 1 en el tablero general)', cant:dispersoresPAT, un:'Un.', ref:'IRAM 2309'},
-      {desc:`Cable Cu 1×10 mm², aislación PVC verde-amarillo (bajada de PAT) — ${fmt(PAT_CABLE_TABLERO_M,0)} m del tablero general + ${jabalinasCircuito} × ${fmt(PAT_CABLE_CIRCUITO_M,0)} m de las jabalinas de fin de circuito`, cant:cablePATml, un:'m', ref:'IRAM 247-3 · medida exacta de obra'},
-      {desc:'Tomacable (WGC / TGC) — conexión de la jabalina al cable de PAT, 1 por jabalina', cant:dispersoresPAT, un:'Un.', ref:'Ítem 15.66'},
-      {desc:'Puntera terminal TIFF 10 mm² — punta del cable verde-amarillo que entra a la bornera BPN (misma medida que el cable), 1 por jabalina', cant:dispersoresPAT, un:'Un.', ref:'Medida exacta de obra'},
-      {desc:'Medición de resistencia de PAT', cant:dispersoresPAT, un:'Un.', ref:'Ítem 81'},
+      {...M(7015,'1 al final de cada circuito + 1 en el tablero general'), cant:dispersoresPAT, un:'Un.', ref:'Ítem 15.67 / ítem 75 · IRAM 2309'},
+      {...M(7010,`bajada de PAT — ${fmt(PAT_CABLE_TABLERO_M,0)} m del tablero general + ${jabalinasCircuito} × ${fmt(PAT_CABLE_CIRCUITO_M,0)} m de las jabalinas de fin de circuito`), cant:cablePATml, un:'m', ref:'IRAM 247-3 · medida exacta de obra'},
+      {...M(7019,'conexión de la jabalina al cable de PAT, 1 por jabalina'), cant:dispersoresPAT, un:'Un.', ref:'Ítem 15.66 / ítem 74'},
+      {...M(2029,'punta del cable verde-amarillo que entra a la bornera BPN, 1 por jabalina'), cant:dispersoresPAT, un:'Un.', ref:'Medida exacta de obra'},
+      {...T, desc:'Medición de resistencia de PAT', cant:dispersoresPAT, un:'Un.', ref:'Ítem 81'},
       {desc:'Bornera BPN verde-amarilla — NO se computa: en el tablero general viene con el tablero armado, y en las columnas el cable entra al grupo de tierra que ya está calculado arriba', cant:'—', un:'—', ref:'No se compra aparte'},
     ];
     secciones.push({titulo:'PUESTA A TIERRA', items:itemsPAT});
@@ -7203,7 +7539,7 @@ function calcular(){
   // ---------------- Cajas de conexión / seguridad eléctrica ----------------
   if(colOn){
     secciones.push({titulo:'CAJAS DE CONEXIÓN Y SEGURIDAD ELÉCTRICA', items:[
-      {desc:'Caja de conexión + tablero de columna con señalización "Riesgo Eléctrico"', cant:cantCol, un:'Un.', ref:'AP-CC-001/014/017'},
+      {...M(6002,'1 por columna'), cant:cantCol, un:'Un.', ref:'AP-CC-001/014/017'},
     ]});
   }
 
@@ -7663,6 +7999,7 @@ function poblarParteObraDatalist(){
     // El autocompletar de productos sale del catálogo, así que también hay que repoblarlo cuando
     // llega un producto nuevo desde otra computadora (2026-08-27).
     if(typeof window.poblarStockDatalist === 'function') window.poblarStockDatalist();
+    if(typeof window.actualizarStockMovBadge === 'function') window.actualizarStockMovBadge();
   }
 
   function actualizarStockAuthUI(user){
@@ -7804,9 +8141,12 @@ function poblarParteObraDatalist(){
     if(!fbAvailable) throw new Error('Firebase no disponible');
     await fbDb.collection('catalogoProductos').doc(id).delete();
   };
+  // Devuelve el id del documento creado (2026-08-27): lo necesita el comprobante que se ofrece
+  // imprimir apenas se registra el movimiento.
   window.fbAddMovimiento = async function(mov){
     if(!fbAvailable) throw new Error('Firebase no disponible');
-    await fbDb.collection('movimientos').add(mov);
+    const ref = await fbDb.collection('movimientos').add(mov);
+    return ref && ref.id ? ref.id : '';
   };
   window.fbDeleteMovimiento = async function(id){
     if(!fbAvailable) throw new Error('Firebase no disponible');
