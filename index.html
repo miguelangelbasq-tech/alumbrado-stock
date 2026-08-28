@@ -949,9 +949,9 @@
         <button type="button" id="addVinculoGrupoBtn" class="btn-auto">+ Agregar grupo de vínculo</button>
         <div class="hint" id="vinculoGruposSummary" style="margin-top:10px;"></div>
 
-        <label>Calibre de BPN si NO cargás la sección "Cableado troncal"</label>
+        <label>Calibre de BPN si NO cargás la sección «Cableado por circuitos»</label>
         <select id="bpnCalibreManual"></select>
-        <div class="hint">Se usa solo cuando la sección de Cableado está apagada. Si cargás Cableado con sus tramos, la calculadora usa el calibre real de cada tramo (como en una plaza completa) y este campo se ignora.</div>
+        <div class="hint">Se usa <b>solo</b> cuando la sección de Cableado está apagada. Si cargás los circuitos, este campo se ignora y la bornera se saca del calibre real que llega a cada columna.<br><br><b>La regla de la bornera de FASE (gris)</b>: cable de hasta <b>4 mm²</b> → BPN de <b>4 mm²</b> (ítem 62); cable de <b>más de 4 mm²</b> → BPN de <b>6 mm²</b> (ítem 63). Por eso un troncal de 6 mm² pide bornera de 6.<br>Si en el cómputo ves las dos medidas, es porque la plaza tiene tramos de distinto calibre: cada línea aclara para qué cable es. Las borneras <b>celeste (neutro) y verde (tierra) van siempre de 6 mm²</b> en columnas PRFV, cualquiera sea el cable.</div>
       </div>
 
       <div class="card" id="cardCableado">
@@ -8312,7 +8312,11 @@ function calcular(){
         const info = infoCalibre(t.calibre);
         const bi = bpnInfoParaCalibre(info.gauge);
         const key = bi.ref;
-        if(!bpnPorCalibre[key]) bpnPorCalibre[key] = {calibre:bi.calibre, fase:0, neutro:0, tierra:0, columnas:0};
+        if(!bpnPorCalibre[key]) bpnPorCalibre[key] = {calibre:bi.calibre, fase:0, neutro:0, tierra:0, columnas:0, cables:[]};
+        // De qué cable(s) sale esta bornera. Sin esto, ver una línea de «BPN 4 mm²» en una plaza
+        // donde se cargó cable de 6 parece un error, y en realidad corresponde a los tramos de 2,5
+        // o 4 que también tiene esa plaza. Es exactamente la duda que planteó el usuario.
+        if(!bpnPorCalibre[key].cables.includes(info.label)) bpnPorCalibre[key].cables.push(info.label);
         bpnPorCalibre[key].fase += faseParaTramos[idx];
         bpnPorCalibre[key].neutro += neutroParaTramos[idx];
         bpnPorCalibre[key].tierra += tierraParaTramos[idx];
@@ -8330,7 +8334,7 @@ function calcular(){
     } else {
       const manualInfo = CABLE_CALIBRES.find(c=>c.value===bpnCalibreManualEl.value);
       const bi = bpnInfoParaCalibre(manualInfo.gauge);
-      bpnPorCalibre[bi.ref] = {calibre:bi.calibre, fase:totalBpnFase, neutro:totalBpnNeutro, tierra:totalBpnTierra, columnas:vincCant};
+      bpnPorCalibre[bi.ref] = {calibre:bi.calibre, fase:totalBpnFase, neutro:totalBpnNeutro, tierra:totalBpnTierra, columnas:vincCant, cables:[manualInfo.label]};
       const gaugeLabel = formatGaugeLabel(manualInfo.gauge);
       const puntasManual = 2 * (totalBpnFase + totalBpnNeutro + totalBpnTierra);
       const doblesManual = Math.min(
@@ -8370,7 +8374,13 @@ function calcular(){
     const ntAcum = { cant:0, tierra:0, columnas:0 };
     Object.entries(bpnPorCalibre).forEach(([ref, x])=>{
       const nota = !cableOn ? ' (calibre manual — activá Cableado para calcularlo por tramo real)' : (bpnEstimadoPorMezcla ? ' (repartido proporcionalmente entre tramos — hay más de un calibre y más de un vínculo a la vez)' : '');
-      itemsLum.push({...M(x.calibre==='4 mm²'?2007:2009, `una por posición de fase${nota}`), cant:x.fase, un:'Un.', ref});
+      // La bornera de FASE sigue el calibre del cable de ESE tramo: ≤4 mm² → BPN de 4 mm² (ítem 62);
+      // más de 4 mm² → BPN de 6 mm² (ítem 63). Se dice de qué cable sale, para que una línea de 4 mm²
+      // en una plaza que también tiene cable de 6 no parezca un error.
+      const deQueCable = (x.cables && x.cables.length)
+        ? ` — para el cable ${x.cables.join(' y ')} (${x.columnas} columna${x.columnas===1?'':'s'})`
+        : '';
+      itemsLum.push({...M(x.calibre==='4 mm²'?2007:2009, `una por posición de fase${deQueCable}${nota}`), cant:x.fase, un:'Un.', ref});
       if(estandarizaNT){
         // Se acumulan para sacar UNA línea de 6 mm² al final, no una por cada calibre de tramo.
         ntAcum.cant += x.neutro;
