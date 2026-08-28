@@ -175,6 +175,33 @@
     background:#eef0f4; color:#5c6a82; cursor:not-allowed;
   }
   .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  /* ---- Cableado por circuitos (2026-08-28) ----
+     Se carga como está dibujado el plano: circuito por circuito, punto por punto desde el tablero.
+     Antes había que sumar a mano los tramos de cada calibre antes de poder cargarlos. */
+  .circ-card{border:1px solid var(--border); border-radius:12px; padding:12px 13px; margin-bottom:12px; background:var(--panel);}
+  .circ-head{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;}
+  .circ-head input[type="text"]{margin:0; width:110px; font-weight:700;}
+  .circ-head .circ-alt{width:74px; margin:0;}
+  .circ-head label{margin:0; font-size:11px; white-space:nowrap;}
+  /* Dos renglones por punto: la card de Cableado va en una columna angosta (~350 px), así que una
+     fila con los siete campos uno al lado del otro no entra. Arriba el nombre del punto, abajo los
+     cuatro datos. `min-width:0` en los campos es lo que permite que el grid los achique de verdad:
+     sin eso, el ancho mínimo propio de un <input> hace desbordar la fila igual. */
+  .circ-pt{display:grid; grid-template-columns:22px repeat(4, minmax(0,1fr)) 22px; gap:5px; align-items:center;
+           margin-bottom:9px; padding-bottom:8px; border-bottom:1px dashed var(--border);}
+  .circ-pt:last-of-type{border-bottom:none;}
+  .circ-pt input, .circ-pt select{margin:0; padding:6px 6px; font-size:12.5px; min-width:0; width:100%;}
+  .circ-pt .circ-n{grid-column:1; grid-row:1; font-size:11px; font-weight:700; color:var(--text-soft); text-align:center;}
+  .circ-pt input[data-f="etiqueta"]{grid-column:2 / 6; grid-row:1;}
+  .circ-pt .circ-x{grid-column:6; grid-row:1; background:none; border:none; color:var(--danger); font-weight:700; font-size:16px; cursor:pointer; padding:0;}
+  .circ-pt input[data-f="largo"]{grid-column:2; grid-row:2;}
+  .circ-pt input[data-f="calibre"]{grid-column:3; grid-row:2;}
+  .circ-pt input[data-f="altura"]{grid-column:4; grid-row:2;}
+  .circ-pt select[data-f="esColumna"]{grid-column:5; grid-row:2;}
+  .circ-acciones{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;}
+  .circ-pegar{width:100%; min-height:70px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; margin-top:6px;}
+  .circ-aviso{font-size:11.5px; color:var(--amber); margin-top:4px;}
+
   .tramo-row{
     display:grid;
     grid-template-columns:34px 1.5fr 1fr 1fr 26px;
@@ -925,21 +952,26 @@
 
       <div class="card" id="cardCableado">
         <div class="card-header-row">
-          <h2><span class="dot"></span>Cableado troncal por tramos</h2>
+          <h2><span class="dot"></span>Cableado por circuitos</h2>
           <div class="toggle-wrap">
             <span class="toggle-txt">Incluir esta tarea</span>
             <label class="switch"><input type="checkbox" id="toggleCableado" checked><span class="slider"></span></label>
           </div>
         </div>
-        <div class="hint" style="margin-top:0;margin-bottom:10px;">El troncal subterráneo que sube por cada columna puede cambiar de calibre en distintos tramos de la plaza (más grueso cerca del tablero, más fino hacia el final). Cargá un tramo por cada cambio de calibre — la calculadora suma el metraje exacto por calibre y ajusta la bornera BPN de cada tramo según las columnas que alimenta.</div>
-        <div class="hint" style="margin-top:0;margin-bottom:10px;"><b>En «Long. (m)» va solo la zanja medida</b> — la ganancia que sube por cada columna se agrega sola, más abajo.</div>
+        <div class="hint" style="margin-top:0;margin-bottom:10px;">Se carga <b>como está dibujado el plano</b>: un circuito por vez, y dentro de cada uno los puntos <b>en orden, saliendo del tablero</b>. De cada punto se copia el largo del tramo que lo alimenta y el calibre de ese tramo — que puede cambiar en el medio del circuito, no hay problema.<br><br>Con eso la calculadora saca sola los <b>metros por calibre</b> y, lo más importante, la <b>ganancia exacta</b>: sabe qué punto es el último de cada circuito (sube 1 cable) y cuáles son intermedios (suben 2), y si el calibre cambia en un punto, cada subida se cuenta con el calibre que le corresponde.</div>
+        <div id="circuitosContainer"></div>
+        <button type="button" id="addCircuitoBtn" class="btn-auto">+ Agregar circuito</button>
+        <div class="hint" id="circuitosResumen" style="margin-top:12px;"></div>
+        <div style="display:none;">
+
         <div id="tramosContainer"></div>
         <button type="button" id="addTramoBtn" class="btn-auto">+ Agregar tramo</button>
         <div class="hint" id="tramosSummary" style="margin-top:10px;"></div>
+        </div>
 
         <label style="margin-top:14px;">Ganancia de cable por subida a columna (m)</label>
         <input type="number" id="cableGanancia" min="0" step="0.5" placeholder="(por defecto, la altura libre de la columna)">
-        <div class="hint" style="margin-top:2px;">Los metros que se dejan de más en cada subida a una columna. En una columna intermedia suben <b>2 cables</b> (entra y sale), en la última del circuito sube <b>1</b> — o sea <b>2 × columnas − circuitos</b> subidas en total. Si lo dejás vacío usa la altura libre de la columna (7 m → 7 m por subida), que es la regla de campo. Poné <b>0</b> si en «Long. (m)» ya cargaste el metraje con la ganancia incluida.</div>
+        <div class="hint" style="margin-top:2px;">Los metros que se dejan de más en cada subida a una columna. En una columna intermedia suben <b>2 cables</b> (entra y sale) y en la última del circuito sube <b>1</b> — <b>la calculadora ya sabe cuál es cuál</b> mirando el orden de los puntos de cada circuito, así que no hay que contarlas.<br>Dejalo <b>vacío</b> y usa la altura de cada columna (la del punto, o la del circuito): es la regla de campo. Poné un número para forzar los mismos metros en todas las subidas, o <b>0</b> si en los largos ya cargaste la ganancia incluida.</div>
         <div class="hint" id="gananciaSummary" style="margin-top:6px;"></div>
       </div>
 
@@ -2461,12 +2493,257 @@ Object.keys(SECTION_CARD).forEach(tid=>{
 });
 
 // ============================================================
-// Tramos de cable troncal (distinto calibre por tramo)
+// CABLEADO POR CIRCUITOS (2026-08-28)
 // ============================================================
+// El usuario lo planteó así: *"el tema de conteo de cables ahora está con tramos... estaría bueno
+// algo que facilite eso y sea más exacto... el circuito puede tener dos tipos de cables... parte
+// desde el tablero"*, y aclaró que ve MUCHOS planos distintos, así que esto no puede depender de
+// ningún proyecto en particular.
+//
+// Cómo quedó: se carga lo que dice el plano, tal cual está dibujado — circuito por circuito, punto
+// por punto SALIENDO DEL TABLERO. De cada punto se copia el largo del tramo que lo alimenta y el
+// calibre de ese tramo. Nada más.
+//
+// Con eso la herramienta deriva los `tramos` por calibre que el resto del cómputo ya sabía usar
+// (BPN, zanja, prensacables, ítems), así que no hubo que tocar nada de eso. Lo que SÍ cambia es la
+// exactitud de dos cosas que antes eran aproximadas:
+//
+//   1) LAS SUBIDAS. Antes se usaba la fórmula global 2×columnas − circuitos y después se repartía
+//      la ganancia entre calibres EN PROPORCIÓN a las columnas de cada uno (aproximado a propósito:
+//      no se sabía qué columna colgaba de qué tramo). Ahora se sabe: recorriendo la cadena, cada
+//      punto suma una subida con el calibre del cable que LLEGA y, si el circuito continúa, otra
+//      con el calibre del que SALE. Si el calibre cambia justo en ese punto, cada subida queda
+//      contada con el suyo. El último punto de cada circuito suma una sola.
+//   2) EL CALIBRE ES LIBRE. Se escribe el que diga el plano, no se elige de una lista cerrada. Si
+//      no es una sección normalizada, se cuenta igual y se avisa — el plano manda, y avisar es más
+//      útil que impedir cargarlo.
 let tramoIdSeq = 1;
 let tramos = [
   { id: tramoIdSeq++, calibre: '4x2.5', ml: 120, columnas: 7 },
 ];
+
+let circuitoIdSeq = 1, puntoIdSeq = 1;
+let circuitos = [];
+
+function nuevoPunto(calibre, altura){
+  return { id: puntoIdSeq++, etiqueta:'', largo:0, calibre: calibre||'4x2.5', altura: altura||null, esColumna:true };
+}
+function nuevoCircuito(){
+  const n = circuitos.length + 1;
+  return { id: circuitoIdSeq++, nombre:'C'+n, altura:7, puntos:[ nuevoPunto() ] };
+}
+circuitos = [ nuevoCircuito() ];
+
+// «4×4 mm²», «4x4mm2», «4 X 4», «4x4» → «4x4». Deja pasar cualquier sección: el plano manda.
+function normalizarCalibre(txt){
+  let t = String(txt||'').toLowerCase().replace(/×/g,'x').replace(/mm2|mm²|mm\s*2/g,'');
+  t = t.replace(/[^0-9x.,]/g,'').replace(/,/g,'.');
+  const m = t.match(/^(\d+)x(\d+(?:\.\d+)?)$/);
+  if(m) return `${m[1]}x${parseFloat(m[2])}`;
+  const m2 = t.match(/^(\d+(?:\.\d+)?)$/);   // solo la sección: se asume tetrapolar
+  if(m2) return `4x${parseFloat(m2[1])}`;
+  return '';
+}
+function etiquetaCalibre(v){
+  const c = CABLE_CALIBRES.find(x=>x.value===v);
+  if(c) return c.label;
+  const m = String(v||'').match(/^(\d+)x(\d+(?:\.\d+)?)$/);
+  return m ? `${m[1]}×${String(m[2]).replace('.',',')} mm²` : String(v||'');
+}
+function calibreConocido(v){ return !!CABLE_CALIBRES.find(x=>x.value===v); }
+function polosDeCalibre(v){
+  const m = String(v||'').match(/^(\d+)x/);
+  return m ? parseInt(m[1]) : null;
+}
+// Datos de un calibre, venga o no de la lista fija. Es lo que permite cargar CUALQUIER plano sin
+// que se rompa el resto del cómputo (BPN, prensacables, resúmenes), que antes daba por sentado que
+// el calibre estaba en CABLE_CALIBRES y se caía con un `undefined` apenas aparecía otro.
+// El diámetro exterior no se puede inventar: si el calibre no está en la lista se toma el del
+// conocido más parecido (misma cantidad de polos primero, después la sección más cercana) y se
+// marca `estimado`, para poder avisarlo donde importa — la medida del prensacable.
+function infoCalibre(v){
+  const exacto = CABLE_CALIBRES.find(x=>x.value===v);
+  if(exacto) return exacto;
+  const gauge = seccionDeCalibre(v);
+  const polos = polosDeCalibre(v);
+  let cand = CABLE_CALIBRES.filter(c=>polosDeCalibre(c.value) === polos);
+  if(!cand.length) cand = CABLE_CALIBRES.slice();
+  let cerca = null;
+  if(gauge != null){
+    cerca = cand.reduce((mej,c)=> (mej === null || Math.abs(c.gauge-gauge) < Math.abs(mej.gauge-gauge)) ? c : mej, null);
+  }
+  return { value:v, label: etiquetaCalibre(v), gauge: gauge != null ? gauge : 2.5,
+           diam: cerca ? cerca.diam : null, estimado:true, parecidoA: cerca ? cerca.label : '' };
+}
+
+// Secciones normalizadas de IRAM 2178-1, para avisar (nunca para bloquear) cuando el plano trae una
+// que no lo es — casi siempre es un error de lectura del plano, pero la decisión es del usuario.
+const SECCIONES_NORMALIZADAS = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120];
+function seccionDeCalibre(v){
+  const m = String(v||'').match(/^\d+x(\d+(?:\.\d+)?)$/);
+  return m ? parseFloat(m[1]) : null;
+}
+
+function renderCircuitos(){
+  const cont = document.getElementById('circuitosContainer');
+  if(!cont) return;
+  const dl = CABLE_CALIBRES.map(c=>`<option value="${c.value}">${c.label}</option>`).join('');
+  cont.innerHTML = circuitos.map((c, ci)=>{
+    const filas = c.puntos.map((p, pi)=>{
+      const sec = seccionDeCalibre(p.calibre);
+      const raro = p.calibre && sec != null && !SECCIONES_NORMALIZADAS.includes(sec);
+      return `<div class="circ-pt" data-circ="${c.id}" data-pt="${p.id}">
+        <div class="circ-n">${pi+1}</div>
+        <input type="text" data-f="etiqueta" value="${escHtml(p.etiqueta||'')}" placeholder="Punto del plano (ej. ${escHtml(c.nombre)}-${pi+1})">
+        <input type="number" min="0" step="0.1" data-f="largo" value="${p.largo||0}" placeholder="Largo m" title="Largo del tramo que alimenta este punto, en metros">
+        <input type="text" data-f="calibre" list="calibresLista" value="${escHtml(p.calibre||'')}" placeholder="Calibre" title="Calibre del tramo que llega a este punto${raro?' — sección no normalizada':''}" ${raro?'style="border-color:var(--amber);"':''}>
+        <input type="number" min="0" step="0.5" data-f="altura" value="${p.altura!=null?p.altura:''}" placeholder="Alt ${c.altura||7}" title="Altura de la columna en este punto, para la ganancia. Vacío = la del circuito.">
+        <select data-f="esColumna" title="¿En este punto hay columna, o el cable solo pasa?">
+          <option value="1" ${p.esColumna?'selected':''}>Columna</option>
+          <option value="0" ${!p.esColumna?'selected':''}>Solo pasa</option>
+        </select>
+        <button type="button" class="circ-x" data-a="delpt" title="Quitar punto" ${c.puntos.length<=1?'disabled':''}>×</button>
+      </div>`;
+    }).join('');
+    return `<div class="circ-card" data-circ="${c.id}">
+      <div class="circ-head">
+        <input type="text" data-f="nombre" value="${escHtml(c.nombre)}" title="Nombre del circuito, como lo llama el plano">
+        <label>Altura de columna</label>
+        <input type="number" class="circ-alt" min="0" step="0.5" data-f="altura" value="${c.altura||7}" title="Altura libre por defecto de las columnas de este circuito (m)">
+        <span style="flex:1;"></span>
+        <button type="button" class="btn-ghost" data-a="delcirc" style="padding:3px 9px; font-size:12px; color:var(--danger);" ${circuitos.length<=1?'disabled':''}>Quitar circuito</button>
+      </div>
+      <div class="hint" style="margin:0 0 7px; font-size:11px;">Por cada punto: <b>largo</b> del tramo que lo alimenta · <b>calibre</b> de ese tramo · <b>altura</b> de la columna · si ahí hay columna o el cable solo pasa.</div>
+      ${filas}
+      <div class="circ-acciones">
+        <button type="button" class="btn-ghost" data-a="addpt" style="padding:4px 10px; font-size:12px;">+ Punto</button>
+        <button type="button" class="btn-ghost" data-a="pegar" style="padding:4px 10px; font-size:12px;">📋 Pegar del plano</button>
+      </div>
+      <div data-pegar="${c.id}" style="display:none;">
+        <textarea class="circ-pegar" placeholder="Una línea por punto, en orden desde el tablero:&#10;TIC1-1  12  4x4&#10;TIC1-2  35  4x4&#10;TIC1-3  36  4x4&#10;&#10;También sirve solo «largo calibre», y se puede agregar la altura al final: «TIC3-1 118 4x6 10»"></textarea>
+        <button type="button" class="btn-auto" data-a="aplicarpegar" style="margin-top:6px;">Cargar estos puntos</button>
+      </div>
+    </div>`;
+  }).join('') + `<datalist id="calibresLista">${dl}</datalist>`;
+
+  actualizarResumenCircuitos();
+  const cableToggle = document.getElementById('toggleCableado');
+  if(cableToggle && !cableToggle.checked){
+    cont.querySelectorAll('input, select, button, textarea').forEach(el=>el.disabled=true);
+  }
+}
+
+// Parser de lo que se pega del plano. Acepta «etiqueta largo calibre [altura]», «largo calibre», y
+// separadores de todo tipo (espacios, tabs, comas, punto y coma), que es como sale de tipear rápido.
+function parsearPuntosPegados(texto, alturaCircuito){
+  const puntos = [];
+  String(texto||'').split(/\r?\n/).forEach(linea=>{
+    let l = linea.trim();
+    if(!l) return;
+    // OJO con la coma: acá es SEPARADOR DE DECIMALES, no de campos. Sin esto, «4x2,5» se partía en
+    // «4x2» y «5» — quedaba un calibre inventado y el 5 se tomaba como altura de columna. Es el
+    // calibre más común de estos planos, así que el error habría pasado desapercibido y falseado
+    // todo el cómputo. Se pasa a punto toda coma que esté ENTRE DÍGITOS antes de separar.
+    l = l.replace(/(\d),(\d)/g, '$1.$2');
+    const partes = l.split(/[\s,;]+/).filter(Boolean);
+    let etiqueta = '', largo = null, calibre = '', altura = null;
+    partes.forEach(tk=>{
+      const esCal = /^\d+\s*[x×]\s*\d/i.test(tk.replace(/\s/g,''));
+      const num = parseFloat(String(tk).replace(',', '.'));
+      if(esCal && !calibre){ calibre = normalizarCalibre(tk); }
+      else if(!isNaN(num) && /^[\d.,]+$/.test(tk)){
+        if(largo === null) largo = num; else if(altura === null) altura = num;
+      }
+      else if(!esCal){ etiqueta = etiqueta ? etiqueta + ' ' + tk : tk; }
+    });
+    if(largo === null && !calibre) return;
+    puntos.push({ id: puntoIdSeq++, etiqueta, largo: largo||0, calibre: calibre||'',
+                  altura: altura, esColumna: true });
+  });
+  // El calibre en blanco arrastra el del punto anterior: en el plano solo se acota donde cambia.
+  let ultimo = '';
+  puntos.forEach(p=>{ if(p.calibre) ultimo = p.calibre; else p.calibre = ultimo; });
+  return puntos;
+}
+
+// ---- Derivación: de los circuitos a los tramos por calibre ----
+// Esto es el corazón del cambio. Recorre cada circuito desde el tablero y va acumulando, por
+// calibre: metros de zanja, metros de ganancia por subida y cantidad de columnas alimentadas.
+function derivarTramosDeCircuitos(){
+  const gInput = (document.getElementById('cableGanancia')||{}).value;
+  const gananciaApagada = gInput !== '' && (parseFloat(gInput) || 0) === 0;
+  const gFija = (gInput !== '' && !gananciaApagada) ? parseFloat(gInput) : null;
+
+  const acum = {};   // calibre -> { zanja, ganancia, columnas }
+  const tocar = cal => (acum[cal] = acum[cal] || { zanja:0, ganancia:0, columnas:0 });
+
+  circuitos.forEach(c=>{
+    const pts = c.puntos.filter(p=>p.calibre);
+    pts.forEach((p, i)=>{
+      const a = tocar(p.calibre);
+      a.zanja += (p.largo || 0);
+      if(!p.esColumna) return;                 // punto de paso: no cuelga columna, no hay subida
+      a.columnas += 1;
+      if(gananciaApagada) return;              // el usuario ya cargó los metros con ganancia incluida
+      const h = gFija != null ? gFija : (p.altura != null ? p.altura : (c.altura || 7));
+      a.ganancia += h;                         // sube el cable que LLEGA a esta columna
+      const sig = pts[i+1];
+      if(sig && sig.calibre) tocar(sig.calibre).ganancia += h;   // y el que SALE hacia la próxima
+    });
+  });
+
+  const calibres = Object.keys(acum);
+  tramos = calibres.map(cal => ({ id: tramoIdSeq++, calibre: cal, ml: acum[cal].zanja, columnas: acum[cal].columnas }));
+  if(!tramos.length) tramos = [{ id: tramoIdSeq++, calibre:'4x2.5', ml:0, columnas:0 }];
+  // La ganancia EXACTA por calibre, para que calcular() no vuelva a repartirla en proporción.
+  window.__gananciaExactaPorCalibre = {};
+  calibres.forEach(cal => { window.__gananciaExactaPorCalibre[cal] = acum[cal].ganancia; });
+  return acum;
+}
+
+function actualizarResumenCircuitos(){
+  const el = document.getElementById('circuitosResumen');
+  if(!el) return;
+  const acum = derivarTramosDeCircuitos();
+  const calibres = Object.keys(acum);
+  if(!calibres.length){ el.innerHTML = 'Cargá los puntos de cada circuito para ver el total por calibre.'; return; }
+
+  const totalCols = calibres.reduce((n,c)=>n+acum[c].columnas, 0);
+  const raros = calibres.filter(c=>{ const s = seccionDeCalibre(c); return s!=null && !SECCIONES_NORMALIZADAS.includes(s); });
+
+  let html = `<table class="hist-table" style="margin-top:4px;"><thead><tr>
+      <th>Calibre</th><th>Zanja</th><th>Ganancia por subidas</th><th>Total a pedir</th><th>Columnas</th>
+    </tr></thead><tbody>`;
+  let tz=0, tg=0;
+  calibres.forEach(cal=>{
+    const a = acum[cal];
+    tz += a.zanja; tg += a.ganancia;
+    html += `<tr>
+      <td><b>${escHtml(etiquetaCalibre(cal))}</b>${calibreConocido(cal)?'':' <span style="color:var(--amber);">⚠</span>'}</td>
+      <td>${fmt(a.zanja,1)} m</td>
+      <td>${fmt(a.ganancia,1)} m</td>
+      <td><b>${fmt(a.zanja + a.ganancia,1)} m</b></td>
+      <td>${a.columnas}</td>
+    </tr>`;
+  });
+  html += `<tr style="font-weight:700; background:var(--panel);">
+      <td>TOTAL</td><td>${fmt(tz,1)} m</td><td>${fmt(tg,1)} m</td><td>${fmt(tz+tg,1)} m</td><td>${totalCols}</td>
+    </tr></tbody></table>`;
+
+  const colCant = parseInt((document.getElementById('colCantidad')||{}).value) || 0;
+  if(colCant && totalCols !== colCant){
+    html += `<div class="circ-aviso">⚠ Los circuitos suman <b>${totalCols}</b> columnas y en la sección Columnas cargaste <b>${colCant}</b>. Revisá cuál de los dos está mal antes de pedir el material.</div>`;
+  }
+  if(raros.length){
+    html += `<div class="circ-aviso">⚠ ${raros.map(r=>escHtml(etiquetaCalibre(r))).join(', ')}: esa sección no es de las normalizadas por IRAM 2178-1 (1,5 · 2,5 · 4 · 6 · 10 · 16 · 25...). Se cuenta igual — revisá que sea lo que dice el plano y no una lectura equivocada.</div>`;
+  }
+  el.innerHTML = html;
+  // La ganancia sale de esta misma cadena de puntos: se refresca acá para que los dos números no
+  // puedan quedar contando cosas distintas.
+  if(typeof actualizarGananciaSummary === 'function') actualizarGananciaSummary();
+}
+window.renderCircuitos = renderCircuitos;
+window.actualizarResumenCircuitos = actualizarResumenCircuitos;
 
 function renderTramos(){
   const cont = document.getElementById('tramosContainer');
@@ -2496,22 +2773,113 @@ function renderTramos(){
 function actualizarGananciaSummary(){
   const el = document.getElementById('gananciaSummary');
   if(!el) return;
-  const circuitos = parseInt((document.getElementById('circuitos')||{}).value) || 1;
-  const cols = tramos.reduce((a,t)=>a+(t.columnas||0),0);
-  const input = document.getElementById('cableGanancia').value;
-  const alturaRef = (typeof columnaGrupos !== 'undefined' && columnaGrupos.length)
-    ? columnaGrupos.slice().sort((a,b)=>(b.columnas||0)-(a.columnas||0))[0].altura
-    : 7;
-  const m = input === '' ? alturaRef : (parseFloat(input) || 0);
-  const subidas = Math.max(0, 2*cols - circuitos);
-  if(!cols || m <= 0){
-    el.innerHTML = m <= 0 && cols
-      ? 'Ganancia desactivada — se toma el metraje de los tramos tal cual está cargado.'
-      : '';
+  const input = (document.getElementById('cableGanancia')||{}).value;
+  // Las subidas se cuentan recorriendo cada circuito: no hay fórmula global que adivinar.
+  let subidas = 0, cols = 0;
+  (circuitos||[]).forEach(c=>{
+    const pts = c.puntos.filter(p=>p.calibre);
+    pts.forEach((p,i)=>{
+      if(!p.esColumna) return;
+      cols++;
+      subidas += 1;                       // el cable que llega
+      if(pts[i+1] && pts[i+1].calibre) subidas += 1;   // y el que sigue hacia la próxima columna
+    });
+  });
+  if(!cols){ el.innerHTML = ''; return; }
+  if(input !== '' && (parseFloat(input)||0) === 0){
+    el.innerHTML = 'Ganancia desactivada — se toman los largos cargados tal cual están.';
     return;
   }
-  el.innerHTML = `<b>${subidas} subidas</b> (2 × ${cols} columnas − ${circuitos} circuito${circuitos>1?'s':''}) × ${fmt(m,1)} m = <b>${fmt(subidas*m,0)} m</b> de ganancia, que se suman al troncal.`;
+  const total = Object.values(window.__gananciaExactaPorCalibre || {}).reduce((a,b)=>a+b, 0);
+  const ultimos = (circuitos||[]).filter(c=>c.puntos.some(p=>p.calibre && p.esColumna)).length;
+  el.innerHTML = `<b>${subidas} subidas</b> en ${cols} columnas de ${ultimos} circuito${ultimos>1?'s':''} `
+    + `(${cols - ultimos} intermedia${cols-ultimos===1?'':'s'} con 2 cables + ${ultimos} última${ultimos===1?'':'s'} con 1) `
+    + `= <b>${fmt(total,0)} m</b> de ganancia, ya repartidos por calibre.`;
 }
+
+// ---- Eventos de la carga por circuitos ----
+(function(){
+  const cont = document.getElementById('circuitosContainer');
+  if(!cont) return;
+
+  const circPorId = id => circuitos.find(c=>String(c.id)===String(id));
+
+  cont.addEventListener('input', (e)=>{
+    const f = e.target.dataset.f;
+    if(!f) return;
+    const ptEl = e.target.closest('.circ-pt');
+    if(ptEl){
+      const c = circPorId(ptEl.dataset.circ);
+      const p = c && c.puntos.find(x=>String(x.id)===String(ptEl.dataset.pt));
+      if(!p) return;
+      if(f === 'largo')        p.largo = parseFloat(e.target.value) || 0;
+      else if(f === 'altura')  p.altura = e.target.value === '' ? null : (parseFloat(e.target.value) || 0);
+      else if(f === 'calibre') p.calibre = normalizarCalibre(e.target.value) || '';
+      else                     p[f] = e.target.value;
+      actualizarResumenCircuitos();
+      actualizarGananciaSummary();
+      return;
+    }
+    const cEl = e.target.closest('.circ-card');
+    const c = cEl && circPorId(cEl.dataset.circ);
+    if(!c) return;
+    if(f === 'nombre')      c.nombre = e.target.value;
+    else if(f === 'altura') c.altura = parseFloat(e.target.value) || 0;
+    actualizarResumenCircuitos();
+    actualizarGananciaSummary();
+  });
+
+  cont.addEventListener('change', (e)=>{
+    if(e.target.dataset.f !== 'esColumna') return;
+    const ptEl = e.target.closest('.circ-pt');
+    const c = circPorId(ptEl.dataset.circ);
+    const p = c && c.puntos.find(x=>String(x.id)===String(ptEl.dataset.pt));
+    if(!p) return;
+    p.esColumna = e.target.value === '1';
+    actualizarResumenCircuitos();
+    actualizarGananciaSummary();
+  });
+
+  cont.addEventListener('click', (e)=>{
+    const a = e.target.dataset.a;
+    if(!a) return;
+    const cEl = e.target.closest('.circ-card');
+    const c = cEl && circPorId(cEl.dataset.circ);
+    if(!c) return;
+
+    if(a === 'addpt'){
+      // El punto nuevo hereda el calibre del último, que es lo que pasa en el plano casi siempre.
+      const ult = c.puntos[c.puntos.length-1];
+      c.puntos.push(nuevoPunto(ult ? ult.calibre : '4x2.5'));
+      renderCircuitos();
+    } else if(a === 'delpt'){
+      const ptEl = e.target.closest('.circ-pt');
+      if(c.puntos.length <= 1) return;
+      c.puntos = c.puntos.filter(x=>String(x.id)!==String(ptEl.dataset.pt));
+      renderCircuitos();
+    } else if(a === 'delcirc'){
+      if(circuitos.length <= 1) return;
+      if(!confirm(`¿Quitar el circuito "${c.nombre}" con sus ${c.puntos.length} punto(s)?`)) return;
+      circuitos = circuitos.filter(x=>x.id!==c.id);
+      renderCircuitos();
+    } else if(a === 'pegar'){
+      const caja = cont.querySelector(`[data-pegar="${c.id}"]`);
+      if(caja) caja.style.display = caja.style.display === 'none' ? '' : 'none';
+    } else if(a === 'aplicarpegar'){
+      const caja = cont.querySelector(`[data-pegar="${c.id}"]`);
+      const ta = caja && caja.querySelector('textarea');
+      const nuevos = parsearPuntosPegados(ta ? ta.value : '', c.altura);
+      if(!nuevos.length){ alert('No se entendió ninguna línea. El formato es: etiqueta, largo y calibre — por ejemplo:\n\nTIC1-1  12  4x4'); return; }
+      const vacio = c.puntos.length === 1 && !c.puntos[0].largo && !c.puntos[0].etiqueta;
+      if(!vacio && !confirm(`Se van a AGREGAR ${nuevos.length} punto(s) al final de "${c.nombre}", que ya tiene ${c.puntos.length}.\n\n¿Continuar? (Si querés reemplazarlos, borrá los que están primero.)`)) return;
+      c.puntos = vacio ? nuevos : c.puntos.concat(nuevos);
+      renderCircuitos();
+    }
+  });
+
+  const btn = document.getElementById('addCircuitoBtn');
+  if(btn) btn.addEventListener('click', ()=>{ circuitos.push(nuevoCircuito()); renderCircuitos(); });
+})();
 
 function actualizarTramosSummary(){
   const cantColTotal = parseInt(document.getElementById('colCantidad').value) || 0;
@@ -2519,7 +2887,7 @@ function actualizarTramosSummary(){
   const sumaMl = tramos.reduce((a,t)=>a+(t.ml||0),0);
   const porCalibre = {};
   tramos.forEach(t=>{
-    const info = CABLE_CALIBRES.find(c=>c.value===t.calibre);
+    const info = infoCalibre(t.calibre);
     const key = info.label;
     porCalibre[key] = (porCalibre[key]||0) + (t.ml||0);
   });
@@ -2859,6 +3227,9 @@ function sincronizarTotalColumnas(){
   // Si cambió el total, los tramos de cable se reescalan igual que antes (conservando proporciones).
   if(total !== previo){
     rescalarColumnas(tramos, total);
+    // El aviso de "los circuitos suman X columnas y acá cargaste Y" tiene que releerse cuando
+    // cambia justamente Y, si no queda mostrando el número viejo.
+    if(typeof actualizarResumenCircuitos === 'function') actualizarResumenCircuitos();
     if(typeof renderTramos === 'function') renderTramos();
   }
 }
@@ -7513,6 +7884,7 @@ poblarAcometidaCable();
 poblarCruce();
 poblarCivilAlturas();
 renderTramos();
+renderCircuitos();
 renderVinculoGrupos();
 aplicarEstadoATodasLasSecciones();
 renderPersonal();
@@ -7779,7 +8151,7 @@ function calcular(){
       const neutroParaTramos = distribuirProporcional(totalBpnNeutro, pesos);
       const tierraParaTramos = distribuirProporcional(totalBpnTierra, pesos);
       tramos.forEach((t, idx)=>{
-        const info = CABLE_CALIBRES.find(c=>c.value===t.calibre);
+        const info = infoCalibre(t.calibre);
         const bi = bpnInfoParaCalibre(info.gauge);
         const key = bi.ref;
         if(!bpnPorCalibre[key]) bpnPorCalibre[key] = {calibre:bi.calibre, fase:0, neutro:0, tierra:0, columnas:0};
@@ -7915,23 +8287,34 @@ function calcular(){
     // (mismo criterio que ya se usa para las BPN cuando hay varios calibres): el total general es
     // exacto, el desglose por calibre es la mejor aproximación posible sin saber qué columna
     // puntual cuelga de qué tramo.
-    const circuitosCable = parseInt(document.getElementById('circuitos').value) || 1;
+    // Desde 2026-08-28 los tramos se DERIVAN de la carga por circuitos, y con ellos viene la
+    // ganancia exacta por calibre (ver derivarTramosDeCircuitos): cada subida ya quedó contada con
+    // el calibre que le corresponde, sabiendo cuál es el último punto de cada circuito. Solo si por
+    // algún motivo no hubiera circuitos cargados se cae al reparto proporcional de antes.
+    derivarTramosDeCircuitos();
+    const exacta = window.__gananciaExactaPorCalibre || null;
     const colsPorTramo = tramos.map(t=>t.columnas||0);
     const colsTotalTramos = colsPorTramo.reduce((a,b)=>a+b,0);
-    const gananciaInput = document.getElementById('cableGanancia').value;
-    // Vacío = usar la altura libre de la columna (regla de campo). Con Columnas apagada, 7 m.
-    const mPorSubida = gananciaInput === '' ? (altura != null ? altura : 7) : (parseFloat(gananciaInput) || 0);
-    const subidasTotales = Math.max(0, 2*colsTotalTramos - circuitosCable);
-    const gananciaTotal = subidasTotales * mPorSubida;
-    const gananciaPorTramo = colsTotalTramos > 0
-      ? distribuirProporcional(gananciaTotal, colsPorTramo)
-      : tramos.map(()=>0);
+    let gananciaPorTramo;
+    if(exacta){
+      gananciaPorTramo = tramos.map(t => exacta[t.calibre] || 0);
+    } else {
+      const circuitosCable = parseInt(document.getElementById('circuitos').value) || 1;
+      const gananciaInput = document.getElementById('cableGanancia').value;
+      const mPorSubida = gananciaInput === '' ? (altura != null ? altura : 7) : (parseFloat(gananciaInput) || 0);
+      const gananciaTotal = Math.max(0, 2*colsTotalTramos - circuitosCable) * mPorSubida;
+      gananciaPorTramo = colsTotalTramos > 0
+        ? distribuirProporcional(gananciaTotal, colsPorTramo)
+        : tramos.map(()=>0);
+    }
 
     const mlPorCalibre = {}, gananciaPorCalibre = {};
     tramos.forEach((t,i)=>{
-      const info = CABLE_CALIBRES.find(c=>c.value===t.calibre);
-      mlPorCalibre[info.label] = (mlPorCalibre[info.label]||0) + (t.ml||0);
-      gananciaPorCalibre[info.label] = (gananciaPorCalibre[info.label]||0) + (gananciaPorTramo[i]||0);
+      // etiquetaCalibre() cubre también los calibres que no están en la lista fija: el plano puede
+      // traer cualquier sección y hay que poder computarla igual.
+      const label = etiquetaCalibre(t.calibre);
+      mlPorCalibre[label] = (mlPorCalibre[label]||0) + (t.ml||0);
+      gananciaPorCalibre[label] = (gananciaPorCalibre[label]||0) + (gananciaPorTramo[i]||0);
     });
     const itemsCable = Object.entries(mlPorCalibre).map(([label, ml])=>{
       const g = gananciaPorCalibre[label] || 0;
@@ -8000,8 +8383,20 @@ function calcular(){
     if(vincOn && gruposVinculoActivos.length && cableSubidaTotalMl > 0){
       tiles.push({num:fmt(cableSubidaTotalMl, 0), lbl:'m de 3×1,5 mm² (subida)'});
     }
-    if(gananciaTotal > 0){
-      tiles.push({num:fmt(gananciaTotal,0), lbl:`m de ganancia (${subidasTotales} subidas)`});
+    // Total de ganancia y cantidad de subidas, contadas sobre la cadena real de cada circuito
+    // (antes salían de la fórmula global 2×columnas − circuitos).
+    const gananciaTotalM = gananciaPorTramo.reduce((a,b)=>a+b, 0);
+    let subidasContadas = 0;
+    (circuitos||[]).forEach(c=>{
+      const pts = c.puntos.filter(p=>p.calibre);
+      pts.forEach((p,i)=>{
+        if(!p.esColumna) return;
+        subidasContadas += 1;
+        if(pts[i+1] && pts[i+1].calibre) subidasContadas += 1;
+      });
+    });
+    if(gananciaTotalM > 0){
+      tiles.push({num:fmt(gananciaTotalM,0), lbl:`m de ganancia (${subidasContadas} subidas)`});
     }
   }
 
@@ -8259,8 +8654,12 @@ function calcular(){
         return tramos.filter(t=>t.calibre===cv).reduce((a,t)=>a+(t.ml||0),0) || 1;
       })).map(n=>Math.max(1, Math.round(n)));
       calibresTramos.forEach((cv,i)=>{
-        const info = CABLE_CALIBRES.find(c=>c.value===cv);
-        if(info) usosPrensa.push({uso:`salida de circuito ${info.label}`, diam:info.diam, cant:porCal[i]||1});
+        const info = infoCalibre(cv);
+        if(!info || !info.diam) return;
+        // Si el calibre no estaba en la tabla, el diámetro es el del más parecido: se dice, porque
+        // de ese diámetro sale la MEDIDA del prensacable y conviene verificarla contra el cable real.
+        const uso = `salida de circuito ${info.label}` + (info.estimado ? ` (⚠ medida tomada del ${info.parecidoA} — verificá el Ø real del cable)` : '');
+        usosPrensa.push({uso, diam:info.diam, cant:porCal[i]||1});
       });
     } else {
       usosPrensa.push({uso:'salida de circuito 4×2,5 mm²', diam:12.28, cant:circuitos});
