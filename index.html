@@ -180,9 +180,9 @@
      Antes había que sumar a mano los tramos de cada calibre antes de poder cargarlos. */
   .circ-card{border:1px solid var(--border); border-radius:12px; padding:12px 13px; margin-bottom:12px; background:var(--panel);}
   .circ-head{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;}
-  .circ-head input[type="text"]{margin:0; width:110px; font-weight:700;}
-  .circ-head .circ-alt{width:74px; margin:0;}
-  .circ-head label{margin:0; font-size:11px; white-space:nowrap;}
+  .circ-nums{display:flex; gap:5px; align-items:center; flex-basis:100%; flex-wrap:wrap;}
+  .circ-nums input{margin:0; width:56px; padding:5px 6px; font-size:12.5px;}
+  .circ-head label, .circ-nums label{margin:0; font-size:11px; white-space:nowrap; color:var(--text-soft);}
   /* Dos renglones por punto: la card de Cableado va en una columna angosta (~350 px), así que una
      fila con los siete campos uno al lado del otro no entra. Arriba el nombre del punto, abajo los
      cuatro datos. `min-width:0` en los campos es lo que permite que el grid los achique de verdad:
@@ -191,13 +191,15 @@
            margin-bottom:9px; padding-bottom:8px; border-bottom:1px dashed var(--border);}
   .circ-pt:last-of-type{border-bottom:none;}
   .circ-pt input, .circ-pt select{margin:0; padding:6px 6px; font-size:12.5px; min-width:0; width:100%;}
+  .circ-pt .circ-tramo{grid-column:2 / 6; grid-row:1; font-size:11px; font-weight:700; color:var(--teal-dark); letter-spacing:.2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .circ-pt input[data-f="etiqueta"]{grid-column:2 / 6; grid-row:2;}
+  .circ-pt input[data-f="largo"]{grid-column:2; grid-row:3;}
+  .circ-pt input[data-f="calibre"]{grid-column:3; grid-row:3;}
+  .circ-pt input[data-f="altura"]{grid-column:4; grid-row:3;}
+  .circ-pt select[data-f="esColumna"]{grid-column:5; grid-row:3;}
+  .circ-nombre{font-size:14px; font-weight:800; color:var(--navy); letter-spacing:.3px;}
   .circ-pt .circ-n{grid-column:1; grid-row:1; font-size:11px; font-weight:700; color:var(--text-soft); text-align:center;}
-  .circ-pt input[data-f="etiqueta"]{grid-column:2 / 6; grid-row:1;}
   .circ-pt .circ-x{grid-column:6; grid-row:1; background:none; border:none; color:var(--danger); font-weight:700; font-size:16px; cursor:pointer; padding:0;}
-  .circ-pt input[data-f="largo"]{grid-column:2; grid-row:2;}
-  .circ-pt input[data-f="calibre"]{grid-column:3; grid-row:2;}
-  .circ-pt input[data-f="altura"]{grid-column:4; grid-row:2;}
-  .circ-pt select[data-f="esColumna"]{grid-column:5; grid-row:2;}
   .circ-acciones{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;}
   .circ-pegar{width:100%; min-height:70px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; margin-top:6px;}
   .circ-aviso{font-size:11.5px; color:var(--amber); margin-top:4px;}
@@ -2529,8 +2531,25 @@ function nuevoPunto(calibre, altura){
   return { id: puntoIdSeq++, etiqueta:'', largo:0, calibre: calibre||'4x2.5', altura: altura||null, esColumna:true };
 }
 function nuevoCircuito(){
-  const n = circuitos.length + 1;
-  return { id: circuitoIdSeq++, nombre:'C'+n, altura:7, puntos:[ nuevoPunto() ] };
+  // Numeración como la nombran los planos: T1C1-1 = Tablero 1, Circuito 1, Columna 1. Se guardan
+  // los dos números por separado (no un texto) para poder armar solos los nombres de cada punto y
+  // de cada tramo, que es de donde sale la mitad del trabajo manual que había antes.
+  const usados = circuitos.map(c=>c.numero||0);
+  let n = 1; while(usados.includes(n)) n++;
+  return { id: circuitoIdSeq++, tablero:1, numero:n, altura:7, puntos:[ nuevoPunto() ] };
+}
+
+// Nombre del circuito: T1C1
+function nombreCircuito(c){ return `T${c.tablero||1}C${c.numero||1}`; }
+// Nombre de una columna: T1C1-3 (o el que se haya escrito a mano, si el plano usa otro)
+function nombrePunto(c, i){
+  const p = c.puntos[i];
+  return (p && p.etiqueta && p.etiqueta.trim()) ? p.etiqueta.trim() : `${nombreCircuito(c)}-${i+1}`;
+}
+// Nombre del TRAMO: de dónde sale y a dónde llega. El primero sale del tablero (TAP).
+function nombreTramo(c, i){
+  const desde = i === 0 ? 'TAP' : nombrePunto(c, i-1);
+  return `${desde} → ${nombrePunto(c, i)}`;
 }
 circuitos = [ nuevoCircuito() ];
 
@@ -2592,12 +2611,14 @@ function renderCircuitos(){
     const filas = c.puntos.map((p, pi)=>{
       const sec = seccionDeCalibre(p.calibre);
       const raro = p.calibre && sec != null && !SECCIONES_NORMALIZADAS.includes(sec);
+      const alturaPropia = p.altura != null && p.altura !== (c.altura||7);
       return `<div class="circ-pt" data-circ="${c.id}" data-pt="${p.id}">
         <div class="circ-n">${pi+1}</div>
-        <input type="text" data-f="etiqueta" value="${escHtml(p.etiqueta||'')}" placeholder="Punto del plano (ej. ${escHtml(c.nombre)}-${pi+1})">
+        <div class="circ-tramo" title="Tramo: de dónde sale el cable y a qué columna llega">${escHtml(nombreTramo(c, pi))}</div>
+        <input type="text" data-f="etiqueta" value="${escHtml(p.etiqueta||'')}" placeholder="${escHtml(nombrePunto(c, pi))}" title="Nombre de esta columna. Vacío = ${escHtml(nombrePunto(c, pi))}, que se arma solo.">
         <input type="number" min="0" step="0.1" data-f="largo" value="${p.largo||0}" placeholder="Largo m" title="Largo del tramo que alimenta este punto, en metros">
         <input type="text" data-f="calibre" list="calibresLista" value="${escHtml(p.calibre||'')}" placeholder="Calibre" title="Calibre del tramo que llega a este punto${raro?' — sección no normalizada':''}" ${raro?'style="border-color:var(--amber);"':''}>
-        <input type="number" min="0" step="0.5" data-f="altura" value="${p.altura!=null?p.altura:''}" placeholder="Alt ${c.altura||7}" title="Altura de la columna en este punto, para la ganancia. Vacío = la del circuito.">
+        <input type="number" min="0" step="0.5" data-f="altura" value="${p.altura!=null?p.altura:''}" placeholder="Alt ${c.altura||7}" title="Altura de ESTA columna, en metros. Cada punto puede tener la suya — vacío toma la del circuito (${c.altura||7} m)." ${alturaPropia?'style="border-color:var(--teal-dark); font-weight:700;"':''}>
         <select data-f="esColumna" title="¿En este punto hay columna, o el cable solo pasa?">
           <option value="1" ${p.esColumna?'selected':''}>Columna</option>
           <option value="0" ${!p.esColumna?'selected':''}>Solo pasa</option>
@@ -2607,11 +2628,16 @@ function renderCircuitos(){
     }).join('');
     return `<div class="circ-card" data-circ="${c.id}">
       <div class="circ-head">
-        <input type="text" data-f="nombre" value="${escHtml(c.nombre)}" title="Nombre del circuito, como lo llama el plano">
-        <label>Altura de columna</label>
-        <input type="number" class="circ-alt" min="0" step="0.5" data-f="altura" value="${c.altura||7}" title="Altura libre por defecto de las columnas de este circuito (m)">
-        <span style="flex:1;"></span>
-        <button type="button" class="btn-ghost" data-a="delcirc" style="padding:3px 9px; font-size:12px; color:var(--danger);" ${circuitos.length<=1?'disabled':''}>Quitar circuito</button>
+        <span class="circ-nombre">${escHtml(nombreCircuito(c))}</span>
+        <button type="button" class="btn-ghost" data-a="delcirc" style="padding:3px 9px; font-size:12px; color:var(--danger); margin-left:auto;" ${circuitos.length<=1?'disabled':''}>Quitar</button>
+        <div class="circ-nums">
+          <label>Tablero</label>
+          <input type="number" min="1" step="1" data-f="tablero" value="${c.tablero||1}" title="Número de tablero del que sale este circuito">
+          <label>Circuito</label>
+          <input type="number" min="1" step="1" data-f="numero" value="${c.numero||1}" title="Número de circuito dentro de ese tablero">
+          <label>Altura</label>
+          <input type="number" min="0" step="0.5" data-f="altura" value="${c.altura||7}" title="Altura por defecto de las columnas de este circuito, en metros. Cada columna puede tener la suya — cargala en su renglón.">
+        </div>
       </div>
       <div class="hint" style="margin:0 0 7px; font-size:11px;">Por cada punto: <b>largo</b> del tramo que lo alimenta · <b>calibre</b> de ese tramo · <b>altura</b> de la columna · si ahí hay columna o el cable solo pasa.</div>
       ${filas}
@@ -2620,7 +2646,7 @@ function renderCircuitos(){
         <button type="button" class="btn-ghost" data-a="pegar" style="padding:4px 10px; font-size:12px;">📋 Pegar del plano</button>
       </div>
       <div data-pegar="${c.id}" style="display:none;">
-        <textarea class="circ-pegar" placeholder="Una línea por punto, en orden desde el tablero:&#10;TIC1-1  12  4x4&#10;TIC1-2  35  4x4&#10;TIC1-3  36  4x4&#10;&#10;También sirve solo «largo calibre», y se puede agregar la altura al final: «TIC3-1 118 4x6 10»"></textarea>
+        <textarea class="circ-pegar" placeholder="Una línea por punto, en orden desde el tablero. Alcanza con el largo y el calibre — el nombre se arma solo:&#10;12  4x4&#10;35  4x4&#10;36  4x4&#10;&#10;Si una columna tiene otra altura, va al final: «118 4x6 10»&#10;Y si el plano usa otros nombres, se pueden poner adelante: «T1C1-1 12 4x4»"></textarea>
         <button type="button" class="btn-auto" data-a="aplicarpegar" style="margin-top:6px;">Cargar estos puntos</button>
       </div>
     </div>`;
@@ -2823,8 +2849,10 @@ function actualizarGananciaSummary(){
     const cEl = e.target.closest('.circ-card');
     const c = cEl && circPorId(cEl.dataset.circ);
     if(!c) return;
-    if(f === 'nombre')      c.nombre = e.target.value;
-    else if(f === 'altura') c.altura = parseFloat(e.target.value) || 0;
+    if(f === 'tablero')      c.tablero = parseInt(e.target.value) || 1;
+    else if(f === 'numero')  c.numero  = parseInt(e.target.value) || 1;
+    else if(f === 'altura')  c.altura  = parseFloat(e.target.value) || 0;
+    if(f === 'tablero' || f === 'numero'){ renderCircuitos(); return; }   // cambian todos los nombres
     actualizarResumenCircuitos();
     actualizarGananciaSummary();
   });
@@ -2859,7 +2887,7 @@ function actualizarGananciaSummary(){
       renderCircuitos();
     } else if(a === 'delcirc'){
       if(circuitos.length <= 1) return;
-      if(!confirm(`¿Quitar el circuito "${c.nombre}" con sus ${c.puntos.length} punto(s)?`)) return;
+      if(!confirm(`¿Quitar el circuito ${nombreCircuito(c)} con sus ${c.puntos.length} punto(s)?`)) return;
       circuitos = circuitos.filter(x=>x.id!==c.id);
       renderCircuitos();
     } else if(a === 'pegar'){
@@ -2871,7 +2899,7 @@ function actualizarGananciaSummary(){
       const nuevos = parsearPuntosPegados(ta ? ta.value : '', c.altura);
       if(!nuevos.length){ alert('No se entendió ninguna línea. El formato es: etiqueta, largo y calibre — por ejemplo:\n\nTIC1-1  12  4x4'); return; }
       const vacio = c.puntos.length === 1 && !c.puntos[0].largo && !c.puntos[0].etiqueta;
-      if(!vacio && !confirm(`Se van a AGREGAR ${nuevos.length} punto(s) al final de "${c.nombre}", que ya tiene ${c.puntos.length}.\n\n¿Continuar? (Si querés reemplazarlos, borrá los que están primero.)`)) return;
+      if(!vacio && !confirm(`Se van a AGREGAR ${nuevos.length} punto(s) al final de ${nombreCircuito(c)}, que ya tiene ${c.puntos.length}.\n\n¿Continuar? (Si querés reemplazarlos, borrá los que están primero.)`)) return;
       c.puntos = vacio ? nuevos : c.puntos.concat(nuevos);
       renderCircuitos();
     }
