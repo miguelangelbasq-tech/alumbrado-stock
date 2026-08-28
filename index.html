@@ -2705,6 +2705,35 @@ function derivarTramosDeCircuitos(){
     });
   });
 
+  // ---- Bornera de FASE por columna: manda el cable MÁS GRUESO de los dos (2026-08-28) ----
+  // Lo marcó el usuario: *"hay columnas que entra cable de 6 y sale cable de 4; en ese caso las BPN
+  // grises tienen que ser de 6 mm"*. Y tiene razón por una cuestión física: en una columna
+  // intermedia los DOS conductores —el que llega y el que sigue— terminan en la MISMA bornera, así
+  // que la bornera tiene que aceptar la sección más grande de las dos.
+  // Antes se asignaba solo por el cable que LLEGA. En el caso que él nombró (entra 6, sale 4) daba
+  // bien de casualidad, porque el que llega ya era el más grueso; pero en el caso inverso —entra 4
+  // y sale 6, que es lo que pasa cuando el proyectista refuerza hacia el final de un circuito— la
+  // herramienta pedía una bornera de 4 mm² para un cable de 6. Ahí no entra.
+  const bpnCol = {};   // ref del ítem -> { calibre, columnas, cables:[] }
+  circuitos.forEach(c=>{
+    const pts = c.puntos.filter(p=>p.calibre);
+    pts.forEach((p,i)=>{
+      if(!p.esColumna) return;
+      const sig = pts[i+1];
+      const gLlega = seccionDeCalibre(p.calibre);
+      const gSale  = (sig && sig.calibre) ? seccionDeCalibre(sig.calibre) : null;
+      const gMax = Math.max(gLlega != null ? gLlega : 0, gSale != null ? gSale : 0);
+      const bi = bpnInfoParaCalibre(gMax);
+      if(!bpnCol[bi.ref]) bpnCol[bi.ref] = { calibre: bi.calibre, columnas: 0, cables: [] };
+      bpnCol[bi.ref].columnas += 1;
+      // Qué cable mandó en esta columna, para poder explicarlo en el cómputo.
+      const manda = (gSale != null && gSale > gLlega) ? sig.calibre : p.calibre;
+      const et = etiquetaCalibre(manda);
+      if(!bpnCol[bi.ref].cables.includes(et)) bpnCol[bi.ref].cables.push(et);
+    });
+  });
+  window.__bpnPorColumna = Object.keys(bpnCol).length ? bpnCol : null;
+
   const calibres = Object.keys(acum);
   tramos = calibres.map(cal => ({ id: tramoIdSeq++, calibre: cal, ml: acum[cal].zanja, columnas: acum[cal].columnas }));
   if(!tramos.length) tramos = [{ id: tramoIdSeq++, calibre:'4x2.5', ml:0, columnas:0 }];
@@ -2747,7 +2776,36 @@ function desgloseSubidasHtml(){
   return out || '<div class="hint" style="margin:0;">Todavía no hay puntos cargados.</div>';
 }
 
+// ---- El campo «cantidad de circuitos» se sincroniza solo (2026-08-28) ----
+// Ese input existía desde antes del editor de circuitos y se lee en CINCO lugares del cómputo:
+// punteras TIFF dobles, ganancia de respaldo, prensacables del tablero y salidas de circuito. Al
+// pasar la carga a circuitos quedó huérfano: alguien cargaba 3 circuitos en el editor y el campo
+// seguía en 1, así que el cómputo pedía prensacables y punteras para un circuito solo.
+// Ahora, con Cableado encendido, el número lo manda el editor y el campo pasa a ser de solo lectura
+// (se sigue mostrando, porque es un dato que la gente mira).
+function circuitosConColumnas(){
+  return (circuitos||[]).filter(c => c.puntos.some(p => p.calibre && p.esColumna)).length;
+}
+function sincronizarCantidadCircuitos(){
+  const el = document.getElementById('circuitos');
+  if(!el) return;
+  const cableOn = (document.getElementById('toggleCableado')||{}).checked;
+  const n = circuitosConColumnas();
+  if(cableOn && n > 0){
+    el.value = n;
+    el.readOnly = true;
+    el.title = 'Sale de los circuitos cargados abajo — no se edita a mano';
+    el.style.background = 'var(--panel)';
+  } else {
+    el.readOnly = false;
+    el.title = '';
+    el.style.background = '';
+  }
+}
+window.sincronizarCantidadCircuitos = sincronizarCantidadCircuitos;
+
 function actualizarResumenCircuitos(){
+  sincronizarCantidadCircuitos();
   const el = document.getElementById('circuitosResumen');
   if(!el) return;
   const acum = derivarTramosDeCircuitos();
@@ -8264,7 +8322,7 @@ function calcular(){
     // Puente fijo (peine ZOLODA de 10 elementos, se corta a medida): NO se puentea la FASE (cada fase va
     // individual a su propio portafusible); NEUTRO y TIERRA se puentean juntos en un solo puente (esquema TN-C).
     // Separador para borne BPN: 1 pieza por columna, divide físicamente el grupo FASE del grupo NEUTRO+TIERRA.
-    let totalBpnFase = 0, totalBpnNeutro = 0, totalBpnTierra = 0;
+    let totalBpnFase = 0, totalBpnNeutro = 0, totalBpnTierra = 0, colsVinculoTotal = 0;
     gruposVinculo.forEach(g=>{
       const v = VINCULOS.find(x=>x.id===g.tipo);
       if(!v) return;
@@ -8272,8 +8330,29 @@ function calcular(){
       totalBpnFase += g.columnas * faseNeutroPorCol;
       totalBpnNeutro += g.columnas * faseNeutroPorCol;
       totalBpnTierra += g.columnas * Math.ceil((1 + v.lum) / BPN_MAX_CABLES);
+      colsVinculoTotal += g.columnas;
     });
     const PUENTE_ELEMENTOS = 10; // el peine puente viene de a 10 elementos y se corta a la medida necesaria
+
+    // ---- Cuántos peines hacen falta de verdad (corregido 2026-08-28) ----
+    // Estaba mal: se sumaban TODOS los elementos de la obra y se dividía por 10. Eso trata al peine
+    // como si fuera material a granel, y no lo es: cada columna necesita UNA TIRA CONTINUA de N
+    // elementos, y lo que sobra de un corte no sirve para otra columna.
+    // Con vínculo cuádruple el error era grande: 6 elementos por columna → de un peine de 10 sale UNA
+    // sola tira (sobran 4 que no se usan), así que 6 columnas necesitan 6 peines y la herramienta
+    // pedía 4. Faltaba un tercio del material.
+    let puentesTotales = 0;
+    const puenteDetalle = [];
+    gruposVinculo.forEach(g=>{
+      const v = VINCULOS.find(x=>x.id===g.tipo);
+      if(!v || !g.columnas) return;
+      const elemPorCol = bpnFaseNeutroPorColumna(vincTipo, v.lum) + Math.ceil((1 + v.lum) / BPN_MAX_CABLES);
+      const tirasPorPeine = Math.max(1, Math.floor(PUENTE_ELEMENTOS / elemPorCol));
+      const peines = Math.ceil(g.columnas / tirasPorPeine);
+      puentesTotales += peines;
+      puenteDetalle.push(`${g.columnas} col × ${elemPorCol} elem (${tirasPorPeine} tira${tirasPorPeine===1?'':'s'} por peine) = ${peines}`);
+    });
+    const puenteNota = puenteDetalle.length ? ` · ${puenteDetalle.join(' + ')}` : '';
     const bpnPorCalibre = {}; // { 'Ítem 62': {calibre, fase, neutro, tierra, columnas}, ... }
     let bpnEstimadoPorMezcla = false;
     // Punteras TIFF de BPN: se acumulan aparte, por calibre EXACTO de cable (no por el bucket de 2
@@ -8303,27 +8382,56 @@ function calcular(){
       // columnas de cada tramo (reparto exacto en el total, aproximado en el desglose por calibre).
       bpnEstimadoPorMezcla = tramos.length > 1 && gruposVinculo.length > 1;
       const pesos = tramos.map(t=>t.columnas||0);
+      // Las BORNERAS se reparten por columna, con el criterio del cable más grueso que llega a cada
+      // una (ver derivarTramosDeCircuitos). Las PUNTERAS no: esas van sobre el cable, así que siguen
+      // el calibre real de cada tramo y se calculan más abajo, sin tocar.
+      const bpnCols = window.__bpnPorColumna;
       const colsTramosTotal = pesos.reduce((a,b)=>a+b,0);
       const columnasPasoPorTramo = distribuirProporcional(Math.max(0, colsTramosTotal - circuitosTiff), pesos);
+      // ---- Tope físico de punteras dobles por columna (corregido 2026-08-28) ----
+      // Una puntera doble ocupa UN borne, así que en una columna no puede haber más dobles que
+      // borneras. El cálculo viejo hacía `columnas de paso × conductores del cable` sin mirar eso, y
+      // el único freno era un tope global. En columna METÁLICA simple (1 fase + 1 neutro + 1 tierra
+      // = 3 borneras) con cable de 4 conductores el resultado era imposible: pedía 4 dobles por
+      // columna y el cómputo terminaba con CERO punteras simples.
+      // En PRFV nunca se disparaba: ahí hay 7 o más borneras por columna.
+      const bpnPorColumnaProm = colsVinculoTotal > 0
+        ? (totalBpnFase + totalBpnNeutro + totalBpnTierra) / colsVinculoTotal
+        : 99;
       const faseParaTramos = distribuirProporcional(totalBpnFase, pesos);
       const neutroParaTramos = distribuirProporcional(totalBpnNeutro, pesos);
       const tierraParaTramos = distribuirProporcional(totalBpnTierra, pesos);
+      // ---- Borneras: por columna, con el cable más grueso de esa columna ----
+      if(bpnCols){
+        const refs = Object.keys(bpnCols);
+        const pesosCol = refs.map(r=>bpnCols[r].columnas);
+        const faseCol   = distribuirProporcional(totalBpnFase,   pesosCol);
+        const neutroCol = distribuirProporcional(totalBpnNeutro, pesosCol);
+        const tierraCol = distribuirProporcional(totalBpnTierra, pesosCol);
+        refs.forEach((r, i)=>{
+          bpnPorCalibre[r] = { calibre: bpnCols[r].calibre, fase: faseCol[i], neutro: neutroCol[i],
+                               tierra: tierraCol[i], columnas: bpnCols[r].columnas,
+                               cables: bpnCols[r].cables.slice() };
+        });
+      }
       tramos.forEach((t, idx)=>{
         const info = infoCalibre(t.calibre);
         const bi = bpnInfoParaCalibre(info.gauge);
         const key = bi.ref;
-        if(!bpnPorCalibre[key]) bpnPorCalibre[key] = {calibre:bi.calibre, fase:0, neutro:0, tierra:0, columnas:0, cables:[]};
-        // De qué cable(s) sale esta bornera. Sin esto, ver una línea de «BPN 4 mm²» en una plaza
-        // donde se cargó cable de 6 parece un error, y en realidad corresponde a los tramos de 2,5
-        // o 4 que también tiene esa plaza. Es exactamente la duda que planteó el usuario.
-        if(!bpnPorCalibre[key].cables.includes(info.label)) bpnPorCalibre[key].cables.push(info.label);
-        bpnPorCalibre[key].fase += faseParaTramos[idx];
-        bpnPorCalibre[key].neutro += neutroParaTramos[idx];
-        bpnPorCalibre[key].tierra += tierraParaTramos[idx];
-        bpnPorCalibre[key].columnas += (t.columnas||0);
+        // Sin circuitos cargados se cae al criterio viejo (por tramo). Con circuitos, las borneras ya
+        // quedaron repartidas arriba y acá solo se calculan las punteras.
+        if(!bpnCols){
+          if(!bpnPorCalibre[key]) bpnPorCalibre[key] = {calibre:bi.calibre, fase:0, neutro:0, tierra:0, columnas:0, cables:[]};
+          if(!bpnPorCalibre[key].cables.includes(info.label)) bpnPorCalibre[key].cables.push(info.label);
+          bpnPorCalibre[key].fase += faseParaTramos[idx];
+          bpnPorCalibre[key].neutro += neutroParaTramos[idx];
+          bpnPorCalibre[key].tierra += tierraParaTramos[idx];
+          bpnPorCalibre[key].columnas += (t.columnas||0);
+        }
         const gaugeLabel = formatGaugeLabel(info.gauge);
         const puntasTramo = 2 * (faseParaTramos[idx] + neutroParaTramos[idx] + tierraParaTramos[idx]);
-        const doblesTramo = (columnasPasoPorTramo[idx]||0) * conductoresDeCalibre(t.calibre);
+        const doblesTramo = (columnasPasoPorTramo[idx]||0)
+          * Math.min(conductoresDeCalibre(t.calibre), Math.floor(bpnPorColumnaProm));
         // Nunca se descuentan más simples de las que había en ese tramo.
         const doblesAplicadas = Math.min(doblesTramo, Math.floor(puntasTramo/2));
         terminalesTiffPorGauge[gaugeLabel] = (terminalesTiffPorGauge[gaugeLabel]||0) + puntasTramo - 2*doblesAplicadas;
@@ -8378,7 +8486,7 @@ function calcular(){
       // más de 4 mm² → BPN de 6 mm² (ítem 63). Se dice de qué cable sale, para que una línea de 4 mm²
       // en una plaza que también tiene cable de 6 no parezca un error.
       const deQueCable = (x.cables && x.cables.length)
-        ? ` — para el cable ${x.cables.join(' y ')} (${x.columnas} columna${x.columnas===1?'':'s'})`
+        ? ` — ${x.columnas} columna${x.columnas===1?'':'s'} cuyo cable más grueso es ${x.cables.join(' o ')}`
         : '';
       itemsLum.push({...M(x.calibre==='4 mm²'?2007:2009, `una por posición de fase${deQueCable}${nota}`), cant:x.fase, un:'Un.', ref});
       if(estandarizaNT){
@@ -8389,20 +8497,21 @@ function calcular(){
       } else {
         itemsLum.push({...M(2008, `calibre ${x.calibre}${nota}`), cant:x.neutro, un:'Un.', ref});
         itemsLum.push({...M(2010, `calibre ${x.calibre}${nota}`), cant:x.tierra, un:'Un.', ref});
-        const elementosPuente = x.neutro + x.tierra;
-        const puenteFijo = elementosPuente > 0 ? Math.ceil(elementosPuente / PUENTE_ELEMENTOS) : 0;
-        itemsLum.push({...M(2027, `se corta a medida · une NEUTRO+TIERRA en un solo puente continuo (esquema TN-C)${nota}`), cant:puenteFijo, un:'Un.', ref:'Criterio de campo'});
+        // El peine ya NO se emite acá: se contaba una vez por cada calibre. Sale una sola línea
+        // después del bucle, con el total calculado por columna.
         itemsLum.push({...M(2041, `divide grupo FASE del grupo NEUTRO+TIERRA${nota}`), cant:x.columnas, un:'Un.', ref:'Criterio de campo'});
       }
     });
+    // En metálica el peine sale acá, una sola vez para toda la obra.
+    if(!estandarizaNT && puentesTotales > 0){
+      itemsLum.push({...M(2027, `se corta a medida · una tira continua por columna, no se reparte entre columnas${puenteNota}`), cant:puentesTotales, un:'Un.', ref:'Criterio de campo'});
+    }
     if(estandarizaNT && (ntAcum.cant + ntAcum.tierra) > 0){
       const nota = !cableOn ? ' (calibre manual — activá Cableado para calcularlo por tramo real)' : '';
       itemsLum.push({...M(2008, `<b>fija en PRFV, no depende del calibre del cable</b>${nota}`), cant:ntAcum.cant, un:'Un.', ref:BPN_PRFV_NT.ref});
       itemsLum.push({...M(2010, `<b>fija en PRFV, no depende del calibre del cable</b>${nota}`), cant:ntAcum.tierra, un:'Un.', ref:BPN_PRFV_NT.ref});
       // El puente fijo une NEUTRO+TIERRA, así que también es de 6 mm².
-      const elementosPuente = ntAcum.cant + ntAcum.tierra;
-      const puenteFijo = elementosPuente > 0 ? Math.ceil(elementosPuente / PUENTE_ELEMENTOS) : 0;
-      itemsLum.push({...M(2027, `se corta a medida · une NEUTRO+TIERRA en un solo puente continuo (esquema TN-C)${nota}`), cant:puenteFijo, un:'Un.', ref:'Criterio de campo'});
+      itemsLum.push({...M(2027, `se corta a medida · una tira continua por columna, no se reparte entre columnas${puenteNota}${nota}`), cant:puentesTotales, un:'Un.', ref:'Criterio de campo'});
       itemsLum.push({...M(2041, `divide grupo FASE del grupo NEUTRO+TIERRA (1 por columna)${nota}`), cant:ntAcum.columnas, un:'Un.', ref:'Criterio de campo'});
       itemsLum.push({desc:`— En columnas <b>PRFV</b> (7 o 10 m) las borneras <b>celeste (neutro) y verde (tierra) se piden siempre de 6 mm²</b>, cualquiera sea el calibre del troncal. Solo la de <b>fase (gris)</b> sigue la sección del cable de ese tramo`, cant:'—', un:'—', ref:'Criterio de compra confirmado'});
     }
@@ -8460,6 +8569,7 @@ function calcular(){
     // el calibre que le corresponde, sabiendo cuál es el último punto de cada circuito. Solo si por
     // algún motivo no hubiera circuitos cargados se cae al reparto proporcional de antes.
     derivarTramosDeCircuitos();
+    sincronizarCantidadCircuitos();   // que los 5 lugares que lo leen usen los circuitos reales
     const exacta = window.__gananciaExactaPorCalibre || null;
     const colsPorTramo = tramos.map(t=>t.columnas||0);
     const colsTotalTramos = colsPorTramo.reduce((a,b)=>a+b,0);
