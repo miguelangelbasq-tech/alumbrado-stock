@@ -491,6 +491,17 @@
   .plan-entry-remove{background:none; border:none; color:var(--danger); font-weight:700; font-size:15px; cursor:pointer; padding:0; line-height:1;}
   .plan-promote-btn{background:none; border:none; color:var(--teal-dark); font-weight:700; font-size:10.5px; cursor:pointer; padding:0; text-align:left;}
   .plan-promote-btn:hover{text-decoration:underline;}
+  /* Órdenes de trabajo dentro de la grilla semanal (2026-08-27). Se ven distintas de las tareas
+     escritas a mano a propósito: estas NO se editan acá, son el reflejo de la orden ya emitida. */
+  .plan-ot{background:rgba(126,198,230,0.13); border:1px solid var(--teal-dark); border-radius:8px; padding:7px 9px 8px; margin-bottom:8px;}
+  .plan-ot-nro{font-size:10.5px; font-weight:800; color:var(--teal-dark); letter-spacing:.3px;}
+  .plan-ot-plaza{font-size:12.5px; font-weight:700; color:var(--text); margin-top:1px; line-height:1.25;}
+  .plan-ot-dato{font-size:11px; color:var(--text-soft); margin-top:2px; line-height:1.35;}
+  .plan-ot-tareas{font-size:10.5px; color:var(--text-soft); margin-top:3px; line-height:1.3;}
+  .plan-ot-btn{background:none; border:none; color:var(--teal-dark); font-weight:700; font-size:10.5px; cursor:pointer; padding:0; margin-top:5px;}
+  .plan-ot-btn:hover{text-decoration:underline;}
+  @media print{ .plan-ot{break-inside:avoid;} .plan-ot-btn{display:none;} }
+
   .plan-add-btn{
     width:100%; background:var(--panel); color:var(--teal-dark); border:1px dashed #b9c2d1; border-radius:6px;
     padding:6px 0; font-size:11.5px; font-weight:600; cursor:pointer; margin-top:auto;
@@ -503,6 +514,32 @@
     .plan-entry-remove, .plan-promote-btn, .plan-add-btn{display:none;}
     .plan-entry input, .plan-entry select{border:none; background:transparent; padding:2px 0; color:#000;}
   }
+
+  /* ---- Panel gráfico de avance (2026-08-27) ----
+     Pedido del usuario: "necesito que una persona que no tiene idea vea el avance de obra, algo
+     simple; por lo menos lo primero que se ve que sean los esquemas gráficos, los nombres de las
+     plazas y el avance al lado; luego, al apretar ver detalle, ahí sí que se despliegue".
+     Antes lo primero eran tres cards de administración (login, traer plaza calculada, plazas del
+     informe) y recién después una tabla de 8 columnas. */
+  .av-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(232px, 1fr)); gap:12px; margin-top:12px;}
+  .av-card{display:flex; gap:12px; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 13px; cursor:pointer; transition:box-shadow .15s, border-color .15s, transform .15s;}
+  .av-card:hover{box-shadow:0 4px 14px rgba(20,35,70,0.12); border-color:var(--teal-dark); transform:translateY(-1px);}
+  .av-card.av-card-activa{border-color:var(--amber); box-shadow:0 0 0 2px rgba(240,183,74,0.35);}
+  .av-donut{position:relative; flex:none; width:68px; height:68px;}
+  .av-donut svg{display:block;}
+  .av-donut-num{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; color:var(--text);}
+  .av-datos{min-width:0; flex:1;}
+  .av-nombre{font-size:13.5px; font-weight:700; line-height:1.25; color:var(--text); overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
+  .av-etapa{font-size:11px; color:var(--text-soft); margin-top:3px; line-height:1.35; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .av-ver{font-size:11px; font-weight:700; color:var(--teal-dark); margin-top:5px;}
+  .av-resumen{display:grid; grid-template-columns:repeat(auto-fit, minmax(120px,1fr)); gap:10px;}
+  .av-res-tile{background:var(--panel); border-radius:10px; padding:11px 13px;}
+  .av-res-num{font-size:22px; font-weight:800; line-height:1.1;}
+  .av-res-lbl{font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--text-soft); margin-top:2px;}
+  .av-leyenda{display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; font-size:11.5px; color:var(--text-soft);}
+  .av-leyenda span{display:flex; align-items:center; gap:5px;}
+  .av-leyenda i{width:11px; height:11px; border-radius:50%; display:inline-block;}
+  @media (max-width:520px){ .av-grid{grid-template-columns:1fr;} }
 
   .avance-bar{width:100%; height:8px; background:#e4e8f0; border-radius:6px; overflow:hidden; margin-top:5px;}
   .avance-bar-fill{height:100%; background:var(--teal); border-radius:6px; transition:width .2s;}
@@ -555,9 +592,9 @@
   }
 
   /* ---- Mapa de obras (2026-08-20) — pestaña nueva, mapa tipo "My Maps" con OpenStreetMap/Leaflet ---- */
-  .mapa-layout{display:grid; grid-template-columns:280px 1fr; gap:16px; align-items:start;}
+  .mapa-layout{display:grid; grid-template-columns:305px 1fr; gap:16px; align-items:start;}
   @media (max-width:820px){ .mapa-layout{grid-template-columns:1fr;} }
-  .mapa-lista{max-height:560px; overflow-y:auto; border:1px solid var(--border); border-radius:10px;}
+  .mapa-lista{max-height:432px; overflow-y:auto; border:1px solid var(--border); border-radius:10px;}
   .mapa-lista-item{display:flex; align-items:center; gap:8px; padding:9px 10px; border-bottom:1px solid var(--border); cursor:pointer; font-size:13px;}
   .mapa-lista-item:last-child{border-bottom:none;}
   .mapa-lista-item:hover{background:var(--panel);}
@@ -566,6 +603,25 @@
   .mapa-pin-dot{width:10px; height:10px; border-radius:50%; flex:none; background:#c7cedd;}
   .mapa-pin-dot.mapa-pin-ok{background:var(--teal-dark);}
   #mapaObras{height:560px; border-radius:10px; border:1px solid var(--border); background:var(--panel);}
+  /* Cuadro de alta de plaza (2026-08-27) — una sola alta, alcanzable desde Calculadora, Mapa y OT */
+  .alta-fondo{position:fixed; inset:0; background:rgba(10,15,30,0.55); z-index:9000; display:flex; align-items:flex-start; justify-content:center; padding:24px 14px; overflow-y:auto;}
+  .alta-caja{background:var(--card); border-radius:var(--radius); box-shadow:0 12px 40px rgba(0,0,0,0.3); width:100%; max-width:480px; padding:20px 22px; margin-top:5vh;}
+  .alta-caja h2{margin:0 0 4px;}
+  .alta-caja label{margin-top:10px;}
+  .alta-acciones{display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;}
+
+  /* Pines numerados + etiqueta con el nombre + referencia de colores (2026-08-27).
+     Antes había que tocar cada punto para saber qué plaza era; ahora se lee de un vistazo. */
+  .mapa-pin{display:flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,0.45); color:#fff; font-weight:700; font-size:12px; font-family:inherit; line-height:1;}
+  .mapa-pin-sel{outline:3px solid var(--amber); outline-offset:1px;}
+  .leaflet-tooltip.mapa-etiqueta{background:rgba(255,255,255,0.94); border:1px solid var(--border); border-radius:5px; padding:1px 6px; font-size:11.5px; font-weight:700; color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,0.25); white-space:nowrap;}
+  .leaflet-tooltip.mapa-etiqueta::before{display:none;}
+  .mapa-ref{background:rgba(255,255,255,0.95); border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:12px; line-height:1.7; box-shadow:0 1px 5px rgba(0,0,0,0.22);}
+  .mapa-ref b{display:block; margin-bottom:3px; font-size:10.5px; letter-spacing:0.5px; color:var(--text-soft); text-transform:uppercase;}
+  .mapa-ref-fila{display:flex; align-items:center; gap:7px;}
+  .mapa-ref-dot{width:12px; height:12px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px rgba(0,0,0,0.18); flex:none;}
+  .mapa-num{display:inline-flex; align-items:center; justify-content:center; width:21px; height:21px; border-radius:50%; color:#fff; font-size:11px; font-weight:700; flex:none; border:1px solid rgba(0,0,0,0.08);}
+  .mapa-lista-sub{display:block; font-size:11px; color:var(--text-soft); font-weight:400; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .mapa-popup-btn{display:inline-block; margin-top:6px; padding:4px 9px; font-size:12px; border-radius:6px; background:var(--navy); color:#fff; text-decoration:none; cursor:pointer; border:none;}
   .mapa-popup-borrar{display:inline-block; margin-top:6px; margin-left:6px; padding:4px 9px; font-size:12px; border-radius:6px; background:rgba(255,107,107,0.15); color:var(--danger); text-decoration:none; cursor:pointer; border:1px solid rgba(255,107,107,0.35);}
 
@@ -661,6 +717,102 @@
 </style>
 </head>
 <body>
+
+<!-- ============================================================
+     CLAVE DE ENTRADA (2026-08-28)
+     ============================================================
+     Pedido del usuario: una clave simple para que el que reciba el link tenga que ponerla antes de
+     entrar. IMPORTANTE, y está dicho en pantalla también: esto es una CORTINA, no una cerradura.
+     Todo pasa dentro del navegador, así que alguien que sepa mirar el código de la página se la
+     saltea. Sirve para lo que se pidió — que el link no se abra solo si alguien lo reenvía — y no
+     para guardar un secreto. La cerradura de verdad es la clave del equipo (Firebase Auth), que es
+     la que se necesita para ESCRIBIR, y esa sí se verifica en el servidor.
+     La clave no está escrita en el archivo: está guardada como huella (ver hashClave), así que
+     abrir el código no la muestra en texto. Para cambiarla hay que cambiar CLAVE_ENTRADA_HUELLA
+     por la huella de la clave nueva. -->
+<div id="portada" style="position:fixed; inset:0; z-index:99999; background:linear-gradient(160deg,#16264a,#0a0f1e); display:flex; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.45); width:100%; max-width:380px; padding:26px 24px; text-align:center; font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+    <svg viewBox="0 0 320 160" width="150" height="75" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:4px;">
+      <rect x="20" y="20" width="280" height="86" rx="43" fill="none" stroke="#152a53" stroke-width="12"/>
+      <path d="M233 565V423H462V291H233V137H492V0H62V702H492V565Z" transform="translate(89.73,84.00) scale(0.06400,-0.06400)" fill="#152a53"/><path d="M857 702V0H686V421L529 0H391L233 422V0H62V702H264L461 216L656 702Z" transform="translate(124.35,84.00) scale(0.06400,-0.06400)" fill="#7ec6e6"/><path d="M499 124H237L195 0H16L270 702H468L722 0H541ZM455 256 368 513 282 256Z" transform="translate(183.10,84.00) scale(0.06400,-0.06400)" fill="#152a53"/>
+      <line x1="62" y1="122" x2="258" y2="122" stroke="#152a53" stroke-width="2.5"/>
+    </svg>
+    <div style="font-size:17px; font-weight:800; color:#16233f;">Alumbrado Público</div>
+    <div style="font-size:12.5px; color:#8b93a1; margin-top:2px; letter-spacing:.4px;">EMA SERVICIOS</div>
+    <div style="font-size:13.5px; color:#16233f; margin-top:18px;">Poné la clave de entrada para continuar</div>
+    <input type="password" id="portadaClave" inputmode="numeric" autocomplete="off"
+           style="width:100%; margin-top:10px; padding:12px 14px; font-size:17px; text-align:center; letter-spacing:3px; border:1px solid #e4e8f0; border-radius:10px; background:#f3f5f9; color:#16233f; box-sizing:border-box;">
+    <button type="button" id="portadaBtn"
+            style="width:100%; margin-top:12px; padding:12px; font-size:15px; font-weight:700; color:#fff; background:#4fa8cc; border:none; border-radius:10px; cursor:pointer;">Entrar</button>
+    <div id="portadaMsg" style="font-size:12.5px; color:#c0392b; margin-top:10px; min-height:17px;"></div>
+    <label style="display:flex; align-items:center; justify-content:center; gap:6px; margin-top:6px; font-size:12px; color:#8b93a1; cursor:pointer;">
+      <input type="checkbox" id="portadaRecordar" checked style="width:auto; margin:0;"> No volver a pedirla en este dispositivo
+    </label>
+  </div>
+</div>
+<script>
+(function(){
+  // Huella de la clave. NO es la clave: es el resultado de pasarla por hashClave(), para que abrir
+  // el código de la página no la muestre escrita. Clave actual: la que el usuario pidió (2026).
+  var CLAVE_ENTRADA_HUELLA = 'a37a8dd940aa0399';
+  var LS_KEY = 'ema_entrada_v1';
+  var DIAS_RECORDAR = 60;
+
+  function hashClave(txt){
+    var s = 'ema-alumbrado-2026|' + String(txt).trim().toLowerCase();
+    var h1 = 0x811c9dc5 >>> 0, h2 = 0x01000193 >>> 0;
+    for(var i=0;i<s.length;i++){
+      var c = s.charCodeAt(i);
+      h1 = (Math.imul(h1 ^ c, 16777619)) >>> 0;
+      h2 = (Math.imul(h2 + c, 2654435761) ^ (h2 >>> 7)) >>> 0;
+    }
+    return h1.toString(16).padStart(8,'0') + h2.toString(16).padStart(8,'0');
+  }
+
+  function abrir(){
+    var p = document.getElementById('portada');
+    if(p && p.parentNode) p.parentNode.removeChild(p);
+    document.body.style.overflow = '';
+  }
+
+  // ¿Ya la puso antes en este dispositivo? Se guarda la huella, no la clave: si mañana se cambia la
+  // clave, la huella guardada deja de coincidir y la vuelve a pedir sola, sin tener que avisarle a
+  // nadie que borre nada.
+  try{
+    var g = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+    if(g && g.h === CLAVE_ENTRADA_HUELLA && (Date.now() - (g.ts||0)) < DIAS_RECORDAR*86400000){
+      abrir();
+      return;
+    }
+  }catch(e){}
+
+  document.body.style.overflow = 'hidden';
+
+  function probar(){
+    var inp = document.getElementById('portadaClave');
+    var msg = document.getElementById('portadaMsg');
+    if(hashClave(inp.value) !== CLAVE_ENTRADA_HUELLA){
+      msg.textContent = 'Esa no es la clave. Probá de nuevo.';
+      inp.value = '';
+      inp.focus();
+      return;
+    }
+    if(document.getElementById('portadaRecordar').checked){
+      try{ localStorage.setItem(LS_KEY, JSON.stringify({ h: CLAVE_ENTRADA_HUELLA, ts: Date.now() })); }catch(e){}
+    }
+    abrir();
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var inp = document.getElementById('portadaClave');
+    var btn = document.getElementById('portadaBtn');
+    if(!inp || !btn) return;
+    btn.addEventListener('click', probar);
+    inp.addEventListener('keydown', function(ev){ if(ev.key === 'Enter') probar(); });
+    setTimeout(function(){ try{ inp.focus(); }catch(e){} }, 80);
+  });
+})();
+</script>
 
 <header>
   <div class="header-inner">
@@ -1013,6 +1165,9 @@
           <button class="btn-ghost" onclick="exportarCSV()">⬇ Exportar historial a CSV</button>
           <button class="btn-ghost" onclick="limpiarHistorial()">🗑 Limpiar historial</button>
         </div>
+        <div class="no-print" id="avisoHistorialLocal" style="margin:8px 0; display:none;"></div>
+        <div style="display:none;">
+        </div>
         <div style="overflow-x:auto;">
         <table class="hist-table">
           <thead>
@@ -1026,7 +1181,7 @@
         </table>
         </div>
         <div class="hint" style="margin-top:10px;">
-          Desde el 15/08/2026 el historial se guarda en este navegador (localStorage) y sobrevive a un recargado de página — pero no se sincroniza con otras computadoras. Usá «Exportar a CSV» para llevar un registro permanente y compartible de cada obra calculada.
+          Desde el 27/08/2026 el historial se guarda en la <b>base compartida</b>: un cómputo hecho en cualquier computadora o celular del equipo se ve en todos, igual que el stock. Antes vivía solo en el navegador de cada uno, y por eso «Traer plaza calculada» no funcionaba desde otra máquina. Para guardar hace falta haber iniciado sesión (pestaña Stock); sin sesión o sin internet el cómputo queda en este navegador y después se sube con el botón que aparece acá arriba.
         </div>
       </div>
     </div>
@@ -1049,9 +1204,13 @@
           </div>
           <div>
             <label>Plaza / obra</label>
-            <select id="otPlaza"></select>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <select id="otPlaza" style="flex:1;"></select>
+              <button type="button" class="btn-ghost" style="flex:none; padding:8px 12px;" onclick="altaPlazaDesdeOt()" title="Registrar una plaza nueva sin salir de esta pantalla">➕</button>
+            </div>
           </div>
         </div>
+        <div class="hint" id="otDireccionHint" style="margin-top:0;"></div>
         <div class="hint" id="parteDiaHint" style="margin-top:0;"></div>
 
         <div class="row2">
@@ -1161,7 +1320,7 @@
         <button type="button" class="btn-auto" id="planIrHoyBtn" style="width:100%; margin-top:14px;">Ir a la semana actual</button>
       </div>
     </div>
-    <div class="hint">Cada día admite una o más tareas: obra/plaza, cuadrilla asignada y qué se va a hacer. Cuando llega el día, usá <b>«Promover a parte diario ⇢»</b> en cada tarea para pasarla directo al formulario de «Actividad diaria de cuadrilla» sin volver a tipear. Desde el 15/08/2026 las tareas cargadas se guardan en este navegador (localStorage) y sobreviven a un recargado de página; la semana que estás mirando vuelve a la actual al reabrir.</div>
+    <div class="hint">Las <b>órdenes de trabajo que emitís</b> aparecen solas en el día de su fecha, en tarjetas celestes — no hay que cargarlas acá. Si la orden se corrige o se elimina, la semana se actualiza sola, y como las órdenes viven en la base compartida, la semana se ve igual en todas las computadoras.<br><br>Aparte de eso, cada día admite tareas escritas a mano: obra/plaza, cuadrilla asignada y qué se va a hacer. Cuando llega el día, usá <b>«Promover a parte diario ⇢»</b> en cada tarea para pasarla directo al formulario de «Actividad diaria de cuadrilla» sin volver a tipear. Desde el 27/08/2026 esas tareas también se guardan en la <b>base compartida</b>: se ven desde cualquier computadora o celular del equipo. Para cargarlas hace falta haber iniciado sesión (pestaña Stock); sin sesión o sin internet quedan en este navegador y después se suben con el botón que aparece abajo. La semana que estás mirando vuelve a la actual al reabrir.</div>
   </div>
 
   <div class="card" style="margin-top:18px;">
@@ -1170,11 +1329,37 @@
       <button type="button" class="btn-ghost" onclick="imprimir()">🖨 Imprimir planificación</button>
     </div>
     <div class="plan-week-title" id="planWeekTitlePrint">Semana del ...</div>
+    <div class="no-print" id="avisoPlanLocal" style="margin:0 0 10px; display:none;"></div>
     <div class="plan-grid" id="planGrid"></div>
   </div>
 </div>
 
 <div class="wrap" id="viewAvance" style="display:none">
+
+  <!-- Panel gráfico — lo primero que se ve (2026-08-27) -->
+  <div class="card" id="avancePanelCard">
+    <div class="card-header-row">
+      <h2 style="margin:0;"><span class="dot"></span>Cómo va cada plaza</h2>
+      <button type="button" class="btn-ghost no-print" onclick="mostrarVista('informe')">📄 Informe</button>
+    </div>
+    <div class="av-resumen" id="avanceResumenTiles" style="margin-top:12px;"></div>
+    <div class="av-leyenda no-print">
+      <span><i style="background:var(--danger);"></i> Recién arrancada</span>
+      <span><i style="background:var(--amber);"></i> En obra</span>
+      <span><i style="background:var(--teal);"></i> Avanzada</span>
+      <span><i style="background:var(--teal-dark);"></i> Finalizada</span>
+    </div>
+    <div class="av-grid" id="avancePanelGrid"></div>
+    <div class="hint no-print" id="avancePanelHint" style="margin-top:12px;">Tocá una plaza para ver el detalle completo: los materiales, las etapas y la valorización.</div>
+  </div>
+
+  <div class="card no-print" id="avanceHerramientasCard" style="margin-top:18px;">
+    <div class="card-header-row" id="avanceHerrCabecera" style="cursor:pointer;" title="Mostrar u ocultar">
+      <h2 style="margin:0;"><span class="dot"></span>Cargar y administrar plazas <span style="font-size:13px; font-weight:600; color:var(--text-soft);">· acceso, alta y tablero en tabla</span></h2>
+      <button type="button" class="btn-ghost" id="avanceHerrBtn" style="white-space:nowrap;">Abrir ▾</button>
+    </div>
+    <div id="avanceHerrCuerpo" style="display:none;">
+
   <div class="card no-print" id="avanceAuthCard">
     <h2><span class="dot"></span>Acceso para editar Avance de obra</h2>
     <div id="avanceAuthLoggedOut">
@@ -1230,6 +1415,9 @@
     </div>
   </div>
 
+    </div>
+  </div>
+
   <div class="card" style="margin-top:18px;" id="avanceDetalleCard">
     <div class="empty-state">
       <div class="big">📊</div>
@@ -1260,14 +1448,49 @@
   </div>
 </div>
 
+<!-- Alta de plaza (2026-08-27). Único formulario de alta de toda la herramienta: lo abren la
+     Calculadora, el Mapa y Órdenes de trabajo, y siempre escribe el mismo registro (avanceObras).
+     Antes el alta estaba en dos lugares distintos (Avance de obra) y ninguno quedaba a mano en el
+     momento en que hacía falta. -->
+<div class="alta-fondo no-print" id="altaPlazaFondo" style="display:none;">
+  <div class="alta-caja">
+    <h2><span class="dot"></span>Registrar plaza nueva</h2>
+    <div class="hint" style="margin-top:0;" id="altaPlazaOrigen"></div>
+    <label>Nombre de la plaza *</label>
+    <input type="text" id="altaNombre" placeholder="Ej: Plaza Hípica">
+    <label>ID de obra</label>
+    <input type="text" id="altaObraId" placeholder="Ej: 7081">
+    <label>Barrio</label>
+    <input type="text" id="altaBarrio" placeholder="Ej: Jardines del Jockey">
+    <label>Dirección / entre calles</label>
+    <input type="text" id="altaDireccion" placeholder="Calle y número, o entre qué calles">
+    <div class="hint" style="margin-top:6px;" id="altaUbicacion"></div>
+    <div class="hint" id="altaPlazaMsg" style="margin-top:8px;"></div>
+    <div class="alta-acciones">
+      <button type="button" class="btn-primary" id="altaPlazaBtn" onclick="altaPlazaConfirmar()">Registrar plaza</button>
+      <button type="button" class="btn-ghost" onclick="cerrarAltaPlaza()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap" id="viewMapa" style="display:none">
   <div class="card no-print">
     <h2><span class="dot"></span>Mapa de obras — todas las plazas de Córdoba</h2>
-    <div class="hint" style="margin-top:0;">Elegí una plaza de la lista y después tocá el punto exacto en el mapa para ubicarla — queda guardado para todo el equipo. Los pines se colorean igual que el tablero de Avance de obra (según el % por etapas). Tocá un pin para ver el detalle o ir directo a esa plaza.</div>
+    <div class="hint" style="margin-top:0;">Elegí una plaza de la lista y después tocá el punto exacto en el mapa para ubicarla — queda guardado para todo el equipo. Cada pin lleva el <b>número</b> que tiene la plaza en la lista de acá al lado y, arriba, su <b>nombre</b> (se puede apagar con «Ver nombres»). El <b>color</b> indica el avance — la referencia está abajo a la derecha del mapa. Tocá un pin para ver el detalle.</div>
     <div id="mapaConnBanner" style="display:none; color:var(--danger); background:rgba(255,107,107,0.15); border:1px solid var(--danger); border-radius:8px; padding:10px 12px; margin:12px 0; font-size:13px; line-height:1.5;">⚠ No se pudo cargar el mapa (Leaflet/OpenStreetMap) — revisá la conexión a internet de este dispositivo y volvé a esta pestaña.</div>
     <div class="mapa-layout" id="mapaLayout">
       <div>
         <div class="hint" style="margin-top:0; margin-bottom:6px;">📍 Plaza elegida para ubicar: <b id="mapaSeleccionLabel">ninguna — elegí una de la lista</b></div>
+        <input type="text" id="mapaBuscar" placeholder="Buscar plaza por nombre, barrio o ID..." oninput="renderMapaObras()" style="margin-bottom:6px;">
+        <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px; flex-wrap:wrap;">
+          <button type="button" class="btn-ghost" style="padding:4px 10px; font-size:12px;" onclick="mapaVerTodas()" title="Ajustar el zoom para que entren todas las plazas ubicadas">🔍 Ver todas</button>
+          <button type="button" class="btn-ghost" id="mapaAltaBtn" style="padding:4px 10px; font-size:12px;" onclick="mapaModoAltaToggle()" title="Registrar una plaza nueva tocando su punto en el mapa">➕ Nueva plaza acá</button>
+          <label style="display:flex; align-items:center; gap:5px; font-size:12.5px; margin:0; cursor:pointer;">
+            <input type="checkbox" id="mapaVerNombresChk" checked style="width:auto; margin:0;" onchange="toggleMapaVerNombres(this.checked)">
+            Ver nombres en el mapa
+          </label>
+        </div>
+        <div class="hint" id="mapaContador" style="margin:0 0 6px;"></div>
         <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-soft); font-weight:600; margin-bottom:8px; cursor:pointer;">
           <input type="checkbox" id="mapaOcultarFinalizadasChk" style="width:auto; margin:0;" onchange="toggleMapaOcultarFinalizadas(this.checked)">
           Ocultar plazas finalizadas
@@ -1350,15 +1573,26 @@
       </div>
 
       <div class="card no-print" style="margin-top:18px;">
-        <h2><span class="dot"></span>Respaldo</h2>
+        <h2><span class="dot"></span>Respaldo de TODA la herramienta</h2>
+        <div class="hint" style="margin-top:0;">Baja un solo archivo con <b>todo</b> lo que hay en la base compartida: movimientos, catálogo de productos, plazas con su avance e itemizado, órdenes de trabajo, historial de etapas y cómputos de la calculadora. Es el seguro contra un borrado accidental — <b>hacelo una vez por semana</b> y guardá el archivo en algún lado.</div>
+        <div class="hist-actions" style="margin-top:10px;">
+          <button class="btn-primary" onclick="exportarRespaldoCompleto()">⬇ Bajar respaldo completo</button>
+          <button class="btn-ghost" onclick="document.getElementById('respaldoImportInput').click()">⬆ Restaurar desde un respaldo</button>
+          <input type="file" id="respaldoImportInput" accept="application/json" style="display:none">
+        </div>
+        <div class="hint" id="respaldoMsg" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="card no-print" style="margin-top:18px;">
+        <h2><span class="dot"></span>Solo stock</h2>
         <div class="hist-actions">
           <button class="btn-ghost" onclick="exportarStockCSV()">⬇ Exportar stock a CSV</button>
-          <button class="btn-ghost" onclick="exportarStockJSON()">⬇ Exportar respaldo (JSON)</button>
-          <button class="btn-ghost" onclick="document.getElementById('stockImportInput').click()">⬆ Importar respaldo (JSON)</button>
+          <button class="btn-ghost" onclick="exportarStockJSON()">⬇ Respaldo solo de movimientos (JSON)</button>
+          <button class="btn-ghost" onclick="document.getElementById('stockImportInput').click()">⬆ Importar movimientos (JSON)</button>
           <input type="file" id="stockImportInput" accept="application/json" style="display:none">
-          <button class="btn-ghost" onclick="reiniciarStock()">🗑 Reiniciar movimientos</button>
+          <button class="btn-ghost" style="color:var(--danger);" onclick="reiniciarStock()">🗑 Reiniciar movimientos</button>
         </div>
-        <div class="hint">«Reiniciar movimientos» borra todo lo que registraste desde acá (entradas y salidas nuevas) y vuelve el stock al punto de partida, que hoy es <b>cero en todos los productos</b>. No borra el catálogo de productos ni los cambios que le hayas hecho.</div>
+        <div class="hint">«Reiniciar movimientos» borra todo lo que registraste desde acá (entradas y salidas nuevas) y vuelve el stock al punto de partida, que hoy es <b>cero en todos los productos</b> — <b>para todo el equipo</b>. No borra el catálogo de productos ni los cambios que le hayas hecho. Antes de tocarlo, bajá el respaldo completo de acá arriba.</div>
       </div>
     </div>
 
@@ -3240,24 +3474,110 @@ let planEntryIdSeq = 1;
 let planEntries = []; // { id, fecha:'YYYY-MM-DD', obra, cuadrilla, catalogoId, tarea }
 let planWeekStart = lunesDeSemana(fechaAISO(new Date())); // lunes de la semana que se está viendo/editando (no persiste, siempre arranca en la semana actual)
 
-// ---- Persistencia local de la planificación semanal (2026-08-15) ----
-// Mismo patrón que el resto de esta sección: solo se persisten las tareas cargadas (planEntries) y el
-// contador de ids, no la semana que se está mirando (planWeekStart siempre arranca en la semana actual).
+// ---- Planificación semanal: de este navegador a la base compartida (2026-08-27) ----
+// Era lo último que quedaba guardado por navegador. Ahora es la colección `planSemanal`, con el
+// mismo criterio del resto: leer libre, escribir con la clave del equipo. Sin sesión o sin internet
+// las tareas quedan en este navegador y se pueden subir después.
 const PLAN_LS_KEY = 'ema_plan_entries_v1';
 function guardarPlanEntries(){
   try{ localStorage.setItem(PLAN_LS_KEY, JSON.stringify({planEntries, planEntryIdSeq})); }catch(e){}
 }
-function cargarPlanEntries(){
+function planLocalGuardado(){
   try{
     const raw = localStorage.getItem(PLAN_LS_KEY);
-    if(!raw) return;
+    if(!raw) return [];
     const data = JSON.parse(raw);
-    if(Array.isArray(data.planEntries)) planEntries = data.planEntries;
-    if(typeof data.planEntryIdSeq === 'number') planEntryIdSeq = data.planEntryIdSeq;
-  }catch(e){}
+    return Array.isArray(data.planEntries) ? data.planEntries : [];
+  }catch(e){ return []; }
 }
-cargarPlanEntries();
+function planCompartidoListo(){
+  return !!(window.__planListo && typeof window.fbPlanAdd === 'function' && window.__fbUser);
+}
+// Clave de una entrada para el DOM: el id del documento si vino de la base, o el id local si no.
+function planKey(e){ return e.docId ? e.docId : ('L' + e.id); }
+function planPorKey(k){ return planEntries.find(x => planKey(x) === k); }
 
+// Escribir mientras se tipea generaría una escritura por tecla: se espera un poco a que pare.
+const planPendientes = {};
+function planGuardarCampos(entry){
+  if(!entry) return;
+  if(!(entry.docId && planCompartidoListo())){ guardarPlanEntries(); return; }
+  const id = entry.docId;
+  clearTimeout(planPendientes[id]);
+  planPendientes[id] = setTimeout(()=>{
+    window.fbPlanUpdate(id, { obra:entry.obra||'', cuadrilla:entry.cuadrilla||'',
+                              catalogoId:entry.catalogoId||'', tarea:entry.tarea||'' })
+      .catch(err=>console.error('No se pudo guardar la tarea de la semana:', err));
+  }, 700);
+}
+
+// Aviso para subir a la base las tareas que quedaron en este navegador.
+function renderAvisoPlanLocal(){
+  const cont = document.getElementById('avisoPlanLocal');
+  if(!cont) return;
+  const locales = planLocalGuardado();
+  const ya = new Set(planEntries.map(e=>`${e.fecha}|${e.obra}|${e.cuadrilla}|${e.tarea}`));
+  const faltan = locales.filter(e=>!ya.has(`${e.fecha}|${e.obra}|${e.cuadrilla}|${e.tarea}`));
+  if(!faltan.length){ cont.innerHTML=''; cont.style.display='none'; return; }
+  cont.style.display = '';
+  cont.innerHTML = `<div style="background:rgba(240,183,74,0.14); border:1px solid var(--amber); color:#6b5312; border-radius:8px; padding:10px 12px; font-size:13px;">
+    Tenés <b>${faltan.length} tarea(s)</b> de la planificación guardadas solo en este navegador, de antes de que la semana pasara a ser compartida.
+    <button type="button" class="btn-primary" style="margin-left:8px; padding:4px 12px; font-size:12.5px;" onclick="subirPlanLocal()">Subir a la base compartida</button>
+  </div>`;
+}
+window.renderAvisoPlanLocal = renderAvisoPlanLocal;
+
+async function subirPlanLocal(){
+  if(!planCompartidoListo()){
+    alert('Iniciá sesión (pestaña Stock → «Acceso para editar stock») y asegurate de tener internet.');
+    return;
+  }
+  const locales = planLocalGuardado();
+  const ya = new Set(planEntries.map(e=>`${e.fecha}|${e.obra}|${e.cuadrilla}|${e.tarea}`));
+  const faltan = locales.filter(e=>!ya.has(`${e.fecha}|${e.obra}|${e.cuadrilla}|${e.tarea}`));
+  if(!faltan.length){ renderAvisoPlanLocal(); return; }
+  if(!confirm(`¿Subir ${faltan.length} tarea(s) a la base compartida? Las va a ver todo el equipo.`)) return;
+  let n = 0;
+  for(const e of faltan){
+    try{
+      await window.fbPlanAdd({ fecha:e.fecha||'', obra:e.obra||'', cuadrilla:e.cuadrilla||'',
+                               catalogoId:e.catalogoId||'', tarea:e.tarea||'', ts:Date.now(),
+                               usuario:(window.__fbUser && window.__fbUser.email)||'' });
+      n++;
+    }catch(err){}
+  }
+  alert(n === faltan.length ? `Listo: se subieron ${n} tarea(s).` : `Se subieron ${n} de ${faltan.length}. Revisá la conexión y probá de nuevo.`);
+  renderAvisoPlanLocal();
+}
+window.subirPlanLocal = subirPlanLocal;
+
+// Órdenes de trabajo emitidas para una fecha (2026-08-27) ----
+// El usuario lo pidió así: *"necesito que cuando cree una orden de trabajo se ponga en el semanal
+// según la fecha que haya puesto"*. Se resuelve leyendo, no copiando: la planificación muestra las
+// órdenes que ya existen en la fecha de cada día. Si la orden se edita o se borra, la semana queda
+// al día sola, y como `ordenesTrabajo` vive en la base compartida, la semana se ve igual en todas
+// las computadoras (las tareas escritas a mano siguen siendo de cada navegador).
+function ordenesTrabajoDelDia(fecha){
+  // OJO: `ordenesTrabajo` se declara con `let` MÁS ABAJO en el archivo, y la grilla semanal se
+  // dibuja una vez durante la carga inicial — antes de esa línea. En esa ventana la variable está
+  // en zona muerta temporal y hasta `typeof` tira ReferenceError, así que el guard va con try.
+  let lista;
+  try{ lista = ordenesTrabajo || []; }catch(e){ return []; }
+  return lista
+    .filter(o => (o.fecha||'') === fecha)
+    .sort((a,b)=> String(a.horaInicio||'').localeCompare(String(b.horaInicio||'')) || String(a.numero||'').localeCompare(String(b.numero||'')));
+}
+
+// Saltar a la semana que contiene una fecha — se usa desde el aviso de "orden emitida".
+function irAPlanDeFecha(fecha){
+  if(!fecha) return;
+  planWeekStart = lunesDeSemana(fecha);
+  mostrarVista('plan');
+  renderPlanGrid();
+}
+window.irAPlanDeFecha = irAPlanDeFecha;
+
+window.renderPlanGrid = renderPlanGrid;
 function renderPlanGrid(){
   const hoy = fechaAISO(new Date());
   const fechaFin = sumarDias(planWeekStart, 6);
@@ -3270,11 +3590,31 @@ function renderPlanGrid(){
     const fecha = sumarDias(planWeekStart, i);
     const esHoy = fecha === hoy;
     const entradas = planEntries.filter(e=>e.fecha===fecha);
+    const ots = ordenesTrabajoDelDia(fecha);
     html += `<div class="plan-day${esHoy?' is-today':''}" data-fecha="${fecha}">
       <div class="plan-day-head">${DIAS_PLAN[i]}${esHoy?' · hoy':''}</div>
       <div class="plan-day-date">${formatFechaCorta(fecha)}</div>`;
+    // Órdenes de trabajo ya emitidas para ese día. No se copian ni se cargan a mano: se leen en vivo
+    // de `ordenesTrabajo`, así que si la orden se corrige o se elimina, la semana lo refleja sola.
+    ots.forEach(o=>{
+      const tareas = [
+        ...(o.actividades||[]).map(idA=>{ const c = ACTIVIDADES_CATALOGO.find(x=>x.id===idA); return c?c.label:idA; }),
+        ...(o.actividadesManuales||[]).map(a=>a.actividad)
+      ].filter(Boolean);
+      const dir = (typeof direccionDeOrden === 'function') ? direccionDeOrden(o) : '';
+      const horario = (o.horaInicio||o.horaFin) ? `${escHtml(o.horaInicio||'—')} a ${escHtml(o.horaFin||'—')}` : '';
+      html += `<div class="plan-ot">
+        <div class="plan-ot-nro">📋 ${escHtml(o.numero||'Orden de trabajo')}</div>
+        <div class="plan-ot-plaza">${escHtml(o.plazaNombre||'(sin plaza)')}</div>
+        ${dir?`<div class="plan-ot-dato">📍 ${escHtml(dir)}</div>`:''}
+        ${o.cuadrilla?`<div class="plan-ot-dato">👷 ${escHtml(o.cuadrilla)}${o.responsable?` — ${escHtml(o.responsable)}`:''}</div>`:''}
+        ${horario?`<div class="plan-ot-dato">🕐 ${horario}</div>`:''}
+        ${tareas.length?`<div class="plan-ot-tareas">${escHtml(tareas.join(' · '))}</div>`:''}
+        <button type="button" class="plan-ot-btn no-print" onclick="verOrdenTrabajo('${o.id}')">Ver la orden →</button>
+      </div>`;
+    });
     entradas.forEach(e=>{
-      html += `<div class="plan-entry" data-entry="${e.id}">
+      html += `<div class="plan-entry" data-entry="${planKey(e)}">
         <label>Obra / plaza</label>
         <input type="text" data-field="obra" value="${escHtml(e.obra)}" placeholder="Ej: Plaza Colinas de Bella Vista">
         <label>Cuadrilla</label>
@@ -3294,48 +3634,60 @@ function renderPlanGrid(){
     html += `<button type="button" class="plan-add-btn no-print" data-action="add">+ Agregar tarea</button></div>`;
   }
   document.getElementById('planGrid').innerHTML = html;
+  renderAvisoPlanLocal();
 }
 
 document.getElementById('planGrid').addEventListener('input', (e)=>{
   const entryEl = e.target.closest('.plan-entry');
   if(!entryEl) return;
-  const id = parseInt(entryEl.dataset.entry);
-  const entry = planEntries.find(x=>x.id===id);
+  const entry = planPorKey(entryEl.dataset.entry);
   if(!entry) return;
   const field = e.target.dataset.field;
   if(field) entry[field] = e.target.value;
-  guardarPlanEntries();
+  planGuardarCampos(entry);
 });
 document.getElementById('planGrid').addEventListener('change', (e)=>{
   if(e.target.dataset.field !== 'catalogoId') return;
   const entryEl = e.target.closest('.plan-entry');
-  const id = parseInt(entryEl.dataset.entry);
-  const entry = planEntries.find(x=>x.id===id);
+  const entry = planPorKey(entryEl.dataset.entry);
   if(!entry) return;
   entry.catalogoId = e.target.value;
   const cat = ACTIVIDADES_CATALOGO.find(c=>c.id===entry.catalogoId);
   if(cat) entry.tarea = cat.label;
-  guardarPlanEntries();
+  planGuardarCampos(entry);
   renderPlanGrid();
 });
-document.getElementById('planGrid').addEventListener('click', (e)=>{
+document.getElementById('planGrid').addEventListener('click', async (e)=>{
   const action = e.target.dataset.action;
   if(!action) return;
   if(action === 'add'){
     const dayEl = e.target.closest('.plan-day');
-    planEntries.push({ id: planEntryIdSeq++, fecha: dayEl.dataset.fecha, obra:'', cuadrilla:'', catalogoId:'', tarea:'' });
+    const nueva = { fecha: dayEl.dataset.fecha, obra:'', cuadrilla:'', catalogoId:'', tarea:'' };
+    if(planCompartidoListo()){
+      try{
+        await window.fbPlanAdd({ ...nueva, ts:Date.now(), usuario:(window.__fbUser && window.__fbUser.email)||'' });
+        return;   // el listener la trae y redibuja
+      }catch(err){ alert('No se pudo guardar la tarea en la base compartida — queda en esta computadora.'); }
+    }
+    planEntries.push({ id: planEntryIdSeq++, ...nueva });
     guardarPlanEntries();
     renderPlanGrid();
+    renderAvisoPlanLocal();
   } else if(action === 'remove'){
     const entryEl = e.target.closest('.plan-entry');
-    const id = parseInt(entryEl.dataset.entry);
-    planEntries = planEntries.filter(x=>x.id!==id);
+    const key = entryEl.dataset.entry;
+    const entry = planPorKey(key);
+    if(!entry) return;
+    if(entry.docId && planCompartidoListo()){
+      try{ await window.fbPlanEliminar(entry.docId); return; }
+      catch(err){ alert('No se pudo borrar la tarea (revisá tu conexión a internet).'); return; }
+    }
+    planEntries = planEntries.filter(x=>planKey(x)!==key);
     guardarPlanEntries();
     renderPlanGrid();
   } else if(action === 'promote'){
     const entryEl = e.target.closest('.plan-entry');
-    const id = parseInt(entryEl.dataset.entry);
-    const entry = planEntries.find(x=>x.id===id);
+    const entry = planPorKey(entryEl.dataset.entry);
     if(entry) promoverAParteDiario(entry);
   }
 });
@@ -4605,6 +4957,124 @@ function exportarStockCSV(){
   URL.revokeObjectURL(url);
 }
 
+// ============================================================
+// RESPALDO COMPLETO DE LA BASE COMPARTIDA (2026-08-27)
+// ============================================================
+// Hasta acá el único respaldo que existía guardaba SOLO los movimientos de stock. Las plazas con
+// todo su avance e itemizado, las órdenes de trabajo, el catálogo y los historiales no tenían
+// ninguno — y hay tres botones que borran para todo el equipo (reiniciar movimientos, el 🗑 de una
+// plaza y el de una orden). Un clic mal dado y no había vuelta atrás.
+// El respaldo se arma con lo que ya está cargado en memoria (los listeners en vivo tienen todas las
+// colecciones al día), así que no hace falta ninguna lectura extra a la base.
+const RESPALDO_COLECCIONES = [
+  { clave:'movimientos',       titulo:'Movimientos de stock',      lista:()=>window.stockMovimientos||[] },
+  { clave:'catalogoProductos', titulo:'Cambios del catálogo',      lista:()=>window.catalogoCambios||[] },
+  { clave:'avanceObras',       titulo:'Plazas (avance e itemizado)', lista:()=>avanceObras||[] },
+  { clave:'ordenesTrabajo',    titulo:'Órdenes de trabajo',        lista:()=>ordenesTrabajo||[] },
+  { clave:'historialEtapas',   titulo:'Historial de etapas',       lista:()=>historialEtapas||[] },
+  { clave:'historialCalculos', titulo:'Cómputos de la calculadora', lista:()=>historial||[] },
+];
+
+function respaldoMensaje(txt, mal){
+  const el = document.getElementById('respaldoMsg');
+  if(!el) return;
+  el.innerHTML = txt;
+  el.style.color = mal ? 'var(--danger)' : 'var(--teal-dark)';
+}
+
+function exportarRespaldoCompleto(){
+  if(!stockFirebaseListo()){
+    respaldoMensaje('⚠ No hay conexión con la base compartida — sin eso el respaldo saldría vacío o incompleto. Revisá internet y recargá la página.', true);
+    return;
+  }
+  const data = { formato:'respaldo-completo-v1', exportado: new Date().toISOString(),
+                 porUsuario: (window.__fbUser && window.__fbUser.email) || '(sin sesión)' };
+  const resumen = [];
+  RESPALDO_COLECCIONES.forEach(c=>{
+    const lista = c.lista() || [];
+    data[c.clave] = lista;
+    resumen.push(`${lista.length} ${c.titulo.toLowerCase()}`);
+  });
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `respaldo_completo_${fechaAISO(new Date())}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  respaldoMensaje(`✓ Respaldo bajado: ${resumen.join(' · ')}. Guardalo en algún lado seguro (no en la misma compu nada más).`);
+}
+window.exportarRespaldoCompleto = exportarRespaldoCompleto;
+
+// Restaurar: AGREGA lo que falta, nunca pisa ni borra lo que ya está.
+// Es a propósito. Un "reemplazar todo" sirve para el caso en que se borró todo, pero es un arma
+// cargada para todos los demás: si alguien restaura un respaldo de hace dos semanas, se lleva
+// puesto el trabajo de esas dos semanas sin que nadie se entere. Agregar solo lo que falta cubre
+// el caso real (recuperar lo borrado) sin poder destruir nada.
+async function restaurarRespaldoCompleto(data){
+  if(!data || data.formato !== 'respaldo-completo-v1'){
+    respaldoMensaje('⚠ Ese archivo no es un respaldo completo de esta herramienta. Buscá uno que se llame «respaldo_completo_...json».', true);
+    return;
+  }
+  if(!stockFirebaseListo() || !window.__fbUser){
+    respaldoMensaje('⚠ Iniciá sesión y revisá tu conexión a internet para poder restaurar.', true);
+    return;
+  }
+  // Qué falta, colección por colección
+  const plan = [];
+  RESPALDO_COLECCIONES.forEach(c=>{
+    const actuales = new Set((c.lista()||[]).map(x=>respaldoHuella(c.clave, x)));
+    const faltan = (data[c.clave]||[]).filter(x=>!actuales.has(respaldoHuella(c.clave, x)));
+    if(faltan.length) plan.push({ ...c, faltan });
+  });
+  if(!plan.length){
+    respaldoMensaje('✓ No falta nada: todo lo que hay en ese respaldo ya está en la base. No se tocó nada.');
+    return;
+  }
+  const detalle = plan.map(p=>`· ${p.faltan.length} ${p.titulo.toLowerCase()}`).join('\n');
+  if(!confirm(`Se van a AGREGAR a la base compartida:\n\n${detalle}\n\nNo se pisa ni se borra nada de lo que ya está. ¿Continuar?`)) return;
+
+  respaldoMensaje('Restaurando, no cierres la página...');
+  let total = 0, fallados = 0;
+  for(const p of plan){
+    for(const reg of p.faltan){
+      try{
+        const { id:_id, docId:_docId, ...datos } = reg;
+        if(p.clave === 'catalogoProductos'){
+          await window.fbGuardarProductoCatalogo(datos);
+        } else if(p.clave === 'avanceObras'){
+          await window.fbAvanceCrear(datos);
+        } else if(p.clave === 'ordenesTrabajo'){
+          await window.fbOtAdd(datos);
+        } else if(p.clave === 'movimientos'){
+          await window.fbAddMovimiento(datos);
+        } else if(p.clave === 'historialEtapas'){
+          await window.fbHistorialEtapaAdd(datos);
+        } else if(p.clave === 'historialCalculos'){
+          await window.fbHistCalcAdd(datos);
+        }
+        total++;
+      }catch(e){ fallados++; }
+    }
+  }
+  respaldoMensaje(fallados
+    ? `Se restauraron ${total} registro(s), pero ${fallados} fallaron (probablemente por la conexión). Volvé a importar el mismo archivo: lo que ya entró no se duplica.`
+    : `✓ Listo: se restauraron ${total} registro(s). Todo lo que ya estaba quedó como estaba.`, !!fallados);
+}
+
+// Huella para reconocer si un registro del respaldo ya está en la base. No se usa el id del
+// documento porque al restaurar Firestore asigna uno nuevo: si se comparara por id, importar dos
+// veces el mismo archivo duplicaría todo.
+function respaldoHuella(clave, x){
+  if(clave === 'catalogoProductos') return String(x.codigo);
+  if(clave === 'avanceObras')       return `${String(x.nombre||'').trim().toLowerCase()}|${x.obraId||''}`;
+  if(clave === 'ordenesTrabajo')    return String(x.numero||'') || `${x.plazaNombre||''}|${x.fecha||''}|${x.ts||''}`;
+  if(clave === 'movimientos')       return `${x.tipo||''}|${x.codigo||''}|${x.cantidad||''}|${x.fecha||''}|${x.ts||''}`;
+  if(clave === 'historialEtapas')   return `${x.plazaId||''}|${x.etapaKey||''}|${x.ts||''}`;
+  if(clave === 'historialCalculos') return `${String(x.nombre||'').trim().toLowerCase()}|${x.id||''}|${x.fecha||''}`;
+  return JSON.stringify(x);
+}
+
 function exportarStockJSON(){
   const data = { exportado: fechaAISO(new Date()), movimientos: stockMovimientos };
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
@@ -4615,6 +5085,20 @@ function exportarStockJSON(){
   a.click();
   URL.revokeObjectURL(url);
 }
+
+document.getElementById('respaldoImportInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    let data;
+    try{ data = JSON.parse(ev.target.result); }
+    catch(err){ respaldoMensaje('⚠ No se pudo leer el archivo — ¿es un JSON válido?', true); e.target.value=''; return; }
+    await restaurarRespaldoCompleto(data);
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
 
 document.getElementById('stockImportInput').addEventListener('change', function(e){
   const file = e.target.files[0];
@@ -4651,7 +5135,7 @@ async function reiniciarStock(){
 poblarStockDatalist();
 
 let avanceItemIdSeq = 1; // solo para IDs de ítems DENTRO de una plaza (secciones/valorItems) — el id de la plaza en sí ahora lo asigna Firestore
-let avanceObras = []; // { id, nombre, obraId, barrio, creado, estado, secciones:[{titulo, items:[{id,desc,cantNecesaria,un,ref,cantInstalada}], extra?}], valorItems:[{id,itemPliego,cantidad,cantidadAvanzada}], etapas:{[key]:bool}, fechaEncendido, listaParaEncender, lat, lng }
+let avanceObras = []; // { id, nombre, obraId, barrio, direccion, creado, estado, secciones:[{titulo, items:[{id,desc,cantNecesaria,un,ref,cantInstalada}], extra?}], valorItems:[{id,itemPliego,cantidad,cantidadAvanzada}], etapas:{[key]:bool}, fechaEncendido, listaParaEncender, lat, lng }
 let avanceActivoId = null;
 
 // ---- Avance físico por ETAPAS DE OBRA (2026-08-19) ----
@@ -4824,6 +5308,7 @@ async function guardarAvanceObras(a){
   }
 }
 
+window.poblarAvanceOrigenSelect = poblarAvanceOrigenSelect;
 function poblarAvanceOrigenSelect(){
   const sel = document.getElementById('avanceOrigenSelect');
   if(!historial.length){
@@ -4886,10 +5371,174 @@ function construirGruposAvance(h, secciones){
   return grupos;
 }
 
+// ============================================================
+// ALTA ÚNICA DE PLAZA (2026-08-27)
+// ============================================================
+// El usuario preguntó dónde convenía dar de alta una plaza nueva — si en el Mapa o en la
+// Calculadora. La respuesta es que el REGISTRO ya era uno solo (avanceObras, que alimenta el Mapa,
+// las órdenes de trabajo, el balance y el informe); lo que faltaba era poder darla de alta desde
+// donde uno está parado. Así que hay un solo formulario de alta y tres puertas para llegar a él:
+//   · Calculadora — después de calcular, si esa plaza todavía no está registrada
+//   · Mapa        — "+ Nueva plaza acá", tocando el punto: queda creada Y ubicada de una
+//   · Órdenes de trabajo — el "+" al lado del selector de plaza
+// Las tres escriben exactamente el mismo documento.
+let altaPlazaPendiente = null;   // { lat, lng, secciones, grupos, alCrear }
+
+function abrirAltaPlaza(opts){
+  opts = opts || {};
+  if(!avanceGuardEdicion()) return;
+  altaPlazaPendiente = opts;
+  document.getElementById('altaNombre').value    = opts.nombre    || '';
+  document.getElementById('altaObraId').value    = opts.obraId    || '';
+  document.getElementById('altaBarrio').value    = opts.barrio    || '';
+  document.getElementById('altaDireccion').value = opts.direccion || '';
+  const org = document.getElementById('altaPlazaOrigen');
+  org.textContent = opts.origen || 'Queda registrada en Avance de obra, y desde ahí aparece sola en el Mapa y en las órdenes de trabajo.';
+  const ubi = document.getElementById('altaUbicacion');
+  if(opts.lat!=null && opts.lng!=null){
+    ubi.innerHTML = `📍 Se va a guardar <b>ya ubicada</b> en el punto que tocaste del mapa.`;
+  } else {
+    ubi.innerHTML = 'Todavía sin ubicar en el mapa — se puede ubicar después desde la pestaña <b>Mapa</b>.';
+  }
+  const cuantos = (opts.secciones||[]).reduce((n,sec)=>n+sec.items.length, 0);
+  document.getElementById('altaPlazaMsg').innerHTML = cuantos
+    ? `<span style="color:var(--teal-dark);">Se le van a cargar <b>${cuantos} ítem(s)</b> de material del cómputo recién calculado.</span>`
+    : '';
+  document.getElementById('altaPlazaMsg').style.color = '';
+  document.getElementById('altaPlazaFondo').style.display = 'flex';
+  setTimeout(()=>document.getElementById('altaNombre').focus(), 50);
+}
+
+function cerrarAltaPlaza(){
+  document.getElementById('altaPlazaFondo').style.display = 'none';
+  altaPlazaPendiente = null;
+}
+
+function altaMensaje(txt, mal){
+  const el = document.getElementById('altaPlazaMsg');
+  el.innerHTML = txt;
+  el.style.color = mal ? 'var(--danger)' : 'var(--teal-dark)';
+}
+
+async function altaPlazaConfirmar(){
+  if(!avanceGuardEdicion()) return;
+  const opts = altaPlazaPendiente || {};
+  const nombre = document.getElementById('altaNombre').value.trim();
+  if(!nombre){ altaMensaje('⚠ Poné el nombre de la plaza.', true); return; }
+  const repetida = avanceObras.find(a=>String(a.nombre||'').trim().toLowerCase() === nombre.toLowerCase());
+  if(repetida){
+    altaMensaje(`⚠ Ya hay una plaza registrada con ese nombre. Si es la misma, no la des de alta otra vez — se duplicaría en el mapa, en las órdenes y en el balance.`, true);
+    return;
+  }
+  const secciones = (opts.secciones && opts.secciones.length) ? opts.secciones : [];
+  if(!secciones.some(sec=>sec.extra)) secciones.push({ titulo:'OTROS ÍTEMS (agregados a mano)', items:[], extra:true });
+  const nuevo = {
+    nombre,
+    obraId: document.getElementById('altaObraId').value.trim(),
+    barrio: document.getElementById('altaBarrio').value.trim(),
+    direccion: document.getElementById('altaDireccion').value.trim(),
+    creado: fechaAISO(new Date()), estado:'Pendiente',
+    secciones, valorItems:[], grupos: opts.grupos || [], etapas:{},
+    fechaEncendido:'', listaParaEncender:false,
+    lat: (opts.lat!=null ? opts.lat : null), lng: (opts.lng!=null ? opts.lng : null)
+  };
+  const btn = document.getElementById('altaPlazaBtn');
+  btn.disabled = true;
+  let nuevoId;
+  try{
+    nuevoId = await window.fbAvanceCrear(nuevo);
+  }catch(e){
+    btn.disabled = false;
+    altaMensaje('⚠ No se pudo registrar la plaza (revisá tu conexión a internet). No se guardó nada.', true);
+    return;
+  }
+  btn.disabled = false;
+  if(!avanceObras.some(x=>x.id===nuevoId)) avanceObras.push({ ...nuevo, id: nuevoId });
+  avanceActivoId = nuevoId;
+  cerrarAltaPlaza();
+  renderAvanceTablero();
+  poblarParteObraDatalist();
+  poblarOtPlazas();
+  poblarHistPlazas();
+  if(typeof poblarStockFiltroPlazas === 'function') poblarStockFiltroPlazas();
+  if(typeof renderMapaObras === 'function') renderMapaObras();
+  if(typeof opts.alCrear === 'function') opts.alCrear(nuevoId, nuevo);
+}
+window.abrirAltaPlaza = abrirAltaPlaza;
+window.cerrarAltaPlaza = cerrarAltaPlaza;
+window.altaPlazaConfirmar = altaPlazaConfirmar;
+
+// ¿Esta plaza (por nombre o por ID de obra) ya está registrada?
+function plazaYaRegistrada(nombre, obraId){
+  const n = String(nombre||'').trim().toLowerCase();
+  const oid = String(obraId||'').trim();
+  return avanceObras.find(a =>
+    (n && String(a.nombre||'').trim().toLowerCase() === n) ||
+    (oid && String(a.obraId||'').trim() === oid)
+  ) || null;
+}
+window.plazaYaRegistrada = plazaYaRegistrada;
+
+// Convierte el cómputo de la Calculadora en las secciones del tablero de avance. Es exactamente lo
+// que hacía `crearAvanceDesdeHistorial`, sacado afuera para que el alta desde la Calculadora use el
+// mismo camino y no haya dos formas distintas de armar lo mismo.
+function seccionesDesdeComputo(h){
+  return (h.secciones||[]).map(sec => ({
+    titulo: sec.titulo,
+    items: sec.items
+      .filter(it => typeof it.cant === 'number')
+      .map(it => ({ id: avanceItemIdSeq++, desc: it.desc, cantNecesaria: it.cant, un: it.un, ref: it.ref, cantInstalada: 0 }))
+  })).filter(sec => sec.items.length);
+}
+
+// Puerta desde la CALCULADORA: registra la plaza con el cómputo que se acaba de calcular adentro.
+function registrarPlazaDesdeComputo(){
+  const r = window.__computoParaAlta;
+  if(!r){ alert('No hay ningún cómputo calculado para registrar.'); return; }
+  const secciones = seccionesDesdeComputo(r);
+  abrirAltaPlaza({
+    nombre: r.nombre === 'Obra sin nombre' ? '' : r.nombre,
+    obraId: r.id || '', barrio: r.barrio || '',
+    secciones, grupos: construirGruposAvance(r, secciones),
+    origen: 'Se registra con el cómputo de materiales que acabás de calcular ya cargado adentro.',
+    alCrear: ()=>{ if(typeof renderAvisoAltaComputo === 'function') renderAvisoAltaComputo(); }
+  });
+}
+window.registrarPlazaDesdeComputo = registrarPlazaDesdeComputo;
+
+// Puerta desde ÓRDENES DE TRABAJO.
+function altaPlazaDesdeOt(){
+  abrirAltaPlaza({
+    origen: 'La vas a poder elegir enseguida en el selector de arriba, sin salir de esta pantalla.',
+    alCrear: (id)=>{
+      poblarOtPlazas();
+      const sel = document.getElementById('otPlaza');
+      if(sel && [...sel.options].some(o=>o.value===id)) sel.value = id;
+      mostrarDireccionOt();
+    }
+  });
+}
+window.altaPlazaDesdeOt = altaPlazaDesdeOt;
+
 async function crearAvanceDesdeHistorial(idx){
   if(!avanceGuardEdicion()) return;
   const h = historial[idx];
   if(!h) return;
+  // Control de duplicados (2026-08-27). Las otras dos vías de alta ya lo hacían; esta no, y el
+  // propio texto de ayuda avisaba del riesgo ("no las dos a la vez, quedarían duplicadas"). Una
+  // plaza repetida se duplica en el mapa, en el selector de órdenes, en el balance y en el informe,
+  // y separar eso después es un trabajo manual. Se avisa y se deja decidir, porque hay un caso
+  // legítimo: volver a traer una obra recalculada. Pero entonces lo correcto es borrar la vieja.
+  const yaEsta = plazaYaRegistrada(h.nombre, h.id);
+  if(yaEsta){
+    const pct = calcularAvanceEtapasPct(yaEsta);
+    const ok = confirm(
+      `"${yaEsta.nombre}"${yaEsta.obraId?` (ID ${yaEsta.obraId})`:''} YA ESTÁ en el tablero de avance, con ${pct}% de avance cargado.\n\n` +
+      `Si seguís vas a tener DOS plazas con el mismo nombre: se duplica en el Mapa, en el selector de órdenes de trabajo, en el balance y en el informe.\n\n` +
+      `Si lo que querés es actualizar el itemizado porque recalculaste la obra, cancelá, borrá la plaza vieja con el 🗑 y recién ahí traela de nuevo (ojo: se pierde el avance cargado).\n\n` +
+      `¿Agregarla igual, duplicada?`);
+    if(!ok) return;
+  }
   const secciones = h.secciones.map(sec => ({
     titulo: sec.titulo,
     items: sec.items
@@ -5004,6 +5653,56 @@ async function crearAvancePlazaConocida(n){
   poblarParteObraDatalist();
 }
 
+// ---- Sugerir la dirección a partir del pin del mapa (2026-08-27) ----
+// Usa la geocodificación inversa de Nominatim (OpenStreetMap): es gratis, no pide clave ni cuenta,
+// y es el mismo proyecto del que ya salen los mapas de la pestaña Mapa.
+// Sobre la política de uso de Nominatim, que se consultó antes de implementarlo
+// (https://operations.osmfoundation.org/policies/nominatim/): las consultas inversas están
+// permitidas cuando las dispara una persona; lo prohibido es el uso automático/masivo (barridos en
+// grilla, autocompletado tecla por tecla, geocodificación en lote). Por eso esto es un BOTÓN que se
+// aprieta una vez por plaza, nunca una llamada automática, y el resultado se deja EDITABLE: el dato
+// bueno es el que escribe el usuario, esto es solo para no tipearlo desde cero.
+async function sugerirDireccionDesdePin(id){
+  if(!avanceGuardEdicion()) return;
+  const a = avanceObras.find(x=>x.id===id);
+  if(!a) return;
+  const msg = document.getElementById('avanceDireccionMsg');
+  const decir = (txt, mal) => { if(msg){ msg.innerHTML = txt; msg.style.color = mal ? 'var(--danger)' : 'var(--text-soft)'; } };
+  if(a.lat==null || a.lng==null){
+    decir('⚠ Esta plaza todavía no está ubicada en el mapa. Ubicala en la pestaña <b>Mapa</b> y volvé a probar.', true);
+    return;
+  }
+  decir('Buscando la dirección en OpenStreetMap...');
+  try{
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${a.lat}&lon=${a.lng}&zoom=18&addressdetails=1&accept-language=es`;
+    const resp = await fetch(url, { headers: { 'Accept':'application/json' } });
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data = await resp.json();
+    const d = data.address || {};
+    const calle = d.road || d.pedestrian || d.footway || d.residential || '';
+    const nro = d.house_number || '';
+    const barrio = d.suburb || d.neighbourhood || d.city_district || d.quarter || '';
+    let dir = calle ? (nro ? `${calle} ${nro}` : calle) : '';
+    if(!dir) dir = String(data.display_name||'').split(',').slice(0,2).join(',').trim();
+    if(!dir){ decir('No se encontró una calle para ese punto. Escribí la dirección a mano.', true); return; }
+    const input = document.querySelector('#avanceDetalleCard input[data-field="direccion"]');
+    if(input) input.value = dir;
+    a.direccion = dir;
+    if(!a.barrio && barrio){
+      a.barrio = barrio;
+      const inpB = document.querySelector('#avanceDetalleCard input[data-field="barrio"]');
+      if(inpB) inpB.value = barrio;
+    }
+    guardarAvanceObras(a);
+    renderAvanceTablero();
+    if(typeof renderMapaObras === 'function') renderMapaObras();
+    if(typeof mostrarDireccionOt === 'function') mostrarDireccionOt();
+    decir(`✓ Sugerencia de OpenStreetMap: <b>${escHtml(dir)}</b>. Revisala y corregila si hace falta — la calle sale del punto donde está el pin.`);
+  }catch(e){
+    decir('⚠ No se pudo consultar OpenStreetMap (revisá la conexión a internet). Escribí la dirección a mano.', true);
+  }
+}
+
 function calcularAvancePct(a){
   let necesarioTotal = 0, instaladoTotal = 0, itemsCount = 0;
   a.secciones.forEach(sec=>{
@@ -5050,7 +5749,89 @@ function calcularValorPlaza(a){
   return { presupuesto, avanzado, pctValor };
 }
 
+// ---- Panel gráfico de avance (2026-08-27) ----
+// Una tarjeta por plaza: dona con el %, nombre y etapa actual. Ordenadas por lo que le importa a
+// alguien que entra a mirar: primero lo que está en obra (lo más avanzado arriba), después lo que
+// todavía no arrancó, y al final lo terminado.
+function ordenPanelAvance(a){
+  const pct = calcularAvanceEtapasPct(a);
+  if(pct >= 100) return 3;      // finalizadas al final
+  if(pct <= 0)   return 2;      // sin arrancar, anteúltimas
+  return 1;                     // en obra, primero
+}
+
+function renderAvancePanel(){
+  const grid = document.getElementById('avancePanelGrid');
+  const tiles = document.getElementById('avanceResumenTiles');
+  const hint = document.getElementById('avancePanelHint');
+  if(!grid) return;
+
+  if(!avanceObras.length){
+    grid.innerHTML = '';
+    if(tiles) tiles.innerHTML = '';
+    if(hint) hint.innerHTML = 'Todavía no hay ninguna plaza cargada. Abrí «Cargar y administrar plazas» acá abajo para dar de alta la primera.';
+    return;
+  }
+
+  const pcts = avanceObras.map(calcularAvanceEtapasPct);
+  const enObra = pcts.filter(p=>p>0 && p<100).length;
+  const finalizadas = pcts.filter(p=>p>=100).length;
+  const sinArrancar = pcts.filter(p=>p<=0).length;
+  const promedio = Math.round(pcts.reduce((t,p)=>t+p,0)/pcts.length);
+  if(tiles){
+    tiles.innerHTML = `
+      <div class="av-res-tile"><div class="av-res-num">${avanceObras.length}</div><div class="av-res-lbl">Plazas</div></div>
+      <div class="av-res-tile"><div class="av-res-num" style="color:var(--amber);">${enObra}</div><div class="av-res-lbl">En obra</div></div>
+      <div class="av-res-tile"><div class="av-res-num" style="color:var(--teal-dark);">${finalizadas}</div><div class="av-res-lbl">Finalizadas</div></div>
+      <div class="av-res-tile"><div class="av-res-num" style="color:var(--text-soft);">${sinArrancar}</div><div class="av-res-lbl">Sin arrancar</div></div>
+      <div class="av-res-tile"><div class="av-res-num">${promedio}%</div><div class="av-res-lbl">Avance promedio</div></div>`;
+  }
+  if(hint) hint.innerHTML = 'Tocá una plaza para ver el detalle completo: los materiales, las etapas y la valorización.';
+
+  const ordenadas = [...avanceObras].sort((a,b)=>
+    ordenPanelAvance(a) - ordenPanelAvance(b) ||
+    calcularAvanceEtapasPct(b) - calcularAvanceEtapasPct(a) ||
+    String(a.nombre||'').localeCompare(String(b.nombre||''),'es'));
+
+  const R = 26, C = 2*Math.PI*R;
+  grid.innerHTML = ordenadas.map(a=>{
+    const pct = calcularAvanceEtapasPct(a);
+    const color = colorPorPctEtapas(pct);
+    const etapa = etapaActualLabel(a);
+    const sub = a.encendida ? '💡 Encendida'
+      : (a.listaParaEncender ? 'Lista para encender' : etapa);
+    return `<div class="av-card${a.id===avanceActivoId?' av-card-activa':''}" onclick="verAvanceDetalle('${a.id}')" title="Ver el detalle de ${escHtml(a.nombre)}">
+      <div class="av-donut">
+        <svg viewBox="0 0 68 68" width="68" height="68">
+          <circle cx="34" cy="34" r="${R}" stroke="#e4e8f0" stroke-width="8" fill="none"></circle>
+          <circle cx="34" cy="34" r="${R}" stroke="${color}" stroke-width="8" fill="none" stroke-linecap="round"
+                  transform="rotate(-90 34 34)" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-pct/100)).toFixed(1)}"></circle>
+        </svg>
+        <div class="av-donut-num">${pct}%</div>
+      </div>
+      <div class="av-datos">
+        <div class="av-nombre">${escHtml(a.nombre)}</div>
+        <div class="av-etapa" title="${escHtml(sub)}">${escHtml(sub)}</div>
+        <div class="av-ver no-print">Ver detalle →</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+window.renderAvancePanel = renderAvancePanel;
+
+// Plegado de las cards de administración: quedan a mano pero no le sacan el lugar al panel.
+let avanceHerrAbierto = false;
+function toggleAvanceHerramientas(forzar){
+  avanceHerrAbierto = (forzar === undefined) ? !avanceHerrAbierto : !!forzar;
+  const cuerpo = document.getElementById('avanceHerrCuerpo');
+  const btn = document.getElementById('avanceHerrBtn');
+  if(cuerpo) cuerpo.style.display = avanceHerrAbierto ? '' : 'none';
+  if(btn) btn.textContent = avanceHerrAbierto ? 'Cerrar ▴' : 'Abrir ▾';
+}
+window.toggleAvanceHerramientas = toggleAvanceHerramientas;
+
 function renderAvanceTablero(){
+  renderAvancePanel();
   renderPlazasConocidas();
   const body = document.getElementById('avanceTableroBody');
   if(!avanceObras.length){
@@ -5261,6 +6042,17 @@ function renderAvanceDetalle(){
         <div class="tile"><div class="num">${escHtml(a.barrio)||'—'}</div><div class="lbl">Barrio</div></div>
         <div class="tile"><div class="num">${a.creado}</div><div class="lbl">Agregada al tablero</div></div>
       </div>
+      <div class="avance-fecha-row no-print" style="flex-wrap:wrap; margin-bottom:6px;">
+        <label style="min-width:96px;">Barrio</label>
+        <input type="text" data-field="barrio" value="${escHtml(a.barrio||'')}" placeholder="Ej: Jardines del Jockey" style="flex:1; min-width:160px;" ${dis}>
+      </div>
+      <div class="avance-fecha-row no-print" style="flex-wrap:wrap;">
+        <label style="min-width:96px;">Dirección</label>
+        <input type="text" data-field="direccion" value="${escHtml(a.direccion||'')}" placeholder="Calle y número, o entre qué calles" style="flex:1; min-width:220px;" ${dis}>
+        <button type="button" class="btn-ghost" data-action="sugerir-direccion" style="white-space:nowrap;" title="Buscar la dirección del pin en OpenStreetMap y completar el campo (después corregila a mano)" ${dis}>📍 Sugerir desde el pin</button>
+      </div>
+      <div class="hint no-print" style="margin-top:2px;" id="avanceDireccionMsg">Esta dirección es la que va impresa en la orden de trabajo de la cuadrilla.</div>
+      <div class="hint print-only" style="margin-top:6px;">Dirección: ${escHtml(a.direccion||'—')}</div>
       <div class="avance-fecha-row no-print">
         <label>Fecha encendido</label>
         <input type="date" data-field="fechaEncendido" value="${a.fechaEncendido||''}" ${dis || a.listaParaEncender ? 'disabled' : ''}>
@@ -5495,6 +6287,15 @@ function actualizarValorResumen(a, row, v){
   renderAvanceTablero();
 }
 
+// Enganche del plegado de "Cargar y administrar plazas"
+(function(){
+  const cab = document.getElementById('avanceHerrCabecera');
+  if(cab) cab.addEventListener('click', (ev)=>{
+    if(ev.target.closest('input, select, a')) return;
+    toggleAvanceHerramientas();
+  });
+})();
+
 document.getElementById('avanceDetalleCard').addEventListener('input', (e)=>{
   const field = e.target.dataset.field;
   if(!field) return;
@@ -5525,6 +6326,17 @@ document.getElementById('avanceDetalleCard').addEventListener('input', (e)=>{
   // Campos del informe a la empresa (2026-08-22). Se guardan igual que el resto (documento completo
   // de la plaza a Firestore) y no re-renderizan el detalle, para no perder el foco mientras se
   // escribe el texto de "qué falta". Sí refrescan la pestaña Registros, que es donde se ven.
+  // Barrio y dirección: se guardan sin re-renderizar el detalle, para no perder el foco mientras se
+  // escribe. Sí refrescan el tablero y el mapa, que son los que los muestran.
+  if(field === 'direccion' || field === 'barrio'){
+    a[field] = e.target.value;
+    guardarAvanceObras(a);
+    renderAvanceTablero();
+    if(typeof renderMapaObras === 'function') renderMapaObras();
+    if(typeof mostrarDireccionOt === 'function') mostrarDireccionOt();
+    return;
+  }
+
   if(field === 'situacion' || field === 'fechaEstimada' || field === 'pendiente' || field === 'fechaInspeccion'){
     a[field] = e.target.value;
     guardarAvanceObras(a);
@@ -5570,6 +6382,11 @@ document.getElementById('avanceDetalleCard').addEventListener('click', (e)=>{
   if(!action) return;
   const a = avanceObras.find(x=>x.id===avanceActivoId);
   if(!a) return;
+
+  if(action === 'sugerir-direccion'){
+    sugerirDireccionDesdePin(a.id);
+    return;
+  }
 
   if(action === 'toggle-grupo'){
     // Expandir/contraer un grupo es solo un estado visual de esta pantalla, no se guarda en la
@@ -5694,6 +6511,11 @@ function poblarOtPlazas(){
     ? ordenadas.map(a=>`<option value="${escHtml(a.id)}">${escHtml(a.nombre)}${a.obraId?` (ID ${escHtml(a.obraId)})`:''}</option>`).join('')
     : `<option value="">— Todavía no hay plazas cargadas en «Avance de obra» —</option>`;
   if(previo && [...sel.options].some(o=>o.value===previo)) sel.value = previo;
+  if(!sel.dataset.dirEnganchada){
+    sel.addEventListener('change', mostrarDireccionOt);
+    sel.dataset.dirEnganchada = '1';
+  }
+  mostrarDireccionOt();
   // Etapas de la OT: la lista es fija (las 12 etapas EPEC), se puebla una sola vez.
   const selEtapa = document.getElementById('otEtapa');
   if(selEtapa && !selEtapa.options.length){
@@ -5724,6 +6546,25 @@ function poblarHistPlazas(){
     + ordenadas.map(a=>`<option value="${escHtml(a.id)}">${escHtml(a.nombre)}</option>`).join('');
   if(previo && [...sel.options].some(o=>o.value===previo)) sel.value = previo;
 }
+
+// Al elegir la plaza en la orden de trabajo se muestra su dirección y barrio, para no tener que ir
+// a buscarlos a otra pestaña — y si la plaza todavía no tiene dirección cargada, lo avisa acá, que
+// es el momento en que hace falta (2026-08-27, a pedido del usuario).
+function mostrarDireccionOt(){
+  const el = document.getElementById('otDireccionHint');
+  if(!el) return;
+  const a = plazaOtActiva();
+  if(!a){ el.innerHTML = ''; return; }
+  const partes = [];
+  if(a.direccion) partes.push(`📍 <b>${escHtml(a.direccion)}</b>`);
+  if(a.barrio) partes.push(escHtml(a.barrio));
+  if(a.obraId) partes.push(`ID ${escHtml(String(a.obraId))}`);
+  el.innerHTML = a.direccion
+    ? partes.join(' · ') + ' — sale impreso en la orden.'
+    : `⚠ Esta plaza no tiene <b>dirección</b> cargada. Cargala en «Avance de obra» → abrí la plaza → campo <b>Dirección</b>, así la cuadrilla la recibe impresa en la orden.${a.barrio?` (Barrio: ${escHtml(a.barrio)})`:''}`;
+  el.style.color = a.direccion ? 'var(--text-soft)' : 'var(--amber)';
+}
+window.mostrarDireccionOt = mostrarDireccionOt;
 
 function plazaOtActiva(){
   const sel = document.getElementById('otPlaza');
@@ -6093,6 +6934,9 @@ function datosOtDesdeFormulario(){
   const etapa = ETAPAS_OBRA.find(e=>e.key===etapaKey);
   return {
     plazaId: a.id, plazaNombre: a.nombre||'', obraId: String(a.obraId||''),
+    // Se guarda una COPIA de la dirección y el barrio en la orden: si mañana se corrige la ficha de
+    // la plaza, la orden que ya se emitió y se imprimió sigue diciendo lo que decía ese día.
+    direccion: a.direccion||'', barrio: a.barrio||'',
     fecha, diaSemana: diaSemanaDeFecha(fecha),
     horaInicio: document.getElementById('otHoraInicio').value,
     horaFin: document.getElementById('otHoraFin').value,
@@ -6128,7 +6972,8 @@ async function emitirOrdenTrabajo(){
       const id = await window.fbOtAdd(ot);
       renderOrdenTrabajo({ ...ot, id });
       msg.style.color = 'var(--teal-dark)';
-      msg.textContent = `✓ ${ot.numero} emitida para ${ot.plazaNombre}. Está en el registro de abajo.`;
+      msg.innerHTML = `✓ ${escHtml(ot.numero)} emitida para ${escHtml(ot.plazaNombre)}. Está en el registro de abajo y ya aparece en la <b>Planificación semanal</b> del ${escHtml(formatFechaCorta(ot.fecha)||ot.fecha)}.`
+        + ` <button type="button" class="btn-ghost" style="margin-left:6px; padding:3px 10px; font-size:12px;" onclick="irAPlanDeFecha('${ot.fecha}')">Ver en la semana →</button>`;
       document.querySelectorAll('.ot-act-check:checked').forEach(c=>{ c.checked = false; });
       document.getElementById('otMateriales').value = '';
       document.getElementById('otNotas').value = '';
@@ -6201,6 +7046,18 @@ function renderOrdenTrabajo(o){
 
 // Cuerpo de la orden, compartido por la vista previa y la impresión — así el papel y la pantalla
 // no se pueden desincronizar.
+// Dirección a imprimir: la que quedó guardada en la orden. Las órdenes emitidas antes de que
+// existiera el campo no la tienen, así que para esas se busca la de la plaza.
+function direccionDeOrden(o){
+  let dir = o.direccion || '';
+  let barrio = o.barrio || '';
+  if(!dir || !barrio){
+    const a = avanceObras.find(x=>x.id===o.plazaId);
+    if(a){ dir = dir || a.direccion || ''; barrio = barrio || a.barrio || ''; }
+  }
+  return [dir, barrio].filter(Boolean).join(' — ');
+}
+
 function cuerpoOrdenTrabajoHtml(o, opts){
   const enPantalla = !!(opts && opts.pantalla);
   const [y,m,d] = (o.fecha||'').split('-');
@@ -6218,6 +7075,7 @@ function cuerpoOrdenTrabajoHtml(o, opts){
   html += `<table style="margin-top:${enPantalla?'14px':'0'};">
     <tr><th style="width:22%;">Orden N°</th><td><b>${escHtml(o.numero||'')}</b></td><th style="width:16%;">Fecha</th><td>${escHtml(fechaFmt)}${o.diaSemana?` (${escHtml(o.diaSemana)})`:''}</td></tr>
     <tr><th>Plaza / obra</th><td colspan="3">${escHtml(o.plazaNombre||'')}${o.obraId?` — ID ${escHtml(o.obraId)}`:''}</td></tr>
+    <tr><th>Dirección</th><td colspan="3">${escHtml(direccionDeOrden(o)||'—')}</td></tr>
     <tr><th>Etapa de obra</th><td>${escHtml(o.etapaLabel||'—')}</td><th>Estado</th><td>${escHtml(o.estado||'Emitida')}</td></tr>
     <tr><th>Cuadrilla</th><td>${escHtml(o.cuadrilla||'—')}</td><th>Responsable</th><td>${escHtml(o.responsable||'—')}</td></tr>
     <tr><th>Horario previsto</th><td>${escHtml(o.horaInicio||'—')} a ${escHtml(o.horaFin||'—')}</td><th>Hora real de terminación</th><td style="min-width:120px;">&nbsp;</td></tr>
@@ -6668,19 +7526,75 @@ actualizarDiaSemana();
 let historial = [];
 let ultimoResultado = null;
 
-// ---- Persistencia local del historial de obras / seguimiento (2026-08-15) ----
+// ---- Historial de cómputos: de este navegador a la base compartida (2026-08-27) ----
+// Hasta hoy el historial se guardaba en el localStorage de cada navegador. Eso tenía un problema
+// concreto que apareció apenas la herramienta pasó a usarse entre varias personas: un cómputo hecho
+// en una computadora no existía para las demás, y "Traer plaza calculada" (en Avance de obra) solo
+// funcionaba en la máquina donde se había calculado. Ahora el historial es una colección más de la
+// base compartida, igual que el stock, las órdenes y el avance.
+// El localStorage NO se borra: queda como respaldo de lo que cada uno tenía, y se ofrece subirlo a
+// la base compartida de una vez (ver subirHistorialLocal).
 const HISTORIAL_LS_KEY = 'ema_historial_obras_v1';
+function historialLocalGuardado(){
+  try{
+    const raw = localStorage.getItem(HISTORIAL_LS_KEY);
+    if(!raw) return [];
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data : [];
+  }catch(e){ return []; }
+}
+// Copia de resguardo en este navegador, por si un día no hay internet: se sigue escribiendo, pero
+// ya no es la fuente de la verdad — la fuente es la base compartida.
 function guardarHistorial(){
   try{ localStorage.setItem(HISTORIAL_LS_KEY, JSON.stringify(historial)); }catch(e){}
 }
-function cargarHistorial(){
-  try{
-    const raw = localStorage.getItem(HISTORIAL_LS_KEY);
-    if(raw){ const data = JSON.parse(raw); if(Array.isArray(data)) historial = data; }
-  }catch(e){}
+function historialCompartidoListo(){
+  return !!(window.__histCalcListo && typeof window.fbHistCalcAdd === 'function' && window.__fbUser);
 }
-cargarHistorial();
+
+// Aviso para subir de una vez los cómputos que quedaron guardados en este navegador.
+function renderAvisoHistorialLocal(){
+  const cont = document.getElementById('avisoHistorialLocal');
+  if(!cont) return;
+  const locales = historialLocalGuardado();
+  const yaEnLaNube = new Set(historial.map(h=>`${h.nombre}|${h.id||''}|${h.fecha||''}`));
+  const faltan = locales.filter(h=>!yaEnLaNube.has(`${h.nombre}|${h.id||''}|${h.fecha||''}`));
+  if(!faltan.length){ cont.innerHTML = ''; cont.style.display='none'; return; }
+  cont.style.display = '';
+  cont.innerHTML = `<div style="background:rgba(240,183,74,0.14); border:1px solid var(--amber); color:#6b5312; border-radius:8px; padding:10px 12px; font-size:13px;">
+    Tenés <b>${faltan.length} cómputo(s)</b> guardados solo en este navegador, de antes de que el historial pasara a ser compartido.
+    <button type="button" class="btn-primary" style="margin-left:8px; padding:4px 12px; font-size:12.5px;" onclick="subirHistorialLocal()">Subir a la base compartida</button>
+  </div>`;
+}
+window.renderAvisoHistorialLocal = renderAvisoHistorialLocal;
+
+async function subirHistorialLocal(){
+  if(!historialCompartidoListo()){
+    alert('Iniciá sesión (pestaña Stock → «Acceso para editar stock») y asegurate de tener internet para poder subirlos.');
+    return;
+  }
+  const locales = historialLocalGuardado();
+  const yaEnLaNube = new Set(historial.map(h=>`${h.nombre}|${h.id||''}|${h.fecha||''}`));
+  const faltan = locales.filter(h=>!yaEnLaNube.has(`${h.nombre}|${h.id||''}|${h.fecha||''}`));
+  if(!faltan.length){ renderAvisoHistorialLocal(); return; }
+  if(!confirm(`¿Subir ${faltan.length} cómputo(s) de este navegador a la base compartida? Los va a ver todo el equipo.`)) return;
+  let subidos = 0;
+  for(const h of faltan){
+    try{
+      const { docId:_viejo, ...datos } = h;   // se conserva `id` (el ID de obra), solo se saca el del documento
+      await window.fbHistCalcAdd({ ...datos, ts: Date.now(), usuario: (window.__fbUser && window.__fbUser.email) || '' });
+      subidos++;
+    }catch(e){ /* si uno falla se sigue con el resto */ }
+  }
+  alert(subidos === faltan.length
+    ? `Listo: se subieron ${subidos} cómputo(s).`
+    : `Se subieron ${subidos} de ${faltan.length}. Revisá la conexión y volvé a probar con los que faltan.`);
+  renderAvisoHistorialLocal();
+}
+window.subirHistorialLocal = subirHistorialLocal;
+
 renderHistorial();
+renderAvisoHistorialLocal();
 
 function fmt(n, dec=2){
   return Number(n).toLocaleString('es-AR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
@@ -7566,13 +8480,41 @@ function calcular(){
   ultimoResultado = {nombre, id, barrio, cantCol: colOn?cantCol:null, tipoCol, altura, vincCant: vincOn?vincCant:null, secciones, totalLuminarias, tiles, tareas: tareasIncluidas};
   renderResultado(ultimoResultado);
   agregarHistorial(ultimoResultado);
+  window.__computoParaAlta = ultimoResultado;
+  renderAvisoAltaComputo();
 }
+
+// ---- Puerta de alta desde la Calculadora (2026-08-27) ----
+// Apenas se calcula una obra, se avisa si esa plaza ya está registrada o no, y si no lo está se
+// ofrece registrarla ahí mismo, con el cómputo adentro. Antes había que acordarse de ir a Avance de
+// obra y usar "Traer plaza calculada", que además solo funcionaba en la misma computadora.
+function renderAvisoAltaComputo(){
+  const cont = document.getElementById('avisoAltaComputo');
+  if(!cont) return;
+  const r = window.__computoParaAlta;
+  if(!r){ cont.innerHTML = ''; cont.style.display = 'none'; return; }
+  cont.style.display = '';
+  const ya = plazaYaRegistrada(r.nombre, r.id);
+  if(ya){
+    cont.innerHTML = `<div style="background:rgba(126,198,230,0.14); border:1px solid var(--teal-dark); color:var(--teal-dark); border-radius:8px; padding:10px 12px; font-size:13px; font-weight:600;">
+      ✓ «${escHtml(ya.nombre)}» ya está registrada en Avance de obra${ya.obraId?` (ID ${escHtml(String(ya.obraId))})`:''}${ya.direccion?` — 📍 ${escHtml(ya.direccion)}`:''}.
+      <button type="button" class="btn-ghost" style="margin-left:8px; padding:3px 10px; font-size:12px;" onclick="mostrarVista('avance'); verAvanceDetalle('${ya.id}');">Abrir la plaza →</button>
+    </div>`;
+  } else {
+    cont.innerHTML = `<div style="background:rgba(240,183,74,0.14); border:1px solid var(--amber); color:#6b5312; border-radius:8px; padding:10px 12px; font-size:13px;">
+      <b>Esta plaza todavía no está registrada.</b> Registrala para que aparezca en el Mapa, en las órdenes de trabajo y en el balance de material — se guarda con este cómputo adentro.
+      <button type="button" class="btn-primary" style="margin-left:8px; padding:4px 12px; font-size:12.5px;" onclick="registrarPlazaDesdeComputo()">Registrar esta plaza</button>
+    </div>`;
+  }
+}
+window.renderAvisoAltaComputo = renderAvisoAltaComputo;
 
 function renderResultado(r){
   const card = document.getElementById('resultCard');
   let html = '';
 
   html += `<h2 style="margin-top:0;"><span class="dot"></span>${r.nombre}${r.id ? ' — ID '+r.id : ''}</h2>`;
+  html += `<div class="no-print" id="avisoAltaComputo" style="margin-bottom:12px;"></div>`;
   // Si el cómputo viene del historial trae `fecha` (se la agrega agregarHistorial); el recién
   // calculado no. Sirve para avisar en pantalla que lo que se está mirando es una obra guardada y
   // no el resultado del formulario de arriba — sin ese aviso es fácil confundirse y creer que los
@@ -7653,11 +8595,22 @@ window.addEventListener('afterprint', ()=>{ document.title = TITULO_APP; });
 // ============================================================
 // HISTORIAL (persistido en localStorage desde 2026-08-15 — ver guardarHistorial()/cargarHistorial() arriba)
 // ============================================================
-function agregarHistorial(r){
-  historial.push({...r, estado:'Pendiente', fecha: new Date().toISOString().slice(0,10)});
+async function agregarHistorial(r){
+  const reg = {...r, estado:'Pendiente', fecha: new Date().toISOString().slice(0,10),
+               ts: Date.now(), usuario: (window.__fbUser && window.__fbUser.email) || ''};
+  if(historialCompartidoListo()){
+    try{
+      await window.fbHistCalcAdd(reg);
+      return;   // el listener en vivo lo trae y redibuja solo
+    }catch(e){ /* si no se pudo guardar en la nube, cae al respaldo local de abajo */ }
+  }
+  // Sin sesión o sin internet: queda en este navegador y después se sube con el aviso de arriba.
+  historial.push(reg);
   guardarHistorial();
   renderHistorial();
+  renderAvisoHistorialLocal();
 }
+window.renderHistorial = renderHistorial;
 function renderHistorial(){
   const body = document.getElementById('histBody');
   if(historial.length === 0){
@@ -7704,12 +8657,21 @@ function verComputoHistorial(i){
   // no, "Traer plaza calculada" en Avance de obra terminaría trayendo la obra que se fue a mirar de
   // paso, en vez de la que se acaba de calcular.
   renderResultado(h);
+  // El aviso de alta pasa a hablar de la obra que se fue a mirar, que es la que está en pantalla.
+  window.__computoParaAlta = h;
+  renderAvisoAltaComputo();
   const card = document.getElementById('resultCard');
   if(card) card.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
-function cambiarEstado(i, val){
-  historial[i].estado = val;
+async function cambiarEstado(i, val){
+  const h = historial[i];
+  if(!h) return;
+  h.estado = val;
+  if(h.docId && historialCompartidoListo()){
+    try{ await window.fbHistCalcUpdate(h.docId, { estado: val }); return; }
+    catch(e){ alert('No se pudo guardar el cambio de estado (revisá tu conexión a internet).'); }
+  }
   guardarHistorial();
   renderHistorial();
 }
@@ -7720,17 +8682,25 @@ function cambiarEstado(i, val){
 // de sacar una fila equivocada era borrar todo y perder también las buenas.
 // El índice se resuelve contra el array en el momento del click (renderHistorial() redibuja las
 // filas con los índices ya recalculados después de cada borrado, así que no quedan desfasados).
-function eliminarObraHistorial(i){
+async function eliminarObraHistorial(i){
   const h = historial[i];
   if(!h) return;
-  if(!confirm(`¿Borrar del historial "${h.nombre}"${h.id?` (ID ${h.id})`:''}?\n\nSe pierde el listado de materiales guardado de esa obra. Las demás quedan como están.`)) return;
+  if(!confirm(`¿Borrar del historial "${h.nombre}"${h.id?` (ID ${h.id})`:''}?\n\nSe pierde el listado de materiales guardado de esa obra, para todo el equipo. Las demás quedan como están.`)) return;
+  if(h.docId && historialCompartidoListo()){
+    try{ await window.fbHistCalcEliminar(h.docId); return; }
+    catch(e){ alert('No se pudo borrar (revisá tu conexión a internet).'); return; }
+  }
   historial.splice(i, 1);
   guardarHistorial();
   renderHistorial();
 }
 
-function limpiarHistorial(){
-  if(historial.length && !confirm('¿Vaciar el historial de obras guardado en este navegador?')) return;
+async function limpiarHistorial(){
+  if(historial.length && !confirm('¿Vaciar el historial de obras? Ahora es COMPARTIDO: se borra para todo el equipo, no solo en esta computadora.')) return;
+  if(historialCompartidoListo()){
+    try{ await window.fbHistCalcVaciar(); return; }
+    catch(e){ alert('No se pudo vaciar el historial compartido (revisá tu conexión a internet).'); return; }
+  }
   historial = [];
   guardarHistorial();
   renderHistorial();
@@ -7781,6 +8751,62 @@ function toggleMapaOcultarFinalizadas(checked){
   renderMapaObras();
 }
 const MAPA_CENTRO_CORDOBA = [-31.4201, -64.1888]; // Córdoba Capital
+let mapaModoAlta = false;           // "+ Nueva plaza acá": el próximo clic en el mapa da de alta
+let mapaVerNombres = true;          // etiquetas con el nombre sobre cada pin
+let mapaMarcadores = {};            // id de plaza -> marcador, para poder ir a un pin desde la lista
+let mapaRefControl = null;          // recuadro de referencia de colores
+
+const MAPA_REFERENCIAS = [
+  { color:'var(--danger)',    txt:'Recién arrancada (menos del 30%)' },
+  { color:'var(--amber)',     txt:'En obra (30% a 59%)' },
+  { color:'var(--teal)',      txt:'Avanzada (60% a 99%)' },
+  { color:'var(--teal-dark)', txt:'Finalizada (100%)' },
+];
+
+// Puerta de alta desde el MAPA: se prende el modo, se toca el punto y la plaza queda creada Y
+// ubicada de una sola vez — que es lo natural cuando uno está mirando el mapa.
+function mapaModoAltaToggle(){
+  if(!avanceGuardEdicion()) return;
+  mapaModoAlta = !mapaModoAlta;
+  const btn = document.getElementById('mapaAltaBtn');
+  const lbl = document.getElementById('mapaSeleccionLabel');
+  if(btn){
+    btn.textContent = mapaModoAlta ? '✖ Cancelar alta' : '➕ Nueva plaza acá';
+    btn.style.color = mapaModoAlta ? 'var(--danger)' : '';
+  }
+  if(mapaModoAlta){
+    mapaSeleccionId = null;   // para no mover el pin de otra plaza sin querer
+    renderMapaObras();
+    if(lbl) lbl.innerHTML = '<span style="color:var(--amber);">tocá en el mapa dónde va la plaza nueva</span>';
+  } else {
+    renderMapaObras();
+  }
+}
+window.mapaModoAltaToggle = mapaModoAltaToggle;
+
+function toggleMapaVerNombres(checked){
+  mapaVerNombres = checked;
+  renderMapaObras();
+}
+
+// Ajusta el zoom para que entren todas las plazas que tienen pin.
+function mapaVerTodas(){
+  if(!mapaLeaflet || typeof L === 'undefined') return;
+  const puntos = avanceObras.filter(a=>a.lat!=null && a.lng!=null).map(a=>[a.lat, a.lng]);
+  if(!puntos.length){ alert('Todavía no hay ninguna plaza ubicada en el mapa.'); return; }
+  if(puntos.length === 1){ mapaLeaflet.setView(puntos[0], 16); return; }
+  mapaLeaflet.fitBounds(L.latLngBounds(puntos), { padding:[40,40], maxZoom:16 });
+}
+
+// Número visible de cada plaza — el mismo en la lista y en el pin. Se asigna por orden alfabético
+// sobre TODAS las plazas (no sobre las filtradas), así el número de una plaza no cambia cuando se
+// escribe algo en el buscador o se ocultan las finalizadas.
+function numerosMapa(){
+  const n = {};
+  [...avanceObras].sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||''),'es'))
+    .forEach((a,i)=>{ n[a.id] = i+1; });
+  return n;
+}
 
 function mostrarErrorConexionMapa(){
   const banner = document.getElementById('mapaConnBanner');
@@ -7799,6 +8825,16 @@ function initMapaObras(){
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(mapaLeaflet);
     mapaMarkersLayer = L.layerGroup().addTo(mapaLeaflet);
+    // Referencia de colores fija en el mapa: sin esto, el color del pin no dice nada por sí solo.
+    mapaRefControl = L.control({ position:'bottomright' });
+    mapaRefControl.onAdd = function(){
+      const d = L.DomUtil.create('div', 'mapa-ref');
+      d.innerHTML = '<b>Referencia</b>' + MAPA_REFERENCIAS.map(r=>
+        `<div class="mapa-ref-fila"><span class="mapa-ref-dot" style="background:${r.color};"></span>${r.txt}</div>`).join('');
+      L.DomEvent.disableClickPropagation(d);   // que tocar la referencia no coloque un pin
+      return d;
+    };
+    mapaRefControl.addTo(mapaLeaflet);
     mapaLeaflet.on('click', onClickMapaObras);
     setTimeout(()=>mapaLeaflet.invalidateSize(), 60);
   }catch(e){
@@ -7807,13 +8843,31 @@ function initMapaObras(){
 }
 
 function onClickMapaObras(e){
+  if(mapaModoAlta){
+    const lat = e.latlng.lat, lng = e.latlng.lng;
+    mapaModoAlta = false;
+    const btn = document.getElementById('mapaAltaBtn');
+    if(btn){ btn.textContent = '➕ Nueva plaza acá'; btn.style.color = ''; }
+    abrirAltaPlaza({
+      lat, lng,
+      origen: 'Se registra ya ubicada en el punto que tocaste del mapa.',
+      alCrear: ()=>{ renderMapaObras(); }
+    });
+    renderMapaObras();
+    return;
+  }
   if(!mapaSeleccionId){
-    alert('Elegí primero una plaza de la lista (a la izquierda) y después tocá el mapa para ubicarla.');
+    alert('Elegí primero una plaza de la lista (a la izquierda) y después tocá el mapa para ubicarla.\n\nSi lo que querés es dar de alta una plaza NUEVA, usá el botón «➕ Nueva plaza acá».');
     return;
   }
   if(!avanceGuardEdicion()) return;
   const a = avanceObras.find(x=>x.id===mapaSeleccionId);
   if(!a) return;
+  // Mover un pin ya colocado se lo cambia a todo el equipo: se pregunta antes, porque el caso normal
+  // es tocar el mapa sin querer teniendo una plaza seleccionada.
+  if(a.lat!=null && a.lng!=null){
+    if(!confirm(`"${a.nombre}" ya está ubicada en el mapa. ¿Mover su pin a este punto nuevo? Se le cambia a todo el equipo.`)) return;
+  }
   a.lat = e.latlng.lat;
   a.lng = e.latlng.lng;
   guardarAvanceObras(a);
@@ -7823,6 +8877,16 @@ function onClickMapaObras(e){
 function elegirPlazaMapa(id){
   mapaSeleccionId = (mapaSeleccionId===id) ? null : id;
   renderMapaObras();
+  // Si la plaza ya tiene pin, además de seleccionarla el mapa vuela hasta ella y abre su ficha:
+  // era lo más incómodo del mapa, tener que buscar el punto a ojo entre todos los de Córdoba.
+  if(mapaSeleccionId && mapaLeaflet){
+    const a = avanceObras.find(x=>x.id===mapaSeleccionId);
+    if(a && a.lat!=null && a.lng!=null){
+      mapaLeaflet.setView([a.lat, a.lng], Math.max(mapaLeaflet.getZoom(), 15), { animate:true });
+      const mk = mapaMarcadores[mapaSeleccionId];
+      if(mk) mk.openPopup();
+    }
+  }
 }
 
 function borrarPinMapa(id){
@@ -7857,24 +8921,53 @@ function ultimoParteDePlaza(nombre){
 function renderMapaObras(){
   const lista = document.getElementById('mapaListaPlazas');
   const label = document.getElementById('mapaSeleccionLabel');
-  const obrasVisibles = mapaOcultarFinalizadas ? avanceObras.filter(a=>etapaActualLabel(a)!=='Finalizada') : avanceObras;
+  const contador = document.getElementById('mapaContador');
+  const q = ((document.getElementById('mapaBuscar')||{}).value||'').trim().toLowerCase();
+  const nums = numerosMapa();
+
+  let obrasVisibles = mapaOcultarFinalizadas ? avanceObras.filter(a=>etapaActualLabel(a)!=='Finalizada') : avanceObras;
+  if(q){
+    obrasVisibles = obrasVisibles.filter(a=>
+      `${a.nombre||''} ${a.barrio||''} ${a.obraId||''}`.toLowerCase().includes(q));
+  }
+  // Se muestran en el mismo orden que el número del pin, para poder ir de la lista al mapa y al revés.
+  obrasVisibles = [...obrasVisibles].sort((a,b)=>(nums[a.id]||0)-(nums[b.id]||0));
+
   const disMapa = window.__fbUser ? '' : 'disabled';
+
+  if(contador){
+    const ubicadas = avanceObras.filter(a=>a.lat!=null && a.lng!=null).length;
+    const sinUbicar = avanceObras.length - ubicadas;
+    contador.innerHTML = avanceObras.length
+      ? `📍 ${ubicadas} de ${avanceObras.length} plaza(s) ubicadas en el mapa${sinUbicar?` · <b>${sinUbicar} sin ubicar</b> (punto gris en la lista)`:''}${q?` · mostrando ${obrasVisibles.length}`:''}.`
+      : '';
+  }
+
   if(lista){
     if(!avanceObras.length){
       lista.innerHTML = '<div class="hint" style="margin:10px;">Todavía no hay plazas cargadas en Avance de obra.</div>';
     } else if(!obrasVisibles.length){
-      lista.innerHTML = '<div class="hint" style="margin:10px;">Todas las plazas cargadas están finalizadas y ocultas — destildá "Ocultar plazas finalizadas" para volver a verlas.</div>';
+      lista.innerHTML = q
+        ? '<div class="hint" style="margin:10px;">Ninguna plaza coincide con lo que buscaste.</div>'
+        : '<div class="hint" style="margin:10px;">Todas las plazas cargadas están finalizadas y ocultas — destildá "Ocultar plazas finalizadas" para volver a verlas.</div>';
     } else {
       lista.innerHTML = obrasVisibles.map(a=>{
         const ubicada = (a.lat!=null && a.lng!=null);
-        return `<div class="mapa-lista-item${a.id===mapaSeleccionId?' mapa-item-activa':''}" onclick="elegirPlazaMapa('${a.id}')">
-          <span class="mapa-pin-dot${ubicada?' mapa-pin-ok':''}"></span>
-          <span class="mapa-lista-nombre">${escHtml(a.nombre)}</span>
+        const pct = calcularAvanceEtapasPct(a);
+        const color = ubicada ? colorPorPctEtapas(pct) : '#c7cedd';
+        const etapa = etapaActualLabel(a);
+        const idTxt = a.obraId ? ` · ID ${escHtml(String(a.obraId))}` : '';
+        return `<div class="mapa-lista-item${a.id===mapaSeleccionId?' mapa-item-activa':''}" onclick="elegirPlazaMapa('${a.id}')" title="${ubicada?'Ir a esta plaza en el mapa':'Todavía sin ubicar — elegila y tocá el mapa'}">
+          <span class="mapa-num" style="background:${color};">${nums[a.id]||'?'}</span>
+          <span class="mapa-lista-nombre">${escHtml(a.nombre)}
+            <span class="mapa-lista-sub">${pct}% · ${escHtml(etapa)}${idTxt}${ubicada?'':' · <b>sin ubicar</b>'}</span>
+          </span>
           <button type="button" class="btn-ghost" style="padding:2px 7px; font-size:12px; color:var(--danger); flex:none;" title="Eliminar esta plaza (por si se cargó por error)" onclick="event.stopPropagation(); eliminarAvance('${a.id}')" ${disMapa}>🗑</button>
         </div>`;
       }).join('');
     }
   }
+
   if(label){
     const sel = avanceObras.find(x=>x.id===mapaSeleccionId);
     label.textContent = sel ? sel.nombre : 'ninguna — elegí una de la lista';
@@ -7882,22 +8975,33 @@ function renderMapaObras(){
 
   if(!mapaLeaflet || !mapaMarkersLayer || typeof L === 'undefined') return;
   mapaMarkersLayer.clearLayers();
+  mapaMarcadores = {};
   obrasVisibles.forEach(a=>{
     if(a.lat==null || a.lng==null) return;
     const pct = calcularAvanceEtapasPct(a);
     const etapaLabel = etapaActualLabel(a);
     const color = colorPorPctEtapas(pct);
-    const marker = L.circleMarker([a.lat, a.lng], {
-      radius: 10, weight:2, color:'#fff', fillColor: color, fillOpacity:0.95
+    const n = nums[a.id] || '?';
+    // Pin con el NÚMERO adentro (mismo que la lista) en vez de un punto pelado: se sabe qué plaza es
+    // sin tener que tocarla, que era justo lo que molestaba.
+    const icono = L.divIcon({
+      className: '',
+      html: `<div class="mapa-pin${a.id===mapaSeleccionId?' mapa-pin-sel':''}" style="background:${color};">${n}</div>`,
+      iconSize: [26,26], iconAnchor: [13,13], popupAnchor: [0,-13], tooltipAnchor: [14,0]
     });
+    const marker = L.marker([a.lat, a.lng], { icon: icono, title: a.nombre });
+    if(mapaVerNombres){
+      marker.bindTooltip(escHtml(a.nombre), { permanent:true, direction:'right', className:'mapa-etiqueta', offset:[6,0] });
+    }
     const fechaHtml = a.listaParaEncender
       ? '<span class="badge-lista">Lista para encender</span>'
       : (a.fechaEncendido ? `📅 ${formatFechaCorta(a.fechaEncendido)}` : '');
     const parte = ultimoParteDePlaza(a.nombre);
     const parteHtml = parte ? `<div style="margin-top:4px; font-size:12px; color:var(--text-soft);">🗓 Último parte: ${formatFechaCorta(parte.fecha)} — ${escHtml(parte.cuadrilla)}</div>` : '';
-    const popupHtml = `<div style="min-width:170px; font-size:13px;">
-      <b>${escHtml(a.nombre)}</b><br>
-      ${escHtml(a.barrio)||''}<br>
+    const popupHtml = `<div style="min-width:180px; font-size:13px;">
+      <b>${n}. ${escHtml(a.nombre)}</b><br>
+      ${escHtml(a.barrio)||''}${a.obraId?`${a.barrio?' · ':''}<span style="color:var(--text-soft);">ID ${escHtml(String(a.obraId))}</span>`:''}<br>
+      ${a.direccion?`<span style="color:var(--text-soft);">📍 ${escHtml(a.direccion)}</span><br>`:''}
       <span class="badge-etapa${etapaLabel==='Finalizada'?' badge-etapa-fin':''}">${escHtml(etapaLabel)}</span> — ${pct}%<br>
       ${fechaHtml}
       ${parteHtml}
@@ -7908,6 +9012,7 @@ function renderMapaObras(){
     </div>`;
     marker.bindPopup(popupHtml);
     marker.addTo(mapaMarkersLayer);
+    mapaMarcadores[a.id] = marker;
   });
 }
 
@@ -8086,10 +9191,37 @@ function poblarParteObraDatalist(){
       if(typeof window.renderRegistros === 'function') window.renderRegistros();
     }, err => console.error('Error escuchando historial de etapas:', err));
 
+    // Planificación semanal (2026-08-27) — ahora compartida.
+    fbDb.collection('planSemanal').onSnapshot(snapshot => {
+      planEntries = snapshot.docs.map(d => ({ ...d.data(), docId: d.id }));
+      window.__planListo = true;
+      // Si alguien está tipeando en la grilla, NO se redibuja: se le iría el foco a mitad de una
+      // palabra. El array ya quedó al día; la pantalla se pone al día cuando suelte el teclado.
+      const foco = document.activeElement;
+      const grid = document.getElementById('planGrid');
+      if(grid && foco && grid.contains(foco)) return;
+      if(typeof window.renderPlanGrid === 'function') window.renderPlanGrid();
+    }, err => console.error('Error escuchando la planificación semanal:', err));
+
+    // Historial de cómputos de la Calculadora (2026-08-27) — ahora compartido.
+    fbDb.collection('historialCalculos').onSnapshot(snapshot => {
+      // OJO: `docId`, no `id`. En estos registros `id` ya es el ID DE OBRA que se carga en la
+      // Calculadora; si se usara `id` para el documento, uno pisaría al otro.
+      historial = snapshot.docs.map(d => ({ ...d.data(), docId: d.id }))
+        .sort((a,b)=> String(a.fecha||'').localeCompare(String(b.fecha||'')) || (a.ts||0)-(b.ts||0));
+      window.historialCompartido = historial;
+      window.__histCalcListo = true;
+      if(typeof window.renderHistorial === 'function') window.renderHistorial();
+      if(typeof window.poblarAvanceOrigenSelect === 'function') window.poblarAvanceOrigenSelect();
+      if(typeof window.renderAvisoHistorialLocal === 'function') window.renderAvisoHistorialLocal();
+    }, err => console.error('Error escuchando el historial de cómputos:', err));
+
     // Órdenes de trabajo (2026-08-22).
     fbDb.collection('ordenesTrabajo').onSnapshot(snapshot => {
       ordenesTrabajo = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       if(typeof window.renderRegistros === 'function') window.renderRegistros();
+      // La planificación semanal muestra las órdenes emitidas en su fecha: se redibuja con cada cambio.
+      if(typeof window.renderPlanGrid === 'function') window.renderPlanGrid();
     }, err => console.error('Error escuchando órdenes de trabajo:', err));
 
     // Avance de obra (2026-08-15): mismo mecanismo que "movimientos" de Stock, pero cada documento
@@ -8196,6 +9328,50 @@ function poblarParteObraDatalist(){
   window.fbOtEliminar = async function(id){
     if(!fbAvailable) throw new Error('Firebase no disponible');
     await fbDb.collection('ordenesTrabajo').doc(id).delete();
+  };
+
+  // ---- Planificación semanal (2026-08-27) ----
+  // Última cosa que quedaba en el localStorage de cada navegador. Con las órdenes de trabajo ya
+  // apareciendo en la semana desde la base compartida, tener las tareas escritas a mano solo en una
+  // computadora dejaba la misma pantalla mitad compartida y mitad no.
+  window.fbPlanAdd = async function(reg){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    const ref = await fbDb.collection('planSemanal').add(reg);
+    return ref.id;
+  };
+  window.fbPlanUpdate = async function(id, patch){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    await fbDb.collection('planSemanal').doc(id).update(patch);
+  };
+  window.fbPlanEliminar = async function(id){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    await fbDb.collection('planSemanal').doc(id).delete();
+  };
+
+  // ---- Historial de cómputos de la Calculadora (2026-08-27) ----
+  // Antes vivía en el localStorage de cada navegador, así que un cómputo hecho en el pañol no se
+  // veía desde otra computadora y "Traer plaza calculada" solo funcionaba donde se había calculado.
+  // Ahora es una colección más, con el mismo criterio que el resto: leer libre, escribir con la
+  // clave del equipo.
+  window.fbHistCalcAdd = async function(reg){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    const ref = await fbDb.collection('historialCalculos').add(reg);
+    return ref.id;
+  };
+  window.fbHistCalcUpdate = async function(id, patch){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    await fbDb.collection('historialCalculos').doc(id).update(patch);
+  };
+  window.fbHistCalcEliminar = async function(id){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    await fbDb.collection('historialCalculos').doc(id).delete();
+  };
+  window.fbHistCalcVaciar = async function(){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    const actuales = (window.historialCompartido || []).filter(h=>h.docId);
+    const batch = fbDb.batch();
+    actuales.forEach(h => batch.delete(fbDb.collection('historialCalculos').doc(h.docId)));
+    await batch.commit();
   };
 
   // Avance de obra — escritura (2026-08-15). Una plaza = un documento completo en 'avanceObras'.
