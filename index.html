@@ -549,6 +549,9 @@
      plazas y el avance al lado; luego, al apretar ver detalle, ahí sí que se despliegue".
      Antes lo primero eran tres cards de administración (login, traer plaza calculada, plazas del
      informe) y recién después una tabla de 8 columnas. */
+  .av-mat{display:inline-block; margin-top:4px; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:20px; white-space:nowrap;}
+  .av-mat-ok{background:rgba(79,168,204,0.16); color:var(--teal-dark);}
+  .av-mat-falta{background:rgba(240,183,74,0.18); color:#6b5312;}
   .av-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(232px, 1fr)); gap:12px; margin-top:12px;}
   .av-card{display:flex; gap:12px; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 13px; cursor:pointer; transition:box-shadow .15s, border-color .15s, transform .15s;}
   .av-card:hover{box-shadow:0 4px 14px rgba(20,35,70,0.12); border-color:var(--teal-dark); transform:translateY(-1px);}
@@ -1941,6 +1944,25 @@ const ZANJA = {
 
 // ---- Catálogo de vínculos / acoples (ampliado 2026-08-22) ----
 // El usuario pidió la grilla completa: *"faltan los artefactos cuádruples de 1 metro, poneme todos
+// ---- Corrección del brazo del vínculo triple (2026-08-28) ----
+// El usuario marcó: *"el triple dice brazo de 425 y de 400, verificá cuál"*. Tenía razón, y la
+// herramienta se contradecía sola: la etiqueta decía 425 mm mientras citaba el ítem 10.17, que dice
+// textualmente otra cosa. Verificado contra las dos fuentes del proyecto:
+//
+//   · Pliego LP 21478, ítem 10.17: *"Acople para tres artefactos de 400mm s/ plano AP C 008 (3/3)"*,
+//     y en el cuerpo del ítem: *"instalación de acople de 400 mm de longitud"*. Los ítems 10.15 y
+//     10.16 (uno y dos artefactos) dicen lo mismo: 400 mm.
+//   · Plano de obra (referencias): *"vínculo triple de 0,4 m según AP-C-033"*, y el doble a 120° y
+//     el cuádruple también de 0,4 m.
+//
+// O sea que el triple del pliego es de 400 mm. El 0,425 NO es un invento: sale del itemizado del
+// proyecto 7081 —*"capuchón + 1 brazo 0,425 m"*— pero eso es un CAPUCHÓN, otra pieza, y encima ahí
+// figura para columna metálica. Se separó en dos entradas para que cada una lleve su referencia
+// correcta, en vez de mezclar la medida de una con el ítem de la otra.
+//
+// Efecto en el cómputo: el cable de subida sumaba 25 mm de más por artefacto (la diferencia contra
+// el brazo base de 400 mm). Poco en metros, pero la etiqueta desinformaba a quien iba a comprar.
+//
 // los brazos todas las medidas"*. El pliego itemiza solo una parte — 400 mm para 1, 2, 3 y 4
 // artefactos (ítems 10.15/10.16/10.17/10.20) y 1000/1500 mm SOLO para un artefacto (10.18/10.19).
 // Las combinaciones de varios artefactos con brazo de 1000 o 1500 mm existen en obra pero NO tienen
@@ -1960,7 +1982,7 @@ const VINCULOS = [
   // --- Brazo 400 mm (los itemizados en el pliego) ---
   {id:'simple_400',      label:'Simple — 1 artefacto (brazo 400 mm)',     lum:1, brazo:'0,400 m', brazoM:0.400, plano:'AP-C-008 (1/3)', item:'10.15'},
   {id:'doble_400',       label:'Doble — 2 artefactos (brazo 400 mm)',     lum:2, brazo:'0,400 m', brazoM:0.400, plano:'AP-C-008 (2/3)', item:'10.16'},
-  {id:'triple_400',      label:'Triple — 3 artefactos (brazo 425 mm)',    lum:3, brazo:'0,425 m', brazoM:0.425, plano:'AP-C-008 (3/3)', item:'10.17'},
+  {id:'triple_400',      label:'Triple — 3 artefactos (brazo 400 mm)',    lum:3, brazo:'0,400 m', brazoM:0.400, plano:'AP-C-008 (3/3)', item:'10.17'},
   {id:'cuadruple_400',   label:'Cuádruple — 4 artefactos (brazo 400 mm)', lum:4, brazo:'0,400 m', brazoM:0.400, plano:'AP-C-034',       item:'10.20'},
 
   // --- Brazo 1000 mm — solo el simple está en el pliego, el resto es criterio de obra ---
@@ -1977,6 +1999,9 @@ const VINCULOS = [
 
   // --- Especiales ---
   {id:'capuchon_120',    label:'Capuchón doble a 120° — 2 artefactos (brazo 400 mm)', lum:2, brazo:'0,400 m', brazoM:0.400, plano:'AP-C-038', item:'—'},
+  // El 0,425 existe, pero es OTRA pieza: el capuchón triple del itemizado del 7081, no el acople del
+  // ítem 10.17. Queda como opción aparte para no perderlo, con su referencia propia (ver abajo).
+  {id:'capuchon_triple_425', label:'Capuchón triple — 3 artefactos (brazo 425 mm)', lum:3, brazo:'0,425 m', brazoM:0.425, plano:'AP-C-008 (3/3)', item:'—'},
   {id:'octogonal',       label:'Octogonal — 4 artefactos (columnas altas / nodos viales)', lum:4, brazo:'s/plano', brazoM:0.400, plano:'AP-C-011', item:'10.21'},
   {id:'medio_octogonal', label:'Medio octogonal — 2 artefactos',                          lum:2, brazo:'s/plano', brazoM:0.400, plano:'AP-C-011', item:'10.22'},
 ];
@@ -6140,6 +6165,41 @@ function calcularValorPlaza(a){
   return { presupuesto, avanzado, pctValor };
 }
 
+// ---- ¿Está todo el material de esta plaza? (2026-08-28) ----
+// Pedido del usuario: *"cuando tenga todo el material listo, que me aparezca MATERIAL COMPLETO para
+// esa plaza"*. Sale del balance que ya existía —lo calculado por la Calculadora contra lo que salió
+// del pañol con destino a esa plaza— pero hasta ahora había que entrar plaza por plaza y leer una
+// tabla para saberlo. Ahora es un cartel que se ve de una.
+//
+// «Completo» = de todo lo que la plaza necesita, no falta ningún renglón. Un renglón está cubierto
+// cuando lo entregado alcanza o supera lo calculado (con una tolerancia mínima, para que no lo
+// arruine un decimal). Lo que sobra no molesta: entregar de más no es estar incompleto.
+//
+// Ojo con lo que NO dice: que el material esté en la plaza, no que esté instalado. El avance de obra
+// es otra cosa y va por su lado.
+function estadoMaterialPlaza(a){
+  if(!a || typeof calcularBalancePlaza !== 'function') return { aplica:false };
+  let bal;
+  try{ bal = calcularBalancePlaza(a); }catch(e){ return { aplica:false }; }
+  const necesarios = (bal.filas||[]).filter(f => f.calc != null && f.calc > 0);
+  // Sin lista de materiales cargada no hay nada que comparar: no se muestra cartel, en vez de
+  // mostrar uno verde que no significaría nada.
+  if(!necesarios.length) return { aplica:false };
+  const cubiertos = necesarios.filter(f => (f.entr || 0) + 0.001 >= f.calc);
+  const faltan = necesarios.filter(f => !((f.entr || 0) + 0.001 >= f.calc));
+  return {
+    aplica: true,
+    total: necesarios.length,
+    completos: cubiertos.length,
+    faltantes: faltan.length,
+    // Los tres primeros que faltan, para poder decir QUÉ falta sin abrir la plaza.
+    ejemplos: faltan.slice(0,3).map(f=>f.desc),
+    pct: Math.round(cubiertos.length / necesarios.length * 100),
+    completo: faltan.length === 0
+  };
+}
+window.estadoMaterialPlaza = estadoMaterialPlaza;
+
 // ---- Panel gráfico de avance (2026-08-27) ----
 // Una tarjeta por plaza: dona con el %, nombre y etapa actual. Ordenadas por lo que le importa a
 // alguien que entra a mirar: primero lo que está en obra (lo más avanzado arriba), después lo que
@@ -6175,7 +6235,13 @@ function renderAvancePanel(){
       <div class="av-res-tile"><div class="av-res-num" style="color:var(--amber);">${enObra}</div><div class="av-res-lbl">En obra</div></div>
       <div class="av-res-tile"><div class="av-res-num" style="color:var(--teal-dark);">${finalizadas}</div><div class="av-res-lbl">Finalizadas</div></div>
       <div class="av-res-tile"><div class="av-res-num" style="color:var(--text-soft);">${sinArrancar}</div><div class="av-res-lbl">Sin arrancar</div></div>
-      <div class="av-res-tile"><div class="av-res-num">${promedio}%</div><div class="av-res-lbl">Avance promedio</div></div>`;
+      <div class="av-res-tile"><div class="av-res-num">${promedio}%</div><div class="av-res-lbl">Avance promedio</div></div>
+      ${(()=>{
+        const mats = avanceObras.map(estadoMaterialPlaza).filter(m=>m.aplica);
+        if(!mats.length) return '';
+        const listas = mats.filter(m=>m.completo).length;
+        return `<div class="av-res-tile"><div class="av-res-num" style="color:${listas?'var(--teal-dark)':'var(--text-soft)'};">${listas}/${mats.length}</div><div class="av-res-lbl">Con material completo</div></div>`;
+      })()}`;
   }
   if(hint) hint.innerHTML = 'Tocá una plaza para ver el detalle completo: los materiales, las etapas y la valorización.';
 
@@ -6191,6 +6257,12 @@ function renderAvancePanel(){
     const etapa = etapaActualLabel(a);
     const sub = a.encendida ? '💡 Encendida'
       : (a.listaParaEncender ? 'Lista para encender' : etapa);
+    const mat = estadoMaterialPlaza(a);
+    const matHtml = mat.aplica
+      ? (mat.completo
+          ? `<span class="av-mat av-mat-ok" title="Todo el material calculado para esta plaza ya salió del pañol">📦 MATERIAL COMPLETO</span>`
+          : `<span class="av-mat av-mat-falta" title="Faltan ${mat.faltantes} de ${mat.total} materiales: ${escHtml(mat.ejemplos.join(' · '))}${mat.faltantes>3?'...':''}">📦 Faltan ${mat.faltantes} de ${mat.total}</span>`)
+      : '';
     return `<div class="av-card${a.id===avanceActivoId?' av-card-activa':''}" onclick="verAvanceDetalle('${a.id}')" title="Ver el detalle de ${escHtml(a.nombre)}">
       <div class="av-donut">
         <svg viewBox="0 0 68 68" width="68" height="68">
@@ -6203,6 +6275,7 @@ function renderAvancePanel(){
       <div class="av-datos">
         <div class="av-nombre">${escHtml(a.nombre)}</div>
         <div class="av-etapa" title="${escHtml(sub)}">${escHtml(sub)}</div>
+        ${matHtml}
         <div class="av-ver no-print">Ver detalle →</div>
       </div>
     </div>`;
@@ -6443,6 +6516,18 @@ function renderAvanceDetalle(){
         <button type="button" class="btn-ghost" data-action="sugerir-direccion" style="white-space:nowrap;" title="Buscar la dirección del pin en OpenStreetMap y completar el campo (después corregila a mano)" ${dis}>📍 Sugerir desde el pin</button>
       </div>
       <div class="hint no-print" style="margin-top:2px;" id="avanceDireccionMsg">Esta dirección es la que va impresa en la orden de trabajo de la cuadrilla.</div>
+      ${(()=>{
+        const m = estadoMaterialPlaza(a);
+        if(!m.aplica) return '';
+        if(m.completo) return `<div style="margin-top:10px; background:rgba(79,168,204,0.14); border:1px solid var(--teal-dark); color:var(--teal-dark); border-radius:8px; padding:10px 12px; font-size:13.5px; font-weight:700;">
+            📦 MATERIAL COMPLETO — los ${m.total} materiales que necesita esta plaza ya salieron del pañol.
+            <div style="font-weight:400; font-size:12px; margin-top:3px;">Es el material entregado, no el instalado. El avance de obra va por su lado.</div>
+          </div>`;
+        return `<div style="margin-top:10px; background:rgba(240,183,74,0.14); border:1px solid var(--amber); color:#6b5312; border-radius:8px; padding:10px 12px; font-size:13.5px;">
+            📦 <b>Material incompleto</b> — entregados ${m.completos} de ${m.total} (${m.pct}%). Faltan <b>${m.faltantes}</b>:
+            <div style="font-size:12px; margin-top:3px;">${escHtml(m.ejemplos.join(' · '))}${m.faltantes>3?` y ${m.faltantes-3} más`:''} — el detalle completo está en el balance de material, más abajo.</div>
+          </div>`;
+      })()}
       <div class="hint print-only" style="margin-top:6px;">Dirección: ${escHtml(a.direccion||'—')}</div>
       <div class="avance-fecha-row no-print">
         <label>Fecha encendido</label>
@@ -9421,6 +9506,10 @@ function renderMapaObras(){
       <b>${n}. ${escHtml(a.nombre)}</b><br>
       ${escHtml(a.barrio)||''}${a.obraId?`${a.barrio?' · ':''}<span style="color:var(--text-soft);">ID ${escHtml(String(a.obraId))}</span>`:''}<br>
       ${a.direccion?`<span style="color:var(--text-soft);">📍 ${escHtml(a.direccion)}</span><br>`:''}
+      ${(()=>{ const m = estadoMaterialPlaza(a); if(!m.aplica) return '';
+        return m.completo
+          ? `<span class="av-mat av-mat-ok">📦 MATERIAL COMPLETO</span><br>`
+          : `<span class="av-mat av-mat-falta">📦 Faltan ${m.faltantes} de ${m.total}</span><br>`; })()}
       <span class="badge-etapa${etapaLabel==='Finalizada'?' badge-etapa-fin':''}">${escHtml(etapaLabel)}</span> — ${pct}%<br>
       ${fechaHtml}
       ${parteHtml}
