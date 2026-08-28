@@ -201,7 +201,6 @@
   .circ-pt .circ-n{grid-column:1; grid-row:1; font-size:11px; font-weight:700; color:var(--text-soft); text-align:center;}
   .circ-pt .circ-x{grid-column:6; grid-row:1; background:none; border:none; color:var(--danger); font-weight:700; font-size:16px; cursor:pointer; padding:0;}
   .circ-acciones{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;}
-  .circ-pegar{width:100%; min-height:70px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; margin-top:6px;}
   .circ-aviso{font-size:11.5px; color:var(--amber); margin-top:4px;}
 
   .tramo-row{
@@ -971,9 +970,9 @@
         <div class="hint" id="tramosSummary" style="margin-top:10px;"></div>
         </div>
 
-        <label style="margin-top:14px;">Ganancia de cable por subida a columna (m)</label>
+        <label style="margin-top:14px;">Ganancia por subida <span style="font-weight:400; color:var(--text-soft);">— opcional, normalmente se deja vacío</span></label>
         <input type="number" id="cableGanancia" min="0" step="0.5" placeholder="(por defecto, la altura libre de la columna)">
-        <div class="hint" style="margin-top:2px;">Los metros que se dejan de más en cada subida a una columna. En una columna intermedia suben <b>2 cables</b> (entra y sale) y en la última del circuito sube <b>1</b> — <b>la calculadora ya sabe cuál es cuál</b> mirando el orden de los puntos de cada circuito, así que no hay que contarlas.<br>Dejalo <b>vacío</b> y usa la altura de cada columna (la del punto, o la del circuito): es la regla de campo. Poné un número para forzar los mismos metros en todas las subidas, o <b>0</b> si en los largos ya cargaste la ganancia incluida.</div>
+        <div class="hint" style="margin-top:2px;"><b>Dejalo vacío.</b> Vos cargás solo los tramos (largo y calibre) y la ganancia sale sola: la calculadora sabe, por el orden de los puntos, que en una columna intermedia suben <b>2 cables</b> (entra y sale) y en la última del circuito sube <b>1</b>, y usa la <b>altura de cada columna</b> para los metros de cada subida.<br>Solo se completa en dos casos: poner un número para forzar los mismos metros en todas las subidas, o poner <b>0</b> si en los largos ya cargaste la ganancia incluida.</div>
         <div class="hint" id="gananciaSummary" style="margin-top:6px;"></div>
       </div>
 
@@ -2643,11 +2642,7 @@ function renderCircuitos(){
       ${filas}
       <div class="circ-acciones">
         <button type="button" class="btn-ghost" data-a="addpt" style="padding:4px 10px; font-size:12px;">+ Punto</button>
-        <button type="button" class="btn-ghost" data-a="pegar" style="padding:4px 10px; font-size:12px;">📋 Pegar del plano</button>
-      </div>
-      <div data-pegar="${c.id}" style="display:none;">
-        <textarea class="circ-pegar" placeholder="Una línea por punto, en orden desde el tablero. Alcanza con el largo y el calibre — el nombre se arma solo:&#10;12  4x4&#10;35  4x4&#10;36  4x4&#10;&#10;Si una columna tiene otra altura, va al final: «118 4x6 10»&#10;Y si el plano usa otros nombres, se pueden poner adelante: «T1C1-1 12 4x4»"></textarea>
-        <button type="button" class="btn-auto" data-a="aplicarpegar" style="margin-top:6px;">Cargar estos puntos</button>
+        <span class="hint" style="margin:0; font-size:11px; align-self:center;">o apretá <b>Enter</b> en el último renglón</span>
       </div>
     </div>`;
   }).join('') + `<datalist id="calibresLista">${dl}</datalist>`;
@@ -2657,39 +2652,6 @@ function renderCircuitos(){
   if(cableToggle && !cableToggle.checked){
     cont.querySelectorAll('input, select, button, textarea').forEach(el=>el.disabled=true);
   }
-}
-
-// Parser de lo que se pega del plano. Acepta «etiqueta largo calibre [altura]», «largo calibre», y
-// separadores de todo tipo (espacios, tabs, comas, punto y coma), que es como sale de tipear rápido.
-function parsearPuntosPegados(texto, alturaCircuito){
-  const puntos = [];
-  String(texto||'').split(/\r?\n/).forEach(linea=>{
-    let l = linea.trim();
-    if(!l) return;
-    // OJO con la coma: acá es SEPARADOR DE DECIMALES, no de campos. Sin esto, «4x2,5» se partía en
-    // «4x2» y «5» — quedaba un calibre inventado y el 5 se tomaba como altura de columna. Es el
-    // calibre más común de estos planos, así que el error habría pasado desapercibido y falseado
-    // todo el cómputo. Se pasa a punto toda coma que esté ENTRE DÍGITOS antes de separar.
-    l = l.replace(/(\d),(\d)/g, '$1.$2');
-    const partes = l.split(/[\s,;]+/).filter(Boolean);
-    let etiqueta = '', largo = null, calibre = '', altura = null;
-    partes.forEach(tk=>{
-      const esCal = /^\d+\s*[x×]\s*\d/i.test(tk.replace(/\s/g,''));
-      const num = parseFloat(String(tk).replace(',', '.'));
-      if(esCal && !calibre){ calibre = normalizarCalibre(tk); }
-      else if(!isNaN(num) && /^[\d.,]+$/.test(tk)){
-        if(largo === null) largo = num; else if(altura === null) altura = num;
-      }
-      else if(!esCal){ etiqueta = etiqueta ? etiqueta + ' ' + tk : tk; }
-    });
-    if(largo === null && !calibre) return;
-    puntos.push({ id: puntoIdSeq++, etiqueta, largo: largo||0, calibre: calibre||'',
-                  altura: altura, esColumna: true });
-  });
-  // El calibre en blanco arrastra el del punto anterior: en el plano solo se acota donde cambia.
-  let ultimo = '';
-  puntos.forEach(p=>{ if(p.calibre) ultimo = p.calibre; else p.calibre = ultimo; });
-  return puntos;
 }
 
 // ---- Derivación: de los circuitos a los tramos por calibre ----
@@ -2876,10 +2838,7 @@ function actualizarGananciaSummary(){
     if(!c) return;
 
     if(a === 'addpt'){
-      // El punto nuevo hereda el calibre del último, que es lo que pasa en el plano casi siempre.
-      const ult = c.puntos[c.puntos.length-1];
-      c.puntos.push(nuevoPunto(ult ? ult.calibre : '4x2.5'));
-      renderCircuitos();
+      agregarPuntoA(c);
     } else if(a === 'delpt'){
       const ptEl = e.target.closest('.circ-pt');
       if(c.puntos.length <= 1) return;
@@ -2890,23 +2849,56 @@ function actualizarGananciaSummary(){
       if(!confirm(`¿Quitar el circuito ${nombreCircuito(c)} con sus ${c.puntos.length} punto(s)?`)) return;
       circuitos = circuitos.filter(x=>x.id!==c.id);
       renderCircuitos();
-    } else if(a === 'pegar'){
-      const caja = cont.querySelector(`[data-pegar="${c.id}"]`);
-      if(caja) caja.style.display = caja.style.display === 'none' ? '' : 'none';
-    } else if(a === 'aplicarpegar'){
-      const caja = cont.querySelector(`[data-pegar="${c.id}"]`);
-      const ta = caja && caja.querySelector('textarea');
-      const nuevos = parsearPuntosPegados(ta ? ta.value : '', c.altura);
-      if(!nuevos.length){ alert('No se entendió ninguna línea. El formato es: etiqueta, largo y calibre — por ejemplo:\n\nTIC1-1  12  4x4'); return; }
-      const vacio = c.puntos.length === 1 && !c.puntos[0].largo && !c.puntos[0].etiqueta;
-      if(!vacio && !confirm(`Se van a AGREGAR ${nuevos.length} punto(s) al final de ${nombreCircuito(c)}, que ya tiene ${c.puntos.length}.\n\n¿Continuar? (Si querés reemplazarlos, borrá los que están primero.)`)) return;
-      c.puntos = vacio ? nuevos : c.puntos.concat(nuevos);
-      renderCircuitos();
+    }
+  });
+
+  // ---- Carga con el teclado (2026-08-28) ----
+  // Había una caja de «pegar del plano» para cargar varios puntos de una. El usuario la marcó como
+  // inútil y tenía razón: el plano está en papel, no hay nada que pegar, y desde que los nombres se
+  // arman solos cada punto son dos datos — escribirlos en una caja aparte no era más rápido que
+  // escribirlos en el renglón, y sumaba un botón y un concepto de más.
+  // Lo que sí hacía falta era no tener que ir al botón «+ Punto» entre punto y punto: ahora Enter
+  // en el último renglón agrega el siguiente y deja el cursor en el largo, listo para seguir.
+  function agregarPuntoA(c, foco){
+    const ult = c.puntos[c.puntos.length-1];
+    const p = nuevoPunto(ult ? ult.calibre : '4x2.5');   // hereda el calibre: en el plano casi siempre sigue igual
+    c.puntos.push(p);
+    renderCircuitos();
+    if(foco !== false){
+      const el = cont.querySelector(`.circ-pt[data-pt="${p.id}"] input[data-f="largo"]`);
+      if(el){ el.focus(); el.select(); }
+    }
+    return p;
+  }
+
+  cont.addEventListener('keydown', (e)=>{
+    if(e.key !== 'Enter') return;
+    const ptEl = e.target.closest('.circ-pt');
+    if(!ptEl) return;
+    e.preventDefault();
+    const c = circPorId(ptEl.dataset.circ);
+    if(!c) return;
+    const esUltimo = c.puntos[c.puntos.length-1] &&
+                     String(c.puntos[c.puntos.length-1].id) === String(ptEl.dataset.pt);
+    if(esUltimo){
+      agregarPuntoA(c);
+    } else {
+      // En un renglón del medio, Enter baja al siguiente en vez de agregar uno al final.
+      const idx = c.puntos.findIndex(x=>String(x.id)===String(ptEl.dataset.pt));
+      const sig = c.puntos[idx+1];
+      const el = sig && cont.querySelector(`.circ-pt[data-pt="${sig.id}"] input[data-f="largo"]`);
+      if(el){ el.focus(); el.select(); }
     }
   });
 
   const btn = document.getElementById('addCircuitoBtn');
-  if(btn) btn.addEventListener('click', ()=>{ circuitos.push(nuevoCircuito()); renderCircuitos(); });
+  if(btn) btn.addEventListener('click', ()=>{
+    circuitos.push(nuevoCircuito());
+    renderCircuitos();
+    const ultimo = circuitos[circuitos.length-1];
+    const el = cont.querySelector(`.circ-pt[data-pt="${ultimo.puntos[0].id}"] input[data-f="largo"]`);
+    if(el){ el.focus(); el.select(); }
+  });
 })();
 
 function actualizarTramosSummary(){
