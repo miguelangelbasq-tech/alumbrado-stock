@@ -2714,6 +2714,39 @@ function derivarTramosDeCircuitos(){
   return acum;
 }
 
+// Detalle de la ganancia, columna por columna: qué sube y qué baja en cada punto, y con qué
+// calibre cada una. Es la única forma de contrastar el total contra lo que uno cuenta a mano.
+function desgloseSubidasHtml(){
+  const gInput = (document.getElementById('cableGanancia')||{}).value;
+  const gananciaApagada = gInput !== '' && (parseFloat(gInput) || 0) === 0;
+  if(gananciaApagada) return '<div class="hint" style="margin:0;">La ganancia está desactivada (hay un 0 en el campo de arriba), así que no se suman subidas.</div>';
+  const gFija = (gInput !== '') ? parseFloat(gInput) : null;
+
+  let out = '';
+  (circuitos||[]).forEach(c=>{
+    const pts = c.puntos.filter(p=>p.calibre);
+    if(!pts.length) return;
+    let totalC = 0;
+    const filas = pts.map((p,i)=>{
+      if(!p.esColumna) return `<tr><td>${escHtml(nombrePunto(c,i))}</td><td colspan="2" style="color:var(--text-soft);">solo pasa el cable, no hay columna</td><td>—</td></tr>`;
+      const h = gFija != null ? gFija : (p.altura != null ? p.altura : (c.altura || 7));
+      const sig = pts[i+1];
+      const sube = `sube ${escHtml(etiquetaCalibre(p.calibre))} <b>${fmt(h,1)} m</b>`;
+      const baja = (sig && sig.calibre)
+        ? `baja ${escHtml(etiquetaCalibre(sig.calibre))} <b>${fmt(h,1)} m</b>`
+        : `<span style="color:var(--text-soft);">no baja: el circuito termina acá</span>`;
+      const sub = (sig && sig.calibre) ? 2*h : h;
+      totalC += sub;
+      return `<tr><td><b>${escHtml(nombrePunto(c,i))}</b></td><td>${sube}</td><td>${baja}</td><td><b>${fmt(sub,1)} m</b></td></tr>`;
+    }).join('');
+    out += `<div style="margin-bottom:10px;">
+      <div style="font-size:12px; font-weight:800; color:var(--navy); margin-bottom:3px;">${escHtml(nombreCircuito(c))} — ${fmt(totalC,1)} m de ganancia</div>
+      <table class="hist-table" style="margin:0;"><thead><tr><th>Columna</th><th>Cable que llega</th><th>Cable que sigue</th><th>Total</th></tr></thead><tbody>${filas}</tbody></table>
+    </div>`;
+  });
+  return out || '<div class="hint" style="margin:0;">Todavía no hay puntos cargados.</div>';
+}
+
 function actualizarResumenCircuitos(){
   const el = document.getElementById('circuitosResumen');
   if(!el) return;
@@ -2750,7 +2783,27 @@ function actualizarResumenCircuitos(){
   if(raros.length){
     html += `<div class="circ-aviso">⚠ ${raros.map(r=>escHtml(etiquetaCalibre(r))).join(', ')}: esa sección no es de las normalizadas por IRAM 2178-1 (1,5 · 2,5 · 4 · 6 · 10 · 16 · 25...). Se cuenta igual — revisá que sea lo que dice el plano y no una lectura equivocada.</div>`;
   }
+
+  // ---- Desglose de subidas, columna por columna (2026-08-28) ----
+  // El usuario sospechó que en una columna intermedia se contaba una sola subida en vez de las dos
+  // (la que sube y la que baja hacia la siguiente). Se verificó que las dos estaban contadas, pero
+  // el número era imposible de auditar: el resumen mostraba un total por calibre y nada más.
+  // Y hay un caso donde PARECE que falta una: cuando el calibre cambia justo en esa columna, la
+  // subida de entrada se suma a un calibre y la de salida al otro, así que mirando la fila de uno
+  // solo se ve la mitad. Este desglose lo hace explícito, renglón por renglón.
+  html += `<div style="margin-top:10px;">
+    <button type="button" class="btn-ghost" id="circDesgloseBtn" style="padding:4px 10px; font-size:12px;">Ver el detalle de las subidas ▾</button>
+    <div id="circDesglose" style="display:none; margin-top:8px;">${desgloseSubidasHtml()}</div>
+  </div>`;
+
   el.innerHTML = html;
+  const btnD = document.getElementById('circDesgloseBtn');
+  if(btnD) btnD.addEventListener('click', ()=>{
+    const d = document.getElementById('circDesglose');
+    const abierto = d.style.display !== 'none';
+    d.style.display = abierto ? 'none' : '';
+    btnD.textContent = abierto ? 'Ver el detalle de las subidas ▾' : 'Ocultar el detalle ▴';
+  });
   // La ganancia sale de esta misma cadena de puntos: se refresca acá para que los dos números no
   // puedan quedar contando cosas distintas.
   if(typeof actualizarGananciaSummary === 'function') actualizarGananciaSummary();
