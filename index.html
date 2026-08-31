@@ -11779,12 +11779,27 @@ function poblarParteObraDatalist(){
   // ==================================================================
   // ARRANQUE
   // ==================================================================
-  // La pantalla se redibuja sola cuando llegan datos de la nube: los listeners de Firestore ya
-  // llaman a renderAvanceTablero() y renderOt(), así que basta con refrescar el Inicio cada vez
-  // que la pestaña está a la vista. Un intervalo liviano alcanza y no toca nada de lo existente.
+  // La pantalla se refresca sola cuando llegan datos de la nube. Los listeners de Firestore ya
+  // llaman a renderAvanceTablero() y renderOt(), pero no saben nada del Inicio, así que acá se lo
+  // revisa cada tanto — sin tocar nada de lo existente.
+  // OJO: redibujar por redibujar es malo. Reescribir el HTML de las tarjetas cada 4 segundos hace
+  // parpadear la pantalla mientras alguien la está leyendo y gasta batería en el celular al pedo.
+  // Por eso primero se arma una FIRMA barata de lo que se muestra (cuántas plazas, su avance, su
+  // estado, cuántas órdenes) y solo se redibuja si esa firma cambió de verdad.
+  function firmaInicio(){
+    try{
+      return obras().map(a=>`${a.id}:${pctDePlaza(a)}:${a.estado}:${a.listaParaEncender?1:0}:${a.encendida?1:0}:${a.nombre}`).join('|')
+             + '#' + ordenes().length + '#' + computos().length + '#' + movs().length;
+    }catch(e){ return ''; }
+  }
+  let ultimaFirma = null;
   setInterval(()=>{
     const v = document.getElementById('viewInicio');
-    if(v && v.style.display !== 'none') renderInicio();
+    if(!v || v.style.display === 'none') return;
+    const f = firmaInicio();
+    if(f === ultimaFirma) return;     // no cambió nada: no se toca la pantalla
+    ultimaFirma = f;
+    renderInicio();
   }, 4000);
 
   renderMenu();
