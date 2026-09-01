@@ -1444,6 +1444,112 @@
   .mapa-num{ border:1.5px solid rgba(11,23,39,.55); font-weight:800; }
   .mapa-ref-dot{ border:2px solid #fff; box-shadow:0 0 0 1.5px rgba(11,23,39,.5); }
 
+
+  /* ==================================================================
+     PRODUCCIÓN POR PERSONA — 2026-08-31
+     ================================================================== */
+  .prod-filtros{ margin-bottom:18px; }
+  .prod-filtros-fila{ display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; }
+  .prod-filtros-fila > div{ flex:1 1 190px; min-width:0; }
+  .prod-filtros-fila label{ margin-top:0; }
+
+  .inf-num.ambar{ color:#b45309; }
+
+  /* El aviso de cómo leer los números. Va grande a propósito: es la advertencia que evita que
+     este tablero se use para algo que no puede sostener. */
+  .prod-aviso{
+    background:#fffbeb; border:1px solid #f0d090; color:#7a5a12;
+    border-radius:12px; padding:12px 15px; font-size:12.5px; line-height:1.6; margin-bottom:18px;
+  }
+
+  .prod-persona{ margin-top:0; }
+  .prod-persona + .prod-persona{ margin-top:14px; }
+  .prod-persona-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+  .prod-nombre{ font-size:16px; font-weight:800; color:var(--text); letter-spacing:-.2px; }
+  .prod-rol{ font-size:12px; color:var(--text-soft); margin-top:2px; }
+  .prod-cifras{ display:flex; gap:22px; text-align:right; }
+  .prod-pts{ font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:24px; font-weight:700; color:var(--navy); line-height:1.05; }
+  .prod-pts.chico{ font-size:18px; color:var(--teal-dark); }
+  .prod-lbl{ font-size:10.5px; color:var(--text-soft); text-transform:uppercase; letter-spacing:.4px; margin-top:2px; }
+  .prod-barra{ height:6px; border-radius:999px; background:#eaeff5; overflow:hidden; margin:12px 0 11px; }
+  .prod-barra > span{ display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,var(--teal),var(--teal-dark)); }
+  .prod-tareas{ display:flex; gap:7px; flex-wrap:wrap; }
+  .prod-chip{
+    background:var(--panel); border:1px solid var(--border); border-radius:999px;
+    padding:4px 11px; font-size:11.5px; color:var(--text-soft);
+  }
+  .prod-chip b{ color:var(--text); font-weight:700; }
+
+  .prod-pesos{ display:grid; grid-template-columns:repeat(auto-fill, minmax(190px,1fr)); gap:12px; margin-top:12px; }
+  .prod-peso{ display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:9px 12px; }
+  .prod-peso input{ width:76px; text-align:right; }
+
+
+  /* Nómina del personal (2026-08-31) */
+  .per-aviso{ border-radius:10px; padding:9px 12px; font-size:12.5px; line-height:1.5; margin-bottom:10px; }
+  .per-aviso.ambar{ background:#fffbeb; border:1px solid #f0d090; color:#7a5a12; }
+  .per-aviso.rojo { background:#fef2f2; border:1px solid #f3b4b4; color:#9b1c1c; }
+  #tablaPersonal input[type="text"], #tablaPersonal select{ padding:7px 9px; font-size:13px; }
+  .per-legajo{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+  .per-legajo.falta{ background:#fffbeb; border-color:#e8c96a; }
+  .prod-legajo{ font-family:var(--mono); font-weight:700; color:var(--teal-dark); }
+  .prod-sinlegajo{ color:var(--amber); font-weight:700; }
+
+  /* ---------- Cuadro para cerrar la orden ---------- */
+  #cierreOt{ position:fixed; inset:0; z-index:1000; }
+  #cierreOt .menu-fondo{ position:absolute; inset:0; background:rgba(11,23,39,.5); opacity:0; transition:opacity .18s; }
+  #cierreOt.abierto .menu-fondo{ opacity:1; }
+  .cierre-panel{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-46%) scale(.97);
+    width:min(620px, 94vw); max-height:88vh; background:#fff; border-radius:18px;
+    box-shadow:0 20px 60px rgba(15,30,51,.3); display:flex; flex-direction:column;
+    opacity:0; transition:opacity .18s, transform .18s;
+  }
+  #cierreOt.abierto .cierre-panel{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  .cierre-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    padding:18px 20px 14px; border-bottom:1px solid var(--border); }
+  .cierre-titulo{ font-size:16px; font-weight:800; color:var(--navy); }
+  .cierre-sub{ font-size:12.5px; color:var(--text-soft); margin-top:3px; }
+  .cierre-cuerpo{ padding:16px 20px; overflow-y:auto; }
+  .cierre-pie{ display:flex; align-items:center; gap:10px; padding:14px 20px;
+    border-top:1px solid var(--border); background:var(--panel); border-radius:0 0 18px 18px; flex-wrap:wrap; }
+
+  .cierre-tabla{ margin-top:10px; }
+  .cierre-tabla td{ vertical-align:top; }
+  .cierre-un{ font-size:11px; color:var(--text-soft); margin-top:2px; line-height:1.4; }
+  .cierre-cant{ display:flex; align-items:center; gap:6px; }
+  .cierre-cant input{ width:82px; text-align:right; }
+  .cierre-cant span{ font-size:11.5px; color:var(--text-soft); }
+  .cierre-pts{ font-family:var(--mono); font-weight:700; color:var(--teal-dark); }
+  .cierre-total{ text-align:right; font-size:14px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+  .cierre-total b{ color:var(--navy); font-family:var(--mono); }
+  .cierre-sub-titulo{ font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.6px;
+    color:var(--navy); margin-top:20px; margin-bottom:8px; }
+  .cierre-chk{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text); margin:0 0 10px; }
+  .cierre-chk input{ width:auto; }
+  .cierre-reparto{ display:grid; gap:8px; }
+  .cierre-persona{ display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:9px 12px; }
+  .cierre-persona input{ width:92px; text-align:right; }
+  .cierre-persona input.auto{ background:#eef2f7; color:var(--text-soft); }
+
+  .btn-cerrar-ot{ border-color:var(--teal) !important; color:var(--teal-dark) !important; }
+
+  @media (max-width:640px){
+    .prod-cifras{ gap:16px; }
+    .prod-pts{ font-size:20px; }
+    .cierre-panel{ width:100vw; max-width:100vw; max-height:100vh; height:100vh;
+      border-radius:0; top:0; left:0; transform:none; }
+    #cierreOt.abierto .cierre-panel{ transform:none; }
+    .cierre-pie{ border-radius:0; }
+  }
+
+  @media print{
+    #cierreOt{ display:none !important; }
+    .prod-aviso{ background:#fff; }
+  }
+
   @media print{
     .subtabs{ display:none !important; }
     /* En el papel del informe se imprime el cuadro completo, no la tarjeta que se esté mirando. */
@@ -2502,6 +2608,89 @@
         <div class="hint" id="catTablaCount" style="margin-top:10px;"></div>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- ============ PRODUCCIÓN (2026-08-31) ============
+     Cuánto produjo cada persona, a partir de lo que se carga al CERRAR cada orden de trabajo.
+     Se dibuja entera desde `renderProduccion()`, que solo LEE `ordenesTrabajo` y el baremo. -->
+<div class="wrap" id="viewProduccion" style="display:none">
+  <div class="subtabs no-print" id="subtabsProd"></div>
+
+  <div id="prodPanelProduccion">
+    <div class="prod-filtros card no-print">
+      <div class="prod-filtros-fila">
+        <div>
+          <label>Período</label>
+          <select id="prodPeriodo">
+            <option value="semana">Esta semana</option>
+            <option value="semana_ant">Semana pasada</option>
+            <option value="mes" selected>Este mes</option>
+            <option value="mes_ant">Mes pasado</option>
+            <option value="todo">Todo</option>
+          </select>
+        </div>
+        <div>
+          <label>Cuadrilla</label>
+          <select id="prodCuadrilla"><option value="">Todas</option></select>
+        </div>
+        <div>
+          <label>Plaza</label>
+          <select id="prodPlaza"><option value="">Todas</option></select>
+        </div>
+        <button type="button" class="btn-ghost" onclick="imprimir()" style="align-self:flex-end;">🖨 Imprimir</button>
+      </div>
+      <div class="hint" id="prodNota" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="inf-tiles" id="prodTiles"></div>
+    <div class="prod-aviso no-print" id="prodAviso"></div>
+    <div id="prodPersonas"></div>
+  </div>
+
+  <div id="prodPanelPersonal" style="display:none;">
+    <div class="card">
+      <div class="card-header-row">
+        <div>
+          <h2 style="margin:0;"><span class="dot"></span>Personal del equipo</h2>
+          <div class="hint" style="margin-top:3px;">La nómina con el <b>legajo</b> de cada uno. De acá sale la lista que aparece al cargar la cuadrilla en una orden de trabajo, para que el nombre se escriba siempre igual.</div>
+        </div>
+        <button type="button" class="btn-primary no-print" style="width:auto; margin:0; padding:9px 16px; font-size:13px;" onclick="guardarPersonalEquipo()">Guardar</button>
+      </div>
+      <div id="personalAvisos"></div>
+      <div style="overflow-x:auto;">
+        <table id="tablaPersonal"><thead><tr>
+          <th style="width:110px;">Legajo</th><th>Nombre y apellido</th><th style="width:160px;">Rol habitual</th>
+          <th style="width:80px; text-align:center;">Activo</th><th class="no-print" style="width:40px;"></th>
+        </tr></thead><tbody id="personalBody"></tbody></table>
+      </div>
+      <button type="button" class="btn-auto no-print" onclick="agregarFilaPersonal()">+ Agregar persona</button>
+      <div class="hint" id="personalMsg" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <div id="prodPanelBaremo" style="display:none;">
+    <div class="card">
+      <div class="card-header-row">
+        <div>
+          <h2 style="margin:0;"><span class="dot"></span>Cuánto vale cada tarea</h2>
+          <div class="hint" style="margin-top:3px;">Los puntos por unidad de cada tarea. Estos valores son un <b>punto de partida</b> — nadie sabe mejor que vos cuánto cuesta cada cosa en tu obra. Cambialos y se guardan para todo el equipo.</div>
+        </div>
+        <button type="button" class="btn-primary no-print" style="width:auto; margin:0; padding:9px 16px; font-size:13px;" onclick="guardarBaremo()">Guardar</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="tablaBaremo"><thead><tr>
+          <th style="width:44%">Tarea</th><th>Se mide en</th><th style="text-align:right;">Puntos por unidad</th>
+        </tr></thead><tbody id="baremoBody"></tbody></table>
+      </div>
+      <div class="hint" id="baremoMsg" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h2><span class="dot"></span>Cuánto pesa cada rol</h2>
+      <div class="hint" style="margin-top:0;">Cuando una cuadrilla hace una tarea junta, los puntos se reparten con estos pesos. Un oficial en 1,0 y un ayudante en 0,6 significa que de cada 16 puntos, 10 van al oficial y 6 al ayudante.</div>
+      <div class="prod-pesos" id="pesosBody"></div>
     </div>
   </div>
 </div>
@@ -8904,6 +9093,7 @@ function renderOt(){
       </select></td>
       <td class="no-print" style="white-space:nowrap;">
         <button class="btn-ghost" onclick="verOrdenTrabajo('${o.id}')" style="padding:4px 8px; font-size:12px;" title="Volver a mostrar la orden completa">👁</button>
+        <button class="btn-ghost btn-cerrar-ot" onclick="abrirCierreOt('${o.id}')" style="padding:4px 8px; font-size:12px;" title="Cargar lo que se hizo de verdad — de acá salen los puntos de cada persona" ${dis}>📥</button>
         <button class="btn-ghost" onclick="editarOrdenTrabajo('${o.id}')" style="padding:4px 8px; font-size:12px;" title="Abrir para corregir" ${dis}>✏</button>
         <button class="btn-ghost" onclick="imprimirOrdenTrabajo('${o.id}')" style="padding:4px 8px; font-size:12px;" title="Imprimir / Guardar PDF">🖨</button>
         <button class="btn-ghost" onclick="eliminarOrdenTrabajo('${o.id}')" style="padding:4px 8px; font-size:12px; color:var(--danger);" title="Eliminar del registro" ${dis}>🗑</button>
@@ -11413,6 +11603,18 @@ function poblarParteObraDatalist(){
       if(typeof window.renderPlanGrid === 'function') window.renderPlanGrid();
     }, err => console.error('Error escuchando la planificación semanal:', err));
 
+    // Baremo de tareas (2026-08-31) — un solo documento, compartido por todo el equipo.
+    fbDb.collection('configEquipo').doc('baremo').onSnapshot(doc => {
+      window.__baremoNube = doc.exists ? doc.data() : null;
+      if(typeof window.aplicarBaremoDeLaNube === 'function') window.aplicarBaremoDeLaNube();
+    }, err => console.error('Error escuchando el baremo de tareas:', err));
+
+    // Nómina del personal (2026-08-31) — compartida, para que el legajo sea el mismo en todos lados.
+    fbDb.collection('configEquipo').doc('personal').onSnapshot(doc => {
+      window.__personalNube = doc.exists ? doc.data() : null;
+      if(typeof window.aplicarPersonalDeLaNube === 'function') window.aplicarPersonalDeLaNube();
+    }, err => console.error('Error escuchando la nómina del personal:', err));
+
     // Historial de cómputos de la Calculadora (2026-08-27) — ahora compartido.
     fbDb.collection('historialCalculos').onSnapshot(snapshot => {
       // OJO: `docId`, no `id`. En estos registros `id` ya es el ID DE OBRA que se carga en la
@@ -11558,6 +11760,23 @@ function poblarParteObraDatalist(){
     await fbDb.collection('planSemanal').doc(id).delete();
   };
 
+  // ---- Baremo de tareas y pesos por rol (2026-08-31) ----
+  // Cuánto vale cada tarea en puntos y cuánto pesa cada rol al repartirlos. Va COMPARTIDO en un
+  // único documento: si cada computadora tuviera su propia tabla, los puntos de una persona no se
+  // podrían comparar con los de otra y el número entero no serviría para nada.
+  window.fbBaremoGuardar = async function(datos){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    await fbDb.collection('configEquipo').doc('baremo').set(datos, { merge:true });
+  };
+  // ---- Personal del equipo con su legajo (2026-08-31) ----
+  // El legajo es lo que identifica a cada uno de verdad. Hay dos Toledo y dos González en la
+  // nómina: si la producción se agrupara por lo que alguien tipeó a mano en la orden, dos personas
+  // distintas podrían terminar sumando en el mismo montón.
+  window.fbPersonalGuardar = async function(datos){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    await fbDb.collection('configEquipo').doc('personal').set(datos, { merge:true });
+  };
+
   // ---- Historial de cómputos de la Calculadora (2026-08-27) ----
   // Antes vivía en el localStorage de cada navegador, así que un cómputo hecho en el pañol no se
   // veía desde otra computadora y "Traer plaza calculada" solo funcionaba donde se había calculado.
@@ -11612,8 +11831,29 @@ function poblarParteObraDatalist(){
   <button type="button" class="nav-item" data-vista="parte"><span class="nav-ico">📋</span><span class="nav-txt">Órdenes</span><span class="nav-badge" id="navBadgeOt"></span></button>
   <button type="button" class="nav-item" data-vista="avance"><span class="nav-ico">📊</span><span class="nav-txt">Obras</span><span class="nav-badge" id="navBadgeObras"></span></button>
   <button type="button" class="nav-item" data-vista="mapa"><span class="nav-ico">🗺</span><span class="nav-txt">Mapa</span></button>
+  <button type="button" class="nav-item" data-vista="produccion"><span class="nav-ico">🏅</span><span class="nav-txt">Producción</span></button>
   <button type="button" class="nav-item" id="navMas" onclick="abrirMenuLateral()"><span class="nav-ico">⋯</span><span class="nav-txt">Más</span></button>
 </nav>
+
+<!-- Cuadro para cerrar una orden: cuánto se hizo de cada tarea y cómo se reparte. -->
+<div id="cierreOt" class="no-print" style="display:none;">
+  <div class="menu-fondo" onclick="cerrarCuadroCierre()"></div>
+  <div class="cierre-panel">
+    <div class="cierre-head">
+      <div>
+        <div class="cierre-titulo" id="cierreTitulo">Cerrar la orden</div>
+        <div class="cierre-sub" id="cierreSub"></div>
+      </div>
+      <button type="button" class="menu-cerrar" onclick="cerrarCuadroCierre()" aria-label="Cerrar">×</button>
+    </div>
+    <div class="cierre-cuerpo" id="cierreCuerpo"></div>
+    <div class="cierre-pie">
+      <div class="hint" id="cierreMsg" style="margin:0; flex:1;"></div>
+      <button type="button" class="btn-ghost" onclick="cerrarCuadroCierre()">Cancelar</button>
+      <button type="button" class="btn-primary" style="width:auto; margin:0; padding:10px 18px;" onclick="guardarCierreOt()">Guardar lo hecho</button>
+    </div>
+  </div>
+</div>
 
 <div id="menuLateral" class="no-print" style="display:none;">
   <div class="menu-fondo" onclick="cerrarMenuLateral()"></div>
@@ -12111,6 +12351,688 @@ function poblarParteObraDatalist(){
   };
 
   pintarSubtabsStock();
+})();
+</script>
+
+
+<script>
+/* ============================================================
+   PRODUCCIÓN POR PERSONA — 2026-08-31
+   ============================================================
+   Todo lo de este bloque es NUEVO y no modifica ninguna función existente.
+   Cómo funciona, en una frase: cada tarea vale puntos por unidad; al CERRAR una orden se carga
+   cuánto se hizo; esos puntos se reparten entre la gente que fue, según el peso de su rol.
+
+   LO QUE ESTE NÚMERO ES Y LO QUE NO ES
+   Mide lo que produjo la CUADRILLA, repartido por una convención (el peso del rol). No es una
+   medición de cada persona: cuando tres tipos arman nueve tableritos juntos, nadie puede decir
+   cuál hizo cuál. Sirve para ver ritmo, comparar semanas y planificar; NO sirve solo para decidir
+   un sueldo o una sanción. Eso está escrito también en la pantalla, a propósito, para que el que
+   la mira dentro de seis meses lo sepa.
+   ============================================================ */
+(function(){
+  'use strict';
+
+  function leer(f){ try{ const v=f(); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
+  const ordenes = ()=> leer(()=> ordenesTrabajo);
+  const obras   = ()=> leer(()=> avanceObras);
+  const esc = (t)=> (typeof escHtml==='function') ? escHtml(t) : String(t==null?'':t);
+  const num = (v,d)=>{ const n=parseFloat(v); return isFinite(n)?n:(d||0); };
+
+  // ==================================================================
+  // BAREMO: cuánto vale cada tarea
+  // ==================================================================
+  // El ancla la puso el usuario: «armar un tablerito de columna vale 3 puntos». El resto se estimó
+  // en proporción a eso, con el criterio de cuánto lleva cada cosa en una cuadrilla normal. SON
+  // ESTIMACIONES: la pantalla lo dice y los valores se editan. Si el zanjeo por metro está mal
+  // puesto, el número de todos los que zanjean sale mal — por eso conviene calibrarlo con una
+  // semana real antes de mirarlo en serio.
+  const BAREMO_DEFECTO = {
+    fundaciones:        { un:'base',      pts:5    },
+    zanjeo:             { un:'metro',     pts:0.4  },
+    cruce_calzada:      { un:'cruce',     pts:15   },
+    tendido_cable:      { un:'metro',     pts:0.15 },
+    galpon_prep:        { un:'columna',   pts:2    },
+    montaje_prfv:       { un:'columna',   pts:4    },
+    montaje_metalica:   { un:'columna',   pts:5    },
+    vinculo_luminaria:  { un:'artefacto', pts:1.5  },
+    bpn:                { un:'columna',   pts:3    },   // ← el ancla: el tablerito de columna
+    base_tablero_nivel: { un:'base',      pts:12   },
+    tablero:            { un:'tablero',   pts:8    },
+    pat:                { un:'jabalina',  pts:3    },
+    acometida:          { un:'acometida', pts:6    },
+    retiro_columna:     { un:'columna',   pts:3    },
+    retiro_tablero:     { un:'tablero',   pts:4    },
+    poda:               { un:'árbol',     pts:1.5  },
+    verificacion:       { un:'plaza',     pts:3    },
+    inspeccion_pruebas: { un:'plaza',     pts:8    },
+    cierre_documentacion:{un:'plaza',     pts:5    },
+  };
+  // Peso de cada rol al repartir. El capataz coordina y también trabaja; el sereno cuida, no produce.
+  const PESOS_DEFECTO = { 'Oficial':1, 'Medio oficial':0.8, 'Ayudante':0.6, 'Capataz':1, 'Chofer':0.4, 'Sereno':0.2 };
+  const PTS_TAREA_MANUAL = 2;   // una tarea escrita a mano, sin baremo, vale esto por unidad
+
+  // ==================================================================
+  // NÓMINA DEL PERSONAL
+  // ==================================================================
+  // Cargada con la lista real que pasó el usuario el 31/08/2026, TAL CUAL la escribió: no se
+  // reordenó nombre/apellido ni se corrigió ninguna ortografía por cuenta propia. En una lista de
+  // legajos, «arreglar» el nombre de alguien adivinando es peor que dejarlo como vino.
+  // Dos cosas quedaron marcadas para que él las cierre:
+  //   · Franco Nahuel Esequiel González vino SIN LEGAJO. Se deja vacío y la pantalla lo avisa en
+  //     ámbar. No se inventa un número: un legajo equivocado en una planilla es un problema real.
+  //   · «Lastra Sergi Ariel» — «Sergi» parece un tipeo de «Sergio», pero es un nombre propio y no
+  //     se toca sin confirmación.
+  // Ojo con los homónimos: hay DOS Toledo y DOS González. Por eso el que manda es el legajo.
+  const PERSONAL_DEFECTO = [
+    { legajo:'51251', nombre:'Mauricio Mainini',                     rol:'Oficial',  activo:true },
+    { legajo:'51115', nombre:'Pablo Maximiliano Picone',             rol:'Oficial',  activo:true },
+    { legajo:'51302', nombre:'Lastra Sergi Ariel',                   rol:'Oficial',  activo:true },
+    { legajo:'51316', nombre:'Víctor Exequiel Franco',               rol:'Ayudante', activo:true },
+    { legajo:'',      nombre:'Franco Nahuel Esequiel González',      rol:'Ayudante', activo:true },
+    { legajo:'51146', nombre:'Marcos Marcelo González',              rol:'Ayudante', activo:true },
+    { legajo:'51222', nombre:'Leandro Luis Damián Toledo Ontivero',  rol:'Ayudante', activo:true },
+    { legajo:'51320', nombre:'Marcos Mancloba',                      rol:'Ayudante', activo:true },
+    { legajo:'51299', nombre:'Ulises Toledo',                        rol:'Ayudante', activo:true },
+    { legajo:'51151', nombre:'Herrera Juan Carlos',                  rol:'Oficial',  activo:true },
+  ];
+  let nomina = JSON.parse(JSON.stringify(PERSONAL_DEFECTO));
+
+  function aplicarPersonalDeLaNube(){
+    const d = window.__personalNube;
+    if(d && Array.isArray(d.nomina) && d.nomina.length) nomina = d.nomina;
+    pintarDatalistPersonal();
+    const v = document.getElementById('viewProduccion');
+    if(v && v.style.display !== 'none' && subProd === 'personal') renderPersonalEquipo();
+  }
+  window.aplicarPersonalDeLaNube = aplicarPersonalDeLaNube;
+
+  function legajoDe(nombre){
+    const n = String(nombre||'').trim().toLowerCase();
+    const p = nomina.find(x=>String(x.nombre||'').trim().toLowerCase() === n);
+    return p ? (p.legajo||'') : null;   // null = no está en la nómina
+  }
+
+  // ---- La lista que aparece al tipear el nombre en la orden de trabajo ----
+  function pintarDatalistPersonal(){
+    let dl = document.getElementById('personalLista');
+    if(!dl){
+      dl = document.createElement('datalist');
+      dl.id = 'personalLista';
+      document.body.appendChild(dl);
+    }
+    dl.innerHTML = nomina.filter(p=>p.activo !== false && String(p.nombre||'').trim())
+      .map(p=>`<option value="${esc(p.nombre)}">${p.legajo?'Legajo '+esc(p.legajo):'sin legajo'} · ${esc(p.rol||'')}</option>`).join('');
+  }
+
+  // La orden de trabajo dibuja sus filas de personal con `renderPersonal()`. No se toca esa
+  // función: se la ENVUELVE para engancharle la lista de nombres a cada casillero después de que
+  // dibuja. Así el nombre se elige en vez de escribirse, y sale igual todas las veces.
+  if(typeof window.renderPersonal === 'function'){
+    const renderPersonalOriginal = window.renderPersonal;
+    window.renderPersonal = function(){
+      const r = renderPersonalOriginal.apply(this, arguments);
+      pintarDatalistPersonal();
+      document.querySelectorAll('#personalContainer input[data-field="nombre"]')
+        .forEach(i=>{ i.setAttribute('list','personalLista'); i.placeholder = 'Elegí de la lista o escribí'; });
+      return r;
+    };
+  }
+
+  function renderPersonalEquipo(){
+    const body = document.getElementById('personalBody');
+    if(!body) return;
+    const roles = (typeof ROLES_CUADRILLA !== 'undefined') ? ROLES_CUADRILLA : ['Oficial'];
+    body.innerHTML = nomina.map((p,i)=>`<tr data-i="${i}">
+      <td><input type="text" class="per-legajo${p.legajo?'':' falta'}" value="${esc(p.legajo||'')}" placeholder="sin legajo"></td>
+      <td><input type="text" class="per-nombre" value="${esc(p.nombre||'')}"></td>
+      <td><select class="per-rol">${roles.map(r=>`<option value="${esc(r)}" ${r===p.rol?'selected':''}>${esc(r)}</option>`).join('')}</select></td>
+      <td style="text-align:center;"><input type="checkbox" class="per-activo" ${p.activo!==false?'checked':''}></td>
+      <td class="no-print"><button type="button" class="tramo-remove" onclick="quitarFilaPersonal(${i})" title="Quitar de la nómina">×</button></td>
+    </tr>`).join('');
+
+    // Avisos: legajos que faltan, legajos repetidos y nombres repetidos.
+    const av = document.getElementById('personalAvisos');
+    if(av){
+      const sin = nomina.filter(p=>!String(p.legajo||'').trim() && String(p.nombre||'').trim());
+      const cuentaLeg = {}, cuentaNom = {};
+      nomina.forEach(p=>{
+        const l=String(p.legajo||'').trim(); if(l) cuentaLeg[l]=(cuentaLeg[l]||0)+1;
+        const n=String(p.nombre||'').trim().toLowerCase(); if(n) cuentaNom[n]=(cuentaNom[n]||0)+1;
+      });
+      const legRep = Object.keys(cuentaLeg).filter(k=>cuentaLeg[k]>1);
+      const nomRep = Object.keys(cuentaNom).filter(k=>cuentaNom[k]>1);
+      let html='';
+      if(sin.length) html += `<div class="per-aviso ambar">⚠ <b>Sin legajo:</b> ${sin.map(p=>esc(p.nombre)).join(', ')}. Completalo — el legajo es lo que distingue a dos personas con el mismo apellido.</div>`;
+      if(legRep.length) html += `<div class="per-aviso rojo">⚠ <b>Legajo repetido:</b> ${legRep.join(', ')}. Dos personas no pueden tener el mismo.</div>`;
+      if(nomRep.length) html += `<div class="per-aviso rojo">⚠ <b>Nombre repetido:</b> ${nomRep.join(', ')}. Como en la orden de trabajo se escribe el nombre, dos iguales suman en el mismo montón.</div>`;
+      av.innerHTML = html;
+    }
+  }
+  window.renderPersonalEquipo = renderPersonalEquipo;
+
+  function leerTablaPersonal(){
+    const filas = [...document.querySelectorAll('#personalBody tr')];
+    return filas.map(tr=>({
+      legajo: (tr.querySelector('.per-legajo').value||'').trim(),
+      nombre: (tr.querySelector('.per-nombre').value||'').trim(),
+      rol:    tr.querySelector('.per-rol').value,
+      activo: tr.querySelector('.per-activo').checked
+    })).filter(p=>p.nombre);
+  }
+  window.agregarFilaPersonal = function(){
+    nomina = leerTablaPersonal();
+    nomina.push({ legajo:'', nombre:'', rol:'Ayudante', activo:true });
+    renderPersonalEquipo();
+  };
+  window.quitarFilaPersonal = function(i){
+    const actual = leerTablaPersonal();
+    const p = nomina[i];
+    if(p && p.nombre && !confirm(`¿Sacar a «${p.nombre}» de la nómina?\n\nLo que ya produjo no se borra: sigue apareciendo en los períodos donde trabajó.`)) return;
+    actual.splice(i,1);
+    nomina = actual;
+    renderPersonalEquipo();
+  };
+  window.guardarPersonalEquipo = async function(){
+    nomina = leerTablaPersonal();
+    pintarDatalistPersonal();
+    renderPersonalEquipo();
+    const msg = document.getElementById('personalMsg');
+    msg.style.color = 'var(--text-soft)'; msg.textContent = 'Guardando…';
+    if(!window.__fbUser){
+      msg.style.color = 'var(--amber)';
+      msg.textContent = 'Se aplicó en esta computadora. Para que la vea todo el equipo hace falta iniciar sesión (pestaña Pañol).';
+      return;
+    }
+    try{
+      await window.fbPersonalGuardar({ nomina, ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
+      msg.style.color = 'var(--teal-dark)';
+      msg.textContent = `✔ Guardado. ${nomina.length} persona(s) en la nómina, para todo el equipo.`;
+    }catch(e){
+      msg.style.color = 'var(--danger)';
+      msg.textContent = 'No se pudo guardar en la base compartida (revisá la conexión). El cambio quedó solo acá.';
+    }
+  };
+
+  let baremo = JSON.parse(JSON.stringify(BAREMO_DEFECTO));
+  let pesos  = { ...PESOS_DEFECTO };
+
+  function aplicarBaremoDeLaNube(){
+    const b = window.__baremoNube;
+    if(!b) return;
+    if(b.baremo && typeof b.baremo === 'object'){
+      Object.keys(baremo).forEach(k=>{ if(b.baremo[k]) baremo[k] = { ...baremo[k], ...b.baremo[k] }; });
+      Object.keys(b.baremo).forEach(k=>{ if(!baremo[k]) baremo[k] = b.baremo[k]; });
+    }
+    if(b.pesos && typeof b.pesos === 'object') pesos = { ...PESOS_DEFECTO, ...b.pesos };
+    const v = document.getElementById('viewProduccion');
+    if(v && v.style.display !== 'none') renderProduccion();
+  }
+  window.aplicarBaremoDeLaNube = aplicarBaremoDeLaNube;
+
+  function tareaLabel(id){
+    const c = (typeof ACTIVIDADES_CATALOGO !== 'undefined') ? ACTIVIDADES_CATALOGO.find(x=>x.id===id) : null;
+    return c ? c.label : id;
+  }
+
+  // ==================================================================
+  // PUNTOS DE UNA ORDEN CERRADA
+  // ==================================================================
+  // Devuelve, para una orden con cierre cargado: el total de puntos y cuánto le toca a cada persona.
+  function puntosDeOrden(o){
+    const c = o && o.cierre;
+    if(!c || !c.cantidades) return null;
+
+    const renglones = [];
+    let total = 0;
+    Object.keys(c.cantidades).forEach(k=>{
+      const cant = num(c.cantidades[k]);
+      if(cant <= 0) return;
+      const esManual = k.startsWith('m:');
+      const def = esManual ? { un:'unidad', pts:PTS_TAREA_MANUAL } : (baremo[k] || { un:'unidad', pts:PTS_TAREA_MANUAL });
+      const pts = cant * num(def.pts);
+      total += pts;
+      renglones.push({ tarea: esManual ? k.slice(2) : tareaLabel(k), cant, un:def.un, ptsUnit:num(def.pts), pts });
+    });
+
+    // Reparto entre la gente que fue. Si al cerrar se cargó un reparto a mano, manda ése.
+    const gente = (o.personal||[]).filter(p=>String(p.nombre||'').trim());
+    const porPersona = [];
+    if(gente.length){
+      const manual = c.reparto && Object.keys(c.reparto).length ? c.reparto : null;
+      if(manual){
+        gente.forEach(p=>{
+          const n = String(p.nombre).trim();
+          porPersona.push({ nombre:n, rol:p.rol||'', pts: num(manual[n], 0), aMano:true });
+        });
+      } else {
+        const suma = gente.reduce((t,p)=> t + num(pesos[p.rol], 0.6), 0) || 1;
+        gente.forEach(p=>{
+          const w = num(pesos[p.rol], 0.6);
+          porPersona.push({ nombre:String(p.nombre).trim(), rol:p.rol||'', pts: total * w / suma, aMano:false });
+        });
+      }
+    }
+    return { total, renglones, porPersona, fecha: c.fecha || o.fecha, obs: c.obs||'' };
+  }
+  window.puntosDeOrden = puntosDeOrden;
+
+  // ==================================================================
+  // CERRAR UNA ORDEN
+  // ==================================================================
+  let cierreOtId = null;
+
+  window.abrirCierreOt = function(id){
+    const o = ordenes().find(x=>x.id===id);
+    if(!o) return;
+    if(!window.__fbUser){ alert('Iniciá sesión (pestaña Pañol) para poder cargar lo que se hizo.'); return; }
+    cierreOtId = id;
+    const cont = document.getElementById('cierreCuerpo');
+    document.getElementById('cierreTitulo').textContent = `Cerrar ${o.numero||'la orden'}`;
+    document.getElementById('cierreSub').textContent =
+      `${o.plazaNombre||'(sin plaza)'} · ${o.fecha ? formatFechaCorta(o.fecha) : ''}${o.cuadrilla?' · '+o.cuadrilla:''}`;
+    document.getElementById('cierreMsg').textContent = '';
+
+    const c = o.cierre || {};
+    const cant = c.cantidades || {};
+    const tareas = [
+      ...(o.actividades||[]).map(id=>({ k:id, label:tareaLabel(id), def: baremo[id] || {un:'unidad', pts:PTS_TAREA_MANUAL}, enBaremo: !!baremo[id] })),
+      ...(o.actividadesManuales||[]).filter(a=>String(a.actividad||'').trim())
+        .map(a=>({ k:'m:'+a.actividad.trim(), label:a.actividad.trim(), def:{un:'unidad', pts:PTS_TAREA_MANUAL}, enBaremo:false })),
+    ];
+
+    let html = '';
+    if(!tareas.length){
+      html += `<div class="hint" style="color:var(--amber);">Esta orden no tiene ninguna tarea tildada, así que no hay nada que contar. Editala y marcá qué se hizo.</div>`;
+    } else {
+      html += `<div class="hint" style="margin-top:0;">Cargá <b>cuánto se hizo de verdad</b> de cada tarea. Lo que quede en cero no suma puntos — sirve para dejar asentado que esa tarea no se llegó a hacer.</div>`;
+      html += `<table class="cierre-tabla"><thead><tr><th>Tarea</th><th style="width:130px;">Cantidad</th><th style="width:74px; text-align:right;">Puntos</th></tr></thead><tbody>`;
+      tareas.forEach(t=>{
+        html += `<tr>
+          <td><b>${esc(t.label)}</b><div class="cierre-un">${num(t.def.pts)} punto(s) por ${esc(t.def.un)}${t.enBaremo?'':' · <b>sin baremo</b>, se le da el valor genérico'}</div></td>
+          <td><div class="cierre-cant"><input type="number" min="0" step="any" class="cierre-qty" data-k="${esc(t.k)}" value="${cant[t.k]!=null?cant[t.k]:''}" placeholder="0"><span>${esc(t.def.un)}</span></div></td>
+          <td class="qty cierre-pts" data-k="${esc(t.k)}">0</td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      html += `<div class="cierre-total">Total de la jornada: <b><span id="cierreTotal">0</span> puntos</b></div>`;
+    }
+
+    const gente = (o.personal||[]).filter(p=>String(p.nombre||'').trim());
+    if(gente.length){
+      const manual = c.reparto && Object.keys(c.reparto).length;
+      html += `<div class="cierre-sub-titulo">Cómo se reparte entre los ${gente.length} que fueron</div>`;
+      html += `<label class="cierre-chk"><input type="checkbox" id="cierreManual" ${manual?'checked':''}> Repartir a mano (si no, se reparte por el peso de cada rol)</label>`;
+      html += `<div id="cierreReparto" class="cierre-reparto">`;
+      gente.forEach(p=>{
+        const n = String(p.nombre).trim();
+        html += `<div class="cierre-persona">
+          <div><b>${esc(n)}</b><div class="cierre-un">${esc(p.rol||'—')} · peso ${num(pesos[p.rol],0.6)}</div></div>
+          <input type="number" min="0" step="any" class="cierre-pers" data-n="${esc(n)}" value="${manual? num((c.reparto||{})[n]) : ''}">
+        </div>`;
+      });
+      html += `</div>`;
+    } else {
+      html += `<div class="hint" style="color:var(--amber);">Esta orden no tiene personal cargado, así que los puntos no se le pueden asignar a nadie. Editala y agregá quién fue.</div>`;
+    }
+
+    html += `<label style="margin-top:14px;">Observaciones de la jornada</label>
+      <textarea id="cierreObs" rows="2" placeholder="Ej: se paró a las 11 por lluvia; falta el cruce de calle">${esc(c.obs||'')}</textarea>`;
+
+    cont.innerHTML = html;
+    const caja = document.getElementById('cierreOt');
+    caja.style.display = '';
+    requestAnimationFrame(()=>caja.classList.add('abierto'));
+    recalcularCierre();
+  };
+
+  function recalcularCierre(){
+    let total = 0;
+    document.querySelectorAll('.cierre-qty').forEach(inp=>{
+      const k = inp.dataset.k;
+      const def = k.startsWith('m:') ? {pts:PTS_TAREA_MANUAL} : (baremo[k] || {pts:PTS_TAREA_MANUAL});
+      const pts = num(inp.value) * num(def.pts);
+      total += pts;
+      const celda = document.querySelector(`.cierre-pts[data-k="${CSS.escape(k)}"]`);
+      if(celda) celda.textContent = fmt(pts, Number.isInteger(pts)?0:1);
+    });
+    const el = document.getElementById('cierreTotal');
+    if(el) el.textContent = fmt(total, Number.isInteger(total)?0:1);
+
+    // Si el reparto es automático, se muestra cuánto le tocaría a cada uno.
+    const manual = (document.getElementById('cierreManual')||{}).checked;
+    const cajas = [...document.querySelectorAll('.cierre-pers')];
+    const o = ordenes().find(x=>x.id===cierreOtId);
+    const gente = o ? (o.personal||[]).filter(p=>String(p.nombre||'').trim()) : [];
+    const suma = gente.reduce((t,p)=> t + num(pesos[p.rol],0.6), 0) || 1;
+    cajas.forEach((inp,i)=>{
+      inp.readOnly = !manual;
+      inp.classList.toggle('auto', !manual);
+      // OJO: acá NO se puede usar fmt(). Devuelve «16,9» con COMA —el formato de acá— y un
+      // <input type="number"> rechaza cualquier valor que no sea un número con punto: lo deja
+      // VACÍO y no avisa nada. Los casilleros del reparto salían en blanco justamente por esto.
+      if(!manual && gente[i]){
+        inp.value = Math.round(total * num(pesos[gente[i].rol],0.6) / suma * 10) / 10;
+      }
+    });
+  }
+
+  window.cerrarCuadroCierre = function(){
+    const c = document.getElementById('cierreOt');
+    if(!c) return;
+    c.classList.remove('abierto');
+    setTimeout(()=>{ c.style.display='none'; }, 180);
+    cierreOtId = null;
+  };
+
+  window.guardarCierreOt = async function(){
+    const o = ordenes().find(x=>x.id===cierreOtId);
+    if(!o) return;
+    const msg = document.getElementById('cierreMsg');
+    const cantidades = {};
+    document.querySelectorAll('.cierre-qty').forEach(inp=>{
+      const v = num(inp.value);
+      if(v > 0) cantidades[inp.dataset.k] = v;
+    });
+    const manual = (document.getElementById('cierreManual')||{}).checked;
+    const reparto = {};
+    if(manual) document.querySelectorAll('.cierre-pers').forEach(inp=>{ reparto[inp.dataset.n] = num(inp.value); });
+
+    const cierre = {
+      cantidades, reparto: manual ? reparto : {},
+      obs: (document.getElementById('cierreObs')||{}).value || '',
+      fecha: o.fecha || '',
+      cerradoPor: (window.__fbUser && window.__fbUser.email) || '',
+      cerradoTs: Date.now()
+    };
+    msg.style.color = 'var(--text-soft)';
+    msg.textContent = 'Guardando…';
+    try{
+      await window.fbOtUpdate(o.id, { cierre });
+      o.cierre = cierre;                      // que se vea al instante, sin esperar a la nube
+      msg.style.color = 'var(--teal-dark)';
+      msg.textContent = '✔ Guardado.';
+      if(typeof renderOt === 'function') renderOt();
+      setTimeout(()=>{ cerrarCuadroCierre(); renderProduccion(); }, 500);
+    }catch(e){
+      msg.style.color = 'var(--danger)';
+      msg.textContent = 'No se pudo guardar (revisá la conexión a internet).';
+    }
+  };
+
+  document.getElementById('cierreCuerpo').addEventListener('input', recalcularCierre);
+  document.getElementById('cierreCuerpo').addEventListener('change', recalcularCierre);
+
+  // ==================================================================
+  // LA PANTALLA
+  // ==================================================================
+  let subProd = 'produccion';
+
+  function rangoPeriodo(){
+    const hoy = new Date();
+    const iso = d => fechaAISO(d);
+    const p = (document.getElementById('prodPeriodo')||{}).value || 'mes';
+    if(p === 'todo') return { desde:'0000-01-01', hasta:'9999-12-31', label:'todo el registro' };
+    if(p === 'semana' || p === 'semana_ant'){
+      const l = lunesDeSemana(iso(hoy));
+      const desde = p==='semana' ? l : sumarDias(l,-7);
+      const hasta = sumarDias(desde, 6);
+      return { desde, hasta, label:`semana del ${formatFechaCorta(desde)} al ${formatFechaCorta(hasta)}` };
+    }
+    const m = p==='mes' ? hoy.getMonth() : hoy.getMonth()-1;
+    const a = new Date(hoy.getFullYear(), m, 1), b = new Date(hoy.getFullYear(), m+1, 0);
+    return { desde:iso(a), hasta:iso(b), label:`${a.toLocaleDateString('es-AR',{month:'long', year:'numeric'})}` };
+  }
+
+  function ordenesDelPeriodo(){
+    const r = rangoPeriodo();
+    const cuad = (document.getElementById('prodCuadrilla')||{}).value || '';
+    const plaza = (document.getElementById('prodPlaza')||{}).value || '';
+    return ordenes().filter(o=>{
+      const f = (o.cierre && o.cierre.fecha) || o.fecha || '';
+      if(!f || f < r.desde || f > r.hasta) return false;
+      if(cuad && String(o.cuadrilla||'') !== cuad) return false;
+      if(plaza && String(o.plazaId||'') !== plaza) return false;
+      return true;
+    });
+  }
+
+  function poblarFiltros(){
+    const selC = document.getElementById('prodCuadrilla');
+    const selP = document.getElementById('prodPlaza');
+    if(selC){
+      const previo = selC.value;
+      const cuadrillas = [...new Set(ordenes().map(o=>String(o.cuadrilla||'').trim()).filter(Boolean))].sort();
+      selC.innerHTML = `<option value="">Todas</option>` + cuadrillas.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+      if(previo) selC.value = previo;
+    }
+    if(selP){
+      const previo = selP.value;
+      selP.innerHTML = `<option value="">Todas</option>` +
+        obras().slice().sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||'')))
+          .map(a=>`<option value="${esc(a.id)}">${esc(a.nombre)}</option>`).join('');
+      if(previo) selP.value = previo;
+    }
+  }
+
+  function renderProduccion(){
+    if(!document.getElementById('viewProduccion')) return;
+    poblarFiltros();
+    const r = rangoPeriodo();
+    const lista = ordenesDelPeriodo();
+    const cerradas = lista.filter(o=>o.cierre && o.cierre.cantidades && Object.keys(o.cierre.cantidades).length);
+    const abiertas = lista.length - cerradas.length;
+
+    // Acumular por persona
+    const gente = new Map();
+    let totalPts = 0;
+    cerradas.forEach(o=>{
+      const p = puntosDeOrden(o);
+      if(!p) return;
+      totalPts += p.total;
+      p.porPersona.forEach(pp=>{
+        if(!pp.nombre) return;
+        const g = gente.get(pp.nombre) || { nombre:pp.nombre, roles:new Set(), pts:0, dias:new Set(), plazas:new Set(), tareas:new Map(), aMano:false };
+        g.pts += pp.pts;
+        if(pp.rol) g.roles.add(pp.rol);
+        if(pp.aMano) g.aMano = true;
+        if(p.fecha) g.dias.add(p.fecha);
+        if(o.plazaNombre) g.plazas.add(o.plazaNombre);
+        // La CANTIDAD que se muestra es la de la cuadrilla, no una porción por persona. Repartir
+        // «9 columnas» entre tres y mostrar «3,8 columnas» inventa una precisión que no existe:
+        // nadie arma 3,8 tableritos. Los PUNTOS sí se reparten —esa es la convención declarada—;
+        // la cantidad se muestra como lo que es, el trabajo del equipo.
+        const cuota = p.total > 0 ? pp.pts / p.total : 0;
+        p.renglones.forEach(rg=>{
+          const t = g.tareas.get(rg.tarea) || { cant:0, un:rg.un, pts:0 };
+          t.cant += rg.cant; t.pts += rg.pts * cuota;
+          g.tareas.set(rg.tarea, t);
+        });
+        gente.set(pp.nombre, g);
+      });
+    });
+
+    const personas = [...gente.values()].sort((a,b)=> b.pts - a.pts);
+
+    // Recuadros de arriba
+    const diasTotales = new Set(); cerradas.forEach(o=>{ const f=(o.cierre&&o.cierre.fecha)||o.fecha; if(f) diasTotales.add(f); });
+    const tiles = document.getElementById('prodTiles');
+    if(tiles) tiles.innerHTML = [
+      { n: fmt(totalPts, Number.isInteger(totalPts)?0:1), l:'Puntos del equipo', c:'' },
+      { n: personas.length, l:'Personas con producción', c:'azul' },
+      { n: cerradas.length, l:'Órdenes cerradas', c:'verde' },
+      { n: abiertas, l:'Sin cerrar (no cuentan)', c: abiertas>0 ? 'ambar' : '' },
+    ].map(t=>`<div class="inf-tile"><div class="inf-num ${t.c}">${t.n}</div><div class="inf-lbl">${t.l}</div></div>`).join('');
+
+    const nota = document.getElementById('prodNota');
+    if(nota) nota.innerHTML = `Período: <b>${esc(r.label)}</b>. Se cuentan solo las órdenes que tienen cargado lo que se hizo.` +
+      (abiertas>0 ? ` Hay <b>${abiertas}</b> orden(es) de este período <b>sin cerrar</b>: su trabajo todavía no le suma a nadie.` : '');
+
+    const aviso = document.getElementById('prodAviso');
+    if(aviso) aviso.innerHTML = `⚖ <b>Cómo leer estos números.</b> Miden lo que produjo la <b>cuadrilla</b>, repartido según el peso de cada rol. Cuando tres personas arman nueve tableritos juntas, nadie puede decir cuál hizo cuál — el reparto es una convención, no una medición. Sirve para ver el ritmo del equipo y comparar semanas. <b>No alcanza, solo, para decidir un sueldo o una sanción.</b>`;
+
+    const cont = document.getElementById('prodPersonas');
+    if(!cont) return;
+    if(!personas.length){
+      cont.innerHTML = `<div class="inicio-vacio">
+        <div class="big">📋</div>
+        Todavía no hay ninguna orden cerrada en este período.<br>
+        Andá a <b>Órdenes de trabajo</b>, buscá la orden del día en el registro y tocá <b>📥</b> para cargar cuánto se hizo.
+      </div>`;
+      return;
+    }
+    const maxPts = personas[0].pts || 1;
+    cont.innerHTML = personas.map(g=>{
+      const dias = g.dias.size;
+      const porDia = dias ? g.pts/dias : 0;
+      const tareas = [...g.tareas.entries()].sort((a,b)=>b[1].pts-a[1].pts);
+      // El legajo se busca por el nombre que se tipeó en la orden. Si no aparece en la nómina, se
+      // avisa: casi siempre es un nombre mal escrito, y un nombre mal escrito parte la producción
+      // de una persona en dos montones sin que nadie se entere.
+      const lj = legajoDe(g.nombre);
+      const leg = lj === null
+        ? `<span class="prod-sinlegajo" title="Este nombre no figura en la nómina — puede estar mal escrito en la orden">⚠ no está en la nómina</span> · `
+        : (lj ? `<span class="prod-legajo">Legajo ${esc(lj)}</span> · ` : `<span class="prod-sinlegajo">sin legajo cargado</span> · `);
+      return `<div class="card prod-persona">
+        <div class="prod-persona-head">
+          <div>
+            <div class="prod-nombre">${esc(g.nombre)}</div>
+            <div class="prod-rol">${leg}${esc([...g.roles].join(' / ')||'—')} · ${dias} día${dias===1?'':'s'} · ${g.plazas.size} plaza${g.plazas.size===1?'':'s'}${g.aMano?' · <b>reparto a mano</b>':''}</div>
+          </div>
+          <div class="prod-cifras">
+            <div><div class="prod-pts">${fmt(g.pts, Number.isInteger(g.pts)?0:1)}</div><div class="prod-lbl">puntos</div></div>
+            <div><div class="prod-pts chico">${fmt(porDia,1)}</div><div class="prod-lbl">por día</div></div>
+          </div>
+        </div>
+        <div class="prod-barra"><span style="width:${Math.max(2, Math.round(g.pts/maxPts*100))}%"></span></div>
+        <div class="prod-tareas">${tareas.map(([t,d])=>
+          `<span class="prod-chip"><b>${esc(t)}</b> ${fmt(d.cant, Number.isInteger(d.cant)?0:1)} ${esc(d.un)}${d.cant===1?'':'s'} con la cuadrilla · <b>${fmt(d.pts,1)} pts</b></span>`
+        ).join('')}</div>
+      </div>`;
+    }).join('');
+  }
+  window.renderProduccion = renderProduccion;
+
+  // ---- Baremo editable ----
+  function renderBaremo(){
+    const body = document.getElementById('baremoBody');
+    if(!body) return;
+    const cat = (typeof ACTIVIDADES_CATALOGO !== 'undefined') ? ACTIVIDADES_CATALOGO : [];
+    body.innerHTML = cat.map(c=>{
+      const d = baremo[c.id] || { un:'unidad', pts:PTS_TAREA_MANUAL };
+      return `<tr>
+        <td><b>${esc(c.label)}</b></td>
+        <td><input type="text" class="bar-un" data-k="${esc(c.id)}" value="${esc(d.un)}" style="width:120px;"></td>
+        <td style="text-align:right;"><input type="number" min="0" step="any" class="bar-pts" data-k="${esc(c.id)}" value="${num(d.pts)}" style="width:92px; text-align:right;"></td>
+      </tr>`;
+    }).join('');
+    const pb = document.getElementById('pesosBody');
+    if(pb) pb.innerHTML = (typeof ROLES_CUADRILLA !== 'undefined' ? ROLES_CUADRILLA : []).map(r=>
+      `<div class="prod-peso"><label style="margin:0;">${esc(r)}</label><input type="number" min="0" step="0.1" class="bar-peso" data-r="${esc(r)}" value="${num(pesos[r],0.6)}"></div>`
+    ).join('');
+  }
+
+  window.guardarBaremo = async function(){
+    const msg = document.getElementById('baremoMsg');
+    const nuevo = {};
+    document.querySelectorAll('.bar-pts').forEach(inp=>{
+      const k = inp.dataset.k;
+      const un = (document.querySelector(`.bar-un[data-k="${CSS.escape(k)}"]`)||{}).value || 'unidad';
+      nuevo[k] = { un: String(un).trim() || 'unidad', pts: num(inp.value) };
+    });
+    const np = {};
+    document.querySelectorAll('.bar-peso').forEach(inp=>{ np[inp.dataset.r] = num(inp.value, 0.6); });
+    baremo = nuevo; pesos = np;
+    msg.style.color = 'var(--text-soft)'; msg.textContent = 'Guardando…';
+    if(!window.__fbUser){
+      msg.style.color = 'var(--amber)';
+      msg.textContent = 'Se aplicó en esta computadora, pero para que lo vea todo el equipo hace falta iniciar sesión (pestaña Pañol).';
+      renderProduccion(); return;
+    }
+    try{
+      await window.fbBaremoGuardar({ baremo:nuevo, pesos:np, ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
+      msg.style.color = 'var(--teal-dark)';
+      msg.textContent = '✔ Guardado. Ya lo ve todo el equipo, y los puntos de todas las órdenes se recalculan con estos valores.';
+      renderProduccion();
+    }catch(e){
+      msg.style.color = 'var(--danger)';
+      msg.textContent = 'No se pudo guardar en la base compartida (revisá la conexión). El cambio quedó aplicado solo acá.';
+    }
+  };
+
+  // ---- Sub-pestañas ----
+  function pintarSubtabsProd(){
+    const barra = document.getElementById('subtabsProd');
+    if(!barra) return;
+    barra.innerHTML = [
+      { id:'produccion', label:'Producción por persona' },
+      { id:'personal',   label:'Personal del equipo' },
+      { id:'baremo',     label:'Cuánto vale cada tarea' },
+    ].map(g=>`<button type="button" class="subtab${subProd===g.id?' activo':''}" data-sub="${g.id}">${g.label}</button>`).join('');
+    document.getElementById('prodPanelProduccion').style.display = subProd==='produccion' ? '' : 'none';
+    document.getElementById('prodPanelPersonal').style.display   = subProd==='personal'   ? '' : 'none';
+    document.getElementById('prodPanelBaremo').style.display     = subProd==='baremo'     ? '' : 'none';
+    if(subProd === 'baremo') renderBaremo();
+    else if(subProd === 'personal') renderPersonalEquipo();
+    else renderProduccion();
+  }
+
+  document.getElementById('subtabsProd').addEventListener('click', (e)=>{
+    const b = e.target.closest('.subtab');
+    if(!b) return;
+    subProd = b.dataset.sub;
+    pintarSubtabsProd();
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+  ['prodPeriodo','prodCuadrilla','prodPlaza'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('change', renderProduccion);
+  });
+
+  // ==================================================================
+  // ENGANCHE
+  // ==================================================================
+  const VISTAS_PROD = ['viewCalculadora','viewParteDiario','viewPlanificacion','viewAvance','viewMapa','viewStock','viewInforme','viewInicio'];
+  const anterior = window.mostrarVista;
+  window.mostrarVista = function(v){
+    const vp = document.getElementById('viewProduccion');
+    if(v === 'produccion'){
+      VISTAS_PROD.forEach(id=>{ const e=document.getElementById(id); if(e) e.style.display='none'; });
+      const f = document.getElementById('mainFooter'); if(f) f.style.display='none';
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      if(vp) vp.style.display = '';
+      pintarSubtabsProd();
+      document.querySelectorAll('#navAbajo .nav-item, #menuLista .menu-item')
+        .forEach(b=>b.classList.toggle('activo', b.dataset.vista==='produccion'));
+      window.scrollTo({top:0, behavior:'auto'});
+      return;
+    }
+    if(vp) vp.style.display = 'none';
+    anterior(v);
+  };
+
+  // Entrada nueva en el menú lateral, después de «Informe de avance».
+  const menuLista = document.getElementById('menuLista');
+  if(menuLista){
+    const obs = new MutationObserver(()=>{
+      if(document.getElementById('menuProduccion')) return;
+      const ref = menuLista.querySelector('.menu-item[data-vista="informe"]');
+      if(!ref) return;
+      const b = document.createElement('button');
+      b.type='button'; b.className='menu-item'; b.id='menuProduccion';
+      b.dataset.vista='produccion';
+      b.innerHTML = '<span class="menu-ico">🏅</span>Producción del personal';
+      ref.insertAdjacentElement('afterend', b);
+    });
+    obs.observe(menuLista, { childList:true });
+  }
+
+  aplicarBaremoDeLaNube();
+  aplicarPersonalDeLaNube();
+  // La orden de trabajo ya dibujó sus filas de personal al abrir la página, antes de que existiera
+  // esta envoltura. Se la vuelve a dibujar una vez para que esos casilleros también queden con la
+  // lista de nombres enganchada. Redibujar no pierde nada: sale del mismo array de siempre.
+  try{ if(typeof renderPersonal === 'function') renderPersonal(); }catch(e){}
 })();
 </script>
 
