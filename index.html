@@ -4617,6 +4617,47 @@ const ACTIVIDADES_CATALOGO = [
 2) Verificar el funcionamiento del fotocontrol (encendido/apagado automático).
 3) Completar la planilla de verificación con las observaciones que correspondan.` },
 
+  // ---- Inspección de plaza: pruebas de funcionamiento y de falla (2026-08-31) ----
+  // La pidió el usuario: *"falta un ítem que es inspección de una plaza, que es donde vamos a hacer
+  // pruebas de cortocircuito para ver que todo reaccione bien; quemamos un fusible para ver si actúa
+  // bien al hacer un corto a la luminaria y probamos que todo funcione"*.
+  // No es una costumbre de la cuadrilla: está EXIGIDO con ese nombre.
+  //   · Memoria del proyecto (7081 y Plaza Hípica), textual: «Una vez ejecutada la Obra y realizadas
+  //     las correspondientes PRUEBAS DE FUNCIONAMIENTO Y DE FALLA, la Contratista deberá presentar,
+  //     dentro del plazo de cuarenta y ocho (48) horas hábiles, planos Conforme a Obra, Certificado
+  //     de Instalación Eléctrica Apta, planillas de medición de puesta a tierra…».
+  //   · Pliego LP 21478, ítem 15.89: «verificación de funcionamiento, ACCIONAMIENTO DE PROTECCIONES,
+  //     medición de parámetros eléctricos para comprobar presencia de fase, consumos, prueba de
+  //     fotocontrol y seguridad electromecánica (existencia de puesta a tierra, estabilidad
+  //     mecánica…)». El ítem 15.90 agrega los megados para determinar el origen de fallas.
+  //   · Memoria Plaza Hípica: las mediciones de PAT van ANTES de vincular la tierra con el neutro.
+  //   · Manual de AP de Córdoba: el procedimiento de bloqueo, señalización y aviso de cese de trabajo.
+  // Lo que hasta ahora existía era una sola línea («hacer las pruebas de funcionamiento y de falla»)
+  // perdida adentro de la tarea de documentación. Acá pasa a ser la tarea que es, con sus pasos.
+  { id:'inspeccion_pruebas', label:'Inspección de plaza — pruebas de funcionamiento y de falla', pasos:
+`1) ANTES DE ENERGIZAR — Coordinar la fecha con la Inspección: esta prueba se hace con la instalación ENERGIZADA y, salvo que la Inspección diga otra cosa, se presencia.
+2) Con la instalación SIN TENSIÓN, medir la resistencia de puesta a tierra de cada columna con jabalina y la del tablero, y volcarla en la planilla. IMPORTANTE: la medición va ANTES de vincular la tierra con el neutro (memoria del proyecto) — después ya no da el valor real.
+3) Megar los circuitos (aislación entre conductores y contra tierra) antes de dar tensión. Si un circuito da bajo, buscar el punto antes de energizar, no después.
+4) Verificar que cada portafusible tenga SU fusible, del calibre de proyecto. Nunca un fusible de más calibre ni un puente: eso invalida la prueba y deja la instalación sin protección.
+
+5) FUNCIONAMIENTO — Energizar y verificar presencia de las tres fases y tensión en el tablero.
+6) Verificar que enciendan TODAS las luminarias. Anotar las que no.
+7) Medir el consumo de cada circuito y compararlo con lo esperado por la cantidad de luminarias y su potencia. Un consumo muy bajo delata luminarias que no encienden; uno muy alto, una derivación o un cable dañado.
+8) Probar el fotocontrol: taparlo (tiene que encender) y destaparlo (tiene que apagar).
+
+9) PRUEBA DE FALLA (ACCIONAMIENTO DE PROTECCIONES) — Elegir la columna a probar. La que vale es la ÚLTIMA DE CADA CIRCUITO: es la más lejos del tablero, la que menos corriente de cortocircuito tiene. Si el fusible actúa ahí, actúa en todas. Probar en la primera columna no demuestra nada.
+10) Antes de provocar la falla: retirar al personal del pie de esa columna, avisar en voz alta, y trabajar con los elementos de protección puestos (guantes y anteojos como mínimo).
+11) Provocar el cortocircuito en el extremo de la luminaria, con la herramienta adecuada y sin quedar en la línea de un posible arco.
+12) Verificar QUÉ actuó. Lo correcto es que se queme SOLAMENTE el fusible de esa columna y que el portafusible NH del tablero y la térmica general queden cerrados. Eso es la selectividad: la falla se corta en el punto más cercano y el resto de la plaza sigue encendida.
+13) Si en cambio saltó el NH del tablero o la térmica general, la coordinación está mal: revisar los calibres (el fusible de columna tiene que ser bastante menor que la protección del tablero) y volver a probar. No dejar la plaza así.
+14) Reponer el fusible quemado por otro IGUAL y verificar que la luminaria vuelva a encender.
+15) Repetir en las columnas que indique la Inspección — como mínimo, la última de cada circuito.
+
+16) CIERRE — Verificar la seguridad electromecánica: puesta a tierra presente y accesible, columnas aplomadas y firmes, tapas de las cajas de conexión cerradas y con la señalización de «Riesgo Eléctrico».
+17) Volcar TODO en la planilla: qué se probó, en qué columna, qué protección actuó y en cuánto tiempo. Esa planilla es la que respalda el Certificado de Instalación Eléctrica Apta.
+18) Cerrar el tablero con su sunchado y dejar la instalación en servicio.
+19) Llevar fusibles de repuesto: esta tarea QUEMA fusibles a propósito, uno por cada prueba como mínimo.` },
+
   { id:'cierre_documentacion', label:'Pruebas, cierre y documentación de obra', pasos:
 `1) Hacer las pruebas de funcionamiento y de falla de toda la instalación.
 2) Preparar los planos "Conforme a Obra".
@@ -8156,6 +8197,9 @@ const MATERIALES_POR_TAREA = {
   tablero:           { secciones:['TABLERO Y ACOMETIDA'] },
   pat:               { secciones:['PUESTA A TIERRA'] },
   acometida:         { secciones:['TABLERO Y ACOMETIDA','CABLEADO TRONCAL'], incluye:/acometida|preensamblad|terminal|ojal|epec|medidor|pilar|4x10|2x10|subterr/i },
+  // La inspección con pruebas de falla QUEMA fusibles a propósito, así que el pañol tiene que
+  // mandar repuestos. Se toman los del tablero de columna (fusible y portafusible).
+  inspeccion_pruebas:{ secciones:['TABLERO DE COLUMNA','LUMINARIAS Y PROTECCIONES'], incluye:/fusible|portafus/i },
   retiro_columna:    { secciones:['RETIROS'] },
   retiro_tablero:    { secciones:['RETIROS'] }
 };
