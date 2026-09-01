@@ -1355,6 +1355,95 @@
     .inf-avance-barra{ display:none; }   /* en pantalla chica alcanza con el número */
   }
 
+
+  /* ==================================================================
+     PIN DEL MAPA — 2026-08-31
+     Antes era un círculo de 26 px con un aro BLANCO. Dos problemas, los dos reales:
+       · de lejos se perdía contra el mapa (el aro blanco lo desdibujaba), y
+       · al ser un círculo centrado en la coordenada, no marcaba el punto exacto.
+     Ahora es una gota: cabeza más grande con aro oscuro, y una PUNTA que apoya justo en el lugar,
+     con su sombrita en el piso. Todo con CSS: el html del pin y el ancla del marcador no se
+     tocaron. La punta va donde antes estaba el centro del círculo, así que el marcador sigue
+     señalando exactamente la misma coordenada de siempre.
+     ================================================================== */
+  .leaflet-marker-icon{ overflow:visible; }
+
+  .mapa-pin{
+    /* El recuadro del marcador mide 26×26 y su centro es la coordenada. Con `bottom:50%` la PUNTA
+       del pin queda apoyada justo ahí, y la cabeza crece hacia arriba, que es como se lee un pin. */
+    position:absolute; left:50%; bottom:50%;
+    transform:translateX(-50%);
+    z-index:0;                       /* crea contexto propio: la punta y la sombra quedan detrás
+                                        de la cabeza, pero nunca detrás del mapa */
+    display:flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:50%;
+    border:2.5px solid #0b1727;      /* aro OSCURO: es lo que lo despega de cualquier mapa */
+    box-shadow:0 0 0 1.5px rgba(255,255,255,.9), 0 3px 8px rgba(0,0,0,.4);
+    color:#fff; font-weight:800; font-size:13.5px; line-height:1;
+    font-family:var(--mono), inherit; font-variant-numeric:tabular-nums;
+    text-shadow:0 1px 2px rgba(0,0,0,.45);
+    margin-bottom:11px;              /* deja lugar para la punta */
+    cursor:pointer;
+  }
+  /* La punta: un cuadrado girado 45° con el MISMO color de la cabeza. `background:inherit` copia
+     el color que el mapa le pone a cada pin por el avance de la obra, sin tener que repetirlo. */
+  .mapa-pin::after{
+    content:''; position:absolute; z-index:-1;
+    left:50%; top:calc(100% - 9px);
+    width:16px; height:16px;
+    background:inherit;
+    border-right:2.5px solid #0b1727;
+    border-bottom:2.5px solid #0b1727;
+    border-bottom-right-radius:4px;
+    transform:translateX(-50%) rotate(45deg);
+  }
+  /* Sombrita en el piso, para que se lea que el pin está APOYADO en ese punto. */
+  .mapa-pin::before{
+    content:''; position:absolute; z-index:-2;
+    left:50%; top:calc(100% + 11px);
+    width:20px; height:7px; border-radius:50%;
+    background:rgba(0,0,0,.22);
+    filter:blur(2px);
+    transform:translateX(-50%);
+  }
+  /* El pin elegido: el aro se pone ÁMBAR y el pin crece un poco. Se probó primero con un halo
+     por fuera (box-shadow), pero ese halo le tapaba la punta y el pin elegido dejaba de señalar
+     el lugar — justo lo que se venía a arreglar. Pintar el aro deja la gota entera. */
+  .mapa-pin-sel{
+    border-color:var(--amber);
+    box-shadow:0 0 0 2px rgba(11,23,39,.75), 0 5px 14px rgba(0,0,0,.5);
+    transform:translateX(-50%) scale(1.16);
+  }
+  .mapa-pin-sel::after{ border-right-color:var(--amber); border-bottom-color:var(--amber); }
+
+  /* La etiqueta con el nombre queda a la altura de la cabeza, no de la punta. */
+  /* Va debajo del pin, con una flechita hacia arriba que lo ata a SU pin. Chico y liviano a
+     propósito: con cinco plazas de la misma zona, carteles grandes tapan el mapa. */
+  .leaflet-tooltip.mapa-etiqueta{
+    background:rgba(255,255,255,.97); border:1px solid rgba(11,23,39,.45); border-radius:6px;
+    padding:2px 7px; font-size:11px; font-weight:700; letter-spacing:.1px; color:var(--navy);
+    box-shadow:0 2px 5px rgba(0,0,0,.22); margin-top:2px;
+  }
+  .leaflet-tooltip.mapa-etiqueta::after{
+    content:''; position:absolute; left:50%; top:-4px;
+    width:7px; height:7px; background:inherit;
+    border-left:1px solid rgba(11,23,39,.45); border-top:1px solid rgba(11,23,39,.45);
+    transform:translateX(-50%) rotate(45deg);
+  }
+  /* El globo del pin se abre por encima de la cabeza, no encima del pin. */
+  .leaflet-popup{ margin-bottom:52px; }
+
+  /* ---- El paredón de «Fuentes» del pie, fuera de la vista (2026-08-31) ----
+     Eran veinte párrafos de criterios técnicos colgando abajo de la Calculadora. Nadie los leía y
+     le daban a la herramienta un aire de borrador. No se borraron —ahí está de dónde sale cada
+     criterio, y eso vale— pero ahora se abren desde el menú ☰, en «Fuentes y criterios técnicos». */
+  #mainFooter{ display:none !important; }
+  #mainFooter.abierto{ display:block !important; }
+
+  /* Los numeritos de la lista, con el mismo aro oscuro para que se relacionen con los del mapa. */
+  .mapa-num{ border:1.5px solid rgba(11,23,39,.55); font-weight:800; }
+  .mapa-ref-dot{ border:2px solid #fff; box-shadow:0 0 0 1.5px rgba(11,23,39,.5); }
+
   @media print{
     .subtabs{ display:none !important; }
     /* En el papel del informe se imprime el cuadro completo, no la tarjeta que se esté mirando. */
@@ -11056,11 +11145,11 @@ function renderMapaObras(){
     const icono = L.divIcon({
       className: '',
       html: `<div class="mapa-pin${a.id===mapaSeleccionId?' mapa-pin-sel':''}" style="background:${color};">${n}</div>`,
-      iconSize: [26,26], iconAnchor: [13,13], popupAnchor: [0,-13], tooltipAnchor: [14,0]
+      iconSize: [26,26], iconAnchor: [13,13], popupAnchor: [0,-13], tooltipAnchor: [0,2]
     });
     const marker = L.marker([a.lat, a.lng], { icon: icono, title: a.nombre });
     if(mapaVerNombres){
-      marker.bindTooltip(escHtml(a.nombre), { permanent:true, direction:'right', className:'mapa-etiqueta', offset:[6,0] });
+      marker.bindTooltip(escHtml(a.nombre), { permanent:true, direction:'bottom', className:'mapa-etiqueta', offset:[0,6] });
     }
     const fechaHtml = a.listaParaEncender
       ? '<span class="badge-lista">Lista para encender</span>'
@@ -11717,12 +11806,28 @@ function poblarParteObraDatalist(){
     { v:'stock',   ico:'📦', txt:'Pañol / Stock' },
     { v:'informe', ico:'📄', txt:'Informe de avance' },
   ];
+  // ---- Las fuentes y criterios, a un clic pero fuera del camino (2026-08-31) ----
+  // Ese bloque estaba desplegado al pie de la Calculadora: veinte párrafos que nadie lee y que le
+  // daban aire de borrador. No se borra —ahí está de dónde sale cada criterio técnico, y eso vale
+  // para defender un cómputo— pero deja de estar a la vista.
+  function alternarFuentes(){
+    const f = document.getElementById('mainFooter');
+    if(!f) return;
+    cerrarMenuLateral();
+    const abriendo = !f.classList.contains('abierto');
+    f.classList.toggle('abierto', abriendo);
+    if(abriendo) setTimeout(()=>f.scrollIntoView({behavior:'smooth', block:'start'}), 220);
+  }
+  window.alternarFuentes = alternarFuentes;
+
   function renderMenu(){
     const cont = document.getElementById('menuLista');
     if(!cont) return;
     cont.innerHTML = DESTINOS.map(d=>
       `<button type="button" class="menu-item" data-vista="${d.v}"><span class="menu-ico">${d.ico}</span>${d.txt}</button>`
-    ).join('');
+    ).join('')
+    + `<div style="border-top:1px solid var(--border); margin:8px 4px;"></div>`
+    + `<button type="button" class="menu-item" id="menuFuentes"><span class="menu-ico">📚</span>Fuentes y criterios técnicos</button>`;
   }
   window.abrirMenuLateral = function(){
     const m = document.getElementById('menuLateral');
@@ -11749,6 +11854,7 @@ function poblarParteObraDatalist(){
   document.getElementById('menuLista').addEventListener('click', (e)=>{
     const b = e.target.closest('.menu-item');
     if(!b) return;
+    if(b.id === 'menuFuentes'){ alternarFuentes(); return; }
     cerrarMenuLateral();
     mostrarVista(b.dataset.vista);
   });
