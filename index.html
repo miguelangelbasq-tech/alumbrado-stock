@@ -1574,6 +1574,8 @@
              border:1px dashed var(--line); border-radius:12px; padding:10px 14px; background:var(--bg-soft); }
   .it-previa{ margin-top:14px; border:1px solid var(--teal-dark); border-radius:14px; padding:14px 16px; background:rgba(126,198,230,.07); }
   .it-previa-tit{ font-weight:800; color:var(--navy); font-size:14px; }
+  .it-previa-resumen{ margin-top:8px; font-size:13px; color:var(--navy); background:#fff;
+                      border:1px solid var(--line); border-radius:10px; padding:9px 13px; line-height:1.55; }
   .it-previa-filas{ display:grid; gap:6px; margin-top:10px; }
   .it-previa-fila{ display:grid; grid-template-columns:24px minmax(0,1fr) auto; align-items:center; gap:10px;
                    background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 12px; cursor:pointer; }
@@ -14011,19 +14013,193 @@ function poblarParteObraDatalist(){
     return { filas:out, dudas };
   }
 
+
+  // ------------------------------------------------------------------
+  // LEER EL ITEMIZADO DEL LISTADO DE MATERIALES
+  // ------------------------------------------------------------------
+  // Los cómputos calculados antes del 31/08/2026 no guardaban la foto del formulario, así que por
+  // ese lado no se podía traer nada — y son justamente las plazas que ya están en obra.
+  // Pero el LISTADO DE MATERIALES sí lo tienen todas: es lo que se imprime y lo que queda guardado
+  // en la plaza. Y como esos renglones los escribe la propia herramienta, se pueden leer con
+  // seguridad: «Columna PRFV recta 7 m…», «Vínculo … para 3 artefactos», «Cable Cu 4×4 mm² … 321 m
+  // de zanja + 114 m de ganancia», «Zanjeo … (profundidad 0,60 m…)».
+  // Esta vía además alcanza cosas que el formulario no sabe: las jabalinas de puesta a tierra, su
+  // medición, el apoya escalera, el tomacable y el fotocontrol.
+  const norm = (t)=> String(t||'')
+    .replace(/[‐-―]/g,'-').replace(/ /g,' ')
+    .replace(/\s+/g,' ').trim();
+  const numAR = (t)=>{
+    // «1.211,86» y «5.032» vienen con punto de miles y coma decimal.
+    const x = String(t||'').replace(/\./g,'').replace(',','.');
+    const v = parseFloat(x);
+    return isFinite(v) ? v : 0;
+  };
+
+  function itemizadoDesdeSecciones(secs, deDonde){
+    const out = [], dudas = [];
+    const push = (item, cant, motivo)=>{
+      if(!(cant > 0)) return;
+      const ya = out.find(x=>x.item === item);
+      if(ya){ ya.cantidad += cant; ya.motivo += ' + ' + motivo; }
+      else out.push({ item, cantidad:cant, motivo });
+    };
+    const colsPorAltura = {};    // 7 -> n, 10 -> n
+    const vincPorBrazos = {};    // 1..4 -> n
+    let tipoCol = null;
+
+    (secs||[]).forEach(sec=>{
+      const T = norm(sec.titulo).toUpperCase();
+      (sec.items||[]).forEach(it=>{
+        const d = norm(it.desc);
+        const cant = n2(it.cant != null ? it.cant : it.cantNecesaria, 0);
+        if(!d) return;
+
+        // ---- Columnas ----
+        let m = d.match(/^Columna\s+(PRFV|met[aá]lica)\s+recta,?\s+([\d.,]+)\s*m/i);
+        if(m){
+          tipoCol = /prfv/i.test(m[1]) ? 'PRFV' : 'Metálica';
+          const alt = Math.round(numAR(m[2]));
+          colsPorAltura[alt] = (colsPorAltura[alt]||0) + cant;
+          return;
+        }
+        // ---- Vínculos (cuántos brazos/artefactos por columna) ----
+        if(/^V[ií]nculo/i.test(d) || /^Capuch[oó]n/i.test(d)){
+          const b = d.match(/(\d+)\s*artefactos?/i);
+          if(b){ const nb = parseInt(b[1],10); vincPorBrazos[nb] = (vincPorBrazos[nb]||0) + cant; }
+          return;
+        }
+        // ---- Cable troncal: los METROS DE ZANJA salen escritos en el propio renglón ----
+        m = d.match(/^Cable Cu\s+(\d+)\s*[x×]\s*([\d.,]+)\s*mm/i);
+        if(m){
+          const clave = `${m[1]}x${String(m[2]).replace(',','.')}`;
+          const zan = d.match(/([\d.,]+)\s*m de zanja/i);
+          if(zan){
+            const ml = numAR(zan[1]);
+            const it2 = CABLE_A_ITEM[clave];
+            if(it2) push(it2, ml, `${fmt(ml,2)} m de cable ${clave.replace('x','×')} mm² en zanja (la ganancia de subida no cuenta acá)`);
+            else if(ml > 0) dudas.push(`No hay ítem del itemizado para el cable ${clave.replace('x','×')} mm² (${fmt(ml,2)} m de zanja). Cargalo a mano.`);
+            return;
+          }
+          // Acometida EPEC ↔ tablero: es el conductor, no el caño ni la vereda
+          if(/acometida/i.test(d)){
+            if(/subterr/i.test(d))    push(12, cant, `${fmt(cant,2)} m de acometida subterránea EPEC ↔ tablero`);
+            else if(/a[eé]rea/i.test(d)) push(11, cant, `${fmt(cant,2)} m de acometida aérea EPEC ↔ tablero`);
+            return;
+          }
+          return;   // el resto de los cables (subida 3×1,5, PAT, cruce) no van por estos ítems
+        }
+        // ---- Zanjeo ----
+        if(/^Zanjeo en v[ií]a p[uú]blica/i.test(d)){
+          const pm = d.match(/profundidad\s+([\d.,]+)\s*m/i);
+          const prof = pm ? (numAR(pm[1]) >= 0.9 ? '1.0' : '0.6') : '0.6';
+          const terr = /baldosa|vereda/i.test(d) ? 'baldosa' : (/hormig[oó]n/i.test(d) ? 'hormigon' : 'natural');
+          const it2 = ZANJA_A_ITEM[`${prof}|${terr}`];
+          const nomT = terr==='natural' ? 'terreno natural' : (terr==='baldosa' ? 'vereda de baldosas' : 'piso de hormigón');
+          if(it2) push(it2, cant, `${fmt(cant,2)} m de zanja de ${prof.replace('.',',')} m en ${nomT}`);
+          return;
+        }
+        // ---- Tablero ----
+        if(/^Tablero de medici[oó]n/i.test(d)){
+          if(/a nivel/i.test(d)) push(10, cant || 1, 'Tablero a nivel, sobre base de mampostería');
+          else {
+            push(9, cant || 1, 'Tablero aéreo de medición, protección y comando');
+            push(13, cant || 1, 'Apoyo PRFV que sostiene el tablero');
+            dudas.push('El apoyo del tablero se cargó con el ítem 13 (PRFV h=8 m Ro1050), que es el que el itemizado usa para sostener el tablero. La calculadora nombra un apoyo de 9,5 m — verificá cuál corresponde en esta plaza.');
+          }
+          return;
+        }
+        // ---- Cruce de calle: solo el renglón de encabezado de esa sección ----
+        if(T.indexOf('CRUCE') >= 0){
+          if(/tunelera en seco \(m[eé]todo/i.test(d))            { push(21, cant, `${fmt(cant,2)} m de cruce con tunelera`); return; }
+          if(/cielo abierto.*calle de tierra/i.test(d))          { push(22, cant, `${fmt(cant,2)} m de cruce a cielo abierto, calle de tierra`); return; }
+          if(/cielo abierto.*hormig[oó]n/i.test(d))              { push(23, cant, `${fmt(cant,2)} m de cruce a cielo abierto, calle de hormigón`); return; }
+          if(/cielo abierto.*(asf[aá]lt|carpeta)/i.test(d))      { push(24, cant, `${fmt(cant,2)} m de cruce a cielo abierto, carpeta asfáltica`); return; }
+          if(/^A[eé]reo/i.test(d)){ dudas.push('El cruce cargado es aéreo sobre postación de EPEC y el itemizado de plazas no tiene un ítem para ese caso. Cargalo a mano si corresponde.'); return; }
+        }
+        // ---- Puesta a tierra y varios que el formulario no sabe ----
+        if(/^Dispersor \(jabalina\)/i.test(d)){ push(75, cant, `${fmt(cant,0)} jabalina(s) de puesta a tierra`); return; }
+        if(/^Medici[oó]n de resistencia de PAT/i.test(d)){ push(81, cant, `${fmt(cant,0)} medición(es) de resistencia de PAT`); return; }
+        if(/^Apoya escalera/i.test(d)){ push(73, cant, `${fmt(cant,0)} apoya escalera con herrajes`); return; }
+        if(/^Tomacable/i.test(d)){ push(74, cant, `${fmt(cant,0)} tomacable WGC/TGC`); return; }
+        if(/^Fotocontrol/i.test(d)){ push(64, cant, `${fmt(cant,0)} fotocontrol`); return; }
+        // ---- Retiros y poda ----
+        if(/^Retiro de columna/i.test(d)){ push(46, cant, `${fmt(cant,0)} columna(s) a retirar`); return; }
+        if(/retiro de tablero existente/i.test(d)){ push(49, cant, `${fmt(cant,0)} tablero(s) a retirar`); return; }
+        if(/^Poda/i.test(d)){ push(82, cant, `${fmt(cant,0)} árbol(es) a podar`); return; }
+      });
+    });
+
+    // ---- Repartir los brazos entre las alturas ----
+    // En el itemizado la columna de 10 m es SIEMPRE de 4 brazos, así que los vínculos cuádruples se
+    // asignan primero a esas y el resto va a las de 7 m.
+    const tipo = tipoCol || 'PRFV';
+    const de10 = colsPorAltura[10] || 0;
+    const de7  = colsPorAltura[7]  || 0;
+    Object.keys(colsPorAltura).forEach(k=>{
+      if(k !== '7' && k !== '10')
+        dudas.push(`Hay ${colsPorAltura[k]} columna(s) de ${k} m: el itemizado solo tiene de 7 m y de 10 m, así que esas no se pudieron cargar.`);
+    });
+    const brazos = Object.keys(vincPorBrazos).map(k=>({ brazos:parseInt(k,10), columnas:vincPorBrazos[k] }))
+                     .sort((a,b)=>b.brazos - a.brazos);
+    if(!brazos.length){
+      if(de7 > 0) dudas.push(`${de7} columna(s) de 7 m sin vínculo en el cómputo: el precio cambia según lleve 1, 2 o 3 brazos, así que hay que elegir el ítem a mano.`);
+      if(de10 > 0){ const it2 = (COLUMNA_A_ITEM[tipo]||{})[10] && COLUMNA_A_ITEM[tipo][10][4];
+        if(it2) push(it2, de10, `${de10} columna(s) ${tipo} de 10 m`); }
+    } else {
+      let resto10 = de10, asignadas7 = 0;
+      const paraSiete = [];
+      brazos.forEach(g=>{
+        let cols = g.columnas;
+        if(g.brazos === 4 && resto10 > 0){
+          const usa = Math.min(resto10, cols);
+          const it2 = (COLUMNA_A_ITEM[tipo]||{})[10] && COLUMNA_A_ITEM[tipo][10][4];
+          if(it2) push(it2, usa, `${usa} columna(s) ${tipo} de 10 m con 4 brazos`);
+          resto10 -= usa; cols -= usa;
+        }
+        if(cols > 0) paraSiete.push({ brazos:g.brazos, columnas:cols });
+      });
+      if(resto10 > 0){
+        const it2 = (COLUMNA_A_ITEM[tipo]||{})[10] && COLUMNA_A_ITEM[tipo][10][4];
+        if(it2) push(it2, resto10, `${resto10} columna(s) ${tipo} de 10 m`);
+        dudas.push(`${resto10} columna(s) de 10 m no tenían un vínculo cuádruple. Se cargaron con el ítem de 10 m, que en el itemizado es siempre de 4 brazos — verificalo.`);
+      }
+      paraSiete.forEach(g=>{
+        const it2 = (COLUMNA_A_ITEM[tipo]||{})[7] && COLUMNA_A_ITEM[tipo][7][g.brazos];
+        if(it2){ push(it2, g.columnas, `${g.columnas} columna(s) ${tipo} de 7 m con ${g.brazos} brazo(s)`); asignadas7 += g.columnas; }
+        else dudas.push(`${g.columnas} columna(s) de 7 m con ${g.brazos} brazo(s): el itemizado solo tiene de 1, 2 y 3 brazos para 7 m (el vínculo cuádruple y el capuchón doble a 120° no están tasados). Cargalas a mano.`);
+      });
+      if(de7 > 0 && asignadas7 !== de7)
+        dudas.push(`El cómputo tiene ${de7} columna(s) de 7 m y ${asignadas7} con brazos asignados. Revisá el reparto — puede que algún vínculo no esté tasado en el itemizado.`);
+    }
+    return { filas:out, dudas, origen: deDonde };
+  }
+
   // Lo que la calculadora NO puede saber y hay que cargar a mano en el itemizado.
   const FALTA_A_MANO = [
-    'Puesta a tierra — el dispersor/jabalina (ítem 75) y su medición (ítem 81).',
-    'Los elementos internos del tablero (térmicas, diferencial, contactor, fotocontrol, reloj) — ítems 50 a 70.',
-    'Empalmes (78 y 79), mediciones de aislación (80) y reacondicionamientos (41, 43, 44).',
+    'Las protecciones del tablero (térmicas, diferencial, contactor, reloj, portafusible NH) — ítems 50 a 67.',
+    'Empalmes (78 y 79) y medición de aislación de conductores existentes (80).',
+    'Reacondicionamiento y aplomado de columnas existentes (41, 43) y luminarias sobre columna existente (44).',
   ];
 
   let previa = {};   // idDePlaza -> { filas, dudas, computo }
 
   function armarPrevia(a){
     const h = computoDeLaPlaza(a);
-    if(!h){ previa[a.id] = { error:'No se encontró ningún cómputo de la Calculadora para esta plaza. Buscamos por ID de obra y por nombre — fijate que coincidan.' }; return; }
-    const r = itemizadoDesdeComputo(h);
+    const tieneSecs = (secs)=> Array.isArray(secs) && secs.some(x=>(x.items||[]).length);
+    let r = null, fuente = '';
+    // El listado de materiales es la fuente más completa y la tienen TODAS las plazas, viejas
+    // incluidas. La foto del formulario queda de respaldo para cómputos sin listado.
+    if(h && tieneSecs(h.secciones)){ r = itemizadoDesdeSecciones(h.secciones); fuente = 'el listado de materiales del cómputo'; }
+    else if(h && h.form && h.form.campos){ r = itemizadoDesdeComputo(h); fuente = 'los datos cargados en la Calculadora'; }
+    else if(tieneSecs(a.secciones)){ r = itemizadoDesdeSecciones(a.secciones); fuente = 'el listado de materiales que tiene cargado la plaza'; }
+    if(!r){
+      previa[a.id] = { error: h
+        ? 'El cómputo que encontramos no trae ni el listado de materiales ni los datos del formulario. Volvé a calcular la plaza en la Calculadora.'
+        : 'No se encontró ningún cómputo de la Calculadora para esta plaza, ni la plaza tiene cargado su listado de materiales. Buscamos por ID de obra y por nombre — fijate que coincidan.' };
+      return;
+    }
+    r.fuente = fuente;
+    r.filas.sort((x,y)=> x.item - y.item);   // en el orden del pliego, que es como se certifica
     const yaCargados = {};
     (a.valorItems||[]).forEach(v=>{ if(v.itemPliego) yaCargados[v.itemPliego] = n2(v.cantidad); });
     r.filas.forEach(fl=>{
@@ -14032,7 +14208,7 @@ function poblarParteObraDatalist(){
       fl.nueva  = fl.anterior == null;
       fl.tildada = true;
     });
-    previa[a.id] = { ...r, computo:h };
+    previa[a.id] = { ...r, computo:h || { nombre:a.nombre, id:a.obraId, fecha:a.creado } };
   }
 
   function htmlPrevia(a){
@@ -14043,7 +14219,8 @@ function poblarParteObraDatalist(){
     const h = p.computo;
     let x = `<div class="it-previa">
       <div class="it-previa-tit">Lo que trae el cómputo de la Calculadora</div>
-      <div class="hint" style="margin-top:0;">Cómputo de <b>${esc(h.nombre)}</b>${h.id?` (ID ${esc(h.id)})`:''}, calculado el ${esc((typeof formatFechaCorta==='function'&&h.fecha)?formatFechaCorta(h.fecha):(h.fecha||'—'))}. Destildá lo que no quieras traer. <b>Las cantidades ya hechas no se tocan.</b></div>`;
+      <div class="hint" style="margin-top:0;">Cómputo de <b>${esc(h.nombre)}</b>${h.id?` (ID ${esc(h.id)})`:''}, calculado el ${esc((typeof formatFechaCorta==='function'&&h.fecha)?formatFechaCorta(h.fecha):(h.fecha||'—'))}${p.fuente?` · leído de ${esc(p.fuente)}`:''}.</div>
+      <div class="it-previa-resumen"><b>Encontramos ${p.filas.length} ítem(s) para cargar.</b> Miralos, destildá lo que no corresponda y, si está bien, tocá «Aplicar a la plaza». <b>Las cantidades ya hechas no se tocan.</b></div>`;
     if(!p.filas.length){
       x += `<div class="hint" style="color:var(--amber);">Ese cómputo no tiene nada que se pueda pasar al itemizado.</div>`;
     } else {
