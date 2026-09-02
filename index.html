@@ -1537,6 +1537,59 @@
     color:var(--navy); margin-top:20px; margin-bottom:8px; }
   .cierre-chk{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text); margin:0 0 10px; }
   .cierre-chk input{ width:auto; }
+  /* ---- Itemizado ($) por plaza ---- */
+  .it-buscador{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px; }
+  .it-buscador input[type="text"]{ flex:1 1 260px; min-width:0; margin:0; }
+  .it-chk{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-soft); white-space:nowrap; }
+  .it-chk input{ width:auto; margin:0; }
+  .it-plaza{ padding:14px 18px 12px; }
+  .it-cab{ display:grid; grid-template-columns:20px minmax(0,1fr) auto 64px; align-items:center; gap:12px; cursor:pointer; }
+  .it-flecha{ color:var(--text-soft); font-size:13px; }
+  .it-nom b{ color:var(--navy); font-size:15px; }
+  .it-sub{ font-size:12px; color:var(--text-soft); margin-top:2px; }
+  .it-plata{ text-align:right; white-space:nowrap; }
+  .it-contratado{ font-weight:800; color:var(--navy); font-size:14.5px; font-variant-numeric:tabular-nums; }
+  .it-avanzado{ font-size:11.5px; color:var(--text-soft); font-variant-numeric:tabular-nums; }
+  .it-pct{ text-align:right; font-weight:900; font-size:19px; font-variant-numeric:tabular-nums; }
+  .it-plaza .avance-bar{ margin-top:10px; }
+  .it-detalle{ margin-top:16px; border-top:1px solid var(--line); padding-top:14px; }
+  .it-tabla{ font-size:12.5px; }
+  .it-tabla input{ margin:0; padding:6px 8px; }
+  .it-tabla input.it-cant{ width:84px; text-align:right; }
+  .it-cat{ font-size:11px; color:var(--text-soft); margin-top:2px; font-weight:500; }
+  .it-badge{ background:rgba(56,189,248,.14); color:var(--teal-dark); border-radius:999px;
+             padding:1px 7px; font-size:10.5px; font-weight:700; }
+  .it-precio-cel{ display:flex; align-items:center; gap:6px; }
+  .it-precio-cel input.it-precio{ width:118px; text-align:right; }
+  .it-precio-txt{ font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--navy); font-weight:600; }
+  .it-precio-cel.cerrado input.it-precio{ display:none; }
+  .it-precio-cel:not(.cerrado) .it-precio-txt{ display:none; }
+  .it-lapiz{ border:1px solid var(--line); background:#fff; border-radius:8px; cursor:pointer;
+             padding:3px 7px; font-size:11px; color:var(--text-soft); line-height:1.2; }
+  .it-lapiz:hover{ border-color:var(--teal-dark); color:var(--teal-dark); }
+  .it-un{ font-size:11px; color:var(--text-soft); white-space:nowrap; }
+  .it-tabla tr.it-sinprecio{ background:rgba(245,158,11,.07); }
+  .it-tabla tr.it-sinprecio input.it-precio{ border-color:var(--amber); }
+  .it-agregar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .it-agregar select{ flex:1 1 320px; min-width:0; margin:0; }
+  .it-agregar input{ width:130px; margin:0; }
+  .it-alta{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .it-alta input{ margin:0; }
+  .it-alta input#itzNuevoDesc{ flex:1 1 280px; min-width:0; }
+  .it-sinprecio-fila{ display:flex; align-items:center; justify-content:space-between; gap:14px;
+                      border:1px solid var(--line); border-radius:12px; padding:10px 14px;
+                      margin-bottom:8px; background:var(--bg-soft); flex-wrap:wrap; }
+  .it-sinprecio-fila b{ font-size:13px; color:var(--navy); }
+  .tabla-scroll{ overflow-x:auto; }
+  .it-scroll-aviso{ display:none; font-size:11.5px; color:var(--text-soft); margin-bottom:6px; }
+  @media (max-width:760px){
+    .it-cab{ grid-template-columns:20px minmax(0,1fr) 58px; grid-template-areas:'fle nom pct' '. plata plata'; }
+    .it-flecha{ grid-area:fle; } .it-nom{ grid-area:nom; } .it-pct{ grid-area:pct; }
+    .it-plata{ grid-area:plata; text-align:left; margin-top:4px; }
+    .it-tabla{ min-width:720px; }
+    .it-scroll-aviso{ display:block; }
+  }
+
   /* ---- Cierre del día ---- */
   .dia-barra{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .dia-flecha{ padding:7px 12px; font-size:13px; }
@@ -2282,6 +2335,12 @@
 
 <div class="wrap" id="viewAvance" style="display:none">
 
+  <!-- Sub-pestañas de Avance de obra (2026-09-02). Mismo criterio que Producción: la pantalla de
+       siempre queda intacta adentro de #avPanelObra, y al lado se suma el itemizado en $. -->
+  <div class="subtabs no-print" id="subtabsAvance"></div>
+
+  <div id="avPanelObra">
+
   <!-- Panel gráfico — lo primero que se ve (2026-08-27) -->
   <div class="card" id="avancePanelCard">
     <div class="card-header-row">
@@ -2391,6 +2450,57 @@
       </table>
     </div>
     <div class="hint" id="historialEtapasNota" style="margin-top:10px;"></div>
+  </div>
+
+  </div><!-- /#avPanelObra -->
+
+  <!-- ============================================================
+       ITEMIZADO ($) POR PLAZA  (2026-09-02)
+       Pedido: *"en avance de obra necesito un sub-índice de itemizado según este PDF, y que me
+       aparezca la plaza y el valor al lado y el porcentaje que va; y al seleccionar la plaza que me
+       despliegue las tareas y el valor de cada ítem según cada plaza; y si en el ítem hay tareas que
+       no encontrás precios, poner las tareas y poner para editar el precio"*.
+       Los precios son los del ANEXO I «ITEMIZADO PLAZAS 17/06/2026», 82 ítems.
+       ============================================================ -->
+  <div id="avPanelItemizado" style="display:none;">
+    <div class="card">
+      <div class="card-header-row">
+        <h2 style="margin:0;"><span class="dot"></span>Itemizado por plaza ($)</h2>
+        <button type="button" class="btn-ghost no-print" onclick="imprimir()">🖨 Imprimir</button>
+      </div>
+      <div class="hint" style="margin-top:8px;">
+        Precios unitarios del <b>ANEXO I — ITEMIZADO PLAZAS del 17/06/2026</b> (82 ítems).
+        El <b>%</b> de cada plaza es <b>en plata</b>: lo certificado sobre lo contratado. No es el mismo
+        número que el % de etapas del tablero de obra — ahí se mide avance físico, acá plata.
+      </div>
+      <div class="summary-tiles" id="itzTiles"></div>
+      <div class="it-buscador no-print">
+        <input type="text" id="itzBuscar" placeholder="Buscar una plaza por nombre, ID o barrio…">
+        <label class="it-chk"><input type="checkbox" id="itzSoloConItems"> Ocultar las plazas sin ítems cargados</label>
+      </div>
+      <div class="hint" id="itzAviso" style="margin-top:10px;"></div>
+    </div>
+
+    <div id="itzLista"></div>
+
+    <div class="card no-print" id="itzSinPrecioCard" style="display:none;">
+      <h2><span class="dot"></span>Ítems sin precio en el itemizado</h2>
+      <div class="hint" style="margin-top:0;">Estos ítems figuran en el pliego pero <b>vienen sin precio</b> (o todavía no se les cargó uno). Escribí el valor unitario y queda guardado para todo el equipo.</div>
+      <div id="itzSinPrecioLista" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card no-print">
+      <h2><span class="dot"></span>Tareas que no están en el itemizado</h2>
+      <div class="hint" style="margin-top:0;">Si una tarea que se hace en la plaza no tiene ítem en el pliego, cargala acá con su precio y después se puede agregar a cualquier plaza como un ítem más.</div>
+      <div id="itzPropiosLista" style="margin-top:12px;"></div>
+      <div class="it-alta">
+        <input type="text" id="itzNuevoDesc" placeholder="Nombre de la tarea (ej: Reposición de cordón de vereda)">
+        <input type="text" id="itzNuevoUn" placeholder="Unidad (Un., m, m²…)" style="max-width:150px;">
+        <input type="number" id="itzNuevoPrecio" min="0" step="any" placeholder="Precio unitario" style="max-width:170px;">
+        <button type="button" class="btn-auto" id="itzNuevoBtn" style="margin:0;">+ Agregar</button>
+      </div>
+      <div class="hint" id="itzPropiosMsg" style="margin-top:8px;"></div>
+    </div>
   </div>
 </div>
 
@@ -11700,6 +11810,12 @@ function poblarParteObraDatalist(){
       if(typeof window.aplicarPersonalDeLaNube === 'function') window.aplicarPersonalDeLaNube();
     }, err => console.error('Error escuchando la nómina del personal:', err));
 
+    // Precios del itemizado corregidos por el equipo (2026-09-02).
+    fbDb.collection('configEquipo').doc('precios').onSnapshot(doc => {
+      window.__preciosNube = doc.exists ? doc.data() : null;
+      if(typeof window.aplicarPreciosDeLaNube === 'function') window.aplicarPreciosDeLaNube();
+    }, err => console.error('Error escuchando los precios del itemizado:', err));
+
     // Historial de cómputos de la Calculadora (2026-08-27) — ahora compartido.
     fbDb.collection('historialCalculos').onSnapshot(snapshot => {
       // OJO: `docId`, no `id`. En estos registros `id` ya es el ID DE OBRA que se carga en la
@@ -11860,6 +11976,12 @@ function poblarParteObraDatalist(){
   window.fbPersonalGuardar = async function(datos){
     if(!fbAvailable) throw new Error('Firebase no disponible');
     await fbDb.collection('configEquipo').doc('personal').set(datos, { merge:true });
+  };
+
+  // ---- Precios del itemizado corregidos/agregados por el equipo (2026-09-02) ----
+  window.fbPreciosGuardar = async function(datos){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    await fbDb.collection('configEquipo').doc('precios').set(datos, { merge:true });
   };
 
   // ---- Historial de cómputos de la Calculadora (2026-08-27) ----
@@ -13613,6 +13735,459 @@ function poblarParteObraDatalist(){
   // esta envoltura. Se la vuelve a dibujar una vez para que esos casilleros también queden con la
   // lista de nombres enganchada. Redibujar no pierde nada: sale del mismo array de siempre.
   try{ if(typeof renderPersonal === 'function') renderPersonal(); }catch(e){}
+})();
+</script>
+
+<!-- ============================================================
+     ITEMIZADO ($) POR PLAZA — bloque propio (2026-09-02)
+     Va en un bloque de código aparte, después de todos los demás, para no tocar una sola línea de los
+     bloques que ya andaban. Solo LEE `avanceObras`, `ITEMIZADO_PLIEGO` y los ayudantes que ya
+     existían, y ESCRIBE por las mismas funciones de siempre (guardarAvanceObras / fbAvanceGuardar).
+     ============================================================ -->
+<script>
+(function(){
+  'use strict';
+  const esc  = (t)=> (typeof escHtml==='function') ? escHtml(t) : String(t==null?'':t);
+  const n2   = (v, d)=> (typeof num==='function') ? num(v, d) : (isNaN(parseFloat(v)) ? (d||0) : parseFloat(v));
+  const plata= (v)=> (typeof formatMoney==='function') ? formatMoney(v) : ('$ '+Math.round(v));
+  const leer = (f)=>{ try{ return f(); }catch(e){ return null; } };
+  const obras = ()=> leer(()=> avanceObras) || [];
+  const pliego= ()=> leer(()=> ITEMIZADO_PLIEGO) || [];
+  const ID_PROPIO_DESDE = 1000;   // los ítems que carga el equipo arrancan en 1000
+
+  let itzAbiertas = {};           // qué plazas están desplegadas
+  let preciosEditados = {};       // { idDeItem: precio } — corrige el precio del pliego
+  let itemsPropios = [];          // [{id, cat, desc, un, precio}]
+
+  const itemDe = (id)=> pliego().find(x=>x.id === id) || null;
+
+  function puedeEditar(){
+    if(!window.__fbUser) return false;
+    return true;
+  }
+
+  // ---- Aplicar los precios del equipo sobre el catálogo del pliego ----
+  // Se toca `precio` del propio ITEMIZADO_PLIEGO para que TODO lo que ya existía (la valorización
+  // dentro del detalle de la plaza, el desplegable de ítems, el informe) use el precio corregido
+  // sin cambiarle una línea a esas pantallas.
+  function aplicarPrecios(){
+    const cat = pliego();
+    // ítems propios: se meten en el mismo catálogo, como se hizo con las tareas propias del baremo
+    for(let i = cat.length - 1; i >= 0; i--){
+      if(cat[i].id >= ID_PROPIO_DESDE && !itemsPropios.some(p=>p.id===cat[i].id)) cat.splice(i,1);
+    }
+    itemsPropios.forEach(p=>{
+      const ya = cat.find(x=>x.id===p.id);
+      if(ya) Object.assign(ya, { desc:p.desc, un:p.un, precio:n2(p.precio) });
+      else cat.push({ id:p.id, cat:'Tareas cargadas por el equipo (fuera del itemizado)', desc:p.desc, un:p.un, precio:n2(p.precio) });
+    });
+    Object.keys(preciosEditados).forEach(k=>{
+      const it = cat.find(x=>x.id === parseInt(k,10));
+      if(it) it.precio = n2(preciosEditados[k]);
+    });
+  }
+
+  window.aplicarPreciosDeLaNube = function(){
+    const d = window.__preciosNube;
+    if(!d) return;
+    if(d.overrides && typeof d.overrides === 'object') preciosEditados = { ...d.overrides };
+    if(Array.isArray(d.itemsPropios)) itemsPropios = d.itemsPropios.slice();
+    aplicarPrecios();
+    renderItemizado();
+  };
+
+  async function guardarPrecios(msgEl){
+    aplicarPrecios();
+    renderItemizado();
+    if(!puedeEditar()){
+      if(msgEl){ msgEl.style.color='var(--amber)';
+        msgEl.textContent='Se aplicó acá, pero para que lo vea todo el equipo hay que iniciar sesión (arriba, en «Cargar y administrar plazas»).'; }
+      return false;
+    }
+    try{
+      await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios,
+                                      ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
+      if(msgEl){ msgEl.style.color='var(--teal-dark)'; msgEl.textContent='✔ Guardado para todo el equipo.'; }
+      return true;
+    }catch(e){
+      if(msgEl){ msgEl.style.color='var(--danger)'; msgEl.textContent='No se pudo guardar (revisá la conexión).'; }
+      return false;
+    }
+  }
+
+  // ---- Cuentas ----
+  function cuentasDePlaza(a){
+    let contratado = 0, avanzado = 0, sinPrecio = 0;
+    (a.valorItems||[]).forEach(v=>{
+      const it = itemDe(v.itemPliego);
+      const precio = it ? n2(it.precio) : 0;
+      const cant = n2(v.cantidad);
+      const cav  = Math.min(n2(v.cantidadAvanzada), cant);
+      if(it && precio <= 0 && cant > 0) sinPrecio++;
+      contratado += cant * precio;
+      avanzado   += cav  * precio;
+    });
+    const pct = contratado > 0 ? Math.round(avanzado / contratado * 100) : 0;
+    return { contratado, avanzado, pct, items:(a.valorItems||[]).length, sinPrecio };
+  }
+
+  function colorPct(p){
+    if(p >= 100) return 'var(--teal-dark)';
+    if(p >= 60)  return 'var(--teal)';
+    if(p > 0)    return 'var(--amber)';
+    return 'var(--danger)';
+  }
+
+  // ---- La pantalla ----
+  function renderItemizado(){
+    const cont = document.getElementById('itzLista');
+    if(!cont) return;
+    aplicarPrecios();
+
+    const busca = ((document.getElementById('itzBuscar')||{}).value||'').toLowerCase().trim();
+    const soloCon = (document.getElementById('itzSoloConItems')||{}).checked;
+
+    const todas = obras().slice().sort((x,y)=> String(x.nombre||'').localeCompare(String(y.nombre||''),'es'));
+    let totC = 0, totA = 0, conItems = 0;
+    todas.forEach(a=>{ const c = cuentasDePlaza(a); totC += c.contratado; totA += c.avanzado; if(c.items) conItems++; });
+
+    const tiles = document.getElementById('itzTiles');
+    if(tiles){
+      const pctG = totC > 0 ? Math.round(totA/totC*100) : 0;
+      tiles.innerHTML = `
+        <div class="tile"><div class="num" style="font-size:18px;">${plata(totC)}</div><div class="lbl">Contratado (plazas cargadas)</div></div>
+        <div class="tile"><div class="num" style="font-size:18px;">${plata(totA)}</div><div class="lbl">Certificado / avanzado</div></div>
+        <div class="tile"><div class="num">${pctG}%</div><div class="lbl">Avance en plata</div></div>
+        <div class="tile"><div class="num">${conItems} / ${todas.length}</div><div class="lbl">Plazas con ítems cargados</div></div>`;
+    }
+    const aviso = document.getElementById('itzAviso');
+    if(aviso){
+      aviso.innerHTML = conItems < todas.length
+        ? `<b>${todas.length - conItems}</b> plaza(s) todavía no tienen ningún ítem del pliego cargado, así que suman $ 0. Desplegalas y agregales los ítems que correspondan.`
+        : 'Todas las plazas tienen ítems del pliego cargados.';
+    }
+
+    const lista = todas.filter(a=>{
+      if(soloCon && !(a.valorItems||[]).length) return false;
+      if(!busca) return true;
+      return [a.nombre, a.obraId, a.barrio].map(x=>String(x||'').toLowerCase()).some(t=>t.includes(busca));
+    });
+
+    if(!lista.length){
+      cont.innerHTML = `<div class="card"><div class="hint">${todas.length ? 'Ninguna plaza coincide con la búsqueda.' : 'Todavía no hay plazas cargadas en el tablero de avance.'}</div></div>`;
+    } else {
+      cont.innerHTML = lista.map(a=>filaPlaza(a)).join('');
+    }
+    renderSinPrecio();
+    renderPropios();
+  }
+
+  function filaPlaza(a){
+    const c = cuentasDePlaza(a);
+    const abierta = !!itzAbiertas[a.id];
+    let h = `<div class="card it-plaza${abierta?' abierta':''}" data-plaza="${esc(a.id)}">
+      <div class="it-cab" data-toggle="${esc(a.id)}">
+        <div class="it-flecha">${abierta?'▾':'▸'}</div>
+        <div class="it-nom">
+          <b>${esc(a.nombre||'(sin nombre)')}</b>
+          <div class="it-sub">${a.obraId?`ID ${esc(a.obraId)}`:'sin ID'}${a.barrio?` · ${esc(a.barrio)}`:''} · ${c.items} ítem(s) del pliego${c.sinPrecio?` · <b style="color:var(--amber)">${c.sinPrecio} sin precio</b>`:''}</div>
+        </div>
+        <div class="it-plata">
+          <div class="it-contratado">${plata(c.contratado)}</div>
+          <div class="it-avanzado">certificado ${plata(c.avanzado)}</div>
+        </div>
+        <div class="it-pct" style="color:${colorPct(c.pct)}">${c.pct}%</div>
+      </div>
+      <div class="avance-bar"><div class="avance-bar-fill" style="width:${c.pct}%; background:${colorPct(c.pct)};"></div></div>`;
+
+    if(abierta) h += detallePlaza(a);
+    h += `</div>`;
+    return h;
+  }
+
+  function detallePlaza(a){
+    const items = a.valorItems || [];
+    const edit = puedeEditar();
+    const dis = edit ? '' : 'disabled';
+    let h = `<div class="it-detalle">`;
+    if(!edit) h += `<div class="hint" style="margin-top:0; color:var(--amber);">Estás viendo sin sesión iniciada: se puede mirar todo, pero para cambiar cantidades o precios hay que iniciar sesión (pestaña «Avance de obra» → «Cargar y administrar plazas»).</div>`;
+
+    if(!items.length){
+      h += `<div class="hint" style="margin-top:0;">Esta plaza no tiene ningún ítem del pliego cargado.</div>`;
+    } else {
+      h += `<div class="it-scroll-aviso no-print">↔ Deslizá la tabla para ver las cantidades y los subtotales.</div>`;
+      h += `<div class="tabla-scroll"><table class="it-tabla"><thead><tr>
+        <th style="width:36%">Ítem del pliego</th>
+        <th style="width:150px;">Precio unitario</th>
+        <th style="width:96px;">Contratada</th>
+        <th style="width:96px;">Hecha</th>
+        <th style="width:130px; text-align:right;">Subtotal</th>
+        <th style="width:130px; text-align:right;">Certificado</th>
+        <th style="width:54px; text-align:right;">%</th>
+        <th class="no-print" style="width:40px;"></th>
+      </tr></thead><tbody>`;
+      items.forEach(v=>{
+        const it = itemDe(v.itemPliego);
+        const precio = it ? n2(it.precio) : 0;
+        const cant = n2(v.cantidad), cav = Math.min(n2(v.cantidadAvanzada), cant);
+        const pct = cant > 0 ? Math.round(cav/cant*100) : 0;
+        const propio = it && it.id >= ID_PROPIO_DESDE;
+        const editado = it && preciosEditados[it.id] != null;
+        h += `<tr data-vid="${esc(v.id)}" data-plaza="${esc(a.id)}"${precio<=0?' class="it-sinprecio"':''}>
+          <td>
+            <b>${it ? `Ítem ${it.id} — ${esc(it.desc)}` : '<span style="color:var(--amber)">⚠ sin ítem elegido</span>'}</b>
+            <div class="it-cat">${it ? esc(it.cat) : 'Elegilo desde el detalle de la plaza, en «Valorización de pliego»'}${propio?' · <span class="it-badge">cargado por el equipo</span>':''}${editado?' · <span class="it-badge">precio editado</span>':''}</div>
+          </td>
+          <td>
+            ${it ? `<div class="it-precio-cel${precio>0?' cerrado':''}">
+                     <span class="it-precio-txt">${plata(precio)}</span>
+                     <input type="number" min="0" step="any" class="it-precio" data-item="${it.id}" value="${precio>0?precio:''}" placeholder="sin precio" ${dis}>
+                     <span class="it-un">/ ${esc(it.un)}</span>
+                     ${precio>0 && edit ? '<button type="button" class="it-lapiz" title="Corregir el precio unitario">✎</button>' : ''}
+                   </div>` : '—'}
+          </td>
+          <td><input type="number" min="0" step="any" class="it-cant" data-f="cantidad" value="${cant||''}" placeholder="0" ${dis}></td>
+          <td><input type="number" min="0" step="any" class="it-cant" data-f="cantidadAvanzada" value="${n2(v.cantidadAvanzada)||''}" placeholder="0" ${dis}></td>
+          <td class="qty">${plata(cant*precio)}</td>
+          <td class="qty">${plata(cav*precio)}</td>
+          <td class="qty" style="color:${colorPct(pct)}"><b>${pct}%</b></td>
+          <td class="no-print"><button type="button" class="tramo-remove it-quitar" title="Quitar este ítem de la plaza" ${dis}>×</button></td>
+        </tr>`;
+      });
+      const c = cuentasDePlaza(a);
+      h += `</tbody><tfoot><tr>
+        <th colspan="4" style="text-align:right;">Total de la plaza</th>
+        <th class="qty">${plata(c.contratado)}</th>
+        <th class="qty">${plata(c.avanzado)}</th>
+        <th class="qty" style="color:${colorPct(c.pct)}">${c.pct}%</th>
+        <th class="no-print"></th>
+      </tr></tfoot></table></div>`;
+    }
+
+    h += `<div class="it-agregar no-print">
+      <select class="it-nuevo-sel" ${dis}>${(typeof opcionesItemizadoHTML==='function') ? opcionesItemizadoHTML(null) : ''}</select>
+      <input type="number" min="0" step="any" class="it-nuevo-cant" placeholder="Cantidad" ${dis}>
+      <button type="button" class="btn-auto it-nuevo-btn" style="margin:0;" ${dis}>+ Agregar a esta plaza</button>
+    </div>
+    <div class="hint it-msg" style="margin-top:8px;"></div>`;
+    h += `</div>`;
+    return h;
+  }
+
+  function renderSinPrecio(){
+    const card = document.getElementById('itzSinPrecioCard');
+    const cont = document.getElementById('itzSinPrecioLista');
+    if(!card || !cont) return;
+    const sin = pliego().filter(it=> n2(it.precio) <= 0);
+    if(!sin.length){ card.style.display='none'; return; }
+    card.style.display='';
+    cont.innerHTML = sin.map(it=>`
+      <div class="it-sinprecio-fila">
+        <div><b>Ítem ${it.id} — ${esc(it.desc)}</b><div class="it-cat">${esc(it.cat)}</div></div>
+        <div class="it-precio-cel">
+          <input type="number" min="0" step="any" class="it-precio" data-item="${it.id}" placeholder="Precio unitario">
+          <span class="it-un">/ ${esc(it.un)}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderPropios(){
+    const cont = document.getElementById('itzPropiosLista');
+    if(!cont) return;
+    cont.innerHTML = !itemsPropios.length
+      ? `<div class="hint" style="margin-top:0;">Todavía no cargaste ninguna.</div>`
+      : itemsPropios.map(p=>`
+        <div class="it-sinprecio-fila">
+          <div><b>Ítem ${p.id} — ${esc(p.desc)}</b><div class="it-cat">Cargado por el equipo · se puede agregar a cualquier plaza</div></div>
+          <div class="it-precio-cel">
+            <input type="number" min="0" step="any" class="it-precio" data-item="${p.id}" value="${n2(p.precio)||''}" placeholder="Precio">
+            <span class="it-un">/ ${esc(p.un)}</span>
+            <button type="button" class="tramo-remove it-borrar-propio" data-item="${p.id}" title="Borrar esta tarea">×</button>
+          </div>
+        </div>`).join('');
+  }
+
+  // ---- Toques ----
+  const panel = document.getElementById('avPanelItemizado');
+  if(panel){
+    panel.addEventListener('click', async (e)=>{
+      const lapiz = e.target.closest('.it-lapiz');
+      if(lapiz){
+        const cel = lapiz.closest('.it-precio-cel');
+        cel.classList.remove('cerrado');
+        const inp = cel.querySelector('.it-precio');
+        if(inp){ inp.focus(); inp.select(); }
+        return;
+      }
+
+      const cab = e.target.closest('.it-cab');
+      if(cab){ const id = cab.dataset.toggle; itzAbiertas[id] = !itzAbiertas[id]; renderItemizado(); return; }
+
+      const quitar = e.target.closest('.it-quitar');
+      if(quitar){
+        const tr = quitar.closest('tr');
+        const a = obras().find(x=>String(x.id)===tr.dataset.plaza); if(!a) return;
+        a.valorItems = (a.valorItems||[]).filter(v=>String(v.id)!==tr.dataset.vid);
+        if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        renderItemizado(); refrescarPantallasDeAvance();
+        return;
+      }
+
+      const nuevo = e.target.closest('.it-nuevo-btn');
+      if(nuevo){
+        const caja = nuevo.closest('.it-agregar');
+        const card = nuevo.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.plaza); if(!a) return;
+        const sel = caja.querySelector('.it-nuevo-sel');
+        const msg = card.querySelector('.it-msg');
+        if(!sel.value){ if(msg){ msg.style.color='var(--danger)'; msg.textContent='Elegí primero el ítem del pliego.'; } return; }
+        const idItem = parseInt(sel.value,10);
+        if((a.valorItems||[]).some(v=>v.itemPliego===idItem)){
+          if(msg){ msg.style.color='var(--amber)'; msg.textContent='Ese ítem ya está cargado en esta plaza — cambiale la cantidad en el renglón que ya existe.'; }
+          return;
+        }
+        const cant = n2(caja.querySelector('.it-nuevo-cant').value);
+        a.valorItems = a.valorItems || [];
+        const nid = (typeof avanceItemIdSeq !== 'undefined') ? avanceItemIdSeq++ : Date.now();
+        a.valorItems.push({ id:nid, itemPliego:idItem, cantidad:cant, cantidadAvanzada:0 });
+        if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        renderItemizado(); refrescarPantallasDeAvance();
+        return;
+      }
+
+      const borrar = e.target.closest('.it-borrar-propio');
+      if(borrar){
+        const id = parseInt(borrar.dataset.item,10);
+        const usada = obras().some(a=>(a.valorItems||[]).some(v=>v.itemPliego===id));
+        if(usada){ alert('No se puede borrar: esa tarea está cargada en alguna plaza. Sacala de las plazas primero.'); return; }
+        itemsPropios = itemsPropios.filter(p=>p.id!==id);
+        delete preciosEditados[id];
+        await guardarPrecios(document.getElementById('itzPropiosMsg'));
+        return;
+      }
+
+      if(e.target.id === 'itzNuevoBtn'){
+        const desc = (document.getElementById('itzNuevoDesc').value||'').trim();
+        const un   = (document.getElementById('itzNuevoUn').value||'').trim() || 'Un.';
+        const pr   = n2(document.getElementById('itzNuevoPrecio').value);
+        const msg  = document.getElementById('itzPropiosMsg');
+        if(!desc){ msg.style.color='var(--danger)'; msg.textContent='Poné el nombre de la tarea.'; return; }
+        const id = itemsPropios.reduce((m,p)=>Math.max(m,p.id), ID_PROPIO_DESDE - 1) + 1;
+        itemsPropios.push({ id, cat:'Tareas cargadas por el equipo (fuera del itemizado)', desc, un, precio:pr });
+        document.getElementById('itzNuevoDesc').value=''; document.getElementById('itzNuevoUn').value='';
+        document.getElementById('itzNuevoPrecio').value='';
+        await guardarPrecios(msg);
+        return;
+      }
+    });
+
+    // Cantidades y precios
+    let guardarPrecioTimer = null;
+    panel.addEventListener('input', (e)=>{
+      const cant = e.target.closest('.it-cant');
+      if(cant){
+        const tr = cant.closest('tr');
+        const a = obras().find(x=>String(x.id)===tr.dataset.plaza); if(!a) return;
+        const v = (a.valorItems||[]).find(x=>String(x.id)===tr.dataset.vid); if(!v) return;
+        v[cant.dataset.f] = Math.max(0, n2(cant.value));
+        actualizarFila(tr, a, v);
+        clearTimeout(guardarPrecioTimer);
+        guardarPrecioTimer = setTimeout(()=>{
+          if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+          refrescarPantallasDeAvance();
+        }, 600);
+        return;
+      }
+      const pr = e.target.closest('.it-precio');
+      if(pr){
+        const id = parseInt(pr.dataset.item,10);
+        const val = n2(pr.value);
+        if(val > 0) preciosEditados[id] = val; else delete preciosEditados[id];
+        const prop = itemsPropios.find(p=>p.id===id);
+        if(prop) prop.precio = val;
+        clearTimeout(guardarPrecioTimer);
+        guardarPrecioTimer = setTimeout(()=>{
+          const msg = pr.closest('.it-plaza') ? pr.closest('.it-plaza').querySelector('.it-msg')
+                                              : document.getElementById('itzPropiosMsg');
+          guardarPrecios(msg);
+          refrescarPantallasDeAvance();
+        }, 800);
+        return;
+      }
+      if(e.target.id === 'itzBuscar') renderItemizado();
+    });
+    panel.addEventListener('change', (e)=>{ if(e.target.id === 'itzSoloConItems') renderItemizado(); });
+  }
+
+  // Recalcula un renglón sin redibujar toda la pantalla, para no sacarle el foco a quien tipea.
+  function actualizarFila(tr, a, v){
+    const it = itemDe(v.itemPliego);
+    const precio = it ? n2(it.precio) : 0;
+    const cant = n2(v.cantidad), cav = Math.min(n2(v.cantidadAvanzada), cant);
+    const pct = cant > 0 ? Math.round(cav/cant*100) : 0;
+    const celdas = tr.querySelectorAll('td');
+    if(celdas[4]) celdas[4].textContent = plata(cant*precio);
+    if(celdas[5]) celdas[5].textContent = plata(cav*precio);
+    if(celdas[6]){ celdas[6].innerHTML = `<b>${pct}%</b>`; celdas[6].style.color = colorPct(pct); }
+    const card = tr.closest('.it-plaza');
+    if(card){
+      const c = cuentasDePlaza(a);
+      const pies = card.querySelectorAll('tfoot th');
+      if(pies[1]) pies[1].textContent = plata(c.contratado);
+      if(pies[2]) pies[2].textContent = plata(c.avanzado);
+      if(pies[3]){ pies[3].textContent = c.pct+'%'; pies[3].style.color = colorPct(c.pct); }
+      const cc = card.querySelector('.it-contratado'); if(cc) cc.textContent = plata(c.contratado);
+      const ca = card.querySelector('.it-avanzado');   if(ca) ca.textContent = 'certificado '+plata(c.avanzado);
+      const cp = card.querySelector('.it-pct'); if(cp){ cp.textContent = c.pct+'%'; cp.style.color = colorPct(c.pct); }
+      const bar = card.querySelector('.avance-bar-fill');
+      if(bar){ bar.style.width = c.pct+'%'; bar.style.background = colorPct(c.pct); }
+    }
+  }
+
+  // Las pantallas viejas se enteran del cambio por sus propias funciones, sin tocarlas.
+  function refrescarPantallasDeAvance(){
+    try{ if(typeof renderAvanceTablero === 'function') renderAvanceTablero(); }catch(e){}
+    try{ if(typeof renderAvancePanel === 'function') renderAvancePanel(); }catch(e){}
+  }
+
+  // ---- Sub-pestañas ----
+  let subAv = 'obra';
+  function pintarSubtabsAvance(){
+    const barra = document.getElementById('subtabsAvance');
+    if(!barra) return;
+    barra.innerHTML = [
+      { id:'obra',      label:'Avance de obra' },
+      { id:'itemizado', label:'Itemizado ($)' },
+    ].map(g=>`<button type="button" class="subtab${subAv===g.id?' activo':''}" data-sub="${g.id}">${g.label}</button>`).join('');
+    const po = document.getElementById('avPanelObra');
+    const pi = document.getElementById('avPanelItemizado');
+    if(po) po.style.display = subAv==='obra' ? '' : 'none';
+    if(pi) pi.style.display = subAv==='itemizado' ? '' : 'none';
+    if(subAv === 'itemizado') renderItemizado();
+  }
+  const barraAv = document.getElementById('subtabsAvance');
+  if(barraAv){
+    barraAv.addEventListener('click', (e)=>{
+      const b = e.target.closest('.subtab');
+      if(!b) return;
+      subAv = b.dataset.sub;
+      pintarSubtabsAvance();
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  }
+
+  // Al entrar a «Avance de obra» se vuelve siempre a la pantalla de obra, como era antes.
+  const anteriorMostrar = window.mostrarVista;
+  window.mostrarVista = function(v){
+    anteriorMostrar(v);
+    if(v === 'avance'){ pintarSubtabsAvance(); }
+  };
+  window.irAlItemizado = function(){ subAv = 'itemizado'; mostrarVista('avance'); };
+  window.renderItemizado = renderItemizado;
+
+  pintarSubtabsAvance();
+  // Si los precios del equipo llegaron de la nube antes de que existiera este bloque.
+  try{ if(window.__preciosNube) window.aplicarPreciosDeLaNube(); }catch(e){}
 })();
 </script>
 
