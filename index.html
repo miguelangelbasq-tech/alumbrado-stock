@@ -1486,6 +1486,15 @@
   .prod-peso input{ width:76px; text-align:right; }
 
 
+
+  .bar-propia{ background:rgba(56,189,248,.14); color:var(--teal-dark); border-radius:999px;
+    padding:1px 8px; font-size:10px; font-weight:700; margin-left:6px; vertical-align:middle; }
+  #tareaEdit{ position:fixed; inset:0; z-index:1001; }
+  #tareaEdit .menu-fondo{ position:absolute; inset:0; background:rgba(11,23,39,.5); opacity:0; transition:opacity .18s; }
+  #tareaEdit.abierto .menu-fondo{ opacity:1; }
+  #tareaEdit .cierre-panel{ opacity:0; }
+  #tareaEdit.abierto .cierre-panel{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+
   /* Nómina del personal (2026-08-31) */
   .per-aviso{ border-radius:10px; padding:9px 12px; font-size:12.5px; line-height:1.5; margin-bottom:10px; }
   .per-aviso.ambar{ background:#fffbeb; border:1px solid #f0d090; color:#7a5a12; }
@@ -1528,6 +1537,60 @@
     color:var(--navy); margin-top:20px; margin-bottom:8px; }
   .cierre-chk{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text); margin:0 0 10px; }
   .cierre-chk input{ width:auto; }
+  /* ---- Cierre del día ---- */
+  .dia-barra{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .dia-flecha{ padding:7px 12px; font-size:13px; }
+  .dia-barra input.dia-input-fecha{ width:auto; max-width:165px; margin:0; padding:7px 10px; }
+  .dia-label{ font-weight:800; color:var(--navy); font-size:16px; min-width:190px; text-transform:capitalize; }
+  .dia-card{ padding:16px 18px; }
+  .dia-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:6px; }
+  .dia-ot{ font-weight:800; color:var(--navy); font-size:15px; }
+  .dia-plaza{ font-weight:600; color:var(--text-soft); }
+  .dia-gente{ font-size:12.5px; color:var(--text-soft); margin-top:3px; }
+  .dia-rol{ opacity:.7; font-size:11.5px; }
+  .dia-estado{ flex:0 0 auto; font-size:11.5px; font-weight:700; border-radius:999px; padding:3px 10px; white-space:nowrap; }
+  .dia-estado.ok{ background:rgba(13,148,136,.13); color:var(--teal-dark); }
+  .dia-estado.pend{ background:rgba(245,158,11,.16); color:#92610a; }
+  .dia-tareas{ display:grid; gap:6px; }
+  .dia-tarea{ display:grid; grid-template-columns:34px minmax(0,1fr) auto 56px; align-items:center; gap:10px;
+              padding:8px 10px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+  .dia-tarea.hecha{ border-color:rgba(13,148,136,.45); background:rgba(13,148,136,.05); }
+  .dia-tick{ width:30px; height:30px; border-radius:9px; border:2px solid #cbd5e1; background:var(--bg-soft);
+             cursor:pointer; font-size:16px; font-weight:900; color:#fff; line-height:1; padding:0;
+             transition:background .12s, border-color .12s; }
+  .dia-tick:hover{ border-color:var(--teal-dark); }
+  .dia-tarea.hecha .dia-tick{ background:var(--teal-dark); border-color:var(--teal-dark); }
+  .dia-tarea-txt b{ font-size:13.5px; color:var(--navy); }
+  .dia-tarea-sub{ font-size:11.5px; color:var(--text-soft); margin-top:2px; }
+  .dia-cant{ display:flex; align-items:center; gap:5px; }
+  .dia-paso{ width:30px; height:30px; border-radius:9px; border:1px solid var(--line); background:#fff;
+             cursor:pointer; font-size:17px; font-weight:800; color:var(--navy); line-height:1; padding:0; }
+  .dia-paso:hover{ background:var(--bg-soft); }
+  .dia-cant input.dia-qty{ width:84px; min-width:84px; flex:0 0 84px; text-align:center;
+                           padding:7px 4px; margin:0; font-weight:700; font-size:15px; }
+  .dia-un{ font-size:11.5px; color:var(--text-soft); min-width:56px; }
+  .dia-pts{ text-align:right; font-weight:800; color:var(--navy); font-variant-numeric:tabular-nums; }
+  .dia-total{ margin-top:12px; font-size:14px; color:var(--navy); }
+  .dia-chk{ display:flex; align-items:center; gap:8px; margin:10px 0 8px; font-size:12.5px; color:var(--text-soft); }
+  .dia-chk input{ width:auto; margin:0; }
+  .dia-reparto{ display:grid; gap:8px; }
+  .dia-persona{ display:flex; align-items:center; justify-content:space-between; gap:12px;
+                border:1px solid var(--line); border-radius:12px; padding:8px 12px; background:var(--bg-soft); }
+  .dia-rol2{ font-size:11.5px; color:var(--text-soft); }
+  .dia-persona input{ width:92px; text-align:right; margin:0; }
+  .dia-persona input.auto{ background:#fff; color:var(--teal-dark); font-weight:800; }
+  .dia-obs{ margin-top:12px; }
+  .dia-pie{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; flex-wrap:wrap; }
+  .dia-pie .hint{ margin:0; }
+  .dia-pie-todo{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+  @media (max-width:640px){
+    .dia-tarea{ grid-template-columns:34px minmax(0,1fr); grid-template-areas:'tick txt' 'cant pts'; }
+    .dia-tarea .dia-tick{ grid-area:tick; }
+    .dia-tarea-txt{ grid-area:txt; }
+    .dia-cant{ grid-area:cant; grid-column:1 / -1; }
+    .dia-pts{ display:none; }
+    .dia-label{ min-width:0; }
+  }
   .cierre-reparto{ display:grid; gap:8px; }
   .cierre-persona{ display:flex; align-items:center; justify-content:space-between; gap:12px;
     background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:9px 12px; }
@@ -2618,6 +2681,25 @@
 <div class="wrap" id="viewProduccion" style="display:none">
   <div class="subtabs no-print" id="subtabsProd"></div>
 
+  <!-- Cierre del día (2026-09-01). Pedido: *"que cuando ellos al final del día vuelvan, yo entre
+       y solo tache las tareas que se hicieron y sea rápido y dinámico, y se llene automático el
+       porcentaje de cada uno"*. Es la misma carga que el cuadro de cerrar una orden, pero con
+       TODAS las órdenes del día en una sola pantalla y con un toque por tarea. -->
+  <div id="prodPanelDia" style="display:none;">
+    <div class="card no-print">
+      <h2><span class="dot"></span>Cierre del día</h2>
+      <div class="dia-barra">
+        <button type="button" class="btn-ghost dia-flecha" id="diaPrev" title="Día anterior">◀</button>
+        <div class="dia-label" id="diaLabel">—</div>
+        <button type="button" class="btn-ghost dia-flecha" id="diaNext" title="Día siguiente">▶</button>
+        <button type="button" class="btn-ghost" id="diaHoy">Hoy</button>
+        <input type="date" id="diaFecha" class="dia-input-fecha">
+      </div>
+      <div class="hint" id="diaResumen" style="margin-top:10px;"></div>
+    </div>
+    <div id="diaOrdenes"></div>
+  </div>
+
   <div id="prodPanelProduccion">
     <div class="prod-filtros card no-print">
       <div class="prod-filtros-fila">
@@ -2626,6 +2708,8 @@
           <select id="prodPeriodo">
             <option value="semana">Esta semana</option>
             <option value="semana_ant">Semana pasada</option>
+            <option value="quincena">Esta quincena</option>
+            <option value="quincena_ant">Quincena pasada</option>
             <option value="mes" selected>Este mes</option>
             <option value="mes_ant">Mes pasado</option>
             <option value="todo">Todo</option>
@@ -2681,9 +2765,10 @@
       </div>
       <div style="overflow-x:auto;">
         <table id="tablaBaremo"><thead><tr>
-          <th style="width:44%">Tarea</th><th>Se mide en</th><th style="text-align:right;">Puntos por unidad</th>
+          <th style="width:44%">Tarea</th><th>Se mide en</th><th style="text-align:right;">Puntos por unidad</th><th class="no-print" style="width:52px;"></th>
         </tr></thead><tbody id="baremoBody"></tbody></table>
       </div>
+      <button type="button" class="btn-auto no-print" onclick="abrirEditorTarea(null)">+ Agregar una tarea propia</button>
       <div class="hint" id="baremoMsg" style="margin-top:10px;"></div>
     </div>
 
@@ -11855,6 +11940,43 @@ function poblarParteObraDatalist(){
   </div>
 </div>
 
+<!-- Alta y edición de una tarea del baremo (2026-08-31). -->
+<div id="tareaEdit" class="no-print" style="display:none;">
+  <div class="menu-fondo" onclick="cerrarEditorTarea()"></div>
+  <div class="cierre-panel">
+    <div class="cierre-head">
+      <div>
+        <div class="cierre-titulo" id="tareaEditTitulo">Nueva tarea</div>
+        <div class="cierre-sub" id="tareaEditSub"></div>
+      </div>
+      <button type="button" class="menu-cerrar" onclick="cerrarEditorTarea()" aria-label="Cerrar">×</button>
+    </div>
+    <div class="cierre-cuerpo">
+      <label>Nombre de la tarea</label>
+      <input type="text" id="tareaEditNombre" placeholder="Ej: Limpieza final y retiro de escombros">
+      <div class="row2" style="margin-top:12px;">
+        <div>
+          <label>Se mide en</label>
+          <input type="text" id="tareaEditUn" placeholder="columna, metro, plaza…">
+        </div>
+        <div>
+          <label>Puntos por unidad</label>
+          <input type="number" id="tareaEditPts" min="0" step="any" placeholder="0">
+        </div>
+      </div>
+      <label style="margin-top:14px;">Pasos para la cuadrilla (opcional)</label>
+      <div class="hint" style="margin-top:0;">Uno por renglón. Salen impresos en la orden de trabajo, para que la cuadrilla los tenga a mano.</div>
+      <textarea id="tareaEditPasos" rows="7" placeholder="1) Primer paso&#10;2) Segundo paso"></textarea>
+      <div class="hint" id="tareaEditAviso" style="margin-top:10px;"></div>
+    </div>
+    <div class="cierre-pie">
+      <button type="button" class="btn-ghost" id="tareaEditBorrar" style="margin-right:auto; color:var(--danger);" onclick="borrarTareaPropia()">🗑 Borrar</button>
+      <button type="button" class="btn-ghost" onclick="cerrarEditorTarea()">Cancelar</button>
+      <button type="button" class="btn-primary" style="width:auto; margin:0; padding:10px 18px;" onclick="guardarTareaEditada()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div id="menuLateral" class="no-print" style="display:none;">
   <div class="menu-fondo" onclick="cerrarMenuLateral()"></div>
   <aside class="menu-panel">
@@ -12557,6 +12679,126 @@ function poblarParteObraDatalist(){
   let baremo = JSON.parse(JSON.stringify(BAREMO_DEFECTO));
   let pesos  = { ...PESOS_DEFECTO };
 
+  // ==================================================================
+  // TAREAS PROPIAS
+  // ==================================================================
+  // Pedido: *"en tareas y valor estaría bueno poder agregar tareas, editar"*.
+  // Una tarea que existiera SOLO en el baremo no serviría de nada: no se podría tildar en una orden
+  // de trabajo ni cargar al cerrarla, así que nunca le sumaría puntos a nadie. Por eso la tarea
+  // nueva se agrega al MISMO catálogo que usa la orden de trabajo (`ACTIVIDADES_CATALOGO`), y con
+  // eso aparece sola en todos lados: en las tildes de la orden, en el desplegable de la semana, en
+  // los pasos impresos y en el cuadro de cierre. No se modificó ninguna función para lograrlo — se
+  // le agregan elementos a un array que ya existía.
+  let tareasPropias = [];   // [{id, label, un, pts, pasos}]
+  const esTareaPropia = (id)=> String(id||'').startsWith('propia_');
+
+  function sincronizarCatalogoTareas(){
+    if(typeof ACTIVIDADES_CATALOGO === 'undefined') return;
+    // Sacar del catálogo las propias que ya no están, y agregar/actualizar las que sí.
+    for(let i = ACTIVIDADES_CATALOGO.length - 1; i >= 0; i--){
+      if(esTareaPropia(ACTIVIDADES_CATALOGO[i].id) && !tareasPropias.some(t=>t.id===ACTIVIDADES_CATALOGO[i].id)){
+        ACTIVIDADES_CATALOGO.splice(i,1);
+      }
+    }
+    tareasPropias.forEach(t=>{
+      const ya = ACTIVIDADES_CATALOGO.find(x=>x.id===t.id);
+      if(ya){ ya.label = t.label; ya.pasos = t.pasos||''; }
+      else   ACTIVIDADES_CATALOGO.push({ id:t.id, label:t.label, pasos:t.pasos||'' });
+      baremo[t.id] = { un: t.un||'unidad', pts: num(t.pts, PTS_TAREA_MANUAL) };
+    });
+    refrescarTildesDeLaOrden();
+  }
+
+  // La orden de trabajo dibuja sus tildes UNA sola vez y después no las vuelve a mirar. Si se
+  // agrega una tarea, hay que pedirle que las dibuje de nuevo — cuidando de no perder lo que ya
+  // estaba tildado, porque alguien puede estar armando una orden en ese momento.
+  function refrescarTildesDeLaOrden(){
+    const cont = document.getElementById('otActividades');
+    if(!cont || !cont.children.length) return;
+    const marcadas = [...cont.querySelectorAll('.ot-act-check')].filter(c=>c.checked).map(c=>c.value);
+    const enPantalla = [...cont.querySelectorAll('.ot-act-check')].map(c=>c.value).join('|');
+    const esperado = ACTIVIDADES_CATALOGO.map(a=>a.id).join('|');
+    if(enPantalla === esperado) return;            // no cambió nada: no se toca
+    cont.innerHTML = '';
+    if(typeof poblarOtActividades === 'function') poblarOtActividades();
+    cont.querySelectorAll('.ot-act-check').forEach(c=>{ c.checked = marcadas.includes(c.value); });
+  }
+
+  // ---- El cuadro de alta / edición ----
+  let tareaEditandoId = null;
+  window.abrirEditorTarea = function(id){
+    tareaEditandoId = id || null;
+    const propia = id ? esTareaPropia(id) : true;
+    const cat = (typeof ACTIVIDADES_CATALOGO !== 'undefined') ? ACTIVIDADES_CATALOGO.find(x=>x.id===id) : null;
+    const d = id ? (baremo[id] || {un:'unidad', pts:PTS_TAREA_MANUAL}) : {un:'', pts:''};
+    document.getElementById('tareaEditTitulo').textContent = id ? 'Editar la tarea' : 'Nueva tarea propia';
+    document.getElementById('tareaEditSub').textContent = id
+      ? (propia ? 'Tarea agregada por el equipo' : 'Tarea del catálogo original')
+      : 'Va a aparecer en las órdenes de trabajo, igual que las demás';
+    document.getElementById('tareaEditNombre').value = cat ? cat.label : '';
+    document.getElementById('tareaEditUn').value = d.un || '';
+    document.getElementById('tareaEditPts').value = (d.pts===''||d.pts==null) ? '' : num(d.pts);
+    document.getElementById('tareaEditPasos').value = cat ? (cat.pasos||'') : '';
+    document.getElementById('tareaEditBorrar').style.display = propia && id ? '' : 'none';
+    document.getElementById('tareaEditAviso').textContent = (id && !propia)
+      ? 'Es una tarea del catálogo original. Podés cambiarle el nombre, la unidad, los puntos y los pasos; borrarla no, porque hay órdenes viejas que la nombran.'
+      : '';
+    const caja = document.getElementById('tareaEdit');
+    caja.style.display = '';
+    requestAnimationFrame(()=>caja.classList.add('abierto'));
+    setTimeout(()=>document.getElementById('tareaEditNombre').focus(), 200);
+  };
+  window.cerrarEditorTarea = function(){
+    const c = document.getElementById('tareaEdit');
+    if(!c) return;
+    c.classList.remove('abierto');
+    setTimeout(()=>{ c.style.display='none'; }, 180);
+    tareaEditandoId = null;
+  };
+
+  window.guardarTareaEditada = function(){
+    const nombre = (document.getElementById('tareaEditNombre').value||'').trim();
+    const un     = (document.getElementById('tareaEditUn').value||'').trim() || 'unidad';
+    const pts    = num(document.getElementById('tareaEditPts').value, 0);
+    const pasos  = (document.getElementById('tareaEditPasos').value||'').trim();
+    const aviso  = document.getElementById('tareaEditAviso');
+    if(!nombre){
+      aviso.style.color='var(--danger)'; aviso.textContent='Poné el nombre de la tarea.'; return;
+    }
+    if(tareaEditandoId && esTareaPropia(tareaEditandoId)){
+      const t = tareasPropias.find(x=>x.id===tareaEditandoId);
+      if(t) Object.assign(t, { label:nombre, un, pts, pasos });
+    } else if(tareaEditandoId){
+      // Tarea del catálogo original: se le cambia el nombre y los pasos en el propio catálogo, y
+      // la unidad y los puntos en el baremo. El ID no se toca nunca — es lo que ata esta tarea con
+      // las órdenes viejas y con la regla de qué material lleva.
+      const cat = ACTIVIDADES_CATALOGO.find(x=>x.id===tareaEditandoId);
+      if(cat){ cat.label = nombre; if(pasos) cat.pasos = pasos; }
+      baremo[tareaEditandoId] = { un, pts };
+    } else {
+      const id = 'propia_' + Date.now().toString(36);
+      tareasPropias.push({ id, label:nombre, un, pts, pasos });
+    }
+    sincronizarCatalogoTareas();
+    renderBaremo();
+    cerrarEditorTarea();
+    const msg = document.getElementById('baremoMsg');
+    if(msg){ msg.style.color='var(--amber)';
+      msg.textContent='Cambio aplicado acá. Tocá «Guardar» para que lo vea todo el equipo.'; }
+  };
+
+  window.borrarTareaPropia = function(){
+    if(!tareaEditandoId || !esTareaPropia(tareaEditandoId)) return;
+    const t = tareasPropias.find(x=>x.id===tareaEditandoId);
+    if(!confirm(`¿Borrar la tarea «${t?t.label:''}»?\n\nDeja de aparecer en las órdenes nuevas. Las órdenes viejas que ya la tienen cargada la siguen mostrando y sus puntos no se pierden.`)) return;
+    tareasPropias = tareasPropias.filter(x=>x.id!==tareaEditandoId);
+    sincronizarCatalogoTareas();
+    renderBaremo();
+    cerrarEditorTarea();
+    const msg = document.getElementById('baremoMsg');
+    if(msg){ msg.style.color='var(--amber)'; msg.textContent='Tarea borrada acá. Tocá «Guardar» para que sea para todos.'; }
+  };
+
   function aplicarBaremoDeLaNube(){
     const b = window.__baremoNube;
     if(!b) return;
@@ -12565,6 +12807,11 @@ function poblarParteObraDatalist(){
       Object.keys(b.baremo).forEach(k=>{ if(!baremo[k]) baremo[k] = b.baremo[k]; });
     }
     if(b.pesos && typeof b.pesos === 'object') pesos = { ...PESOS_DEFECTO, ...b.pesos };
+    if(Array.isArray(b.tareasPropias)){ tareasPropias = b.tareasPropias; sincronizarCatalogoTareas(); }
+    // Nombres cambiados de las tareas del catálogo original.
+    if(b.labels && typeof ACTIVIDADES_CATALOGO !== 'undefined'){
+      ACTIVIDADES_CATALOGO.forEach(c=>{ if(b.labels[c.id]) c.label = b.labels[c.id]; });
+    }
     const v = document.getElementById('viewProduccion');
     if(v && v.style.display !== 'none') renderProduccion();
   }
@@ -12766,7 +13013,8 @@ function poblarParteObraDatalist(){
   // ==================================================================
   // LA PANTALLA
   // ==================================================================
-  let subProd = 'produccion';
+  // Abre en «Cierre del día»: es lo que se hace todos los días al volver la cuadrilla.
+  let subProd = 'dia';
 
   function rangoPeriodo(){
     const hoy = new Date();
@@ -12778,6 +13026,21 @@ function poblarParteObraDatalist(){
       const desde = p==='semana' ? l : sumarDias(l,-7);
       const hasta = sumarDias(desde, 6);
       return { desde, hasta, label:`semana del ${formatFechaCorta(desde)} al ${formatFechaCorta(hasta)}` };
+    }
+    // QUINCENA — como se cobra: del 1 al 15 y del 16 al último día del mes.
+    if(p === 'quincena' || p === 'quincena_ant'){
+      const y = hoy.getFullYear(), m = hoy.getMonth(), d = hoy.getDate();
+      // 0 = primera quincena (1 al 15), 1 = segunda (16 a fin de mes)
+      let qm = m, qi = d <= 15 ? 0 : 1;
+      if(p === 'quincena_ant'){
+        if(qi === 1) qi = 0;
+        else { qi = 1; qm = m - 1; }
+      }
+      const ini = new Date(y, qm, qi === 0 ? 1 : 16);
+      const fin = qi === 0 ? new Date(y, qm, 15) : new Date(y, qm + 1, 0);
+      const mes = ini.toLocaleDateString('es-AR', { month:'long', year:'numeric' });
+      return { desde:iso(ini), hasta:iso(fin),
+               label:`${qi===0?'1ª':'2ª'} quincena de ${mes} (${formatFechaCorta(iso(ini))} al ${formatFechaCorta(iso(fin))})` };
     }
     const m = p==='mes' ? hoy.getMonth() : hoy.getMonth()-1;
     const a = new Date(hoy.getFullYear(), m, 1), b = new Date(hoy.getFullYear(), m+1, 0);
@@ -12920,10 +13183,12 @@ function poblarParteObraDatalist(){
     const cat = (typeof ACTIVIDADES_CATALOGO !== 'undefined') ? ACTIVIDADES_CATALOGO : [];
     body.innerHTML = cat.map(c=>{
       const d = baremo[c.id] || { un:'unidad', pts:PTS_TAREA_MANUAL };
+      const propia = esTareaPropia(c.id);
       return `<tr>
-        <td><b>${esc(c.label)}</b></td>
+        <td><b>${esc(c.label)}</b>${propia?' <span class="bar-propia">propia</span>':''}</td>
         <td><input type="text" class="bar-un" data-k="${esc(c.id)}" value="${esc(d.un)}" style="width:120px;"></td>
         <td style="text-align:right;"><input type="number" min="0" step="any" class="bar-pts" data-k="${esc(c.id)}" value="${num(d.pts)}" style="width:92px; text-align:right;"></td>
+        <td class="no-print" style="text-align:center;"><button type="button" class="btn-ghost" style="padding:4px 9px; font-size:12px;" onclick="abrirEditorTarea('${esc(c.id)}')" title="Cambiar el nombre y los pasos que salen impresos">✎</button></td>
       </tr>`;
     }).join('');
     const pb = document.getElementById('pesosBody');
@@ -12950,7 +13215,10 @@ function poblarParteObraDatalist(){
       renderProduccion(); return;
     }
     try{
-      await window.fbBaremoGuardar({ baremo:nuevo, pesos:np, ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
+      const labels = {};
+      (typeof ACTIVIDADES_CATALOGO !== 'undefined' ? ACTIVIDADES_CATALOGO : []).forEach(c=>{ labels[c.id] = c.label; });
+      await window.fbBaremoGuardar({ baremo:nuevo, pesos:np, tareasPropias, labels,
+                                     ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
       msg.style.color = 'var(--teal-dark)';
       msg.textContent = '✔ Guardado. Ya lo ve todo el equipo, y los puntos de todas las órdenes se recalculan con estos valores.';
       renderProduccion();
@@ -12960,19 +13228,331 @@ function poblarParteObraDatalist(){
     }
   };
 
+  // ==================================================================
+  // CIERRE DEL DÍA
+  // ==================================================================
+  // Todas las órdenes de una misma fecha en una sola pantalla: se tilda la tarea que se hizo, se
+  // pone la cantidad y el reparto entre la cuadrilla se llena solo con el peso de cada rol.
+  // Guarda EXACTAMENTE el mismo objeto `cierre` que el cuadro de cerrar una orden, así que
+  // «Producción por persona» lo lee sin cambiarle una coma.
+  let diaFecha = fechaAISO(new Date());
+  const diaBorradores = {};       // id de orden -> {cantidades, obs, manual, reparto} sin guardar
+
+  function ordenesDelDia(f){
+    return ordenes().filter(o => String(o.fecha||'') === f)
+      .sort((a,b)=> String(a.numero||'').localeCompare(String(b.numero||''), 'es', {numeric:true}));
+  }
+
+  function tareasDeOrden(o){
+    return [
+      ...(o.actividades||[]).map(id=>({ k:id, label:tareaLabel(id),
+            def: baremo[id] || {un:'unidad', pts:PTS_TAREA_MANUAL}, enBaremo: !!baremo[id] })),
+      ...(o.actividadesManuales||[]).filter(a=>String(a.actividad||'').trim())
+        .map(a=>({ k:'m:'+a.actividad.trim(), label:a.actividad.trim(),
+            def:{un:'unidad', pts:PTS_TAREA_MANUAL}, enBaremo:false })),
+    ];
+  }
+
+  // Cuánto de esa misma tarea ya quedó cargado en OTRAS órdenes de la misma plaza. No es una
+  // estimación ni un pronóstico: es lo que está guardado. Sirve para no cargar dos veces lo mismo.
+  function yaCargadoEnLaPlaza(o, k){
+    let t = 0;
+    ordenes().forEach(x=>{
+      if(x.id === o.id) return;
+      if(String(x.plazaId||'') !== String(o.plazaId||'')) return;
+      const c = (x.cierre||{}).cantidades || {};
+      if(c[k]) t += num(c[k]);
+    });
+    return t;
+  }
+
+  function borradorDe(o){
+    if(!diaBorradores[o.id]){
+      const c = o.cierre || {};
+      diaBorradores[o.id] = {
+        cantidades: { ...(c.cantidades||{}) },
+        obs: c.obs || '',
+        manual: !!(c.reparto && Object.keys(c.reparto).length),
+        reparto: { ...(c.reparto||{}) },
+        sucio: false
+      };
+    }
+    return diaBorradores[o.id];
+  }
+
+  function repartoAutomatico(o, total){
+    const gente = (o.personal||[]).filter(p=>String(p.nombre||'').trim());
+    const suma = gente.reduce((t,p)=> t + num(pesos[p.rol], 0.6), 0) || 1;
+    return gente.map(p=>({ nombre:String(p.nombre).trim(), rol:p.rol||'—',
+                           pts: Math.round(total * num(pesos[p.rol], 0.6) / suma * 10) / 10 }));
+  }
+
+  function renderCierreDelDia(){
+    const lbl = document.getElementById('diaLabel');
+    const inp = document.getElementById('diaFecha');
+    const cont = document.getElementById('diaOrdenes');
+    if(!cont) return;
+    if(inp && inp.value !== diaFecha) inp.value = diaFecha;
+    if(lbl) lbl.textContent = `${diaSemanaDeFecha(diaFecha)} ${formatFechaCorta(diaFecha)}`;
+
+    const lista = ordenesDelDia(diaFecha);
+    const sinCargar = lista.filter(o=>!(o.cierre && Object.keys(o.cierre.cantidades||{}).length)).length;
+    const res = document.getElementById('diaResumen');
+    if(res){
+      res.innerHTML = !lista.length
+        ? 'No hay ninguna orden de trabajo con esa fecha.'
+        : `<b>${lista.length}</b> orden(es) de ese día · <b>${sinCargar}</b> sin cargar. ` +
+          `Tocá la tarea que se hizo, poné la cantidad y listo: el reparto entre la cuadrilla se llena solo.`;
+    }
+
+    if(!lista.length){
+      cont.innerHTML = `<div class="card"><div class="hint">Para que aparezca acá, la orden tiene que estar emitida con la fecha del día. Se emiten en <b>Órdenes de trabajo</b>.</div></div>`;
+      return;
+    }
+
+    let html = '';
+    lista.forEach(o=>{
+      const b = borradorDe(o);
+      const tareas = tareasDeOrden(o);
+      const gente = (o.personal||[]).filter(p=>String(p.nombre||'').trim());
+      const cerrada = o.cierre && Object.keys(o.cierre.cantidades||{}).length;
+      let total = 0;
+      tareas.forEach(t=>{ total += num(b.cantidades[t.k]) * num(t.def.pts); });
+
+      html += `<div class="card dia-card" data-ot="${esc(o.id)}">
+        <div class="dia-head">
+          <div>
+            <div class="dia-ot">${esc(o.numero||'(sin número)')} <span class="dia-plaza">· ${esc(o.plazaNombre||'sin plaza')}</span></div>
+            <div class="dia-gente">${gente.length ? gente.map(p=>`${esc(p.nombre)} <span class="dia-rol">${esc(p.rol||'—')}</span>`).join(' · ') : '<span style="color:var(--amber)">Sin personal cargado — editá la orden y agregá quién fue</span>'}${o.cuadrilla?` &nbsp;·&nbsp; cuadrilla ${esc(o.cuadrilla)}`:''}</div>
+          </div>
+          <span class="dia-estado ${cerrada?'ok':'pend'}">${cerrada?'✓ cargada':'sin cargar'}</span>
+        </div>`;
+
+      if(!tareas.length){
+        html += `<div class="hint" style="color:var(--amber);">Esta orden no tiene tareas tildadas, así que no hay nada que contar.</div>`;
+      } else {
+        html += `<button type="button" class="btn-ghost dia-todas" data-ot="${esc(o.id)}" style="margin:4px 0 10px;">✓ Se hizo todo (1 de cada una)</button>`;
+        html += `<div class="dia-tareas">`;
+        tareas.forEach(t=>{
+          const q = num(b.cantidades[t.k]);
+          const hecho = q > 0;
+          const ya = yaCargadoEnLaPlaza(o, t.k);
+          const pts = q * num(t.def.pts);
+          html += `<div class="dia-tarea${hecho?' hecha':''}" data-k="${esc(t.k)}" data-ot="${esc(o.id)}">
+            <button type="button" class="dia-tick" data-ot="${esc(o.id)}" data-k="${esc(t.k)}" aria-label="Se hizo">${hecho?'✓':''}</button>
+            <div class="dia-tarea-txt">
+              <b>${esc(t.label)}</b>
+              <div class="dia-tarea-sub">${num(t.def.pts)} punto(s) por ${esc(t.def.un)}${t.enBaremo?'':' · sin baremo, valor genérico'}${ya>0?` · ya cargado en esta plaza: <b>${fmt(ya, Number.isInteger(ya)?0:1)} ${esc(t.def.un)}</b>`:''}</div>
+            </div>
+            <div class="dia-cant">
+              <button type="button" class="dia-paso" data-ot="${esc(o.id)}" data-k="${esc(t.k)}" data-d="-1">−</button>
+              <input type="number" min="0" step="any" class="dia-qty" data-ot="${esc(o.id)}" data-k="${esc(t.k)}" value="${hecho ? (Math.round(q*100)/100) : ''}" placeholder="0">
+              <button type="button" class="dia-paso" data-ot="${esc(o.id)}" data-k="${esc(t.k)}" data-d="1">+</button>
+              <span class="dia-un">${esc(t.def.un)}</span>
+            </div>
+            <div class="dia-pts">${fmt(pts, Number.isInteger(pts)?0:1)}</div>
+          </div>`;
+        });
+        html += `</div>`;
+
+        html += `<div class="dia-total">Total del parte: <b>${fmt(total, Number.isInteger(total)?0:1)} puntos</b></div>`;
+        if(gente.length){
+          const rep = b.manual
+            ? gente.map(p=>({nombre:String(p.nombre).trim(), rol:p.rol||'—', pts:num(b.reparto[String(p.nombre).trim()])}))
+            : repartoAutomatico(o, total);
+          html += `<label class="dia-chk"><input type="checkbox" class="dia-manual" data-ot="${esc(o.id)}" ${b.manual?'checked':''}> Repartir a mano</label>`;
+          html += `<div class="dia-reparto">` + rep.map(r=>`
+            <div class="dia-persona">
+              <div><b>${esc(r.nombre)}</b><div class="dia-rol2">${esc(r.rol)} · peso ${num(pesos[r.rol], 0.6)}</div></div>
+              <input type="number" min="0" step="any" class="dia-pers${b.manual?'':' auto'}" data-ot="${esc(o.id)}" data-n="${esc(r.nombre)}" value="${r.pts}" ${b.manual?'':'readonly'}>
+            </div>`).join('') + `</div>`;
+        }
+        html += `<textarea class="dia-obs" data-ot="${esc(o.id)}" rows="2" placeholder="Observaciones del día: se paró por lluvia, faltó material…">${esc(b.obs)}</textarea>`;
+        html += `<div class="dia-pie">
+          <span class="hint dia-msg" data-ot="${esc(o.id)}">${b.sucio?'Hay cambios sin guardar.':''}</span>
+          <button type="button" class="btn-primary dia-guardar" data-ot="${esc(o.id)}" style="width:auto; margin:0; padding:9px 18px;">Guardar el parte</button>
+        </div>`;
+      }
+      html += `</div>`;
+    });
+
+    html += `<div class="card no-print dia-pie-todo">
+      <div class="hint" id="diaMsgTodo" style="margin:0;">Podés guardar de a una o todas juntas.</div>
+      <button type="button" class="btn-primary" id="diaGuardarTodo" style="width:auto; margin:0; padding:11px 22px;">Guardar todo el día</button>
+    </div>`;
+    cont.innerHTML = html;
+  }
+
+  async function guardarParteDelDia(id, silencioso){
+    const o = ordenes().find(x=>x.id===id);
+    if(!o) return false;
+    const b = borradorDe(o);
+    const msg = document.querySelector(`.dia-msg[data-ot="${CSS.escape(id)}"]`);
+    if(!window.__fbUser){
+      if(msg){ msg.style.color='var(--danger)'; msg.textContent='Iniciá sesión (pestaña Pañol) para poder guardar.'; }
+      return false;
+    }
+    const cantidades = {};
+    Object.keys(b.cantidades).forEach(k=>{ if(num(b.cantidades[k]) > 0) cantidades[k] = num(b.cantidades[k]); });
+    const cierre = {
+      cantidades,
+      reparto: b.manual ? { ...b.reparto } : {},
+      obs: b.obs || '',
+      fecha: o.fecha || diaFecha,
+      cerradoPor: (window.__fbUser && window.__fbUser.email) || '',
+      cerradoTs: Date.now()
+    };
+    if(msg && !silencioso){ msg.style.color='var(--text-soft)'; msg.textContent='Guardando…'; }
+    try{
+      await window.fbOtUpdate(o.id, { cierre });
+      o.cierre = cierre;
+      b.sucio = false;
+      if(msg){ msg.style.color='var(--teal-dark)'; msg.textContent='✔ Guardado.'; }
+      return true;
+    }catch(e){
+      if(msg){ msg.style.color='var(--danger)'; msg.textContent='No se pudo guardar (revisá la conexión).'; }
+      return false;
+    }
+  }
+
+  // ---- Los toques de la pantalla ----
+  (function engancharCierreDelDia(){
+    const panel = document.getElementById('prodPanelDia');
+    if(!panel) return;
+
+    const setCant = (id, k, v)=>{
+      const o = ordenes().find(x=>x.id===id); if(!o) return;
+      const b = borradorDe(o);
+      b.cantidades[k] = Math.max(0, num(v));
+      b.sucio = true;
+      renderCierreDelDia();
+    };
+
+    panel.addEventListener('click', async (e)=>{
+      const tick = e.target.closest('.dia-tick');
+      if(tick){
+        const o = ordenes().find(x=>x.id===tick.dataset.ot); if(!o) return;
+        const b = borradorDe(o);
+        const q = num(b.cantidades[tick.dataset.k]);
+        setCant(tick.dataset.ot, tick.dataset.k, q > 0 ? 0 : 1);
+        return;
+      }
+      const paso = e.target.closest('.dia-paso');
+      if(paso){
+        const o = ordenes().find(x=>x.id===paso.dataset.ot); if(!o) return;
+        const b = borradorDe(o);
+        setCant(paso.dataset.ot, paso.dataset.k, num(b.cantidades[paso.dataset.k]) + Number(paso.dataset.d));
+        return;
+      }
+      const todas = e.target.closest('.dia-todas');
+      if(todas){
+        const o = ordenes().find(x=>x.id===todas.dataset.ot); if(!o) return;
+        const b = borradorDe(o);
+        tareasDeOrden(o).forEach(t=>{ if(!num(b.cantidades[t.k])) b.cantidades[t.k] = 1; });
+        b.sucio = true; renderCierreDelDia();
+        return;
+      }
+      const g = e.target.closest('.dia-guardar');
+      if(g){ await guardarParteDelDia(g.dataset.ot); renderCierreDelDia(); if(typeof renderOt === 'function') renderOt(); return; }
+
+      if(e.target.id === 'diaGuardarTodo'){
+        const m = document.getElementById('diaMsgTodo');
+        const lista = ordenesDelDia(diaFecha);
+        let ok = 0;
+        for(const o of lista){
+          const b = diaBorradores[o.id];
+          if(!b || !Object.keys(b.cantidades).some(k=>num(b.cantidades[k])>0)) continue;
+          if(await guardarParteDelDia(o.id, true)) ok++;
+        }
+        renderCierreDelDia();
+        if(typeof renderOt === 'function') renderOt();
+        const m2 = document.getElementById('diaMsgTodo');
+        if(m2){ m2.style.color = ok ? 'var(--teal-dark)' : 'var(--amber)';
+          m2.textContent = ok ? `✔ Se guardaron ${ok} parte(s) del ${formatFechaCorta(diaFecha)}.`
+                              : 'No había ninguna tarea tildada para guardar.'; }
+        return;
+      }
+    });
+
+    panel.addEventListener('input', (e)=>{
+      const q = e.target.closest('.dia-qty');
+      if(q){
+        const o = ordenes().find(x=>x.id===q.dataset.ot); if(!o) return;
+        const b = borradorDe(o);
+        b.cantidades[q.dataset.k] = Math.max(0, num(q.value));
+        b.sucio = true;
+        // Se recalcula en vivo SIN volver a dibujar, para no sacarle el foco a quien está tecleando.
+        const fila = q.closest('.dia-tarea');
+        const def = q.dataset.k.startsWith('m:') ? {pts:PTS_TAREA_MANUAL} : (baremo[q.dataset.k] || {pts:PTS_TAREA_MANUAL});
+        const pts = num(q.value) * num(def.pts);
+        if(fila){
+          fila.classList.toggle('hecha', num(q.value) > 0);
+          const tk = fila.querySelector('.dia-tick'); if(tk) tk.textContent = num(q.value) > 0 ? '✓' : '';
+          const cp = fila.querySelector('.dia-pts'); if(cp) cp.textContent = fmt(pts, Number.isInteger(pts)?0:1);
+        }
+        actualizarTotalesDeLaTarjeta(q.dataset.ot);
+        return;
+      }
+      const ob = e.target.closest('.dia-obs');
+      if(ob){ const o = ordenes().find(x=>x.id===ob.dataset.ot); if(o){ borradorDe(o).obs = ob.value; borradorDe(o).sucio = true; } return; }
+      const pe = e.target.closest('.dia-pers');
+      if(pe && !pe.readOnly){ const o = ordenes().find(x=>x.id===pe.dataset.ot); if(o){ borradorDe(o).reparto[pe.dataset.n] = num(pe.value); borradorDe(o).sucio = true; } return; }
+    });
+
+    panel.addEventListener('change', (e)=>{
+      const m = e.target.closest('.dia-manual');
+      if(m){ const o = ordenes().find(x=>x.id===m.dataset.ot); if(o){ borradorDe(o).manual = m.checked; borradorDe(o).sucio = true; renderCierreDelDia(); } }
+    });
+
+    const irA = (f)=>{ diaFecha = f; renderCierreDelDia(); };
+    document.getElementById('diaPrev').addEventListener('click', ()=>irA(sumarDias(diaFecha,-1)));
+    document.getElementById('diaNext').addEventListener('click', ()=>irA(sumarDias(diaFecha, 1)));
+    document.getElementById('diaHoy').addEventListener('click', ()=>irA(fechaAISO(new Date())));
+    document.getElementById('diaFecha').addEventListener('change', (e)=>{ if(e.target.value) irA(e.target.value); });
+  })();
+
+  // Recalcula el total y el reparto de UNA tarjeta sin redibujar (para no perder el foco).
+  function actualizarTotalesDeLaTarjeta(id){
+    const o = ordenes().find(x=>x.id===id); if(!o) return;
+    const b = borradorDe(o);
+    let total = 0;
+    tareasDeOrden(o).forEach(t=>{ total += num(b.cantidades[t.k]) * num(t.def.pts); });
+    const card = document.querySelector(`.dia-card[data-ot="${CSS.escape(id)}"]`);
+    if(!card) return;
+    const tot = card.querySelector('.dia-total b');
+    if(tot) tot.textContent = fmt(total, Number.isInteger(total)?0:1) + ' puntos';
+    if(!b.manual){
+      const rep = repartoAutomatico(o, total);
+      card.querySelectorAll('.dia-pers').forEach((inp,i)=>{ if(rep[i]) inp.value = rep[i].pts; });
+    }
+    const msg = card.querySelector('.dia-msg');
+    if(msg && b.sucio){ msg.style.color='var(--amber)'; msg.textContent='Hay cambios sin guardar.'; }
+  }
+
+  window.renderCierreDelDia = renderCierreDelDia;
+  window.irAlCierreDelDia = function(f){
+    if(f) diaFecha = f;
+    subProd = 'dia';
+    mostrarVista('produccion');
+  };
+
   // ---- Sub-pestañas ----
   function pintarSubtabsProd(){
     const barra = document.getElementById('subtabsProd');
     if(!barra) return;
     barra.innerHTML = [
+      { id:'dia',        label:'Cierre del día' },
       { id:'produccion', label:'Producción por persona' },
       { id:'personal',   label:'Personal del equipo' },
       { id:'baremo',     label:'Cuánto vale cada tarea' },
     ].map(g=>`<button type="button" class="subtab${subProd===g.id?' activo':''}" data-sub="${g.id}">${g.label}</button>`).join('');
+    const pd = document.getElementById('prodPanelDia');
+    if(pd) pd.style.display = subProd==='dia' ? '' : 'none';
     document.getElementById('prodPanelProduccion').style.display = subProd==='produccion' ? '' : 'none';
     document.getElementById('prodPanelPersonal').style.display   = subProd==='personal'   ? '' : 'none';
     document.getElementById('prodPanelBaremo').style.display     = subProd==='baremo'     ? '' : 'none';
-    if(subProd === 'baremo') renderBaremo();
+    if(subProd === 'dia') renderCierreDelDia();
+    else if(subProd === 'baremo') renderBaremo();
     else if(subProd === 'personal') renderPersonalEquipo();
     else renderProduccion();
   }
