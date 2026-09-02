@@ -1570,6 +1570,27 @@
   .it-un{ font-size:11px; color:var(--text-soft); white-space:nowrap; }
   .it-tabla tr.it-sinprecio{ background:rgba(245,158,11,.07); }
   .it-tabla tr.it-sinprecio input.it-precio{ border-color:var(--amber); }
+  .it-traer{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:14px;
+             border:1px dashed var(--line); border-radius:12px; padding:10px 14px; background:var(--bg-soft); }
+  .it-previa{ margin-top:14px; border:1px solid var(--teal-dark); border-radius:14px; padding:14px 16px; background:rgba(126,198,230,.07); }
+  .it-previa-tit{ font-weight:800; color:var(--navy); font-size:14px; }
+  .it-previa-filas{ display:grid; gap:6px; margin-top:10px; }
+  .it-previa-fila{ display:grid; grid-template-columns:24px minmax(0,1fr) auto; align-items:center; gap:10px;
+                   background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 12px; cursor:pointer; }
+  .it-previa-fila b{ font-size:13px; color:var(--navy); }
+  .it-previa-fila input[type="checkbox"]{ width:auto; margin:0; }
+  .it-previa-cant{ text-align:right; font-size:13px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .it-previa-antes{ color:var(--text-soft); text-decoration:line-through; }
+  .it-badge-amb{ background:rgba(245,158,11,.18); color:#92610a; }
+  .it-previa-dudas{ margin-top:12px; border-radius:10px; padding:10px 14px; font-size:12.5px; line-height:1.55;
+                    background:rgba(245,158,11,.12); color:#6b5312; }
+  .it-previa-dudas ul{ margin:6px 0 0; padding-left:20px; }
+  .it-previa-info{ background:rgba(148,163,184,.14); color:var(--text-soft); }
+  .it-previa-pie{ display:flex; justify-content:flex-end; gap:10px; margin-top:14px; flex-wrap:wrap; }
+  @media (max-width:640px){
+    .it-previa-fila{ grid-template-columns:24px minmax(0,1fr); }
+    .it-previa-cant{ grid-column:2; text-align:left; }
+  }
   .it-agregar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:14px; }
   .it-agregar select{ flex:1 1 320px; min-width:0; margin:0; }
   .it-agregar input{ width:130px; margin:0; }
@@ -13815,6 +13836,265 @@ function poblarParteObraDatalist(){
     }
   }
 
+
+  // ==================================================================
+  // TRAER LAS CANTIDADES DESDE LA CALCULADORA
+  // ==================================================================
+  // Pedido: *"la idea es que se llene automáticamente con la calculadora, porque ahí ponemos todas
+  // las cosas que hay que hacer; igual si falta algo lo modificamos directo del itemizado"*.
+  //
+  // La calculadora ya guarda, junto a cada cómputo, una foto del formulario (`form`): los grupos de
+  // columnas, los de vínculo, los tramos de cable, los metros de zanja con su profundidad y su
+  // terreno, el tipo de cruce, el tablero, la acometida, los retiros y la poda. De ahí sale casi
+  // todo el itemizado sin inventar nada.
+  //
+  // REGLA DE LA CASA: acá NO se adivina. Cada renglón dice de dónde salió, y lo que no se puede
+  // deducir con certeza sale marcado con ⚠ para revisar a mano. Nada se aplica sin que se vea antes.
+  const CABLE_A_ITEM = { '2x2.5':25, '2x4':26, '2x6':27, '2x10':28, '2x16':29,
+                         '3x1.5':30, '3x2.5':31, '3x4':32, '3x6':33, '3x10':34, '3x16':35,
+                         '4x2.5':36, '4x4':37, '4x6':38, '4x10':39, '4x16':40 };
+  const ZANJA_A_ITEM  = { '0.6|natural':15, '0.6|baldosa':16, '0.6|hormigon':17,
+                          '1.0|natural':18, '1.0|baldosa':19, '1.0|hormigon':20 };
+  const CRUCE_A_ITEM  = { tunelera:21, tierra:22, hormigon:23, asfalto:24 };
+  // Columna: [tipo][altura][cantidad de brazos] -> ítem del pliego
+  const COLUMNA_A_ITEM = {
+    'Metálica': { 7:{1:1, 2:2, 3:3}, 10:{4:4} },
+    'PRFV':     { 7:{1:5, 2:6, 3:7}, 10:{4:8} },
+  };
+
+  // Busca el cómputo de la calculadora que corresponde a esta plaza (por ID de obra, y si no por
+  // nombre). Si hay varios, se queda con el último calculado.
+  function computoDeLaPlaza(a){
+    const hist = leer(()=> (window.historialCompartido || historial)) || [];
+    const norm = (t)=> String(t||'').trim().toLowerCase();
+    const cands = hist.filter(h=>
+      (a.obraId && String(h.id||'').trim() === String(a.obraId).trim()) ||
+      (norm(h.nombre) && norm(h.nombre) === norm(a.nombre)));
+    if(!cands.length) return null;
+    return cands.slice().sort((x,y)=> (y.ts||0) - (x.ts||0))[0];
+  }
+
+  // Traduce un cómputo a renglones del itemizado. Devuelve [{item, cantidad, motivo, duda}].
+  function itemizadoDesdeComputo(h){
+    const out = [], dudas = [];
+    const f = h && h.form;
+    if(!f || !f.campos) return { filas:out, dudas:['El cómputo de esta plaza es anterior a que se guardara la foto del formulario. Volvé a calcularla en la Calculadora y quedará disponible.'] };
+    const C = f.campos;
+    const numC = (k)=> n2(C[k], 0);
+    const on = (k)=> C[k] === true || C[k] === 'true';
+    const push = (item, cant, motivo)=>{
+      if(!(cant > 0)) return;
+      const ya = out.find(x=>x.item === item);
+      if(ya){ ya.cantidad += cant; ya.motivo += ' + ' + motivo; }
+      else out.push({ item, cantidad:cant, motivo });
+    };
+
+    // ---------- Columnas ----------
+    if(on('toggleColumnas')){
+      const tipo = C.colTipo || 'PRFV';
+      const gruposCol = (f.columnaGrupos||[]).filter(g=>n2(g.columnas) > 0);
+      const vinc = leer(()=> VINCULOS) || [];
+      const brazosDe = (t)=>{ const v = vinc.find(x=>x.id===t); return v ? v.lum : null; };
+      const gruposVinc = on('toggleVinculos')
+        ? (f.vinculoGrupos||[]).filter(g=>n2(g.columnas) > 0).map(g=>({ brazos:brazosDe(g.tipo), columnas:n2(g.columnas) }))
+        : [];
+
+      const de10 = gruposCol.filter(g=>n2(g.altura) === 10).reduce((t,g)=>t+n2(g.columnas), 0);
+      const de7  = gruposCol.filter(g=>n2(g.altura) === 7 ).reduce((t,g)=>t+n2(g.columnas), 0);
+      const otras= gruposCol.filter(g=>n2(g.altura) !== 7 && n2(g.altura) !== 10);
+      otras.forEach(g=>dudas.push(`Hay ${n2(g.columnas)} columna(s) de ${n2(g.altura)} m: el itemizado solo tiene columnas de 7 m y de 10 m, así que esas no se pudieron cargar.`));
+
+      if(!gruposVinc.length){
+        if(de7 > 0)  dudas.push(`${de7} columna(s) de 7 m sin vínculo cargado en la calculadora: el precio del pliego cambia según lleve 1, 2 o 3 brazos, así que hay que elegir el ítem a mano.`);
+        if(de10 > 0){ const it = COLUMNA_A_ITEM[tipo] && COLUMNA_A_ITEM[tipo][10] && COLUMNA_A_ITEM[tipo][10][4];
+          if(it) push(it, de10, `${de10} columna(s) ${tipo} de 10 m (el itemizado solo las tiene de 4 brazos)`); }
+      } else {
+        // Las de 10 m del pliego son SIEMPRE de 4 brazos, así que los grupos cuádruples se les
+        // asignan primero. El resto de los vínculos corresponde a las columnas de 7 m.
+        let resto10 = de10;
+        const paraSiete = [];
+        gruposVinc.forEach(g=>{
+          let cols = g.columnas;
+          if(g.brazos === 4 && resto10 > 0){
+            const usa = Math.min(resto10, cols);
+            const it = COLUMNA_A_ITEM[tipo] && COLUMNA_A_ITEM[tipo][10] && COLUMNA_A_ITEM[tipo][10][4];
+            if(it) push(it, usa, `${usa} columna(s) ${tipo} de 10 m con 4 brazos`);
+            resto10 -= usa; cols -= usa;
+          }
+          if(cols > 0) paraSiete.push({ brazos:g.brazos, columnas:cols });
+        });
+        if(resto10 > 0){
+          const it = COLUMNA_A_ITEM[tipo] && COLUMNA_A_ITEM[tipo][10] && COLUMNA_A_ITEM[tipo][10][4];
+          if(it) push(it, resto10, `${resto10} columna(s) ${tipo} de 10 m`);
+          dudas.push(`${resto10} columna(s) de 10 m no tenían un vínculo cuádruple cargado. Se cargaron igual con el ítem de 10 m, que en el itemizado es siempre de 4 brazos — verificalo.`);
+        }
+        let asignadas7 = 0;
+        paraSiete.forEach(g=>{
+          const it = COLUMNA_A_ITEM[tipo] && COLUMNA_A_ITEM[tipo][7] && COLUMNA_A_ITEM[tipo][7][g.brazos];
+          if(it){ push(it, g.columnas, `${g.columnas} columna(s) ${tipo} de 7 m con ${g.brazos} brazo(s)`); asignadas7 += g.columnas; }
+          else dudas.push(`${g.columnas} columna(s) de 7 m con ${g.brazos||'?'} brazo(s): el itemizado solo tiene de 1, 2 y 3 brazos para 7 m. Cargalas a mano.`);
+        });
+        if(de7 > 0 && asignadas7 !== de7)
+          dudas.push(`La calculadora tiene ${de7} columna(s) de 7 m pero ${asignadas7} con vínculo asignado. Revisá el reparto de brazos.`);
+      }
+    }
+
+    // ---------- Zanjeo ----------
+    if(on('toggleCivil')){
+      const ml = numC('civilZanjaMl');
+      const prof = String(C.civilZanjaProf || '0.6');
+      const terr = String(C.civilZanjaTerreno || 'natural');
+      const it = ZANJA_A_ITEM[`${prof}|${terr}`];
+      const nombreTerr = terr==='natural' ? 'terreno natural' : (terr==='baldosa' ? 'vereda de baldosas' : 'piso de hormigón');
+      if(it) push(it, ml, `${fmt(ml,2)} m de zanja de ${prof.replace('.',',')} m en ${nombreTerr}`);
+      else if(ml > 0) dudas.push(`No hay ítem de zanjeo para ${prof} m en ${nombreTerr}.`);
+    }
+
+    // ---------- Cruce de calle ----------
+    if(on('toggleCruce')){
+      const ml = numC('cruceMl');
+      const tipo = String(C.cruceTipo || '');
+      const it = CRUCE_A_ITEM[tipo];
+      if(it) push(it, ml, `${fmt(ml,2)} m de cruce (${tipo})`);
+      else if(ml > 0) dudas.push(`El cruce cargado es «${tipo||'sin tipo'}» y el itemizado de plazas no tiene un ítem para ese caso (sí tiene tunelera, tierra, hormigón y asfalto). Cargalo a mano si corresponde.`);
+    }
+
+    // ---------- Cables ----------
+    // La fuente de verdad es «Cableado por circuitos»: cada punto trae su largo y su calibre. Se
+    // suman los LARGOS DE ZANJA por calibre — la ganancia (lo que sube por la columna) no va acá,
+    // porque el ítem del pliego es «provisión y tendido EN ZANJA». Si el cómputo es viejo y no tiene
+    // circuitos, se cae a los tramos derivados que la calculadora guardaba igual.
+    if(on('toggleCableado')){
+      const porCalibre = {};
+      let hayCircuitos = false;
+      (f.circuitos||[]).forEach(c=>{
+        (c.puntos||[]).forEach(p=>{
+          if(!p.calibre) return;
+          hayCircuitos = true;
+          porCalibre[p.calibre] = (porCalibre[p.calibre]||0) + n2(p.largo);
+        });
+      });
+      if(!hayCircuitos) (f.tramos||[]).forEach(t=>{ if(t.calibre) porCalibre[t.calibre] = (porCalibre[t.calibre]||0) + n2(t.ml); });
+      Object.keys(porCalibre).forEach(cal=>{
+        const ml = porCalibre[cal];
+        const it = CABLE_A_ITEM[cal];
+        const nombre = String(cal).replace('x','×');
+        if(it) push(it, ml, `${fmt(ml,2)} m de cable ${nombre} mm²${hayCircuitos?' (largo de zanja de los circuitos, sin la ganancia de subida)':''}`);
+        else if(ml > 0) dudas.push(`No hay ítem del itemizado para el cable ${nombre} mm² (${fmt(ml,2)} m). Cargalo a mano.`);
+      });
+    }
+
+    // ---------- Tablero y su apoyo ----------
+    if(on('toggleTablero')){
+      const tt = String(C.tableroTipo || '');
+      if(tt === 'aereo_prfv'){
+        push(9, 1, 'Tablero aéreo de medición, protección y comando');
+        push(13, 1, 'Apoyo PRFV que sostiene el tablero');
+        dudas.push('El apoyo del tablero se cargó con el ítem 13 (PRFV h=8 m Ro1050), que es el que el itemizado usa para sostener el tablero. La calculadora nombra un apoyo de 9,5 m — verificá cuál corresponde en esta plaza.');
+      } else if(tt === 'nivel_prfv'){
+        push(10, 1, 'Tablero a nivel, sobre base de mampostería');
+      }
+      // Acometida EPEC ↔ tablero
+      const aml = numC('acometidaMl');
+      const at = String(C.acometidaTipo || '');
+      if(at === 'aerea')            push(11, aml, `${fmt(aml,2)} m de acometida aérea EPEC ↔ tablero`);
+      else if(at === 'subterranea') push(12, aml, `${fmt(aml,2)} m de acometida subterránea EPEC ↔ tablero`);
+    }
+
+    // ---------- Retiros y poda ----------
+    if(on('toggleRetiros')){
+      push(46, numC('retiroCol'), `${numC('retiroCol')} columna(s) a retirar`);
+      push(49, numC('retiroTab'), `${numC('retiroTab')} tablero(s) a retirar`);
+      if(on('podaCheck')) push(82, numC('podaCant'), `${numC('podaCant')} árbol(es) a podar`);
+    }
+
+    return { filas:out, dudas };
+  }
+
+  // Lo que la calculadora NO puede saber y hay que cargar a mano en el itemizado.
+  const FALTA_A_MANO = [
+    'Puesta a tierra — el dispersor/jabalina (ítem 75) y su medición (ítem 81).',
+    'Los elementos internos del tablero (térmicas, diferencial, contactor, fotocontrol, reloj) — ítems 50 a 70.',
+    'Empalmes (78 y 79), mediciones de aislación (80) y reacondicionamientos (41, 43, 44).',
+  ];
+
+  let previa = {};   // idDePlaza -> { filas, dudas, computo }
+
+  function armarPrevia(a){
+    const h = computoDeLaPlaza(a);
+    if(!h){ previa[a.id] = { error:'No se encontró ningún cómputo de la Calculadora para esta plaza. Buscamos por ID de obra y por nombre — fijate que coincidan.' }; return; }
+    const r = itemizadoDesdeComputo(h);
+    const yaCargados = {};
+    (a.valorItems||[]).forEach(v=>{ if(v.itemPliego) yaCargados[v.itemPliego] = n2(v.cantidad); });
+    r.filas.forEach(fl=>{
+      fl.anterior = yaCargados[fl.item];
+      fl.cambia = fl.anterior != null && Math.abs(fl.anterior - fl.cantidad) > 0.001;
+      fl.nueva  = fl.anterior == null;
+      fl.tildada = true;
+    });
+    previa[a.id] = { ...r, computo:h };
+  }
+
+  function htmlPrevia(a){
+    const p = previa[a.id];
+    if(!p) return '';
+    if(p.error) return `<div class="it-previa"><div class="hint" style="margin-top:0; color:var(--danger);">${esc(p.error)}</div>
+      <div class="it-previa-pie"><button type="button" class="btn-ghost it-previa-cerrar">Cerrar</button></div></div>`;
+    const h = p.computo;
+    let x = `<div class="it-previa">
+      <div class="it-previa-tit">Lo que trae el cómputo de la Calculadora</div>
+      <div class="hint" style="margin-top:0;">Cómputo de <b>${esc(h.nombre)}</b>${h.id?` (ID ${esc(h.id)})`:''}, calculado el ${esc((typeof formatFechaCorta==='function'&&h.fecha)?formatFechaCorta(h.fecha):(h.fecha||'—'))}. Destildá lo que no quieras traer. <b>Las cantidades ya hechas no se tocan.</b></div>`;
+    if(!p.filas.length){
+      x += `<div class="hint" style="color:var(--amber);">Ese cómputo no tiene nada que se pueda pasar al itemizado.</div>`;
+    } else {
+      x += `<div class="it-previa-filas">` + p.filas.map((fl,i)=>{
+        const it = itemDe(fl.item);
+        return `<label class="it-previa-fila">
+          <input type="checkbox" class="it-previa-chk" data-i="${i}" ${fl.tildada?'checked':''}>
+          <div>
+            <b>Ítem ${fl.item} — ${esc(it?it.desc:'?')}</b>
+            <div class="it-cat">${esc(fl.motivo)}</div>
+          </div>
+          <div class="it-previa-cant">
+            ${fl.cambia ? `<span class="it-previa-antes">${fmt(fl.anterior, Number.isInteger(fl.anterior)?0:2)}</span> → ` : ''}
+            <b>${fmt(fl.cantidad, Number.isInteger(fl.cantidad)?0:2)}</b> ${esc(it?it.un:'')}
+            ${fl.nueva ? '<span class="it-badge">nuevo</span>' : (fl.cambia ? '<span class="it-badge it-badge-amb">cambia</span>' : '<span class="it-cat">igual</span>')}
+          </div>
+        </label>`;
+      }).join('') + `</div>`;
+    }
+    if(p.dudas && p.dudas.length){
+      x += `<div class="it-previa-dudas"><b>⚠ Esto hay que revisarlo a mano:</b><ul>` +
+           p.dudas.map(d=>`<li>${esc(d)}</li>`).join('') + `</ul></div>`;
+    }
+    x += `<div class="it-previa-dudas it-previa-info"><b>La calculadora no puede saber esto — cargalo acá:</b><ul>` +
+         FALTA_A_MANO.map(d=>`<li>${esc(d)}</li>`).join('') + `</ul></div>`;
+    x += `<div class="it-previa-pie">
+      <button type="button" class="btn-ghost it-previa-cerrar">Cancelar</button>
+      <button type="button" class="btn-primary it-previa-aplicar" style="width:auto; margin:0; padding:10px 18px;">Aplicar a la plaza</button>
+    </div></div>`;
+    return x;
+  }
+
+  function aplicarPrevia(a){
+    const p = previa[a.id];
+    if(!p || !p.filas) return 0;
+    a.valorItems = a.valorItems || [];
+    let n = 0;
+    p.filas.filter(fl=>fl.tildada).forEach(fl=>{
+      const ya = a.valorItems.find(v=>v.itemPliego === fl.item);
+      if(ya){ ya.cantidad = fl.cantidad; }              // la cantidad HECHA no se toca
+      else {
+        const nid = (typeof avanceItemIdSeq !== 'undefined') ? avanceItemIdSeq++ : Date.now() + n;
+        a.valorItems.push({ id:nid, itemPliego:fl.item, cantidad:fl.cantidad, cantidadAvanzada:0 });
+      }
+      n++;
+    });
+    if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+    delete previa[a.id];
+    return n;
+  }
+
   // ---- Cuentas ----
   function cuentasDePlaza(a){
     let contratado = 0, avanzado = 0, sinPrecio = 0;
@@ -13964,6 +14244,16 @@ function poblarParteObraDatalist(){
       </tr></tfoot></table></div>`;
     }
 
+    if(previa[a.id]) h += htmlPrevia(a);
+    else {
+      const hay = computoDeLaPlaza(a);
+      h += `<div class="it-traer no-print">
+        <button type="button" class="btn-auto it-traer-btn" style="margin:0;" ${dis}>⟳ Traer las cantidades de la Calculadora</button>
+        <span class="hint" style="margin:0;">${hay
+          ? `Hay un cómputo de <b>${esc(hay.nombre)}</b>${hay.id?` (ID ${esc(hay.id)})`:''} para traer. Se ve primero y se aplica si estás de acuerdo.`
+          : '<span style="color:var(--amber)">No encontramos un cómputo de la Calculadora para esta plaza (buscamos por ID de obra y por nombre).</span>'}</span>
+      </div>`;
+    }
     h += `<div class="it-agregar no-print">
       <select class="it-nuevo-sel" ${dis}>${(typeof opcionesItemizadoHTML==='function') ? opcionesItemizadoHTML(null) : ''}</select>
       <input type="number" min="0" step="any" class="it-nuevo-cant" placeholder="Cantidad" ${dis}>
@@ -14030,6 +14320,30 @@ function poblarParteObraDatalist(){
         a.valorItems = (a.valorItems||[]).filter(v=>String(v.id)!==tr.dataset.vid);
         if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
         renderItemizado(); refrescarPantallasDeAvance();
+        return;
+      }
+
+      const traer = e.target.closest('.it-traer-btn');
+      if(traer){
+        const card = traer.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.plaza); if(!a) return;
+        armarPrevia(a); renderItemizado();
+        return;
+      }
+      const cerrarPrev = e.target.closest('.it-previa-cerrar');
+      if(cerrarPrev){
+        const card = cerrarPrev.closest('.it-plaza');
+        delete previa[card.dataset.plaza]; renderItemizado();
+        return;
+      }
+      const aplicar = e.target.closest('.it-previa-aplicar');
+      if(aplicar){
+        const card = aplicar.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.plaza); if(!a) return;
+        const n = aplicarPrevia(a);
+        renderItemizado(); refrescarPantallasDeAvance();
+        const msg = document.querySelector(`.it-plaza[data-plaza="${CSS.escape(String(a.id))}"] .it-msg`);
+        if(msg){ msg.style.color='var(--teal-dark)'; msg.textContent = `✔ Se cargaron ${n} ítem(s) desde la Calculadora. Revisá las cantidades antes de certificar.`; }
         return;
       }
 
@@ -14116,7 +14430,15 @@ function poblarParteObraDatalist(){
       }
       if(e.target.id === 'itzBuscar') renderItemizado();
     });
-    panel.addEventListener('change', (e)=>{ if(e.target.id === 'itzSoloConItems') renderItemizado(); });
+    panel.addEventListener('change', (e)=>{
+      if(e.target.id === 'itzSoloConItems'){ renderItemizado(); return; }
+      const chk = e.target.closest('.it-previa-chk');
+      if(chk){
+        const card = chk.closest('.it-plaza');
+        const p = previa[card.dataset.plaza];
+        if(p && p.filas && p.filas[chk.dataset.i]) p.filas[chk.dataset.i].tildada = chk.checked;
+      }
+    });
   }
 
   // Recalcula un renglón sin redibujar toda la pantalla, para no sacarle el foco a quien tipea.
