@@ -1537,6 +1537,66 @@
     color:var(--navy); margin-top:20px; margin-bottom:8px; }
   .cierre-chk{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text); margin:0 0 10px; }
   .cierre-chk input{ width:auto; }
+  /* ---- Producción por persona: lista con barra y detalle adentro (2026-09-02) ---- */
+  .prod-lista{ padding:16px 18px 10px; }
+  .prod-lista-cab{ margin-bottom:12px; }
+  .prod-lista-tit{ font-weight:800; color:var(--navy); font-size:15px; }
+  .prod-fila{ border-top:1px solid var(--line); }
+  .prod-fila:first-of-type{ border-top:none; }
+  .prod-fila-cab{ display:grid; grid-template-columns:30px minmax(0,1.15fr) minmax(0,1.6fr) 108px;
+                  align-items:center; gap:14px; padding:11px 4px; cursor:pointer; border-radius:10px; }
+  .prod-fila-cab:hover{ background:var(--bg-soft); }
+  .prod-fila.abierta .prod-fila-cab{ background:var(--bg-soft); }
+  .prod-pos{ font-weight:800; color:var(--text-soft); font-size:13px; text-align:center;
+             font-variant-numeric:tabular-nums; }
+  .prod-chev{ color:var(--text-soft); font-size:11px; }
+  .prod-bar-wrap{ height:12px; border-radius:999px; background:rgba(148,163,184,.22); overflow:hidden; }
+  .prod-bar-wrap .prod-bar{ display:block; height:100%; border-radius:999px; background:var(--teal-dark); }
+  .prod-bar-wrap.chica{ height:9px; }
+  .prod-num{ text-align:right; white-space:nowrap; }
+  .prod-num b{ font-size:17px; color:var(--navy); font-variant-numeric:tabular-nums; }
+  .prod-num span{ display:block; font-size:10.5px; color:var(--text-soft); }
+  .prod-det{ padding:6px 4px 18px 48px; }
+  .prod-det-tit{ font-size:11.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+                 color:var(--text-soft); margin:14px 0 8px; }
+  .prod-det-tit:first-child{ margin-top:4px; }
+  .prod-obras{ display:grid; gap:7px; }
+  .prod-obra{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) 84px; align-items:center; gap:12px; }
+  .prod-obra-nom{ font-size:13px; font-weight:700; color:var(--navy); }
+  .prod-obra-sub{ font-size:11px; font-weight:500; color:var(--text-soft); }
+  .prod-obra-pts{ text-align:right; font-size:12.5px; font-weight:700; color:var(--navy);
+                  font-variant-numeric:tabular-nums; }
+  .prod-ord-tabla{ font-size:12.5px; }
+  @media (max-width:760px){
+    .prod-fila-cab{ grid-template-columns:26px minmax(0,1fr) 92px;
+                    grid-template-areas:'pos id num' '. bar bar'; gap:10px; }
+    .prod-pos{ grid-area:pos; } .prod-id{ grid-area:id; } .prod-num{ grid-area:num; }
+    .prod-bar-wrap{ grid-area:bar; }
+    .prod-det{ padding-left:12px; }
+    .prod-obra{ grid-template-columns:minmax(0,1fr) 76px; grid-template-areas:'nom pts' 'bar bar'; }
+    .prod-obra-nom{ grid-area:nom; } .prod-obra-pts{ grid-area:pts; } .prod-obra .prod-bar-wrap{ grid-area:bar; }
+    .prod-ord-tabla{ min-width:520px; }
+  }
+  @media print{
+    .prod-fila-cab{ background:none !important; }
+    .prod-chev{ display:none; }
+    .prod-bar-wrap{ background:#e6e9ef; }
+    .prod-bar-wrap .prod-bar{ background:#0d9488; }
+    .prod-fila{ break-inside:avoid; }
+  }
+
+  /* ---- Aviso de «Rehacer un cómputo viejo» ---- */
+  #rehacerAviso{ border:1px solid var(--teal-dark); background:rgba(126,198,230,.09); }
+  .reh-tit{ font-weight:800; color:var(--navy); font-size:15px; }
+  .reh-sub{ font-size:12.5px; color:var(--text-soft); margin-top:4px; line-height:1.55; }
+  .reh-cols{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px; margin-top:14px; }
+  .reh-h{ font-size:11.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+          color:var(--teal-dark); margin-bottom:5px; }
+  .reh-h.reh-amb{ color:#92610a; }
+  .reh-cols ul{ margin:0; padding-left:20px; font-size:12.5px; line-height:1.6; color:var(--navy); }
+  #rehacerAviso .btn-ghost{ margin-top:14px; }
+  .reh-btn{ padding:4px 9px; font-size:12px; margin-left:4px; }
+
   /* ---- Itemizado ($) por plaza ---- */
   .it-buscador{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px; }
   .it-buscador input[type="text"]{ flex:1 1 260px; min-width:0; margin:0; }
@@ -1552,6 +1612,32 @@
   .it-avanzado{ font-size:11.5px; color:var(--text-soft); font-variant-numeric:tabular-nums; }
   .it-pct{ text-align:right; font-weight:900; font-size:19px; font-variant-numeric:tabular-nums; }
   .it-plaza .avance-bar{ margin-top:10px; }
+  .it-imprimir{ padding:6px 10px; font-size:13px; margin-left:4px; }
+  .it-membrete-plaza{ margin-bottom:12px; }
+  .it-mp-tit{ font-size:16px; font-weight:800; color:var(--navy); }
+  .it-mp-sub{ font-size:11.5px; color:var(--text-soft); margin-top:3px; }
+  .solo-print{ display:none; }
+  /* Imprimir UNA sola plaza: se esconde todo lo demás del itemizado. */
+  @media print{
+    .solo-print{ display:block; }
+    body.imprimiendo-plaza #avPanelItemizado > .card:first-child,
+    body.imprimiendo-plaza #itzTiles,
+    body.imprimiendo-plaza .it-buscador,
+    body.imprimiendo-plaza #itzAviso,
+    body.imprimiendo-plaza #itzSinPrecioCard,
+    body.imprimiendo-plaza #itzPropiosLista,
+    body.imprimiendo-plaza .it-plaza:not(.imprimiendo){ display:none !important; }
+    body.imprimiendo-plaza .it-plaza.imprimiendo{ border:none; box-shadow:none; padding:0; }
+    body.imprimiendo-plaza .it-plaza.imprimiendo .it-cab{ display:none; }
+    body.imprimiendo-plaza .it-plaza.imprimiendo .avance-bar{ display:none; }
+    body.imprimiendo-plaza .it-plaza.imprimiendo .it-detalle{ border-top:none; padding-top:0; margin-top:0; }
+    .it-tabla{ font-size:11px; }
+    .it-tabla input{ border:none !important; background:transparent !important; padding:0 !important;
+                     text-align:right; -webkit-appearance:none; appearance:none; }
+    .it-precio-cel .it-lapiz{ display:none; }
+    .it-plaza{ break-inside:auto; }
+    .it-tabla tr{ break-inside:avoid; }
+  }
   .it-detalle{ margin-top:16px; border-top:1px solid var(--line); padding-top:14px; }
   .it-tabla{ font-size:12.5px; }
   .it-tabla input{ margin:0; padding:6px 8px; }
@@ -1849,6 +1935,8 @@
 </div>
 
 <div class="wrap" id="viewCalculadora">
+  <!-- Aviso de «Rehacer» (2026-09-02): qué se cargó desde el listado viejo y qué falta. -->
+  <div class="card no-print" id="rehacerAviso" style="display:none;"></div>
   <div class="grid">
 
     <!-- ============ FORM ============ -->
@@ -13158,8 +13246,10 @@ function poblarParteObraDatalist(){
   // ==================================================================
   // LA PANTALLA
   // ==================================================================
-  // Abre en «Cierre del día»: es lo que se hace todos los días al volver la cuadrilla.
-  let subProd = 'dia';
+  // Abre en «Producción por persona»: pedido del 02/09/2026 — *"lo primero que tiene que aparecer
+  // es el personal"*. El cierre del día queda al lado, a un toque.
+  let subProd = 'produccion';
+  let prodAbierta = {};   // nombre -> ¿está desplegado su detalle?
 
   function rangoPeriodo(){
     const hoy = new Date();
@@ -13240,12 +13330,19 @@ function poblarParteObraDatalist(){
       totalPts += p.total;
       p.porPersona.forEach(pp=>{
         if(!pp.nombre) return;
-        const g = gente.get(pp.nombre) || { nombre:pp.nombre, roles:new Set(), pts:0, dias:new Set(), plazas:new Set(), tareas:new Map(), aMano:false };
+        const g = gente.get(pp.nombre) || { nombre:pp.nombre, roles:new Set(), pts:0, dias:new Set(), plazas:new Map(), tareas:new Map(), ordenes:[], aMano:false };
         g.pts += pp.pts;
         if(pp.rol) g.roles.add(pp.rol);
         if(pp.aMano) g.aMano = true;
         if(p.fecha) g.dias.add(p.fecha);
-        if(o.plazaNombre) g.plazas.add(o.plazaNombre);
+        // Avance por obra: cuánto de lo de esta persona salió de cada plaza.
+        const nomPlaza = o.plazaNombre || '(sin plaza)';
+        const pl = g.plazas.get(nomPlaza) || { nombre:nomPlaza, pts:0, dias:new Set(), tareas:new Map() };
+        pl.pts += pp.pts;
+        if(p.fecha) pl.dias.add(p.fecha);
+        g.plazas.set(nomPlaza, pl);
+        g.ordenes.push({ numero:o.numero||'', fecha:p.fecha||o.fecha||'', plaza:nomPlaza, pts:pp.pts,
+                         tareas:p.renglones.map(rg=>rg.tarea) });
         // La CANTIDAD que se muestra es la de la cuadrilla, no una porción por persona. Repartir
         // «9 columnas» entre tres y mostrar «3,8 columnas» inventa una precisión que no existe:
         // nadie arma 3,8 tableritos. Los PUNTOS sí se reparten —esa es la convención declarada—;
@@ -13255,6 +13352,9 @@ function poblarParteObraDatalist(){
           const t = g.tareas.get(rg.tarea) || { cant:0, un:rg.un, pts:0 };
           t.cant += rg.cant; t.pts += rg.pts * cuota;
           g.tareas.set(rg.tarea, t);
+          const tp = pl.tareas.get(rg.tarea) || { cant:0, un:rg.un, pts:0 };
+          tp.cant += rg.cant; tp.pts += rg.pts * cuota;
+          pl.tareas.set(rg.tarea, tp);
         });
         gente.set(pp.nombre, g);
       });
@@ -13289,35 +13389,78 @@ function poblarParteObraDatalist(){
       </div>`;
       return;
     }
+    // ---- La lista: una barra por persona, y el detalle adentro ----
+    // Rediseño del 02/09/2026, pedido: *"lo primero que tiene que aparecer es el personal con
+    // gráficos o algo que distinga el avance; que aprietes el nombre y adentro tengas el dato de su
+    // avance de las obras y trabajos que hizo"*.
+    // Las barras van TODAS del mismo color a propósito: la barra mide una sola cosa (puntos), así
+    // que pintar cada una distinta no agregaría información — solo ruido. El largo es el dato.
     const maxPts = personas[0].pts || 1;
-    cont.innerHTML = personas.map(g=>{
-      const dias = g.dias.size;
-      const porDia = dias ? g.pts/dias : 0;
-      const tareas = [...g.tareas.entries()].sort((a,b)=>b[1].pts-a[1].pts);
-      // El legajo se busca por el nombre que se tipeó en la orden. Si no aparece en la nómina, se
-      // avisa: casi siempre es un nombre mal escrito, y un nombre mal escrito parte la producción
-      // de una persona en dos montones sin que nadie se entere.
-      const lj = legajoDe(g.nombre);
-      const leg = lj === null
-        ? `<span class="prod-sinlegajo" title="Este nombre no figura en la nómina — puede estar mal escrito en la orden">⚠ no está en la nómina</span> · `
-        : (lj ? `<span class="prod-legajo">Legajo ${esc(lj)}</span> · ` : `<span class="prod-sinlegajo">sin legajo cargado</span> · `);
-      return `<div class="card prod-persona">
-        <div class="prod-persona-head">
-          <div>
-            <div class="prod-nombre">${esc(g.nombre)}</div>
-            <div class="prod-rol">${leg}${esc([...g.roles].join(' / ')||'—')} · ${dias} día${dias===1?'':'s'} · ${g.plazas.size} plaza${g.plazas.size===1?'':'s'}${g.aMano?' · <b>reparto a mano</b>':''}</div>
-          </div>
-          <div class="prod-cifras">
-            <div><div class="prod-pts">${fmt(g.pts, Number.isInteger(g.pts)?0:1)}</div><div class="prod-lbl">puntos</div></div>
-            <div><div class="prod-pts chico">${fmt(porDia,1)}</div><div class="prod-lbl">por día</div></div>
-          </div>
+    cont.innerHTML = `<div class="card prod-lista">
+      <div class="prod-lista-cab">
+        <div class="prod-lista-tit">Quién produjo cuánto</div>
+        <div class="hint" style="margin:0;">Tocá a alguien para ver en qué obras trabajó y qué hizo.</div>
+      </div>
+      ${personas.map((g, i)=>filaPersona(g, i, maxPts)).join('')}
+    </div>`;
+  }
+
+  function filaPersona(g, i, maxPts){
+    const abierta = !!prodAbierta[g.nombre];
+    const dias = g.dias.size;
+    const porDia = dias ? g.pts/dias : 0;
+    const ancho = Math.max(2, Math.round(g.pts / maxPts * 100));
+    // El legajo se busca por el nombre que se tipeó en la orden. Si no aparece en la nómina, se
+    // avisa: casi siempre es un nombre mal escrito, y un nombre mal escrito parte la producción
+    // de una persona en dos montones sin que nadie se entere.
+    const lj = legajoDe(g.nombre);
+    const leg = lj === null
+      ? `<span class="prod-sinlegajo" title="Este nombre no figura en la nómina — puede estar mal escrito en la orden">⚠ no está en la nómina</span> · `
+      : (lj ? `<span class="prod-legajo">Legajo ${esc(lj)}</span> · ` : `<span class="prod-sinlegajo">sin legajo cargado</span> · `);
+
+    let h = `<div class="prod-fila${abierta?' abierta':''}" data-persona="${esc(g.nombre)}">
+      <div class="prod-fila-cab" title="Ver el detalle de ${esc(g.nombre)}">
+        <div class="prod-pos">${i+1}</div>
+        <div class="prod-id">
+          <div class="prod-nombre"><span class="prod-chev">${abierta?'▾':'▸'}</span> ${esc(g.nombre)}</div>
+          <div class="prod-rol">${leg}${esc([...g.roles].join(' / ')||'—')} · ${dias} día${dias===1?'':'s'} · ${g.plazas.size} plaza${g.plazas.size===1?'':'s'}${g.aMano?' · <b>reparto a mano</b>':''}</div>
         </div>
-        <div class="prod-barra"><span style="width:${Math.max(2, Math.round(g.pts/maxPts*100))}%"></span></div>
-        <div class="prod-tareas">${tareas.map(([t,d])=>
-          `<span class="prod-chip"><b>${esc(t)}</b> ${fmt(d.cant, Number.isInteger(d.cant)?0:1)} ${esc(d.un)}${d.cant===1?'':'s'} con la cuadrilla · <b>${fmt(d.pts,1)} pts</b></span>`
-        ).join('')}</div>
+        <div class="prod-bar-wrap"><span class="prod-bar" style="width:${ancho}%"></span></div>
+        <div class="prod-num"><b>${fmt(g.pts, Number.isInteger(g.pts)?0:1)}</b><span>pts · ${fmt(porDia,1)}/día</span></div>
       </div>`;
-    }).join('');
+
+    if(abierta){
+      const plazas = [...g.plazas.values()].sort((a,b)=>b.pts-a.pts);
+      const maxPl = plazas.length ? plazas[0].pts || 1 : 1;
+      const tareas = [...g.tareas.entries()].sort((a,b)=>b[1].pts-a[1].pts);
+      const ords = g.ordenes.slice().sort((a,b)=> String(b.fecha||'').localeCompare(String(a.fecha||'')));
+      h += `<div class="prod-det">
+        <div class="prod-det-tit">Avance por obra</div>
+        <div class="prod-obras">` + plazas.map(pl=>`
+          <div class="prod-obra">
+            <div class="prod-obra-nom">${esc(pl.nombre)}<div class="prod-obra-sub">${pl.dias.size} día${pl.dias.size===1?'':'s'} · ${[...pl.tareas.keys()].length} tarea(s)</div></div>
+            <div class="prod-bar-wrap chica"><span class="prod-bar" style="width:${Math.max(2, Math.round(pl.pts/maxPl*100))}%"></span></div>
+            <div class="prod-obra-pts">${fmt(pl.pts, Number.isInteger(pl.pts)?0:1)} pts</div>
+          </div>`).join('') + `</div>
+
+        <div class="prod-det-tit">Lo que hizo</div>
+        <div class="prod-tareas">` + tareas.map(([t,d])=>
+          `<span class="prod-chip"><b>${esc(t)}</b> ${fmt(d.cant, Number.isInteger(d.cant)?0:1)} ${esc(d.un)}${d.cant===1?'':'s'} con la cuadrilla · <b>${fmt(d.pts,1)} pts</b></span>`
+        ).join('') + `</div>
+
+        <div class="prod-det-tit">Las órdenes en las que estuvo (${ords.length})</div>
+        <div class="tabla-scroll"><table class="prod-ord-tabla"><thead><tr>
+          <th style="width:130px;">Orden</th><th style="width:110px;">Fecha</th><th>Plaza</th><th style="text-align:right; width:90px;">Sus puntos</th>
+        </tr></thead><tbody>` + ords.map(o=>`<tr>
+          <td><b>${esc(o.numero||'—')}</b></td>
+          <td>${esc(o.fecha ? formatFechaCorta(o.fecha) : '—')}</td>
+          <td>${esc(o.plaza)}</td>
+          <td class="qty">${fmt(o.pts, Number.isInteger(o.pts)?0:1)}</td>
+        </tr>`).join('') + `</tbody></table></div>
+      </div>`;
+    }
+    h += `</div>`;
+    return h;
   }
   window.renderProduccion = renderProduccion;
 
@@ -13686,8 +13829,8 @@ function poblarParteObraDatalist(){
     const barra = document.getElementById('subtabsProd');
     if(!barra) return;
     barra.innerHTML = [
-      { id:'dia',        label:'Cierre del día' },
       { id:'produccion', label:'Producción por persona' },
+      { id:'dia',        label:'Cierre del día' },
       { id:'personal',   label:'Personal del equipo' },
       { id:'baremo',     label:'Cuánto vale cada tarea' },
     ].map(g=>`<button type="button" class="subtab${subProd===g.id?' activo':''}" data-sub="${g.id}">${g.label}</button>`).join('');
@@ -13709,6 +13852,22 @@ function poblarParteObraDatalist(){
     pintarSubtabsProd();
     window.scrollTo({top:0, behavior:'smooth'});
   });
+  // Tocar a una persona abre o cierra su detalle.
+  (function(){
+    const cont = document.getElementById('prodPersonas');
+    if(!cont) return;
+    cont.addEventListener('click', (e)=>{
+      const cab = e.target.closest('.prod-fila-cab');
+      if(!cab) return;
+      const fila = cab.closest('.prod-fila');
+      const n = fila.dataset.persona;
+      prodAbierta[n] = !prodAbierta[n];
+      renderProduccion();
+      const nueva = document.querySelector(`.prod-fila[data-persona="${CSS.escape(n)}"]`);
+      if(nueva && prodAbierta[n]) nueva.scrollIntoView({ block:'nearest', behavior:'smooth' });
+    });
+  })();
+
   ['prodPeriodo','prodCuadrilla','prodPlaza'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.addEventListener('change', renderProduccion);
@@ -14354,6 +14513,7 @@ function poblarParteObraDatalist(){
           <div class="it-avanzado">certificado ${plata(c.avanzado)}</div>
         </div>
         <div class="it-pct" style="color:${colorPct(c.pct)}">${c.pct}%</div>
+        <button type="button" class="btn-ghost it-imprimir no-print" data-plaza="${esc(a.id)}" title="Imprimir solo esta plaza">🖨</button>
       </div>
       <div class="avance-bar"><div class="avance-bar-fill" style="width:${c.pct}%; background:${colorPct(c.pct)};"></div></div>`;
 
@@ -14366,7 +14526,11 @@ function poblarParteObraDatalist(){
     const items = a.valorItems || [];
     const edit = puedeEditar();
     const dis = edit ? '' : 'disabled';
-    let h = `<div class="it-detalle">`;
+    let h = `<div class="it-membrete-plaza solo-print">
+        <div class="it-mp-tit">Itemizado de ${esc(a.nombre||'')}${a.obraId?` — ID ${esc(a.obraId)}`:''}</div>
+        <div class="it-mp-sub">${a.barrio?esc(a.barrio)+' · ':''}Precios del ANEXO I — Itemizado Plazas del 17/06/2026 · Impreso el ${esc(typeof formatFechaCorta==='function'?formatFechaCorta(fechaAISO(new Date())):'')}</div>
+      </div>`;
+    h += `<div class="it-detalle">`;
     if(!edit) h += `<div class="hint" style="margin-top:0; color:var(--amber);">Estás viendo sin sesión iniciada: se puede mirar todo, pero para cambiar cantidades o precios hay que iniciar sesión (pestaña «Avance de obra» → «Cargar y administrar plazas»).</div>`;
 
     if(!items.length){
@@ -14484,6 +14648,26 @@ function poblarParteObraDatalist(){
         cel.classList.remove('cerrado');
         const inp = cel.querySelector('.it-precio');
         if(inp){ inp.focus(); inp.select(); }
+        return;
+      }
+
+      const impr = e.target.closest('.it-imprimir');
+      if(impr){
+        const id = impr.dataset.plaza;
+        itzAbiertas[id] = true;              // para imprimir hay que tenerla desplegada
+        delete previa[id];                   // la previa no va al papel
+        renderItemizado();
+        const card = document.querySelector(`.it-plaza[data-plaza="${CSS.escape(String(id))}"]`);
+        if(!card) return;
+        document.body.classList.add('imprimiendo-plaza');
+        card.classList.add('imprimiendo');
+        const limpiar = ()=>{
+          document.body.classList.remove('imprimiendo-plaza');
+          card.classList.remove('imprimiendo');
+          window.removeEventListener('afterprint', limpiar);
+        };
+        window.addEventListener('afterprint', limpiar);
+        setTimeout(()=>{ window.print(); setTimeout(limpiar, 1200); }, 120);
         return;
       }
 
@@ -14648,6 +14832,219 @@ function poblarParteObraDatalist(){
     try{ if(typeof renderAvanceTablero === 'function') renderAvanceTablero(); }catch(e){}
     try{ if(typeof renderAvancePanel === 'function') renderAvancePanel(); }catch(e){}
   }
+
+
+  // ==================================================================
+  // REHACER UN CÓMPUTO VIEJO EN LA CALCULADORA
+  // ==================================================================
+  // Reportado el 02/09/2026: en el historial, el botón «✏ Editar» de Plaza Hípica está gris. El
+  // motivo es el mismo que el del itemizado: los cómputos anteriores al 31/08/2026 no guardaban la
+  // foto del formulario, así que no hay con qué volver a llenarlo.
+  //
+  // Lo que SÍ tienen es el listado de materiales. De ahí se puede reconstruir buena parte del
+  // formulario — columnas, vínculos, zanjeo, cruce, tablero, acometida, retiros y poda.
+  // Lo que NO se puede reconstruir es el **Cableado por circuitos**: el listado guarda los metros
+  // por calibre, pero no cómo estaban repartidos punto por punto, y de ese orden salen la ganancia
+  // exacta y el calibre de cada bornera. Por eso esa sección se deja APAGADA y se avisa en pantalla,
+  // en vez de rellenarla con un número inventado que después saldría mal en el cómputo.
+  //
+  // El cómputo viejo no se toca: sigue igual en el historial hasta que se toque «Calcular», que
+  // guarda uno nuevo.
+  function vinculoParaDesc(d, lum){
+    const cat = leer(()=> VINCULOS) || [];
+    if(!cat.length) return { v:null, seguro:false };
+    const D = norm(d);
+
+    // 1) Por el NOMBRE DE PRODUCTO del pañol. Es la vía exacta: los vínculos que existen como
+    //    producto se imprimen con ese nombre y cada uno tiene su código.
+    //    OJO: el nombre del producto no siempre coincide con la medida del catálogo — el triple
+    //    (código 6021, brazo 0,400 m en el catálogo) se llama «brazos 425 mm». Por eso el nombre
+    //    manda sobre los milímetros: mirar solo los mm elegía el capuchón de 425, que es otra pieza.
+    const codigos = leer(()=> COD_VINCULO) || {};
+    const prods = leer(()=> catalogoCompleto()) || [];
+    for(const id of Object.keys(codigos)){
+      const prod = prods.find(x=>x.codigo === codigos[id]);
+      if(prod && D.indexOf(norm(prod.desc)) === 0){
+        const v = cat.find(x=>x.id === id);
+        if(v) return { v, seguro:true };
+      }
+    }
+
+    // 2) Por la etiqueta del catálogo de vínculos (los que no existen como producto).
+    const sinPrefijo = D.replace(/^V[ií]nculo\/acople\s+/i,'').replace(/^V[ií]nculo\s+/i,'');
+    const porLabel = cat.find(v => sinPrefijo.indexOf(norm(v.label)) === 0 || D.indexOf(norm(v.label)) === 0);
+    if(porLabel) return { v:porLabel, seguro:true };
+
+    // 3) Último recurso: misma cantidad de artefactos y el brazo más parecido — con aviso.
+    const mismos = cat.filter(v => v.lum === lum);
+    if(!mismos.length) return { v:null, seguro:false };
+    const mm = D.match(/brazos?\s+([\d.,]+)\s*mm/i);
+    const medida = mm ? numAR(mm[1]) : null;
+    if(medida != null){
+      const orden = mismos.slice().sort((a,b)=>
+        Math.abs(a.brazoM*1000 - medida) - Math.abs(b.brazoM*1000 - medida));
+      return { v:orden[0], seguro:false };
+    }
+    return { v:mismos[0], seguro:false };
+  }
+
+  function formDesdeSecciones(h){
+    const campos = {}, columnaGrupos = [], vinculoGrupos = [];
+    const cargado = [], falta = [], dudoso = [];
+    let tipoCol = null, hayCol = false, hayVinc = false, hayCivil = false,
+        hayTablero = false, hayCruce = false, hayRetiros = false, hayCable = false;
+    let idSeq = 1;
+
+    (h.secciones||[]).forEach(sec=>{
+      const T = norm(sec.titulo).toUpperCase();
+      (sec.items||[]).forEach(it=>{
+        const d = norm(it.desc);
+        const cant = n2(it.cant != null ? it.cant : it.cantNecesaria, 0);
+        if(!d) return;
+
+        let m = d.match(/^Columna\s+(PRFV|met[aá]lica)\s+recta,?\s+([\d.,]+)\s*m/i);
+        if(m){
+          tipoCol = /prfv/i.test(m[1]) ? 'PRFV' : 'Metálica';
+          const alt = numAR(m[2]);
+          const ya = columnaGrupos.find(g=>g.altura === alt);
+          if(ya) ya.columnas += Math.round(cant);
+          else columnaGrupos.push({ id:idSeq++, altura:alt, columnas:Math.round(cant) });
+          hayCol = true;
+          return;
+        }
+        if(/^V[ií]nculo/i.test(d) || /^Capuch[oó]n/i.test(d)){
+          const b = d.match(/(\d+)\s*artefactos?/i);
+          if(b){
+            const r = vinculoParaDesc(d, parseInt(b[1],10));
+            if(r.v){
+              vinculoGrupos.push({ id:idSeq++, tipo:r.v.id, columnas:Math.round(cant) });
+              hayVinc = true;
+              if(!r.seguro) dudoso.push(`El vínculo «${d.slice(0,60)}…» se cargó como «${r.v.label}». Verificalo antes de calcular.`);
+            } else {
+              falta.push(`El vínculo «${d.slice(0,60)}…» no se pudo identificar — elegilo a mano.`);
+            }
+          }
+          return;
+        }
+        if(/^Zanjeo en v[ií]a p[uú]blica/i.test(d)){
+          campos.civilZanjaMl = String(cant);
+          const pm = d.match(/profundidad\s+([\d.,]+)\s*m/i);
+          campos.civilZanjaProf = (pm && numAR(pm[1]) >= 0.9) ? '1.0' : '0.6';
+          campos.civilZanjaTerreno = /baldosa|vereda/i.test(d) ? 'baldosa' : (/hormig[oó]n/i.test(d) ? 'hormigon' : 'natural');
+          const am = d.match(/ancho\s+([\d.,]+)\s*m/i);
+          if(am){
+            const a = numAR(am[1]);
+            campos.civilZanjaAncho = (a >= 0.55) ? '0.60' : (a >= 0.35 ? '0.40' : '0.20');
+          }
+          hayCivil = true;
+          return;
+        }
+        if(/^Fundaci[oó]n de hormig[oó]n/i.test(d)) { hayCivil = true; return; }
+        if(/^Tablero de medici[oó]n/i.test(d)){
+          campos.tableroTipo = /a nivel/i.test(d) ? 'nivel_prfv' : 'aereo_prfv';
+          hayTablero = true; return;
+        }
+        if(/^Cable Cu/i.test(d) && /acometida/i.test(d)){
+          campos.acometidaTipo = /subterr/i.test(d) ? 'subterranea' : 'aerea';
+          campos.acometidaMl = String(cant);
+          hayTablero = true; return;
+        }
+        if(/^Cable Cu/i.test(d) && /m de zanja/i.test(d)) { hayCable = true; return; }
+        if(T.indexOf('CRUCE') >= 0){
+          if(/tunelera en seco \(m[eé]todo/i.test(d)) { campos.cruceTipo='tunelera'; campos.cruceMl=String(cant); hayCruce=true; return; }
+          if(/cielo abierto.*calle de tierra/i.test(d)){ campos.cruceTipo='tierra';   campos.cruceMl=String(cant); hayCruce=true; return; }
+          if(/cielo abierto.*hormig[oó]n/i.test(d))    { campos.cruceTipo='hormigon'; campos.cruceMl=String(cant); hayCruce=true; return; }
+          if(/cielo abierto.*(asf[aá]lt|carpeta)/i.test(d)){ campos.cruceTipo='asfalto'; campos.cruceMl=String(cant); hayCruce=true; return; }
+          if(/^A[eé]reo/i.test(d)) { campos.cruceTipo='aereo'; campos.cruceMl=String(cant); hayCruce=true; return; }
+        }
+        if(/^Retiro de columna/i.test(d)){ campos.retiroCol = String(Math.round(cant)); hayRetiros = true; return; }
+        if(/retiro de tablero existente/i.test(d)){ campos.retiroTab = String(Math.round(cant)); hayRetiros = true; return; }
+        if(/^Poda/i.test(d)){ campos.podaCheck = true; campos.podaCant = String(Math.round(cant)); hayRetiros = true; return; }
+      });
+    });
+
+    campos.obraNombre = h.nombre || '';
+    campos.obraId     = h.id || '';
+    campos.obraBarrio = h.barrio || '';
+    if(tipoCol){ campos.colTipo = tipoCol; campos.vincTipoCol = tipoCol; }
+    const totalCol = columnaGrupos.reduce((t,g)=>t+g.columnas, 0);
+    if(totalCol) campos.vincCantCol = String(totalCol);
+
+    campos.toggleColumnas = hayCol;
+    campos.toggleVinculos = hayVinc;
+    campos.toggleCivil    = hayCivil;
+    campos.toggleTablero  = hayTablero;
+    campos.toggleCruce    = hayCruce;
+    campos.toggleRetiros  = hayRetiros;
+    campos.toggleCableado = false;   // no se puede reconstruir: ver el comentario de arriba
+
+    if(hayCol)     cargado.push(`Columnas: ${columnaGrupos.map(g=>`${g.columnas} de ${fmt(g.altura,g.altura%1?1:0)} m`).join(' + ')} (${tipoCol})`);
+    if(hayVinc)    cargado.push(`Vínculos: ${vinculoGrupos.length} grupo(s), ${vinculoGrupos.reduce((t,g)=>t+g.columnas,0)} columna(s)`);
+    if(hayCivil)   cargado.push(`Obra civil: ${campos.civilZanjaMl||0} m de zanja de ${(campos.civilZanjaProf||'0.6').replace('.',',')} m` +
+                                (campos.civilZanjaTerreno ? ` en ${campos.civilZanjaTerreno === 'natural' ? 'terreno natural' : (campos.civilZanjaTerreno==='baldosa'?'vereda de baldosas':'piso de hormigón')}` : ''));
+    if(hayTablero) cargado.push(`Tablero ${campos.tableroTipo === 'nivel_prfv' ? 'a nivel' : 'aéreo'}` +
+                                (campos.acometidaMl ? ` · acometida ${campos.acometidaTipo === 'subterranea' ? 'subterránea' : 'aérea'} de ${campos.acometidaMl} m` : ''));
+    if(hayCruce)   cargado.push(`Cruce de calle: ${campos.cruceMl||0} m (${campos.cruceTipo})`);
+    if(hayRetiros) cargado.push(`Retiros y poda: ${campos.retiroCol||0} columna(s), ${campos.retiroTab||0} tablero(s), ${campos.podaCant||0} árbol(es)`);
+
+    if(hayCable) falta.push('El <b>Cableado por circuitos</b> quedó apagado. El listado viejo guarda los metros por calibre, pero no cómo estaban repartidos punto por punto — y de ese orden salen la ganancia exacta de cada subida y el calibre de cada bornera. Volvé a cargar los circuitos como están en el plano.');
+    falta.push('Revisá los campos que la herramienta agregó después de esa fecha (potencia de la luminaria, anchos y espesores de la zanja, tipo de tendido) — quedaron en su valor por defecto.');
+
+    return { snap:{ v:1, campos, columnaGrupos, vinculoGrupos, civilGrupos:columnaGrupos.map(g=>({...g})), circuitos:[], tramos:[] },
+             cargado, falta, dudoso };
+  }
+
+  window.rehacerComputoEnCalculadora = function(i){
+    const hist = leer(()=> historial) || [];
+    const h = hist[i];
+    if(!h) return;
+    if(!Array.isArray(h.secciones) || !h.secciones.some(x=>(x.items||[]).length)){
+      alert('Ese cómputo no tiene el listado de materiales adentro, así que no hay de dónde reconstruirlo. Hay que cargarlo de nuevo a mano.');
+      return;
+    }
+    const r = formDesdeSecciones(h);
+    if(typeof restaurarFormulario !== 'function'){ alert('No se pudo abrir el formulario.'); return; }
+    restaurarFormulario(r.snap);
+    if(typeof mostrarVista === 'function') mostrarVista('calc');
+    const caja = document.getElementById('rehacerAviso');
+    if(caja){
+      caja.style.display = '';
+      caja.innerHTML = `
+        <div class="reh-tit">Se volvió a cargar «${esc(h.nombre)}»${h.id?` (ID ${esc(h.id)})`:''} desde su listado de materiales</div>
+        <div class="reh-sub">El cómputo viejo del ${esc((typeof formatFechaCorta==='function'&&h.fecha)?formatFechaCorta(h.fecha):(h.fecha||'—'))} <b>no se tocó</b>: sigue igual en el historial hasta que toques «Calcular», que guarda uno nuevo.</div>
+        <div class="reh-cols">
+          <div><div class="reh-h">✓ Se cargó</div><ul>${r.cargado.map(x=>`<li>${esc(x)}</li>`).join('') || '<li>—</li>'}</ul></div>
+          <div><div class="reh-h reh-amb">⚠ Falta revisar o cargar</div><ul>${r.falta.map(x=>`<li>${x}</li>`).join('')}${r.dudoso.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+        </div>
+        <button type="button" class="btn-ghost" onclick="document.getElementById('rehacerAviso').style.display='none';">Entendido, cerrar este aviso</button>`;
+      caja.scrollIntoView({ block:'start', behavior:'smooth' });
+    }
+  };
+
+  // El botón, agregado a cada fila del historial que no tenga la foto del formulario.
+  (function(){
+    const body = document.getElementById('histBody');
+    if(!body) return;
+    const poner = ()=>{
+      const hist = leer(()=> historial) || [];
+      body.querySelectorAll('tr').forEach((tr, i)=>{
+        if(tr.querySelector('.reh-btn')) return;
+        const h = hist[i];
+        if(!h || h.form) return;                       // con foto del formulario, «✏ Editar» ya anda
+        if(!Array.isArray(h.secciones) || !h.secciones.length) return;
+        const celda = tr.lastElementChild;
+        if(!celda) return;
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'btn-ghost reh-btn';
+        b.textContent = '🔄 Rehacer';
+        b.title = 'Volver a cargar esta obra en el formulario a partir de su listado de materiales (los cómputos viejos no guardan los datos del formulario)';
+        b.onclick = ()=> window.rehacerComputoEnCalculadora(i);
+        celda.appendChild(b);
+      });
+    };
+    new MutationObserver(poner).observe(body, { childList:true });
+    poner();
+  })();
 
   // ---- Sub-pestañas ----
   let subAv = 'obra';
