@@ -1699,6 +1699,79 @@
     .it-scroll-aviso{ display:block; }
   }
 
+  /* ---- Planificación: el mes completo (2026-09-03) ---- */
+  .mes-nav{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .mes-flecha{ padding:7px 13px; font-size:13px; }
+  /* Sin text-transform: el nombre del mes ya viene con la primera en mayúscula desde el código.
+     Con capitalize salía «Septiembre De 2026», con la «de» en mayúscula. */
+  .mes-label{ font-weight:800; color:var(--navy); font-size:17px; min-width:190px; }
+  .mes-leyenda{ display:flex; align-items:center; gap:8px 20px; flex-wrap:wrap; margin:2px 0 14px;
+                font-size:12px; color:var(--text-soft); }
+  .mes-leyenda span{ display:flex; align-items:center; gap:7px; }
+  .mes-leyenda i{ width:11px; height:11px; border-radius:3px; display:inline-block; }
+  .mes-leyenda .lg-ot{ background:rgba(56,189,248,.35); border:1px solid var(--teal-dark); }
+  .mes-leyenda .lg-tarea{ background:var(--bg-soft); border:1px solid var(--line); }
+  .mes-leyenda .mes-hint{ color:var(--text-soft); font-style:italic; }
+  .mes-grid{ display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:6px; }
+  .mes-cab{ font-size:10.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase;
+            color:var(--text-soft); padding:2px 4px 6px; text-align:center; }
+  .mes-dia{ min-height:104px; border:1px solid var(--line); border-radius:10px; padding:6px 7px 8px;
+            background:#fff; cursor:pointer; display:flex; flex-direction:column; gap:4px;
+            transition:border-color .12s, background .12s; }
+  .mes-dia:hover{ border-color:var(--teal-dark); background:var(--bg-soft); }
+  .mes-dia:focus-visible{ outline:2px solid var(--teal-dark); outline-offset:2px; }
+  .mes-dia.fuera{ background:var(--bg-soft); opacity:.5; }
+  .mes-dia.hoy{ border-color:var(--navy); border-width:2px; }
+  .mes-num{ font-family:ui-monospace,monospace; font-size:12px; font-weight:700; color:var(--text-soft);
+            display:flex; align-items:center; justify-content:space-between; gap:4px; }
+  .mes-dia.hoy .mes-num{ color:var(--navy); }
+  .mes-hoy{ font-family:inherit; font-size:9px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+            background:var(--navy); color:#fff; border-radius:999px; padding:1px 6px; }
+  .mes-chip{ border-radius:7px; padding:4px 7px; font-size:11px; line-height:1.35; display:grid; gap:1px; }
+  .mes-chip.ot{ background:rgba(56,189,248,.14); border:1px solid rgba(13,148,136,.38); }
+  .mes-chip.tarea{ background:var(--bg-soft); border:1px solid var(--line); }
+  .mes-chip b{ color:var(--navy); font-size:11px; }
+  .mes-chip span{ color:var(--text-soft); overflow-wrap:anywhere; }
+  .mes-chip .mes-cu{ font-weight:600; }
+  .mes-chip .mes-ta{ font-size:10.5px; }
+  @media (max-width:900px){
+    .mes-grid{ grid-template-columns:repeat(7, minmax(64px,1fr)); overflow-x:auto; }
+    .mes-dia{ min-height:86px; }
+    .mes-chip{ font-size:10px; }
+    .mes-label{ min-width:0; }
+  }
+  @media print{
+    .mes-dia{ break-inside:avoid; min-height:74px; }
+    .mes-dia:hover{ background:#fff; }
+    .mes-chip.ot{ background:#eef7fb; border-color:#8fb9c9; }
+    .mes-dia.fuera{ opacity:.35; }
+  }
+
+  /* ---- Itemizado EPEC (coeficientes) ---- */
+  .ep-base{ display:flex; align-items:flex-end; gap:22px; flex-wrap:wrap; margin-top:16px;
+            border:1px dashed var(--line); border-radius:12px; padding:12px 16px; background:var(--bg-soft); }
+  .ep-base-fila{ display:flex; align-items:center; gap:8px; }
+  .ep-base-fila span{ font-size:13px; color:var(--text-soft); }
+  .ep-base-fila input{ width:150px; margin:0; text-align:right; font-weight:700; }
+  .ep-base .hint{ flex:1 1 260px; min-width:0; }
+  .ep-pesos{ font-size:11px; color:var(--text-soft); font-weight:600; margin-top:1px;
+             font-variant-numeric:tabular-nums; }
+  .nota-epec{ margin-top:14px; border-left:3px solid var(--teal-dark); background:rgba(126,198,230,.08);
+              border-radius:0 8px 8px 0; padding:11px 15px; font-size:12.5px; line-height:1.6;
+              color:var(--navy); }
+  .it-tabla input.ep-cant{ width:84px; text-align:right; }
+  .it-imprimir-ep{ padding:6px 10px; font-size:13px; margin-left:4px; }
+  #epecTablaK{ font-size:12px; }
+  @media print{
+    body.imprimiendo-plaza #epecTiles,
+    body.imprimiendo-plaza .ep-base,
+    body.imprimiendo-plaza .nota-epec,
+    body.imprimiendo-plaza #epecBaseMsg,
+    body.imprimiendo-epec #avPanelEpec > .card:first-child,
+    body.imprimiendo-epec #avPanelEpec > .card:last-child,
+    body.imprimiendo-plaza .it-plaza[data-epec]:not(.imprimiendo){ display:none !important; }
+  }
+
   /* ---- Cierre del día ---- */
   .dia-barra{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .dia-flecha{ padding:7px 12px; font-size:13px; }
@@ -2314,6 +2387,12 @@
               <select id="otPlaza" style="flex:1;"></select>
               <button type="button" class="btn-ghost" style="flex:none; padding:8px 12px;" onclick="altaPlazaDesdeOt()" title="Registrar una plaza nueva sin salir de esta pantalla">➕</button>
             </div>
+            <!-- Lugar libre, solo para las órdenes sin plaza (2026-09-03) -->
+            <div id="otLugarBox" style="display:none; margin-top:10px;">
+              <label style="margin-top:0;">¿Dónde se hace?</label>
+              <input type="text" id="otLugar" placeholder="Ej: Galpón · B° Villa Cabrera · Depósito de la Municipalidad">
+              <div class="hint" style="margin-top:4px;">Sale impreso en la orden, en el lugar donde iría la plaza. Se puede dejar vacío.</div>
+            </div>
           </div>
         </div>
         <div class="hint" id="otDireccionHint" style="margin-top:0;"></div>
@@ -2414,6 +2493,12 @@
 </div>
 
 <div class="wrap" id="viewPlanificacion" style="display:none">
+
+  <!-- Sub-pestañas de la planificación (2026-09-03). La semana queda igual que siempre —es donde se
+       carga y se edita—; el mes es una vista de conjunto, de solo lectura. -->
+  <div class="subtabs no-print" id="subtabsPlan"></div>
+
+  <div id="planPanelSemana">
   <div class="card no-print">
     <h2><span class="dot"></span>Semana</h2>
     <div class="plan-week-nav">
@@ -2441,6 +2526,38 @@
     <div class="plan-week-title" id="planWeekTitlePrint">Semana del ...</div>
     <div class="no-print" id="avisoPlanLocal" style="margin:0 0 10px; display:none;"></div>
     <div class="plan-grid" id="planGrid"></div>
+  </div>
+  </div><!-- /#planPanelSemana -->
+
+  <!-- ============================================================
+       EL MES COMPLETO (2026-09-03)
+       Pedido: *"en semanal poder ver todo el mes, no solo por semana"*.
+       Es una vista de CONJUNTO: se ve todo el mes de un vistazo, pero se sigue cargando en la
+       semana. Tocar un día lleva a la semana que lo contiene, ya posicionada.
+       ============================================================ -->
+  <div id="planPanelMes" style="display:none;">
+    <div class="card no-print">
+      <div class="card-header-row">
+        <h2 style="margin:0;"><span class="dot"></span>El mes completo</h2>
+        <button type="button" class="btn-ghost" onclick="imprimir()">🖨 Imprimir el mes</button>
+      </div>
+      <div class="mes-nav">
+        <button type="button" class="btn-ghost mes-flecha" id="mesPrev" title="Mes anterior">◀</button>
+        <div class="mes-label" id="mesLabel">—</div>
+        <button type="button" class="btn-ghost mes-flecha" id="mesNext" title="Mes siguiente">▶</button>
+        <button type="button" class="btn-ghost" id="mesHoy">Este mes</button>
+      </div>
+      <div class="hint" id="mesResumen" style="margin-top:10px;"></div>
+    </div>
+    <div class="card" style="margin-top:18px;">
+      <div class="plan-week-title" id="mesTitlePrint">—</div>
+      <div class="mes-leyenda no-print">
+        <span><i class="lg-ot"></i> Orden de trabajo emitida</span>
+        <span><i class="lg-tarea"></i> Tarea planificada a mano</span>
+        <span class="mes-hint">Tocá un día para abrirlo en la semana y editarlo.</span>
+      </div>
+      <div class="mes-grid" id="mesGrid"></div>
+    </div>
   </div>
 </div>
 
@@ -2564,6 +2681,64 @@
   </div>
 
   </div><!-- /#avPanelObra -->
+
+  <!-- ============================================================
+       ITEMIZADO EPEC — POR COEFICIENTE (K)   (2026-09-03)
+       Pedido: *"en la parte de itemizado, al lado poné otro que diga itemizado pero que sea con
+       este itemizado"* — el ANEXO I de la NOTA ACLARATORIA N° 1, Licitación Pública Electrónica
+       N° 5589 / SIC N° 21760 de EPEC S.A.U., que en vez de precio unitario trae un COEFICIENTE DE
+       APLICACIÓN (K). Los ítems 1 a 82 son los mismos que el itemizado de la Municipalidad, así que
+       se reusan las cantidades que ya están cargadas por plaza; los ítems 83.1 a 89 («provisión de
+       materiales en caso de eventualidad») son propios de este pliego y se cargan acá.
+       ============================================================ -->
+  <div id="avPanelEpec" style="display:none;">
+    <div class="card">
+      <div class="card-header-row">
+        <h2 style="margin:0;"><span class="dot"></span>Itemizado EPEC — por coeficiente (K)</h2>
+        <button type="button" class="btn-ghost no-print" onclick="imprimir()">🖨 Imprimir</button>
+      </div>
+      <div class="hint" style="margin-top:8px;">
+        Coeficientes del <b>ANEXO I — Nota Aclaratoria N° 1</b>, Licitación Pública Electrónica
+        N° 5589 · SIC N° 21760 · <b>EPEC S.A.U.</b>, «Servicio de adecuación eléctrica de plazas»
+        (31/08/2026). 92 ítems. Cada ítem vale <b>K módulos</b>.
+      </div>
+      <div class="ep-base no-print">
+        <div>
+          <label style="margin-top:0;">Valor del módulo</label>
+          <div class="ep-base-fila">
+            <span>$</span>
+            <input type="number" id="epecBase" min="0" step="any" placeholder="281988">
+            <span class="it-un">por módulo</span>
+            <button type="button" class="btn-auto" id="epecBaseBtn" style="margin:0;">Guardar</button>
+          </div>
+        </div>
+        <div class="hint" style="margin:0;">El <b>K</b> de cada ítem es <b>cuántos módulos vale</b>: el precio unitario es K × módulo. Cambialo en cada redeterminación y queda para todo el equipo. Si lo dejás en cero, los totales vuelven a mostrarse en coeficientes.</div>
+      </div>
+      <div class="hint" id="epecBaseMsg" style="margin-top:8px;"></div>
+      <div class="summary-tiles" id="epecTiles"></div>
+      <div class="it-buscador no-print">
+        <input type="text" id="epecBuscar" placeholder="Buscar una plaza por nombre, ID o barrio…">
+        <label class="it-chk"><input type="checkbox" id="epecSoloConItems"> Ocultar las plazas sin ítems cargados</label>
+      </div>
+      <div class="nota-epec">
+        <b>Las cantidades son las mismas</b> que las del itemizado de la Municipalidad: los ítems 1 a 82
+        coinciden uno por uno entre los dos pliegos, así que la obra se carga una sola vez. Si cambiás una
+        cantidad acá, cambia también allá. Los ítems <b>83.1 a 89</b> son propios de este pliego y se cargan
+        en cada plaza, abajo de su tabla.
+      </div>
+    </div>
+
+    <div id="epecLista"></div>
+
+    <div class="card no-print">
+      <h2><span class="dot"></span>La tabla de coeficientes completa</h2>
+      <div class="hint" style="margin-top:0;">Los 92 ítems con su K, tal como figuran en el ANEXO I, y al lado lo que sale cada uno con el módulo cargado arriba. Es de consulta: no se edita.</div>
+      <div class="it-buscador"><input type="text" id="epecBuscarItem" placeholder="Buscar un ítem por número o descripción…"></div>
+      <div class="tabla-scroll" style="margin-top:12px;"><table class="it-tabla" id="epecTablaK"><thead><tr>
+        <th style="width:70px;">Ítem</th><th>Descripción</th><th style="width:70px;">Unidad</th><th style="width:90px; text-align:right;">K</th>
+      </tr></thead><tbody id="epecTablaKBody"></tbody></table></div>
+    </div>
+  </div>
 
   <!-- ============================================================
        ITEMIZADO ($) POR PLAZA  (2026-09-02)
@@ -8607,9 +8782,14 @@ function poblarOtPlazas(){
   if(!sel) return;
   const previo = sel.value;
   const ordenadas = [...avanceObras].sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||'')));
-  sel.innerHTML = ordenadas.length
+  // «Sin plaza» (2026-09-03): hay tareas que no son de ninguna obra puntual — retiro de material,
+  // acarreo entre obras, preparación en el galpón, un reclamo de barrio. Antes no se podían emitir
+  // porque la plaza era obligatoria.
+  const SIN = `<option value="__sin__">— Sin plaza · trabajo general (galpón, traslados, barrio) —</option>`;
+  sel.innerHTML = SIN + (ordenadas.length
     ? ordenadas.map(a=>`<option value="${escHtml(a.id)}">${escHtml(a.nombre)}${a.obraId?` (ID ${escHtml(a.obraId)})`:''}</option>`).join('')
-    : `<option value="">— Todavía no hay plazas cargadas en «Avance de obra» —</option>`;
+    : '');
+  if(ordenadas.length) sel.value = ordenadas[0].id;   // por defecto sigue siendo la primera plaza
   if(previo && [...sel.options].some(o=>o.value===previo)) sel.value = previo;
   if(!sel.dataset.dirEnganchada){
     sel.addEventListener('change', mostrarDireccionOt);
@@ -8653,6 +8833,16 @@ function poblarHistPlazas(){
 function mostrarDireccionOt(){
   const el = document.getElementById('otDireccionHint');
   if(!el) return;
+  // Orden sin plaza: se muestra el casillero del lugar y se explica qué significa.
+  const selP = document.getElementById('otPlaza');
+  const caja = document.getElementById('otLugarBox');
+  const sinP = selP && selP.value === '__sin__';
+  if(caja) caja.style.display = sinP ? '' : 'none';
+  if(sinP){
+    el.style.color = 'var(--text-soft)';
+    el.innerHTML = 'Orden <b>sin plaza</b>: para trabajos que no son de una obra puntual —retiro de material, acarreo entre obras, preparación en el galpón, un reclamo de barrio—. Suma puntos igual y aparece en la producción del personal.';
+    return;
+  }
   const a = plazaOtActiva();
   if(!a){ el.innerHTML = ''; return; }
   const partes = [];
@@ -8765,7 +8955,10 @@ function traerMaterialesDeLaPlaza(opts){
   const a = plazaOtActiva();
   const aviso = (txt, color)=>{ if(hint){ hint.textContent = txt; hint.style.color = color || 'var(--text-soft)'; } };
   if(!a){
-    if(!opts.silencioso) alert('Elegí primero la plaza, arriba.');
+    const sinP = (document.getElementById('otPlaza')||{}).value === '__sin__';
+    if(!opts.silencioso) alert(sinP
+      ? 'Esta orden es «sin plaza», así que no hay un cómputo de dónde traer los materiales. Escribilos a mano en el casillero de abajo.'
+      : 'Elegí primero la plaza, arriba.');
     return;
   }
   if(!(a.secciones||[]).some(sec=>(sec.items||[]).length)){
@@ -9157,8 +9350,13 @@ function datosOtDesdeFormulario(){
   msg.style.color = 'var(--danger)';
   if(!avanceFirebaseListo()){ msg.textContent = '⚠ No se pudo conectar con la base compartida — revisá tu conexión a internet y recargá la página.'; return null; }
   if(!window.__fbUser){ msg.textContent = '⚠ Iniciá sesión (pestaña Stock o Avance de obra) para poder emitir órdenes de trabajo.'; return null; }
+  const selPlazaEl = document.getElementById('otPlaza');
+  const sinPlaza = selPlazaEl && selPlazaEl.value === '__sin__';
   const a = plazaOtActiva();
-  if(!a){ msg.textContent = '⚠ Elegí la plaza para la que se emite la orden.'; return null; }
+  if(!a && !sinPlaza){ msg.textContent = '⚠ Elegí la plaza para la que se emite la orden, o «Sin plaza» si es un trabajo general.'; return null; }
+  // En una orden sin plaza, el lugar lo escribe quien la emite: «Galpón», «B° Villa Cabrera»,
+  // «Depósito de la Municipalidad». Si lo deja vacío, se guarda igual con un nombre genérico.
+  const lugarLibre = ((document.getElementById('otLugar')||{}).value||'').trim();
   const fecha = document.getElementById('otFecha').value;
   if(!fecha){ msg.textContent = '⚠ Elegí una fecha.'; return null; }
   const cuadrilla = document.getElementById('otCuadrilla').value.trim();
@@ -9176,10 +9374,14 @@ function datosOtDesdeFormulario(){
   const etapaKey = document.getElementById('otEtapa').value;
   const etapa = ETAPAS_OBRA.find(e=>e.key===etapaKey);
   return {
-    plazaId: a.id, plazaNombre: a.nombre||'', obraId: String(a.obraId||''),
+    plazaId: sinPlaza ? '' : a.id,
+    plazaNombre: sinPlaza ? (lugarLibre || 'Trabajo general (sin plaza)') : (a.nombre||''),
+    obraId: sinPlaza ? '' : String(a.obraId||''),
+    sinPlaza: !!sinPlaza,
     // Se guarda una COPIA de la dirección y el barrio en la orden: si mañana se corrige la ficha de
     // la plaza, la orden que ya se emitió y se imprimió sigue diciendo lo que decía ese día.
-    direccion: a.direccion||'', barrio: a.barrio||'',
+    direccion: sinPlaza ? lugarLibre : (a.direccion||''),
+    barrio: sinPlaza ? '' : (a.barrio||''),
     fecha, diaSemana: diaSemanaDeFecha(fecha),
     horaInicio: document.getElementById('otHoraInicio').value,
     horaFin: document.getElementById('otHoraFin').value,
@@ -9236,7 +9438,12 @@ function editarOrdenTrabajo(id){
   otEditandoId = id;
   poblarOtPlazas();
   const selPlaza = document.getElementById('otPlaza');
-  if([...selPlaza.options].some(op=>op.value===o.plazaId)) selPlaza.value = o.plazaId;
+  if(o.sinPlaza || !o.plazaId){
+    selPlaza.value = '__sin__';
+    const lug = document.getElementById('otLugar');
+    if(lug) lug.value = (o.plazaNombre === 'Trabajo general (sin plaza)') ? '' : (o.plazaNombre || '');
+  } else if([...selPlaza.options].some(op=>op.value===o.plazaId)) selPlaza.value = o.plazaId;
+  mostrarDireccionOt();
   document.getElementById('otFecha').value = o.fecha || '';
   document.getElementById('otCuadrilla').value = o.cuadrilla || '';
   document.getElementById('otResponsable').value = o.responsable || '';
@@ -13544,6 +13751,8 @@ function poblarParteObraDatalist(){
   // Cuánto de esa misma tarea ya quedó cargado en OTRAS órdenes de la misma plaza. No es una
   // estimación ni un pronóstico: es lo que está guardado. Sirve para no cargar dos veces lo mismo.
   function yaCargadoEnLaPlaza(o, k){
+    // Sin plaza no hay con qué comparar: dos órdenes generales no son «la misma obra».
+    if(!String(o.plazaId||'').trim()) return 0;
     let t = 0;
     ordenes().forEach(x=>{
       if(x.id === o.id) return;
@@ -13974,8 +14183,14 @@ function poblarParteObraDatalist(){
     if(!d) return;
     if(d.overrides && typeof d.overrides === 'object') preciosEditados = { ...d.overrides };
     if(Array.isArray(d.itemsPropios)) itemsPropios = d.itemsPropios.slice();
+    if(d.baseEpec != null){
+      epecBase = n2(d.baseEpec);
+      const inp = document.getElementById('epecBase');
+      if(inp && document.activeElement !== inp) inp.value = epecBase > 0 ? epecBase : '';
+    }
     aplicarPrecios();
     renderItemizado();
+    try{ renderEpec(); }catch(e){}
   };
 
   async function guardarPrecios(msgEl){
@@ -15046,6 +15261,429 @@ function poblarParteObraDatalist(){
     poner();
   })();
 
+
+  // ==================================================================
+  // ITEMIZADO EPEC — POR COEFICIENTE (K)
+  // ==================================================================
+  // Fuente: ANEXO I de la NOTA ACLARATORIA N° 1, Licitación Pública Electrónica N° 5589 /
+  // SIC N° 21760, EPEC S.A.U., «Servicio de adecuación eléctrica de plazas», 31/08/2026.
+  //
+  // Este pliego NO tasa en pesos: cada ítem tiene un COEFICIENTE DE APLICACIÓN (K). El precio sale
+  // de multiplicar K por un valor base único. Mientras ese valor no esté cargado, todo se muestra
+  // en K — que es el número que de verdad dice el papel. No se inventa un peso.
+  //
+  // Los ítems 1 a 82 son los MISMOS que los del itemizado de la Municipalidad (mismo orden, mismas
+  // categorías, misma descripción), así que se reusan las cantidades ya cargadas en `valorItems`.
+  // Los ítems 83.1 a 89 —«provisión de materiales en caso de eventualidad»— son propios de este
+  // pliego y se guardan aparte, en `valorItemsEpec` de cada plaza.
+const ITEMIZADO_EPEC = [
+  {id:'1', cat:'Columnas metálicas', desc:'Columna metálica 7 m, capuchón + 1 brazo 0,425 m', un:'Un.', k:3.89},
+  {id:'2', cat:'Columnas metálicas', desc:'Columna metálica 7 m, capuchón + 2 brazos 0,425 m', un:'Un.', k:4},
+  {id:'3', cat:'Columnas metálicas', desc:'Columna metálica 7 m, capuchón + 3 brazos 0,425 m', un:'Un.', k:4.17},
+  {id:'4', cat:'Columnas metálicas', desc:'Columna metálica 10 m, capuchón + 4 brazos 1,025 m', un:'Un.', k:4.56},
+  {id:'5', cat:'Columnas PRFV', desc:'Columna PRFV 7 m, capuchón + 1 brazo 0,425 m', un:'Un.', k:3.19},
+  {id:'6', cat:'Columnas PRFV', desc:'Columna PRFV 7 m, capuchón + 2 brazos 0,425 m', un:'Un.', k:3.37},
+  {id:'7', cat:'Columnas PRFV', desc:'Columna PRFV 7 m, capuchón + 3 brazos 0,425 m', un:'Un.', k:3.55},
+  {id:'8', cat:'Columnas PRFV', desc:'Columna PRFV 10 m, capuchón + 4 brazos 1,025 m', un:'Un.', k:4.02},
+  {id:'9', cat:'Tableros de medición/protección/comando', desc:'Tablero aéreo (TA°P°), salidas subterráneas — s/AP T 008', un:'Un.', k:5.46},
+  {id:'10', cat:'Tableros de medición/protección/comando', desc:'Tablero a nivel (TA°P°), salidas subterráneas — s/AP T 002', un:'Un.', k:37.15},
+  {id:'11', cat:'Acometidas EPEC ↔ tablero', desc:'Acometida aérea EPEC ↔ tablero, por metro lineal', un:'m', k:0.32},
+  {id:'12', cat:'Acometidas EPEC ↔ tablero', desc:'Acometida subterránea EPEC ↔ tablero, por metro lineal', un:'m', k:0.76},
+  {id:'13', cat:'Apoyos', desc:'Apoyo PRFV H=8 m Ro1050 (soporte tablero)', un:'Un.', k:5.33},
+  {id:'14', cat:'Apoyos', desc:'Apoyo PRFV H=8 m Ro550 (soporte tablero de transición)', un:'Un.', k:7.95},
+  {id:'15', cat:'Zanjeo', desc:'Zanjeo terreno natural, profundidad 0,60 m', un:'m', k:0.29},
+  {id:'16', cat:'Zanjeo', desc:'Zanjeo con pisos de baldosas, profundidad 0,60 m', un:'m', k:0.48},
+  {id:'17', cat:'Zanjeo', desc:'Zanjeo con pisos de hormigón, profundidad 0,60 m', un:'m', k:0.44},
+  {id:'18', cat:'Zanjeo', desc:'Zanjeo terreno natural, profundidad 1,00 m', un:'m', k:0.41},
+  {id:'19', cat:'Zanjeo', desc:'Zanjeo con pisos de baldosas, profundidad 1,00 m', un:'m', k:0.6},
+  {id:'20', cat:'Zanjeo', desc:'Zanjeo con pisos de hormigón, profundidad 1,00 m', un:'m', k:0.56},
+  {id:'21', cat:'Cruces de calle', desc:'Cruce de calzada con tunelera, caño PVC Ø160 mm', un:'m', k:1.81},
+  {id:'22', cat:'Cruces de calle', desc:'Cruce a cielo abierto, calle de tierra', un:'m', k:1.82},
+  {id:'23', cat:'Cruces de calle', desc:'Cruce a cielo abierto, calle de hormigón armado', un:'m', k:4.78},
+  {id:'24', cat:'Cruces de calle', desc:'Cruce a cielo abierto, carpeta asfáltica', un:'m', k:5.23},
+  {id:'25', cat:'Cables y tendido', desc:'Cable Cu 2×2,5 mm² tendido en zanja', un:'m', k:0.1},
+  {id:'26', cat:'Cables y tendido', desc:'Cable Cu 2×4 mm² tendido en zanja', un:'m', k:0.11},
+  {id:'27', cat:'Cables y tendido', desc:'Cable Cu 2×6 mm² tendido en zanja', un:'m', k:0.12},
+  {id:'28', cat:'Cables y tendido', desc:'Cable Cu 2×10 mm² tendido en zanja', un:'m', k:0.15},
+  {id:'29', cat:'Cables y tendido', desc:'Cable Cu 2×16 mm² tendido en zanja', un:'m', k:0.18},
+  {id:'30', cat:'Cables y tendido', desc:'Cable Cu 3×1,5 mm² instalado EN COLUMNA', un:'m', k:0.09},
+  {id:'31', cat:'Cables y tendido', desc:'Cable Cu 3×2,5 mm² tendido en zanja', un:'m', k:0.11},
+  {id:'32', cat:'Cables y tendido', desc:'Cable Cu 3×4 mm² tendido en zanja', un:'m', k:0.12},
+  {id:'33', cat:'Cables y tendido', desc:'Cable Cu 3×6 mm² tendido en zanja', un:'m', k:0.14},
+  {id:'34', cat:'Cables y tendido', desc:'Cable Cu 3×10 mm² tendido en zanja', un:'m', k:0.18},
+  {id:'35', cat:'Cables y tendido', desc:'Cable Cu 3×16 mm² tendido en zanja', un:'m', k:0.23},
+  {id:'36', cat:'Cables y tendido', desc:'Cable Cu 4×2,5 mm² tendido en zanja', un:'m', k:0.12},
+  {id:'37', cat:'Cables y tendido', desc:'Cable Cu 4×4 mm² tendido en zanja', un:'m', k:0.13},
+  {id:'38', cat:'Cables y tendido', desc:'Cable Cu 4×6 mm² tendido en zanja', un:'m', k:0.15},
+  {id:'39', cat:'Cables y tendido', desc:'Cable Cu 4×10 mm² tendido en zanja', un:'m', k:0.19},
+  {id:'40', cat:'Cables y tendido', desc:'Cable Cu 4×16 mm² tendido en zanja', un:'m', k:0.25},
+  {id:'41', cat:'Reacondicionamiento', desc:'Reacondicionamiento de columna metálica existente', un:'Un.', k:2.57},
+  {id:'42', cat:'Reacondicionamiento', desc:'Acometida subterránea nueva en columna metálica existente (BPN + portafusible + PAT)', un:'Un.', k:1.77},
+  {id:'43', cat:'Reacondicionamiento', desc:'Aplomado de columna metálica fuera de plomo', un:'Un.', k:0.67},
+  {id:'44', cat:'Reacondicionamiento', desc:'Montaje, conexionado y energización de luminaria LED sobre columna existente', un:'Un.', k:0.73},
+  {id:'45', cat:'Retiros', desc:'Retiro de luminaria de A°P° existente', un:'Un.', k:0.78},
+  {id:'46', cat:'Retiros', desc:'Retiro de columna metálica de A°P° en mal estado', un:'Un.', k:0.81},
+  {id:'47', cat:'Retiros', desc:'Retiro de poste de hormigón armado de A°P°', un:'Un.', k:1.4},
+  {id:'48', cat:'Retiros', desc:'Retiro de poste de madera de A°P°', un:'Un.', k:0.78},
+  {id:'49', cat:'Retiros', desc:'Desconexión, desmantelamiento y retiro de tablero existente', un:'Un.', k:1.76},
+  {id:'50', cat:'Elementos de tablero — protecciones', desc:'Termomagnético tetrapolar 380 V, hasta 25 A', un:'Un.', k:0.8},
+  {id:'51', cat:'Elementos de tablero — protecciones', desc:'Termomagnético tetrapolar 380 V, mayor a 25 A', un:'Un.', k:0.86},
+  {id:'52', cat:'Elementos de tablero — protecciones', desc:'Termomagnético tripolar 380 V, hasta 25 A', un:'Un.', k:0.71},
+  {id:'53', cat:'Elementos de tablero — protecciones', desc:'Termomagnético tripolar 380 V, mayor a 25 A', un:'Un.', k:0.76},
+  {id:'54', cat:'Elementos de tablero — protecciones', desc:'Termomagnético bipolar 380 V, hasta 25 A', un:'Un.', k:0.65},
+  {id:'55', cat:'Elementos de tablero — protecciones', desc:'Termomagnético bipolar 380 V, mayor a 25 A', un:'Un.', k:0.72},
+  {id:'56', cat:'Elementos de tablero — protecciones', desc:'Termomagnético unipolar 380 V, hasta 25 A', un:'Un.', k:0.73},
+  {id:'57', cat:'Elementos de tablero — protecciones', desc:'Termomagnético unipolar 380 V, mayor a 25 A', un:'Un.', k:0.85},
+  {id:'58', cat:'Elementos de tablero — protecciones', desc:'Diferencial bipolar 250 V/40 A, clase A', un:'Un.', k:2.53},
+  {id:'59', cat:'Elementos de tablero — protecciones', desc:'Diferencial tetrapolar 250 V/40 A, clase A', un:'Un.', k:2.91},
+  {id:'60', cat:'Elementos de tablero — protecciones', desc:'Contactor tripolar 380 V, hasta 25 A', un:'Un.', k:1},
+  {id:'61', cat:'Elementos de tablero — protecciones', desc:'Contactor tripolar 380 V, mayor a 25 A', un:'Un.', k:1.24},
+  {id:'62', cat:'Elementos varios — conexión y protección', desc:'Bornera BPN (RSTN+T) 4 mm² – 2,5 mm²', un:'Un.', k:0.43},
+  {id:'63', cat:'Elementos varios — conexión y protección', desc:'Bornera BPN (RSTN+T) 10 mm² – 6 mm²', un:'Un.', k:0.45},
+  {id:'64', cat:'Elementos varios — conexión y protección', desc:'Fotocontrol electromecánico/electrónico 10 A – 220 V', un:'Un.', k:0.31},
+  {id:'65', cat:'Elementos varios — conexión y protección', desc:'Reloj temporizador mecánico programable (4 programas)', un:'Un.', k:1.57},
+  {id:'66', cat:'Elementos varios — conexión y protección', desc:'Base portafusible NH 20–125 A / 500 V', un:'Un.', k:0.63},
+  {id:'67', cat:'Elementos varios — conexión y protección', desc:'Fusible NH 20 A – 100 A', un:'Un.', k:0.42},
+  {id:'68', cat:'Elementos varios — conexión y protección', desc:'Fusible cerámico 2 A – 10 A', un:'Un.', k:0.11},
+  {id:'69', cat:'Elementos varios — conexión y protección', desc:'Portafusible tabaquera con fusible 1 A – 6 A – 10 A', un:'Un.', k:0.21},
+  {id:'70', cat:'Elementos varios — conexión y protección', desc:'Tomacorriente 2×10 A tipo Mignon', un:'Un.', k:0.18},
+  {id:'71', cat:'Elementos varios — conexión y protección', desc:'Fleje de acero inoxidable AISI 304 (largo 3 m)', un:'Un.', k:0.11},
+  {id:'72', cat:'Elementos varios — conexión y protección', desc:'Hebilla de acero inoxidable AISI 304, 3/4"', un:'Un.', k:0.18},
+  {id:'73', cat:'Elementos varios — conexión y protección', desc:'Apoya escalera H 12 m con herrajes', un:'Un.', k:1},
+  {id:'74', cat:'Elementos varios — conexión y protección', desc:'Tomacable WGC / TGC', un:'Un.', k:0.38},
+  {id:'75', cat:'Elementos varios — conexión y protección', desc:'Dispersor de Cu con alma de acero Ø14,6×1500 mm', un:'Un.', k:0.49},
+  {id:'76', cat:'Elementos varios — conexión y protección', desc:'Caño doble aislación Ø2″, L=4 m', un:'Un.', k:1.66},
+  {id:'77', cat:'Elementos varios — conexión y protección', desc:'Caño de H°G° con jabalina, tomacable, terminal y cable 1×10 mm²', un:'Un.', k:1.5},
+  {id:'78', cat:'Empalmes', desc:'Empalme recto c/resina, 4×2,5 a 4×6 mm², subterráneo', un:'Un.', k:4.13},
+  {id:'79', cat:'Empalmes', desc:'Empalme recto c/resina, 4×10 a 3×35+1×16 mm², subterráneo', un:'Un.', k:4.2},
+  {id:'80', cat:'Mediciones', desc:'Medición de resistencia de aislación de conductor subterráneo (c/100 m)', un:'Un.', k:1.04},
+  {id:'81', cat:'Mediciones', desc:'Medición de resistencia de PAT', un:'Un.', k:0.52},
+  {id:'82', cat:'Poda', desc:'Poda de árboles s/AP-TC-025', un:'Un.', k:0.58},
+  {id:'83.1', cat:'Provisión de materiales (eventualidad)', desc:'Provisión de columna metálica recta de 7 m', un:'Un.', k:2.64},
+  {id:'83.2', cat:'Provisión de materiales (eventualidad)', desc:'Provisión de columna metálica recta de 10 m', un:'Un.', k:4.37},
+  {id:'84.1', cat:'Provisión de materiales (eventualidad)', desc:'Provisión de columna de PRFV de 7 m', un:'Un.', k:2.75},
+  {id:'84.2', cat:'Provisión de materiales (eventualidad)', desc:'Provisión de columna de PRFV de 10 m', un:'Un.', k:4.56},
+  {id:'85.1', cat:'Provisión de materiales (eventualidad)', desc:'Provisión de luminaria LED de 75 W', un:'Un.', k:0.81},
+  {id:'85.2', cat:'Provisión de materiales (eventualidad)', desc:'Provisión de luminaria LED de 180 W', un:'Un.', k:1.27},
+  {id:'86', cat:'Provisión de materiales (eventualidad)', desc:'Provisión de cable subterráneo Cu 3×1,5 mm²', un:'m', k:0.02},
+  {id:'87', cat:'Provisión de materiales (eventualidad)', desc:'Provisión de cable verde-amarillo Cu 10 mm²', un:'m', k:0.02},
+  {id:'88', cat:'Provisión de materiales (eventualidad)', desc:'Provisión de jabalina Cu con alma de acero Ø14,6 × 1500 mm', un:'Un.', k:0.09},
+  {id:'89', cat:'Provisión de materiales (eventualidad)', desc:'Provisión de tablero de medición, protección y comando aéreo — s/AP T 107', un:'Un.', k:16.06},
+];
+
+  const itemEpec = (id)=> ITEMIZADO_EPEC.find(x=>x.id === String(id)) || null;
+  const esEventualidad = (id)=> {
+    const it = itemEpec(id);
+    return !!it && it.cat.indexOf('eventualidad') >= 0;
+  };
+  // El valor del MÓDULO, confirmado por el usuario el 03/09/2026: $ 281.988,00.
+  // El coeficiente K de cada ítem es la cantidad de módulos que vale ese ítem, así que el precio
+  // unitario es K × módulo. Queda editable: en cada redeterminación se cambia acá y vale para todos.
+  const MODULO_EPEC = 281988;
+  let epecBase = MODULO_EPEC;
+  let epecAbiertas = {};
+
+  const fmtK = (v)=> fmt(v, 2) + ' K';
+  const enPesos = (k)=> epecBase > 0 ? plata(k * epecBase) : '';
+
+  window.aplicarBaseEpec = function(){
+    const d = window.__preciosNube;
+    if(d && d.baseEpec != null) epecBase = n2(d.baseEpec);
+    const inp = document.getElementById('epecBase');
+    if(inp && document.activeElement !== inp) inp.value = epecBase > 0 ? epecBase : '';
+    renderEpec();
+  };
+
+  // ---- Cuentas ----
+  function itemsEpecDePlaza(a){
+    // Los 1 a 82 salen de la carga compartida; los de eventualidad, de la carga propia de este pliego.
+    const compartidos = (a.valorItems||[]).filter(v=>itemEpec(v.itemPliego)).map(v=>({
+      ref:v, id:String(v.itemPliego), propio:false }));
+    const propios = (a.valorItemsEpec||[]).filter(v=>itemEpec(v.itemEpec)).map(v=>({
+      ref:v, id:String(v.itemEpec), propio:true }));
+    return compartidos.concat(propios).sort((x,y)=> parseFloat(x.id) - parseFloat(y.id));
+  }
+
+  function cuentasEpec(a){
+    let contratado = 0, avanzado = 0;
+    itemsEpecDePlaza(a).forEach(f=>{
+      const it = itemEpec(f.id); if(!it) return;
+      const cant = n2(f.ref.cantidad);
+      const cav  = Math.min(n2(f.ref.cantidadAvanzada), cant);
+      contratado += cant * it.k;
+      avanzado   += cav  * it.k;
+    });
+    const pct = contratado > 0 ? Math.round(avanzado / contratado * 100) : 0;
+    return { contratado, avanzado, pct, items: itemsEpecDePlaza(a).length };
+  }
+
+  // ---- La pantalla ----
+  function renderEpec(){
+    const cont = document.getElementById('epecLista');
+    if(!cont) return;
+    // Que el casillero muestre el módulo con el que se está calculando, sin pisar lo que
+    // alguien esté tipeando en ese momento.
+    const inpBase = document.getElementById('epecBase');
+    if(inpBase && document.activeElement !== inpBase && inpBase.value === '' && epecBase > 0)
+      inpBase.value = epecBase;
+
+    const busca = ((document.getElementById('epecBuscar')||{}).value||'').toLowerCase().trim();
+    const soloCon = (document.getElementById('epecSoloConItems')||{}).checked;
+    const todas = obras().slice().sort((x,y)=> String(x.nombre||'').localeCompare(String(y.nombre||''),'es'));
+    let totC = 0, totA = 0, conItems = 0;
+    todas.forEach(a=>{ const c = cuentasEpec(a); totC += c.contratado; totA += c.avanzado; if(c.items) conItems++; });
+
+    const tiles = document.getElementById('epecTiles');
+    if(tiles){
+      const pctG = totC > 0 ? Math.round(totA/totC*100) : 0;
+      const sub = (k)=> epecBase > 0 ? `<div class="ep-pesos">${plata(k*epecBase)}</div>`
+                                     : `<div class="ep-pesos">falta el valor del módulo para pasarlo a pesos</div>`;
+      tiles.innerHTML = `
+        <div class="tile"><div class="num" style="font-size:18px;">${fmtK(totC)}</div>${sub(totC)}<div class="lbl">Contratado (plazas cargadas)</div></div>
+        <div class="tile"><div class="num" style="font-size:18px;">${fmtK(totA)}</div>${sub(totA)}<div class="lbl">Certificado / avanzado</div></div>
+        <div class="tile"><div class="num">${pctG}%</div><div class="lbl">Avance</div></div>
+        <div class="tile"><div class="num">${conItems} / ${todas.length}</div><div class="lbl">Plazas con ítems cargados</div></div>`;
+    }
+
+    const lista = todas.filter(a=>{
+      if(soloCon && !cuentasEpec(a).items) return false;
+      if(!busca) return true;
+      return [a.nombre, a.obraId, a.barrio].map(x=>String(x||'').toLowerCase()).some(t=>t.includes(busca));
+    });
+
+    cont.innerHTML = lista.length
+      ? lista.map(a=>filaPlazaEpec(a)).join('')
+      : `<div class="card"><div class="hint">${todas.length ? 'Ninguna plaza coincide con la búsqueda.' : 'Todavía no hay plazas cargadas en el tablero de avance.'}</div></div>`;
+    renderTablaK();
+  }
+
+  function filaPlazaEpec(a){
+    const c = cuentasEpec(a);
+    const abierta = !!epecAbiertas[a.id];
+    let h = `<div class="card it-plaza${abierta?' abierta':''}" data-epec="${esc(a.id)}">
+      <div class="it-cab" data-togglep="${esc(a.id)}">
+        <div class="it-flecha">${abierta?'▾':'▸'}</div>
+        <div class="it-nom">
+          <b>${esc(a.nombre||'(sin nombre)')}</b>
+          <div class="it-sub">${a.obraId?`ID ${esc(a.obraId)}`:'sin ID'}${a.barrio?` · ${esc(a.barrio)}`:''} · ${c.items} ítem(s)</div>
+        </div>
+        <div class="it-plata">
+          <div class="it-contratado">${fmtK(c.contratado)}</div>
+          <div class="it-avanzado">certificado ${fmtK(c.avanzado)}</div>
+          ${epecBase>0 ? `<div class="ep-pesos">${plata(c.contratado*epecBase)} contratado · ${plata(c.avanzado*epecBase)} certificado</div>` : ''}
+        </div>
+        <div class="it-pct" style="color:${colorPct(c.pct)}">${c.pct}%</div>
+        <button type="button" class="btn-ghost it-imprimir-ep no-print" data-plaza="${esc(a.id)}" title="Imprimir solo esta plaza">🖨</button>
+      </div>
+      <div class="avance-bar"><div class="avance-bar-fill" style="width:${c.pct}%; background:${colorPct(c.pct)};"></div></div>`;
+    if(abierta) h += detallePlazaEpec(a);
+    h += `</div>`;
+    return h;
+  }
+
+  function detallePlazaEpec(a){
+    const filas = itemsEpecDePlaza(a);
+    const edit = puedeEditar();
+    const dis = edit ? '' : 'disabled';
+    let h = `<div class="it-membrete-plaza solo-print">
+        <div class="it-mp-tit">Itemizado EPEC de ${esc(a.nombre||'')}${a.obraId?` — ID ${esc(a.obraId)}`:''}</div>
+        <div class="it-mp-sub">${a.barrio?esc(a.barrio)+' · ':''}Coeficientes del ANEXO I — Nota Aclaratoria N° 1 · LPE 5589 · SIC 21760 · EPEC S.A.U.${epecBase>0?` · Módulo ${plata(epecBase)}`:' · Valor del módulo todavía sin cargar'} · Impreso el ${esc(typeof formatFechaCorta==='function'?formatFechaCorta(fechaAISO(new Date())):'')}</div>
+      </div>`;
+    h += `<div class="it-detalle">`;
+    if(!edit) h += `<div class="hint" style="margin-top:0; color:var(--amber);">Estás viendo sin sesión iniciada: se puede mirar todo, pero para cambiar cantidades hay que iniciar sesión.</div>`;
+
+    if(!filas.length){
+      h += `<div class="hint" style="margin-top:0;">Esta plaza no tiene ningún ítem cargado. Los ítems 1 a 82 se cargan desde el itemizado de la Municipalidad (la pestaña de al lado, que además los puede traer solos desde la Calculadora).</div>`;
+    } else {
+      h += `<div class="it-scroll-aviso no-print">↔ Deslizá la tabla para ver las cantidades y los subtotales.</div>`;
+      h += `<div class="tabla-scroll"><table class="it-tabla"><thead><tr>
+        <th style="width:34%">Ítem del pliego</th>
+        <th style="width:82px; text-align:right;">K</th>
+        <th style="width:96px;">Contratada</th>
+        <th style="width:96px;">Hecha</th>
+        <th style="width:132px; text-align:right;">Subtotal</th>
+        <th style="width:132px; text-align:right;">Certificado</th>
+        <th style="width:54px; text-align:right;">%</th>
+        <th class="no-print" style="width:40px;"></th>
+      </tr></thead><tbody>`;
+      filas.forEach(f=>{
+        const it = itemEpec(f.id);
+        const cant = n2(f.ref.cantidad), cav = Math.min(n2(f.ref.cantidadAvanzada), cant);
+        const pct = cant > 0 ? Math.round(cav/cant*100) : 0;
+        h += `<tr data-vid="${esc(f.ref.id)}" data-plaza="${esc(a.id)}" data-propio="${f.propio?1:0}">
+          <td>
+            <b>Ítem ${esc(it.id)} — ${esc(it.desc)}</b>
+            <div class="it-cat">${esc(it.cat)}${f.propio?' · <span class="it-badge">propio de este pliego</span>':' · <span class="it-badge">cantidad compartida</span>'}</div>
+          </td>
+          <td class="qty"><b>${fmt(it.k,2)}</b><div class="it-un">/ ${esc(it.un)}</div></td>
+          <td><input type="number" min="0" step="any" class="ep-cant" data-f="cantidad" value="${cant||''}" placeholder="0" ${dis}></td>
+          <td><input type="number" min="0" step="any" class="ep-cant" data-f="cantidadAvanzada" value="${n2(f.ref.cantidadAvanzada)||''}" placeholder="0" ${dis}></td>
+          <td class="qty">${fmtK(cant*it.k)}${epecBase>0?`<div class="ep-pesos">${plata(cant*it.k*epecBase)}</div>`:''}</td>
+          <td class="qty">${fmtK(cav*it.k)}${epecBase>0?`<div class="ep-pesos">${plata(cav*it.k*epecBase)}</div>`:''}</td>
+          <td class="qty" style="color:${colorPct(pct)}"><b>${pct}%</b></td>
+          <td class="no-print">${f.propio?`<button type="button" class="tramo-remove ep-quitar" title="Quitar este ítem" ${dis}>×</button>`:''}</td>
+        </tr>`;
+      });
+      const c = cuentasEpec(a);
+      h += `</tbody><tfoot><tr>
+        <th colspan="4" style="text-align:right;">Total de la plaza</th>
+        <th class="qty">${fmtK(c.contratado)}${epecBase>0?`<div class="ep-pesos">${plata(c.contratado*epecBase)}</div>`:''}</th>
+        <th class="qty">${fmtK(c.avanzado)}${epecBase>0?`<div class="ep-pesos">${plata(c.avanzado*epecBase)}</div>`:''}</th>
+        <th class="qty" style="color:${colorPct(c.pct)}">${c.pct}%</th>
+        <th class="no-print"></th>
+      </tr></tfoot></table></div>`;
+    }
+
+    h += `<div class="it-agregar no-print">
+      <select class="ep-nuevo-sel" ${dis}>${opcionesEventualidadHTML()}</select>
+      <input type="number" min="0" step="any" class="ep-nuevo-cant" placeholder="Cantidad" ${dis}>
+      <button type="button" class="btn-auto ep-nuevo-btn" style="margin:0;" ${dis}>+ Agregar ítem de eventualidad</button>
+    </div>
+    <div class="hint" style="margin-top:6px;">Solo los ítems <b>83.1 a 89</b> se cargan acá. Los demás salen de la carga compartida con el itemizado de la Municipalidad.</div>
+    <div class="hint ep-msg" style="margin-top:6px;"></div></div>`;
+    return h;
+  }
+
+  function opcionesEventualidadHTML(){
+    let html = '<option value="">— Elegí un ítem de eventualidad —</option>';
+    ITEMIZADO_EPEC.filter(it=>esEventualidad(it.id)).forEach(it=>{
+      html += `<option value="${esc(it.id)}">Ítem ${esc(it.id)} — ${esc(it.desc)} (${esc(it.un)}, ${fmt(it.k,2)} K)</option>`;
+    });
+    return html;
+  }
+
+  function renderTablaK(){
+    const body = document.getElementById('epecTablaKBody');
+    if(!body) return;
+    const q = ((document.getElementById('epecBuscarItem')||{}).value||'').toLowerCase().trim();
+    const filas = ITEMIZADO_EPEC.filter(it=> !q || (it.id+' '+it.desc+' '+it.cat).toLowerCase().includes(q));
+    body.innerHTML = filas.map(it=>`<tr>
+      <td><b>${esc(it.id)}</b></td>
+      <td>${esc(it.desc)}<div class="it-cat">${esc(it.cat)}</div></td>
+      <td>${esc(it.un)}</td>
+      <td class="qty"><b>${fmt(it.k,2)}</b>${epecBase>0?`<div class="ep-pesos">${plata(it.k*epecBase)}</div>`:''}</td>
+    </tr>`).join('');
+  }
+
+  // ---- Toques ----
+  const panelEp = document.getElementById('avPanelEpec');
+  if(panelEp){
+    panelEp.addEventListener('click', async (e)=>{
+      const impr = e.target.closest('.it-imprimir-ep');
+      if(impr){
+        const id = impr.dataset.plaza;
+        epecAbiertas[id] = true; renderEpec();
+        const card = document.querySelector(`.it-plaza[data-epec="${CSS.escape(String(id))}"]`);
+        if(!card) return;
+        document.body.classList.add('imprimiendo-plaza','imprimiendo-epec');
+        card.classList.add('imprimiendo');
+        const limpiar = ()=>{ document.body.classList.remove('imprimiendo-plaza','imprimiendo-epec');
+          card.classList.remove('imprimiendo'); window.removeEventListener('afterprint', limpiar); };
+        window.addEventListener('afterprint', limpiar);
+        setTimeout(()=>{ window.print(); setTimeout(limpiar, 1200); }, 120);
+        return;
+      }
+      const cab = e.target.closest('.it-cab');
+      if(cab && cab.dataset.togglep){ const id = cab.dataset.togglep; epecAbiertas[id] = !epecAbiertas[id]; renderEpec(); return; }
+
+      const quitar = e.target.closest('.ep-quitar');
+      if(quitar){
+        const tr = quitar.closest('tr');
+        const a = obras().find(x=>String(x.id)===tr.dataset.plaza); if(!a) return;
+        a.valorItemsEpec = (a.valorItemsEpec||[]).filter(v=>String(v.id)!==tr.dataset.vid);
+        if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        renderEpec(); return;
+      }
+
+      const nuevo = e.target.closest('.ep-nuevo-btn');
+      if(nuevo){
+        const card = nuevo.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        const sel = card.querySelector('.ep-nuevo-sel');
+        const msg = card.querySelector('.ep-msg');
+        if(!sel.value){ if(msg){ msg.style.color='var(--danger)'; msg.textContent='Elegí primero el ítem.'; } return; }
+        a.valorItemsEpec = a.valorItemsEpec || [];
+        if(a.valorItemsEpec.some(v=>String(v.itemEpec)===sel.value)){
+          if(msg){ msg.style.color='var(--amber)'; msg.textContent='Ese ítem ya está cargado en esta plaza.'; } return;
+        }
+        const nid = (typeof avanceItemIdSeq !== 'undefined') ? avanceItemIdSeq++ : Date.now();
+        a.valorItemsEpec.push({ id:nid, itemEpec:sel.value,
+                                cantidad:n2(card.querySelector('.ep-nuevo-cant').value), cantidadAvanzada:0 });
+        if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        renderEpec(); return;
+      }
+
+      if(e.target.id === 'epecBaseBtn'){
+        epecBase = n2(document.getElementById('epecBase').value);
+        const msg = document.getElementById('epecBaseMsg');
+        aplicarPrecios();
+        try{
+          if(!puedeEditar()) throw new Error('sin sesión');
+          await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, baseEpec:epecBase,
+                                          ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
+          if(msg){ msg.style.color='var(--teal-dark)';
+            msg.textContent = epecBase>0 ? `✔ Guardado: el módulo vale ${plata(epecBase)}, para todo el equipo.`
+                                         : '✔ Guardado. Sin valor de módulo, los totales vuelven a mostrarse en coeficientes.'; }
+        }catch(err){
+          if(msg){ msg.style.color='var(--amber)';
+            msg.textContent='Se aplicó acá, pero para que lo vea todo el equipo hay que iniciar sesión.'; }
+        }
+        renderEpec(); return;
+      }
+    });
+
+    let epTimer = null;
+    panelEp.addEventListener('input', (e)=>{
+      const cant = e.target.closest('.ep-cant');
+      if(cant){
+        const tr = cant.closest('tr');
+        const a = obras().find(x=>String(x.id)===tr.dataset.plaza); if(!a) return;
+        const lista = tr.dataset.propio === '1' ? (a.valorItemsEpec||[]) : (a.valorItems||[]);
+        const v = lista.find(x=>String(x.id)===tr.dataset.vid); if(!v) return;
+        v[cant.dataset.f] = Math.max(0, n2(cant.value));
+        actualizarFilaEpec(tr, a, v);
+        clearTimeout(epTimer);
+        epTimer = setTimeout(()=>{
+          if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+          refrescarPantallasDeAvance();
+        }, 600);
+        return;
+      }
+      if(e.target.id === 'epecBuscar') renderEpec();
+      if(e.target.id === 'epecBuscarItem') renderTablaK();
+    });
+    panelEp.addEventListener('change', (e)=>{ if(e.target.id === 'epecSoloConItems') renderEpec(); });
+  }
+
+  function actualizarFilaEpec(tr, a, v){
+    const id = tr.dataset.propio === '1' ? v.itemEpec : v.itemPliego;
+    const it = itemEpec(id); if(!it) return;
+    const cant = n2(v.cantidad), cav = Math.min(n2(v.cantidadAvanzada), cant);
+    const pct = cant > 0 ? Math.round(cav/cant*100) : 0;
+    const celdas = tr.querySelectorAll('td');
+    const cel = (i, k)=>{ if(celdas[i]) celdas[i].innerHTML = fmtK(k) + (epecBase>0?`<div class="ep-pesos">${plata(k*epecBase)}</div>`:''); };
+    cel(4, cant*it.k); cel(5, cav*it.k);
+    if(celdas[6]){ celdas[6].innerHTML = `<b>${pct}%</b>`; celdas[6].style.color = colorPct(pct); }
+    const card = tr.closest('.it-plaza');
+    if(card){
+      const c = cuentasEpec(a);
+      const pies = card.querySelectorAll('tfoot th');
+      if(pies[1]) pies[1].innerHTML = fmtK(c.contratado) + (epecBase>0?`<div class="ep-pesos">${plata(c.contratado*epecBase)}</div>`:'');
+      if(pies[2]) pies[2].innerHTML = fmtK(c.avanzado) + (epecBase>0?`<div class="ep-pesos">${plata(c.avanzado*epecBase)}</div>`:'');
+      if(pies[3]){ pies[3].textContent = c.pct+'%'; pies[3].style.color = colorPct(c.pct); }
+      const cc = card.querySelector('.it-contratado'); if(cc) cc.textContent = fmtK(c.contratado);
+      const ca = card.querySelector('.it-avanzado');
+      if(ca) ca.textContent = 'certificado ' + fmtK(c.avanzado);
+      const cpe = card.querySelector('.it-plata .ep-pesos');
+      if(cpe && epecBase>0) cpe.textContent = `${plata(c.contratado*epecBase)} contratado · ${plata(c.avanzado*epecBase)} certificado`;
+      const cp = card.querySelector('.it-pct'); if(cp){ cp.textContent = c.pct+'%'; cp.style.color = colorPct(c.pct); }
+      const bar = card.querySelector('.avance-bar-fill');
+      if(bar){ bar.style.width = c.pct+'%'; bar.style.background = colorPct(c.pct); }
+    }
+  }
+
+  window.renderEpec = renderEpec;
+
   // ---- Sub-pestañas ----
   let subAv = 'obra';
   function pintarSubtabsAvance(){
@@ -15053,13 +15691,17 @@ function poblarParteObraDatalist(){
     if(!barra) return;
     barra.innerHTML = [
       { id:'obra',      label:'Avance de obra' },
-      { id:'itemizado', label:'Itemizado ($)' },
+      { id:'itemizado', label:'Itemizado Municipalidad ($)' },
+      { id:'epec',      label:'Itemizado EPEC (K)' },
     ].map(g=>`<button type="button" class="subtab${subAv===g.id?' activo':''}" data-sub="${g.id}">${g.label}</button>`).join('');
     const po = document.getElementById('avPanelObra');
     const pi = document.getElementById('avPanelItemizado');
+    const pe = document.getElementById('avPanelEpec');
     if(po) po.style.display = subAv==='obra' ? '' : 'none';
     if(pi) pi.style.display = subAv==='itemizado' ? '' : 'none';
+    if(pe) pe.style.display = subAv==='epec' ? '' : 'none';
     if(subAv === 'itemizado') renderItemizado();
+    else if(subAv === 'epec') renderEpec();
   }
   const barraAv = document.getElementById('subtabsAvance');
   if(barraAv){
@@ -15084,6 +15726,178 @@ function poblarParteObraDatalist(){
   pintarSubtabsAvance();
   // Si los precios del equipo llegaron de la nube antes de que existiera este bloque.
   try{ if(window.__preciosNube) window.aplicarPreciosDeLaNube(); }catch(e){}
+})();
+</script>
+
+<!-- ============================================================
+     LA PLANIFICACIÓN, MES COMPLETO  (2026-09-03)
+     Bloque propio, después de todos los demás, para no tocar los que ya andaban. Solo LEE
+     `planEntries` y `ordenesTrabajo`, y para navegar escribe `planWeekStart` y llama a
+     `renderPlanGrid()`, que son los mismos que usa la semana.
+     ============================================================ -->
+<script>
+(function(){
+  'use strict';
+  const esc = (t)=> (typeof escHtml==='function') ? escHtml(t) : String(t==null?'':t);
+  const leer = (f)=>{ try{ return f(); }catch(e){ return null; } };
+  const DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+
+  let mesAncla = (typeof fechaAISO === 'function') ? fechaAISO(new Date()) : '2026-01-01';
+  let subPlan = 'semana';
+
+  const aDate = (iso)=>{ const [a,m,d] = String(iso).split('-').map(Number); return new Date(a, m-1, d, 12); };
+  const aIso  = (dt)=> (typeof fechaAISO === 'function') ? fechaAISO(dt)
+                       : dt.toISOString().slice(0,10);
+
+  function tareasDeOrden(o){
+    const cat = leer(()=> ACTIVIDADES_CATALOGO) || [];
+    return [
+      ...(o.actividades||[]).map(id=>{ const c = cat.find(x=>x.id===id); return c ? c.label : id; }),
+      ...(o.actividadesManuales||[]).map(a=>a.actividad)
+    ].filter(Boolean);
+  }
+
+  function renderMes(){
+    const grid = document.getElementById('mesGrid');
+    if(!grid) return;
+    const hoy = (typeof fechaAISO === 'function') ? fechaAISO(new Date()) : '';
+    const ancla = aDate(mesAncla);
+    const anio = ancla.getFullYear(), mes = ancla.getMonth();
+    const primero = new Date(anio, mes, 1, 12);
+    const ultimo  = new Date(anio, mes + 1, 0, 12);
+    const nombreMes = primero.toLocaleDateString('es-AR', { month:'long', year:'numeric' });
+    const titulo = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
+    const lbl = document.getElementById('mesLabel'); if(lbl) lbl.textContent = titulo;
+    const tp = document.getElementById('mesTitlePrint'); if(tp) tp.textContent = 'Planificación de ' + titulo;
+
+    // La grilla arranca el lunes de la semana del día 1 y termina el domingo de la del último día.
+    const desde = (typeof lunesDeSemana === 'function') ? lunesDeSemana(aIso(primero)) : aIso(primero);
+    const finSemana = (typeof lunesDeSemana === 'function') ? lunesDeSemana(aIso(ultimo)) : aIso(ultimo);
+    const hasta = (typeof sumarDias === 'function') ? sumarDias(finSemana, 6) : aIso(ultimo);
+
+    const entradas = leer(()=> planEntries) || [];
+    const ordenes  = leer(()=> ordenesTrabajo) || [];
+
+    let html = DIAS.map(d=>`<div class="mes-cab">${d}</div>`).join('');
+    let f = desde, nOt = 0, nTareas = 0, dias = 0;
+    let guardia = 0;
+    while(f <= hasta && guardia++ < 60){
+      const dt = aDate(f);
+      const delMes = dt.getMonth() === mes;
+      const esHoy = f === hoy;
+      const ots = ordenes.filter(o=>String(o.fecha||'') === f)
+                         .sort((a,b)=>String(a.numero||'').localeCompare(String(b.numero||''),'es',{numeric:true}));
+      const tar = entradas.filter(e=>String(e.fecha||'') === f);
+      if(delMes){ nOt += ots.length; nTareas += tar.length; if(ots.length || tar.length) dias++; }
+
+      html += `<div class="mes-dia${delMes?'':' fuera'}${esHoy?' hoy':''}${(ots.length||tar.length)?' con':''}" data-fecha="${f}" tabindex="0" role="button" title="Abrir la semana del ${esc(typeof formatFechaCorta==='function'?formatFechaCorta(f):f)}">
+        <div class="mes-num">${dt.getDate()}${esHoy?'<span class="mes-hoy">hoy</span>':''}</div>`;
+      ots.forEach(o=>{
+        const t = tareasDeOrden(o);
+        html += `<div class="mes-chip ot">
+          <b>${esc(o.numero||'Orden')}</b>
+          <span>${esc(o.plazaNombre||'(sin plaza)')}</span>
+          ${o.cuadrilla?`<span class="mes-cu">${esc(o.cuadrilla)}</span>`:''}
+          ${t.length?`<span class="mes-ta">${esc(t.join(' · '))}</span>`:''}
+        </div>`;
+      });
+      tar.forEach(e=>{
+        const cat = leer(()=> ACTIVIDADES_CATALOGO) || [];
+        const c = e.catalogoId ? cat.find(x=>x.id===e.catalogoId) : null;
+        const nom = c ? c.label : (e.tarea||'');
+        html += `<div class="mes-chip tarea">
+          <b>${esc(e.obra||'(sin obra)')}</b>
+          ${e.cuadrilla?`<span class="mes-cu">${esc(e.cuadrilla)}</span>`:''}
+          ${nom?`<span class="mes-ta">${esc(nom)}</span>`:''}
+        </div>`;
+      });
+      html += `</div>`;
+      f = (typeof sumarDias === 'function') ? sumarDias(f, 1) : f;
+      if(typeof sumarDias !== 'function') break;
+    }
+    grid.innerHTML = html;
+
+    const res = document.getElementById('mesResumen');
+    if(res){
+      res.innerHTML = (nOt || nTareas)
+        ? `En ${esc(titulo.toLowerCase())}: <b>${nOt}</b> orden(es) de trabajo emitida(s) y <b>${nTareas}</b> tarea(s) planificada(s) a mano, repartidas en <b>${dias}</b> día(s).`
+        : `No hay nada cargado en ${esc(titulo.toLowerCase())}. Las órdenes de trabajo aparecen solas en el día de su fecha; las tareas a mano se cargan en la pestaña <b>Semana</b>.`;
+    }
+  }
+
+  // ---- Navegación ----
+  function moverMes(n){
+    const dt = aDate(mesAncla);
+    mesAncla = aIso(new Date(dt.getFullYear(), dt.getMonth() + n, 1, 12));
+    renderMes();
+  }
+  const bind = (id, fn)=>{ const e = document.getElementById(id); if(e) e.addEventListener('click', fn); };
+  bind('mesPrev', ()=>moverMes(-1));
+  bind('mesNext', ()=>moverMes(1));
+  bind('mesHoy',  ()=>{ mesAncla = aIso(new Date()); renderMes(); });
+
+  // Tocar un día abre la semana que lo contiene, ya posicionada.
+  const gridEl = document.getElementById('mesGrid');
+  if(gridEl){
+    const abrir = (fecha)=>{
+      if(!fecha) return;
+      try{
+        if(typeof lunesDeSemana === 'function') planWeekStart = lunesDeSemana(fecha);
+        subPlan = 'semana';
+        pintarSubtabsPlan();
+        if(typeof renderPlanGrid === 'function') renderPlanGrid();
+        const dia = document.querySelector(`#planGrid .plan-day[data-fecha="${fecha}"]`);
+        if(dia) dia.scrollIntoView({ block:'center', behavior:'smooth' });
+        else window.scrollTo({ top:0, behavior:'smooth' });
+      }catch(e){}
+    };
+    gridEl.addEventListener('click', (e)=>{
+      const d = e.target.closest('.mes-dia'); if(d) abrir(d.dataset.fecha);
+    });
+    gridEl.addEventListener('keydown', (e)=>{
+      if(e.key !== 'Enter' && e.key !== ' ') return;
+      const d = e.target.closest('.mes-dia'); if(d){ e.preventDefault(); abrir(d.dataset.fecha); }
+    });
+  }
+
+  // ---- Sub-pestañas ----
+  function pintarSubtabsPlan(){
+    const barra = document.getElementById('subtabsPlan');
+    if(!barra) return;
+    barra.innerHTML = [
+      { id:'semana', label:'Semana' },
+      { id:'mes',    label:'El mes completo' },
+    ].map(g=>`<button type="button" class="subtab${subPlan===g.id?' activo':''}" data-sub="${g.id}">${g.label}</button>`).join('');
+    const ps = document.getElementById('planPanelSemana');
+    const pm = document.getElementById('planPanelMes');
+    if(ps) ps.style.display = subPlan==='semana' ? '' : 'none';
+    if(pm) pm.style.display = subPlan==='mes'    ? '' : 'none';
+    if(subPlan === 'mes') renderMes();
+  }
+  const barraPlan = document.getElementById('subtabsPlan');
+  if(barraPlan){
+    barraPlan.addEventListener('click', (e)=>{
+      const b = e.target.closest('.subtab'); if(!b) return;
+      subPlan = b.dataset.sub;
+      // Al abrir el mes se muestra el de la semana que se estaba mirando. Se toma el JUEVES de esa
+      // semana, no el lunes: una semana que arranca el 31/08 y termina el 06/09 pertenece a
+      // septiembre, y si tomáramos el lunes abriría en agosto, que no es lo que uno espera ver.
+      if(subPlan === 'mes'){
+        try{ if(planWeekStart && typeof sumarDias === 'function') mesAncla = sumarDias(planWeekStart, 3); }catch(err){}
+      }
+      pintarSubtabsPlan();
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
+  }
+
+  // Al entrar a la planificación se vuelve siempre a la semana, que es donde se trabaja.
+  const anteriorMostrar = window.mostrarVista;
+  window.mostrarVista = function(v){
+    anteriorMostrar(v);
+    if(v === 'plan'){ pintarSubtabsPlan(); }
+  };
+  window.renderPlanMes = renderMes;
+  pintarSubtabsPlan();
 })();
 </script>
 
