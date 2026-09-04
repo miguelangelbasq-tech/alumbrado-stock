@@ -1266,10 +1266,13 @@
     .inicio-accesos{ grid-template-columns:repeat(2, 1fr); gap:11px; }
     .inicio-plazas{ grid-template-columns:1fr; }
     .inicio-buscador input{ padding:12px 14px 12px 42px; }
-    .nav-txt{ font-size:9.5px; }
-    .nav-ico{ font-size:18px; }
-    .nav-item{ flex:1 1 0; }
-    #navAbajo{ justify-content:space-around; gap:0; }
+    /* Con 8 botones (se sumó «Semana») el ancho por botón baja a ~48 px en una pantalla de 390:
+       se achican un punto el texto y el ícono para que ninguno se corte. */
+    .nav-txt{ font-size:9px; letter-spacing:-.01em; }
+    .nav-ico{ font-size:17px; }
+    .nav-item{ flex:1 1 0; padding:6px 1px; }
+    .nav-item.activo .nav-ico{ padding:3px 7px; }
+    #navAbajo{ justify-content:space-around; gap:0; padding-left:0; padding-right:0; }
     body{ padding-bottom:74px; }
   }
 
@@ -1731,14 +1734,35 @@
   .mes-chip.ot{ background:rgba(56,189,248,.14); border:1px solid rgba(13,148,136,.38); }
   .mes-chip.tarea{ background:var(--bg-soft); border:1px solid var(--line); }
   .mes-chip b{ color:var(--navy); font-size:11px; }
-  .mes-chip span{ color:var(--text-soft); overflow-wrap:anywhere; }
+  .mes-chip span{ color:var(--text-soft); overflow-wrap:break-word; }
   .mes-chip .mes-cu{ font-weight:600; }
   .mes-chip .mes-ta{ font-size:10.5px; }
   @media (max-width:900px){
-    .mes-grid{ grid-template-columns:repeat(7, minmax(64px,1fr)); overflow-x:auto; }
+    .mes-grid{ grid-template-columns:repeat(7, minmax(96px,1fr)); overflow-x:auto; }
     .mes-dia{ min-height:86px; }
     .mes-chip{ font-size:10px; }
     .mes-label{ min-width:0; }
+  }
+  /* En el celular no entran siete columnas con texto: en 88 px las palabras se partían al medio
+     ("Cuadri lla 1") y encima había que arrastrar la grilla para ver viernes, sábado y domingo.
+     Acá el mes se muestra como calendario de puntos: un punto por orden o tarea, el mes entero
+     en una pantalla, y el detalle a un toque —el día abre la semana, que sí tiene lugar para el
+     texto. En la compu y en la impresión no cambia nada: sigue el texto completo. */
+  @media (max-width:640px){
+    .mes-grid{ grid-template-columns:repeat(7, minmax(0,1fr)); gap:3px; overflow-x:visible; }
+    .mes-cab{ font-size:9px; letter-spacing:.04em; padding:2px 0 5px; }
+    .mes-dia{ min-height:52px; padding:5px 2px 6px; flex-direction:row; flex-wrap:wrap;
+              align-content:flex-start; justify-content:center; gap:3px; border-radius:8px; }
+    .mes-num{ flex:0 0 100%; justify-content:center; font-size:13px; }
+    .mes-hoy{ display:none; }
+    .mes-dia.hoy .mes-num{ color:var(--navy); font-size:14px; }
+    .mes-chip{ width:9px; height:9px; padding:0; border-radius:50%; display:block; overflow:hidden; }
+    .mes-chip b, .mes-chip span{ display:none; }
+    .mes-chip.ot{ background:var(--teal-dark); border-color:var(--teal-dark); }
+    .mes-chip.tarea{ background:var(--text-soft); border-color:var(--text-soft); }
+    .mes-leyenda i{ border-radius:50%; width:9px; height:9px; }
+    .mes-leyenda .lg-ot{ background:var(--teal-dark); border-color:var(--teal-dark); }
+    .mes-leyenda .lg-tarea{ background:var(--text-soft); border-color:var(--text-soft); }
   }
   @media print{
     .mes-dia{ break-inside:avoid; min-height:74px; }
@@ -9620,8 +9644,16 @@ function renderOt(){
 function verOrdenTrabajo(id){
   const o = ordenesTrabajo.find(x=>x.id===id);
   if(!o) return;
+  // La orden se dibuja dentro de «Órdenes de trabajo». Si se toca «Ver la orden» desde la
+  // Planificación —o desde cualquier otra pantalla— hay que ir primero a esa vista: si no, se
+  // dibujaba en una pantalla escondida y parecía que el botón no hacía nada (2026-09-03).
+  const vista = document.getElementById('viewParteDiario');
+  if(typeof mostrarVista === 'function' && (!vista || vista.style.display === 'none')) mostrarVista('parte');
   renderOrdenTrabajo(o);
-  document.getElementById('parteResultCard').scrollIntoView({behavior:'smooth', block:'start'});
+  setTimeout(()=>{
+    const card = document.getElementById('parteResultCard');
+    if(card) card.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 60);
 }
 
 async function cambiarEstadoOt(id, estado){
@@ -12353,10 +12385,14 @@ function poblarParteObraDatalist(){
 <nav id="navAbajo" class="no-print">
   <button type="button" class="nav-item" data-vista="inicio"><span class="nav-ico">🏠</span><span class="nav-txt">Inicio</span></button>
   <button type="button" class="nav-item" data-vista="calc"><span class="nav-ico">🧮</span><span class="nav-txt">Cálculo</span></button>
+  <button type="button" class="nav-item" data-vista="plan"><span class="nav-ico">📅</span><span class="nav-txt">Semana</span></button>
   <button type="button" class="nav-item" data-vista="parte"><span class="nav-ico">📋</span><span class="nav-txt">Órdenes</span><span class="nav-badge" id="navBadgeOt"></span></button>
   <button type="button" class="nav-item" data-vista="avance"><span class="nav-ico">📊</span><span class="nav-txt">Obras</span><span class="nav-badge" id="navBadgeObras"></span></button>
   <button type="button" class="nav-item" data-vista="mapa"><span class="nav-ico">🗺</span><span class="nav-txt">Mapa</span></button>
-  <button type="button" class="nav-item" data-vista="produccion"><span class="nav-ico">🏅</span><span class="nav-txt">Producción</span></button>
+  <!-- «Equipo» y no «Producción»: con 8 botones, en un celular de 390 px cada uno mide 49 px y
+       «Producción» se cortaba. La pantalla se sigue llamando Producción por persona; en el menú
+       lateral figura con el nombre completo. -->
+  <button type="button" class="nav-item" data-vista="produccion"><span class="nav-ico">🏅</span><span class="nav-txt">Equipo</span></button>
   <button type="button" class="nav-item" id="navMas" onclick="abrirMenuLateral()"><span class="nav-ico">⋯</span><span class="nav-txt">Más</span></button>
 </nav>
 
