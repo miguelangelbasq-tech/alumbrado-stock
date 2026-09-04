@@ -32,6 +32,14 @@
     --danger:#dc2626;
     --radius:14px;
     /* Nuevas — solo las usa el CSS de abajo. */
+    /* --line y --bg-soft son los MISMOS colores que --border y --panel, con otro nombre.
+       Las pantallas nuevas (Producción, Itemizado, Cierre del día, Itemizado EPEC, El mes completo,
+       y el armado de la caja de columna) se escribieron con estos dos nombres, que nunca habían sido
+       declarados: el navegador tiraba a la basura toda la regla que los usaba, así que esas pantallas
+       venían sin bordes ni fondo — se veía, por ejemplo, el calendario del mes sin las cajas de los
+       días. Declararlos acá arregla las 28 reglas de una y no cambia ningún color. */
+    --line:#e2e8f0;
+    --bg-soft:#f6f8fb;
     --ring:rgba(56,189,248,.28);
     --sombra-sm:0 1px 2px rgba(15,30,51,.05), 0 1px 3px rgba(15,30,51,.06);
     --sombra-md:0 2px 4px rgba(15,30,51,.04), 0 8px 20px -6px rgba(15,30,51,.10);
@@ -1771,6 +1779,31 @@
     .mes-dia.fuera{ opacity:.35; }
   }
 
+  /* ---- Cómo se arma la caja de la columna (cantidades editables) ----
+     Cinco casilleros que en la compu entran en una grilla y en el celular se apilan. La pastilla de
+     color a la izquierda repite el color real de la bornera (gris, celeste, verde) para que el que
+     lo carga no tenga que leer la palabra: mira el color y sabe cuál es. */
+  .bpncfg{ display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:4px;
+           border:1px dashed var(--border); border-radius:12px; padding:10px 14px; background:var(--panel); }
+  .bpncfg-item{ display:flex; align-items:center; gap:9px; padding:4px 0; }
+  .bpncfg-item + .bpncfg-item{ border-top:1px solid var(--border); }
+  .bpncfg-lbl{ display:flex; align-items:baseline; gap:7px; flex:1 1 auto; min-width:0;
+               font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; }
+  .bpncfg-lbl small{ font-weight:500; color:var(--text-soft); }
+  .bpncfg-chip{ width:13px; height:13px; border-radius:3px; flex:0 0 auto; border:1px solid rgba(0,0,0,.22);
+                align-self:center; }
+  .bpncfg-chip.gris{ background:#d9d5cd; }
+  .bpncfg-chip.celeste{ background:#2f9fd6; }
+  .bpncfg-chip.verde{ background:#2e9e57; }
+  .bpncfg-chip.pf{ background:#f3f3f1; border-color:#9aa2a8;
+                   box-shadow:inset 0 -4px 0 #cfd6da; border-radius:2px; }
+  .bpncfg-item input{ width:66px; flex:0 0 auto; text-align:center; font-weight:700; margin:0; }
+  .bpncfg-un{ font-size:11.5px; color:var(--text-soft); flex:1 1 auto; min-width:0; }
+  @media (max-width:640px){
+    .bpncfg{ grid-template-columns:1fr; padding:10px 11px; }
+    .bpncfg-un{ display:none; }
+  }
+
   /* ---- Itemizado EPEC (coeficientes) ---- */
   .ep-base{ display:flex; align-items:flex-end; gap:22px; flex-wrap:wrap; margin-top:16px;
             border:1px dashed var(--line); border-radius:12px; padding:12px 16px; background:var(--bg-soft); }
@@ -2095,7 +2128,7 @@
           <option value="PRFV">PRFV (poliéster reforzado c/ fibra de vidrio)</option>
           <option value="Metálica">Metálica</option>
         </select>
-        <div class="hint">Define si el portafusible y la bornera BPN fase/neutro van fijos en 3 por columna (PRFV) o 1 por luminaria real (Metálica).</div>
+        <div class="hint">Define cómo se cuenta la caja de la columna: en <b>PRFV</b> las cantidades son fijas por columna y se editan más abajo (portafusibles y borneras gris / celeste / verde); en <b>Metálica</b> va 1 portafusible y 1 bornera de fase y de neutro por luminaria real.</div>
 
         <label>Cantidad de columnas</label>
         <input type="number" id="vincCantCol" min="0" value="7">
@@ -2119,6 +2152,39 @@
         <label>Calibre de BPN si NO cargás la sección «Cableado por circuitos»</label>
         <select id="bpnCalibreManual"></select>
         <div class="hint">Se usa <b>solo</b> cuando la sección de Cableado está apagada. Si cargás los circuitos, este campo se ignora y la bornera se saca del calibre real que llega a cada columna.<br><br><b>La regla de la bornera de FASE (gris)</b>: cable de hasta <b>4 mm²</b> → BPN de <b>4 mm²</b> (ítem 62); cable de <b>más de 4 mm²</b> → BPN de <b>6 mm²</b> (ítem 63). Por eso un troncal de 6 mm² pide bornera de 6.<br>Si en el cómputo ves las dos medidas, es porque la plaza tiene tramos de distinto calibre: cada línea aclara para qué cable es. Las borneras <b>celeste (neutro) y verde (tierra) van siempre de 6 mm²</b> en columnas PRFV, cualquiera sea el cable.</div>
+
+        <label>Cómo se arma la caja de la columna <span style="font-weight:600;color:var(--text-soft)">(solo PRFV)</span></label>
+        <div class="hint" style="margin-top:0;margin-bottom:10px;">Estas cinco cantidades son las que usa el cómputo. Ya vienen cargadas con la forma que se usa hoy — si mañana cambia el armado, se cambian acá y listo, no hay que tocar nada más. Se guardan con el cómputo de esta plaza.</div>
+        <div class="bpncfg">
+          <div class="bpncfg-item">
+            <span class="bpncfg-lbl"><i class="bpncfg-chip pf"></i>Portafusibles</span>
+            <input type="number" id="bpnCfgPf" min="0" max="12" value="2">
+            <span class="bpncfg-un">por columna</span>
+          </div>
+          <div class="bpncfg-item">
+            <span class="bpncfg-lbl"><i class="bpncfg-chip gris"></i>BPN gris <small>(fase)</small></span>
+            <input type="number" id="bpnCfgGris" min="0" max="12" value="3">
+            <span class="bpncfg-un">por columna</span>
+          </div>
+          <div class="bpncfg-item">
+            <span class="bpncfg-lbl"><i class="bpncfg-chip celeste"></i>BPN celeste <small>(neutro)</small></span>
+            <input type="number" id="bpnCfgCeleste" min="0" max="12" value="3">
+            <span class="bpncfg-un">por columna</span>
+          </div>
+          <div class="bpncfg-item">
+            <span class="bpncfg-lbl"><i class="bpncfg-chip verde"></i>BPN verde <small>(tierra)</small></span>
+            <input type="number" id="bpnCfgVerde" min="0" max="12" value="2">
+            <span class="bpncfg-un">por columna</span>
+          </div>
+          <div class="bpncfg-item">
+            <span class="bpncfg-lbl"><i class="bpncfg-chip verde"></i>BPN verde <small>(final de circuito)</small></span>
+            <input type="number" id="bpnCfgVerdeFinal" min="0" max="12" value="3">
+            <span class="bpncfg-un">en la última columna de cada circuito</span>
+          </div>
+        </div>
+        <div class="hint" id="bpnCfgResumen" style="margin-top:10px;"></div>
+        <button type="button" id="bpnCfgResetBtn" class="btn-auto">↺ Volver a la forma de armado actual (2 · 3 · 3 · 2 / 3)</button>
+        <div class="hint"><b>El fusible no se carga acá: sale solo.</b> Va <b>2 A por artefacto</b>, repartido entre los portafusibles de esa columna — vínculo simple: un fusible de 2 A (el otro portafusible queda sin fusible); doble: 2 A + 2 A; triple: 2 A + 4 A; cuádruple: 4 A + 4 A.</div>
       </div>
 
       <div class="card" id="cardCableado">
@@ -3270,7 +3336,7 @@
   <b>Modularización por tareas (2026-08-10):</b> cada sección (Columnas, Cableado, Obra civil, Tablero, Retiros) se puede activar o desactivar por separado con el interruptor «Incluir esta tarea», para armar órdenes de trabajo parciales sin tener que completar toda la planilla. «Datos de la obra» siempre está activa porque identifica la obra en el historial. La sección <b>Obra civil</b> es nueva e independiente: agrupa fundaciones, contrabase/torta o sellado, zanjeo y (si corresponde) la base de mampostería del tablero, con carga manual propia o con el botón «Cargar automáticamente» (copia una única vez los datos de Columnas/Cableado, sin quedar sincronizado en vivo).<br>
   <b>Contrabase/torta vs. sellado (2026-08-10, según pliego ítem 12.05 y criterio de campo):</b> la torta redonda de mortero cementicio (protección del bloquete de puesta a tierra contra hurto/vandalismo) aplica solo a columnas de <b>hormigón y metálicas</b> según el pliego. Las columnas <b>PRFV</b> no llevan contrabase/torta — solo un sellado de base, que no tiene ítem de pliego asociado (criterio de campo).<br>
   <b>Fundaciones — hormigón, dosificación y complementarios (actualizado 2026-08-15, planos AP-TC-003 y AP-TC-003-A):</b> el volumen de hormigón y sus materiales complementarios (molde, arena fina de relleno, caños, hierro, etc.) están verificados contra el cuadro oficial del plano para PRFV 7 m/10 m y Metálica 6/7/8/9/10/12 m — coinciden exactos con el cómputo del plano. Solo Metálica 4 m sigue siendo <span class="badge badge-est">estimado</span> (el cuadro fuente arranca en 6 m). La dosificación de hormigón (cemento, arena, piedra, agua) es H-13, dosaje 1:2,5:4 por m³, y se aplica sobre el volumen de cada fundación — es una tasa fija válida para cualquier altura, se haya verificado o no el volumen. Los metros de <b>cable columna–luminaria</b> siguen siendo una aproximación referencial (altura libre + 2 m por columna); ajustalos según relevamiento en obra.<br>
-  <b>Portafusibles y BPN (corregido 2026-08-12):</b> en columnas <b>PRFV</b> se computan siempre <b>3 portafusibles fijos por columna</b> (caja de conexión completa), sin importar la cantidad real de luminarias. En columnas <b>metálicas</b> se calcula 1 portafusible por luminaria real. <b>FASE y NEUTRO viven en ese mismo bloque fijo de conexión</b>: en PRFV son <b>siempre 3</b> (fijo, igual que los portafusibles — no varía con el vínculo/cantidad real de luminarias), en metálica 1 por luminaria real (no hay caja fija). <b>TIERRA sí depende de la cantidad real de luminarias</b> y se agrupa de a 2 cables por bornera (incluido el cable de entrada): `ceil((1+luminarias)/2)`. Por eso, en una columna PRFV con vínculo triple (3 luminarias) da 3 BPN fase + 3 BPN neutro + 2 BPN tierra, y con vínculo simple (1 luminaria) también da 3 BPN fase + 3 BPN neutro (fijo) + 1 BPN tierra (variable) — confirmado por el usuario. El calibre de BPN se toma del tramo de cable real (sección Cableado) o, si esa sección está apagada, del selector manual dentro de Columnas: <b>cable de 1,5 a 4 mm² → BPN de 4 mm² (Ítem 62)</b>; <b>cable de más de 4 mm² → BPN de 6 mm² (Ítem 63)</b>. <b>Excepción confirmada (2026-08-26): en columnas PRFV —de 7 o de 10 m— las borneras CELESTE (neutro) y VERDE (tierra) se piden SIEMPRE de 6 mm², cualquiera sea el calibre del troncal</b>; solo la de FASE (gris) sigue la sección del cable de ese tramo. En columnas metálicas se mantiene el criterio por cable para las tres. El criterio por sección es de campo (no está escrito textualmente en el pliego/manual) — verificalo contra el esquema de conexionado de cada tablero antes de certificar.<br>
+  <b>Portafusibles, BPN y fusibles (metodología nueva, 2026-09-04 — reemplaza a la del 12/08):</b> el usuario cambió la forma de armar la caja y mandó la foto del armado real (ZOLODA BMFN 10×38 + bloque BPN): <b>2 portafusibles por columna</b>, <b>3 borneras grises (fase)</b>, <b>3 celestes (neutro)</b> y <b>2 verdes (tierra)</b>; la <b>última columna de cada circuito —el final de circuito— lleva 3 verdes</b> en vez de 2. Los finales se cuentan desde los circuitos cargados en la sección Cableado (uno por circuito); si esa sección está apagada se usa el casillero suelto «Circuitos» y el cómputo lo avisa. <b>Fusible: 2 A por artefacto</b>, repartido entre los portafusibles de esa columna — simple 2 A (el otro portafusible queda sin fusible), doble 2+2, triple 2+4, cuádruple 4+4. El fusible pasó a pedirse en medida <b>cilíndrica 10 × 38 mm</b> (código 3017), que es la de la tabaquera que se computa (ítem 3053); el de <b>4 A en 10 × 38 no está cargado en el pañol</b> y sale sin código, avisado en el cómputo. Todo esto vale <b>solo para PRFV</b>: en <b>metálicas</b> no cambió nada (1 portafusible y 1 BPN de fase y de neutro por luminaria real; tierra de a 2 cables por bornera, <code>ceil((1+luminarias)/2)</code>). Como esto ya cambió dos veces, las cinco cantidades <b>son editables</b> desde la sección Vínculos y se guardan con el cómputo de cada plaza. El calibre de BPN se toma del tramo de cable real (sección Cableado) o, si esa sección está apagada, del selector manual dentro de Columnas: <b>cable de 1,5 a 4 mm² → BPN de 4 mm² (Ítem 62)</b>; <b>cable de más de 4 mm² → BPN de 6 mm² (Ítem 63)</b>. <b>Excepción confirmada (2026-08-26): en columnas PRFV —de 7 o de 10 m— las borneras CELESTE (neutro) y VERDE (tierra) se piden SIEMPRE de 6 mm², cualquiera sea el calibre del troncal</b>; solo la de FASE (gris) sigue la sección del cable de ese tramo. En columnas metálicas se mantiene el criterio por cable para las tres. El criterio por sección es de campo (no está escrito textualmente en el pliego/manual) — verificalo contra el esquema de conexionado de cada tablero antes de certificar.<br>
   <b>Puente fijo y separador de BPN (agregado y corregido 2026-08-11, según hardware real fotografiado en obra):</b> las borneras BPN de <b>NEUTRO y TIERRA se puentean juntas, en un solo puente fijo continuo</b> (peine ZOLODA de 10 elementos, se corta a la medida necesaria — ej. 5 elementos para 3 neutro + 2 tierra en una columna), porque el esquema es <b>TN-C (neutro y tierra combinados / PEN)</b>. Si el proyecto usa esquema <b>TN-S</b> (neutro y tierra separados en todo el recorrido, como el de Plaza Hípica), NO corresponde puentearlos juntos — verificar el esquema de conexión a tierra del proyecto ejecutivo antes de aplicar este criterio. La <b>FASE nunca se puentea</b>: cada fase va individual a su propio portafusible/fusible. Además, entre el grupo FASE y el grupo NEUTRO+TIERRA del bloque de borneras se coloca un <b>separador para borne BPN</b> (1 por columna) que los divide físicamente. Ambos son criterio de campo, sin ítem de pliego específico — verificados con foto real del armado (portafusibles ZOLODA BMFN 10×38 + puente y bloque BPN, todo marca ZOLODA).<br>
   <b>Grupos de vínculo — columnas mixtas en la misma plaza (agregado 2026-08-11):</b> el campo de vínculo/acople dejó de ser un único selector para toda la obra: ahora se cargan uno o más <b>grupos</b> (tipo de vínculo + cantidad de columnas), para plazas donde se combinan columnas triples, dobles, simples, etc. Luminarias, portafusibles y borneras BPN se calculan por grupo y se suman. Si además la sección Cableado tiene más de un tramo (calibre) a la vez que hay más de un grupo de vínculo, la calculadora no sabe qué columnas puntuales de cada tramo llevan cada vínculo — reparte el total de BPN proporcionalmente entre tramos (el total general es exacto, el desglose por calibre es una estimación) y lo marca en la descripción del ítem.<br>
   <b>Código de colores de conductores (fijado 2026-08-10):</b> Fase = <b>gris</b> · Neutro = <b>celeste</b> · Tierra = <b>verde</b>. El pliego (AEA 90364-7) exige respetar una codificación de colores sin fijar un color único por conductor en el texto disponible — este es el criterio fijo adoptado para esta obra/cuadrilla y debe mantenerse en todo el cableado interno de tablero, columna y luminaria.<br>
@@ -3846,9 +3912,94 @@ const BPN_MAX_CABLES = 2; // máximo de cables por bornera BPN (nunca 3)
 // NO varía con la cantidad real de luminarias del vínculo (confirmado por el usuario 2026-08-12).
 // En Metálica no hay caja fija: la BPN fase/neutro sigue siendo 1 por luminaria real, igual que los portafusibles.
 const PORTAFUSIBLES_FIJOS_PRFV = 3;
-function bpnFaseNeutroPorColumna(tipoCol, lum){
-  return tipoCol === 'PRFV' ? PORTAFUSIBLES_FIJOS_PRFV : lum;
+
+// ---- Armado de la caja de columna PRFV — metodología nueva (2026-09-04) ----
+// El usuario cambió la forma de armar la caja y mandó la foto del armado real (ZOLODA BMFN 10×38 +
+// bloque BPN): *"dos portafusibles por columna, 3 BPN celestes, las verdes van 3 si es final de
+// circuito si no solo van dos, y abajo las 3 BPN gris; y un fusible 2 amper por artefacto — o sea,
+// si tenemos un vínculo triple iría un fusible de 2 A a un portafusible y al otro uno de 4 A"*.
+//
+// Como esto ya cambió dos veces (12/08 eran 3 portafusibles y 3+3 fase/neutro), las cantidades
+// dejaron de estar clavadas en el código: viven en cinco casilleros editables adentro de la sección
+// Vínculos, se guardan con el cómputo y se restauran al abrirlo. Si mañana vuelve a cambiar, se
+// edita ahí y no hace falta tocar nada más.
+//
+// Vale SOLO para columnas PRFV (elección del usuario). Las metálicas siguen igual que siempre:
+// 1 portafusible y 1 BPN fase/neutro por luminaria real, y tierra de a 2 cables por bornera.
+const BPN_COL_DEF = { pf:2, gris:3, celeste:3, verde:2, verdeFinal:3 };
+function bpnColCfg(){
+  const n = (id, def)=>{
+    try{
+      const el = document.getElementById(id);
+      if(!el || el.value === '') return def;
+      const v = parseInt(el.value, 10);
+      return (isNaN(v) || v < 0) ? def : v;
+    }catch(e){ return def; }
+  };
+  return { pf:      n('bpnCfgPf',      BPN_COL_DEF.pf),
+           gris:    n('bpnCfgGris',    BPN_COL_DEF.gris),
+           celeste: n('bpnCfgCeleste', BPN_COL_DEF.celeste),
+           verde:   n('bpnCfgVerde',   BPN_COL_DEF.verde),
+           verdeFinal: n('bpnCfgVerdeFinal', BPN_COL_DEF.verdeFinal) };
 }
+window.bpnColCfg = bpnColCfg;
+
+// Cuántos circuitos tiene la plaza. Con «Cableado por circuitos» encendido sale del editor de
+// circuitos (es el dato real); si no, del casillero suelto. Sirve para saber cuántas columnas son
+// FINAL DE CIRCUITO — que son las que llevan la tercera bornera verde.
+function circuitosDeLaPlaza(){
+  try{
+    const cableOn = (document.getElementById('toggleCableado')||{}).checked;
+    if(cableOn && typeof circuitosConColumnas === 'function'){
+      const n = circuitosConColumnas();
+      if(n > 0) return n;
+    }
+  }catch(e){}
+  try{ const el = document.getElementById('circuitos'); if(el) return parseInt(el.value,10) || 1; }catch(e){}
+  return 1;
+}
+// ¿Los circuitos salen del editor (exacto) o del casillero suelto (estimado)?
+function circuitosSonReales(){
+  try{
+    const cableOn = (document.getElementById('toggleCableado')||{}).checked;
+    return !!(cableOn && typeof circuitosConColumnas === 'function' && circuitosConColumnas() > 0);
+  }catch(e){ return false; }
+}
+
+function bpnFaseNeutroPorColumna(tipoCol, lum){
+  return tipoCol === 'PRFV' ? bpnColCfg().gris : lum;
+}
+function bpnGrisPorColumna(tipoCol, lum){
+  return tipoCol === 'PRFV' ? bpnColCfg().gris : lum;
+}
+function bpnCelestePorColumna(tipoCol, lum){
+  return tipoCol === 'PRFV' ? bpnColCfg().celeste : lum;
+}
+// Verdes (tierra) de TODA la obra. Las de paso llevan `verde`; la última columna de cada circuito
+// lleva `verdeFinal`. Se calcula sobre el total de columnas y no por grupo de vínculo, porque los
+// finales de circuito son de la plaza, no del grupo: si no, una plaza con dos grupos contaría los
+// finales dos veces.
+function bpnVerdeTotalPRFV(columnasTotal, circuitos){
+  const c = bpnColCfg();
+  const finales = Math.max(0, Math.min(columnasTotal, circuitos||0));
+  return (columnasTotal - finales) * c.verde + finales * c.verdeFinal;
+}
+// Qué fusible va en cada portafusible de una columna: 2 A por artefacto, repartido lo más parejo
+// posible entre los portafusibles. Triple (3 artefactos, 2 portafusibles) → uno de 4 A y uno de 2 A,
+// que es el ejemplo que dio el usuario. Simple → un solo fusible de 2 A; el otro portafusible queda
+// armado y sin fusible.
+function fusiblesDeColumna(lum, pf){
+  const n = Math.max(1, pf|0);
+  const amp = [];
+  let resto = Math.max(0, lum|0);
+  for(let i = 0; i < n; i++){
+    const q = Math.ceil(resto / (n - i));
+    if(q > 0) amp.push(q * 2);
+    resto -= q;
+  }
+  return amp;
+}
+window.fusiblesDeColumna = fusiblesDeColumna;
 
 // Calibres de cable troncal disponibles y su bornera BPN correspondiente (pliego LP21478):
 // ítem 62 = BPN (RSTN+T) 4mm²-2,5mm² · ítem 63 = BPN (RSTN+T) 10mm²-6mm²
@@ -4324,7 +4475,7 @@ function actualizarResumenCircuitos(){
   const raros = calibres.filter(c=>{ const s = seccionDeCalibre(c); return s!=null && !SECCIONES_NORMALIZADAS.includes(s); });
 
   let html = `<table class="hist-table" style="margin-top:4px;"><thead><tr>
-      <th>Calibre</th><th>Zanja</th><th>Ganancia por subidas</th><th>Total a pedir</th><th>Columnas</th>
+      <th>Calibre</th><th>Zanja</th><th>Subida y bajada en columnas</th><th>Total a pedir <small>(ya sumado)</small></th><th>Columnas</th>
     </tr></thead><tbody>`;
   let tz=0, tg=0;
   calibres.forEach(cal=>{
@@ -4426,7 +4577,7 @@ function actualizarGananciaSummary(){
   const ultimos = (circuitos||[]).filter(c=>c.puntos.some(p=>p.calibre && p.esColumna)).length;
   el.innerHTML = `<b>${subidas} subidas</b> en ${cols} columnas de ${ultimos} circuito${ultimos>1?'s':''} `
     + `(${cols - ultimos} intermedia${cols-ultimos===1?'':'s'} con 2 cables + ${ultimos} última${ultimos===1?'':'s'} con 1) `
-    + `= <b>${fmt(total,0)} m</b> de ganancia, ya repartidos por calibre.`;
+    + `= <b>${fmt(total,0)} m</b> para subir y bajar el cable por las columnas. <b>Ya están sumados</b> en los metros de cada calibre — no se piden aparte.`;
 }
 
 // ---- Eventos de la carga por circuitos ----
@@ -4644,24 +4795,37 @@ function actualizarVinculoGruposSummary(){
   let totalLum = 0, totalBpnFase = 0, totalBpnNeutro = 0, totalBpnTierra = 0;
   const detalle = [];
   const tipoColActual = document.getElementById('vincTipoCol').value;
+  const cfgCol = bpnColCfg();
+  const fusAmp = {};   // { 2: cantidad, 4: cantidad }
   vinculoGrupos.forEach(g=>{
     const v = VINCULOS.find(x=>x.id===g.tipo);
     if(!v) return;
-    const faseNeutroPorCol = bpnFaseNeutroPorColumna(tipoColActual, v.lum);
     totalLum += g.columnas * v.lum;
-    totalBpnFase += g.columnas * faseNeutroPorCol;
-    totalBpnNeutro += g.columnas * faseNeutroPorCol;
-    totalBpnTierra += g.columnas * Math.ceil((1+v.lum)/BPN_MAX_CABLES);
+    totalBpnFase   += g.columnas * bpnGrisPorColumna(tipoColActual, v.lum);
+    totalBpnNeutro += g.columnas * bpnCelestePorColumna(tipoColActual, v.lum);
+    if(esPRFV) totalBpnTierra += g.columnas * cfgCol.verde;
+    else       totalBpnTierra += g.columnas * Math.ceil((1+v.lum)/BPN_MAX_CABLES);
+    if(esPRFV) fusiblesDeColumna(v.lum, cfgCol.pf).forEach(a=>{ fusAmp[a] = (fusAmp[a]||0) + g.columnas; });
     detalle.push(`${g.columnas}× ${v.label.split('—')[0].trim()}`);
   });
-  const totalPF = esPRFV ? cantColTotal * 3 : totalLum;
+  // La tercera verde de los finales de circuito se suma una sola vez para toda la plaza.
+  let finalesCirc = 0;
+  if(esPRFV){
+    const colsVinc = vinculoGrupos.reduce((a,g)=>a+(g.columnas||0),0);
+    finalesCirc = Math.max(0, Math.min(colsVinc, circuitosDeLaPlaza()));
+    totalBpnTierra += finalesCirc * (cfgCol.verdeFinal - cfgCol.verde);
+  }
+  const totalPF = esPRFV ? cantColTotal * cfgCol.pf : totalLum;
   const totalBpn = totalBpnFase + totalBpnNeutro + totalBpnTierra;
   // Puntera terminal TIFF: 2 por cada BPN (fase+neutro+tierra) + 2 por cada portafusible — el cable
   // entra primero a la BPN y de ahí sale hacia el portafusible, cada punta lleva su propia puntera.
   const totalPunterasTiff = 2*totalBpn + 2*totalPF;
   const ok = sumaColumnas === cantColTotal;
   const summaryEl = document.getElementById('vinculoGruposSummary');
-  summaryEl.innerHTML = `Con ${detalle.join(' + ') || '—'} → <b>${totalLum} luminarias</b> · <b>${totalPF} portafusibles</b>${esPRFV ? ' (3 fijos/columna PRFV)' : ''} · <b>${totalBpn} borneras BPN</b> (${totalBpnFase} fase + ${totalBpnNeutro} neutro + ${totalBpnTierra} tierra) · <b>${totalPunterasTiff} puntas a engarzar</b> (el cómputo las reparte entre punteras TIFF simples y dobles).<br>` +
+  const fusTxt = Object.keys(fusAmp).sort((a,b)=>a-b)
+    .map(a=>`${fusAmp[a]} de ${a} A`).join(' + ');
+  summaryEl.innerHTML = `Con ${detalle.join(' + ') || '—'} → <b>${totalLum} luminarias</b> · <b>${totalPF} portafusibles</b>${esPRFV ? ` (${cfgCol.pf}/columna PRFV)` : ''} · <b>${totalBpn} borneras BPN</b> (${totalBpnFase} gris + ${totalBpnNeutro} celeste + ${totalBpnTierra} verde) · <b>${totalPunterasTiff} puntas a engarzar</b> (el cómputo las reparte entre punteras TIFF simples y dobles).<br>` +
+    (esPRFV && fusTxt ? `Fusibles: <b>${fusTxt}</b>. Verdes: ${finalesCirc} columna${finalesCirc===1?'':'s'} de final de circuito lleva${finalesCirc===1?'':'n'} ${cfgCol.verdeFinal}, el resto ${cfgCol.verde}${circuitosSonReales()?'':' <b>(los circuitos salen del casillero suelto — encendé «Cableado por circuitos» para que sea exacto)</b>'}.<br>` : '') +
     `Columnas asignadas a vínculos: <b style="color:${ok?'#3ecc57':'#ff6b6b'}">${sumaColumnas} / ${cantColTotal}</b>${ok ? ' ✓' : ' — revisá la distribución, no coincide con la cantidad total de columnas'}.`;
 }
 
@@ -4700,6 +4864,44 @@ document.getElementById('addVinculoGrupoBtn').addEventListener('click', ()=>{
   vinculoGrupos.push({ id: vinculoGrupoIdSeq++, tipo:'simple_400', columnas: restantes });
   renderVinculoGrupos();
 });
+
+// ---- Los cinco casilleros de «cómo se arma la caja de la columna» ----
+// Cada vez que se toca uno, se vuelve a dibujar el resumen de arriba para que el cambio se vea al
+// instante (cuántos portafusibles, cuántas borneras, qué fusibles). Los valores no se guardan
+// aparte: son inputs con id adentro de #viewCalculadora, así que ya viajan con el cómputo por
+// snapshotFormulario/restaurarFormulario, igual que el resto del formulario.
+['bpnCfgPf','bpnCfgGris','bpnCfgCeleste','bpnCfgVerde','bpnCfgVerdeFinal'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('input', ()=>{ try{ actualizarVinculoGruposSummary(); pintarBpnCfgResumen(); }catch(e){} });
+});
+function pintarBpnCfgResumen(){
+  const el = document.getElementById('bpnCfgResumen');
+  if(!el) return;
+  const c = bpnColCfg();
+  const esPRFV = (document.getElementById('vincTipoCol')||{}).value === 'PRFV';
+  const def = (c.pf===BPN_COL_DEF.pf && c.gris===BPN_COL_DEF.gris && c.celeste===BPN_COL_DEF.celeste
+               && c.verde===BPN_COL_DEF.verde && c.verdeFinal===BPN_COL_DEF.verdeFinal);
+  el.innerHTML = !esPRFV
+    ? 'La columna elegida es <b>metálica</b>: estas cantidades no se aplican. En metálica va 1 portafusible y 1 bornera de fase y de neutro por luminaria real, y la tierra de a 2 cables por bornera.'
+    : `Cada columna lleva <b>${c.pf} portafusible${c.pf===1?'':'s'}</b>, <b>${c.gris} gris</b>, <b>${c.celeste} celeste</b> y <b>${c.verde} verde</b> — <b>${c.verdeFinal} verdes</b> si es final de circuito.` +
+      (def ? '' : ' <b style="color:#c77b18">Cambiado respecto de la forma de armado actual.</b>');
+}
+(function(){
+  const b = document.getElementById('bpnCfgResetBtn');
+  if(!b) return;
+  b.addEventListener('click', ()=>{
+    const v = { bpnCfgPf:BPN_COL_DEF.pf, bpnCfgGris:BPN_COL_DEF.gris, bpnCfgCeleste:BPN_COL_DEF.celeste,
+                bpnCfgVerde:BPN_COL_DEF.verde, bpnCfgVerdeFinal:BPN_COL_DEF.verdeFinal };
+    Object.keys(v).forEach(id=>{ const el = document.getElementById(id); if(el) el.value = v[id]; });
+    try{ actualizarVinculoGruposSummary(); pintarBpnCfgResumen(); }catch(e){}
+  });
+})();
+try{
+  const tc = document.getElementById('vincTipoCol');
+  if(tc) tc.addEventListener('change', ()=>{ try{ pintarBpnCfgResumen(); }catch(e){} });
+  pintarBpnCfgResumen();
+}catch(e){}
 
 // ============================================================
 // UI: poblar selects dependientes
@@ -5238,12 +5440,13 @@ const ACTIVIDADES_CATALOGO = [
 
   { id:'bpn', label:'Conexionado de bornera BPN', pasos:
 `1) Instalar el bloque BPN con sus 3 grupos: FASE (gris), NEUTRO (celeste), TIERRA (verde).
+1a) Cantidades por columna PRFV: 2 portafusibles, 3 borneras GRISES (fase), 3 CELESTES (neutro) y 2 VERDES (tierra). Si la columna es FINAL DE CIRCUITO — la última del circuito, la que no sigue a otra — van 3 VERDES.
 1b) En columnas de PRFV — de 7 m, de 10 m, cualquiera sea la altura libre — las BPN de NEUTRO (celeste) y de TIERRA (verde) son SIEMPRE de 6 mm², sin importar el calibre del cable que llega (ítem 63). La de FASE (gris) sí acompaña el calibre del cable.
 2) Colocar el separador entre el grupo FASE y el grupo NEUTRO+TIERRA.
 3) Engarzar la puntera terminal TIFF correspondiente (mismo calibre que el cable) en cada punta antes de fijarla a la BPN o al portafusible (el cable entra primero a la BPN y de ahí sale hacia el portafusible). Si el circuito continúa a otra columna, usar puntera TIFF doble en ese punto.
 4) Verificar el esquema de conexión a tierra del proyecto antes de puentear: TN-C permite puentear NEUTRO+TIERRA juntos; TN-S los exige separados (no puentear en ese caso).
 5) Si corresponde TN-C: puentear NEUTRO y TIERRA con el puente fijo, cortado del peine a la medida necesaria (ej. 5 elementos de un peine de 10, para 3 neutro + 2 tierra) — la FASE nunca se puentea.
-6) Conectar cada portafusible con su fusible cerámico de 2A.
+6) Poner el fusible en cada portafusible: 2 A POR ARTEFACTO, repartido entre los dos portafusibles de la columna. Vínculo simple: uno de 2 A (el otro portafusible queda armado, sin fusible). Doble: 2 A + 2 A. Triple: 2 A + 4 A. Cuádruple: 4 A + 4 A. Cartucho cilíndrico 10 × 38 mm, que es la medida de la tabaquera.
 7) Verificar el ajuste de todos los bornes antes de energizar.` },
 
   { id:'base_tablero_nivel', label:'Base de tablero a nivel (mampostería)', pasos:
@@ -10275,29 +10478,44 @@ function calcular(){
     // Portafusible: en columnas PRFV se deja SIEMPRE la caja de conexión completa (3 posiciones),
     // independientemente de la cantidad real de luminarias (y del vínculo de cada grupo). En metálicas,
     // 1 por luminaria real.
-    const totalPortafusibles = vincTipo === 'PRFV' ? vincCant * PORTAFUSIBLES_FIJOS_PRFV : totalLuminarias;
+    // Cantidades por columna: en PRFV salen de los cinco casilleros editables de la sección Vínculos
+    // (por defecto 2 portafusibles · 3 grises · 3 celestes · 2 verdes, 3 si es final de circuito).
+    const cfgCaja = bpnColCfg();
+    const totalPortafusibles = vincTipo === 'PRFV' ? vincCant * cfgCaja.pf : totalLuminarias;
 
-    // Bornera BPN — cantidades confirmadas por el usuario contra armado real:
-    //  · FASE y NEUTRO: viven en el mismo bloque fijo de conexión que los portafusibles. En PRFV son
-    //    SIEMPRE 3 (fijo, igual que los portafusibles — no varía con la cantidad real de luminarias del
-    //    vínculo, confirmado por el usuario 2026-08-12). En Metálica, 1 por luminaria real (no hay caja fija).
-    //  · TIERRA: se agrupa de a 2 (máx. 2 cables por BPN), incluyendo el cable de entrada: ceil((1+lum)/2)
-    //    — esto SÍ depende de la cantidad real de luminarias, es un bloque distinto al de fase/neutro.
+    // ---- Bornera BPN — armado nuevo confirmado por el usuario con foto de obra (2026-09-04) ----
+    // En PRFV las tres cantidades salen de los casilleros editables (por defecto 3 grises, 3 celestes,
+    // 2 verdes) y la VERDE tiene una excepción: la última columna de cada circuito —el final de
+    // circuito— lleva una más (3). En Metálica no cambia nada: 1 de fase y 1 de neutro por luminaria
+    // real, y la tierra agrupada de a 2 cables por bornera, ceil((1+lum)/2).
     // Se calcula por grupo de vínculo (cada grupo puede tener un lum distinto) y se suman los totales.
     // El calibre sale del tramo real de cableado (si esa sección está activa) o del selector manual (fallback).
     // Puente fijo (peine ZOLODA de 10 elementos, se corta a medida): NO se puentea la FASE (cada fase va
     // individual a su propio portafusible); NEUTRO y TIERRA se puentean juntos en un solo puente (esquema TN-C).
     // Separador para borne BPN: 1 pieza por columna, divide físicamente el grupo FASE del grupo NEUTRO+TIERRA.
     let totalBpnFase = 0, totalBpnNeutro = 0, totalBpnTierra = 0, colsVinculoTotal = 0;
+    const fusiblesPorAmp = {};   // { 2: cantidad de fusibles de 2 A, 4: ... }
     gruposVinculo.forEach(g=>{
       const v = VINCULOS.find(x=>x.id===g.tipo);
       if(!v) return;
-      const faseNeutroPorCol = bpnFaseNeutroPorColumna(vincTipo, v.lum);
-      totalBpnFase += g.columnas * faseNeutroPorCol;
-      totalBpnNeutro += g.columnas * faseNeutroPorCol;
-      totalBpnTierra += g.columnas * Math.ceil((1 + v.lum) / BPN_MAX_CABLES);
+      totalBpnFase   += g.columnas * bpnGrisPorColumna(vincTipo, v.lum);
+      totalBpnNeutro += g.columnas * bpnCelestePorColumna(vincTipo, v.lum);
+      if(vincTipo === 'PRFV') totalBpnTierra += g.columnas * cfgCaja.verde;
+      else                    totalBpnTierra += g.columnas * Math.ceil((1 + v.lum) / BPN_MAX_CABLES);
+      // Fusible: 2 A por artefacto, repartido entre los portafusibles de esa columna.
+      if(vincTipo === 'PRFV'){
+        fusiblesDeColumna(v.lum, cfgCaja.pf).forEach(a=>{ fusiblesPorAmp[a] = (fusiblesPorAmp[a]||0) + g.columnas; });
+      }
       colsVinculoTotal += g.columnas;
     });
+    // La tercera verde del final de circuito se suma UNA vez para toda la plaza (los finales son de
+    // la plaza, no de cada grupo de vínculo: repartirlos por grupo los contaría dos veces).
+    let finalesDeCircuito = 0;
+    const circuitosExactos = circuitosSonReales();
+    if(vincTipo === 'PRFV'){
+      finalesDeCircuito = Math.max(0, Math.min(colsVinculoTotal, circuitosDeLaPlaza()));
+      totalBpnTierra += finalesDeCircuito * (cfgCaja.verdeFinal - cfgCaja.verde);
+    }
     const PUENTE_ELEMENTOS = 10; // el peine puente viene de a 10 elementos y se corta a la medida necesaria
 
     // ---- Cuántos peines hacen falta de verdad (corregido 2026-08-28) ----
@@ -10312,7 +10530,12 @@ function calcular(){
     gruposVinculo.forEach(g=>{
       const v = VINCULOS.find(x=>x.id===g.tipo);
       if(!v || !g.columnas) return;
-      const elemPorCol = bpnFaseNeutroPorColumna(vincTipo, v.lum) + Math.ceil((1 + v.lum) / BPN_MAX_CABLES);
+      // El peine une NEUTRO + TIERRA (la fase nunca se puentea): son los elementos de una tira.
+      // Se toma el caso más grande —la columna de final de circuito, con una verde de más— para no
+      // quedarse corto de peine en esas columnas.
+      const elemPorCol = bpnCelestePorColumna(vincTipo, v.lum) +
+        (vincTipo === 'PRFV' ? Math.max(cfgCaja.verde, cfgCaja.verdeFinal)
+                             : Math.ceil((1 + v.lum) / BPN_MAX_CABLES));
       const tirasPorPeine = Math.max(1, Math.floor(PUENTE_ELEMENTOS / elemPorCol));
       const peines = Math.ceil(g.columnas / tirasPorPeine);
       puentesTotales += peines;
@@ -10465,10 +10688,29 @@ function calcular(){
     const itemsLum = [
       ...(avisoColumnasDescuadradas ? [{desc:avisoColumnasDescuadradas, cant:'—', un:'—', ref:'Control de carga'}] : []),
       {...M(3053, vincTipo==='PRFV'
-        ? 'en la caja de conexión fija de 3 posiciones de la columna PRFV'
+        ? `en la caja de conexión de la columna PRFV (${cfgCaja.pf} por columna)`
         : 'protección individual, 1 por luminaria'),
        cant:totalPortafusibles, un:'Un.', ref:'Ítem 69 / 15.19'},
-      {...M(3014,'1 por portafusible'), cant:totalPortafusibles, un:'Un.', ref:'Ítem 68 / 15.18'},
+      // ---- Fusibles (2026-09-04) ----
+      // Antes salía «1 fusible por portafusible», todos iguales. Ahora la regla es 2 A POR ARTEFACTO
+      // repartido entre los portafusibles de esa columna, así que en una misma plaza conviven medidas
+      // distintas: un vínculo triple da un fusible de 4 A y uno de 2 A. Por eso se emite una línea por
+      // amperaje y no una sola con el total.
+      // El código del pañol cambió de 3014 («Fusible cerámico 8,5 × 31,5 mm, 2 A») a 3017 («Fusible
+      // cilíndrico 10 × 38 mm, 2 A»): el portafusible que se computa es la tabaquera 10 × 38 (ítem 3053,
+      // ZOLODA BMFN 10×38 en la foto de obra), y el cartucho de 8,5 × 31,5 no entra ahí. El de 4 A en
+      // medida 10 × 38 todavía no está cargado en el pañol — sale sin código y avisado.
+      ...(vincTipo === 'PRFV'
+        ? Object.keys(fusiblesPorAmp).sort((a,b)=>a-b).map(a=>{
+            const cant = fusiblesPorAmp[a];
+            const cod = ({2:3017, 1:3016})[a];
+            return cod
+              ? {...M(cod, `${a} A — 2 A por artefacto, repartido entre los portafusibles de la columna`),
+                 cant, un:'Un.', ref:'Ítem 68 / 15.18'}
+              : {desc:`Fusible cilíndrico 10 × 38 mm, ${a} A — 2 A por artefacto, repartido entre los portafusibles de la columna. <b>Falta cargarlo en el catálogo del pañol</b>`,
+                 cant, un:'Un.', ref:'Ítem 68 / 15.18 · sin código de pañol'};
+          })
+        : [{...M(3014,'1 por portafusible'), cant:totalPortafusibles, un:'Un.', ref:'Ítem 68 / 15.18'}]),
       // Puntera terminal TIFF (nombre correcto confirmado por el usuario 2026-08-13 — no es un terminal
       // ojal/anillo, es la puntera/ferrule que se engarza en la punta del cable antes de fijarla bajo el
       // tornillo de la BPN o del portafusible). El cable entra primero a la BPN y de ahí sale hacia el
@@ -10525,6 +10767,13 @@ function calcular(){
       itemsLum.push({...M(2027, `se corta a medida · una tira continua por columna, no se reparte entre columnas${puenteNota}${nota}`), cant:puentesTotales, un:'Un.', ref:'Criterio de campo'});
       itemsLum.push({...M(2041, `divide grupo FASE del grupo NEUTRO+TIERRA (1 por columna)${nota}`), cant:ntAcum.columnas, un:'Un.', ref:'Criterio de campo'});
       itemsLum.push({desc:`— En columnas <b>PRFV</b> (7 o 10 m) las borneras <b>celeste (neutro) y verde (tierra) se piden siempre de 6 mm²</b>, cualquiera sea el calibre del troncal. Solo la de <b>fase (gris)</b> sigue la sección del cable de ese tramo`, cant:'—', un:'—', ref:'Criterio de compra confirmado'});
+      // Cómo se armó la caja, escrito en el cómputo: si mañana alguien mira este papel tiene que poder
+      // reconstruir de dónde salieron las cantidades sin abrir la herramienta.
+      itemsLum.push({desc:`— <b>Armado de la caja de columna</b>: ${cfgCaja.pf} portafusible${cfgCaja.pf===1?'':'s'}, ${cfgCaja.gris} bornera${cfgCaja.gris===1?'':'s'} gris (fase), ${cfgCaja.celeste} celeste (neutro) y ${cfgCaja.verde} verde (tierra) por columna. ${finalesDeCircuito===1?'La':'Las'} <b>${finalesDeCircuito} columna${finalesDeCircuito===1?'':'s'} de final de circuito</b> lleva${finalesDeCircuito===1?'':'n'} ${cfgCaja.verdeFinal} verdes en vez de ${cfgCaja.verde}` +
+        (circuitosExactos
+          ? ' — los finales salen de los circuitos cargados en la sección Cableado'
+          : ' — ⚠️ los finales salen del casillero «Circuitos» cargado a mano; encendé «Cableado por circuitos» para que sea exacto'),
+        cant:'—', un:'—', ref:'Editable en la sección Vínculos'});
     }
     // Punteras TIFF de BPN: 2 por cada BPN (fase+neutro+tierra) — la punta que entra desde el troncal y
     // la que sale hacia el portafusible/puente (confirmado por el usuario 2026-08-13). Van agrupadas por
@@ -10606,13 +10855,36 @@ function calcular(){
       mlPorCalibre[label] = (mlPorCalibre[label]||0) + (t.ml||0);
       gananciaPorCalibre[label] = (gananciaPorCalibre[label]||0) + (gananciaPorTramo[i]||0);
     });
+    // ---- Cómo se muestra la ganancia (corregido 2026-09-04) ----
+    // El usuario: *"te sale la subida, la cantidad, y no se entiende si ya se tomó la suma al cable
+    // total o no. O directamente no la pongas, y en la descripción de cada cable poné: ya se
+    // contempló x cantidad de cable para subida y bajada de columnas"*. Tenía razón: los metros de
+    // cada cable YA traían la ganancia sumada, pero además salía un recuadro suelto arriba que decía
+    // «114 m de ganancia», y ese número parecía material aparte para pedir. Se sacó el recuadro y
+    // ahora cada cable dice, en su propia descripción, que el total ya la incluye y cuánto es.
+    const subidasTotalesCircuitos = (()=>{
+      let n = 0;
+      (circuitos||[]).forEach(c=>{
+        const pts = c.puntos.filter(p=>p.calibre);
+        pts.forEach((p,i)=>{
+          if(!p.esColumna) return;
+          n += 1;                                       // el cable que llega y sube
+          if(pts[i+1] && pts[i+1].calibre) n += 1;      // y el que baja y sigue a la próxima
+        });
+      });
+      return n;
+    })();
     const itemsCable = Object.entries(mlPorCalibre).map(([label, ml])=>{
       const g = gananciaPorCalibre[label] || 0;
       // Cada calibre de troncal es un producto distinto del pañol — enlace por código (2026-08-27).
       const COD_TRONCAL = {'4×2,5 mm²':1009, '4×4 mm²':1010, '4×6 mm²':1011, '4×10 mm²':1007};
       const cod = COD_TRONCAL[label];
       const detalle = `troncal subterráneo · F: gris · N: celeste · T: verde`
-          + (g > 0 ? ` · ${fmt(ml,0)} m de zanja + ${fmt(g,0)} m de ganancia por subidas` : '');
+          + (g > 0
+              ? ` · <b>estos ${fmt(ml+g,0)} m ya contemplan ${fmt(g,0)} m para la subida y bajada del cable en las columnas</b>`
+                + (subidasTotalesCircuitos ? ` (la plaza tiene ${subidasTotalesCircuitos} subidas y bajadas)` : '')
+                + ` — ${fmt(ml,0)} m de zanja + ${fmt(g,0)} m por las columnas. No hay que sumarle nada más`
+              : '');
       return {
         ...(cod ? M(cod, detalle) : {desc:`Cable Cu XLPE/PVC ${label} — ${detalle}`}),
         cant: ml + g, un:'m', ref:'IRAM 2178-1 / IEC 60502-1'
@@ -10637,7 +10909,9 @@ function calcular(){
         detalleSubidas.push(`${subidas}×${fmt(mPorSubida,1)} m (${v.label.split('—')[0].trim()}, brazo ${v.brazo})`);
       });
       itemsCable.push({
-        ...M(6001, `F: gris · N: celeste · T: verde · ${subidasTotales} subida(s): ${detalleSubidas.join(' + ')}`),
+        // Se dice «tiradas» y no «subidas» para no confundirlo con la subida del troncal por la
+        // columna, que no es material aparte: éste sí es un cable distinto, que se compra aparte.
+        ...M(6001, `F: gris · N: celeste · T: verde · <b>cable aparte, uno por artefacto</b> · ${subidasTotales} tirada(s): ${detalleSubidas.join(' + ')}`),
         cant:cableInternoMl, un:'m', ref:`${CABLE_SUBIDA_M} m por artefacto (medida de campo, sobrante incluido)`
       });
       cableSubidaTotalMl = cableInternoMl;
@@ -10677,25 +10951,16 @@ function calcular(){
       const g = gananciaPorCalibre[label] || 0;
       tiles.push({num:fmt(ml + g, 0), lbl:`m de ${label}`});
     });
-    // El cable de subida a la luminaria es otro calibre más y también se compra aparte.
+    // El cable columna → luminaria es otro calibre más y también se compra aparte. Se lo llamaba
+    // «(subida)» y se confundía con la ganancia por subir el troncal por la columna, que es otra
+    // cosa y NO se pide aparte: ahora dice «a la luminaria», que es lo que realmente es.
     if(vincOn && gruposVinculoActivos.length && cableSubidaTotalMl > 0){
-      tiles.push({num:fmt(cableSubidaTotalMl, 0), lbl:'m de 3×1,5 mm² (subida)'});
+      tiles.push({num:fmt(cableSubidaTotalMl, 0), lbl:'m de 3×1,5 mm² (a la luminaria)'});
     }
-    // Total de ganancia y cantidad de subidas, contadas sobre la cadena real de cada circuito
-    // (antes salían de la fórmula global 2×columnas − circuitos).
-    const gananciaTotalM = gananciaPorTramo.reduce((a,b)=>a+b, 0);
-    let subidasContadas = 0;
-    (circuitos||[]).forEach(c=>{
-      const pts = c.puntos.filter(p=>p.calibre);
-      pts.forEach((p,i)=>{
-        if(!p.esColumna) return;
-        subidasContadas += 1;
-        if(pts[i+1] && pts[i+1].calibre) subidasContadas += 1;
-      });
-    });
-    if(gananciaTotalM > 0){
-      tiles.push({num:fmt(gananciaTotalM,0), lbl:`m de ganancia (${subidasContadas} subidas)`});
-    }
+    // El recuadro suelto «m de ganancia (N subidas)» se sacó a pedido del usuario: esos metros ya
+    // están adentro de los metros de cada calibre de acá arriba, y verlos aparte hacía pensar que
+    // eran cable extra para pedir. Lo que dice cuánto es y que ya está sumado ahora es la
+    // descripción de cada cable en el listado de materiales.
   }
 
   // ---------------- Obra civil ----------------
