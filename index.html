@@ -3165,10 +3165,7 @@
       </div>
       <div class="nota-epec">
         <b>Este es el itemizado con el que se cobra</b>: el ANEXO I de la Nota Aclaratoria N° 1 del pliego de EPEC.
-        Los ítems <b>1 a 82</b> son los mismos que los del pliego de la Municipalidad —coinciden uno por uno—,
-        así que la cantidad se carga <b>una sola vez</b> y sirve para los dos. Los <b>83.1 a 89</b> son propios
-        de este pliego. Todo se carga acá: se pueden traer las cantidades de la Calculadora o agregarlas de a una,
-        en cada plaza, abajo de su tabla.
+        En cada plaza podés <b>traer las cantidades de la Calculadora</b> o cargarlas de a una.
       </div>
     </div>
 
@@ -17863,9 +17860,7 @@ const ITEMIZADO_EPEC = [
         h += `<tr data-vid="${esc(f.ref.id)}" data-plaza="${esc(a.id)}" data-propio="${f.propio?1:0}">
           <td>
             <b>Ítem ${esc(it.id)} — ${esc(it.desc)}</b>
-            <div class="it-cat">${esc(it.cat)}${f.propio
-              ? ' · <span class="it-badge" title="Ítem 83.1 a 89, «provisión de materiales en caso de eventualidad». Existe SOLO en el pliego de EPEC: no tiene equivalente en el de la Municipalidad, así que esta cantidad vale únicamente para este pliego.">propio de este pliego</span>'
-              : ' · <span class="it-badge" title="Ítem 1 a 82: es el mismo ítem en el pliego de la Municipalidad y en el Anexo I de EPEC, y coinciden uno por uno. Por eso la cantidad se carga UNA SOLA VEZ y vale para los dos pliegos: no hay que cargarla dos veces ni se pueden desincronizar. Lo que cambia entre uno y otro es el precio, no la cantidad.">cantidad compartida</span>'}</div>
+            <div class="it-cat">${esc(it.cat)}</div>
             ${notaItemHtml(it.id, it)}
           </td>
           <td class="qty"><b>${fmt(it.k,2)}</b><div class="it-un">/ ${esc(it.un)}</div></td>
@@ -17874,7 +17869,7 @@ const ITEMIZADO_EPEC = [
           <td class="qty">${fmtK(cant*it.k)}${epecBase>0?`<div class="ep-pesos">${plata(cant*it.k*baseEf())}</div>`:''}</td>
           <td class="qty">${fmtK(cav*it.k)}${epecBase>0?`<div class="ep-pesos">${plata(cav*it.k*baseEf())}</div>`:''}</td>
           <td class="qty" style="color:${colorPct(pct)}"><b>${pct}%</b></td>
-          <td class="no-print"><button type="button" class="tramo-remove ep-quitar" title="${f.propio?'Quitar este ítem de esta plaza':'Quitar este ítem de esta plaza (es cantidad compartida: vale para los dos pliegos)'}" ${dis}>×</button></td>
+          <td class="no-print"><button type="button" class="tramo-remove ep-quitar" title="Quitar este ítem de esta plaza" ${dis}>×</button></td>
         </tr>`;
       });
       const c = cuentasEpec(a);
@@ -17905,7 +17900,7 @@ const ITEMIZADO_EPEC = [
       <input type="number" min="0" step="any" class="ep-nuevo-cant" placeholder="Cantidad" ${dis}>
       <button type="button" class="btn-auto ep-nuevo-btn" style="margin:0;" ${dis}>+ Agregar a esta plaza</button>
     </div>
-    <div class="hint" style="margin-top:6px;">Se pueden agregar los <b>92 ítems</b> del pliego. Los <b>1 a 82</b> son la cantidad compartida; los <b>83.1 a 89</b>, propios de este pliego.</div>
+    <div class="hint" style="margin-top:6px;">Se pueden agregar los <b>92 ítems</b> del ANEXO I. Los <b>83.1 a 89</b> son de provisión de materiales en caso de eventualidad: van solo si esos materiales los pone la contratista.</div>
     <div class="hint ep-msg" style="margin-top:6px;"></div>`;
     h += bloqueSinItemHtml(a, dis);
     h += `</div>`;
@@ -17914,14 +17909,17 @@ const ITEMIZADO_EPEC = [
 
   // Un solo selector con TODO el pliego (2026-09-06). Al sacarse la pestaña del itemizado de la
   // Municipalidad, los ítems 1 a 82 también se tienen que poder agregar desde acá; antes solo se
-  // podían agregar allá. Se separan en dos grupos para que se vea de dónde sale cada cantidad:
-  // los 1 a 82 son la cantidad compartida, los 83.1 a 89 son propios de este pliego.
+  // podían agregar allá. Se separan en dos grupos por lo que SON, que es lo único que le importa a
+  // quien carga: los 1 a 82 son obra ejecutada, los 83.1 a 89 son provisión de materiales en caso
+  // de eventualidad. Adentro siguen guardándose en listas distintas (`valorItems` /
+  // `valorItemsEpec`), pero eso ya no se muestra: con un solo itemizado a la vista, distinguirlo en
+  // pantalla solo confundía.
   function opcionesTodoElPliegoHTML(){
     const norm = ITEMIZADO_EPEC.filter(it=>!esEventualidad(it.id));
     const ev   = ITEMIZADO_EPEC.filter(it=> esEventualidad(it.id));
     const op = it=>`<option value="${esc(it.id)}">Ítem ${esc(it.id)} — ${esc(it.desc)} (${esc(it.un)}, ${fmt(it.k,2)} K)</option>`;
     return '<option value="">— Elegí el ítem que querés agregar —</option>'
-      + `<optgroup label="Ítems 1 a 82 — del pliego (cantidad compartida)">${norm.map(op).join('')}</optgroup>`
+      + `<optgroup label="Ítems 1 a 82 — obra">${norm.map(op).join('')}</optgroup>`
       + `<optgroup label="Ítems 83.1 a 89 — provisión en caso de eventualidad">${ev.map(op).join('')}</optgroup>`;
   }
 
@@ -17978,7 +17976,7 @@ const ITEMIZADO_EPEC = [
           // Municipalidad, porque es el mismo dato. Por eso se pregunta antes.
           const v = (a.valorItems||[]).find(x=>String(x.id)===tr.dataset.vid);
           const it = v ? itemEpec(v.itemPliego) : null;
-          if(!confirm(`¿Sacar el ítem ${it?it.id:''} de esta plaza?\n\nEs una cantidad compartida: el mismo ítem existe en el pliego de la Municipalidad y en el de EPEC, así que se saca para los dos.`)) return;
+          if(!confirm(`¿Sacar el ítem ${it?it.id:''} de esta plaza?`)) return;
           a.valorItems = (a.valorItems||[]).filter(x=>String(x.id)!==tr.dataset.vid);
         }
         if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
