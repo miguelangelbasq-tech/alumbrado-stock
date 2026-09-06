@@ -1117,6 +1117,63 @@
   .acceso-titulo{ font-size:13.5px; font-weight:700; color:var(--text); }
   .acceso-sub{ font-size:11px; color:var(--text-soft); }
 
+  /* ---------- TARJETAS PLEGABLES (2026-09-06) ----------
+     Pedido del usuario: *"deberíamos tener el botón desplegable porque hay varias partes en el
+     itemizado"*. El Itemizado 2026 tiene cinco bloques largos uno abajo del otro; ahora cada uno se
+     abre y se cierra, y lo que quedó cerrado tampoco sale al imprimir. La elección de cada uno se
+     recuerda en esta computadora. */
+  .card.plegable > h2, .card.plegable > .card-header-row > h2{ cursor:pointer; user-select:none; }
+  .pleg-btn{
+    margin-left:auto; flex:none; border:1px solid var(--line); background:#fff; border-radius:999px;
+    padding:3px 11px; font-size:11px; font-weight:700; color:var(--text-soft); cursor:pointer;
+    display:inline-flex; align-items:center; gap:5px; line-height:1.3; white-space:nowrap;
+  }
+  .pleg-btn:hover{ border-color:var(--teal-dark); color:var(--teal-dark); }
+  .pleg-btn .pleg-flecha{ font-size:9px; }
+  .card.plegable > h2{ display:flex; align-items:center; gap:8px; }
+  .card.plegable.cerrado > *:not(h2):not(.card-header-row){ display:none !important; }
+  /* Con la parte cerrada, los botones propios del encabezado (ej. «Imprimir») no tienen sobre qué
+     actuar, así que se esconden y queda solo el de mostrar. */
+  .card.plegable.cerrado > .card-header-row > *:not(h2):not(.pleg-btn){ display:none !important; }
+  .card.plegable.cerrado{ padding-bottom:14px; }
+  .card.plegable.cerrado > h2, .card.plegable.cerrado > .card-header-row{ margin-bottom:0; }
+  @media print{
+    .card.plegable.cerrado > *:not(h2):not(.card-header-row){ display:none !important; }
+    .pleg-btn{ display:none !important; }
+  }
+
+  /* ---------- RESUMEN DE LA LICITACIÓN (2026-09-06) ---------- */
+  .res-caja{
+    max-width:900px; margin:0 auto 20px; background:#fff; border:1px solid var(--border);
+    border-radius:16px; padding:16px 18px 14px; box-shadow:var(--sombra-sm);
+  }
+  .res-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:13px; }
+  .res-tit{ font-size:14px; font-weight:800; color:var(--navy); display:flex; align-items:center; gap:8px; }
+  .res-tiles{ display:grid; grid-template-columns:repeat(4, 1fr); gap:13px; }
+  .res-tile{ border-left:3px solid var(--border); padding-left:11px; min-width:0; }
+  .res-tile.res-plata{ border-left-color:var(--teal); }
+  .res-n{ font-size:21px; font-weight:800; color:var(--navy); line-height:1.15;
+    font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+  .res-de{ font-size:14px; font-weight:700; color:var(--text-soft); }
+  .res-l{ font-size:11.5px; font-weight:700; color:var(--text-soft); text-transform:uppercase;
+    letter-spacing:.02em; margin-top:3px; }
+  .res-x{ font-size:11px; color:var(--text-soft); margin-top:3px; line-height:1.35; }
+  .res-barra{ height:7px; border-radius:999px; background:var(--bg-soft); margin-top:14px; overflow:hidden; }
+  .res-barra-fill{ height:100%; border-radius:999px; background:var(--teal); transition:width .3s; }
+  .res-pie{ margin-top:11px; display:flex; flex-direction:column; gap:6px; font-size:12px; line-height:1.45; }
+  .res-lic{ color:var(--text-soft); }
+  .res-lic b{ color:var(--navy); }
+  .res-fuera{ color:#7a5c00; background:#fff8e6; border-left:3px solid #e0a800;
+    border-radius:0 6px 6px 0; padding:6px 10px; }
+  .res-enc{ color:var(--teal-dark); background:rgba(13,148,136,.08); border-left:3px solid var(--teal-dark);
+    border-radius:0 6px 6px 0; padding:6px 10px; }
+  .res-vacio{ font-size:12.5px; color:var(--text-soft); line-height:1.5; }
+  @media (max-width:760px){
+    .res-tiles{ grid-template-columns:repeat(2, 1fr); gap:14px 12px; }
+    .res-n{ font-size:18px; }
+    .res-head{ flex-wrap:wrap; }
+  }
+
   /* ---------- CHIPS DE FILTRO ---------- */
   .inicio-chips{
     display:flex; gap:8px; flex-wrap:wrap; max-width:900px; margin:0 auto 18px;
@@ -1725,6 +1782,22 @@
   }
   .it-badge{ background:rgba(56,189,248,.14); color:var(--teal-dark); border-radius:999px;
              padding:1px 7px; font-size:10.5px; font-weight:700; }
+  /* ---- «Ver» un ítem nombrado adentro de una explicación (2026-09-06) ---- */
+  .it-ref{
+    border:1px solid var(--teal); background:rgba(13,148,136,.09); color:var(--teal-dark);
+    border-radius:6px; padding:0 5px; margin:0 1px; font-size:inherit; font-family:inherit;
+    font-weight:800; cursor:pointer; line-height:1.35; display:inline;
+  }
+  .it-ref:hover{ background:var(--teal-dark); color:#fff; border-color:var(--teal-dark); }
+  .it-ver-caja{ max-width:520px; }
+  .it-ver-num{ font-size:12px; font-weight:800; color:var(--teal-dark); text-transform:uppercase;
+    letter-spacing:.03em; }
+  .it-ver-desc{ font-size:16px; font-weight:800; color:var(--navy); line-height:1.35; margin-top:3px; }
+  .it-ver-meta{ font-size:12px; color:var(--text-soft); margin-top:5px; line-height:1.5; }
+  .it-ver-meta b{ color:var(--navy); }
+  .it-ver-caja .it-exp-l{ font-size:12px; }
+  @media print{ #itVerFondo{ display:none !important; } .it-ref{ border:none; background:none; color:inherit; padding:0; } }
+
   /* ---- Trabajos sin ítem en el pliego (2026-09-06) ---- */
   .si-caja{ margin-top:14px; padding:12px 14px; border-radius:10px;
     background:#fdf6ec; border:1px solid #e8d5ae; }
@@ -2365,6 +2438,11 @@
   </div>
 
   <div class="inicio-accesos no-print" id="inicioAccesos"></div>
+
+  <!-- Resumen de la licitación (2026-09-06) — pedido del usuario: *"necesito que en Inicio, como
+       para ver rápido, me diga el total de las plazas ya realizadas, en el itemizado el total de
+       módulos y su precio, y otras cosas que veas importante y lógico ver"*. -->
+  <div id="inicioResumen"></div>
 
   <div class="inicio-chips no-print" id="inicioChips"></div>
 
@@ -3116,7 +3194,7 @@
        ============================================================ -->
   <div id="avPanelEpec" style="display:none;">
     <datalist id="siUnidades"><option value="Un."><option value="m"><option value="m²"><option value="m³"><option value="kg"><option value="h"><option value="día"><option value="gl"></datalist>
-    <div class="card">
+    <div class="card plegable" data-pleg="epecCab">
       <div class="card-header-row">
         <h2 style="margin:0;"><span class="dot"></span>Itemizado 2026 — con el que se cobra</h2>
         <button type="button" class="btn-ghost no-print" onclick="imprimir()">🖨 Imprimir</button>
@@ -3171,7 +3249,7 @@
 
     <div id="epecLista"></div>
 
-    <div class="card no-print">
+    <div class="card no-print plegable" data-pleg="epec244" data-pleg-def="cerrado">
       <h2><span class="dot"></span>Las 244 plazas de la licitación</h2>
       <div class="hint" style="margin-top:0;">Es el <b>ANEXO VI</b> del pliego, tal cual: número de orden, ID de plaza, barrio, renglón y coordenadas.
         Es el <b>catálogo de la licitación</b>, no las obras cargadas — una plaza de acá recién existe como obra cuando se le calcula el cómputo
@@ -3181,7 +3259,7 @@
       <div id="epecLicLista"></div>
     </div>
 
-    <div class="card" id="cardHechas">
+    <div class="card plegable" id="cardHechas" data-pleg="epecHechas" data-pleg-def="cerrado">
       <div class="card-header-row">
         <h2 style="margin:0;"><span class="dot"></span>Las 36 plazas ya ejecutadas</h2>
         <button type="button" class="btn-ghost no-print" onclick="imprimir()">🖨 Imprimir</button>
@@ -3199,7 +3277,7 @@
       <div id="hechasLista"></div>
     </div>
 
-    <div class="card" id="cardCobertura">
+    <div class="card plegable" id="cardCobertura" data-pleg="epecCobertura" data-pleg-def="cerrado">
       <div class="card-header-row">
         <h2 style="margin:0;"><span class="dot"></span>Control de cobertura — qué se cobra y qué no</h2>
         <button type="button" class="btn-ghost no-print" onclick="imprimir()">🖨 Imprimir</button>
@@ -3214,7 +3292,7 @@
       <div id="cobResultado"></div>
     </div>
 
-    <div class="card no-print">
+    <div class="card no-print plegable" data-pleg="epecTablaK" data-pleg-def="cerrado">
       <h2><span class="dot"></span>La tabla de coeficientes completa</h2>
       <div class="hint" style="margin-top:0;">Los 92 ítems con su K, tal como figuran en el ANEXO I, y al lado lo que sale cada uno con el módulo cargado arriba. Es de consulta: no se edita.</div>
       <div class="it-buscador"><input type="text" id="epecBuscarItem" placeholder="Buscar un ítem por número o descripción…"></div>
@@ -14054,6 +14132,92 @@ function poblarParteObraDatalist(){
       </button>`).join('');
   }
 
+  // ==================================================================
+  // RESUMEN DE LA LICITACIÓN, ARRIBA DE TODO (2026-09-06)
+  // ==================================================================
+  // Pedido del usuario, textual: *"necesito que en Inicio, como para ver rápido, me diga el total
+  // de las plazas ya realizadas, en el itemizado el total de módulos y su precio, y otras cosas que
+  // veas importante y lógico ver"*.
+  //
+  // Qué se muestra y por qué:
+  //   · plazas TERMINADAS sobre las cargadas — es la pregunta de «cómo venimos»;
+  //   · módulos contratados y su precio — el itemizado entero de todas las plazas, sumado;
+  //   · certificado y % — lo que ya se puede cobrar, que es distinto de lo contratado;
+  //   · cuánto es eso contra la licitación COMPLETA (35.364 módulos) — para no perder la escala:
+  //     una plaza puede estar al 100 % y ser el 0,3 % del contrato;
+  //   · trabajos fuera del itemizado — plata que no está en ningún ítem y hay que reclamar aparte,
+  //     así no se olvida;
+  //   · plazas listas para encender — es lo único accionable hoy, va como aviso.
+  // Todo sale de las MISMAS funciones que usan las otras pantallas (calcularValorPlaza y el módulo
+  // del Itemizado 2026), así que no puede dar distinto de lo que se ve allá.
+  function renderResumen(){
+    const cont = document.getElementById('inicioResumen');
+    if(!cont) return;
+    const todas = obras();
+    const T = (typeof window.epecTotales === 'function') ? window.epecTotales() : { modulos:0, base:0, modulo:0, conIva:false };
+
+    let kTot = 0, kCert = 0, fuera = 0, conItems = 0;
+    todas.forEach(a=>{
+      const v = (typeof calcularValorPlaza === 'function') ? calcularValorPlaza(a) : { kTotal:0, kAvanzado:0 };
+      kTot += v.kTotal; kCert += v.kAvanzado;
+      if(v.kTotal > 0) conItems++;
+      (a.trabajosSinItem||[]).forEach(t=>{ fuera += (Number(t.cant)||0) * (Number(t.pu)||0); });
+    });
+    const terminadas = todas.filter(a=>grupoDePlaza(a) === 'finalizadas').length;
+    const enObra     = todas.filter(a=>grupoDePlaza(a) === 'ejecucion').length;
+    const paraEnc    = todas.filter(a=>grupoDePlaza(a) === 'encender').length;
+    const pct        = kTot > 0 ? Math.round(kCert / kTot * 100) : 0;
+    const pctLic     = T.modulos > 0 ? (kTot / T.modulos * 100) : 0;
+    const base       = T.base || 0;
+    const K2 = (v)=> fmt(v, 2) + ' K';
+    const $$ = (k)=> base > 0 ? formatMoney(k * base) : '—';
+
+    if(!todas.length){
+      cont.innerHTML = `<div class="res-caja"><div class="res-vacio">Todavía no hay ninguna plaza cargada en el tablero. Calculá una en <b>Cálculo</b> y registrala, o cargale los ítems en <b>Itemizado 2026</b>, y acá vas a ver el total de módulos y lo que se cobra.</div></div>`;
+      return;
+    }
+
+    let h = `<div class="res-caja">
+      <div class="res-head">
+        <div class="res-tit"><span class="dot"></span>Cómo venimos — licitación 2026 (LPE 5589)</div>
+        <button type="button" class="inicio-link no-print" onclick="mostrarVista('avance')">Ver el itemizado &rsaquo;</button>
+      </div>
+      <div class="res-tiles">
+        <div class="res-tile">
+          <div class="res-n">${terminadas}<span class="res-de"> / ${todas.length}</span></div>
+          <div class="res-l">plazas terminadas</div>
+          <div class="res-x">${enObra ? enObra + ' en ejecución' : 'ninguna en ejecución'}</div>
+        </div>
+        <div class="res-tile">
+          <div class="res-n">${K2(kTot)}</div>
+          <div class="res-l">módulos contratados</div>
+          <div class="res-x">${conItems} de ${todas.length} plaza(s) con ítems cargados</div>
+        </div>
+        <div class="res-tile res-plata">
+          <div class="res-n">${$$(kTot)}</div>
+          <div class="res-l">precio contratado</div>
+          <div class="res-x">${base > 0 ? `módulo ${formatMoney(base)}${T.conIva ? ' c/IVA' : ' s/IVA'}` : 'falta cargar el valor del módulo'}</div>
+        </div>
+        <div class="res-tile">
+          <div class="res-n">${$$(kCert)}</div>
+          <div class="res-l">ya certificado</div>
+          <div class="res-x">${K2(kCert)} · ${pct}% de lo contratado</div>
+        </div>
+      </div>
+      <div class="res-barra"><div class="res-barra-fill" style="width:${pct}%;"></div></div>`;
+
+    h += `<div class="res-pie">
+      <div class="res-lic">De la licitación entera llevamos cargados <b>${K2(kTot)}</b> de <b>${fmt(T.modulos,0)} módulos</b> — <b>${fmt(pctLic,2)}%</b> del contrato.</div>`;
+    if(fuera > 0){
+      h += `<div class="res-fuera">⚠ <b>${formatMoney(fuera)}</b> en trabajos fuera del itemizado, para reclamar aparte.</div>`;
+    }
+    if(paraEnc > 0){
+      h += `<div class="res-enc">💡 Hay <b>${paraEnc} plaza(s) listas para encender</b>.</div>`;
+    }
+    h += `</div></div>`;
+    cont.innerHTML = h;
+  }
+
   // ---- Los chips de filtro, con el conteo de cada uno ----
   function renderChips(){
     const cont = document.getElementById('inicioChips');
@@ -14119,6 +14283,7 @@ function poblarParteObraDatalist(){
   function renderInicio(){
     if(!document.getElementById('viewInicio')) return;
     renderAccesos();
+    renderResumen();
     renderChips();
     renderPlazas();
     renderBadgesNav();
@@ -17109,6 +17274,90 @@ const ITEMIZADO_EPEC = [
   // Dibuja el desplegable de un ítem. Contesta primero QUÉ ES el ítem —con su descripción completa,
   // unidad, coeficiente y precio— para no tener que ir a buscarlo a la tabla de abajo, y después,
   // si hay algo que aclarar, si coincide con lo que se pone en obra y con qué ítem se certifica.
+  // ---- «Ver» los ítems que se nombran adentro de una explicación (2026-09-06) ----
+  // Pedido del usuario, textual: *"cuando entrás al itemizado de una plaza te sale qué es el ítem,
+  // y luego «para el cobro: ítem...». Estaría bueno ahí poner ver y que te salga una ventana o algo
+  // para ver qué son esos ítems, porque no los sabés de memoria."*
+  //
+  // Las notas dicen cosas como «no se cobran aparte los ítems 74, 75, 77 ni 81». Ahora cada uno de
+  // esos números es un botoncito: se aprieta y se abre una ventana con qué es ese ítem, cómo se
+  // mide, su coeficiente y cuánto vale. Sin salir de donde estabas.
+  //
+  // El reemplazo se hace SOLO sobre el texto, nunca adentro de una etiqueta HTML: el `replace` de
+  // abajo parte la cadena en «etiquetas» y «texto», y toca únicamente lo segundo. Si no, un número
+  // que viviera dentro de un atributo rompería el HTML.
+  function marcarRefsItems(html){
+    const partes = String(html||'').match(/<[^>]*>|[^<]+/g) || [];
+    // Ojo con el `title`: NO puede decir «ítem 74», porque el propio botón volvería a caer bajo el
+    // patrón de más abajo y se marcaría a sí mismo. Por eso dice «este ítem», sin número detrás.
+    const boton = (n)=> itemEpec(n)
+      ? `<button type="button" class="it-ref" data-ver="${n}" title="Ver qué es este ítem">${n}</button>`
+      : n;
+    const marcarLista = (lista)=> lista.replace(/\d+(?:\.\d)?/g, boton);
+    // Una lista de ítems al principio del texto: pasa cuando el número quedó adentro de una
+    // negrita —«los ítems <b>1 a 4</b>»— y la etiqueta cortó la frase en dos.
+    const listaAlPrincipio = /^(\s*)((?:\d+(?:\.\d)?)(?:\s*(?:,|y|ni|o|a|hasta)\s*\d+(?:\.\d)?)*)/;
+    let esperando = false;
+    return partes.map(p=>{
+      if(p[0] === '<') return p;   // etiqueta: se deja igual, y NO corta la espera
+      let t = p;
+      if(esperando){
+        const m = t.match(listaAlPrincipio);
+        if(m && m[2]) t = m[1] + marcarLista(m[2]) + t.slice(m[0].length);
+      }
+      // Caso normal, todo en el mismo pedazo de texto: «ítem 42», «ítems 74, 75, 77 ni 81».
+      t = t.replace(/([íi]tems?\s+)((?:\d+(?:\.\d)?)(?:\s*(?:,|y|ni|o|a|hasta)\s*\d+(?:\.\d)?)*)/gi,
+        (todo, pre, lista)=> pre + marcarLista(lista));
+      // ¿Este pedazo termina en «ítem»/«ítems»? Entonces los números vienen después de la etiqueta.
+      // Se mira el texto ORIGINAL, no el ya marcado.
+      esperando = /[íi]tems?\s*$/i.test(p);
+      return t;
+    }).join('');
+  }
+
+  // La ventana. Se arma una sola vez y se reusa.
+  function verItemVentana(id){
+    const it = itemEpec(id);
+    if(!it) return;
+    let fondo = document.getElementById('itVerFondo');
+    if(!fondo){
+      fondo = document.createElement('div');
+      fondo.id = 'itVerFondo';
+      fondo.className = 'alta-fondo';
+      fondo.style.display = 'none';
+      fondo.innerHTML = `<div class="alta-caja it-ver-caja"><div id="itVerCuerpo"></div>
+        <div class="alta-acciones"><button type="button" class="btn-primary" id="itVerCerrar" style="width:auto; margin:0; padding:9px 18px;">Cerrar</button></div></div>`;
+      document.body.appendChild(fondo);
+      const cerrar = ()=>{ fondo.style.display = 'none'; };
+      fondo.addEventListener('click', (e)=>{ if(e.target === fondo) cerrar(); });
+      fondo.querySelector('#itVerCerrar').addEventListener('click', cerrar);
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && fondo.style.display !== 'none') cerrar(); });
+    }
+    const precio = epecBase > 0 ? ` · <b>${plata(it.k * baseEf())}</b>${ivaEncendido() ? ' c/IVA' : ' s/IVA'}` : '';
+    const n = NOTA_ITEM[String(it.id)];
+    let extra = '';
+    if(n){
+      const est = n.coincide === true ? '<span class="it-exp-est it-exp-ok">✓ Coincide con lo que se pone en obra</span>'
+                : n.coincide === false ? '<span class="it-exp-est it-exp-no">✗ NO coincide con lo que se pone en obra</span>'
+                : '<span class="it-exp-est it-exp-duda">? A definir con la Inspección</span>';
+      extra += `<div style="margin-top:9px;">${est}</div>`;
+      if(n.obra)   extra += `<div class="it-exp-l"><b>Lo que se pone en obra:</b> ${marcarRefsItems(n.obra)}</div>`;
+      if(n.item)   extra += `<div class="it-exp-l"><b>Con qué ítem se certifica:</b> ${marcarRefsItems(n.item)}</div>`;
+      if(n.cobro)  extra += `<div class="it-exp-l it-exp-plata"><b>Para el cobro:</b> ${marcarRefsItems(n.cobro)}</div>`;
+    }
+    fondo.querySelector('#itVerCuerpo').innerHTML = `
+      <div class="it-ver-num">Ítem ${esc(it.id)}</div>
+      <div class="it-ver-desc">${esc(it.desc)}</div>
+      <div class="it-ver-meta">${esc(it.cat)} · se mide por <b>${esc(it.un)}</b> · <b>${fmt(it.k,2)} K</b>${precio}</div>
+      ${extra}`;
+    fondo.style.display = 'flex';
+  }
+  // Un solo enganche para todos los botoncitos, estén donde estén (tabla, plaza o la propia ventana).
+  document.addEventListener('click', (e)=>{
+    const r = e.target.closest('.it-ref');
+    if(r){ e.preventDefault(); e.stopPropagation(); verItemVentana(r.dataset.ver); }
+  });
+
   function notaItemHtml(id, it){
     it = it || itemEpec(id);
     if(!it) return '';
@@ -17121,10 +17370,10 @@ const ITEMIZADO_EPEC = [
     let cuerpo = `<div class="it-exp-ficha">${esc(it.desc)}<div class="it-exp-meta">${esc(it.cat)} · se mide por <b>${esc(it.un)}</b> · <b>${fmt(it.k,2)} K</b>${precio}</div></div>`;
     cuerpo += `<div class="it-exp-est it-exp-${est.cls}">${est.cls==='ok'?'✓':(est.cls==='no'?'✗':'?')} ${est.txt}</div>`;
     if(n){
-      if(n.obra)   cuerpo += `<div class="it-exp-l"><b>Lo que se pone en obra:</b> ${n.obra}</div>`;
-      if(n.item)   cuerpo += `<div class="it-exp-l"><b>Con qué ítem se certifica:</b> ${n.item}</div>`;
-      if(n.porque) cuerpo += `<div class="it-exp-l"><b>Por qué:</b> ${n.porque}</div>`;
-      if(n.cobro)  cuerpo += `<div class="it-exp-l it-exp-plata"><b>Para el cobro:</b> ${n.cobro}</div>`;
+      if(n.obra)   cuerpo += `<div class="it-exp-l"><b>Lo que se pone en obra:</b> ${marcarRefsItems(n.obra)}</div>`;
+      if(n.item)   cuerpo += `<div class="it-exp-l"><b>Con qué ítem se certifica:</b> ${marcarRefsItems(n.item)}</div>`;
+      if(n.porque) cuerpo += `<div class="it-exp-l"><b>Por qué:</b> ${marcarRefsItems(n.porque)}</div>`;
+      if(n.cobro)  cuerpo += `<div class="it-exp-l it-exp-plata"><b>Para el cobro:</b> ${marcarRefsItems(n.cobro)}</div>`;
     } else {
       cuerpo += `<div class="it-exp-l">Sin observaciones: lo que se instala es lo que este ítem paga.</div>`;
     }
@@ -17151,8 +17400,54 @@ const ITEMIZADO_EPEC = [
   window.epecItemUn  = (id)=>{ const it = itemEpec(id); return it ? it.un : ''; };
   window.epecBaseEf  = ()=> baseEf();                 // $ por módulo, ya con IVA si está encendido
   window.epecConIva  = ()=> ivaEncendido();
+  window.epecTotales = ()=> ({ modulos: MODULOS_TOTALES, presupuesto: PRESUPUESTO_OFICIAL,
+                               modulo: epecBase, base: baseEf(), conIva: ivaEncendido() });
   window.epecOpcionesItems = (sel)=> opcionesTodoElPliegoHTML().replace(
     `value="${sel}"`, `value="${sel}" selected`);
+
+  // ---- Plegar y desplegar cada parte del Itemizado 2026 (2026-09-06) ----
+  // Cada tarjeta marcada con `plegable` recibe un botón en su encabezado. Las de consulta
+  // (las 244 plazas, las 36 ejecutadas, la cobertura y la tabla de coeficientes) arrancan cerradas
+  // —`data-pleg-def="cerrado"`— para que al entrar se vea primero lo que se carga todos los días.
+  // Lo que el usuario abra o cierre queda guardado en esta computadora.
+  const PLEG_LS = 'emaPlegables';
+  function plegLeer(){ try{ return JSON.parse(localStorage.getItem(PLEG_LS)||'{}') || {}; }catch(e){ return {}; } }
+  function plegGuardar(o){ try{ localStorage.setItem(PLEG_LS, JSON.stringify(o)); }catch(e){} }
+  function plegPintarBtn(card){
+    const btn = card.querySelector(':scope > h2 > .pleg-btn, :scope > .card-header-row > .pleg-btn');
+    if(!btn) return;
+    const cerrado = card.classList.contains('cerrado');
+    btn.innerHTML = `<span class="pleg-flecha">${cerrado ? '▸' : '▾'}</span>${cerrado ? 'Mostrar' : 'Ocultar'}`;
+    btn.setAttribute('aria-expanded', cerrado ? 'false' : 'true');
+  }
+  function armarPlegables(){
+    const guardado = plegLeer();
+    document.querySelectorAll('#avPanelEpec .card.plegable').forEach(card=>{
+      if(card.dataset.plegListo) return;
+      card.dataset.plegListo = '1';
+      const key = card.dataset.pleg;
+      const abierto = (guardado[key] != null) ? !!guardado[key] : (card.dataset.plegDef !== 'cerrado');
+      card.classList.toggle('cerrado', !abierto);
+      const h2 = card.querySelector(':scope > h2, :scope > .card-header-row > h2');
+      if(!h2) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pleg-btn no-print';
+      // En las tarjetas con `card-header-row` el botón va en la fila (al lado de los otros
+      // botones); en las que solo tienen <h2>, adentro del propio título.
+      const fila = card.querySelector(':scope > .card-header-row');
+      (fila || h2).appendChild(btn);
+      plegPintarBtn(card);
+      const alternar = ()=>{
+        card.classList.toggle('cerrado');
+        plegPintarBtn(card);
+        const g = plegLeer(); g[key] = !card.classList.contains('cerrado'); plegGuardar(g);
+      };
+      btn.addEventListener('click', (e)=>{ e.stopPropagation(); alternar(); });
+      h2.addEventListener('click', alternar);
+    });
+  }
+  armarPlegables();
 
   window.aplicarBaseEpec = function(){
     const d = window.__preciosNube;
