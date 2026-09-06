@@ -3164,9 +3164,10 @@
         <label class="it-chk"><input type="checkbox" id="epecSoloConItems"> Ocultar las plazas sin ítems cargados</label>
       </div>
       <div class="nota-epec">
-        <b>Las cantidades son las mismas</b> que las del itemizado de la Municipalidad: los ítems 1 a 82
-        coinciden uno por uno entre los dos pliegos, así que la obra se carga una sola vez. Si cambiás una
-        cantidad acá, cambia también allá. Los ítems <b>83.1 a 89</b> son propios de este pliego y se cargan
+        <b>Este es el itemizado con el que se cobra</b>: el ANEXO I de la Nota Aclaratoria N° 1 del pliego de EPEC.
+        Los ítems <b>1 a 82</b> son los mismos que los del pliego de la Municipalidad —coinciden uno por uno—,
+        así que la cantidad se carga <b>una sola vez</b> y sirve para los dos. Los <b>83.1 a 89</b> son propios
+        de este pliego. Todo se carga acá: se pueden traer las cantidades de la Calculadora o agregarlas de a una,
         en cada plaza, abajo de su tabla.
       </div>
     </div>
@@ -7151,7 +7152,11 @@ function opcionesItemizadoHTML(selectedId){
       html += `<optgroup label="${escHtml(it.cat)}">`;
       catActual = it.cat;
     }
-    html += `<option value="${it.id}" ${selectedId===it.id?'selected':''}>Ítem ${it.id} — ${escHtml(it.desc)} (${escHtml(it.un)}, ${formatMoney(it.precio)})</option>`;
+    // Se muestra el coeficiente K de la licitación, no el precio en pesos del pliego viejo
+    // (2026-09-06): *"nos guiamos con lo que dice la licitación únicamente"*.
+    const kIt = (typeof window.epecItemK === 'function') ? window.epecItemK(it.id) : 0;
+    const etq = kIt ? `${escHtml(it.un)}, ${kIt.toLocaleString('es-AR',{minimumFractionDigits:2, maximumFractionDigits:2})} K` : escHtml(it.un);
+    html += `<option value="${it.id}" ${selectedId===it.id?'selected':''}>Ítem ${it.id} — ${escHtml(it.desc)} (${etq})</option>`;
   });
   html += '</optgroup>';
   return html;
@@ -8959,18 +8964,31 @@ function completarMaterialesAlFinalizar(a){
   (a.grupos||[]).forEach(g=>{ g.columnasCompletas = g.columnasTotal; });
 }
 
+// Valorización de la plaza CON LOS VALORES DE LA LICITACIÓN (2026-09-06).
+// Antes multiplicaba por el precio en pesos del pliego de la Municipalidad. Ahora usa el ANEXO I:
+// cada ítem vale un coeficiente K (módulos) y el módulo tiene un precio, así que
+//     plata = cantidad × K × valor del módulo
+// Se cuentan las DOS listas de ítems de la plaza, igual que el Itemizado 2026, para que los dos
+// lugares muestren exactamente el mismo número: `valorItems` (ítems 1 a 82, la cantidad compartida)
+// y `valorItemsEpec` (83.1 a 89, propios del pliego de EPEC).
+// Devuelve además los totales en K, que es lo que se certifica cuando todavía no hay módulo cargado.
 function calcularValorPlaza(a){
-  let presupuesto = 0, avanzado = 0;
-  (a.valorItems||[]).forEach(v=>{
-    const item = ITEMIZADO_PLIEGO.find(x=>x.id===v.itemPliego);
-    if(!item) return;
+  const K = (id)=> (typeof window.epecItemK === 'function') ? window.epecItemK(id) : 0;
+  let kTotal = 0, kAvanzado = 0;
+  const sumar = (lista, campo)=> (lista||[]).forEach(v=>{
+    const k = K(v[campo]);
+    if(!k) return;
     const cant = v.cantidad || 0;
     const cantAv = Math.min(v.cantidadAvanzada || 0, cant);
-    presupuesto += cant * item.precio;
-    avanzado += cantAv * item.precio;
+    kTotal += cant * k;
+    kAvanzado += cantAv * k;
   });
-  const pctValor = presupuesto > 0 ? Math.round(Math.min(100, Math.max(0, avanzado / presupuesto * 100))) : 0;
-  return { presupuesto, avanzado, pctValor };
+  sumar(a.valorItems, 'itemPliego');
+  sumar(a.valorItemsEpec, 'itemEpec');
+  const base = (typeof window.epecBaseEf === 'function') ? window.epecBaseEf() : 0;
+  const pctValor = kTotal > 0 ? Math.round(Math.min(100, Math.max(0, kAvanzado / kTotal * 100))) : 0;
+  return { presupuesto: kTotal * base, avanzado: kAvanzado * base,
+           kTotal, kAvanzado, base, pctValor };
 }
 
 // ---- ¿Está todo el material de esta plaza? (2026-08-28) ----
@@ -9403,29 +9421,50 @@ function renderAvanceDetalle(){
   html += `</div>`;
 
   const {presupuesto, avanzado, pctValor} = calcularValorPlaza(a);
-  html += `<div class="section-title" style="margin-top:24px;">💰 Valorización de pliego (presupuesto de la plaza)</div>`;
-  html += `<div class="hint no-print" style="margin-top:0;">Cargá acá los ítems del pliego (ITEMIZADO PLAZAS) que corresponden a esta plaza, con la cantidad contratada de cada uno — son paquetes completos de obra (ej. "columna PRFV 7m + 3 brazos, todo incluido"), no el detalle suelto de materiales de abajo. Con eso se calcula el presupuesto total de la plaza y, según lo que cargues como "Avanzada" en cada ítem, cuánto valor ya está ejecutado.</div>`;
+  const vp = calcularValorPlaza(a);
+  const hayBase = vp.base > 0;
+  const fmtK2 = (v)=> (typeof fmt === 'function' ? fmt(v,2) : Number(v).toFixed(2)) + ' K';
+  html += `<div class="section-title" style="margin-top:24px;">💰 Valorización de la licitación (presupuesto de la plaza)</div>`;
+  html += `<div class="hint no-print" style="margin-top:0;">Son los ítems del <b>ANEXO I</b> de la licitación cargados en esta plaza — los mismos que ves en <b>Itemizado 2026</b>, con los mismos números. Cada ítem vale un coeficiente <b>K</b> (módulos) y la plata sale de <b>K × el valor del módulo</b>. Según lo que cargues como «Avanzada» en cada ítem, se calcula cuánto valor ya está ejecutado.${hayBase?'':' <b>Todavía no hay valor de módulo cargado</b>, así que por ahora se muestra en módulos (K) — cargalo en Itemizado 2026.'}</div>`;
   html += `<div class="summary-tiles" id="valorResumenTiles">
-    <div class="tile"><div class="num" style="font-size:18px;">${formatMoney(presupuesto)}</div><div class="lbl">Presupuesto (pliego)</div></div>
-    <div class="tile"><div class="num" style="font-size:18px;">${formatMoney(avanzado)}</div><div class="lbl">Valor avanzado</div></div>
-    <div class="tile"><div class="num">${pctValor}%</div><div class="lbl">Avance en valor ($)</div></div>
+    <div class="tile"><div class="num" style="font-size:18px;">${hayBase ? formatMoney(vp.presupuesto) : fmtK2(vp.kTotal)}</div><div class="lbl">Contratado${hayBase?' (licitación)':' en módulos'}</div></div>
+    <div class="tile"><div class="num" style="font-size:18px;">${hayBase ? formatMoney(vp.avanzado) : fmtK2(vp.kAvanzado)}</div><div class="lbl">Certificado / avanzado</div></div>
+    <div class="tile"><div class="num">${pctValor}%</div><div class="lbl">Avance en valor</div></div>
   </div>`;
   html += `<div class="avance-bar avance-bar-lg"><div class="avance-bar-fill" id="valorBarFill" style="width:${pctValor}%; background:var(--amber);"></div></div>`;
   if((a.valorItems||[]).length){
-    html += `<table><thead><tr><th style="width:32%">Ítem de pliego</th><th>Precio unitario</th><th>Cantidad contratada</th><th>Avanzada</th><th>Subtotal</th><th>Valor avanzado</th><th class="no-print"></th></tr></thead><tbody>`;
+    const K = (id)=> (typeof window.epecItemK === 'function') ? window.epecItemK(id) : 0;
+    const valor = (v)=> hayBase ? formatMoney(v * vp.base) : fmtK2(v);
+    html += `<table><thead><tr><th style="width:32%">Ítem de la licitación</th><th>Coeficiente K</th><th>Cantidad contratada</th><th>Avanzada</th><th>Subtotal</th><th>Valor avanzado</th><th class="no-print"></th></tr></thead><tbody>`;
     a.valorItems.forEach(v=>{
-      const item = ITEMIZADO_PLIEGO.find(x=>x.id===v.itemPliego);
-      const precio = item ? item.precio : 0;
+      const k = K(v.itemPliego);
+      const un = (typeof window.epecItemUn === 'function') ? window.epecItemUn(v.itemPliego) : '';
       const cant = v.cantidad || 0;
       const cantAv = Math.min(v.cantidadAvanzada || 0, cant);
       html += `<tr data-valoritem="${v.id}">
         <td><select class="valor-item-select" style="width:100%;" onchange="actualizarValorItemPliego(${v.id}, this.value)" ${dis}>${opcionesItemizadoHTML(v.itemPliego)}</select></td>
-        <td class="ref valor-precio-cell">${item ? formatMoney(item.precio)+' / '+escHtml(item.un) : '—'}</td>
+        <td class="ref valor-precio-cell">${k ? fmtK2(k)+' / '+escHtml(un) : '—'}</td>
         <td><input type="number" min="0" step="any" class="avance-extra-input" data-field="cantidad" value="${v.cantidad}" style="width:80px;" ${dis}></td>
         <td><input type="number" min="0" step="any" class="avance-input" data-field="cantidadAvanzada" value="${v.cantidadAvanzada}" style="width:80px;" ${dis}></td>
-        <td class="qty valor-subtotal-cell">${formatMoney(cant*precio)}</td>
-        <td class="qty valor-avanzado-cell">${formatMoney(cantAv*precio)}</td>
+        <td class="qty valor-subtotal-cell">${valor(cant*k)}</td>
+        <td class="qty valor-avanzado-cell">${valor(cantAv*k)}</td>
         <td class="no-print"><button type="button" class="tramo-remove" data-action="remove-valor" title="Quitar ítem" ${dis}>×</button></td>
+      </tr>`;
+    });
+    // Los 83.1 a 89 se cargan y se editan en el Itemizado 2026; acá se muestran de solo lectura
+    // para que la tabla sume lo mismo que las tarjetas de arriba y que esa pantalla.
+    (a.valorItemsEpec||[]).forEach(v=>{
+      const k = K(v.itemEpec);
+      const cant = v.cantidad || 0;
+      const cantAv = Math.min(v.cantidadAvanzada || 0, cant);
+      html += `<tr>
+        <td><b>Ítem ${escHtml(v.itemEpec)}</b> — ${escHtml((typeof window.epecItemDesc==='function')?window.epecItemDesc(v.itemEpec):'')}
+            <div class="ref" style="font-size:11px;">Provisión en caso de eventualidad · se edita en Itemizado 2026</div></td>
+        <td class="ref">${k ? fmtK2(k) : '—'}</td>
+        <td class="qty">${cant}</td><td class="qty">${cantAv}</td>
+        <td class="qty">${valor(cant*k)}</td>
+        <td class="qty">${valor(cantAv*k)}</td>
+        <td class="no-print"></td>
       </tr>`;
     });
     html += `</tbody></table>`;
@@ -9572,25 +9611,29 @@ function actualizarValorItemPliego(vid, value){
 }
 
 function actualizarValorResumen(a, row, v){
-  const {presupuesto, avanzado, pctValor} = calcularValorPlaza(a);
+  const vp = calcularValorPlaza(a);
+  const hayBase = vp.base > 0;
+  const fmtK2 = (x)=> (typeof fmt === 'function' ? fmt(x,2) : Number(x).toFixed(2)) + ' K';
+  const valor = (x)=> hayBase ? formatMoney(x * vp.base) : fmtK2(x);
   const tilesWrap = document.getElementById('valorResumenTiles');
   if(tilesWrap){
     const nums = tilesWrap.querySelectorAll('.num');
-    if(nums[0]) nums[0].textContent = formatMoney(presupuesto);
-    if(nums[1]) nums[1].textContent = formatMoney(avanzado);
-    if(nums[2]) nums[2].textContent = pctValor+'%';
+    if(nums[0]) nums[0].textContent = hayBase ? formatMoney(vp.presupuesto) : fmtK2(vp.kTotal);
+    if(nums[1]) nums[1].textContent = hayBase ? formatMoney(vp.avanzado)    : fmtK2(vp.kAvanzado);
+    if(nums[2]) nums[2].textContent = vp.pctValor+'%';
   }
   const barFill = document.getElementById('valorBarFill');
-  if(barFill) barFill.style.width = pctValor+'%';
+  if(barFill) barFill.style.width = vp.pctValor+'%';
   if(row && v){
-    const item = ITEMIZADO_PLIEGO.find(x=>x.id===v.itemPliego);
-    const precio = item ? item.precio : 0;
+    const k = (typeof window.epecItemK === 'function') ? window.epecItemK(v.itemPliego) : 0;
     const cant = v.cantidad || 0;
     const cantAv = Math.min(v.cantidadAvanzada || 0, cant);
     const subtotalCell = row.querySelector('.valor-subtotal-cell');
-    if(subtotalCell) subtotalCell.textContent = formatMoney(cant*precio);
+    if(subtotalCell) subtotalCell.textContent = valor(cant*k);
     const avanzadoCell = row.querySelector('.valor-avanzado-cell');
-    if(avanzadoCell) avanzadoCell.textContent = formatMoney(cantAv*precio);
+    if(avanzadoCell) avanzadoCell.textContent = valor(cantAv*k);
+    const precioCell = row.querySelector('.valor-precio-cell');
+    if(precioCell) precioCell.textContent = k ? fmtK2(k) : '—';
   }
   renderAvanceTablero();
 }
@@ -15706,6 +15749,7 @@ function poblarParteObraDatalist(){
   async function guardarPrecios(msgEl){
     aplicarPrecios();
     renderItemizado();
+    try{ renderEpec(); }catch(e){}   // el 2026 es el único itemizado a la vista: también se refresca
     if(!puedeEditar()){
       if(msgEl){ msgEl.style.color='var(--amber)';
         msgEl.textContent='Se aplicó acá, pero para que lo vea todo el equipo hay que iniciar sesión (arriba, en «Cargar y administrar plazas»).'; }
@@ -17099,6 +17143,20 @@ const ITEMIZADO_EPEC = [
   const fmtK = (v)=> fmt(v, 2) + ' K';
   const enPesos = (k)=> epecBase > 0 ? plata(k * baseEf()) : '';
 
+  // ---- Valores de la LICITACIÓN, expuestos para el resto de la herramienta (2026-09-06) ----
+  // Pedido del usuario: *"esos precios no los ocupamos, nos guiamos con lo que dice la licitación
+  // únicamente, es el importante"*. La «Valorización de pliego» de Avance de obra venía calculando
+  // con los precios en pesos del pliego de la Municipalidad; ahora usa el ANEXO I: K × módulo.
+  // Estos ayudantes viven acá adentro (donde están ITEMIZADO_EPEC y el módulo) y se publican en
+  // window para que Avance de obra los use sin duplicar ni la tabla ni la cuenta.
+  window.epecItemK   = (id)=>{ const it = itemEpec(id); return it ? n2(it.k) : 0; };
+  window.epecItemDesc= (id)=>{ const it = itemEpec(id); return it ? it.desc : ''; };
+  window.epecItemUn  = (id)=>{ const it = itemEpec(id); return it ? it.un : ''; };
+  window.epecBaseEf  = ()=> baseEf();                 // $ por módulo, ya con IVA si está encendido
+  window.epecConIva  = ()=> ivaEncendido();
+  window.epecOpcionesItems = (sel)=> opcionesTodoElPliegoHTML().replace(
+    `value="${sel}"`, `value="${sel}" selected`);
+
   window.aplicarBaseEpec = function(){
     const d = window.__preciosNube;
     if(d && d.baseEpec != null) epecBase = n2(d.baseEpec);
@@ -17785,7 +17843,7 @@ const ITEMIZADO_EPEC = [
     if(!edit) h += `<div class="hint" style="margin-top:0; color:var(--amber);">Estás viendo sin sesión iniciada: se puede mirar todo, pero para cambiar cantidades hay que iniciar sesión.</div>`;
 
     if(!filas.length){
-      h += `<div class="hint" style="margin-top:0;">Esta plaza no tiene ningún ítem cargado. Los ítems 1 a 82 se cargan desde el itemizado de la Municipalidad (la pestaña de al lado, que además los puede traer solos desde la Calculadora).</div>`;
+      h += `<div class="hint" style="margin-top:0;">Esta plaza <b>no tiene ningún ítem cargado</b>. Traelos de una con el botón <b>«⟳ Traer las cantidades de la Calculadora»</b> de acá abajo, o agregalos de a uno con el selector.</div>`;
     } else {
       h += `<div class="it-scroll-aviso no-print">↔ Deslizá la tabla para ver las cantidades y los subtotales.</div>`;
       h += `<div class="tabla-scroll"><table class="it-tabla"><thead><tr>
@@ -17806,8 +17864,8 @@ const ITEMIZADO_EPEC = [
           <td>
             <b>Ítem ${esc(it.id)} — ${esc(it.desc)}</b>
             <div class="it-cat">${esc(it.cat)}${f.propio
-              ? ' · <span class="it-badge" title="Ítem 83.1 a 89, «provisión de materiales en caso de eventualidad». Existe SOLO en el pliego de EPEC, no tiene equivalente en el de la Municipalidad, así que la cantidad se carga acá y vive solo acá. Es el único tipo de ítem que se puede quitar con la ✕.">propio de este pliego</span>'
-              : ' · <span class="it-badge" title="Ítem 1 a 82: es el mismo ítem en el pliego de la Municipalidad y en el Anexo I de EPEC. La cantidad es UN SOLO número guardado en un solo lugar, que las dos pantallas leen. Si la cambiás acá, cambia también en el itemizado de la Municipalidad — no es una copia.">cantidad compartida</span>'}</div>
+              ? ' · <span class="it-badge" title="Ítem 83.1 a 89, «provisión de materiales en caso de eventualidad». Existe SOLO en el pliego de EPEC: no tiene equivalente en el de la Municipalidad, así que esta cantidad vale únicamente para este pliego.">propio de este pliego</span>'
+              : ' · <span class="it-badge" title="Ítem 1 a 82: es el mismo ítem en el pliego de la Municipalidad y en el Anexo I de EPEC, y coinciden uno por uno. Por eso la cantidad se carga UNA SOLA VEZ y vale para los dos pliegos: no hay que cargarla dos veces ni se pueden desincronizar. Lo que cambia entre uno y otro es el precio, no la cantidad.">cantidad compartida</span>'}</div>
             ${notaItemHtml(it.id, it)}
           </td>
           <td class="qty"><b>${fmt(it.k,2)}</b><div class="it-un">/ ${esc(it.un)}</div></td>
@@ -17816,7 +17874,7 @@ const ITEMIZADO_EPEC = [
           <td class="qty">${fmtK(cant*it.k)}${epecBase>0?`<div class="ep-pesos">${plata(cant*it.k*baseEf())}</div>`:''}</td>
           <td class="qty">${fmtK(cav*it.k)}${epecBase>0?`<div class="ep-pesos">${plata(cav*it.k*baseEf())}</div>`:''}</td>
           <td class="qty" style="color:${colorPct(pct)}"><b>${pct}%</b></td>
-          <td class="no-print">${f.propio?`<button type="button" class="tramo-remove ep-quitar" title="Quitar este ítem" ${dis}>×</button>`:''}</td>
+          <td class="no-print"><button type="button" class="tramo-remove ep-quitar" title="${f.propio?'Quitar este ítem de esta plaza':'Quitar este ítem de esta plaza (es cantidad compartida: vale para los dos pliegos)'}" ${dis}>×</button></td>
         </tr>`;
       });
       const c = cuentasEpec(a);
@@ -17829,16 +17887,42 @@ const ITEMIZADO_EPEC = [
       </tr></tfoot></table></div>`;
     }
 
+    // Traer las cantidades desde la Calculadora. Antes esto vivía solo en la pestaña del itemizado
+    // de la Municipalidad; al sacarse esa pestaña se mudó acá, reusando las MISMAS funciones
+    // (armarPrevia / htmlPrevia / aplicarPrevia), sin duplicar la lógica.
+    if(previa[a.id]) h += htmlPrevia(a);
+    else {
+      const hay = computoDeLaPlaza(a);
+      h += `<div class="it-traer no-print">
+        <button type="button" class="btn-auto ep-traer-btn" style="margin:0;" ${dis}>⟳ Traer las cantidades de la Calculadora</button>
+        <span class="hint" style="margin:0;">${hay
+          ? `Hay un cómputo de <b>${esc(hay.nombre)}</b>${hay.id?` (ID ${esc(hay.id)})`:''} para traer. Se ve primero y se aplica si estás de acuerdo.`
+          : '<span style="color:var(--amber)">No encontramos un cómputo de la Calculadora para esta plaza (buscamos por ID de obra y por nombre).</span>'}</span>
+      </div>`;
+    }
     h += `<div class="it-agregar no-print">
-      <select class="ep-nuevo-sel" ${dis}>${opcionesEventualidadHTML()}</select>
+      <select class="ep-nuevo-sel" ${dis}>${opcionesTodoElPliegoHTML()}</select>
       <input type="number" min="0" step="any" class="ep-nuevo-cant" placeholder="Cantidad" ${dis}>
-      <button type="button" class="btn-auto ep-nuevo-btn" style="margin:0;" ${dis}>+ Agregar ítem de eventualidad</button>
+      <button type="button" class="btn-auto ep-nuevo-btn" style="margin:0;" ${dis}>+ Agregar a esta plaza</button>
     </div>
-    <div class="hint" style="margin-top:6px;">Solo los ítems <b>83.1 a 89</b> se cargan acá. Los demás salen de la carga compartida con el itemizado de la Municipalidad.</div>
+    <div class="hint" style="margin-top:6px;">Se pueden agregar los <b>92 ítems</b> del pliego. Los <b>1 a 82</b> son la cantidad compartida; los <b>83.1 a 89</b>, propios de este pliego.</div>
     <div class="hint ep-msg" style="margin-top:6px;"></div>`;
     h += bloqueSinItemHtml(a, dis);
     h += `</div>`;
     return h;
+  }
+
+  // Un solo selector con TODO el pliego (2026-09-06). Al sacarse la pestaña del itemizado de la
+  // Municipalidad, los ítems 1 a 82 también se tienen que poder agregar desde acá; antes solo se
+  // podían agregar allá. Se separan en dos grupos para que se vea de dónde sale cada cantidad:
+  // los 1 a 82 son la cantidad compartida, los 83.1 a 89 son propios de este pliego.
+  function opcionesTodoElPliegoHTML(){
+    const norm = ITEMIZADO_EPEC.filter(it=>!esEventualidad(it.id));
+    const ev   = ITEMIZADO_EPEC.filter(it=> esEventualidad(it.id));
+    const op = it=>`<option value="${esc(it.id)}">Ítem ${esc(it.id)} — ${esc(it.desc)} (${esc(it.un)}, ${fmt(it.k,2)} K)</option>`;
+    return '<option value="">— Elegí el ítem que querés agregar —</option>'
+      + `<optgroup label="Ítems 1 a 82 — del pliego (cantidad compartida)">${norm.map(op).join('')}</optgroup>`
+      + `<optgroup label="Ítems 83.1 a 89 — provisión en caso de eventualidad">${ev.map(op).join('')}</optgroup>`;
   }
 
   function opcionesEventualidadHTML(){
@@ -17887,9 +17971,18 @@ const ITEMIZADO_EPEC = [
       if(quitar){
         const tr = quitar.closest('tr');
         const a = obras().find(x=>String(x.id)===tr.dataset.plaza); if(!a) return;
-        a.valorItemsEpec = (a.valorItemsEpec||[]).filter(v=>String(v.id)!==tr.dataset.vid);
+        if(tr.dataset.propio === '1'){
+          a.valorItemsEpec = (a.valorItemsEpec||[]).filter(v=>String(v.id)!==tr.dataset.vid);
+        } else {
+          // Es una cantidad COMPARTIDA: al sacarla de acá se saca también del itemizado de la
+          // Municipalidad, porque es el mismo dato. Por eso se pregunta antes.
+          const v = (a.valorItems||[]).find(x=>String(x.id)===tr.dataset.vid);
+          const it = v ? itemEpec(v.itemPliego) : null;
+          if(!confirm(`¿Sacar el ítem ${it?it.id:''} de esta plaza?\n\nEs una cantidad compartida: el mismo ítem existe en el pliego de la Municipalidad y en el de EPEC, así que se saca para los dos.`)) return;
+          a.valorItems = (a.valorItems||[]).filter(x=>String(x.id)!==tr.dataset.vid);
+        }
         if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
-        renderEpec(); return;
+        renderEpec(); refrescarPantallasDeAvance(); return;
       }
 
       // ---- Trabajos sin ítem en el pliego ----
@@ -17919,6 +18012,29 @@ const ITEMIZADO_EPEC = [
         renderEpec(); return;
       }
 
+      // ---- Traer las cantidades de la Calculadora (mudado desde la pestaña de la Municipalidad) ----
+      const epTraer = e.target.closest('.ep-traer-btn');
+      if(epTraer){
+        const card = epTraer.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        armarPrevia(a); renderEpec(); return;
+      }
+      const epPrevCerrar = e.target.closest('.it-previa-cerrar');
+      if(epPrevCerrar){
+        const card = epPrevCerrar.closest('.it-plaza');
+        delete previa[card.dataset.epec]; renderEpec(); return;
+      }
+      const epPrevAplicar = e.target.closest('.it-previa-aplicar');
+      if(epPrevAplicar){
+        const card = epPrevAplicar.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        const n = aplicarPrevia(a);
+        renderEpec(); refrescarPantallasDeAvance();
+        const msg = document.querySelector(`.it-plaza[data-epec="${CSS.escape(String(a.id))}"] .ep-msg`);
+        if(msg){ msg.style.color='var(--teal-dark)'; msg.textContent = `✔ Se cargaron ${n} ítem(s) desde la Calculadora. Revisá las cantidades antes de certificar.`; }
+        return;
+      }
+
       const nuevo = e.target.closest('.ep-nuevo-btn');
       if(nuevo){
         const card = nuevo.closest('.it-plaza');
@@ -17926,15 +18042,26 @@ const ITEMIZADO_EPEC = [
         const sel = card.querySelector('.ep-nuevo-sel');
         const msg = card.querySelector('.ep-msg');
         if(!sel.value){ if(msg){ msg.style.color='var(--danger)'; msg.textContent='Elegí primero el ítem.'; } return; }
-        a.valorItemsEpec = a.valorItemsEpec || [];
-        if(a.valorItemsEpec.some(v=>String(v.itemEpec)===sel.value)){
-          if(msg){ msg.style.color='var(--amber)'; msg.textContent='Ese ítem ya está cargado en esta plaza.'; } return;
-        }
+        const cant = n2(card.querySelector('.ep-nuevo-cant').value);
         const nid = (typeof avanceItemIdSeq !== 'undefined') ? avanceItemIdSeq++ : Date.now();
-        a.valorItemsEpec.push({ id:nid, itemEpec:sel.value,
-                                cantidad:n2(card.querySelector('.ep-nuevo-cant').value), cantidadAvanzada:0 });
+        // Los 83.1 a 89 son propios de este pliego; los 1 a 82 van a la cantidad COMPARTIDA, que es
+        // la misma que usaba el itemizado de la Municipalidad — por eso se guardan en `valorItems`.
+        if(esEventualidad(sel.value)){
+          a.valorItemsEpec = a.valorItemsEpec || [];
+          if(a.valorItemsEpec.some(v=>String(v.itemEpec)===sel.value)){
+            if(msg){ msg.style.color='var(--amber)'; msg.textContent='Ese ítem ya está cargado en esta plaza — cambiale la cantidad en el renglón que ya existe.'; } return;
+          }
+          a.valorItemsEpec.push({ id:nid, itemEpec:sel.value, cantidad:cant, cantidadAvanzada:0 });
+        } else {
+          const idNum = parseInt(sel.value, 10);
+          a.valorItems = a.valorItems || [];
+          if(a.valorItems.some(v=>String(v.itemPliego)===String(idNum))){
+            if(msg){ msg.style.color='var(--amber)'; msg.textContent='Ese ítem ya está cargado en esta plaza — cambiale la cantidad en el renglón que ya existe.'; } return;
+          }
+          a.valorItems.push({ id:nid, itemPliego:idNum, cantidad:cant, cantidadAvanzada:0 });
+        }
         if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
-        renderEpec(); return;
+        renderEpec(); refrescarPantallasDeAvance(); return;
       }
 
       if(e.target.id === 'epecBaseBtn'){
@@ -18105,19 +18232,24 @@ const ITEMIZADO_EPEC = [
   function pintarSubtabsAvance(){
     const barra = document.getElementById('subtabsAvance');
     if(!barra) return;
+    // El itemizado de la Municipalidad se sacó de las pestañas el 06/09/2026, a pedido del usuario:
+    // *"para evitar confusiones sacá el itemizado de la Muni, dejá el 2026 nomás; el del pliego es
+    // el importante"*. Se saca de la VISTA, no de los datos: las cantidades de los ítems 1 a 82
+    // son las mismas (la «cantidad compartida»), se siguen guardando en `valorItems` y ahora se
+    // cargan, editan y traen de la Calculadora desde el Itemizado 2026. El panel viejo queda en el
+    // archivo, oculto, para no romper nada y poder volver atrás si hiciera falta.
     barra.innerHTML = [
-      { id:'obra',      label:'Avance de obra' },
-      { id:'itemizado', label:'Itemizado Municipalidad ($)' },
-      { id:'epec',      label:'Itemizado 2026' },
+      { id:'obra', label:'Avance de obra' },
+      { id:'epec', label:'Itemizado 2026' },
     ].map(g=>`<button type="button" class="subtab${subAv===g.id?' activo':''}" data-sub="${g.id}">${g.label}</button>`).join('');
     const po = document.getElementById('avPanelObra');
     const pi = document.getElementById('avPanelItemizado');
     const pe = document.getElementById('avPanelEpec');
+    if(subAv === 'itemizado') subAv = 'epec';   // por si quedó apuntando a la pestaña que se sacó
     if(po) po.style.display = subAv==='obra' ? '' : 'none';
-    if(pi) pi.style.display = subAv==='itemizado' ? '' : 'none';
+    if(pi) pi.style.display = 'none';               // el itemizado de la Municipalidad ya no se muestra
     if(pe) pe.style.display = subAv==='epec' ? '' : 'none';
-    if(subAv === 'itemizado') renderItemizado();
-    else if(subAv === 'epec') renderEpec();
+    if(subAv === 'epec') renderEpec();
   }
   const barraAv = document.getElementById('subtabsAvance');
   if(barraAv){
@@ -18136,7 +18268,9 @@ const ITEMIZADO_EPEC = [
     anteriorMostrar(v);
     if(v === 'avance'){ pintarSubtabsAvance(); }
   };
-  window.irAlItemizado = function(){ subAv = 'itemizado'; mostrarVista('avance'); };
+  // Los atajos que antes llevaban al itemizado de la Municipalidad ahora llevan al 2026, que es el
+  // único que queda. Se conserva el nombre de la función para no tocar a quienes la llaman.
+  window.irAlItemizado = function(){ subAv = 'epec'; mostrarVista('avance'); };
   window.renderItemizado = renderItemizado;
 
   pintarSubtabsAvance();
