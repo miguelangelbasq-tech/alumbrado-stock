@@ -2439,7 +2439,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas</div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-06 13:57 · 2ec987</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -9342,7 +9342,9 @@ async function crearAvanceDesdeHistorial(idx){
   if(!avanceObras.some(x=>x.id===nuevoId)) avanceObras.push({ ...nuevo, id: nuevoId });
   renderAvanceTablero();
   renderAvanceDetalle();
-  document.getElementById('avanceDetalleCard').scrollIntoView({behavior:'smooth', block:'start'});
+  const cardDet = document.getElementById('avanceDetalleCard');
+  if(cardDet && cardDet.offsetParent !== null) cardDet.scrollIntoView({behavior:'smooth', block:'start'});
+  return nuevoId;   // lo usa el Itemizado 2026 para abrir la plaza recién registrada (2026-09-06)
 }
 
 // Catálogo de referencia: las 13 plazas del informe que el usuario mandó en .docx (2026-08-21),
@@ -14601,6 +14603,8 @@ function poblarParteObraDatalist(){
       window.historialCompartido = historial;
       window.__histCalcListo = true;
       if(typeof window.renderHistorial === 'function') window.renderHistorial();
+      // El Itemizado 2026 muestra las últimas plazas calculadas: si está a la vista, se refresca.
+      try{ const pe = document.getElementById('avPanelEpec'); if(pe && pe.style.display !== 'none' && typeof window.renderEpec === 'function') window.renderEpec(); }catch(e){}
       if(typeof window.poblarAvanceOrigenSelect === 'function') window.poblarAvanceOrigenSelect();
       if(typeof window.renderAvisoHistorialLocal === 'function') window.renderAvisoHistorialLocal();
     }, err => console.error('Error escuchando el historial de cómputos:', err));
@@ -18988,13 +18992,61 @@ const ITEMIZADO_EPEC = [
     // Vacío con contexto (2026-09-06): antes era una tarjeta suelta con una sola frase entre la
     // principal y las desplegables, y parecía un cartel perdido. Ahora dice de qué lista se trata
     // y cómo se llena.
-    cont.innerHTML = lista.length
+    // ---- Las calculadas que todavía no están en el tablero (2026-09-06) ----
+    // El usuario: *"acabo de llenar una plaza pero no me aparece en el itemizado"*. La llenó y la
+    // calculó en la Calculadora, pero el itemizado lista las plazas del TABLERO (avanceObras), y un
+    // cómputo entra al tablero recién cuando se registra. Antes eso solo se avisaba en la
+    // Calculadora, arriba del resultado; ahora se ve también acá, con el botón para registrarla y
+    // traer sus cantidades en el mismo paso.
+    // Se listan las ÚLTIMAS calculadas (una por plaza), y para cada una se dice en qué está: si ya
+    // está registrada, con qué nombre y un botón para abrirla; si no, el botón para registrarla.
+    const recientes = (()=>{
+      if(typeof plazaYaRegistrada !== 'function' || typeof historial === 'undefined') return [];
+      const vistos = new Set(); const out = [];
+      (historial||[]).map((h,i)=>({h,i})).slice().reverse().forEach(({h,i})=>{   // el más nuevo de cada plaza
+        if(!h || !h.nombre || h.nombre === 'Obra sin nombre') return;
+        const k = (String(h.id||'').trim() || String(h.nombre).trim().toLowerCase());
+        if(vistos.has(k)) return; vistos.add(k);
+        out.push({h, i, reg: plazaYaRegistrada(h.nombre, h.id)});
+      });
+      return out;
+    })();
+    const pendientes = recientes.filter(x=>!x.reg);
+    const ultimas = recientes.slice(0, 5);
+    const ocultas = soloCon ? todas.filter(a=>!cuentasEpec(a).items).length : 0;
+    const edit = puedeEditar();
+    let extra = '';
+    if(ultimas.length){
+      const filaRec = ({h,i,reg})=>{
+        const escondida = reg && ((soloCon && !cuentasEpec(reg).items) || (busca && !lista.some(a=>a.id===reg.id)));
+        return `<div class="ep-pend" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:8px 0; border-top:1px solid var(--border);">
+            <div style="flex:1 1 220px;"><b>${esc(h.nombre)}</b>${h.id?` · ID ${esc(h.id)}`:''}${h.barrio?` · ${esc(h.barrio)}`:''}
+              <div class="it-cat">calculada el ${esc(h.fecha||'—')}${reg
+                ? ` · <b style="color:#1f6f2e">ya está registrada</b>${String(reg.nombre||'').trim().toLowerCase() !== String(h.nombre||'').trim().toLowerCase() ? ` como «${esc(reg.nombre)}»` : ''}${cuentasEpec(reg).items ? ` · ${cuentasEpec(reg).items} ítem(s)` : ' · <b style="color:#c77b18">sin ítems todavía</b>'}${escondida ? ' · <b style="color:var(--danger)">no se ve por el filtro o la búsqueda</b>' : ''}`
+                : ' · <b style="color:#c77b18">todavía no está en el tablero</b>'}</div>
+            </div>
+            ${reg
+              ? `<button type="button" class="btn-ghost ep-abrir-reg" data-plaza="${esc(reg.id)}" style="padding:6px 12px; font-size:12.5px;">Abrir en el itemizado →</button>`
+              : `<button type="button" class="btn-primary ep-registrar-hist" data-hist="${i}" style="padding:6px 12px; font-size:12.5px;" ${edit?'':'disabled'}>＋ Registrar y traer sus cantidades</button>`}
+          </div>`;
+      };
+      extra += `<div class="card" style="border:1px solid ${pendientes.length ? 'var(--amber)' : 'var(--border)'}; background:${pendientes.length ? 'rgba(240,183,74,0.08)' : 'var(--card)'};">
+        <h2 style="margin-top:0;"><span class="dot" style="background:${pendientes.length ? 'var(--amber)' : 'var(--teal-dark)'}"></span>Últimas plazas calculadas en la Calculadora${pendientes.length ? ` — ${pendientes.length} sin registrar` : ''}</h2>
+        <div class="hint" style="margin-top:0;"><b>El itemizado lista las plazas del tablero</b>, y una plaza calculada entra al tablero cuando se <b>registra</b>. Acá ves en qué está cada una de las últimas que calculaste: si falta registrarla, se hace desde acá y en el mismo paso te trae las cantidades; si ya está, se abre con un toque.</div>
+        ${ultimas.map(filaRec).join('')}
+        ${(!edit && pendientes.length) ? '<div class="hint" style="color:var(--amber);">Para registrar hay que iniciar sesión (pestaña Pañol).</div>' : ''}
+      </div>`;
+    }
+    if(ocultas){
+      extra += `<div class="hint" style="margin:6px 0 10px; color:var(--amber);">⚠ Hay <b>${ocultas} plaza${ocultas===1?'':'s'} sin ítems</b> que no se ${ocultas===1?'muestra':'muestran'} porque está tildado «Ocultar las plazas sin ítems cargados». Destildalo para verla${ocultas===1?'':'s'} y cargarle${ocultas===1?'':'s'} los ítems.</div>`;
+    }
+    cont.innerHTML = extra + (lista.length
       ? lista.map(a=>filaPlazaEpec(a)).join('')
       : `<div class="card" style="text-align:center; border-style:dashed;">
            <div style="font-size:26px; margin-bottom:4px;">📋</div>
            <div style="font-weight:700; margin-bottom:4px;">${todas.length ? 'Ninguna plaza coincide con la búsqueda' : 'Acá van las plazas con sus ítems del itemizado'}</div>
            <div class="hint" style="margin:0;">${todas.length ? 'Probá con otra parte del nombre, el ID o el barrio.' : 'Todavía no hay ninguna cargada. Calculá una plaza en <b>Cálculo</b> y registrala, o dala de alta en <b>Avance de obra</b>: acá le cargás los ítems y ves cuántos módulos suma.'}</div>
-         </div>`;
+         </div>`);
     renderTablaK();
   }
 
@@ -19165,6 +19217,36 @@ const ITEMIZADO_EPEC = [
       }
       const cab = e.target.closest('.it-cab');
       if(cab && cab.dataset.togglep){ const id = cab.dataset.togglep; epecAbiertas[id] = !epecAbiertas[id]; renderEpec(); return; }
+
+      // Registrar en el tablero una plaza calculada, desde acá mismo, y dejar la previa de sus
+      // cantidades abierta para aplicarla (2026-09-06).
+      // Abrir una plaza ya registrada desde la lista de «últimas calculadas»: limpia el filtro y la
+      // búsqueda que la pudieran estar escondiendo, la abre y la lleva a la vista.
+      const abrirReg = e.target.closest('.ep-abrir-reg');
+      if(abrirReg){
+        const id = abrirReg.dataset.plaza;
+        const chk = document.getElementById('epecSoloConItems'); if(chk) chk.checked = false;
+        const bq = document.getElementById('epecBuscar'); if(bq) bq.value = '';
+        epecAbiertas[id] = true; renderEpec();
+        const card = document.querySelector(`.it-plaza[data-epec="${CSS.escape(String(id))}"]`);
+        if(card) card.scrollIntoView({behavior:'smooth', block:'start'});
+        return;
+      }
+      const regHist = e.target.closest('.ep-registrar-hist');
+      if(regHist){
+        if(typeof crearAvanceDesdeHistorial !== 'function') return;
+        regHist.disabled = true; regHist.textContent = 'Registrando…';
+        let nuevoId = null;
+        try{ nuevoId = await crearAvanceDesdeHistorial(parseInt(regHist.dataset.hist, 10)); }catch(err){ console.error(err); }
+        if(!nuevoId){ renderEpec(); return; }
+        epecAbiertas[nuevoId] = true;
+        const a = obras().find(x=>String(x.id)===String(nuevoId));
+        if(a){ try{ armarPrevia(a); }catch(err){} }
+        renderEpec(); refrescarPantallasDeAvance();
+        const card = document.querySelector(`.it-plaza[data-epec="${CSS.escape(String(nuevoId))}"]`);
+        if(card) card.scrollIntoView({behavior:'smooth', block:'start'});
+        return;
+      }
 
       const quitar = e.target.closest('.ep-quitar');
       if(quitar){
