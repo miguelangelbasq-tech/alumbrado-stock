@@ -1662,6 +1662,24 @@
   /* «Lo que se pone en obra»: la aclaración de qué se instala realmente cuando el ítem con el que
      se certifica dice otra cosa (2026-09-06). Va SIEMPRE visible —también al imprimir— porque es
      justo lo que tiene que ver quien firma el certificado. */
+  /* ---- Buscador de plazas de la Calculadora (2026-09-06) ---- */
+  .pb-wrap{ position:relative; }
+  .pb-lista{ position:absolute; z-index:60; left:0; right:0; top:calc(100% + 4px);
+    max-height:340px; overflow-y:auto; background:var(--card,#fff); border:1px solid var(--line);
+    border-radius:10px; box-shadow:0 10px 28px rgba(0,0,0,.14); }
+  .pb-op{ display:block; width:100%; text-align:left; border:0; background:none; cursor:pointer;
+    padding:9px 12px; border-bottom:1px solid var(--line); font-size:13.5px; line-height:1.35; }
+  .pb-op:last-child{ border-bottom:0; }
+  .pb-op:hover, .pb-op.sel{ background:var(--bg-soft); }
+  .pb-op-n{ font-weight:650; }
+  .pb-op-d{ font-size:11.5px; color:var(--text-soft); margin-top:2px; }
+  .pb-tag{ display:inline-block; font-size:10px; font-weight:700; letter-spacing:.02em;
+    padding:1px 6px; border-radius:20px; margin-left:6px; vertical-align:1px; }
+  .pb-tag-lic{ background:#e8f0fe; color:#1a4d8f; }
+  .pb-tag-hecha{ background:#e6f6ec; color:#1d6b3a; }
+  .pb-tag-tablero{ background:#fdf0e3; color:#8a5200; }
+  .pb-vacio{ padding:12px; font-size:13px; color:var(--text-soft); }
+  .pb-mas{ padding:8px 12px; font-size:11.5px; color:var(--text-soft); background:var(--bg-soft); }
   .it-nota-obra{ font-size:11.5px; line-height:1.45; margin-top:6px; padding:6px 9px;
     background:#fff8e6; border-left:3px solid #e0a800; border-radius:0 5px 5px 0; color:#5c4600; }
   .it-nota-obra b{ color:#7a5c00; }
@@ -2280,6 +2298,16 @@
       <div class="card">
         <h2><span class="dot"></span>Datos de la obra</h2>
         <div id="histEditMsg" class="no-print" style="display:none; background:rgba(240,183,74,0.14); border:1px solid var(--amber); color:#6b5312; border-radius:8px; padding:10px 12px; font-size:13px; margin-bottom:10px;"></div>
+        <!-- Buscador de plaza (2026-09-06) — pedido del usuario: escribir las iniciales y que
+             aparezcan todas las plazas, elegir una y que la calculadora se llene sola con lo que
+             se sepa, para después editar y guardar. -->
+        <label for="plazaBuscar">Buscá la plaza y se llena sola</label>
+        <div class="pb-wrap">
+          <input type="text" id="plazaBuscar" autocomplete="off" placeholder="Escribí 2 letras del nombre, del barrio o el ID — ej: «mai», «renaci», «7081»">
+          <div class="pb-lista" id="plazaBuscarLista" style="display:none;"></div>
+        </div>
+        <div class="hint" id="plazaBuscarMsg" style="margin-top:6px;">Están las <b>244 plazas de la licitación</b>, las <b>36 que ya hicieron</b> y las que tengas cargadas en el tablero. Al elegir una se completan nombre, ID, barrio y zona, y si hay datos de esa plaza se precargan columnas, vínculos y zanjeo para que los corrijas contra el plano.</div>
+
         <label>Nombre de la obra / Plaza</label>
         <input type="text" id="obraNombre" placeholder="Ej: Plaza Colinas de Bella Vista">
         <div class="row2">
@@ -5533,6 +5561,255 @@ colTipoEl.addEventListener('change', poblarAlturas);
 // siempre metálica), así que el tipo sigue siendo uno solo por obra — eso mantiene intacto el cálculo
 // de BPN/portafusibles, que sí depende del tipo. También confirmó que los grupos de vínculo siguen
 // cargándose por separado, sin atarlos a los grupos de columna.
+// ============================================================
+// BUSCADOR DE PLAZAS — «escribo las iniciales y se llena sola» (2026-09-06)
+// ============================================================
+// Pedido del usuario, textual: *"yo pongo las iniciales y me vaya dando las opciones de plazas
+// como un listado de todas las plazas, y aparte selecciono una y me cargue, llene solo todo la
+// calculadora, cosa que yo vaya editando o agrandando, y al apretar guardar que se quede con eso"*.
+//
+// De dónde salen las plazas:
+//   · las 244 del ANEXO VI del pliego (window.PLAZAS_LICITACION) — de ellas sabemos ID, barrio,
+//     coordenadas y renglón, pero NO cuántas columnas tienen: eso sale del plano;
+//   · las 36 ya ejecutadas (window.PLAZAS_HECHAS) — de ellas hay itemizado viejo, así que se puede
+//     precargar columnas, vínculos y zanjeo;
+//   · las que ya estén cargadas en el tablero (avanceObras) — ahí puede haber un cómputo guardado.
+//
+// Lo que se precarga es SIEMPRE un punto de partida para corregir contra el plano, nunca un dato
+// definitivo: por eso cada precarga avisa de dónde salió y qué falta mirar.
+
+// Del texto del itemizado viejo se sacan altura, cantidad y cantidad de brazos. Los renglones son
+// del estilo «Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m».
+const PB_NUM_TXT = { un:1, uno:1, dos:2, tres:3, cuatro:4 };
+function pbLeerColumna(desc){
+  const d = String(desc||'');
+  if(!/columna/i.test(d)) return null;
+  const mAlt = d.match(/de\s+(\d+(?:[,.]\d+)?)\s*m\b/i);
+  if(!mAlt) return null;
+  const altura = parseFloat(mAlt[1].replace(',','.'));
+  const tipo = /prfv|poli[eé]ster/i.test(d) ? 'PRFV' : (/met[aá]lic/i.test(d) ? 'Metálica' : null);
+  if(!tipo) return null;
+  let brazos = null;
+  const mB = d.match(/(un|uno|dos|tres|cuatro|\d+)\s+brazo/i);
+  if(mB) brazos = PB_NUM_TXT[mB[1].toLowerCase()] || parseInt(mB[1]) || null;
+  const brazoM = /1[,.]0?25|1025/.test(d) ? 1.025 : (/1[,.]0?00|1000/.test(d) ? 1.0 : 0.425);
+  return { altura, tipo, brazos, brazoM };
+}
+const PB_VINC_ID = { 1:'simple_400', 2:'doble_400', 3:'triple_400', 4:'cuadruple_400' };
+const PB_VINC_ID_1025 = { 4:'cuadruple_1025' };
+
+// Arma el «paquete» de datos de una plaza de las 36 ejecutadas, a partir del itemizado viejo.
+function pbDatosDeHecha(ph){
+  const cols = [];        // {tipo, altura, columnas}
+  const vincs = [];       // {tipo, columnas}
+  let zanjeo = 0, tipoDominante = null, luminarias = 0;
+  (ph.it||[]).forEach(r=>{
+    const cant = parseFloat(r[1])||0, desc = String(r[2]||'');
+    if(!cant) return;
+    const c = pbLeerColumna(desc);
+    if(c){
+      const f = cols.find(x=>x.tipo===c.tipo && x.altura===c.altura);
+      if(f) f.columnas += cant; else cols.push({tipo:c.tipo, altura:c.altura, columnas:cant});
+      if(c.brazos){
+        const vid = (c.brazoM === 1.025 ? PB_VINC_ID_1025[c.brazos] : PB_VINC_ID[c.brazos]) || PB_VINC_ID[c.brazos];
+        if(vid){ const g = vincs.find(x=>x.tipo===vid); if(g) g.columnas += cant; else vincs.push({tipo:vid, columnas:cant}); }
+        luminarias += cant * c.brazos;
+      }
+      return;
+    }
+    if(/^zanjeo/i.test(desc)) zanjeo += cant;
+  });
+  cols.forEach(c=>{ if(!tipoDominante || c.columnas > (cols.find(x=>x.tipo===tipoDominante)||{columnas:0}).columnas) tipoDominante = c.tipo; });
+  return { cols, vincs, zanjeo, luminarias, tipo: ph.prfv ? 'PRFV' : (tipoDominante || 'Metálica') };
+}
+
+// Junta las tres fuentes en una sola lista buscable, sin repetir.
+function pbCatalogo(){
+  const out = [];
+  const vistos = new Set();
+  const hechas = (window.PLAZAS_HECHAS || []);
+  const lic    = (window.PLAZAS_LICITACION || []);
+  const enTablero = (typeof avanceObras !== 'undefined' && Array.isArray(avanceObras)) ? avanceObras : [];
+
+  // 1) Las 36 ya ejecutadas — son las que más datos traen, van primero.
+  hechas.forEach(ph=>{
+    const ids = (ph.ids||[]).filter(Boolean);
+    const key = 'H|' + ph.n;
+    if(vistos.has(key)) return; vistos.add(key);
+    ids.forEach(id=>vistos.add('ID|'+id));
+    out.push({ fuente:'hecha', nombre:ph.n, id:ids.join(' / '), ids, barrio:ph.barrio||'',
+               zona:ph.z||'', mod:ph.mod||0, obra:!!ph.obra, ph });
+  });
+  // 2) Las 244 de la licitación que no estén ya arriba.
+  lic.forEach(p=>{
+    const id = String(p[1]);
+    if(vistos.has('ID|'+id)) return; vistos.add('ID|'+id);
+    out.push({ fuente:'licitacion', nombre:p[2], id, ids:[id], barrio:p[2],
+               zona:p[5]||'', lat:p[3], lng:p[4], nro:p[0] });
+  });
+  // 3) Las del tablero que no sean ninguna de las anteriores.
+  enTablero.forEach(a=>{
+    const id = String(a.obraId||'').trim();
+    if(id && vistos.has('ID|'+id)) return;
+    const key = 'T|' + (a.nombre||a.id);
+    if(vistos.has(key)) return; vistos.add(key);
+    out.push({ fuente:'tablero', nombre:a.nombre||'(sin nombre)', id, ids:id?[id]:[],
+               barrio:a.barrio||'', zona:'', obraRef:a });
+  });
+  return out;
+}
+
+// Helpers locales del buscador — no dependen de nada de otros bloques.
+function pbEsc(t){ return (typeof escHtml === 'function') ? escHtml(String(t==null?'':t)) : String(t==null?'':t); }
+function pbFmt(n){ return new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(Number(n)||0); }
+function pbFmt2(n){ return new Intl.NumberFormat('es-AR',{maximumFractionDigits:2}).format(Number(n)||0); }
+
+// Normaliza para buscar sin tildes ni mayúsculas.
+function pbNorm(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+let pbResultados = [], pbSel = -1;
+function pbRenderLista(q){
+  const cont = document.getElementById('plazaBuscarLista');
+  if(!cont) return;
+  const t = pbNorm(q).trim();
+  if(t.length < 2){ cont.style.display='none'; cont.innerHTML=''; pbResultados=[]; return; }
+  const todos = pbCatalogo();
+  const hits = todos.filter(p =>
+    pbNorm(p.nombre).includes(t) || pbNorm(p.barrio).includes(t) || pbNorm(p.id).includes(t)
+  );
+  // Primero las que arrancan con lo escrito, después las que lo contienen.
+  hits.sort((a,b)=>{
+    const ap = pbNorm(a.nombre).startsWith(t) || pbNorm(a.id).startsWith(t) ? 0 : 1;
+    const bp = pbNorm(b.nombre).startsWith(t) || pbNorm(b.id).startsWith(t) ? 0 : 1;
+    if(ap !== bp) return ap - bp;
+    const orden = { hecha:0, tablero:1, licitacion:2 };
+    if(orden[a.fuente] !== orden[b.fuente]) return orden[a.fuente] - orden[b.fuente];
+    return pbNorm(a.nombre).localeCompare(pbNorm(b.nombre));
+  });
+  pbResultados = hits.slice(0, 40);
+  pbSel = -1;
+  if(!hits.length){
+    cont.innerHTML = `<div class="pb-vacio">No hay ninguna plaza que coincida con «${pbEsc(q)}». Probá con el barrio o con el ID.<br>
+      Si es una plaza que no está en la licitación, escribí el nombre a mano en el campo de abajo.</div>`;
+    cont.style.display='block'; return;
+  }
+  const ZL = { A:'Renglón 1 · Zona A (Este)', B:'Renglón 2 · Zona B (Centro)', C:'Renglón 3 · Zona C (Oeste)' };
+  const TAG = { hecha:'<span class="pb-tag pb-tag-hecha">ya ejecutada</span>',
+                tablero:'<span class="pb-tag pb-tag-tablero">en el tablero</span>',
+                licitacion:'<span class="pb-tag pb-tag-lic">de la licitación</span>' };
+  cont.innerHTML = pbResultados.map((p,i)=>{
+    const det = [ p.id ? 'ID ' + p.id : '', p.barrio && p.barrio !== p.nombre ? p.barrio : '',
+                  ZL[p.zona] || '', p.obra ? 'en obra ahora' : '' ].filter(Boolean).join(' · ');
+    return `<button type="button" class="pb-op" data-i="${i}">
+      <div class="pb-op-n">${pbEsc(p.nombre)}${TAG[p.fuente]||''}</div>
+      <div class="pb-op-d">${pbEsc(det)}</div></button>`;
+  }).join('') + (hits.length > 40 ? `<div class="pb-mas">…y ${hits.length-40} más. Escribí un poco más para achicar la lista.</div>` : '');
+  cont.style.display = 'block';
+}
+
+// Al elegir una plaza: llena el encabezado y, si hay con qué, precarga las secciones.
+function pbElegir(i){
+  const p = pbResultados[i];
+  if(!p) return;
+  const set = (id,v)=>{ const e=document.getElementById(id); if(e){ e.value = v; e.dispatchEvent(new Event('input',{bubbles:true})); } };
+  set('obraNombre', p.nombre);
+  set('obraId', p.id ? p.id.split(' / ')[0] : '');
+  set('obraBarrio', p.barrio || '');
+
+  const avisos = [];
+  const ZL = { A:'Renglón 1 · Zona A (Este)', B:'Renglón 2 · Zona B (Centro)', C:'Renglón 3 · Zona C (Oeste)' };
+  if(p.zona) avisos.push(`Es del <b>${ZL[p.zona]}</b>.`);
+
+  if(p.fuente === 'hecha'){
+    const d = pbDatosDeHecha(p.ph);
+    if(d.cols.length){
+      // Tipo de columna
+      const sel = document.getElementById('colTipo');
+      if(sel){ sel.value = d.tipo; sel.dispatchEvent(new Event('change',{bubbles:true})); }
+      const selV = document.getElementById('vincTipoCol');
+      if(selV){ selV.value = d.tipo; selV.dispatchEvent(new Event('change',{bubbles:true})); }
+      const selC = document.getElementById('civilTipoCol');
+      if(selC){ selC.value = d.tipo; selC.dispatchEvent(new Event('change',{bubbles:true})); }
+      // Columnas y obra civil
+      columnaGrupos = d.cols.map(c=>({ id: columnaGrupoIdSeq++, altura: c.altura, columnas: Math.round(c.columnas) }));
+      if(typeof renderColumnaGrupos === 'function') renderColumnaGrupos();
+      civilGrupos = d.cols.map(c=>({ id: civilGrupoIdSeq++, altura: c.altura, columnas: Math.round(c.columnas) }));
+      if(typeof renderCivilGrupos === 'function') renderCivilGrupos();
+      // Vínculos
+      if(d.vincs.length){
+        vinculoGrupos = d.vincs.map(v=>({ id: vinculoGrupoIdSeq++, tipo: v.tipo, columnas: Math.round(v.columnas) }));
+        if(typeof renderVinculoGrupos === 'function') renderVinculoGrupos();
+      }
+      if(d.zanjeo > 0) set('civilZanjaMl', String(Math.round(d.zanjeo)));
+      const tot = d.cols.reduce((a,c)=>a+c.columnas,0);
+      // El itemizado viejo a veces trae cantidades partidas (p. ej. «0,8 columna de 10 m»), que son
+      // proporciones de pago, no columnas. Se redondean para poder arrancar, pero hay que avisarlo.
+      const partidas = d.cols.filter(c=>Math.abs(c.columnas - Math.round(c.columnas)) > 0.001);
+      if(partidas.length){
+        avisos.push('⚠ En el itemizado viejo hay cantidades <b>partidas</b> (' +
+          partidas.map(c=>pbFmt2(c.columnas)+' de '+pbFmt2(c.altura)+' m').join(', ') +
+          '), que son proporciones de pago y no columnas enteras. Se redondearon para arrancar: <b>confirmá contra el plano cuántas columnas hay de verdad.</b>');
+      }
+      avisos.push(`Se precargaron <b>${pbFmt(tot,0)} columna(s)</b> ${d.tipo === 'PRFV' ? 'de PRFV' : 'metálicas'} en ${d.cols.length} altura(s)${d.vincs.length?`, sus vínculos`:''}${d.zanjeo?` y <b>${pbFmt(d.zanjeo,0)} m de zanjeo</b>`:''}.`);
+      avisos.push(`<b>Estos números salen del itemizado viejo de esa plaza, no del plano.</b> Sirven de arranque: revisalos uno por uno contra el plano y corregí lo que haga falta antes de guardar.`);
+    } else {
+      avisos.push('Esta plaza está en la lista de las ya ejecutadas pero <b>no tiene ítems cargados todavía</b>, así que hay que cargar todo desde el plano.');
+    }
+    if(p.obra) avisos.push('⚠ Esta plaza <b>está en obra ahora mismo</b>: el cómputo que saques todavía no es el final.');
+  } else if(p.fuente === 'tablero'){
+    avisos.push('Esta plaza <b>ya está cargada en el tablero</b>. Si tenía un cómputo guardado, lo podés traer entero desde <b>Historial</b> en vez de cargarlo de nuevo.');
+  } else {
+    avisos.push('De esta plaza el pliego solo trae el ID, el barrio y la zona. <b>Las columnas, los cables y el zanjeo salen del plano</b> — cargalos abajo.');
+  }
+
+  const msg = document.getElementById('plazaBuscarMsg');
+  if(msg) msg.innerHTML = `<b>${pbEsc(p.nombre)}</b> — ` + avisos.join(' ');
+  const inp = document.getElementById('plazaBuscar');
+  if(inp) inp.value = p.nombre;
+  const cont = document.getElementById('plazaBuscarLista');
+  if(cont){ cont.style.display='none'; cont.innerHTML=''; }
+  if(typeof calcular === 'function'){ try{ calcular(); }catch(e){} }
+}
+
+// Cableado, defensivo: si el input no existe todavía, no rompe nada.
+(function cablearBuscadorPlazas(){
+  const armar = ()=>{
+    const inp = document.getElementById('plazaBuscar');
+    const cont = document.getElementById('plazaBuscarLista');
+    if(!inp || !cont || inp.dataset.pbListo) return;
+    inp.dataset.pbListo = '1';
+    inp.addEventListener('input', ()=> pbRenderLista(inp.value));
+    inp.addEventListener('focus', ()=>{ if(inp.value.trim().length >= 2) pbRenderLista(inp.value); });
+    inp.addEventListener('keydown', (e)=>{
+      const ops = cont.querySelectorAll('.pb-op');
+      if(!ops.length) return;
+      if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+        e.preventDefault();
+        pbSel = e.key === 'ArrowDown' ? Math.min(pbSel+1, ops.length-1) : Math.max(pbSel-1, 0);
+        ops.forEach(o=>o.classList.remove('sel'));
+        ops[pbSel].classList.add('sel');
+        ops[pbSel].scrollIntoView({block:'nearest'});
+      } else if(e.key === 'Enter'){
+        e.preventDefault();
+        pbElegir(pbSel >= 0 ? pbSel : 0);
+      } else if(e.key === 'Escape'){
+        cont.style.display='none';
+      }
+    });
+    cont.addEventListener('click', (e)=>{
+      const b = e.target.closest('.pb-op');
+      if(b) pbElegir(parseInt(b.dataset.i, 10));
+    });
+    document.addEventListener('click', (e)=>{
+      if(!e.target.closest('.pb-wrap')) cont.style.display='none';
+    });
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', armar);
+  else armar();
+})();
+
 let columnaGrupoIdSeq = 1;
 let columnaGrupos = [{ id: columnaGrupoIdSeq++, altura: 7, columnas: 7 }];
 
@@ -16459,6 +16736,13 @@ const PLAZAS_LICITACION = [[1,"4045","Altos de Santa Ana",-31.410859,-64.245641,
 //      · Ampliación Las Palmas: el resumen decía 18,0355 · la hoja da 20,8410
 //    Con eso el total de las 36 pasa de 998,3691 a **993,2637 módulos**.
 const PLAZAS_HECHAS = [{"n":"SANTA ANA","ids":["4045"],"ord":[1],"barrio":"Altos de Santa Ana","z":"A","mod":19.5468,"it":[[2,2.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,3.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[25,2.0,"Acometida subterránea nueva en columna metálica","42"],[28,0.2,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[32,1.0,"Termomagnético unipolar mayor a 16 A","57"],[47,2.0,"Reacondicionamiento · limpieza, lijado y pintado","41"],[48,2.0,"Reacondicionamiento · borneras y conductores","42"],[49,2.0,"Reacondicionamiento · PAT completa y dado de hormigón","","77","el viejo es la PAT completa de una columna existente; el 77 es el caño de H°G° con jabalina. En columna METÁLICA nueva la PAT ya está adentro del ítem 1 a 4"],[50,2.0,"Retiro de luminaria existente","45"],[51,1.0,"Retiro de columna metálica","46"],[55,7.0,"Montaje de luminaria LED sobre columna existente","44"],[65,191.0,"Cable 2×6 mm² tendido en zanja","27"],[74,238.0,"Zanjeo en terreno natural","15"],[80,3.0,"Poda de árboles","82"]]},{"n":"JERUSALEN","ids":["4026"],"ord":[2],"barrio":"Los Platanos","z":"A","mod":22.6803,"it":[[1,1.0,"Columna metálica de 8 m · capuchón + un brazo(s) de 0,425 m","","1","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[2,1.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,2.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[12,0.8,"Columna metálica de 10 m · capuchón + dos brazo(s) de 1,025 m","","4","la cantidad de brazos: el viejo tiene 2 y el ítem nuevo de 10 m es de 4"],[21,15.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[47,5.0,"Reacondicionamiento · limpieza, lijado y pintado","41"],[48,5.0,"Reacondicionamiento · borneras y conductores","42"],[49,5.0,"Reacondicionamiento · PAT completa y dado de hormigón","","77","el viejo es la PAT completa de una columna existente; el 77 es el caño de H°G° con jabalina. En columna METÁLICA nueva la PAT ya está adentro del ítem 1 a 4"],[50,5.0,"Retiro de luminaria existente","45"],[51,2.0,"Retiro de columna metálica","46"],[55,13.0,"Montaje de luminaria LED sobre columna existente","44"],[61,268.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,198.0,"Zanjeo en terreno natural","15"],[80,5.0,"Poda de árboles","82"]]},{"n":"PARQUE LATINO","ids":["6072"],"ord":[3],"barrio":"Parque Latino","z":"A","mod":22.3908,"it":[[2,1.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,3.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[12,0.6,"Columna metálica de 10 m · capuchón + dos brazo(s) de 1,025 m","","4","la cantidad de brazos: el viejo tiene 2 y el ítem nuevo de 10 m es de 4"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,15.0,"Acometida aérea EPEC ↔ tablero","11"],[25,3.0,"Acometida subterránea nueva en columna metálica","42"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[29,2.0,"Diferencial bipolar","58"],[38,2.0,"Termomagnético tetrapolar mayor a 25 A","51"],[47,3.0,"Reacondicionamiento · limpieza, lijado y pintado","41"],[48,3.0,"Reacondicionamiento · borneras y conductores","42"],[49,3.0,"Reacondicionamiento · PAT completa y dado de hormigón","","77","el viejo es la PAT completa de una columna existente; el 77 es el caño de H°G° con jabalina. En columna METÁLICA nueva la PAT ya está adentro del ítem 1 a 4"],[50,3.0,"Retiro de luminaria existente","45"],[55,9.0,"Montaje de luminaria LED sobre columna existente","44"],[56,1.0,"Retiro de tablero existente","49"],[61,270.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,187.0,"Zanjeo en terreno natural","15"],[80,5.0,"Poda de árboles","82"]]},{"n":"PARQUE DEL AGUA","ids":["5909"],"ord":[4],"barrio":"Parque Capital","z":"A","mod":53.4734,"it":[[12,2.25,"Columna metálica de 10 m · capuchón + dos brazo(s) de 1,025 m","","4","la cantidad de brazos: el viejo tiene 2 y el ítem nuevo de 10 m es de 4"],[15,0.75,"Relevamiento, ingeniería, marcado, excavación, fundación de hormigón; ","","4","es una columna tipo JIRAFA de MÁS de 10 m, y el Anexo I no tasa jirafas ni alturas mayores a 10 m"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,15.0,"Acometida aérea EPEC ↔ tablero","11"],[25,6.0,"Acometida subterránea nueva en columna metálica","42"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[32,10.0,"Termomagnético unipolar mayor a 16 A","57"],[47,6.0,"Reacondicionamiento · limpieza, lijado y pintado","41"],[48,6.0,"Reacondicionamiento · borneras y conductores","42"],[49,6.0,"Reacondicionamiento · PAT completa y dado de hormigón","","77","el viejo es la PAT completa de una columna existente; el 77 es el caño de H°G° con jabalina. En columna METÁLICA nueva la PAT ya está adentro del ítem 1 a 4"],[50,28.0,"Retiro de luminaria existente","45"],[51,3.0,"Retiro de columna metálica","46"],[55,28.0,"Montaje de luminaria LED sobre columna existente","44"],[56,1.0,"Retiro de tablero existente","49"],[61,218.0,"Cable 4×2,5 mm² tendido en zanja","36"],[64,398.0,"Cable 4×4 mm² tendido en zanja","37"],[74,800.0,"Zanjeo en terreno natural","15"],[80,4.0,"Poda de árboles","82"]]},{"n":"LA PLAZONA","ids":["5082"],"ord":[5],"barrio":"Mariano Balcarce","z":"A","mod":19.496,"it":[[6,2.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[12,0.8,"Columna metálica de 10 m · capuchón + dos brazo(s) de 1,025 m","","4","la cantidad de brazos: el viejo tiene 2 y el ítem nuevo de 10 m es de 4"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,15.0,"Acometida aérea EPEC ↔ tablero","11"],[25,4.0,"Acometida subterránea nueva en columna metálica","42"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[30,1.0,"Diferencial tetrapolar","59"],[47,4.0,"Reacondicionamiento · limpieza, lijado y pintado","41"],[48,4.0,"Reacondicionamiento · borneras y conductores","42"],[49,4.0,"Reacondicionamiento · PAT completa y dado de hormigón","","77","el viejo es la PAT completa de una columna existente; el 77 es el caño de H°G° con jabalina. En columna METÁLICA nueva la PAT ya está adentro del ítem 1 a 4"],[50,4.0,"Retiro de luminaria existente","45"],[51,2.0,"Retiro de columna metálica","46"],[55,12.0,"Montaje de luminaria LED sobre columna existente","44"],[56,1.0,"Retiro de tablero existente","49"],[61,191.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,170.0,"Zanjeo en terreno natural","15"],[80,4.0,"Poda de árboles","82"]]},{"n":"LUIS VERNET","ids":["0002"],"ord":[6],"barrio":"Observatorio","z":"A","mod":12.7991,"it":[[2,1.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,3.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,15.0,"Acometida aérea EPEC ↔ tablero","11"],[23,1.0,"Acometida aérea monofásica a luminaria","","","el Anexo I no tiene ítem de acometida aérea monofásica a luminaria"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[30,1.0,"Diferencial tetrapolar","59"],[61,70.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,75.0,"Zanjeo en terreno natural","15"],[76,5.0,"Zanjeo con pisos de hormigón","17"],[80,3.0,"Poda de árboles","82"]]},{"n":"NICOLAS AVELLANEDA","ids":["7161"],"ord":[7],"barrio":"Nicolas Avellaneda","z":"A","mod":31.3656,"it":[[6,8.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[12,0.2,"Columna metálica de 10 m · capuchón + dos brazo(s) de 1,025 m","","4","la cantidad de brazos: el viejo tiene 2 y el ítem nuevo de 10 m es de 4"],[15,0.1,"Relevamiento, ingeniería, marcado, excavación, fundación de hormigón; ","","4","es una columna tipo JIRAFA de MÁS de 10 m, y el Anexo I no tasa jirafas ni alturas mayores a 10 m"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,20.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[51,5.0,"Retiro de columna metálica","46"],[61,210.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,375.0,"Zanjeo en terreno natural","15"],[76,15.0,"Zanjeo con pisos de hormigón","17"],[80,7.0,"Poda de árboles","82"]]},{"n":"SOLDADO AERONAUTICO","ids":["1072"],"ord":[8],"barrio":"Parque Jorge Newbery","z":"A","mod":64.8335,"it":[[2,18.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,6.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,15.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[50,22.0,"Retiro de luminaria existente","45"],[51,22.0,"Retiro de columna metálica","46"],[52,1.0,"Poste de hormigón armado / PRFV para el tendido","47"],[56,1.0,"Retiro de tablero existente","49"],[64,698.0,"Cable 4×4 mm² tendido en zanja","37"],[74,630.0,"Zanjeo en terreno natural","15"]]},{"n":"JERONIMO LUIS DE CABRERA","ids":["1010"],"ord":[9],"barrio":"Alta Córdoba","z":"A","mod":33.5374,"it":[[2,11.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[21,5.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[31,6.0,"Termomagnético unipolar hasta 16 A","56"],[61,350.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,360.0,"Zanjeo en terreno natural","15"],[80,5.0,"Poda de árboles","82"]]},{"n":"PABLO BRACAMONTE","ids":["3114"],"ord":[10],"barrio":"Colinas del Cerro","z":"A","mod":9.3982,"it":[[6,2.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,15.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[30,1.0,"Diferencial tetrapolar","59"],[61,70.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,60.0,"Zanjeo en terreno natural","15"],[80,2.0,"Poda de árboles","82"]]},{"n":"ELEODORO FIERRO","ids":[],"ord":[],"barrio":"","z":"","mod":18.282,"it":[[21,15.0,"Acometida aérea EPEC ↔ tablero","11"],[25,4.0,"Acometida subterránea nueva en columna metálica","42"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[30,1.0,"Diferencial tetrapolar","59"],[47,4.0,"Reacondicionamiento · limpieza, lijado y pintado","41"],[48,4.0,"Reacondicionamiento · borneras y conductores","42"],[49,4.0,"Reacondicionamiento · PAT completa y dado de hormigón","","77","el viejo es la PAT completa de una columna existente; el 77 es el caño de H°G° con jabalina. En columna METÁLICA nueva la PAT ya está adentro del ítem 1 a 4"],[50,12.0,"Retiro de luminaria existente","45"],[55,16.0,"Montaje de luminaria LED sobre columna existente","44"],[61,138.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,225.0,"Zanjeo en terreno natural","15"],[80,4.0,"Poda de árboles","82"]]},{"n":"PASEO DE LA SOLIDARIDAD","ids":["3123"],"ord":[12],"barrio":"Alejandro Centeno","z":"A","mod":18.4892,"it":[[1,2.0,"Columna metálica de 8 m · capuchón + un brazo(s) de 0,425 m","","1","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[2,2.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,3.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,15.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[30,1.0,"Diferencial tetrapolar","59"],[61,175.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,125.0,"Zanjeo en terreno natural","15"],[80,5.0,"Poda de árboles","82"]]},{"n":"EVARISTO FERNANDEZ","ids":["9074"],"ord":[13],"barrio":"Parque Liceo 3ª Sección","z":"A","mod":22.5479,"it":[[6,6.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,5.0,"Acometida aérea EPEC ↔ tablero","11"],[25,1.0,"Acometida subterránea nueva en columna metálica","42"],[31,6.0,"Termomagnético unipolar hasta 16 A","56"],[38,1.0,"Termomagnético tetrapolar mayor a 25 A","51"],[47,1.0,"Reacondicionamiento · limpieza, lijado y pintado","41"],[48,1.0,"Reacondicionamiento · borneras y conductores","42"],[49,1.0,"Reacondicionamiento · PAT completa y dado de hormigón","","77","el viejo es la PAT completa de una columna existente; el 77 es el caño de H°G° con jabalina. En columna METÁLICA nueva la PAT ya está adentro del ítem 1 a 4"],[50,2.0,"Retiro de luminaria existente","45"],[61,309.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,300.0,"Zanjeo en terreno natural","15"],[80,1.0,"Poda de árboles","82"]]},{"n":"TIERRA DEL FUEGO","ids":["8074"],"ord":[14],"barrio":"Los Pinos","z":"A","mod":17.9275,"it":[[2,3.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,2.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,5.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[61,170.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,192.0,"Zanjeo en terreno natural","15"]]},{"n":"MARQUES DE SOBREMONTE","ids":["2051"],"ord":[15],"barrio":"Marques de Sobremonte","z":"A","mod":14.224,"it":[[6,3.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[12,0.2,"Columna metálica de 10 m · capuchón + dos brazo(s) de 1,025 m","","4","la cantidad de brazos: el viejo tiene 2 y el ítem nuevo de 10 m es de 4"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,20.0,"Acometida aérea EPEC ↔ tablero","11"],[25,1.0,"Acometida subterránea nueva en columna metálica","42"],[26,1.0,"Modificación de columna metálica","","41","el viejo es «modificación de columna metálica a apta para acometida aérea» y el 41 es el reacondicionamiento general"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[30,1.0,"Diferencial tetrapolar","59"],[47,1.0,"Reacondicionamiento · limpieza, lijado y pintado","41"],[48,1.0,"Reacondicionamiento · borneras y conductores","42"],[49,1.0,"Reacondicionamiento · PAT completa y dado de hormigón","","77","el viejo es la PAT completa de una columna existente; el 77 es el caño de H°G° con jabalina. En columna METÁLICA nueva la PAT ya está adentro del ítem 1 a 4"],[50,3.0,"Retiro de luminaria existente","45"],[51,3.0,"Retiro de columna metálica","46"],[55,3.0,"Montaje de luminaria LED sobre columna existente","44"],[61,114.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,82.0,"Zanjeo en terreno natural","15"],[76,10.0,"Zanjeo con pisos de hormigón","17"],[80,2.0,"Poda de árboles","82"]]},{"n":"POETA LUGONES","ids":["2005"],"ord":[16],"barrio":"Poeta Lugones","z":"A","mod":70.4593,"it":[[1,2.0,"Columna metálica de 8 m · capuchón + un brazo(s) de 0,425 m","","1","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[4,5.4,"Columna metálica de 8 m · capuchón + dos brazo(s) de 1,025 m","","2","la altura (8 m contra 7 m) y el largo del brazo (1,025 m contra 0,425 m)"],[21,30.0,"Acometida aérea EPEC ↔ tablero","11"],[25,17.0,"Acometida subterránea nueva en columna metálica","42"],[28,2.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[31,12.0,"Termomagnético unipolar hasta 16 A","56"],[37,2.0,"Termomagnético tetrapolar hasta 25 A","50"],[38,2.0,"Termomagnético tetrapolar mayor a 25 A","51"],[47,17.0,"Reacondicionamiento · limpieza, lijado y pintado","41"],[48,17.0,"Reacondicionamiento · borneras y conductores","42"],[49,17.0,"Reacondicionamiento · PAT completa y dado de hormigón","","77","el viejo es la PAT completa de una columna existente; el 77 es el caño de H°G° con jabalina. En columna METÁLICA nueva la PAT ya está adentro del ítem 1 a 4"],[50,2.0,"Retiro de luminaria existente","45"],[51,2.0,"Retiro de columna metálica","46"],[54,17.0,"Aplomado de columna metálica","43"],[55,2.0,"Montaje de luminaria LED sobre columna existente","44"],[61,826.0,"Cable 4×2,5 mm² tendido en zanja","36"],[67,105.0,"Cable 4×6 mm² tendido en zanja","38"],[74,736.0,"Zanjeo en terreno natural","15"],[75,30.0,"Zanjeo con pisos de baldosas","16"],[79,10.0,"Cruce de calle · carpeta asfáltica","24"],[80,17.0,"Poda de árboles","82"]]},{"n":"ALBERTO PIO","ids":["3191"],"ord":[17],"barrio":"Los Boulevares","z":"A","mod":25.4031,"it":[[6,1.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[12,1.6,"Columna metálica de 10 m · capuchón + dos brazo(s) de 1,025 m","","4","la cantidad de brazos: el viejo tiene 2 y el ítem nuevo de 10 m es de 4"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,20.0,"Acometida aérea EPEC ↔ tablero","11"],[25,8.0,"Acometida subterránea nueva en columna metálica","42"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[32,6.0,"Termomagnético unipolar mayor a 16 A","57"],[47,8.0,"Reacondicionamiento · limpieza, lijado y pintado","41"],[48,8.0,"Reacondicionamiento · borneras y conductores","42"],[49,8.0,"Reacondicionamiento · PAT completa y dado de hormigón","","77","el viejo es la PAT completa de una columna existente; el 77 es el caño de H°G° con jabalina. En columna METÁLICA nueva la PAT ya está adentro del ítem 1 a 4"],[54,1.0,"Aplomado de columna metálica","43"],[55,24.0,"Montaje de luminaria LED sobre columna existente","44"],[56,1.0,"Retiro de tablero existente","49"],[61,283.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,240.0,"Zanjeo en terreno natural","15"],[80,2.0,"Poda de árboles","82"]]},{"n":"NUEVO ARGUELLO","ids":["3232"],"ord":[18],"barrio":"Nuevo Argüello","z":"A","mod":17.9322,"it":[[2,1.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,4.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,5.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[30,1.0,"Diferencial tetrapolar","59"],[51,3.0,"Retiro de columna metálica","46"],[61,171.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,176.0,"Zanjeo en terreno natural","15"]]},{"n":"LA VIRGEN","ids":["3231"],"ord":[19],"barrio":"Nuevo Argüello","z":"A","mod":25.899,"it":[[6,7.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,25.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[30,1.0,"Diferencial tetrapolar","59"],[51,5.0,"Retiro de columna metálica","46"],[61,257.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,284.0,"Zanjeo en terreno natural","15"]]},{"n":"LOS TARTAROS","ids":["5001","5002"],"ord":[20,55],"barrio":"Industrial Oeste / 20 de Junio","z":"A","mod":23.1889,"it":[[6,5.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,5.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[30,2.0,"Diferencial tetrapolar","59"],[38,2.0,"Termomagnético tetrapolar mayor a 25 A","51"],[39,1.0,"Contactor tripolar 40 A","61"],[50,12.0,"Retiro de luminaria existente","45"],[51,4.0,"Retiro de columna metálica","46"],[61,172.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,192.0,"Zanjeo en terreno natural","15"],[79,10.0,"Cruce de calle · carpeta asfáltica","24"]]},{"n":"CABILDO","ids":["6240","6241"],"ord":[21,22],"barrio":"Ampliación Cabildo / Ampliación Cabildo","z":"A","mod":49.6315,"it":[[6,6.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[12,5.0,"Columna metálica de 10 m · capuchón + dos brazo(s) de 1,025 m","","4","la cantidad de brazos: el viejo tiene 2 y el ítem nuevo de 10 m es de 4"],[21,20.0,"Acometida aérea EPEC ↔ tablero","11"],[25,5.0,"Acometida subterránea nueva en columna metálica","42"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[47,5.0,"Reacondicionamiento · limpieza, lijado y pintado","41"],[48,5.0,"Reacondicionamiento · borneras y conductores","42"],[49,5.0,"Reacondicionamiento · PAT completa y dado de hormigón","","77","el viejo es la PAT completa de una columna existente; el 77 es el caño de H°G° con jabalina. En columna METÁLICA nueva la PAT ya está adentro del ítem 1 a 4"],[50,10.0,"Retiro de luminaria existente","45"],[55,15.0,"Montaje de luminaria LED sobre columna existente","44"],[61,380.0,"Cable 4×2,5 mm² tendido en zanja","36"],[64,151.0,"Cable 4×4 mm² tendido en zanja","37"],[74,480.0,"Zanjeo en terreno natural","15"],[75,21.0,"Zanjeo con pisos de baldosas","16"],[79,15.0,"Cruce de calle · carpeta asfáltica","24"]]},{"n":"RENACIMIENTO","ids":["12022","12001"],"ord":[25,24],"barrio":"Renacimiento / Renacimiento","z":"A","mod":51.6354,"it":[[2,4.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,8.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[20,2.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,15.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[50,4.0,"Retiro de luminaria existente","45"],[51,4.0,"Retiro de columna metálica","46"],[64,253.0,"Cable 4×4 mm² tendido en zanja","37"],[67,236.0,"Cable 4×6 mm² tendido en zanja","38"],[76,366.0,"Zanjeo con pisos de hormigón","17"],[78,30.0,"Cruce de calle · hormigón armado","23"]]},{"n":"MALVAVISCO","ids":["4724","4725"],"ord":[23,63],"barrio":"Valle Escondido / Jardines del Valle","z":"A","mod":41.5823,"it":[[2,2.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","2","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[3,12.0,"Columna metálica de 8 m · capuchón + un brazo(s) de 1,025 m","","1","la altura (8 m contra 7 m) y el largo del brazo (1,025 m contra 0,425 m)"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,15.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[50,13.0,"Retiro de luminaria existente","45"],[51,13.0,"Retiro de columna metálica","46"],[56,1.0,"Retiro de tablero existente","49"],[61,391.0,"Cable 4×2,5 mm² tendido en zanja","36"],[64,116.0,"Cable 4×4 mm² tendido en zanja","37"],[74,401.0,"Zanjeo en terreno natural","15"]]},{"n":"PLAZA CERRO COLORADO","ids":["D010"],"ord":[26],"barrio":"Bialet Masse","z":"A","mod":24.5431,"it":[[2,1.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,8.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,15.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[50,3.0,"Retiro de luminaria existente","45"],[51,3.0,"Retiro de columna metálica","46"],[61,71.0,"Cable 4×2,5 mm² tendido en zanja","36"],[64,235.0,"Cable 4×4 mm² tendido en zanja","37"],[74,189.0,"Zanjeo en terreno natural","15"]],"prfv":1},{"n":"PLAZA COLINAS DE BELLA VISTA","ids":["C001"],"ord":[29],"barrio":"Colinas de Bella Vista","z":"B","mod":14.592,"it":[[2,1.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,4.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,10.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[51,2.0,"Retiro de columna metálica","46"],[61,154.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,102.0,"Zanjeo en terreno natural","15"]],"prfv":1},{"n":"PLAZA VUELTA DEL OBLIGADO 4029-4028","ids":["4029","4028"],"ord":[33,32],"barrio":"Los Platanos / Los Platanos","z":"B","mod":41.8103,"it":[[2,2.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,11.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,5.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[50,4.0,"Retiro de luminaria existente","45"],[51,4.0,"Retiro de columna metálica","46"],[67,568.0,"Cable 4×6 mm² tendido en zanja","38"],[74,415.0,"Zanjeo en terreno natural","15"]],"prfv":1},{"n":"PLAZA CHAMICAL-4063","ids":["4063"],"ord":[38],"barrio":"Escobar","z":"A","mod":21.7679,"it":[[2,1.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,6.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,18.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[61,121.0,"Cable 4×2,5 mm² tendido en zanja","36"],[64,150.0,"Cable 4×4 mm² tendido en zanja","37"],[74,195.0,"Zanjeo en terreno natural","15"]],"prfv":1},{"n":"PLAZA ROBERTO KOCH","ids":["3086"],"ord":[39],"barrio":"Argüello","z":"A","mod":9.8393,"it":[[2,2.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,1.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[22,12.0,"Acometida subterránea EPEC ↔ tablero","12"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[51,2.0,"Retiro de columna metálica","46"],[61,71.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,40.0,"Zanjeo en terreno natural","15"]],"prfv":1},{"n":"PLAZA ROBERTO VIOLA","ids":["2020"],"ord":[42],"barrio":"Altos San Martín","z":"B","mod":12.1471,"it":[[2,2.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,1.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,18.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[51,3.0,"Retiro de columna metálica","46"],[61,110.0,"Cable 4×2,5 mm² tendido en zanja","36"],[75,63.0,"Zanjeo con pisos de baldosas","16"]],"prfv":1},{"n":"PLAZA MAIPU","ids":["7081"],"ord":[66],"barrio":"Maipú 1era Sección","z":"A","mod":16.141,"it":[[6,5.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,12.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[51,4.0,"Retiro de columna metálica","46"],[56,1.0,"Retiro de tablero existente","49"],[64,183.0,"Cable 4×4 mm² tendido en zanja","37"],[74,120.0,"Zanjeo en terreno natural","15"]],"prfv":1},{"n":"PLAZA CONSORCIO ESPERANZA","ids":["4031"],"ord":[36],"barrio":"Los Granados","z":"A","mod":10.1246,"it":[[6,3.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[21,5.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[51,2.0,"Retiro de columna metálica","46"],[61,93.0,"Cable 4×2,5 mm² tendido en zanja","36"],[74,60.0,"Zanjeo en terreno natural","15"]],"prfv":1},{"n":"PLAZA HIPICA","ids":["6461"],"ord":[30],"barrio":"Jardines del Jockey","z":"A","mod":55.2713,"it":[[6,13.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[8,2.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 1,025 m","","6","la altura (9 m contra 7 m) y el largo del brazo (1,025 m contra 0,425 m)"],[22,10.0,"Acometida subterránea EPEC ↔ tablero","12"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[61,300.0,"Cable 4×2,5 mm² tendido en zanja","36"],[64,549.0,"Cable 4×4 mm² tendido en zanja","37"],[67,132.0,"Cable 4×6 mm² tendido en zanja","38"],[74,608.0,"Zanjeo en terreno natural","15"]],"prfv":1,"obra":1},{"n":"POLIDEPORTIVO VICOR","ids":["6039"],"ord":[28],"barrio":"Vicor","z":"A","mod":38.969,"it":[[8,11.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 1,025 m","","6","la altura (9 m contra 7 m) y el largo del brazo (1,025 m contra 0,425 m)"],[17,12.0,"Cable piloto mayor a 1×25/25 mm² AlAl","","","el Anexo I no tiene ítem de cable piloto"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,5.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[64,349.0,"Cable 4×4 mm² tendido en zanja","37"],[65,386.0,"Cable 2×6 mm² tendido en zanja","27"],[74,376.0,"Zanjeo en terreno natural","15"]],"prfv":1,"obra":1},{"n":"AMPLIACIÓN LAS PALMAS","ids":["4084"],"ord":[34],"barrio":"Ampliación Las Palmas","z":"C","mod":20.841,"it":[[2,2.0,"Columna metálica de 8 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 8 m y el ítem nuevo es de 7 m"],[6,5.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[16,15.0,"Cable piloto 1×25/25 mm² AlAl","","","el Anexo I no tiene ítem de cable piloto"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,5.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[64,246.0,"Cable 4×4 mm² tendido en zanja","37"],[74,170.0,"Zanjeo en terreno natural","15"]],"prfv":1},{"n":"SAN CAYETANO","ids":["7620"],"ord":[27],"barrio":"San Cayetano","z":"A","mod":22.4582,"it":[[6,7.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[17,11.0,"Cable piloto mayor a 1×25/25 mm² AlAl","","","el Anexo I no tiene ítem de cable piloto"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,5.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[61,113.0,"Cable 4×2,5 mm² tendido en zanja","36"],[64,170.0,"Cable 4×4 mm² tendido en zanja","37"],[74,205.0,"Zanjeo en terreno natural","15"]],"prfv":1,"obra":1},{"n":"AYCARDOZ","ids":["7654"],"ord":[54],"barrio":"Villa Bustos","z":"A","mod":18.0355,"it":[[6,6.0,"Columna metálica de 9 m · capuchón + dos brazo(s) de 0,425 m","","6","la altura: el viejo es de 9 m y el ítem nuevo es de 7 m"],[17,16.0,"Cable piloto mayor a 1×25/25 mm² AlAl","","","el Anexo I no tiene ítem de cable piloto"],[20,1.0,"Poste de hormigón armado / PRFV para el tendido","","13","el viejo es un poste de hormigón armado y el ítem 13 del Anexo I es un apoyo de PRFV H=8 m Ro1050"],[21,5.0,"Acometida aérea EPEC ↔ tablero","11"],[28,1.0,"Tablero · circuitos subterráneos","","9","hay que definir si el tablero es AÉREO (ítem 9) o A NIVEL (ítem 10); el viejo solo decía «para circuitos subterráneos»"],[64,210.0,"Cable 4×4 mm² tendido en zanja","37"],[74,135.0,"Zanjeo en terreno natural","15"]],"prfv":1,"obra":1}];
+
+// ---- Se exponen para el buscador de plazas de la Calculadora (2026-09-06) ----
+// La Calculadora vive en otro bloque <script> y no ve estas constantes, que están dentro de este
+// closure. Se publican en window para que el buscador pueda ofrecer las 244 de la licitación y
+// las 36 ya ejecutadas sin duplicar los datos en dos lugares.
+window.PLAZAS_LICITACION = PLAZAS_LICITACION;
+window.PLAZAS_HECHAS = PLAZAS_HECHAS;
 
 const ITEMIZADO_EPEC = [
   {id:'1', cat:'Columnas metálicas', desc:'Columna metálica 7 m, capuchón + 1 brazo 0,425 m', un:'Un.', k:3.89},
