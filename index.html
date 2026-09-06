@@ -2069,6 +2069,13 @@
      Cinco casilleros que en la compu entran en una grilla y en el celular se apilan. La pastilla de
      color a la izquierda repite el color real de la bornera (gris, celeste, verde) para que el que
      lo carga no tenga que leer la palabra: mira el color y sabe cuál es. */
+  .bpnmet-tabla{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .bpnmet-tabla th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-soft); padding:4px 6px; border-bottom:1px solid var(--border); white-space:nowrap; }
+  .bpnmet-tabla th .bpncfg-chip{ vertical-align:middle; margin-right:4px; }
+  .bpnmet-tabla td{ padding:6px 4px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .bpnmet-tabla input.bpnmet-in{ width:54px; margin:0; padding:6px 4px; text-align:center; font-family:var(--mono); font-weight:700; }
+  .bpnmet-tabla input.bpnmet-in.tocado{ border-color:var(--amber); background:rgba(224,140,26,.10); }
+  .bpnmet-tabla td.bpnmet-fus{ font-family:var(--mono); font-weight:700; white-space:nowrap; }
   .bpncfg{ display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:4px;
            border:1px dashed var(--border); border-radius:12px; padding:10px 14px; background:var(--panel); }
   .bpncfg-item{ display:flex; align-items:center; gap:9px; padding:4px 0; }
@@ -2636,6 +2643,17 @@
         </div>
         <div class="hint" id="bpnCfgResumen" style="margin-top:10px;"></div>
         <button type="button" id="bpnCfgResetBtn" class="btn-auto">↺ Volver a la forma de armado actual (2 · 3 · 3 · 2 / 3)</button>
+
+        <!-- Armado de la caja en columna METÁLICA (2026-09-06): se llena solo según el vínculo (1 a 4
+             artefactos) y el esquema de tierra (TT / TN-S), y cada casillero se puede corregir. -->
+        <div id="bpnMetPanel" style="display:none; margin-top:14px;">
+          <label>Cómo se arma la caja de la columna <span style="font-weight:600;color:var(--text-soft)">(Metálica)</span> — <span style="font-weight:600;color:var(--teal-dark)">se llena sola</span></label>
+          <div class="hint" style="margin-top:0;margin-bottom:8px;">Sale de los <b>constructivos</b> (AP-CC-014-A / AP-CC-016-C) según el <b>vínculo</b> de cada grupo y el <b>esquema de tierra</b> que elegiste arriba. Los casilleros se pueden corregir: lo que toques queda como <b>a mano</b> y se guarda con el cómputo; lo que no, se vuelve a calcular solo si cambiás el vínculo o el esquema.</div>
+          <div id="bpnMetTabla"></div>
+          <input type="hidden" id="bpnMetTocados" value="">
+          <div class="hint" id="bpnMetRegla" style="margin-top:8px;"></div>
+          <button type="button" id="bpnMetResetBtn" class="btn-auto">↺ Volver al automático</button>
+        </div>
         <div class="hint"><b>El fusible no se carga acá: sale solo.</b> Va <b>2 A por artefacto</b>, repartido entre los portafusibles de esa columna — vínculo simple: un fusible de 2 A (el otro portafusible queda sin fusible); doble: 2 A + 2 A; triple: 2 A + 4 A; cuádruple: 4 A + 4 A.</div>
       </div>
 
@@ -4776,15 +4794,126 @@ function circuitosSonReales(){
   }catch(e){ return false; }
 }
 
+// ---- Armado de la caja en columna METÁLICA — automático por vínculo y esquema (2026-09-06) ----
+// Pedido: *"el tema de BPN y portafusibles se tiene que cargar solo según lo que yo ponga, en
+// automático según constructivos: si son artefactos dobles, si es TT o TN-S… igual dejá la opción
+// editable"*. Regla por columna, con L = artefactos del vínculo:
+//   · TN-S / TN-C — cada artefacto en su fase (AP-CC-014-A: F1-R, F2-S, F3-T; AP-CC-016-C alt. TN-S:
+//     bases R·R·S·T): 1 portafusible por artefacto · 1 BPN gris por artefacto · 1 celeste por
+//     artefacto · tierra de a 2 cables por bornera → ceil((1+L)/2) verdes. Es la regla que ya usaba
+//     la herramienta para metálicas, elegida por el usuario el 04/09.
+//   · TT — todos los artefactos de la columna en UNA sola fase (nota del AP-PL-002 b / 003 b) y el
+//     neutro pasa por una base seccionable (AP-CC-016-C alt. TT: bases N·R·R·R): L + 1 portafusibles
+//     (la del neutro va sin fusible) · fase con 1 entrada + L salidas, de a 2 por bornera →
+//     ceil((1+L)/2) grises · 1 celeste por artefacto · ceil((1+L)/2) verdes.
+// Los fusibles no dependen de esto: 2 A por artefacto, uno por artefacto.
+function bpnMetDef(lum, esq){
+  const L = Math.max(1, parseInt(lum, 10) || 1);
+  const dePares = Math.ceil((1 + L) / BPN_MAX_CABLES);
+  if(esq === 'TT') return { pf: L + 1, gris: dePares, celeste: L, verde: dePares };
+  return { pf: L, gris: L, celeste: L, verde: dePares };
+}
+function bpnMetTocados(){
+  try{ return JSON.parse((document.getElementById('bpnMetTocados')||{}).value || '{}') || {}; }catch(e){ return {}; }
+}
+function bpnMetMarcarTocado(clave, si){
+  const el = document.getElementById('bpnMetTocados'); if(!el) return;
+  const t = bpnMetTocados();
+  if(si) t[clave] = 1; else delete t[clave];
+  el.value = JSON.stringify(t);
+}
+// Lo que usa el cómputo para una columna metálica con `lum` artefactos: el casillero si el usuario
+// lo tocó, si no el automático del esquema vigente.
+function bpnMetCfg(lum){
+  const esq = (typeof esquemaActual === 'function') ? esquemaActual() : 'TN-S';
+  const def = bpnMetDef(lum, esq);
+  const toc = bpnMetTocados();
+  const leer = (campo)=>{
+    const el = document.getElementById(`bpnMet_${lum}_${campo}`);
+    if(!el || !toc[`${lum}_${campo}`] || el.value === '') return def[campo];
+    const v = parseInt(el.value, 10);
+    return (isNaN(v) || v < 0) ? def[campo] : v;
+  };
+  const cfg = { pf: leer('pf'), gris: leer('gris'), celeste: leer('celeste'), verde: leer('verde'), esq, def };
+  cfg.aMano = ['pf','gris','celeste','verde'].some(c=>cfg[c] !== def[c]);
+  return cfg;
+}
+window.bpnMetCfg = bpnMetCfg;
+// El panel: una fila por cada vínculo que tenga la plaza (por cantidad de artefactos).
+function renderBpnMetPanel(forzar){
+  const panel = document.getElementById('bpnMetPanel');
+  const tabla = document.getElementById('bpnMetTabla');
+  if(!panel || !tabla) return;
+  const esMet = (document.getElementById('vincTipoCol')||{}).value === 'Metálica';
+  panel.style.display = esMet ? '' : 'none';
+  if(!esMet) return;
+  const esq = (typeof esquemaActual === 'function') ? esquemaActual() : 'TN-S';
+  const lums = [...new Set(vinculoGrupos.filter(g=>(g.columnas||0) > 0).map(g=>{ const v = VINCULOS.find(x=>x.id===g.tipo); return v ? v.lum : null; }).filter(Boolean))].sort((a,b)=>a-b);
+  const filas = lums.length ? lums : [3];
+  // Se redibuja solo si cambió qué filas van o el esquema: así no se pierde el foco mientras se tipea.
+  const clave = filas.join(',') + '|' + esq;
+  if(!forzar && tabla.dataset.clave === clave && tabla.innerHTML) return;
+  tabla.dataset.clave = clave;
+  const toc = bpnMetTocados();
+  const nombre = l=>({1:'Simple (1 artefacto)',2:'Doble (2 artefactos)',3:'Triple (3 artefactos)',4:'Cuádruple (4 artefactos)'})[l] || `${l} artefactos`;
+  const celda = (l, campo, val)=>{
+    const t = !!toc[`${l}_${campo}`];
+    return `<td><input type="number" min="0" max="12" id="bpnMet_${l}_${campo}" class="bpnmet-in${t?' tocado':''}" value="${val}" title="${t?'Corregido a mano — con ↺ vuelve al automático':'Automático según el constructivo'}"></td>`;
+  };
+  let h = `<div class="tabla-scroll"><table class="bpnmet-tabla"><thead><tr><th>Vínculo</th><th title="Portafusibles tabaquera 10 × 38"><i class="bpncfg-chip pf"></i>Portaf.</th><th title="Bornera BPN gris (fase)"><i class="bpncfg-chip gris"></i>Gris</th><th title="Bornera BPN celeste (neutro)"><i class="bpncfg-chip celeste"></i>Celeste</th><th title="Bornera BPN verde (tierra)"><i class="bpncfg-chip verde"></i>Verde</th><th>Fusibles</th></tr></thead><tbody>`;
+  filas.forEach(l=>{
+    const c = bpnMetCfg(l);
+    h += `<tr><td><b>${nombre(l)}</b><div class="cierre-un">por columna · ${esq}</div></td>${celda(l,'pf',c.pf)}${celda(l,'gris',c.gris)}${celda(l,'celeste',c.celeste)}${celda(l,'verde',c.verde)}<td class="bpnmet-fus">${l} × 2 A${esq==='TT'?`<div class="cierre-un">la base del neutro va sin fusible</div>`:''}</td></tr>`;
+  });
+  h += `</tbody></table></div>`;
+  tabla.innerHTML = h;
+  const regla = document.getElementById('bpnMetRegla');
+  const hayMano = Object.keys(toc).length > 0;
+  if(regla) regla.innerHTML = (esq === 'TT'
+    ? `<b>Esquema TT</b> (AP-CC-016-C, alternativa TT — bases N · R · R · R): todos los artefactos de la columna van a <b>una sola fase</b> y el <b>neutro pasa por una base seccionable</b>, por eso hay un portafusible más que artefactos. Fase de a 2 cables por bornera (1 entrada + las salidas). La tierra es local: neutro y tierra van en <b>dos tiras</b> de puente.`
+    : `<b>Esquema ${esq}</b> (AP-CC-014-A / AP-CC-016-C, alternativa TN-S — bases R · R · S · T): <b>cada artefacto va a su fase</b>, con su portafusible y su bornera gris; una celeste por artefacto; la tierra de a 2 cables por bornera. Neutro y tierra se vinculan en <b>una sola tira</b> de puente.`)
+    + (hayMano ? ` <b style="color:#c77b18">Hay casilleros corregidos a mano</b> (los que están en ámbar).` : ` Cambiá el vínculo o el esquema y se recalcula solo.`);
+}
+window.renderBpnMetPanel = renderBpnMetPanel;
+(function cablearBpnMet(){
+  const armar = ()=>{
+    const panel = document.getElementById('bpnMetPanel'); if(!panel || panel.dataset.listo) return;
+    panel.dataset.listo = '1';
+    panel.addEventListener('input', (e)=>{
+      const inp = e.target.closest('.bpnmet-in'); if(!inp) return;
+      const m = inp.id.match(/^bpnMet_(\d+)_(\w+)$/); if(!m) return;
+      bpnMetMarcarTocado(`${m[1]}_${m[2]}`, true);
+      inp.classList.add('tocado');
+      try{ actualizarVinculoGruposSummary(); }catch(err){}
+      const regla = document.getElementById('bpnMetRegla');
+      if(regla && !/corregidos a mano/.test(regla.innerHTML)) regla.innerHTML += ` <b style="color:#c77b18">Hay casilleros corregidos a mano</b> (los que están en ámbar).`;
+    });
+    const reset = document.getElementById('bpnMetResetBtn');
+    if(reset) reset.addEventListener('click', ()=>{
+      const el = document.getElementById('bpnMetTocados'); if(el) el.value = '';
+      renderBpnMetPanel(true);
+      try{ actualizarVinculoGruposSummary(); }catch(err){}
+    });
+    const tc = document.getElementById('vincTipoCol');
+    if(tc) tc.addEventListener('change', ()=>{ try{ renderBpnMetPanel(); }catch(err){} });
+    const esq = document.getElementById('esquemaTierra');
+    if(esq) esq.addEventListener('change', ()=>{ try{ renderBpnMetPanel(); actualizarVinculoGruposSummary(); }catch(err){} });
+    renderBpnMetPanel();
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', armar); else armar();
+})();
+
 function bpnFaseNeutroPorColumna(tipoCol, lum){
-  return tipoCol === 'PRFV' ? bpnColCfg().gris : lum;
+  return tipoCol === 'PRFV' ? bpnColCfg().gris : bpnMetCfg(lum).gris;
 }
 function bpnGrisPorColumna(tipoCol, lum){
-  return tipoCol === 'PRFV' ? bpnColCfg().gris : lum;
+  return tipoCol === 'PRFV' ? bpnColCfg().gris : bpnMetCfg(lum).gris;
 }
 function bpnCelestePorColumna(tipoCol, lum){
-  return tipoCol === 'PRFV' ? bpnColCfg().celeste : lum;
+  return tipoCol === 'PRFV' ? bpnColCfg().celeste : bpnMetCfg(lum).celeste;
 }
+function bpnVerdePorColumnaMet(lum){ return bpnMetCfg(lum).verde; }
+function bpnPfPorColumnaMet(lum){ return bpnMetCfg(lum).pf; }
 // Verdes (tierra) de TODA la obra. Las de paso llevan `verde`; la última columna de cada circuito
 // lleva `verdeFinal`. Se calcula sobre el total de columnas y no por grupo de vínculo, porque los
 // finales de circuito son de la plaza, no del grupo: si no, una plaza con dos grupos contaría los
@@ -5620,6 +5749,7 @@ function actualizarVinculoGruposSummary(){
   const tipoColActual = document.getElementById('vincTipoCol').value;
   const cfgCol = bpnColCfg();
   const fusAmp = {};   // { 2: cantidad, 4: cantidad }
+  let totalPFMet = 0;  // metálica: portafusibles según el armado automático por vínculo y esquema
   vinculoGrupos.forEach(g=>{
     const v = VINCULOS.find(x=>x.id===g.tipo);
     if(!v) return;
@@ -5627,10 +5757,12 @@ function actualizarVinculoGruposSummary(){
     totalBpnFase   += g.columnas * bpnGrisPorColumna(tipoColActual, v.lum);
     totalBpnNeutro += g.columnas * bpnCelestePorColumna(tipoColActual, v.lum);
     if(esPRFV) totalBpnTierra += g.columnas * cfgCol.verde;
-    else       totalBpnTierra += g.columnas * Math.ceil((1+v.lum)/BPN_MAX_CABLES);
+    else       totalBpnTierra += g.columnas * bpnVerdePorColumnaMet(v.lum);
     if(esPRFV) fusiblesDeColumna(v.lum, cfgCol.pf).forEach(a=>{ fusAmp[a] = (fusAmp[a]||0) + g.columnas; });
+    else       totalPFMet += g.columnas * bpnPfPorColumnaMet(v.lum);
     detalle.push(`${g.columnas}× ${v.label.split('—')[0].trim()}`);
   });
+  try{ renderBpnMetPanel(); }catch(e){}
   // La tercera verde de los finales de circuito se suma una sola vez para toda la plaza.
   let finalesCirc = 0;
   if(esPRFV){
@@ -5638,7 +5770,7 @@ function actualizarVinculoGruposSummary(){
     finalesCirc = Math.max(0, Math.min(colsVinc, circuitosDeLaPlaza()));
     totalBpnTierra += finalesCirc * (cfgCol.verdeFinal - cfgCol.verde);
   }
-  const totalPF = esPRFV ? cantColTotal * cfgCol.pf : totalLum;
+  const totalPF = esPRFV ? cantColTotal * cfgCol.pf : totalPFMet;
   const totalBpn = totalBpnFase + totalBpnNeutro + totalBpnTierra;
   // Puntera terminal TIFF: 2 por cada BPN (fase+neutro+tierra) + 2 por cada portafusible — el cable
   // entra primero a la BPN y de ahí sale hacia el portafusible, cada punta lleva su propia puntera.
@@ -5738,7 +5870,7 @@ function pintarBpnCfgResumen(){
   const def = (c.pf===BPN_COL_DEF.pf && c.gris===BPN_COL_DEF.gris && c.celeste===BPN_COL_DEF.celeste
                && c.verde===BPN_COL_DEF.verde && c.verdeFinal===BPN_COL_DEF.verdeFinal);
   el.innerHTML = !esPRFV
-    ? 'La columna elegida es <b>metálica</b>: estas cantidades no se aplican. En metálica va 1 portafusible y 1 bornera de fase y de neutro por luminaria real, y la tierra de a 2 cables por bornera.'
+    ? 'La columna elegida es <b>metálica</b>: estos cinco casilleros no se aplican. El armado de la caja metálica está <b>acá abajo</b>, y se llena solo según el vínculo y el esquema TT / TN-S.'
     : `Cada columna lleva <b>${c.pf} portafusible${c.pf===1?'':'s'}</b>, <b>${c.gris} gris</b>, <b>${c.celeste} celeste</b> y <b>${c.verde} verde</b> — <b>${c.verdeFinal} verdes</b> si es final de circuito.` +
       (def ? '' : ' <b style="color:#c77b18">Cambiado respecto de la forma de armado actual.</b>');
 }
@@ -11670,6 +11802,8 @@ function restaurarFormulario(snap){
   // Redibujar las listas con los datos restaurados.
   try{ renderColumnaGrupos(); }catch(e){}
   try{ renderVinculoGrupos(); }catch(e){}
+  // El armado de la caja metálica se redibuja con los casilleros «a mano» que vinieron en la foto.
+  try{ if(typeof renderBpnMetPanel === 'function') renderBpnMetPanel(true); }catch(e){}
   try{ renderCivilGrupos(); }catch(e){}
   try{ renderCircuitos(); }catch(e){}
   try{ renderTramos(); }catch(e){}
@@ -11885,7 +12019,11 @@ function calcular(){
     // Cantidades por columna: en PRFV salen de los cinco casilleros editables de la sección Vínculos
     // (por defecto 2 portafusibles · 3 grises · 3 celestes · 2 verdes, 3 si es final de circuito).
     const cfgCaja = bpnColCfg();
-    const totalPortafusibles = vincTipo === 'PRFV' ? vincCant * cfgCaja.pf : totalLuminarias;
+    // Metálica (2026-09-06): los portafusibles salen del armado automático por vínculo y esquema
+    // (editable en la sección Vínculos), no de «1 por luminaria» clavado.
+    const totalPortafusibles = vincTipo === 'PRFV'
+      ? vincCant * cfgCaja.pf
+      : gruposVinculo.reduce((t,g)=>{ const v = VINCULOS.find(x=>x.id===g.tipo); return v ? t + g.columnas * bpnPfPorColumnaMet(v.lum) : t; }, 0);
 
     // ---- Bornera BPN — armado nuevo confirmado por el usuario con foto de obra (2026-09-04) ----
     // En PRFV las tres cantidades salen de los casilleros editables (por defecto 3 grises, 3 celestes,
@@ -11905,7 +12043,7 @@ function calcular(){
       totalBpnFase   += g.columnas * bpnGrisPorColumna(vincTipo, v.lum);
       totalBpnNeutro += g.columnas * bpnCelestePorColumna(vincTipo, v.lum);
       if(vincTipo === 'PRFV') totalBpnTierra += g.columnas * cfgCaja.verde;
-      else                    totalBpnTierra += g.columnas * Math.ceil((1 + v.lum) / BPN_MAX_CABLES);
+      else                    totalBpnTierra += g.columnas * bpnVerdePorColumnaMet(v.lum);
       // Fusible: 2 A por artefacto, repartido entre los portafusibles de esa columna.
       if(vincTipo === 'PRFV'){
         fusiblesDeColumna(v.lum, cfgCaja.pf).forEach(a=>{ fusiblesPorAmp[a] = (fusiblesPorAmp[a]||0) + g.columnas; });
@@ -11945,7 +12083,7 @@ function calcular(){
       // una verde de más— para no quedarse corto de peine en esas columnas.
       const nCeleste = bpnCelestePorColumna(vincTipo, v.lum);
       const nVerde   = (vincTipo === 'PRFV' ? Math.max(cfgCaja.verde, cfgCaja.verdeFinal)
-                                            : Math.ceil((1 + v.lum) / BPN_MAX_CABLES));
+                                            : bpnVerdePorColumnaMet(v.lum));
       const tiras = puenteJunto
         ? [{ n: nCeleste + nVerde, que: 'neutro+tierra' }]
         : [{ n: nCeleste, que: 'neutro' }, { n: nVerde, que: 'tierra' }].filter(t => t.n >= 2);
@@ -12116,7 +12254,7 @@ function calcular(){
       ...(avisoColumnasDescuadradas ? [{desc:avisoColumnasDescuadradas, cant:'—', un:'—', ref:'Control de carga'}] : []),
       {...M(3053, vincTipo==='PRFV'
         ? `en la caja de conexión de la columna PRFV (${cfgCaja.pf} por columna)`
-        : 'protección individual, 1 por luminaria'),
+        : `en la caja de la columna metálica, según vínculo y esquema ${esquemaActual()}: ${gruposVinculo.map(g=>{ const v = VINCULOS.find(x=>x.id===g.tipo); return v ? `${g.columnas} col × ${bpnPfPorColumnaMet(v.lum)}` : ''; }).filter(Boolean).join(' + ')}${esquemaActual()==='TT' ? ' (incluye la base del neutro, sin fusible)' : ''}`),
        cant:totalPortafusibles, un:'Un.', ref:'Ítem 69 / 15.19'},
       // ---- Fusibles (2026-09-04) ----
       // Antes salía «1 fusible por portafusible», todos iguales. Ahora la regla es 2 A POR ARTEFACTO
@@ -12142,8 +12280,8 @@ function calcular(){
         // entra en la tabaquera 10 × 38 que el mismo cómputo pide dos líneas más arriba. Se corrige
         // al 3017 (cilíndrico 10 × 38, 2 A). El amperaje ya era correcto: 1 portafusible por
         // luminaria = 2 A por artefacto, que es la regla del proyecto ejecutivo de Plaza Hípica.
-        : [{...M(3017,'2 A por artefacto — 1 por portafusible'), cant:totalPortafusibles, un:'Un.', ref:'Ítem 68 / 15.18'},
-           {desc:'ℹ En metálicas se mantiene 1 portafusible por luminaria (protección individual). El proyecto ejecutivo de Plaza Hípica dice que cuando en una columna metálica dos artefactos comparten una misma tabaquera 10 × 38 la protección pasa a ser de 4 A: si querés que las metálicas usen la caja nueva de 2 portafusibles como las PRFV, avisá y se cambia.', cant:'—', un:'—', ref:'Proyecto ejecutivo Plaza Hípica'}]),
+        : [{...M(3017,'2 A por artefacto — 1 por artefacto'), cant:totalLuminarias, un:'Un.', ref:'Ítem 68 / 15.18'},
+           {desc:`— <b>Armado de la caja de columna metálica</b> (esquema <b>${esquemaActual()}</b>, ${esquemaActual()==='TT' ? 'AP-CC-016-C alternativa TT: todos los artefactos en una fase y el neutro por base seccionable' : 'AP-CC-014-A / AP-CC-016-C alternativa TN-S: cada artefacto en su fase'}): ${gruposVinculo.map(g=>{ const v = VINCULOS.find(x=>x.id===g.tipo); if(!v) return ''; const c = bpnMetCfg(v.lum); return `${v.label.split('—')[0].trim()} → ${c.pf} portafusible${c.pf===1?'':'s'}, ${c.gris} gris, ${c.celeste} celeste, ${c.verde} verde por columna${c.aMano?' (corregido a mano)':''}`; }).filter(Boolean).join(' · ')}. Fusibles: 2 A por artefacto. Editable en la sección Vínculos.`, cant:'—', un:'—', ref:'Proyecto ejecutivo Plaza Hípica'}]),
       // Puntera terminal TIFF (nombre correcto confirmado por el usuario 2026-08-13 — no es un terminal
       // ojal/anillo, es la puntera/ferrule que se engarza en la punta del cable antes de fijarla bajo el
       // tornillo de la BPN o del portafusible). El cable entra primero a la BPN y de ahí sale hacia el
