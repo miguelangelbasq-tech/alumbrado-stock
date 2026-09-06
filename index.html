@@ -626,6 +626,19 @@
      la tabla vacía: aparece entera recién cuando se prenden las explicaciones. */
   /* Avisos de algo mal cargado, arriba del cómputo: rojos, siempre visibles, se imprimen. */
   .computo-alertas{margin:0 0 14px;}
+  /* ¿Quién pone el material? (2026-09-06) */
+  .prov-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:8px 14px; margin-top:12px; }
+  .prov-op{ display:flex; align-items:flex-start; gap:10px; margin:0; padding:9px 12px; border:1px solid var(--line);
+            border-radius:10px; background:var(--bg-soft); cursor:pointer; font-weight:500; font-size:13.5px; }
+  .prov-op input{ width:auto; margin:3px 0 0; flex:0 0 auto; }
+  .prov-op span{ display:block; line-height:1.35; }
+  .prov-op small{ display:block; font-size:11.5px; color:var(--text-soft); margin-top:2px; }
+  .prov-op:has(input:checked){ border-color:var(--teal-dark); background:rgba(126,198,230,.10); }
+  .computo-provision{ display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; margin:0 0 14px; padding:9px 12px;
+                      border:1px dashed var(--line); border-radius:8px; font-size:12.5px; color:var(--text-soft); }
+  .computo-provision b{ color:var(--navy); }
+  .computo-provision .pv{ padding:2px 8px; border-radius:6px; background:var(--bg-soft); border:1px solid var(--line); color:var(--text); }
+  .computo-provision .pv.ema{ border-color:var(--teal-dark); }
   .computo-alerta{background:rgba(214,64,64,0.09); border:1px solid rgba(214,64,64,0.55); border-left:5px solid var(--danger); color:#7a1f1f; border-radius:8px; padding:10px 14px; font-size:13px; line-height:1.45; margin-bottom:8px;}
   .computo-sec.sec-solo-notas{display:none;}
   #resultCard.ver-notas .computo-sec.sec-solo-notas{display:block;}
@@ -1697,7 +1710,10 @@
   .it-chk{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-soft); white-space:nowrap; }
   .it-chk input{ width:auto; margin:0; }
   .it-plaza{ padding:14px 18px 12px; }
-  .it-cab{ display:grid; grid-template-columns:20px minmax(0,1fr) auto 64px; align-items:center; gap:12px; cursor:pointer; }
+  /* 5 columnas: flecha · nombre · plata · % · botón de imprimir. Antes eran 4 para 5 hijos, así que
+     el botón de imprimir caía solo en una segunda fila, dentro de la columna de 20 px de la flecha:
+     quedaba como un cuadradito con un ícono suelto y no se entendía qué era (2026-09-06). */
+  .it-cab{ display:grid; grid-template-columns:20px minmax(0,1fr) auto 64px auto; align-items:center; gap:12px; cursor:pointer; }
   .it-flecha{ color:var(--text-soft); font-size:13px; }
   .it-nom b{ color:var(--navy); font-size:15px; }
   .it-sub{ font-size:12px; color:var(--text-soft); margin-top:2px; }
@@ -1891,6 +1907,8 @@
   .it-previa-cant{ text-align:right; font-size:13px; white-space:nowrap; font-variant-numeric:tabular-nums; }
   .it-previa-antes{ color:var(--text-soft); text-decoration:line-through; }
   .it-badge-amb{ background:rgba(245,158,11,.18); color:#92610a; }
+  .it-badge-prov{ background:rgba(126,198,230,.25); color:var(--navy); margin-left:6px; }
+  .it-previa-fila.it-previa-prov{ background:rgba(126,198,230,.07); }
   .it-previa-dudas{ margin-top:12px; border-radius:10px; padding:10px 14px; font-size:12.5px; line-height:1.55;
                     background:rgba(245,158,11,.12); color:#6b5312; }
   .it-previa-dudas ul{ margin:6px 0 0; padding-left:20px; }
@@ -1913,9 +1931,13 @@
   .tabla-scroll{ overflow-x:auto; }
   .it-scroll-aviso{ display:none; font-size:11.5px; color:var(--text-soft); margin-bottom:6px; }
   @media (max-width:760px){
-    .it-cab{ grid-template-columns:20px minmax(0,1fr) 58px; grid-template-areas:'fle nom pct' '. plata plata'; }
+    .it-cab{ grid-template-columns:20px minmax(0,1fr) auto; grid-template-areas:'fle nom pct' '. plata plata' '. impr impr'; gap:8px 12px; }
     .it-flecha{ grid-area:fle; } .it-nom{ grid-area:nom; } .it-pct{ grid-area:pct; }
     .it-plata{ grid-area:plata; text-align:left; margin-top:4px; }
+    /* El botón de imprimir tiene su propio casillero: sin esto caía en el hueco de 20 px de la
+       primera columna y no se leía (2026-09-06). */
+    .it-cab .it-imprimir-ep{ grid-area:impr; }
+    .it-plata{ white-space:normal; }
     .it-tabla{ min-width:720px; }
     .it-scroll-aviso{ display:block; }
   }
@@ -2229,7 +2251,18 @@
               border-radius:0 8px 8px 0; padding:11px 15px; font-size:12.5px; line-height:1.6;
               color:var(--navy); }
   .it-tabla input.ep-cant{ width:84px; text-align:right; }
-  .it-imprimir-ep{ padding:6px 10px; font-size:13px; margin-left:4px; }
+  .it-imprimir-ep{ padding:6px 11px; font-size:12.5px; margin:0; white-space:nowrap; }
+  .it-cab .it-imprimir-ep{ justify-self:end; }
+  .it-imprimir-corto{ display:none; }
+  .it-imprimir-fila{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 14px; }
+  .it-imprimir-fila .hint{ margin:0; flex:1 1 240px; min-width:0; }
+  /* En el celular el botón lleva el texto corto. Va acá y no arriba con el resto de lo angosto
+     porque este bloque viene después en la hoja y, con la misma especificidad, gana el último. */
+  @media (max-width:760px){
+    .it-imprimir-largo{ display:none; }
+    .it-imprimir-corto{ display:inline; }
+    .it-cab .it-imprimir-ep{ justify-self:start; }
+  }
   #epecTablaK{ font-size:12px; }
   @media print{
     body.imprimiendo-plaza #epecTiles,
@@ -2238,6 +2271,13 @@
     body.imprimiendo-plaza #epecBaseMsg,
     body.imprimiendo-epec #avPanelEpec > .card:first-child,
     body.imprimiendo-epec #avPanelEpec > .card:last-child,
+    /* Al imprimir una plaza sola no tiene que salir NADA del resto del itemizado: ni la tarjeta de
+       la licitación de arriba, ni la de «últimas plazas calculadas», ni los avisos de la lista.
+       Las reglas de arriba no las agarraban (:first-child no matcheaba porque el primer hijo del
+       panel es un <datalist>) y se imprimían igual (2026-09-06). */
+    body.imprimiendo-epec #avPanelEpec > .card,
+    body.imprimiendo-epec #epecLista > .card:not(.it-plaza),
+    body.imprimiendo-epec #epecLista > .hint,
     body.imprimiendo-plaza .it-plaza[data-epec]:not(.imprimiendo){ display:none !important; }
   }
 
@@ -2439,7 +2479,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-06 13:57 · 2ec987</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-06 15:48 · 542d34</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -2900,6 +2940,28 @@
           <label style="margin:0;" for="podaCheck">Incluir poda de arboleda</label>
         </div>
         <input type="number" id="podaCant" min="0" value="0" style="margin-top:8px;" disabled placeholder="Cantidad de árboles">
+      </div>
+
+      <!-- ¿Quién pone el material? (2026-09-06). Los ítems 1 a 9 del Anexo I pagan el trabajo pero
+           «no incluyen la provisión» de la columna, la luminaria, la jabalina, los dos cables ni el
+           tablero aéreo: eso se cobra aparte por los ítems 83.1 a 89, SOLO si el material lo puso
+           la contratista. Lo que se marca acá viaja con el cómputo y decide qué ítems de provisión
+           trae el itemizado. Pedido del usuario, textual: *"tendríamos que tener un botón en la
+           calculadora para poner que pusimos nosotros o nos la da EPEC"*. -->
+      <div class="card" id="cardProvision">
+        <div class="card-header-row">
+          <h2><span class="dot"></span>¿Quién pone el material?</h2>
+        </div>
+        <div class="hint" style="margin-top:0;">Decide qué ítems de <b>provisión (83.1 a 89)</b> se cobran en el itemizado. Los ítems de columna y de tablero pagan el trabajo pero <b>no incluyen</b> estos materiales: si los puso EMA se cobran aparte; si los dio EPEC, no. Lo marcado viaja con el cómputo y se puede corregir en el itemizado antes de aplicarlo.</div>
+        <div class="prov-grid">
+          <label class="prov-op"><input type="checkbox" id="provColumnas" checked><span><b>Columnas</b> (metálicas o PRFV)<small>las pone EMA → ítems 83.1/83.2 ó 84.1/84.2</small></span></label>
+          <label class="prov-op"><input type="checkbox" id="provTablero" checked><span><b>Tablero aéreo</b> TA"P"<small>lo pone EMA → ítem 89 (16,06 K)</small></span></label>
+          <label class="prov-op"><input type="checkbox" id="provJabalinas" checked><span><b>Jabalinas</b><small>las pone EMA → ítem 88, una por jabalina del cómputo</small></span></label>
+          <label class="prov-op"><input type="checkbox" id="provLuminarias"><span><b>Luminarias LED</b><small>destildado = las da EPEC (lo normal). Tildado → ítems 85.1/85.2</small></span></label>
+          <label class="prov-op"><input type="checkbox" id="provCable15"><span><b>Cable 3×1,5 mm²</b> columna → luminaria<small>destildado = lo da EPEC. Tildado → ítem 86 por metro</small></span></label>
+          <label class="prov-op"><input type="checkbox" id="provCableVA"><span><b>Cable verde-amarillo 10 mm²</b><small>destildado = lo da EPEC. Tildado → ítem 87 por metro</small></span></label>
+        </div>
+        <div class="hint" style="margin-top:10px;">Así están las plazas ya hechas: columnas, tableros y jabalinas los puso EMA; EPEC dio los artefactos, el 3×1,5 y el verde-amarillo. Si en una plaza nueva EPEC entrega las columnas, destildá «Columnas» antes de calcular.</div>
       </div>
 
       <button class="btn-primary" onclick="calcular()">Calcular materiales</button>
@@ -9327,7 +9389,9 @@ async function crearAvanceDesdeHistorial(idx){
   const grupos = construirGruposAvance(h, secciones);
   secciones.push({ titulo:'OTROS ÍTEMS (agregados a mano)', items:[], extra:true });
   // Sin `id` todavía — lo asigna Firestore al crear el documento (ver fbAvanceCrear).
-  const nuevo = { nombre:h.nombre, obraId:h.id, barrio:h.barrio, creado: fechaAISO(new Date()), estado:'Pendiente', secciones, valorItems:[], grupos, etapas:{}, fechaEncendido:'', listaParaEncender:false, lat:null, lng:null };
+  const nuevo = { nombre:h.nombre, obraId:h.id, barrio:h.barrio, creado: fechaAISO(new Date()), estado:'Pendiente', secciones, valorItems:[], grupos, etapas:{}, fechaEncendido:'', listaParaEncender:false, lat:null, lng:null,
+                  // quién pone el material (2026-09-06): viaja con la plaza para el itemizado
+                  provision: (typeof provisionNormalizar === 'function') ? provisionNormalizar(h.provision || null, h.form && h.form.campos) : null };
   let nuevoId;
   try{
     nuevoId = await window.fbAvanceCrear(nuevo);
@@ -11817,6 +11881,46 @@ function restaurarFormulario(snap){
   return true;
 }
 
+// ============================================================
+// ¿QUIÉN PONE EL MATERIAL?  (2026-09-06)
+// ============================================================
+// Los ítems 1 a 8 (columnas) y 9 (tablero aéreo) del Anexo I pagan el trabajo pero dicen, textual,
+// «No incluye la provisión de los materiales aportados en los ítems 88, 87, 83.1, 86, 85.1» (y
+// variantes). Esos materiales se cobran aparte por los ítems 83.1 a 89 SOLO si los puso la
+// contratista. Acá se lee lo marcado en la tarjeta de la Calculadora; viaja con el cómputo
+// (`resultado.provision`) y además queda en la foto del formulario. Los cómputos anteriores a hoy
+// no lo traen: para ellos vale PROVISION_DEFAULT, que es como se hicieron todas las plazas ya
+// ejecutadas (columnas, tablero y jabalinas de EMA; luminarias y los dos cables de EPEC).
+const PROVISION_CAMPOS = [
+  { k:'columnas',   id:'provColumnas',   txt:'Columnas',                 items:'83.1 / 83.2 ó 84.1 / 84.2' },
+  { k:'tablero',    id:'provTablero',    txt:'Tablero aéreo',            items:'89' },
+  { k:'jabalinas',  id:'provJabalinas',  txt:'Jabalinas',                items:'88' },
+  { k:'luminarias', id:'provLuminarias', txt:'Luminarias LED',           items:'85.1 / 85.2' },
+  { k:'cable15',    id:'provCable15',    txt:'Cable 3×1,5 mm²',          items:'86' },
+  { k:'cableVA',    id:'provCableVA',    txt:'Cable verde-amarillo 10 mm²', items:'87' },
+];
+const PROVISION_DEFAULT = { columnas:true, tablero:true, jabalinas:true, luminarias:false, cable15:false, cableVA:false };
+function leerProvision(){
+  const p = {};
+  PROVISION_CAMPOS.forEach(c=>{ const el = document.getElementById(c.id); p[c.k] = el ? !!el.checked : PROVISION_DEFAULT[c.k]; });
+  return p;
+}
+// Normaliza lo que venga (un cómputo nuevo, la foto del formulario de uno viejo, o nada).
+function provisionNormalizar(p, campos){
+  if(p && typeof p === 'object'){ const r = {...PROVISION_DEFAULT}; PROVISION_CAMPOS.forEach(c=>{ if(c.k in p) r[c.k] = !!p[c.k]; }); return r; }
+  if(campos && typeof campos === 'object' && ('provColumnas' in campos)){
+    const r = {}; PROVISION_CAMPOS.forEach(c=>{ const v = campos[c.id]; r[c.k] = v === true || v === 'true'; }); return r;
+  }
+  return { ...PROVISION_DEFAULT, asumido:true };
+}
+function provisionHtml(p, campos){
+  const pv = provisionNormalizar(p, campos);
+  const chips = PROVISION_CAMPOS.map(c=> pv[c.k]
+    ? `<span class="pv ema" title="Se cobra aparte por el ítem ${c.items}">${c.txt}: <b>EMA</b></span>`
+    : `<span class="pv" title="No se cobra la provisión (ítem ${c.items})">${c.txt}: EPEC</span>`).join('');
+  return `<div class="computo-provision"><b>Quién pone el material</b>${pv.asumido ? '<span style="font-size:11px;">(cómputo anterior al 06/09/2026: se asume como en las plazas ya hechas)</span>' : ''}${chips}</div>`;
+}
+
 function calcular(){
   const nombre = document.getElementById('obraNombre').value.trim() || 'Obra sin nombre';
   const id = document.getElementById('obraId').value.trim();
@@ -13336,7 +13440,8 @@ function calcular(){
         + `Si es una orden parcial a propósito, dejalo; si no, corregí el tipo en las tres secciones (o usá «Cargar automáticamente») y volvé a calcular.`);
     }
   }
-  const resultado = {nombre, id, barrio, cantCol: colOn?cantCol:null, tipoCol, altura, vincCant: vincOn?vincCant:null, secciones, totalLuminarias, tiles, tareas: tareasIncluidas, alertas};
+  const resultado = {nombre, id, barrio, cantCol: colOn?cantCol:null, tipoCol, altura, vincCant: vincOn?vincCant:null, secciones, totalLuminarias, tiles, tareas: tareasIncluidas, alertas,
+                     provision: leerProvision()};   // quién pone el material (2026-09-06)
   // Modo silencioso (2026-09-06): lo usa «actualizar un cómputo viejo con la versión nueva». Calcula
   // igual pero NO dibuja, NO guarda en el historial y NO toca `ultimoResultado` — solo devuelve el
   // resultado. Sin esto, recalcular un cómputo viejo agregaba una entrada nueva al historial y
@@ -13394,6 +13499,9 @@ function renderResultado(r){
   if(Array.isArray(r.alertas) && r.alertas.length){
     html += `<div class="computo-alertas">` + r.alertas.map(a=>`<div class="computo-alerta">⚠ ${a}</div>`).join('') + `</div>`;
   }
+  // Quién pone el material (2026-09-06): se imprime también, porque es lo que decide qué ítems de
+  // provisión lleva el itemizado de esta plaza.
+  if(typeof provisionHtml === 'function') html += provisionHtml(r.provision || null, r.form && r.form.campos);
 
   if(r.tiles.length){
     html += `<div class="summary-tiles">` + r.tiles.map(t=>`<div class="tile"><div class="num">${t.num}</div><div class="lbl">${t.lbl}</div></div>`).join('') + `</div>`;
@@ -16962,6 +17070,17 @@ function poblarParteObraDatalist(){
       if(on('podaCheck')) push(82, numC('podaCant'), `${numC('podaCant')} árbol(es) a podar`);
     }
 
+    // ---------- Provisión 83.1–89 (2026-09-06): lo que se puede saber desde el formulario ----------
+    // Columnas y tablero salen de lo ya cargado; las jabalinas, luminarias y cables no están en la
+    // foto del formulario (los calcula el cómputo), así que acá quedan avisados para cargar a mano.
+    {
+      const cant = (ids)=> out.filter(x=>ids.includes(x.item)).reduce((s,x)=>s + x.cantidad, 0);
+      const tipo = String(C.colTipo || 'PRFV') === 'Metálica' ? 'Metálica' : 'PRFV';
+      const c = { tipo, de7: cant(tipo === 'Metálica' ? [1,2,3] : [5,6,7]), de10: cant(tipo === 'Metálica' ? [4] : [8]),
+                  tableroAereo: cant([9]), jabalinas:0, lum75:0, lum180:0, cable15:0, cableVA:0 };
+      agregarProvision(push, dudas, c, provisionDe(h, null));
+      dudas.push('Este itemizado salió de la foto del formulario, no del listado de materiales: las <b>jabalinas (88)</b> y, si las puso EMA, las luminarias (85) y los cables (86, 87) hay que cargarlos a mano. Si volvés a calcular la plaza, salen solos.');
+    }
     return { filas:out, dudas };
   }
 
@@ -16987,7 +17106,7 @@ function poblarParteObraDatalist(){
     return isFinite(v) ? v : 0;
   };
 
-  function itemizadoDesdeSecciones(secs, deDonde){
+  function itemizadoDesdeSecciones(secs, deDonde, prov){
     const out = [], dudas = [];
     const push = (item, cant, motivo)=>{
       if(!(cant > 0)) return;
@@ -16999,6 +17118,8 @@ function poblarParteObraDatalist(){
     const vincPorBrazos = {};    // 1..4 -> n
     let tipoCol = null;
     let colExistentes = 0;       // columnas metálicas existentes reutilizadas (sección nueva del 06/09/2026)
+    // Para los ítems de PROVISIÓN 83.1–89 (2026-09-06): qué material hay en el cómputo.
+    const ctx = { jabalinas:0, tableroAereo:0, lum75:0, lum180:0, cable15:0, cableVA:0 };
 
     (secs||[]).forEach(sec=>{
       const T = norm(sec.titulo).toUpperCase();
@@ -17039,6 +17160,10 @@ function poblarParteObraDatalist(){
             else if(/a[eé]rea/i.test(d)) push(11, cant, `${fmt(cant,2)} m de acometida aérea EPEC ↔ tablero`);
             return;
           }
+          // Los metros de 3×1,5 (columna → luminaria) y de verde-amarillo 10 mm² (PAT) se anotan
+          // por si su PROVISIÓN la hizo EMA (ítems 86 y 87). Su instalación va adentro de 1–8.
+          if(clave === '3x1.5') ctx.cable15 += cant;
+          if(clave === '1x10' && /verde/i.test(d)) ctx.cableVA += cant;
           return;   // el resto de los cables (subida 3×1,5, PAT, cruce) no van por estos ítems
         }
         // ---- Zanjeo ----
@@ -17056,6 +17181,7 @@ function poblarParteObraDatalist(){
           if(/a nivel/i.test(d)) push(10, cant || 1, 'Tablero a nivel, sobre base de mampostería');
           else {
             push(9, cant || 1, 'Tablero aéreo de medición, protección y comando');
+            ctx.tableroAereo += (cant || 1);
             push(13, cant || 1, 'Apoyo PRFV que sostiene el tablero');
             dudas.push('El apoyo del tablero se cargó con el ítem 13 (PRFV h=8 m Ro1050), que es el que el itemizado usa para sostener el tablero. La calculadora nombra un apoyo de 9,5 m — verificá cuál corresponde en esta plaza.');
           }
@@ -17070,7 +17196,10 @@ function poblarParteObraDatalist(){
           if(/^A[eé]reo/i.test(d)){ dudas.push('El cruce cargado es aéreo sobre postación de EPEC y el itemizado de plazas no tiene un ítem para ese caso. Cargalo a mano si corresponde.'); return; }
         }
         // ---- Puesta a tierra y varios que el formulario no sabe ----
-        if(/^Dispersor \(jabalina\)/i.test(d)){ push(75, cant, `${fmt(cant,0)} jabalina(s) de puesta a tierra`); return; }
+        if(/^Dispersor \(jabalina\)/i.test(d)){ ctx.jabalinas += cant; push(75, cant, `${fmt(cant,0)} jabalina(s) de puesta a tierra`); return; }
+        // ---- Luminarias: solo cuentan para la PROVISIÓN (85.1 / 85.2); el montaje va adentro de 1–8 ----
+        m = d.match(/^Luminaria vial LED\s+(\d+)\s*W/i);
+        if(m){ if(parseInt(m[1],10) >= 150) ctx.lum180 += cant; else ctx.lum75 += cant; return; }
         if(/^Medici[oó]n de resistencia de PAT/i.test(d)){ push(81, cant, `${fmt(cant,0)} medición(es) de resistencia de PAT`); return; }
         if(/^Apoya escalera/i.test(d)){ push(73, cant, `${fmt(cant,0)} apoya escalera con herrajes`); return; }
         if(/^Tomacable/i.test(d)){ push(74, cant, `${fmt(cant,0)} tomacable WGC/TGC`); return; }
@@ -17147,11 +17276,81 @@ function poblarParteObraDatalist(){
       if(de7 > 0 && asignadas7 !== de7)
         dudas.push(`El cómputo tiene ${de7} columna(s) de 7 m y ${asignadas7} con brazos asignados. Revisá el reparto — puede que algún vínculo no esté tasado en el itemizado.`);
     }
+
+    // ---- Columna METÁLICA nueva: la PAT ya está adentro del ítem 1–4 (2026-09-06) ----
+    // Los ítems 1 a 4 dicen «instalación completa de puesta a tierra y su medición». El cómputo
+    // trae una jabalina, un tomacable y una medición POR COLUMNA metálica (AP-TC-005/006), y hasta
+    // hoy el mapeador los cargaba enteros en 75, 74 y 81: cobraba la PAT dos veces. Acá se descuenta
+    // una por cada columna metálica nueva; lo que queda (la del tablero) sí se cobra aparte.
+    // El ítem 88 (provisión de la jabalina) NO se descuenta: los ítems 1–4 lo excluyen expresamente.
+    // Lo mismo vale para la columna metálica EXISTENTE con acometida nueva: el ítem 42 también dice
+    // «Instalación completa de puesta a tierra y su medición».
+    const colMetNuevas = tipo === 'Metálica' ? (de7 + de10) : 0;
+    const con42 = (out.find(x=>x.item === 42) || {}).cantidad || 0;
+    const patAdentro = colMetNuevas + con42;
+    if(patAdentro > 0){
+      const quitar = (item)=>{
+        const r = out.find(x=>x.item === item);
+        if(!r) return 0;
+        const q = Math.min(r.cantidad, patAdentro);
+        r.cantidad -= q;
+        if(r.cantidad <= 0) out.splice(out.indexOf(r), 1);
+        else r.motivo += ` − ${q} de las columnas metálicas (su PAT ya está adentro de los ítems 1–4 / 42)`;
+        return q;
+      };
+      const q75 = quitar(75); quitar(74); quitar(81);
+      if(q75 > 0) dudas.push(`Columnas <b>metálicas</b>: se descontaron <b>${q75}</b> jabalina(s), tomacable(s) y medición(es) de los ítems 75, 74 y 81 porque la PAT <b>ya está adentro</b>${colMetNuevas ? ` de los ítems 1 a 4 (${colMetNuevas} columna(s) nueva(s))` : ''}${colMetNuevas && con42 ? ' y' : ''}${con42 ? ` del ítem 42 (${con42} existente(s) con acometida nueva)` : ''}: «instalación completa de puesta a tierra y su medición». ${out.find(x=>x.item===75) ? 'Lo que quedó en 75/74/81 es la PAT del tablero.' : ''} La <b>provisión</b> de todas las jabalinas (ítem 88) sí se cobra: esos ítems la excluyen.`);
+    }
+
+    // ---- PROVISIÓN de materiales, ítems 83.1 a 89 (2026-09-06) ----
+    agregarProvision(push, dudas, { tipo, de7, de10, ...ctx }, prov);
     return { filas:out, dudas, origen: deDonde };
+  }
+
+  // Los ítems de PROVISIÓN (83.1 a 89). Los ítems 1–9 pagan el trabajo pero «no incluyen la provisión»
+  // de la columna, la luminaria, la jabalina, los cables 3×1,5 y verde-amarillo y el tablero aéreo.
+  // Si el material lo puso EMA, se cobra aparte por estos ítems; si lo dio EPEC, no. Quién lo puso
+  // sale de la tarjeta «¿Quién pone el material?» de la Calculadora (viaja con el cómputo); los
+  // cómputos anteriores al 06/09/2026 no la traen y se asumen como las plazas ya hechas:
+  // columnas, tablero y jabalinas de EMA; luminarias y los dos cables de EPEC.
+  const PROV_DEF_ITZ = { columnas:true, tablero:true, jabalinas:true, luminarias:false, cable15:false, cableVA:false };
+  function provisionDe(h, a){
+    if(typeof provisionNormalizar === 'function'){
+      if(h && (h.provision || (h.form && h.form.campos))) return provisionNormalizar(h.provision || null, h.form && h.form.campos);
+      if(a && a.provision) return provisionNormalizar(a.provision, null);
+      return provisionNormalizar(null, null);
+    }
+    return { ...PROV_DEF_ITZ, asumido:true };
+  }
+  function agregarProvision(push, dudas, c, prov){
+    const p = { ...PROV_DEF_ITZ, ...(prov||{}) };
+    const met = c.tipo === 'Metálica';
+    if(p.columnas){
+      if(met){
+        push('83.1', c.de7,  `${c.de7} columna(s) metálica(s) de 7 m que puso EMA — los ítems 1 a 3 no incluyen su provisión`);
+        push('83.2', c.de10, `${c.de10} columna(s) metálica(s) de 10 m que puso EMA — el ítem 4 no incluye su provisión`);
+      } else {
+        push('84.1', c.de7,  `${c.de7} columna(s) PRFV de 7 m que puso EMA — los ítems 5 a 7 no incluyen su provisión`);
+        push('84.2', c.de10, `${c.de10} columna(s) PRFV de 10 m que puso EMA — el ítem 8 no incluye su provisión`);
+      }
+    }
+    if(p.tablero)    push('89',   c.tableroAereo, `${c.tableroAereo} tablero(s) aéreo(s) TA"P" que puso EMA — el ítem 9 no incluye su provisión`);
+    if(p.jabalinas)  push('88',   c.jabalinas,    `${fmt(c.jabalinas,0)} jabalina(s) que puso EMA — los ítems 1–4, 42, 75 y 77 no incluyen su provisión`);
+    if(p.luminarias){
+      push('85.1', c.lum75,  `${c.lum75} luminaria(s) LED 75 W que puso EMA`);
+      push('85.2', c.lum180, `${c.lum180} luminaria(s) LED 180 W que puso EMA`);
+    }
+    if(p.cable15)    push('86',   c.cable15, `${fmt(c.cable15,2)} m de cable 3×1,5 mm² que puso EMA`);
+    if(p.cableVA)    push('87',   c.cableVA, `${fmt(c.cableVA,2)} m de cable verde-amarillo 10 mm² que puso EMA`);
+    const quien = k=> p[k] ? 'EMA' : 'EPEC';
+    dudas.push(`<b>Provisión de materiales (83.1 a 89)</b>${p.asumido ? ' — cómputo anterior al 06/09/2026, se asume como en las plazas ya hechas' : ' — según lo marcado en la Calculadora'}: columnas <b>${quien('columnas')}</b> · tablero aéreo <b>${quien('tablero')}</b> · jabalinas <b>${quien('jabalinas')}</b> · luminarias <b>${quien('luminarias')}</b> · 3×1,5 <b>${quien('cable15')}</b> · verde-amarillo <b>${quien('cableVA')}</b>. Lo que dice EMA se cobra aparte; lo que dice EPEC no. Si no es así en esta plaza, destildá el renglón antes de aplicar.`);
+    if(met && p.columnas && (c.de7 + c.de10) > 0)
+      dudas.push(`<b>Nota EMA (06/09/2026) sobre el 83.x:</b> el texto de los ítems 1 a 4 dice «provisión… de columna metálica» y a la vez «no incluye la provisión de los materiales aportados en el ítem 83.1/83.2». <b>El itemizado se contradice.</b> Decisión: se cobra igual el 83.x cuando la columna la puso EMA, porque la exclusión es expresa y el ítem 83 fue creado en el Anexo I justamente para eso. Dejarlo asentado por escrito con la Inspección antes de certificar.`);
   }
 
   // Lo que la calculadora NO puede saber y hay que cargar a mano en el itemizado.
   const FALTA_A_MANO = [
+    'Los ítems de <b>provisión 83.1 a 89</b> salen solos según lo marcado en «¿Quién pone el material?» de la Calculadora (o, en cómputos viejos, como en las plazas ya hechas). Si en esta plaza fue distinto, destildá el renglón o agregalo abajo con el selector.',
     'Las protecciones del tablero (térmicas, diferencial, contactor, reloj, portafusible NH) — ítems 50 a 67.',
     'Empalmes (78 y 79) y medición de aislación de conductores existentes (80).',
     'Reacondicionamiento y aplomado de columnas existentes (41, 43), luminarias sobre columna existente (44) y retiro de luminarias (45): salen solos SI en la Calculadora cargaste «Columnas metálicas EXISTENTES» y los retiros; si no, van a mano.',
@@ -17165,9 +17364,10 @@ function poblarParteObraDatalist(){
     let r = null, fuente = '';
     // El listado de materiales es la fuente más completa y la tienen TODAS las plazas, viejas
     // incluidas. La foto del formulario queda de respaldo para cómputos sin listado.
-    if(h && tieneSecs(h.secciones)){ r = itemizadoDesdeSecciones(h.secciones); fuente = 'el listado de materiales del cómputo'; }
+    const prov = provisionDe(h, a);   // quién puso el material (2026-09-06)
+    if(h && tieneSecs(h.secciones)){ r = itemizadoDesdeSecciones(h.secciones, undefined, prov); fuente = 'el listado de materiales del cómputo'; }
     else if(h && h.form && h.form.campos){ r = itemizadoDesdeComputo(h); fuente = 'los datos cargados en la Calculadora'; }
-    else if(tieneSecs(a.secciones)){ r = itemizadoDesdeSecciones(a.secciones); fuente = 'el listado de materiales que tiene cargado la plaza'; }
+    else if(tieneSecs(a.secciones)){ r = itemizadoDesdeSecciones(a.secciones, undefined, prov); fuente = 'el listado de materiales que tiene cargado la plaza'; }
     if(!r){
       previa[a.id] = { error: h
         ? 'El cómputo que encontramos no trae ni el listado de materiales ni los datos del formulario. Volvé a calcular la plaza en la Calculadora.'
@@ -17178,6 +17378,7 @@ function poblarParteObraDatalist(){
     r.filas.sort((x,y)=> x.item - y.item);   // en el orden del pliego, que es como se certifica
     const yaCargados = {};
     (a.valorItems||[]).forEach(v=>{ if(v.itemPliego) yaCargados[v.itemPliego] = n2(v.cantidad); });
+    (a.valorItemsEpec||[]).forEach(v=>{ if(v.itemEpec) yaCargados[String(v.itemEpec)] = n2(v.cantidad); });   // 83.1–89
     r.filas.forEach(fl=>{
       fl.anterior = yaCargados[fl.item];
       fl.cambia = fl.anterior != null && Math.abs(fl.anterior - fl.cantidad) > 0.001;
@@ -17201,11 +17402,12 @@ function poblarParteObraDatalist(){
       x += `<div class="hint" style="color:var(--amber);">Ese cómputo no tiene nada que se pueda pasar al itemizado.</div>`;
     } else {
       x += `<div class="it-previa-filas">` + p.filas.map((fl,i)=>{
-        const it = itemDe(fl.item);
-        return `<label class="it-previa-fila">
+        const it = itemDe(fl.item) || (typeof itemEpec === 'function' ? itemEpec(fl.item) : null);   // 83.1–89 viven solo en el Anexo I
+        const ev = typeof esEventualidad === 'function' && esEventualidad(fl.item);
+        return `<label class="it-previa-fila${ev?' it-previa-prov':''}">
           <input type="checkbox" class="it-previa-chk" data-i="${i}" ${fl.tildada?'checked':''}>
           <div>
-            <b>Ítem ${fl.item} — ${esc(it?it.desc:'?')}</b>
+            <b>Ítem ${fl.item} — ${esc(it?it.desc:'?')}</b>${ev?' <span class="it-badge it-badge-prov" title="Provisión de material: se cobra porque lo puso EMA">provisión</span>':''}
             <div class="it-cat">${esc(fl.motivo)}</div>
           </div>
           <div class="it-previa-cant">
@@ -17217,11 +17419,12 @@ function poblarParteObraDatalist(){
       }).join('') + `</div>`;
     }
     if(p.dudas && p.dudas.length){
+      // Las dudas las escribe la propia herramienta (traen negritas); no llevan texto del usuario.
       x += `<div class="it-previa-dudas"><b>⚠ Esto hay que revisarlo a mano:</b><ul>` +
-           p.dudas.map(d=>`<li>${esc(d)}</li>`).join('') + `</ul></div>`;
+           p.dudas.map(d=>`<li>${d}</li>`).join('') + `</ul></div>`;
     }
     x += `<div class="it-previa-dudas it-previa-info"><b>La calculadora no puede saber esto — cargalo acá:</b><ul>` +
-         FALTA_A_MANO.map(d=>`<li>${esc(d)}</li>`).join('') + `</ul></div>`;
+         FALTA_A_MANO.map(d=>`<li>${d}</li>`).join('') + `</ul></div>`;
     x += `<div class="it-previa-pie">
       <button type="button" class="btn-ghost it-previa-cerrar">Cancelar</button>
       <button type="button" class="btn-primary it-previa-aplicar" style="width:auto; margin:0; padding:10px 18px;">Aplicar a la plaza</button>
@@ -17233,13 +17436,20 @@ function poblarParteObraDatalist(){
     const p = previa[a.id];
     if(!p || !p.filas) return 0;
     a.valorItems = a.valorItems || [];
+    a.valorItemsEpec = a.valorItemsEpec || [];
     let n = 0;
     p.filas.filter(fl=>fl.tildada).forEach(fl=>{
-      const ya = a.valorItems.find(v=>v.itemPliego === fl.item);
-      if(ya){ ya.cantidad = fl.cantidad; }              // la cantidad HECHA no se toca
-      else {
-        const nid = (typeof avanceItemIdSeq !== 'undefined') ? avanceItemIdSeq++ : Date.now() + n;
-        a.valorItems.push({ id:nid, itemPliego:fl.item, cantidad:fl.cantidad, cantidadAvanzada:0 });
+      const nid = ()=> (typeof avanceItemIdSeq !== 'undefined') ? avanceItemIdSeq++ : Date.now() + n;
+      // Los ítems de provisión 83.1–89 van en la lista propia del Anexo I (`valorItemsEpec`), que es
+      // donde también los deja el selector de «agregar» y donde el conforme a obra los sigue (2026-09-06).
+      if(typeof esEventualidad === 'function' && esEventualidad(fl.item)){
+        const ya = a.valorItemsEpec.find(v=>String(v.itemEpec) === String(fl.item));
+        if(ya){ ya.cantidad = fl.cantidad; }
+        else a.valorItemsEpec.push({ id:nid(), itemEpec:String(fl.item), cantidad:fl.cantidad, cantidadAvanzada:0 });
+      } else {
+        const ya = a.valorItems.find(v=>v.itemPliego === fl.item);
+        if(ya){ ya.cantidad = fl.cantidad; }              // la cantidad HECHA no se toca
+        else a.valorItems.push({ id:nid(), itemPliego:fl.item, cantidad:fl.cantidad, cantidadAvanzada:0 });
       }
       n++;
     });
@@ -18084,7 +18294,8 @@ const ITEMIZADO_EPEC = [
     '42': { coincide:false,
       obra:'Tabaquera (portafusible) de <b>10 × 38 mm</b> con <b>fusible de 2 A por artefacto</b> — 4 A cuando dos artefactos comparten la misma tabaquera.',
       item:'Se certifica igual por el <b>ítem 42</b>. Dejalo asentado por escrito con la Inspección antes de certificar.',
-      porque:'El ítem paga seccionador portafusible para riel DIN con fusible <b>cerámico de 2/4 A</b> y conductor 3×1,5 o 3×2,5 mm². El cartucho cerámico de 8,5 × 31,5 no entra en una tabaquera de 10 × 38, y la tabaquera es lo que piden los proyectos ejecutivos 2026 y lo que se está instalando.' },
+      porque:'El ítem paga seccionador portafusible para riel DIN con fusible <b>cerámico de 2/4 A</b> y conductor 3×1,5 o 3×2,5 mm². El cartucho cerámico de 8,5 × 31,5 no entra en una tabaquera de 10 × 38, y la tabaquera es lo que piden los proyectos ejecutivos 2026 y lo que se está instalando.',
+      cobro:'Incluye la caja externa, borneras, portafusible, fusibles, terminales, el tramo de 3×1,5/3×2,5, el acrílico <b>y la PAT completa con su medición</b>: en una columna existente no se cobran aparte 74, 75, 77 ni 81. No incluye la provisión de la jabalina (88) ni del verde-amarillo (87): el <b>88</b> se cobra si la jabalina la puso EMA.' },
     '68': { coincide:false,
       obra:'Fusible cilíndrico de <b>10 × 38 mm</b>.',
       item:'Por el <b>ítem 68</b>, igual que el 42 — misma discusión, misma constancia con la Inspección.',
@@ -18106,10 +18317,10 @@ const ITEMIZADO_EPEC = [
       cobro:'Si en obra se puso uno de rosca, no es certificable por este ítem: hay que cambiarlo antes de presentar la medición.' },
     '75': { coincide:true,
       obra:'Puede haber <b>más de un dispersor por punto</b>: la ETG cap. 14.1 admite «jabalina de 1,5 m o conjunto de ellas (hasta 3)» según la resistividad del suelo.',
-      cobro:'<b>Cada jabalina se certifica por este ítem.</b> Si el terreno no da los 40 Ω y hubo que hincar la segunda o la tercera, van 2 o 3 unidades en ese punto, no 1.' },
+      cobro:'<b>Cada jabalina se certifica por este ítem</b>, salvo las de columna <b>metálica nueva</b>, cuya PAT ya está adentro del ítem 1–4 (queda la del tablero, y todas en las plazas de PRFV). Si el terreno no da los 40 Ω y hubo que hincar la segunda o la tercera, van 2 o 3 unidades en ese punto, no 1. No incluye la provisión de la jabalina: el <b>88</b> va aparte si la puso EMA — y ése sí, por todas.' },
     '30': { coincide:true,
       porque:'La ETG cap. 5.3 deja elegir entre <b>3×1,5 y 3×2,5 mm²</b> «según lo determine la Inspección». Todos los proyectos leídos usan 3×1,5.',
-      cobro:'El metraje es el mismo con cualquiera de las dos secciones; el precio no. Si en tu plaza pidieron 3×2,5, verificá que se esté certificando por el ítem correcto.' },
+      cobro:'El metraje es el mismo con cualquiera de las dos secciones; el precio no. Si en tu plaza pidieron 3×2,5, verificá que se esté certificando por el ítem correcto. Ojo: es para tirar el cable en una columna <b>existente</b>; en columna nueva ya está adentro de los ítems 1 a 8. No incluye la provisión del cable (ítem 86), que en esta obra la da EPEC.' },
     '21': { coincide:null,
       obra:'Varios proyectos ejecutivos (Renacimiento, Los Tártaros) especifican caño de <b>Ø110 mm</b>, no el Ø160 del ítem.',
       porque:'El ítem describe el cruce con tunelera en seco en 1 caño PVC de Ø160 mm.',
@@ -18119,7 +18330,7 @@ const ITEMIZADO_EPEC = [
       porque:'El ítem admite las dos tecnologías, así que por el ítem no se resuelve.',
       cobro:'<b>No valen lo mismo.</b> Hay que definir cuál va antes de certificar la plaza.' },
     '1': { coincide:true,
-      cobro:'Incluye la <b>torta</b> y la <b>puesta a tierra completa y su medición</b>. Por eso, en columna metálica nueva <b>NO se cobran aparte</b> los ítems 74, 75, 77 ni 81. Sí se cobran, cuando esos materiales los pone la contratista, los ítems 88, 87, 83.1, 86 y 85.1, que el propio ítem excluye.' },
+      cobro:'Incluye la <b>torta</b> y la <b>puesta a tierra completa y su medición</b>. Por eso, en columna metálica nueva <b>NO se cobran aparte</b> los ítems 74, 75, 77 ni 81. Sí se cobran, cuando esos materiales los pone la contratista, los ítems 88, 87, 83.1, 86 y 85.1, que el propio ítem excluye. <b>En las plazas ya hechas</b> la columna y la jabalina las puso EMA → van <b>83.1 y 88</b>; la luminaria y los cables los dio EPEC → 85.1, 86 y 87 no. <b>Nota EMA (06/09/2026):</b> este ítem dice «provisión… de columna» en la descripción y a la vez excluye el 83.1 — se contradice; se cobra igual el 83.1 y se deja por escrito con la Inspección.' },
     '2': { coincide:true,
       cobro:'Igual que el ítem 1: torta y PAT completa (con medición) incluidas, así que 74, 75, 77 y 81 no se cobran aparte. Excluye la provisión de los ítems 88, 87, 83.1, 86 y 85.1.' },
     '3': { coincide:true,
@@ -18139,17 +18350,44 @@ const ITEMIZADO_EPEC = [
     '82': { coincide:true,
       cobro:'<b>Ojo con cobrarla dos veces:</b> los ítems 1 a 8 ya incluyen la poda de arboleda en el entorno de la columna que se instala. Este ítem es solo para la poda que se pida <b>aparte</b> de eso.' },
     '85.1': { coincide:true,
-      obra:'<b>En esta licitación la luminaria la provee la EPEC.</b>',
-      cobro:'Este ítem solo se usa si excepcionalmente la pone la contratista. Además <b>no incluye el «shorting cup»</b> que la ETG exige en el zócalo NEMA cuando la luminaria no lleva fotocélula.' },
+      obra:'<b>La luminaria la provee la EPEC</b> — en las plazas ya hechas también fue así (EPEC puso los artefactos, el 3×1,5 y el verde-amarillo de 10).',
+      cobro:'No se cobra, salvo que excepcionalmente la haya puesto la contratista (se marca en «¿Quién pone el material?» de la Calculadora). Además <b>no incluye el «shorting cup»</b> que la ETG exige en el zócalo NEMA cuando la luminaria no lleva fotocélula.' },
     '85.2': { coincide:true,
-      obra:'<b>En esta licitación la luminaria la provee la EPEC.</b>',
+      obra:'<b>La luminaria la provee la EPEC.</b>',
       cobro:'Igual que el 85.1: solo si la pone la contratista, y no está claro si el «shorting cup» viene incluido.' },
     '84.1': { coincide:true,
-      obra:'<b>En esta licitación la columna PRFV la provee la EPEC.</b>',
-      cobro:'Este ítem es para la eventualidad de que la ponga la contratista.' },
+      obra:'El pliego dice que la columna PRFV la provee la EPEC, <b>pero en las 13 plazas de PRFV ya hechas las columnas las puso EMA</b> (confirmado 06/09/2026).',
+      cobro:'<b>En esas 13 plazas se cobra</b>: 2,75 K por columna. Los ítems 5 a 7 dicen «no incluye la provisión de los materiales aportados en el ítem 84.1». En una plaza nueva donde EPEC entregue las columnas, destildá «Columnas» en la Calculadora y no sale.' },
     '84.2': { coincide:true,
-      obra:'<b>En esta licitación la columna PRFV la provee la EPEC.</b>',
-      cobro:'Igual que el 84.1: solo si la pone la contratista.' },
+      obra:'Igual que el 84.1: el pliego la asigna a EPEC, pero si la puso EMA se cobra.',
+      cobro:'4,56 K por columna de 10 m puesta por EMA. El ítem 8 excluye expresamente su provisión.' },
+    '83.1': { coincide:true,
+      obra:'Columna metálica recta de 7 m <b>puesta por EMA</b> — en todas las plazas de metálicas ya hechas las columnas las compró EMA.',
+      item:'Se carga <b>además</b> del ítem 1, 2 o 3 de esa columna: una unidad de 83.1 por cada columna metálica nueva de 7 m.',
+      cobro:'<b>2,64 K por columna</b> — más que la instalación misma. Los ítems 1 a 3 dicen «no incluye la provisión de los materiales aportados en los ítems 88, 87, 83.1, 86, 85.1». <b>Nota EMA (06/09/2026):</b> el mismo ítem 1 dice «provisión… de columna metálica» en su descripción y al final excluye el 83.1: <b>el itemizado se contradice</b>. Decisión: <b>se cobra igual</b>, porque la exclusión es expresa y el 83.1 se creó en el Anexo I del 31/08/2026 justamente para esto (el itemizado de junio no tenía ni la exclusión ni el ítem). Dejarlo por escrito con la Inspección antes de certificar.' },
+    '83.2': { coincide:true,
+      obra:'Columna metálica recta de 10 m puesta por EMA.',
+      cobro:'4,37 K por columna, además del ítem 4. Vale la misma nota que el 83.1: el ítem 4 excluye expresamente su provisión aunque en la descripción diga «provisión… de columna». Se cobra igual y se deja por escrito.' },
+    '86': { coincide:true,
+      obra:'<b>El cable 3×1,5 lo da EPEC</b> en esta obra (confirmado 06/09/2026).',
+      cobro:'No se cobra. Solo si lo pusiera EMA, por metro (0,02 K/m). Su <b>instalación</b> ya está adentro de los ítems 1 a 8; el ítem 30 es para tirarlo suelto en una columna existente.' },
+    '87': { coincide:true,
+      obra:'<b>El cable verde-amarillo de 10 mm² lo da EPEC</b> en esta obra (confirmado 06/09/2026).',
+      cobro:'No se cobra. Solo si lo pusiera EMA, por metro (0,02 K/m). Lo excluyen los ítems 1 a 4, 42 y 77.' },
+    '88': { coincide:true,
+      obra:'<b>Las jabalinas las pone EMA.</b> En metálica, una por columna (AP-TC-005/006) más la del tablero; en PRFV, una por final de circuito más la del tablero — así las computa la Calculadora.',
+      item:'Una unidad de 88 por cada jabalina del cómputo, <b>se cobre o no el 75</b>: en columna metálica nueva la instalación de la jabalina está adentro del ítem 1–4, pero su provisión no.',
+      cobro:'0,09 K por jabalina. La excluyen expresamente los ítems 1 a 4, 42, 75 y 77. <b>No contarla dos veces</b>: una jabalina = una unidad de 88, venga de la columna, del tablero o del final de circuito.' },
+    '89': { coincide:true,
+      obra:'<b>Los tableros aéreos los compró EMA</b> (confirmado 06/09/2026).',
+      item:'Se carga además del ítem 9. El ítem 10 (tablero a nivel) <b>no</b> lo excluye: ahí el tablero ya está adentro.',
+      cobro:'<b>16,06 K por tablero</b> — el ítem más caro del Anexo I después del tablero a nivel. El ítem 9 dice «no incluye la provisión del tablero aportado en ítem 89».' },
+    '9': { coincide:true,
+      cobro:'Paga la instalación, el equipamiento interno, la programación, la certificación y la puesta en servicio. <b>No incluye</b> el poste (ítem 13), la acometida (11/12), el medidor <b>ni el tablero en sí (ítem 89)</b>: si el tablero lo puso EMA, el 89 va aparte.' },
+    '44': { coincide:true,
+      cobro:'Montaje y conexionado sobre columna existente. No incluye la provisión de la luminaria (ítem 85), que la da EPEC.' },
+    '77': { coincide:true,
+      cobro:'Caño de H°G° con jabalina, tomacable, terminal y el 1×10. No incluye la provisión de la jabalina (88) ni del verde-amarillo (87).' },
     '80': { coincide:true,
       cobro:'<b>La unidad es «cada 100 metros lineales»</b>, no por metro ni por punto: 250 m de conductor son <b>2,5 unidades</b> de este ítem, no 250.' },
     '81': { coincide:true,
@@ -19066,7 +19304,7 @@ const ITEMIZADO_EPEC = [
           ${epecBase>0 ? `<div class="ep-pesos">${plata(c.contratado*baseEf())} contratado · ${plata(c.avanzado*baseEf())} certificado</div>` : ''}
         </div>
         <div class="it-pct" style="color:${colorPct(c.pct)}">${c.pct}%</div>
-        <button type="button" class="btn-ghost it-imprimir-ep no-print" data-plaza="${esc(a.id)}" title="Imprimir solo esta plaza">🖨</button>
+        <button type="button" class="btn-ghost it-imprimir-ep no-print" data-plaza="${esc(a.id)}" title="Imprime una hoja con el itemizado de esta plaza sola: su membrete, sus ítems, cantidades y subtotales. No sale nada del resto del itemizado."><span class="it-imprimir-largo">🖨 Imprimir esta plaza</span><span class="it-imprimir-corto">🖨 Imprimir</span></button>
       </div>
       <div class="avance-bar"><div class="avance-bar-fill" style="width:${c.pct}%; background:${colorPct(c.pct)};"></div></div>`;
     if(abierta) h += detallePlazaEpec(a);
@@ -19088,6 +19326,15 @@ const ITEMIZADO_EPEC = [
     const CO = window.CO;
     const coFijado = !!(CO && CO.estado(a).fijado);
     if(CO && filas.length) h += CO.bandaHtml(a, dis);
+
+    // Imprimir SOLO esta plaza, también con la plaza abierta y esté o no fijado el proyecto: el
+    // botón del encabezado se veía apenas y no se encontraba (2026-09-06).
+    if(filas.length){
+      h += `<div class="it-imprimir-fila no-print">
+        <button type="button" class="btn-ghost it-imprimir-ep" data-plaza="${esc(a.id)}"><span class="it-imprimir-largo">🖨 Imprimir el itemizado de esta plaza</span><span class="it-imprimir-corto">🖨 Imprimir esta plaza</span></button>
+        <span class="hint">Sale <b>una sola hoja con esta plaza</b>: membrete, ítems, cantidades y subtotales. No se imprime el resto del itemizado${(CO && CO.estado(a).fijado) ? ', y las columnas de proyecto y conforme a obra van incluidas' : ''}.</span>
+      </div>`;
+    }
 
     if(!filas.length){
       h += `<div class="hint" style="margin-top:0;">Esta plaza <b>no tiene ningún ítem cargado</b>. Traelos de una con el botón <b>«⟳ Traer las cantidades de la Calculadora»</b> de acá abajo, o agregalos de a uno con el selector.</div>`;
