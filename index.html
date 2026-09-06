@@ -1683,8 +1683,95 @@
   .it-nota-obra{ font-size:11.5px; line-height:1.45; margin-top:6px; padding:6px 9px;
     background:#fff8e6; border-left:3px solid #e0a800; border-radius:0 5px 5px 0; color:#5c4600; }
   .it-nota-obra b{ color:#7a5c00; }
+  /* ---- Explicación del ítem, que se abre al apretarlo (2026-09-06) ---- */
+  .it-exp{ margin-top:5px; }
+  /* El <summary> conserva su display nativo a propósito — ver la nota en notaItemHtml(). Solo se
+     le saca la flechita del navegador; todo el aspecto de pastilla va en el <span> de adentro. */
+  .it-exp-sum{ cursor:pointer; list-style:none; user-select:none; }
+  .it-exp-sum::-webkit-details-marker{ display:none; }
+  .it-exp-sum::marker{ content:''; }
+  .it-exp-tit{ display:inline-flex; align-items:center; gap:5px;
+    font-size:11px; font-weight:700; color:var(--teal-dark); border:1px solid var(--line);
+    background:#fff; border-radius:999px; padding:2px 10px 2px 9px; }
+  .it-exp-tit::after{ content:'▾'; font-size:9px; opacity:.65; }
+  .it-exp[open] .it-exp-tit::after{ content:'▴'; }
+  .it-exp-sum:hover .it-exp-tit{ border-color:var(--teal-dark); background:var(--bg-soft); }
+  .it-exp-punto{ width:7px; height:7px; border-radius:50%; display:inline-block; flex:none; }
+  .it-exp-p-no{ background:#c0392b; }
+  .it-exp-p-duda{ background:#e0a800; }
+  /* Ancho propio y previsible: adentro de una tabla que se desplaza a lo ancho, si el panel se
+     estira con el texto la fila crece y en el celular la explicación queda cortada afuera de la
+     pantalla. Con un ancho fijo el texto envuelve adentro de lo que se ve. */
+  .it-exp-cuerpo{ margin-top:6px; padding:9px 11px; border-radius:8px; width:min(430px, calc(100vw - 78px));
+    background:var(--bg-soft); border:1px solid var(--line); font-size:11.5px; line-height:1.5;
+    white-space:normal; overflow-wrap:anywhere; }
+  .it-exp-ficha{ font-weight:600; color:var(--navy); }
+  .it-exp-meta{ font-weight:500; color:var(--text-soft); font-size:11px; margin-top:3px; }
+  .it-exp-est{ margin:7px 0; font-weight:700; font-size:11px; display:inline-block;
+    padding:2px 9px; border-radius:999px; }
+  .it-exp-ok{ background:rgba(45,160,110,.14); color:#1d7a51; }
+  .it-exp-no{ background:rgba(192,57,43,.12); color:#a5271b; }
+  .it-exp-duda{ background:#fff3cd; color:#7a5c00; }
+  .it-exp-l{ margin-top:5px; color:var(--text); }
+  .it-exp-l b{ color:var(--navy); }
+  .it-exp-plata{ margin-top:7px; padding:6px 9px; border-radius:0 5px 5px 0;
+    background:#fff8e6; border-left:3px solid #e0a800; color:#5c4600; }
+  .it-exp-plata b{ color:#7a5c00; }
+  /* Al imprimir, el desplegable cerrado no ocupa lugar y el botoncito no se ve: el itemizado sale
+     limpio. Lo que el usuario dejó abierto sí se imprime, que es justamente lo que quiso mostrar. */
+  @media print{
+    .it-exp-sum{ display:none; }
+    .it-exp-cuerpo{ background:#fff; border:1px solid #ccc; }
+  }
   .it-badge{ background:rgba(56,189,248,.14); color:var(--teal-dark); border-radius:999px;
              padding:1px 7px; font-size:10.5px; font-weight:700; }
+  /* ---- Trabajos sin ítem en el pliego (2026-09-06) ---- */
+  .si-caja{ margin-top:14px; padding:12px 14px; border-radius:10px;
+    background:#fdf6ec; border:1px solid #e8d5ae; }
+  .si-tit{ font-weight:800; color:#7a5c00; font-size:13.5px; }
+  .si-sub{ font-size:11.5px; line-height:1.5; color:#6b5312; margin-top:4px; }
+  .si-vacio{ font-size:12px; color:#8a6d2f; margin-top:10px; font-style:italic; }
+  .si-fila{ margin-top:10px; padding:10px 11px; background:#fff; border:1px solid #e8d5ae; border-radius:9px; }
+  .si-fila input, .si-fila select{ margin:0; }
+  .si-fila > input.si-desc{ width:100%; font-weight:600; }
+  .si-linea{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:9px; margin-top:8px; }
+  .si-linea label{ display:flex; flex-direction:column; gap:3px; font-size:11px;
+    font-weight:700; color:var(--text-soft); }
+  .si-linea label input, .si-linea label select{ width:118px; }
+  .si-linea label.si-ancho{ flex:1 1 240px; }
+  .si-linea label.si-ancho input, .si-linea label.si-ancho select{ width:100%; }
+  .si-sub-total{ font-size:12px; color:var(--text-soft); margin-left:auto; white-space:nowrap;
+    padding-bottom:7px; }
+  .si-sub-total b{ color:var(--navy); font-variant-numeric:tabular-nums; }
+  .si-asignado{ margin-top:8px; font-size:11.5px; line-height:1.45; padding:6px 9px;
+    border-radius:0 5px 5px 0; background:rgba(13,148,136,.09);
+    border-left:3px solid var(--teal-dark); color:var(--teal-dark); }
+  .si-pie{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:12px; }
+  .si-total{ margin-left:auto; font-size:13px; color:#6b5312; }
+  .si-total b{ color:#7a5c00; font-variant-numeric:tabular-nums; font-size:14.5px; }
+  .si-badge{ background:#fdf0e3; color:#8a5200; border-radius:999px;
+    padding:1px 8px; font-size:10.5px; font-weight:700; white-space:nowrap; }
+  @media (max-width:620px){
+    /* En el celular: cantidad, unidad y precio comparten un renglón (son cortos), el subtotal pasa a
+       ser el pie de ese bloque, y la ✕ se va a la esquina para no pelear con los campos. */
+    .si-fila{ position:relative; }
+    .si-fila > input.si-desc{ padding-right:36px; }
+    .si-linea{ gap:7px; }
+    .si-linea label{ flex:1 1 0; min-width:0; }
+    .si-linea label input, .si-linea label select{ width:100%; }
+    .si-linea label.si-ancho{ flex:1 1 100%; }
+    .si-sub-total{ flex:1 1 100%; margin-left:0; margin-top:2px; padding:7px 0 0;
+      border-top:1px dashed #e8d5ae; }
+    .si-quitar{ position:absolute; top:9px; right:9px; }
+    .si-linea + .si-linea{ margin-top:11px; }
+    .si-pie{ flex-direction:column; align-items:stretch; gap:8px; }
+    .si-total{ margin-left:0; }
+  }
+  @media print{
+    .si-caja{ background:#fff; border:1px solid #ccc; }
+    .si-fila input, .si-fila select{ border:none; padding:0; background:transparent;
+      -webkit-appearance:none; appearance:none; }
+  }
   .it-precio-cel{ display:flex; align-items:center; gap:6px; }
   .it-precio-cel input.it-precio{ width:118px; text-align:right; }
   .it-precio-txt{ font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--navy); font-weight:600; }
@@ -3028,6 +3115,7 @@
        materiales en caso de eventualidad») son propios de este pliego y se cargan acá.
        ============================================================ -->
   <div id="avPanelEpec" style="display:none;">
+    <datalist id="siUnidades"><option value="Un."><option value="m"><option value="m²"><option value="m³"><option value="kg"><option value="h"><option value="día"><option value="gl"></datalist>
     <div class="card">
       <div class="card-header-row">
         <h2 style="margin:0;"><span class="dot"></span>Itemizado 2026 — con el que se cobra</h2>
@@ -16882,37 +16970,130 @@ const ITEMIZADO_EPEC = [
   // que se cobra— no coincide con lo que efectivamente se instala. El ítem NO se cambia: se
   // certifica con el que corresponde, pero al lado queda escrito qué se puso, para que quien
   // firme el certificado sepa exactamente qué está aprobando y no aparezca una sorpresa después.
+  // ============================================================
+  // QUÉ ES CADA ÍTEM — se abre al apretarlo (2026-09-06)
+  // ============================================================
+  // Pedido del usuario, textual: *"el itemizado es para ver costos, no hace falta poner «tené
+  // cuidado a comprar»; es: se puso o no se puso, y el ítem si coincide, y en caso de no, qué ítem
+  // se usó, y el por qué. Que aprietes y te abra la explicación. Igual que los ítems: estaría bueno
+  // que al apretar te diga qué son esos ítems, sin tener que ir a buscarlos abajo."*
+  //
+  // Antes esto era un cartel amarillo siempre visible, redactado como advertencia de COMPRA. Acá no
+  // se compra: se certifica. Así que ahora la nota contesta, en este orden, lo único que hace falta
+  // para certificar sin equivocarse:
+  //   · coincide  → true = lo que se pone en obra es lo que el ítem paga · false = no coincide
+  //                 · null = todavía no está definido, hay que decidirlo
+  //   · obra      → qué se pone realmente en obra, cuando no es lo que dice el ítem
+  //   · item      → con qué ítem se certifica eso (que a veces NO es el ítem que estás mirando)
+  //   · porque    → de dónde sale la diferencia (plano, ETG, proyecto ejecutivo)
+  //   · cobro     → lo que hace a la plata: qué está incluido, qué no se cobra aparte, qué unidad es
+  // Cualquiera de los cuatro últimos puede faltar; se dibuja solo lo que hay.
   const NOTA_ITEM = {
-    '42': 'El ítem paga <b>seccionador portafusible para riel DIN con fusibles cerámicos de 2/4 A</b> y conductor <b>3×1,5 o 3×2,5 mm²</b>. <b>En obra se pone tabaquera 10 × 38 mm con fusible de 2 A por artefacto</b> (4 A cuando dos artefactos comparten tabaquera), que es lo que dicen los proyectos ejecutivos 2026 y lo que se está instalando. El cartucho cerámico de 8,5 × 31,5 no entra en la tabaquera 10 × 38. <b>Dejalo asentado por escrito con la Inspección antes de certificar.</b>',
-    '68': 'El ítem dice <b>fusible cerámico de 2 A a 10 A</b> (medida 8,5 × 31,5 de los planos tipo). <b>En obra se usa fusible cilíndrico de 10 × 38 mm</b>, que es la medida de la tabaquera que se instala. Misma discusión que el ítem 42.',
-    '69': 'Este ítem sí nombra <b>portafusible tabaquera con fusible</b>, que es lo que se pone en obra — pero declara <b>1 A, 6 A o 10 A</b> y el fusible que va en la columna es de <b>2 A por artefacto</b> (o 4 A si dos comparten tabaquera). Verificá con la Inspección si el amperaje de 2/4 A entra en este ítem o hay que certificarlo por el 68.',
-    '62': 'Bornera BPN de 4 a 2,5 mm². <b>Ojo en PRFV:</b> por criterio de compra, las borneras <b>celeste (neutro) y verde (tierra) se piden siempre de 6 mm²</b>, cualquiera sea el calibre del troncal, así que esas van por el ítem 63 y no por este. Solo la gris (fase) sigue la sección del cable.',
-    '63': 'Bornera BPN de 10 a 6 mm². En columnas PRFV es la que corresponde a <b>neutro y tierra siempre</b>, más la fase cuando el cable es de más de 4 mm².',
-    '74': 'El ítem nombra <b>tomacable WGC / TGC</b>. Cuidado al comprar: la ETG (cap. 14.2) <b>prohíbe expresamente el tomacable de ajuste a rosca</b> — tiene que ser a compresión elástica, aplicado con pinza «pico de loro», o del tipo TGC, y <b>sin zinc en la aleación</b> (o sea, no de latón), aunque venga estañado.',
-    '75': 'Dispersor. <b>Puede hacer falta más de uno por punto:</b> la ETG cap. 14.1 admite «jabalina de 1,5 m <b>o conjunto de ellas (hasta 3)</b>» según la resistividad del suelo. Si el terreno no da los 40 Ω del esquema TT, hay que hincar la segunda y hasta la tercera — y cada una se certifica por este ítem.',
-    '30': 'Cable 3×1,5 mm² instalado en columna. La ETG cap. 5.3 deja elegir entre <b>3×1,5 y 3×2,5 mm² «según lo determine la Inspección»</b>. Todos los proyectos que leímos usan 3×1,5, pero si en tu plaza piden 3×2,5 el metraje es el mismo y el precio no: <b>preguntá antes de comprar el rollo</b>.',
-    '21': 'Cruce de calzada con tunelera en seco en <b>1 caño PVC de Ø160 mm</b>. Ojo: varios proyectos ejecutivos (Renacimiento, Los Tártaros) especifican <b>Ø110 mm</b>. Además el ítem no aclara si se mide por metro o por unidad — los proyectos lo computan <b>en metros</b>. Confirmalo antes de certificar.',
-    '64': 'Fotocontrol. El ítem admite <b>electromecánico o electrónico</b>, así que cubre las dos tecnologías. Pero los planos AP-T-007/008 piden <b>electromecánico</b> (IRAM-AADL J20-24/74 y J20-25/74) y la planilla de datos garantizados especifica uno <b>electrónico</b> (cruce por cero, ANSI C136.10). No son intercambiables ni valen lo mismo: definí cuál antes de comprar.',
-    '1': 'Incluye la <b>torta</b> y la <b>puesta a tierra completa y su medición</b>. Por eso, en columnas metálicas nuevas <b>NO se cobran aparte</b> los ítems 74, 75, 77 ni 81. Sí se cobran las provisiones que el propio ítem excluye: 88, 87, 83.1, 86 y 85.1, cuando esos materiales los pone la contratista.',
-    '2': 'Igual que el ítem 1: torta y PAT completa incluidas, y excluye la provisión de los ítems 88, 87, 83.1, 86 y 85.1.',
-    '3': 'Igual que el ítem 1: torta y PAT completa incluidas, y excluye la provisión de los ítems 88, 87, 83.1, 86 y 85.1.',
-    '4': 'Columna metálica de <b>10 m</b> con <b>cuatro brazos de 1,025 m</b>, plano <b>AP-C-040</b> — no el AP-C-034, que es el cuádruple de 400 mm. Torta y PAT completa incluidas. Excluye la provisión de los ítems 88, 87, 83.2, 86 y 85.2.',
-    '5': 'PRFV: <b>NO incluye torta ni puesta a tierra</b>. Acá la PAT <b>sí se cobra aparte</b> por los ítems 74, 75, 77 y 81. Excluye la provisión de los ítems 85.1, 84.1 y 86.',
-    '6': 'PRFV: no incluye torta ni PAT — se cobran aparte por los ítems 74, 75, 77 y 81. Excluye la provisión de los ítems 85.1, 84.1 y 86.',
-    '7': 'PRFV: no incluye torta ni PAT — se cobran aparte por los ítems 74, 75, 77 y 81. Excluye la provisión de los ítems 85.1, 84.1 y 86.',
-    '8': 'PRFV de <b>10 m</b> con <b>cuatro brazos de 1,025 m</b>, plano <b>AP-C-040</b>. No incluye torta ni PAT. Excluye la provisión de los ítems 85.2, 84.2 y 86.',
-    '82': 'Poda. <b>Ojo con no cobrarla dos veces:</b> los ítems 1 a 8 ya incluyen «poda de arboleda» en el entorno de la columna que se instala. Este ítem es para la poda que se pida <b>aparte</b> de eso.',
-    '85.1': 'Provisión de luminaria LED de 75 W. <b>En esta licitación la luminaria la provee la EPEC</b>, así que este ítem solo se usa si excepcionalmente la pone la contratista. Y ojo: <b>no incluye el «shorting cup»</b> que la ETG exige en el zócalo NEMA cuando la luminaria no lleva fotocélula — preguntá si viene con el artefacto.',
-    '85.2': 'Provisión de luminaria LED de 180 W. Misma aclaración que el ítem 85.1: normalmente la provee la EPEC, y no está claro si el «shorting cup» viene incluido.',
-    '84.1': 'Provisión de columna PRFV de 7 m. <b>En esta licitación la columna PRFV la provee la EPEC</b> — este ítem es para la eventualidad de que la ponga la contratista.',
-    '84.2': 'Provisión de columna PRFV de 10 m. Misma aclaración que el 84.1.',
-    '80': 'Medición de resistencia de aislación. <b>La unidad es «cada 100 metros lineales»</b>, no por metro ni por punto: 250 m de conductor son 2,5 unidades de este ítem.',
-    '81': 'Medición de resistencia de PAT. <b>En columnas metálicas nuevas NO se cobra aparte</b> — ya está adentro de los ítems 1 a 4, que dicen «instalación completa de puesta a tierra <b>y su medición</b>». En PRFV sí se cobra.',
+    '42': { coincide:false,
+      obra:'Tabaquera (portafusible) de <b>10 × 38 mm</b> con <b>fusible de 2 A por artefacto</b> — 4 A cuando dos artefactos comparten la misma tabaquera.',
+      item:'Se certifica igual por el <b>ítem 42</b>. Dejalo asentado por escrito con la Inspección antes de certificar.',
+      porque:'El ítem paga seccionador portafusible para riel DIN con fusible <b>cerámico de 2/4 A</b> y conductor 3×1,5 o 3×2,5 mm². El cartucho cerámico de 8,5 × 31,5 no entra en una tabaquera de 10 × 38, y la tabaquera es lo que piden los proyectos ejecutivos 2026 y lo que se está instalando.' },
+    '68': { coincide:false,
+      obra:'Fusible cilíndrico de <b>10 × 38 mm</b>.',
+      item:'Por el <b>ítem 68</b>, igual que el 42 — misma discusión, misma constancia con la Inspección.',
+      porque:'El ítem dice fusible cerámico de 2 A a 10 A, medida 8,5 × 31,5 de los planos tipo. La medida que entra en la tabaquera que se instala es la de 10 × 38.' },
+    '69': { coincide:null,
+      obra:'Tabaquera con fusible de <b>2 A</b> por artefacto (4 A si dos comparten).',
+      item:'A definir con la Inspección: <b>por el 69</b> si acepta el amperaje, o <b>por el 68</b> si no.',
+      porque:'Este ítem sí nombra portafusible tabaquera con fusible, que es lo que se pone. Pero declara <b>1 A, 6 A o 10 A</b>, y el que va en la columna es de 2/4 A.' },
+    '62': { coincide:null,
+      obra:'En columnas <b>PRFV</b>, las borneras de <b>neutro (celeste) y tierra (verde) se ponen siempre de 6 mm²</b>, sea cual sea el calibre del troncal. Solo la <b>gris (fase)</b> sigue la sección del cable.',
+      item:'Esas dos van por el <b>ítem 63</b> (10 a 6 mm²), no por éste.',
+      porque:'Criterio de compra del pañol: neutro y tierra se piden siempre de 6.',
+      cobro:'Si las cargás todas acá, estás certificando de menos: el 63 vale más que el 62.' },
+    '63': { coincide:true,
+      obra:'En PRFV es la de <b>neutro y tierra siempre</b>, más la de fase cuando el cable troncal es de más de 4 mm².' },
+    '74': { coincide:null,
+      obra:'Tomacable <b>a compresión elástica</b> (aplicado con pinza pico de loro) o del tipo <b>TGC</b>, sin zinc en la aleación.',
+      porque:'La ETG cap. 14.2 <b>prohíbe expresamente el tomacable de ajuste a rosca</b>, y también el de latón aunque venga estañado.',
+      cobro:'Si en obra se puso uno de rosca, no es certificable por este ítem: hay que cambiarlo antes de presentar la medición.' },
+    '75': { coincide:true,
+      obra:'Puede haber <b>más de un dispersor por punto</b>: la ETG cap. 14.1 admite «jabalina de 1,5 m o conjunto de ellas (hasta 3)» según la resistividad del suelo.',
+      cobro:'<b>Cada jabalina se certifica por este ítem.</b> Si el terreno no da los 40 Ω y hubo que hincar la segunda o la tercera, van 2 o 3 unidades en ese punto, no 1.' },
+    '30': { coincide:true,
+      porque:'La ETG cap. 5.3 deja elegir entre <b>3×1,5 y 3×2,5 mm²</b> «según lo determine la Inspección». Todos los proyectos leídos usan 3×1,5.',
+      cobro:'El metraje es el mismo con cualquiera de las dos secciones; el precio no. Si en tu plaza pidieron 3×2,5, verificá que se esté certificando por el ítem correcto.' },
+    '21': { coincide:null,
+      obra:'Varios proyectos ejecutivos (Renacimiento, Los Tártaros) especifican caño de <b>Ø110 mm</b>, no el Ø160 del ítem.',
+      porque:'El ítem describe el cruce con tunelera en seco en 1 caño PVC de Ø160 mm.',
+      cobro:'El ítem <b>no aclara si se mide por metro o por unidad</b>. Los proyectos lo computan <b>en metros</b>. Confirmalo antes de certificar: la diferencia es grande.' },
+    '64': { coincide:null,
+      obra:'Todavía sin definir: los planos <b>AP-T-007/008</b> piden fotocontrol <b>electromecánico</b> (IRAM-AADL J20-24/74 y J20-25/74) y la planilla de datos garantizados especifica uno <b>electrónico</b> (cruce por cero, ANSI C136.10).',
+      porque:'El ítem admite las dos tecnologías, así que por el ítem no se resuelve.',
+      cobro:'<b>No valen lo mismo.</b> Hay que definir cuál va antes de certificar la plaza.' },
+    '1': { coincide:true,
+      cobro:'Incluye la <b>torta</b> y la <b>puesta a tierra completa y su medición</b>. Por eso, en columna metálica nueva <b>NO se cobran aparte</b> los ítems 74, 75, 77 ni 81. Sí se cobran, cuando esos materiales los pone la contratista, los ítems 88, 87, 83.1, 86 y 85.1, que el propio ítem excluye.' },
+    '2': { coincide:true,
+      cobro:'Igual que el ítem 1: torta y PAT completa (con medición) incluidas, así que 74, 75, 77 y 81 no se cobran aparte. Excluye la provisión de los ítems 88, 87, 83.1, 86 y 85.1.' },
+    '3': { coincide:true,
+      cobro:'Igual que el ítem 1: torta y PAT completa (con medición) incluidas, así que 74, 75, 77 y 81 no se cobran aparte. Excluye la provisión de los ítems 88, 87, 83.1, 86 y 85.1.' },
+    '4': { coincide:true,
+      obra:'Columna metálica de <b>10 m</b> con <b>cuatro brazos de 1,025 m</b>, plano <b>AP-C-040</b> — no el AP-C-034, que es el cuádruple de 400 mm.',
+      cobro:'Torta y PAT completa incluidas (74, 75, 77 y 81 no se cobran aparte). Excluye la provisión de los ítems 88, 87, 83.2, 86 y 85.2.' },
+    '5': { coincide:true,
+      cobro:'PRFV: <b>NO incluye torta ni puesta a tierra.</b> Acá la PAT <b>sí se cobra aparte</b>, por los ítems 74, 75, 77 y 81. Excluye la provisión de los ítems 85.1, 84.1 y 86.' },
+    '6': { coincide:true,
+      cobro:'PRFV: no incluye torta ni PAT — se cobran aparte por los ítems 74, 75, 77 y 81. Excluye la provisión de los ítems 85.1, 84.1 y 86.' },
+    '7': { coincide:true,
+      cobro:'PRFV: no incluye torta ni PAT — se cobran aparte por los ítems 74, 75, 77 y 81. Excluye la provisión de los ítems 85.1, 84.1 y 86.' },
+    '8': { coincide:true,
+      obra:'PRFV de <b>10 m</b> con <b>cuatro brazos de 1,025 m</b>, plano <b>AP-C-040</b>.',
+      cobro:'No incluye torta ni PAT — se cobran aparte por los ítems 74, 75, 77 y 81. Excluye la provisión de los ítems 85.2, 84.2 y 86.' },
+    '82': { coincide:true,
+      cobro:'<b>Ojo con cobrarla dos veces:</b> los ítems 1 a 8 ya incluyen la poda de arboleda en el entorno de la columna que se instala. Este ítem es solo para la poda que se pida <b>aparte</b> de eso.' },
+    '85.1': { coincide:true,
+      obra:'<b>En esta licitación la luminaria la provee la EPEC.</b>',
+      cobro:'Este ítem solo se usa si excepcionalmente la pone la contratista. Además <b>no incluye el «shorting cup»</b> que la ETG exige en el zócalo NEMA cuando la luminaria no lleva fotocélula.' },
+    '85.2': { coincide:true,
+      obra:'<b>En esta licitación la luminaria la provee la EPEC.</b>',
+      cobro:'Igual que el 85.1: solo si la pone la contratista, y no está claro si el «shorting cup» viene incluido.' },
+    '84.1': { coincide:true,
+      obra:'<b>En esta licitación la columna PRFV la provee la EPEC.</b>',
+      cobro:'Este ítem es para la eventualidad de que la ponga la contratista.' },
+    '84.2': { coincide:true,
+      obra:'<b>En esta licitación la columna PRFV la provee la EPEC.</b>',
+      cobro:'Igual que el 84.1: solo si la pone la contratista.' },
+    '80': { coincide:true,
+      cobro:'<b>La unidad es «cada 100 metros lineales»</b>, no por metro ni por punto: 250 m de conductor son <b>2,5 unidades</b> de este ítem, no 250.' },
+    '81': { coincide:true,
+      item:'En columna <b>metálica nueva</b> se certifica adentro de los ítems <b>1 a 4</b>, que dicen «instalación completa de puesta a tierra <b>y su medición</b>».',
+      cobro:'En metálica nueva <b>no se cobra aparte</b>. En PRFV sí, porque los ítems 5 a 8 no incluyen la PAT.' },
   };
-  function notaItemHtml(id){
+
+  // Dibuja el desplegable de un ítem. Contesta primero QUÉ ES el ítem —con su descripción completa,
+  // unidad, coeficiente y precio— para no tener que ir a buscarlo a la tabla de abajo, y después,
+  // si hay algo que aclarar, si coincide con lo que se pone en obra y con qué ítem se certifica.
+  function notaItemHtml(id, it){
+    it = it || itemEpec(id);
+    if(!it) return '';
     const n = NOTA_ITEM[String(id)];
-    return n ? `<div class="it-nota-obra"><b>⚠ Lo que se pone en obra:</b> ${n}</div>` : '';
+    const precio = epecBase > 0 ? ` · <b>${plata(it.k * baseEf())}</b>${ivaEncendido() ? ' c/IVA' : ' s/IVA'}` : '';
+    const est = !n ? { cls:'ok',   txt:'Coincide con lo que se pone en obra' }
+              : n.coincide === true  ? { cls:'ok',   txt:'Coincide con lo que se pone en obra' }
+              : n.coincide === false ? { cls:'no',   txt:'NO coincide con lo que se pone en obra' }
+              :                        { cls:'duda', txt:'A definir con la Inspección' };
+    let cuerpo = `<div class="it-exp-ficha">${esc(it.desc)}<div class="it-exp-meta">${esc(it.cat)} · se mide por <b>${esc(it.un)}</b> · <b>${fmt(it.k,2)} K</b>${precio}</div></div>`;
+    cuerpo += `<div class="it-exp-est it-exp-${est.cls}">${est.cls==='ok'?'✓':(est.cls==='no'?'✗':'?')} ${est.txt}</div>`;
+    if(n){
+      if(n.obra)   cuerpo += `<div class="it-exp-l"><b>Lo que se pone en obra:</b> ${n.obra}</div>`;
+      if(n.item)   cuerpo += `<div class="it-exp-l"><b>Con qué ítem se certifica:</b> ${n.item}</div>`;
+      if(n.porque) cuerpo += `<div class="it-exp-l"><b>Por qué:</b> ${n.porque}</div>`;
+      if(n.cobro)  cuerpo += `<div class="it-exp-l it-exp-plata"><b>Para el cobro:</b> ${n.cobro}</div>`;
+    } else {
+      cuerpo += `<div class="it-exp-l">Sin observaciones: lo que se instala es lo que este ítem paga.</div>`;
+    }
+    const marca = n && n.coincide !== true ? `<span class="it-exp-punto it-exp-p-${est.cls}" title="${esc(est.txt)}"></span>` : '';
+    // La pastilla va en un <span> adentro del <summary> en vez de estilar el <summary> mismo:
+    // cambiarle el `display` a un <summary> da problemas en algunos navegadores (Safari), así que
+    // se lo deja con el suyo y todo el aspecto se le da al span.
+    return `<details class="it-exp"><summary class="it-exp-sum"><span class="it-exp-tit">${marca}Qué es este ítem${n && n.coincide !== true ? ' · hay algo que mirar' : ''}</span></summary><div class="it-exp-cuerpo">${cuerpo}</div></details>`;
   }
+
   let epecAbiertas = {};
 
   const fmtK = (v)=> fmt(v, 2) + ' K';
@@ -16927,6 +17108,84 @@ const ITEMIZADO_EPEC = [
   };
 
   // ---- Cuentas ----
+  // ============================================================
+  // TRABAJOS SIN ÍTEM EN EL PLIEGO (2026-09-06)
+  // ============================================================
+  // Pedido del usuario, textual: *"faltan los ítems de cosas que no tiene contempladas el
+  // itemizado pero que se hicieron en obra, debajo de los ítems de cada plaza. Poner las tareas que
+  // no se tienen en cuenta y ni siquiera hay algo que se aproxime, y poder ponerle precio, o la
+  // opción de ponerle un ítem a esa tarea."*
+  //
+  // Es distinto del «agregar ítem de eventualidad» que ya estaba, y por eso va aparte: aquel sirve
+  // para los ítems 83.1 a 89, que EXISTEN en el pliego. Esto es para lo que no tiene ítem ninguno,
+  // ni uno parecido — trabajo hecho que hoy no se puede certificar por ningún renglón.
+  //
+  // Regla que se respeta a propósito: esto NO suma al total contratado ni al certificado de la
+  // plaza. Esos dos números son contra el pliego y tienen que quedar limpios para certificar. Lo de
+  // acá va con su propio total, separado, que es lo que se reclama aparte.
+  const SI_UNIDADES = ['Un.','m','m²','m³','kg','h','día','gl'];
+
+  function opcionesItemParaAsignar(valor){
+    let h = `<option value="">— todavía sin ítem —</option>`;
+    ITEMIZADO_EPEC.forEach(it=>{
+      h += `<option value="${esc(it.id)}"${String(valor)===String(it.id)?' selected':''}>Ítem ${esc(it.id)} — ${esc(it.desc)}</option>`;
+    });
+    return h;
+  }
+
+  function totalSinItem(a){
+    return (a.trabajosSinItem||[]).reduce((t,x)=> t + n2(x.cant) * n2(x.pu), 0);
+  }
+
+  function bloqueSinItemHtml(a, dis){
+    const lista = a.trabajosSinItem || [];
+    const total = totalSinItem(a);
+    const base  = baseEf();
+    let h = `<div class="si-caja">
+      <div class="si-tit">Trabajos que se hicieron y el pliego no contempla</div>
+      <div class="si-sub">Lo que se ejecutó en obra y <b>no tiene ítem en el itemizado, ni uno que se le aproxime</b>.
+        No entra en el total contratado ni en el certificado de arriba — esos son contra el pliego y quedan limpios.
+        Esto va con su propio total, para reclamarlo aparte. Si después se acuerda con la Inspección
+        que entra por algún ítem, se lo asignás acá y ahí sí lo cargás arriba.</div>`;
+
+    if(!lista.length){
+      h += `<div class="si-vacio">Todavía no cargaste ningún trabajo fuera del itemizado en esta plaza.</div>`;
+    }
+    h += lista.map(t=>{
+      const sub = n2(t.cant) * n2(t.pu);
+      const enK = base > 0 ? ` · ≈ <b>${fmt(sub/base,2)} K</b>` : '';
+      const asignado = t.item ? `<div class="si-asignado">Se le asignó el <b>ítem ${esc(t.item)}</b>. Cuando lo apruebe la Inspección, cargalo arriba con su cantidad: ahí sí certifica.</div>` : '';
+      return `<div class="si-fila" data-sid="${esc(t.id)}" data-plaza="${esc(a.id)}">
+        <input type="text" class="si-campo si-desc" data-f="desc" value="${esc(t.desc||'')}" placeholder="Qué se hizo — ej: «Retiro de escombro y relleno de zanja de un caño roto de agua»" ${dis}>
+        <div class="si-linea">
+          <label>Cantidad<input type="number" min="0" step="any" class="si-campo" data-f="cant" value="${t.cant!=null&&t.cant!==''?esc(t.cant):''}" placeholder="0" ${dis}></label>
+          <label>Unidad<input type="text" class="si-campo si-un" data-f="un" list="siUnidades" value="${esc(t.un||'')}" placeholder="Un." ${dis}></label>
+          <label>$ por unidad<input type="number" min="0" step="any" class="si-campo" data-f="pu" value="${t.pu!=null&&t.pu!==''?esc(t.pu):''}" placeholder="0" ${dis}></label>
+          <div class="si-sub-total">Subtotal <b class="si-monto">${plata(sub)}</b><span class="si-enk">${enK}</span></div>
+          <button type="button" class="tramo-remove si-quitar no-print" title="Quitar este trabajo" ${dis}>×</button>
+        </div>
+        <div class="si-linea">
+          <label class="si-ancho">Quién lo pidió o autorizó<input type="text" class="si-campo" data-f="pedido" value="${esc(t.pedido||'')}" placeholder="Ej: Inspección — Ing. ..., por nota / por WhatsApp" ${dis}></label>
+          <label>Fecha<input type="date" class="si-campo" data-f="fecha" value="${esc(t.fecha||'')}" ${dis}></label>
+        </div>
+        <div class="si-linea">
+          <label class="si-ancho">Si más adelante se acuerda que entra por un ítem, elegilo acá
+            <select class="si-campo si-item" data-f="item" ${dis}>${opcionesItemParaAsignar(t.item)}</select></label>
+        </div>
+        ${asignado}
+      </div>`;
+    }).join('');
+
+    const enKTot = base > 0 ? ` · equivale a <b>${fmt(total/base,2)} K</b> con el módulo cargado` : '';
+    h += `<div class="si-pie">
+        <button type="button" class="btn-auto si-nuevo no-print" style="margin:0;" ${dis}>+ Agregar trabajo sin ítem</button>
+        <div class="si-total">Fuera del itemizado: <b>${plata(total)}</b>${enKTot}</div>
+      </div>
+      <div class="hint si-msg" style="margin-top:6px;"></div>
+    </div>`;
+    return h;
+  }
+
   function itemsEpecDePlaza(a){
     // Los 1 a 82 salen de la carga compartida; los de eventualidad, de la carga propia de este pliego.
     const compartidos = (a.valorItems||[]).filter(v=>itemEpec(v.itemPliego)).map(v=>({
@@ -17498,7 +17757,7 @@ const ITEMIZADO_EPEC = [
         <div class="it-flecha">${abierta?'▾':'▸'}</div>
         <div class="it-nom">
           <b>${esc(a.nombre||'(sin nombre)')}</b>
-          <div class="it-sub">${a.obraId?`ID ${esc(a.obraId)}`:'sin ID'}${a.barrio?` · ${esc(a.barrio)}`:''} · ${c.items} ítem(s)</div>
+          <div class="it-sub">${a.obraId?`ID ${esc(a.obraId)}`:'sin ID'}${a.barrio?` · ${esc(a.barrio)}`:''} · ${c.items} ítem(s)${(a.trabajosSinItem||[]).length?` · <span class="si-badge" title="Trabajos hechos en obra que el pliego no contempla. No están sumados en el total contratado ni en el certificado: se reclaman aparte.">${(a.trabajosSinItem||[]).length} fuera del itemizado</span>`:''}</div>
         </div>
         <div class="it-plata">
           <div class="it-contratado">${fmtK(c.contratado)}</div>
@@ -17546,8 +17805,10 @@ const ITEMIZADO_EPEC = [
         h += `<tr data-vid="${esc(f.ref.id)}" data-plaza="${esc(a.id)}" data-propio="${f.propio?1:0}">
           <td>
             <b>Ítem ${esc(it.id)} — ${esc(it.desc)}</b>
-            <div class="it-cat">${esc(it.cat)}${f.propio?' · <span class="it-badge">propio de este pliego</span>':' · <span class="it-badge">cantidad compartida</span>'}</div>
-            ${notaItemHtml(it.id)}
+            <div class="it-cat">${esc(it.cat)}${f.propio
+              ? ' · <span class="it-badge" title="Ítem 83.1 a 89, «provisión de materiales en caso de eventualidad». Existe SOLO en el pliego de EPEC, no tiene equivalente en el de la Municipalidad, así que la cantidad se carga acá y vive solo acá. Es el único tipo de ítem que se puede quitar con la ✕.">propio de este pliego</span>'
+              : ' · <span class="it-badge" title="Ítem 1 a 82: es el mismo ítem en el pliego de la Municipalidad y en el Anexo I de EPEC. La cantidad es UN SOLO número guardado en un solo lugar, que las dos pantallas leen. Si la cambiás acá, cambia también en el itemizado de la Municipalidad — no es una copia.">cantidad compartida</span>'}</div>
+            ${notaItemHtml(it.id, it)}
           </td>
           <td class="qty"><b>${fmt(it.k,2)}</b><div class="it-un">/ ${esc(it.un)}</div></td>
           <td><input type="number" min="0" step="any" class="ep-cant" data-f="cantidad" value="${cant||''}" placeholder="0" ${dis}></td>
@@ -17574,7 +17835,9 @@ const ITEMIZADO_EPEC = [
       <button type="button" class="btn-auto ep-nuevo-btn" style="margin:0;" ${dis}>+ Agregar ítem de eventualidad</button>
     </div>
     <div class="hint" style="margin-top:6px;">Solo los ítems <b>83.1 a 89</b> se cargan acá. Los demás salen de la carga compartida con el itemizado de la Municipalidad.</div>
-    <div class="hint ep-msg" style="margin-top:6px;"></div></div>`;
+    <div class="hint ep-msg" style="margin-top:6px;"></div>`;
+    h += bloqueSinItemHtml(a, dis);
+    h += `</div>`;
     return h;
   }
 
@@ -17593,7 +17856,7 @@ const ITEMIZADO_EPEC = [
     const filas = ITEMIZADO_EPEC.filter(it=> !q || (it.id+' '+it.desc+' '+it.cat).toLowerCase().includes(q));
     body.innerHTML = filas.map(it=>`<tr>
       <td><b>${esc(it.id)}</b></td>
-      <td>${esc(it.desc)}<div class="it-cat">${esc(it.cat)}</div>${notaItemHtml(it.id)}</td>
+      <td>${esc(it.desc)}<div class="it-cat">${esc(it.cat)}</div>${notaItemHtml(it.id, it)}</td>
       <td>${esc(it.un)}</td>
       <td class="qty"><b>${fmt(it.k,2)}</b>${epecBase>0?`<div class="ep-pesos">${plata(it.k*baseEf())}</div>`:''}</td>
     </tr>`).join('');
@@ -17625,6 +17888,33 @@ const ITEMIZADO_EPEC = [
         const tr = quitar.closest('tr');
         const a = obras().find(x=>String(x.id)===tr.dataset.plaza); if(!a) return;
         a.valorItemsEpec = (a.valorItemsEpec||[]).filter(v=>String(v.id)!==tr.dataset.vid);
+        if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        renderEpec(); return;
+      }
+
+      // ---- Trabajos sin ítem en el pliego ----
+      const siNuevo = e.target.closest('.si-nuevo');
+      if(siNuevo){
+        const card = siNuevo.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        a.trabajosSinItem = a.trabajosSinItem || [];
+        const nid = (typeof avanceItemIdSeq !== 'undefined') ? avanceItemIdSeq++ : Date.now();
+        a.trabajosSinItem.push({ id:nid, desc:'', cant:'', un:'Un.', pu:'', item:'', pedido:'',
+                                 fecha: (typeof fechaAISO === 'function' ? fechaAISO(new Date()) : '') });
+        if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        renderEpec();
+        // el foco va al renglón nuevo, para poder escribir sin buscarlo
+        const f = document.querySelector(`.it-plaza[data-epec="${CSS.escape(String(a.id))}"] .si-fila[data-sid="${CSS.escape(String(nid))}"] .si-desc`);
+        if(f) f.focus();
+        return;
+      }
+      const siQuitar = e.target.closest('.si-quitar');
+      if(siQuitar){
+        const fila = siQuitar.closest('.si-fila');
+        const a = obras().find(x=>String(x.id)===fila.dataset.plaza); if(!a) return;
+        const t = (a.trabajosSinItem||[]).find(x=>String(x.id)===fila.dataset.sid);
+        if(t && (t.desc||'').trim() && !confirm(`¿Quitar «${t.desc}» de los trabajos fuera del itemizado?`)) return;
+        a.trabajosSinItem = (a.trabajosSinItem||[]).filter(x=>String(x.id)!==fila.dataset.sid);
         if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
         renderEpec(); return;
       }
@@ -17667,7 +17957,35 @@ const ITEMIZADO_EPEC = [
     });
 
     let epTimer = null;
+    // Un solo camino para los campos de «trabajos sin ítem», enganchado a `input` y a `change`:
+    // los <select> y los <input type=date> no disparan los dos eventos igual en todos los navegadores.
+    let siTimer = null;
+    function siEditar(e){
+      const campo = e.target.closest('.si-campo');
+      if(!campo) return false;
+      const fila = campo.closest('.si-fila');
+      const a = obras().find(x=>String(x.id)===fila.dataset.plaza); if(!a) return true;
+      const t = (a.trabajosSinItem||[]).find(x=>String(x.id)===fila.dataset.sid); if(!t) return true;
+      const f = campo.dataset.f;
+      t[f] = (f === 'cant' || f === 'pu') ? Math.max(0, n2(campo.value)) : campo.value;
+      // El subtotal y el total se recalculan en el momento, sin redibujar (redibujar perdería el foco).
+      const sub = n2(t.cant) * n2(t.pu);
+      const base = baseEf();
+      const monto = fila.querySelector('.si-monto');  if(monto) monto.textContent = plata(sub);
+      const enk = fila.querySelector('.si-enk');
+      if(enk) enk.innerHTML = base > 0 ? ` · ≈ <b>${fmt(sub/base,2)} K</b>` : '';
+      const caja = fila.closest('.si-caja');
+      const tot = caja && caja.querySelector('.si-total');
+      if(tot){
+        const T = totalSinItem(a);
+        tot.innerHTML = `Fuera del itemizado: <b>${plata(T)}</b>` + (base > 0 ? ` · equivale a <b>${fmt(T/base,2)} K</b> con el módulo cargado` : '');
+      }
+      clearTimeout(siTimer);
+      siTimer = setTimeout(()=>{ if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a); }, 600);
+      return true;
+    }
     panelEp.addEventListener('input', (e)=>{
+      if(siEditar(e)) return;
       const cant = e.target.closest('.ep-cant');
       if(cant){
         const tr = cant.closest('tr');
@@ -17689,6 +18007,15 @@ const ITEMIZADO_EPEC = [
       if(e.target.id === 'hechasBuscar') renderHechas();
     });
     panelEp.addEventListener('change', (e)=>{
+      // Al elegir un ítem para asignarle a un trabajo hay que redibujar, para que aparezca el aviso.
+      const siSel = e.target.closest('.si-item');
+      if(siSel){
+        siEditar(e);
+        const a = obras().find(x=>String(x.id)===siSel.closest('.si-fila').dataset.plaza);
+        if(a && typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        renderEpec(); return;
+      }
+      if(siEditar(e)) return;
       if(e.target.id === 'cobPlaza'){ cobPlazaId = e.target.value; renderCobertura(); }
       // Cambiar el ítem del Anexo I que se va a usar para un renglón viejo sin equivalencia exacta.
       const sel = e.target.closest('.hech-sel');
