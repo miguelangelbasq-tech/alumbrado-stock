@@ -5787,6 +5787,54 @@ function pbDatosDeHecha(ph){
   return { cols, vincs, zanjeo, luminarias, tipo: ph.prfv ? 'PRFV' : (tipoDominante || 'Metálica') };
 }
 
+// Del mismo itemizado viejo salen además los TRAMOS DE CABLE, el tipo de zanja, los retiros, el
+// cruce de calle y la poda (2026-09-06). Pedido del usuario: *"si pongo el nombre de la plaza, que
+// me aparezca llena la parte donde edito la cantidad de columnas, cables por tramos, jabalinas, lo
+// que tengas, y yo modifico; porque ahora me tira la lista de materiales directamente y ahí es
+// difícil modificar"*. Antes solo se precargaban columnas, vínculos y zanjeo: el resto del
+// formulario quedaba en sus valores por defecto, así que la lista de materiales salía con datos
+// inventados y corregirla era peor que cargar de cero.
+const PB_CALIBRE_TXT = {   // como lo escribe el itemizado viejo → como lo espera el formulario
+  '2x2,5':'2x2.5', '2x4':'2x4', '2x6':'2x6',
+  '3x2,5':'3x2.5', '3x4':'3x4', '3x6':'3x6',
+  '4x2,5':'4x2.5', '4x4':'4x4', '4x6':'4x6', '4x10':'4x10',
+};
+function pbExtras(ph){
+  const x = { tramos:[], zanjaTerreno:null, zanjaOtros:[], retiroCol:0, retiroTab:0, retiroLum:0,
+              poda:0, cruceMl:0, cruceTipoTxt:'', tablero:0, luminariasExistentes:0,
+              acometidaTipo:null, cablePiloto:0, reacondicionadas:0 };
+  (ph.it||[]).forEach(r=>{
+    const cant = parseFloat(r[1])||0, d = String(r[2]||'');
+    if(!cant) return;
+    // Cable en zanja: «Cable 4×2,5 mm² tendido en zanja»
+    const mc = d.match(/^Cable\s+(\d+)\s*[x×]\s*(\d+(?:[,.]\d+)?)\s*mm/i);
+    if(mc && /zanja/i.test(d)){
+      const clave = `${mc[1]}x${mc[2].replace('.',',')}`;
+      const cal = PB_CALIBRE_TXT[clave];
+      if(cal){
+        const y = x.tramos.find(t=>t.calibre===cal);
+        if(y) y.ml += cant; else x.tramos.push({ calibre:cal, ml:cant });
+      }
+      return;
+    }
+    if(/^Cable piloto/i.test(d)){ x.cablePiloto += cant; return; }
+    if(/^Zanjeo con pisos de hormig/i.test(d)){ x.zanjaOtros.push({t:'hormigon', ml:cant}); return; }
+    if(/^Zanjeo con pisos de baldosas/i.test(d)){ x.zanjaOtros.push({t:'baldosa', ml:cant}); return; }
+    if(/^Zanjeo en terreno natural/i.test(d)){ x.zanjaTerreno = 'natural'; return; }
+    if(/^Retiro de columna/i.test(d)){ x.retiroCol += cant; return; }
+    if(/^Retiro de tablero/i.test(d)){ x.retiroTab += cant; return; }
+    if(/^Retiro de luminaria/i.test(d)){ x.retiroLum += cant; return; }
+    if(/^Poda/i.test(d)){ x.poda += cant; return; }
+    if(/^Cruce de calle/i.test(d)){ x.cruceMl += cant; x.cruceTipoTxt = d.replace(/^Cruce de calle\s*·?\s*/i,''); return; }
+    if(/^Tablero\b/i.test(d)){ x.tablero += cant; return; }
+    if(/^Montaje de luminaria LED sobre columna existente/i.test(d)){ x.luminariasExistentes += cant; return; }
+    if(/^Acometida a[eé]rea EPEC/i.test(d)){ x.acometidaTipo = 'aerea'; return; }
+    if(/^Acometida subterr[aá]nea EPEC/i.test(d)){ x.acometidaTipo = 'subterranea'; return; }
+    if(/^Reacondicionamiento/i.test(d)){ x.reacondicionadas = Math.max(x.reacondicionadas, cant); return; }
+  });
+  return x;
+}
+
 // Junta las tres fuentes en una sola lista buscable, sin repetir.
 function pbCatalogo(){
   const out = [];
@@ -5907,6 +5955,68 @@ function pbElegir(i){
         if(typeof renderVinculoGrupos === 'function') renderVinculoGrupos();
       }
       if(d.zanjeo > 0) set('civilZanjaMl', String(Math.round(d.zanjeo)));
+
+      // ---- El resto del formulario, para que no queden valores por defecto inventados ----
+      const X = pbExtras(p.ph);
+      const enc = (id, on)=>{ const e = document.getElementById(id);
+        if(e && e.checked !== on){ e.checked = on; e.dispatchEvent(new Event('change',{bubbles:true})); } };
+      const llenados = [];
+
+      // El cable se carga por CIRCUITOS, no por la tabla de tramos: esa tabla es un resumen que
+      // `calcular()` vuelve a derivar de los circuitos cada vez (ver derivarTramosDeCircuitos), así
+      // que escribir ahí no serviría de nada — se borraría al primer cálculo. Entonces se arma un
+      // circuito por calibre, con un punto por columna y los metros repartidos en partes iguales.
+      // Es un arranque para corregir contra el plano, que es justamente lo que el usuario pidió.
+      const totCols = Math.round(d.cols.reduce((a,c)=>a+c.columnas,0));
+      if(X.tramos.length && totCols > 0){
+        const alturaTipica = (d.cols[0] && d.cols[0].altura) || 7;
+        // Las columnas se reparten entre los circuitos en proporción a los metros de cada calibre.
+        const mlTotal = X.tramos.reduce((a,t)=>a+t.ml, 0) || 1;
+        let colsRestantes = totCols;
+        circuitos = X.tramos.map((t, i)=>{
+          const ultimo = i === X.tramos.length - 1;
+          const nCols = ultimo ? colsRestantes
+                               : Math.max(1, Math.min(colsRestantes - (X.tramos.length - 1 - i),
+                                                      Math.round(totCols * t.ml / mlTotal)));
+          colsRestantes -= nCols;
+          const largoPorPunto = nCols > 0 ? +(t.ml / nCols).toFixed(2) : 0;
+          return { id: circuitoIdSeq++, tablero:1, numero:i+1, altura: alturaTipica,
+                   puntos: Array.from({length: Math.max(1, nCols)}, ()=>({
+                     id: puntoIdSeq++, etiqueta:'', largo: largoPorPunto,
+                     calibre: t.calibre, altura: null, esColumna: true })) };
+        });
+        if(typeof renderCircuitos === 'function') renderCircuitos();
+        if(typeof actualizarResumenCircuitos === 'function') actualizarResumenCircuitos();
+        if(typeof derivarTramosDeCircuitos === 'function') derivarTramosDeCircuitos();
+        if(typeof renderTramos === 'function') renderTramos();
+        enc('toggleCableado', true);
+        llenados.push(`<b>${X.tramos.length} circuito(s) de cable</b> (${X.tramos.map(t=>t.calibre.replace('x','×').replace('.',',')+': '+pbFmt(t.ml,0)+' m').join(', ')}), con un punto por columna`);
+      }
+      if(X.zanjaTerreno){ const e=document.getElementById('civilZanjaTerreno');
+        if(e){ e.value = X.zanjaTerreno; e.dispatchEvent(new Event('change',{bubbles:true})); } }
+      if(X.cruceMl > 0){ enc('toggleCruce', true); set('cruceMl', String(X.cruceMl));
+        llenados.push(`el <b>cruce de calle</b> (${pbFmt2(X.cruceMl)} m${X.cruceTipoTxt?', '+pbEsc(X.cruceTipoTxt):''})`); }
+      if(X.retiroCol > 0 || X.retiroTab > 0){
+        enc('toggleRetiros', true);
+        if(X.retiroCol > 0) set('retiroCol', String(Math.round(X.retiroCol)));
+        if(X.retiroTab > 0) set('retiroTab', String(Math.round(X.retiroTab)));
+        llenados.push(`los <b>retiros</b> (${X.retiroCol?pbFmt(X.retiroCol,0)+' columna(s)':''}${X.retiroCol&&X.retiroTab?' y ':''}${X.retiroTab?pbFmt(X.retiroTab,0)+' tablero(s)':''})`);
+      }
+      if(X.poda > 0){ enc('toggleRetiros', true); enc('podaCheck', true);
+        set('podaCant', String(Math.round(X.poda)));
+        llenados.push(`la <b>poda</b> (${pbFmt(X.poda,0)} árbol/es)`); }
+      if(X.tablero > 0){ enc('toggleTablero', true); }
+
+      if(llenados.length) avisos.push('También se precargaron ' + llenados.join(', ') + '.');
+
+      // Lo que el itemizado viejo NO puede decir: hay que mirarlo en el plano sí o sí.
+      const faltan = [];
+      if(X.tramos.length) faltan.push('el <b>largo de cada tramo</b> del circuito: el itemizado viejo solo da el total por calibre, así que se repartió en partes iguales entre las columnas');
+      if(!X.tramos.length) faltan.push('los <b>circuitos y el cable</b> (el itemizado viejo de esta plaza no trae cable en zanja)');
+      if(X.zanjaOtros.length) faltan.push(`hay <b>${X.zanjaOtros.map(z=>pbFmt(z.ml,0)+' m de zanja en '+(z.t==='hormigon'?'piso de hormigón':'vereda de baldosas')).join(' y ')}</b>, y el formulario toma un solo tipo de terreno`);
+      if(X.luminariasExistentes > 0) faltan.push(`<b>${pbFmt(X.luminariasExistentes,0)} luminaria(s) sobre columna existente</b>, que se cargan aparte`);
+      if(X.cablePiloto > 0) faltan.push(`esta plaza lleva <b>cable piloto</b> (${pbFmt(X.cablePiloto,0)} m), que no tiene campo propio`);
+      if(faltan.length) avisos.push('<b>Ojo, esto lo tenés que cargar o corregir a mano:</b> ' + faltan.join(' · ') + '.');
       const tot = d.cols.reduce((a,c)=>a+c.columnas,0);
       // El itemizado viejo a veces trae cantidades partidas (p. ej. «0,8 columna de 10 m»), que son
       // proporciones de pago, no columnas. Se redondean para poder arrancar, pero hay que avisarlo.
@@ -5935,6 +6045,11 @@ function pbElegir(i){
   const cont = document.getElementById('plazaBuscarLista');
   if(cont){ cont.style.display='none'; cont.innerHTML=''; }
   if(typeof calcular === 'function'){ try{ calcular(); }catch(e){} }
+  // Se calcula igual (así la lista queda lista abajo), pero la pantalla queda parada en el
+  // FORMULARIO, que es donde el usuario va a corregir. Antes terminaba mirando la lista de
+  // materiales, que no se edita: *"ahí es difícil modificar"*.
+  const card = document.getElementById('cardColumnas');
+  if(card) setTimeout(()=>card.scrollIntoView({behavior:'smooth', block:'start'}), 120);
 }
 
 // Cableado, defensivo: si el input no existe todavía, no rompe nada.
