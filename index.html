@@ -2046,6 +2046,11 @@
   .it-previa-grupo-prov{ background:rgba(126,198,230,.14); border-left-color:var(--teal-dark); }
   .it-previa-grupo-falta{ background:rgba(224,140,26,.13); border-left-color:var(--amber); }
   .it-previa-fila.it-previa-agregado{ border-style:dashed; }
+  .it-repetidos{ margin:0 0 14px; padding:11px 14px; border-radius:11px; font-size:12.5px; line-height:1.5;
+                 background:rgba(199,74,74,.09); border:1px solid #c74a4a; color:#a33; }
+  .it-repetidos > b{ display:block; font-size:13.5px; margin-bottom:4px; }
+  .it-repetidos div{ margin-top:3px; }
+  .it-repetidos .hint{ color:#a33; }
   .it-previa-dudas{ margin-top:12px; border-radius:10px; padding:10px 14px; font-size:12.5px; line-height:1.55;
                     background:rgba(245,158,11,.12); color:#6b5312; }
   .it-previa-dudas ul{ margin:6px 0 0; padding-left:20px; }
@@ -2665,7 +2670,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 12:18 · a9720f</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 13:50 · 50c9e3</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -17344,7 +17349,11 @@ function poblarParteObraDatalist(){
   let preciosEditados = {};       // { idDeItem: precio } — corrige el precio del pliego
   let itemsPropios = [];          // [{id, cat, desc, un, precio}]
 
-  const itemDe = (id)=> pliego().find(x=>x.id === id) || null;
+  // ---- Un ítem se busca por su NÚMERO, no por su tipo de dato (2026-09-07) ----
+  // El mismo ítem se guardó a veces como número (2) y a veces como texto ('2'), según por dónde
+  // hubiera entrado. Con `x.id === id` eso son dos ítems distintos, y de ahí salían renglones
+  // repetidos y precios en cero. Se compara siempre como texto.
+  const itemDe = (id)=> pliego().find(x=>String(x.id) === String(id)) || null;
 
   function puedeEditar(){
     if(!window.__fbUser) return false;
@@ -18055,6 +18064,26 @@ function poblarParteObraDatalist(){
     const nProv  = filas.filter(f=>f.grupo === 'prov').length;
     const nFalta = filas.filter(f=>f.grupo === 'falta').length;
 
+    // ---- La hoja que cubre DOS plazas (2026-09-07) ----
+    // Cuatro hojas del certificado están hechas para dos plazas juntas (5001-5002, 6240-6241,
+    // 12022-12001, 4724-4725). Si en la herramienta esas dos plazas están separadas, las dos
+    // matchean la misma hoja y cargar el total en cada una lo cuenta DOS VECES. Es exactamente lo
+    // que reportó el usuario: *"en algunas plazas me da el doble de todo"*.
+    // No se puede repartir solo —el certificado no dice qué le toca a cada una—, así que se avisa
+    // fuerte, se dice si la hermana ya lo tiene cargado, y se deja la decisión.
+    const hermanas = (typeof window.certifHermanas === 'function') ? window.certifHermanas(a, obras()) : [];
+    if(hermanas.length){
+      const cargadas = hermanas.filter(x=>{
+        const tiene = {};
+        (x.valorItems||[]).forEach(v=>{ tiene[String(v.itemPliego)] = n2(v.cantidad); });
+        (x.valorItemsEpec||[]).forEach(v=>{ tiene[String(v.itemEpec)] = n2(v.cantidad); });
+        return Object.keys(p.it).some(it=> n2(tiene[it]) > 0 && Math.abs(n2(tiene[it]) - n2(p.it[it])) < 0.001);
+      });
+      previa[a.id] = previa[a.id] || {};
+      dudas.unshift(`🚨 <b>OJO — esta hoja del certificado cubre ${hermanas.length + 1} plazas juntas</b> (ID ${esc(p.ids.join(' y '))}): en la herramienta son <b>${[a, ...hermanas].map(x=>esc(x.nombre||'sin nombre')).join('</b>, <b>')}</b>. Las cantidades de abajo son el <b>TOTAL de las ${hermanas.length + 1}</b>, no las de ésta sola. `
+        + `Si las cargás en todas, <b>se cuentan ${hermanas.length + 1} veces</b>. Cargalas en <b>UNA sola</b> y dejá la(s) otra(s) sin estos ítems, o repartilas a mano.`
+        + (cargadas.length ? ` <b style="color:#c74a4a">Y ojo: ${cargadas.map(x=>esc(x.nombre||'')).join(', ')} ya tiene(n) estos ítems cargados</b> — si aplicás acá, quedan duplicados.` : ''));
+    }
     if(nProv) dudas.push(`Se agregaron <b>${nProv} ítem(s) de PROVISIÓN</b> (83 a 89) que esa planilla no podía tener: se armó <b>antes</b> de la Nota Aclaratoria N° 1 del 31/08/2026, que los creó. Van porque <b>EPEC solo provee los artefactos, el cable 3×1,5 y el verde-amarillo de 10 mm²</b> — las columnas, el tablero y las jabalinas las puso EMA. Si en esta plaza fue distinto, destildalos.`);
     if(nFalta) dudas.push(`Se agregaron <b>${nFalta} ítem(s) que se hicieron y no se certificaron</b>, calculados desde lo que la propia planilla dice. Cada uno explica de dónde sale su cantidad — miralos uno por uno antes de aplicar.`);
     dudas.push('<b>NO se agregaron</b> los ítems <b>85.1/85.2 (luminarias)</b>, <b>86 (cable 3×1,5)</b> ni <b>87 (verde-amarillo 10 mm²)</b>: ésos son los tres materiales que <b>provee EPEC</b>, así que su provisión no se cobra. Si en alguna plaza los puso EMA, agregalos a mano.');
@@ -18139,6 +18168,56 @@ function poblarParteObraDatalist(){
     return x;
   }
 
+  // ==========================================================================================
+  // RENGLONES REPETIDOS: DETECTARLOS Y UNIFICARLOS  (2026-09-07)
+  // ==========================================================================================
+  // Mientras el ítem se comparaba por tipo estricto (9 vs '9'), traer dos veces —la Calculadora y
+  // después el certificado— dejaba DOS renglones del mismo ítem en la plaza, y el itemizado los
+  // sumaba a los dos: la plaza valía el doble. El bug ya está tapado, pero las plazas que se
+  // cargaron antes quedaron con los renglones duplicados adentro y hay que poder arreglarlas.
+  // No se toca nada solo: se avisa en la tarjeta de la plaza y se unifica con un botón.
+  function itemsRepetidos(a){
+    const cuenta = (lista, campo)=>{
+      const m = new Map();
+      (lista||[]).forEach(v=>{
+        const k = String(v[campo] == null ? '' : v[campo]);
+        if(!k) return;
+        if(!m.has(k)) m.set(k, []);
+        m.get(k).push(v);
+      });
+      return [...m.entries()].filter(([,vs])=>vs.length > 1);
+    };
+    return { items: cuenta(a.valorItems, 'itemPliego'), prov: cuenta(a.valorItemsEpec, 'itemEpec') };
+  }
+  function hayRepetidos(a){ const r = itemsRepetidos(a); return r.items.length + r.prov.length; }
+  // Deja UN renglón por ítem. La cantidad que queda es la del ÚLTIMO renglón —el que se cargó al
+  // final, que es el que el usuario quiso que valiera— y lo AVANZADO es el mayor de los repetidos,
+  // para no perder trabajo ya hecho. Devuelve qué se unificó, para poder contarlo.
+  function unificarRepetidos(a){
+    const r = itemsRepetidos(a);
+    const detalle = [];
+    const juntar = (lista, campo, grupos)=>{
+      grupos.forEach(([k, vs])=>{
+        const queda = vs[vs.length - 1];
+        const suma  = vs.reduce((t,v)=>t + n2(v.cantidad), 0);
+        queda.cantidad = n2(queda.cantidad);
+        queda.cantidadAvanzada = vs.reduce((t,v)=>Math.max(t, n2(v.cantidadAvanzada)), 0);
+        queda[campo] = String(k);
+        detalle.push({ item:k, veces:vs.length, sumaba:suma, queda:queda.cantidad });
+        vs.slice(0, -1).forEach(v=>{ const i = lista.indexOf(v); if(i >= 0) lista.splice(i, 1); });
+      });
+    };
+    juntar(a.valorItems || [], 'itemPliego', r.items);
+    juntar(a.valorItemsEpec || [], 'itemEpec', r.prov);
+    // De paso, todo lo que quede se normaliza a texto: así no vuelve a pasar con datos viejos.
+    (a.valorItems||[]).forEach(v=>{ if(v.itemPliego != null) v.itemPliego = String(v.itemPliego); });
+    (a.valorItemsEpec||[]).forEach(v=>{ if(v.itemEpec != null) v.itemEpec = String(v.itemEpec); });
+    if(detalle.length && typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+    return detalle;
+  }
+  window.itemizadoRepetidos = hayRepetidos;
+  window.itemizadoUnificar  = unificarRepetidos;
+
   function aplicarPrevia(a){
     const p = previa[a.id];
     if(!p || !p.filas) return 0;
@@ -18154,9 +18233,16 @@ function poblarParteObraDatalist(){
         if(ya){ ya.cantidad = fl.cantidad; }
         else a.valorItemsEpec.push({ id:nid(), itemEpec:String(fl.item), cantidad:fl.cantidad, cantidadAvanzada:0 });
       } else {
-        const ya = a.valorItems.find(v=>v.itemPliego === fl.item);
+        // ---- EL BUG DE LOS RENGLONES REPETIDOS (2026-09-07) ----
+        // Acá decía `v.itemPliego === fl.item`, comparación ESTRICTA. El cómputo de la Calculadora
+        // manda el ítem como NÚMERO (push(9, …)) y el certificado de la Municipalidad como TEXTO
+        // ('9'), así que 9 !== '9' y en vez de actualizar el renglón se agregaba otro. Quien traía
+        // primero la Calculadora y después el certificado terminaba con el ítem 2 dos veces, el 15
+        // dos veces, el 36 dos veces… y la plaza valiendo el doble. Lo reportó el usuario en
+        // Jerónimo Luis de Cabrera. Se compara y se guarda SIEMPRE como texto.
+        const ya = a.valorItems.find(v=>String(v.itemPliego) === String(fl.item));
         if(ya){ ya.cantidad = fl.cantidad; }              // la cantidad HECHA no se toca
-        else a.valorItems.push({ id:nid(), itemPliego:fl.item, cantidad:fl.cantidad, cantidadAvanzada:0 });
+        else a.valorItems.push({ id:nid(), itemPliego:String(fl.item), cantidad:fl.cantidad, cantidadAvanzada:0 });
       }
       n++;
     });
@@ -18451,14 +18537,14 @@ function poblarParteObraDatalist(){
         const msg = card.querySelector('.it-msg');
         if(!sel.value){ if(msg){ msg.style.color='var(--danger)'; msg.textContent='Elegí primero el ítem del pliego.'; } return; }
         const idItem = parseInt(sel.value,10);
-        if((a.valorItems||[]).some(v=>v.itemPliego===idItem)){
+        if((a.valorItems||[]).some(v=>String(v.itemPliego)===String(idItem))){
           if(msg){ msg.style.color='var(--amber)'; msg.textContent='Ese ítem ya está cargado en esta plaza — cambiale la cantidad en el renglón que ya existe.'; }
           return;
         }
         const cant = n2(caja.querySelector('.it-nuevo-cant').value);
         a.valorItems = a.valorItems || [];
         const nid = (typeof avanceItemIdSeq !== 'undefined') ? avanceItemIdSeq++ : Date.now();
-        a.valorItems.push({ id:nid, itemPliego:idItem, cantidad:cant, cantidadAvanzada:0 });
+        a.valorItems.push({ id:nid, itemPliego:String(idItem), cantidad:cant, cantidadAvanzada:0 });
         if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
         renderItemizado(); refrescarPantallasDeAvance();
         return;
@@ -18467,7 +18553,7 @@ function poblarParteObraDatalist(){
       const borrar = e.target.closest('.it-borrar-propio');
       if(borrar){
         const id = parseInt(borrar.dataset.item,10);
-        const usada = obras().some(a=>(a.valorItems||[]).some(v=>v.itemPliego===id));
+        const usada = obras().some(a=>(a.valorItems||[]).some(v=>String(v.itemPliego)===String(id)));
         if(usada){ alert('No se puede borrar: esa tarea está cargada en alguna plaza. Sacala de las plazas primero.'); return; }
         itemsPropios = itemsPropios.filter(p=>p.id!==id);
         delete preciosEditados[id];
@@ -20280,6 +20366,25 @@ const ITEMIZADO_EPEC = [
     const coFijado = !!(CO && CO.estado(a).fijado);
     if(CO && filas.length) h += CO.bandaHtml(a, dis);
 
+    // ---- Aviso de renglones repetidos (2026-09-07) ----
+    // Si la plaza tiene el mismo ítem en dos renglones, el itemizado los suma a los dos y la plaza
+    // vale de más. Se avisa arriba de todo, con el detalle, y se unifica con un botón: no se toca
+    // nada sin que el usuario lo pida.
+    const rep = itemsRepetidos(a);
+    const nRep = rep.items.length + rep.prov.length;
+    if(nRep){
+      const lista = [...rep.items, ...rep.prov]
+        .map(([k, vs])=>`<b>ítem ${esc(k)}</b> ×${vs.length} (${vs.map(v=>fmt(n2(v.cantidad), Number.isInteger(n2(v.cantidad))?0:2)).join(' + ')})`)
+        .join(' · ');
+      h += `<div class="it-repetidos no-print">
+        <b>🚨 Esta plaza tiene ${nRep} ítem(s) cargados DOS VECES</b>
+        <div>El itemizado suma los dos renglones, así que esos ítems están valiendo de más: ${lista}.</div>
+        <div>Pasaba al traer las cantidades dos veces (la Calculadora y después el certificado). <b>Ya está corregido para lo que se cargue de ahora en más</b>; esto es para arreglar lo que quedó.</div>
+        <button type="button" class="btn-auto ep-unificar-btn" style="margin:8px 0 0;" ${dis}>🧹 Unificar los renglones repetidos</button>
+        <div class="hint" style="margin:6px 0 0;">Deja <b>un solo renglón por ítem</b>, con la cantidad del <b>último</b> que se cargó y lo <b>avanzado</b> más alto de los repetidos. Lo podés corregir después a mano.</div>
+      </div>`;
+    }
+
     // Imprimir SOLO esta plaza, también con la plaza abierta y esté o no fijado el proyecto: el
     // botón del encabezado se veía apenas y no se encontraba (2026-09-06).
     if(filas.length){
@@ -20352,10 +20457,12 @@ const ITEMIZADO_EPEC = [
       const cert = (typeof window.certifDePlaza === 'function') ? window.certifDePlaza(a) : null;
       if(cert){
         const n = Object.keys(cert.it || {}).length;
+        const herm = (typeof window.certifHermanas === 'function') ? window.certifHermanas(a, obras()) : [];
         h += `<div class="it-traer no-print">
           <button type="button" class="btn-auto ep-certif-btn" style="margin:0;" ${dis}>📋 Traer lo certificado en la Municipalidad</button>
           <span class="hint" style="margin:0;">${n
-            ? `La planilla de la Municipalidad tiene <b>${n} ítem(s)</b> certificados para <b>${esc(cert.n)}</b>. Son las cantidades <b>ya cobradas</b>, no las que calcula la herramienta — no traen los ítems 83 a 89 de provisión.`
+            ? `La planilla de la Municipalidad tiene <b>${n} ítem(s)</b> certificados para <b>${esc(cert.n)}</b>, y la herramienta le agrega la <b>provisión que puso EMA</b> y lo que se hizo sin certificar.`
+              + (herm.length ? ` <b style="color:#c74a4a">OJO: esa hoja cubre ${herm.length + 1} plazas juntas (${esc([a, ...herm].map(x=>x.nombre||'').join(' + '))}). Cargala en UNA sola o vas a contar todo ${herm.length + 1} veces.</b>` : '')
             : `<span style="color:var(--amber)">La hoja de <b>${esc(cert.n)}</b> existe en la planilla pero está <b>vacía</b>.</span>`}</span>
         </div>`;
       }
@@ -20540,6 +20647,22 @@ const ITEMIZADO_EPEC = [
         }
         armarPrevia(a); renderEpec(); return;
       }
+      // Unificar los renglones repetidos de una plaza (2026-09-07).
+      const unif = e.target.closest('.ep-unificar-btn');
+      if(unif){
+        const card = unif.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        const antes = itemsRepetidos(a);
+        const n = (antes.items.length + antes.prov.length);
+        if(!confirm(`Se van a unificar ${n} ítem(s) que están cargados dos veces en «${a.nombre||'esta plaza'}».\n\nDe cada uno queda UN renglón, con la cantidad del último que se cargó. Esto no se puede deshacer solo.\n\n¿Seguimos?`)) return;
+        const hecho = unificarRepetidos(a);
+        renderEpec(); refrescarPantallasDeAvance();
+        const msg = document.querySelector(`.it-plaza[data-epec="${CSS.escape(String(a.id))}"] .ep-msg`);
+        if(msg){ msg.style.color='var(--teal-dark)';
+          msg.textContent = `✔ Se unificaron ${hecho.length} ítem(s): ${hecho.map(x=>`${x.item} (sumaba ${fmt(x.sumaba,2)} → queda ${fmt(x.queda,2)})`).join(' · ')}. Revisá las cantidades.`; }
+        return;
+      }
+
       // La misma puerta, pero desde el certificado de la Municipalidad (2026-09-07).
       const epCertif = e.target.closest('.ep-certif-btn');
       if(epCertif){
@@ -20594,7 +20717,7 @@ const ITEMIZADO_EPEC = [
           if(a.valorItems.some(v=>String(v.itemPliego)===String(idNum))){
             if(msg){ msg.style.color='var(--amber)'; msg.textContent='Ese ítem ya está cargado en esta plaza — cambiale la cantidad en el renglón que ya existe.'; } return;
           }
-          a.valorItems.push({ id:nid, itemPliego:idNum, cantidad:cant, cantidadAvanzada:0 });
+          a.valorItems.push({ id:nid, itemPliego:String(idNum), cantidad:cant, cantidadAvanzada:0 });
         }
         // Con el proyecto fijado, el ítem nuevo es un ajuste (proyecto 0 → cantidad) y pide motivo.
         if(window.CO && window.CO.estado(a).fijado && cant > 0){
@@ -21721,7 +21844,7 @@ const ITEMIZADO_EPEC = [
     } else {
       a.valorItems = a.valorItems || [];
       v = a.valorItems.find(x=>String(x.itemPliego)===String(parseInt(id,10)));
-      if(!v){ v = { id: Date.now() + Math.floor(Math.random()*1000), itemPliego:parseInt(id,10), cantidad:0, cantidadAvanzada:0 }; a.valorItems.push(v); }
+      if(!v){ v = { id: Date.now() + Math.floor(Math.random()*1000), itemPliego:String(parseInt(id,10)), cantidad:0, cantidadAvanzada:0 }; a.valorItems.push(v); }
     }
     const antes = n2(v.cantidad);
     const nueva = Math.max(0, antes + n2(delta));
@@ -22532,15 +22655,37 @@ const ITEMIZADO_EPEC = [
   };
   // Cruce con las plazas de la herramienta: primero por ID de obra —una plaza puede tener dos, como
   // «5001-5002»—, y si no, por nombre, sin acentos ni dobles espacios.
-  const sinAcento = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  const sinAcento = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'')
                           .toUpperCase().replace(/\s+/g,' ').trim();
+  // ---- El cruce, endurecido (2026-09-07) ----
+  // El usuario avisó: *"en algunas plazas me da el doble de todo"*. Eran dos cosas:
+  //   1) El cruce por nombre era por PARECIDO («¿uno contiene al otro?»), así que la hoja «CABILDO»
+  //      se llevaba puestas a «Plaza Cabildo Norte» y a «Cabildo Sur» — dos plazas distintas
+  //      cobrando cada una el total de la hoja. Ahora el nombre tiene que coincidir ENTERO (sin
+  //      acentos, sin el «Plaza» de adelante) y tiene que ser el único que coincida.
+  //   2) Si la plaza TIENE ID de obra y ese ID no está en ninguna hoja, ya no se busca por nombre:
+  //      un ID que no coincide es motivo para desconfiar, no para adivinar.
+  // Lo que NO se puede resolver acá es que CUATRO hojas cubren DOS plazas juntas (5001-5002,
+  // 6240-6241, 12022-12001, 4724-4725). Ésas matchean bien las dos veces, y se avisa aparte.
+  const claveNombre = s => sinAcento(s).replace(/^PLAZA\s+/, '').trim();
   function certifDe(a){
     if(!a) return null;
     const id = String(a.obraId||'').trim();
-    if(id){ const p = CERTIF.plazas.find(x=>x.ids.indexOf(id) >= 0); if(p) return p; }
-    const nom = sinAcento(a.nombre);
+    if(id){
+      const p = CERTIF.plazas.find(x=>x.ids.indexOf(id) >= 0);
+      return p || null;                    // con ID que no figura: no se adivina por nombre
+    }
+    const nom = claveNombre(a.nombre);
     if(!nom) return null;
-    return CERTIF.plazas.find(x=>{ const n = sinAcento(x.n); return n === nom || nom.indexOf(n) >= 0 || n.indexOf(nom) >= 0; }) || null;
+    const iguales = CERTIF.plazas.filter(x=>claveNombre(x.n) === nom);
+    return iguales.length === 1 ? iguales[0] : null;   // si el nombre pesca dos, no se elige ninguna
+  }
+  // Las OTRAS plazas de la herramienta que caen en la misma hoja del certificado. Si hay alguna, las
+  // cantidades de esa hoja son el TOTAL de todas juntas y cargarlas en cada una las cuenta dos veces.
+  function certifHermanas(a, lista){
+    const p = certifDe(a);
+    if(!p) return [];
+    return (lista || obras() || []).filter(x=> x && String(x.id) !== String(a.id) && certifDe(x) === p);
   }
   // Por qué un renglón no coincide. Es la columna que pidió el usuario: *"cuáles son las
   // diferencias y por qué"*. No adivina: cada motivo sale de algo que sabemos del Anexo I.
@@ -22608,6 +22753,7 @@ const ITEMIZADO_EPEC = [
   // certificado en la Municipalidad». Sale de acá porque acá vive el dato (2026-09-07).
   window.CERTIF_MUNI   = CERTIF;
   window.certifDePlaza = certifDe;
+  window.certifHermanas = certifHermanas;
 
   // ==========================================================================================
   // ESTADO DE LA PANTALLA
@@ -22888,16 +23034,29 @@ const ITEMIZADO_EPEC = [
                           (base > 0 ? ` · módulo ${plata(base)} ${iva?'con IVA':'sin IVA'}` : ' · valor del módulo sin cargar'),
                 tiles:[], avisos:[], secciones:[] };
 
-    // ---- Cruce ----
-    const cruzadas = [], sinCertif = [], vacias = [];
-    o.items.forEach((a,i)=>{
+    // ---- Cruce, agrupado por HOJA (2026-09-07) ----
+    // Cuatro hojas del certificado cubren DOS plazas juntas (5001-5002, 6240-6241, 12022-12001,
+    // 4724-4725). Antes cada plaza se comparaba por separado contra la MISMA hoja, así que el
+    // total certificado salía contado dos veces — el usuario lo vio como «me da el doble de todo».
+    // Ahora una hoja es UNA fila: se compara contra la SUMA de las plazas que cubre, que es la
+    // única comparación que cierra, porque el certificado no las separa.
+    const porHoja = new Map();
+    const sinCertif = [];
+    o.items.forEach(a=>{
       const c = certifDe(a);
       if(!c){ sinCertif.push(a); return; }
-      const calc = {};
-      itemsDe(a).forEach(f=>{ calc[f.id] = n2(calc[f.id]) + n2(f.v.cantidad); });
-      if(!Object.keys(calc).length) vacias.push(a);
-      cruzadas.push({ a, c, calc, n: cruzadas.length + 1 });
+      if(!porHoja.has(c)) porHoja.set(c, { c, plazas:[], calc:{} });
+      const gr = porHoja.get(c);
+      gr.plazas.push(a);
+      itemsDe(a).forEach(f=>{ gr.calc[f.id] = n2(gr.calc[f.id]) + n2(f.v.cantidad); });
     });
+    const cruzadas = [...porHoja.values()].map((gr,i)=>({
+      ...gr, a: gr.plazas[0], n: i + 1,
+      nombre: gr.plazas.map(x=>x.nombre || '(sin nombre)').join(' + '),
+      ids: gr.plazas.map(x=>x.obraId).filter(Boolean).join(' / ') || '—',
+    }));
+    const vacias = cruzadas.filter(x=>!Object.keys(x.calc).length).map(x=>({ nombre:x.nombre }));
+    const juntas = cruzadas.filter(x=>x.plazas.length > 1);
     const usadas = new Set(cruzadas.map(x=>x.c));
     const noElegidas = CERTIF.plazas.filter(p=>!usadas.has(p) && Object.keys(p.it).length);
 
@@ -22905,6 +23064,9 @@ const ITEMIZADO_EPEC = [
       m.avisos.push('Ninguna de las plazas elegidas figura en el certificado de la Municipalidad. Se cruza por <b>ID de obra</b> y, si no, por nombre — fijate que el ID de la plaza coincida con el de la planilla.');
     if(vacias.length)
       m.avisos.push(`<b>${vacias.length}</b> plaza(s) elegida(s) <b>no tienen ningún ítem cargado</b> en el Itemizado 2026 (${vacias.slice(0,4).map(a=>a.nombre).join(', ')}${vacias.length>4?'…':''}). Contra el certificado van a salir TODAS como faltantes, y eso no es real: tocales «⟳ Traer las cantidades» antes de leer este informe.`);
+    if(juntas.length)
+      m.avisos.push(`${juntas.length === 1 ? 'Una hoja del certificado cubre' : `<b>${juntas.length}</b> hojas del certificado cubren`} <b>más de una plaza juntas</b> `
+        + `(${juntas.map(x=>`<b>${x.nombre}</b>`).join(' · ')}). El certificado no las separa, así que acá van en <b>una sola fila</b>, comparadas contra la <b>suma</b> de esas plazas — si se compararan de a una, el certificado se contaría dos veces.`);
     if(base <= 0)
       m.avisos.push('El <b>valor del módulo</b> no está cargado, así que el informe sale en <b>K (módulos)</b> y las columnas de plata van en cero.');
     m.avisos.push('El certificado de la Municipalidad se armó <b>antes</b> de la Nota Aclaratoria N° 1 del 31/08/2026, que agregó los ítems <b>83 a 89</b> (la <b>provisión</b> de columnas, tableros, luminarias, cables y jabalinas). Por eso esos ítems aparecen siempre como diferencia a favor: no es un error del certificado, es que <b>todavía no se cobraron</b>.');
@@ -22943,7 +23105,7 @@ const ITEMIZADO_EPEC = [
         [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},
          {t:'K certificado', num:true},{t:'K Calculadora', num:true},{t:'Diferencia (K)', num:true},
          {t:'Diferencia ($)', num:true},{t:'Ítems que no coinciden', num:true, w:'80px'}],
-        cruzadas.map(x=>[N(x.n,'int'), x.a.nombre||'', String(x.a.obraId||'—'),
+        cruzadas.map(x=>[N(x.n,'int'), x.nombre, x.ids,
                          N(x.kCert,'k'), N(x.kCalc,'k'), mas(N(x.kDif,'k')),
                          base>0 ? mas(N(x.kDif*base,'money')) : '—', N(x.nDif,'int')]),
         [['', 'TOTAL', '', N(tCert,'k'), N(tCalc,'k'), mas(N(tDif,'k')),
@@ -22956,13 +23118,14 @@ const ITEMIZADO_EPEC = [
       cruzadas.forEach(x=>{
         const filas = solo ? x.filas.filter(f=>f.pq.cl !== 'ok') : x.filas;
         if(!filas.length){
-          m.secciones.push(texto(`${x.n}. ${x.a.nombre||''}${x.a.obraId?' · ID '+x.a.obraId:''}`,
+          m.secciones.push(texto(`${x.n}. ${x.nombre}${x.ids !== '—' ? ' · ID ' + x.ids : ''}`,
             ['Todos los ítems coinciden con el certificado de la Municipalidad.']));
           return;
         }
-        m.secciones.push(tabla(`${x.n}. ${x.a.nombre||''}${x.a.obraId?' · ID '+x.a.obraId:''}`,
+        m.secciones.push(tabla(`${x.n}. ${x.nombre}${x.ids !== '—' ? ' · ID ' + x.ids : ''}`,
           `Certificado: ${nf(x.kCert,2)} K · Calculadora: ${nf(x.kCalc,2)} K · diferencia ${x.kDif>0?'+':''}${nf(x.kDif,2)} K`
             + (base>0 ? ` = ${x.kDif>0?'+':''}${plata(x.kDif*base)}` : '')
+            + (x.plazas.length > 1 ? ` · esta hoja del certificado cubre ${x.plazas.length} plazas juntas: se compara contra la suma de las dos` : '')
             + (solo ? ` · se muestran solo los ${filas.length} ítem(s) que no coinciden, de ${x.filas.length}` : ''),
           [{t:'Ítem', w:'46px'},{t:'Descripción'},{t:'Un.', w:'44px'},
            {t:'Certificado', num:true},{t:'Calculadora', num:true},{t:'Dif.', num:true},
@@ -22972,7 +23135,7 @@ const ITEMIZADO_EPEC = [
                         base>0 ? mas(N(f.kd*base,'money')) : '—', f.pq.txt]),
           [['', 'TOTAL de la plaza', '', N(x.kCert,'k'), N(x.kCalc,'k'), '', mas(N(x.kDif,'k')),
             base>0 ? mas(N(x.kDif*base,'money')) : '—', '']],
-          { grupo:'Detalle por plaza', etiqueta:x.a.nombre||'(sin nombre)', etiquetaCol:'Plaza' }));
+          { grupo:'Detalle por plaza', etiqueta:x.nombre, etiquetaCol:'Plaza' }));
       });
     }
 
