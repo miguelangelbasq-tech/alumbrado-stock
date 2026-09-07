@@ -1450,9 +1450,96 @@
   .inf-pill.medio{ background:#ffedd5; color:#9a3412; }
   .inf-pill.alto { background:#e0f2fe; color:#075985; }
   .inf-pill.ok   { background:#d1fae5; color:#065f46; }
+  .inf-num.ambar{ color:#b45309; }
+  .inf-num.rojo { color:var(--danger); }
+
+  /* ---------- Centro de informes (2026-09-06) ---------- */
+  .inf-paso{ display:flex; gap:14px; align-items:flex-start; padding:18px 0; border-top:1px solid var(--line); }
+  .inf-paso:first-of-type{ border-top:none; padding-top:10px; }
+  .inf-paso-num{ flex:0 0 28px; height:28px; border-radius:50%; background:var(--navy); color:#fff;
+                 font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .inf-paso-cuerpo{ flex:1 1 auto; min-width:0; }
+  .inf-paso-tit{ font-weight:800; color:var(--navy); font-size:15px; margin-bottom:10px; }
+  .inf-paso.inf-apagado{ opacity:.45; pointer-events:none; }
+
+  .inf-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .inf-chip{ display:inline-flex; align-items:center; gap:7px; padding:9px 14px; border-radius:999px;
+             border:1px solid var(--line); background:var(--bg-soft); cursor:pointer;
+             font-size:13.5px; font-weight:600; color:var(--text); white-space:nowrap; }
+  .inf-chip:hover{ border-color:var(--teal-dark); }
+  .inf-chip.on{ background:var(--navy); border-color:var(--navy); color:#fff; }
+  .inf-chip small{ font-weight:500; opacity:.75; font-size:11.5px; }
+  .inf-chips-filtro .inf-chip{ padding:6px 11px; font-size:12px; font-weight:600; }
+  .inf-chips-filtro{ margin-top:10px; }
+
+  .inf-sel-barra{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .inf-sel-barra input[type="text"]{ flex:1 1 240px; min-width:0; }
+  .inf-mini{ padding:8px 12px; font-size:12.5px; margin:0; white-space:nowrap; }
+  .inf-lista{ margin-top:12px; border:1px solid var(--line); border-radius:12px;
+              max-height:330px; overflow-y:auto; background:var(--card); }
+  .inf-item{ display:flex; align-items:center; gap:11px; padding:9px 13px; border-bottom:1px solid var(--line);
+             cursor:pointer; font-size:13.5px; margin:0; }
+  .inf-item:last-child{ border-bottom:none; }
+  .inf-item:hover{ background:var(--bg-soft); }
+  .inf-item input{ width:auto; margin:0; flex:0 0 auto; }
+  .inf-item-nom{ flex:1 1 auto; min-width:0; }
+  .inf-item-nom b{ color:var(--navy); font-weight:700; }
+  .inf-item-sub{ font-size:11.5px; color:var(--text-soft); margin-top:1px; }
+  .inf-item-dato{ flex:0 0 auto; font-size:12px; color:var(--text-soft); font-variant-numeric:tabular-nums;
+                  text-align:right; font-weight:600; }
+  .inf-vacio{ padding:22px; text-align:center; color:var(--text-soft); font-size:13px; }
+
+  .inf-opts{ display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px 16px; }
+  .inf-opts input, .inf-opts select{ margin:0; }
+  .inf-secciones{ display:flex; flex-wrap:wrap; gap:8px 16px; margin:14px 0 4px; }
+  .inf-secciones label{ display:flex; align-items:center; gap:7px; margin:0; font-size:13px; font-weight:500;
+                        color:var(--text); cursor:pointer; }
+  .inf-secciones input{ width:auto; margin:0; }
+  .inf-generar{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:16px; }
+
+  /* ---- El informe generado ---- */
+  .inf-doc{ margin-top:18px; }
+  .inf-membrete{ display:flex; align-items:center; gap:16px; border-bottom:2px solid var(--navy);
+                 padding-bottom:12px; margin-bottom:16px; }
+  .inf-membrete-txt{ flex:1 1 auto; min-width:0; }
+  .inf-membrete h1{ font-size:19px; margin:0; color:var(--navy); line-height:1.2; }
+  .inf-membrete .inf-marca{ font-size:11px; font-weight:800; letter-spacing:1.2px; color:var(--text-soft);
+                            text-transform:uppercase; margin-bottom:3px; }
+  .inf-membrete .inf-sub{ font-size:12px; color:var(--text-soft); margin-top:5px; }
+  .inf-acc{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+  .inf-acc button{ margin:0; width:auto; }
+  .inf-sec{ margin-bottom:22px; break-inside:auto; }
+  .inf-sec-tit{ font-size:15px; font-weight:800; color:var(--navy); margin:0 0 4px;
+                border-left:4px solid var(--teal-dark); padding-left:10px; }
+  .inf-sec-hint{ font-size:12px; color:var(--text-soft); margin:0 0 9px 14px; }
+  .inf-tabla{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .inf-tabla th, .inf-tabla td{ border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top; }
+  .inf-tabla th{ background:var(--bg-soft); font-weight:700; color:var(--navy); font-size:11.5px;
+                 text-transform:uppercase; letter-spacing:.3px; }
+  .inf-tabla td.num, .inf-tabla th.num{ text-align:right; font-variant-numeric:tabular-nums; }
+  .inf-tabla tbody tr:nth-child(even){ background:var(--bg-soft); }
+  .inf-tabla tfoot td{ font-weight:800; background:rgba(126,198,230,.14); color:var(--navy); }
+  .inf-tabla tr.inf-sep td{ background:var(--panel); font-weight:800; color:var(--navy); }
+  .inf-texto p{ margin:0 0 9px; font-size:13.5px; line-height:1.6; }
+  .inf-aviso{ border-left:4px solid var(--amber); background:rgba(240,183,74,.10); border-radius:0 8px 8px 0;
+              padding:10px 14px; font-size:12.5px; line-height:1.55; margin-bottom:10px; }
+  .inf-nada{ text-align:center; padding:26px; border:1px dashed var(--line); border-radius:12px; color:var(--text-soft); }
 
   @media (max-width:900px){
     .inf-tiles{ grid-template-columns:repeat(2, 1fr); }
+  }
+  @media (max-width:640px){
+    .inf-paso{ gap:10px; }
+    .inf-paso-num{ flex-basis:24px; height:24px; font-size:12.5px; }
+    .inf-tabla{ font-size:11.5px; }
+    .inf-membrete{ flex-wrap:wrap; gap:10px; }
+  }
+  @media print{
+    #infArmador, .inf-acc, .tab-bar, #mainFooter, .barra-abajo{ display:none !important; }
+    .inf-doc{ margin-top:0; }
+    .inf-sec{ break-inside:auto; }
+    .inf-tabla tr{ break-inside:avoid; }
+    .inf-tabla th{ background:#eef5f2 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   }
   @media (max-width:640px){
     .subtabs{ flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; border-radius:14px; }
@@ -2479,7 +2566,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-06 15:48 · 542d34</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-06 20:49 · ae528d</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3885,68 +3972,101 @@
 </div>
 
 <div class="wrap" id="viewInforme" style="display:none">
-  <!-- Consolidado de obras (2026-08-31). Es la foto de una sola mirada: cuántas plazas hay, cuántas
-       terminadas, cuántas en obra y el promedio de avance, más una tabla con todas. Se dibuja desde
-       `renderConsolidadoInforme()`, que SOLO LEE `avanceObras` — no calcula ni guarda nada. -->
-  <div class="inf-tiles" id="informeConsolidadoTiles"></div>
-  <div class="card" id="cardInformeConsolidado">
+  <!-- ==========================================================================================
+       CENTRO DE INFORMES (2026-09-06). Reemplaza a la hoja vieja, que hacía UN solo informe fijo
+       (el avance de todas las plazas). Pedido del usuario, textual:
+         *"esa hoja tiene que ser para poder hacer informes de todas las demás. Ejemplo: quiero
+          hacer un informe de las 36 plazas, tendría que seleccionar esas plazas y seleccionar que
+          quiero hacer un informe del itemizado. También si quiero hacer un informe de un personal
+          y seleccionar y decir hacer el informe de su avance."*
+       Son cuatro pasos: sobre qué · qué informe · quiénes · período y opciones. Un solo motor
+       (`INF.construir`) arma un MODELO de informe, y cuatro salidas lo dibujan: pantalla, hoja de
+       impresión, Word y Excel. Así el papel, el .doc y la planilla no se pueden desincronizar.
+       Los ids `informeFecha`, `informePeriodo` e `informeObs` se conservan: los lee `datosInforme()`
+       del bloque viejo, que sigue siendo la fuente del informe de avance.
+       ========================================================================================== -->
+  <div class="card no-print" id="infArmador">
     <div class="card-header-row">
       <div>
-        <h2 style="margin:0;"><span class="dot"></span>Consolidado de obras y plazas</h2>
-        <div class="hint" style="margin-top:3px;">Cuadro para auditoría, EPEC y dirección técnica.</div>
+        <h2 style="margin:0;"><span class="dot"></span>Centro de informes</h2>
+        <div class="hint" style="margin-top:3px;">Elegí sobre qué, qué informe, sobre quiénes y de qué período. Sale en pantalla, y de ahí a PDF, Word o Excel.</div>
       </div>
-      <button type="button" class="btn-primary no-print" style="width:auto; margin:0; padding:9px 16px; font-size:13px;" onclick="imprimir()">🖨 Imprimir informe</button>
+      <button type="button" class="btn-ghost" id="infReset" style="width:auto; margin:0; padding:8px 14px; font-size:13px;">↺ Empezar de nuevo</button>
     </div>
-    <div style="overflow-x:auto;">
-      <table id="tablaConsolidado"><thead><tr>
-        <th style="width:38%">Plaza / obra</th><th>ID</th><th>Barrio</th>
-        <th style="text-align:right;">Avance físico</th><th>Estado</th>
-      </tr></thead><tbody id="consolidadoBody"></tbody></table>
-    </div>
-  </div>
 
-  <div class="card no-print" style="margin-top:18px;">
-    <h2><span class="dot"></span>Informe: cómo está la obra</h2>
-    <div class="hint" style="margin-top:0;">Esta hoja muestra, en palabras simples, cómo viene cada plaza: cuánto está hecho, qué falta, para cuándo, si ya se prendió y si pasó la inspección. Está pensada para que la entienda cualquiera, sin saber nada de la obra. Se puede imprimir, guardar como PDF o bajar en Word/Excel para presentarla.</div>
-    <div class="row2">
-      <div>
-        <label>Fecha del informe</label>
-        <input type="date" id="informeFecha">
-      </div>
-      <div>
-        <label>Período</label>
-        <select id="informePeriodo">
-          <option value="A la fecha">A la fecha</option>
-          <option value="Informe semanal">Informe semanal</option>
-          <option value="Informe mensual">Informe mensual</option>
-        </select>
+    <div class="inf-paso">
+      <div class="inf-paso-num">1</div>
+      <div class="inf-paso-cuerpo">
+        <div class="inf-paso-tit">¿Sobre qué es el informe?</div>
+        <div class="inf-chips" id="infTemas"></div>
       </div>
     </div>
-    <label>Comentarios para agregar al informe</label>
-    <div class="hint" style="margin-top:2px;">Si lo dejás vacío, se escribe solo: cuáles están frenadas, cuáles esperan una definición, cuáles ya se prendieron.</div>
-    <textarea id="informeObs" rows="3" placeholder="(Se completa solo si lo dejás vacío)"></textarea>
-    <div class="hist-actions" style="margin-top:12px;">
-      <button class="btn-primary" style="margin:0; flex:none; width:auto;" onclick="imprimirInformeAvance()">🖨 Ver / Guardar PDF</button>
-      <button class="btn-ghost" onclick="descargarInformeWord()">⬇ Descargar Word</button>
-      <button class="btn-ghost" onclick="descargarInformeExcel()">⬇ Descargar Excel</button>
+
+    <div class="inf-paso">
+      <div class="inf-paso-num">2</div>
+      <div class="inf-paso-cuerpo">
+        <div class="inf-paso-tit">¿Qué informe querés?</div>
+        <div class="inf-chips" id="infTipos"></div>
+        <div class="hint" id="infTipoHint" style="margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <div class="inf-paso" id="infPasoSel">
+      <div class="inf-paso-num">3</div>
+      <div class="inf-paso-cuerpo">
+        <div class="inf-paso-tit" id="infSelTit">¿Sobre cuáles?</div>
+        <div class="inf-sel-barra">
+          <input type="text" id="infBuscar" placeholder="Buscar…" style="margin:0;">
+          <button type="button" class="btn-ghost inf-mini" id="infTodas">Marcar todas</button>
+          <button type="button" class="btn-ghost inf-mini" id="infNinguna">Ninguna</button>
+        </div>
+        <div class="inf-chips inf-chips-filtro" id="infFiltros"></div>
+        <div class="inf-lista" id="infLista"></div>
+        <div class="hint" id="infSelMsg" style="margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <div class="inf-paso">
+      <div class="inf-paso-num">4</div>
+      <div class="inf-paso-cuerpo">
+        <div class="inf-paso-tit">Período y opciones</div>
+        <div class="inf-opts">
+          <div id="infCampoFecha">
+            <label style="margin-top:0;">Fecha del informe</label>
+            <input type="date" id="informeFecha">
+          </div>
+          <div id="infCampoPeriodo">
+            <label style="margin-top:0;">Período</label>
+            <select id="informePeriodo">
+              <option value="A la fecha">A la fecha</option>
+              <option value="Informe semanal">Informe semanal</option>
+              <option value="Informe mensual">Informe mensual</option>
+            </select>
+          </div>
+          <div id="infCampoDesde" style="display:none;">
+            <label style="margin-top:0;">Desde</label>
+            <input type="date" id="infDesde">
+          </div>
+          <div id="infCampoHasta" style="display:none;">
+            <label style="margin-top:0;">Hasta</label>
+            <input type="date" id="infHasta">
+          </div>
+        </div>
+        <div class="inf-secciones" id="infSecciones"></div>
+        <label>Comentarios para agregar al informe</label>
+        <div class="hint" style="margin-top:2px;">Si lo dejás vacío, en el informe de avance se escribe solo (cuáles están frenadas, cuáles esperan definición, cuáles ya se prendieron).</div>
+        <textarea id="informeObs" rows="3" placeholder="(Opcional)"></textarea>
+      </div>
+    </div>
+
+    <div class="inf-generar">
+      <button type="button" class="btn-primary" id="infGenerar" style="width:auto; margin:0; padding:12px 26px; font-size:15px;">📄 Generar informe</button>
+      <span class="hint" id="infGenerarHint" style="margin:0;"></span>
     </div>
   </div>
 
-  <div class="card" id="cardInformeResumen" style="margin-top:18px;">
-    <h2><span class="dot"></span>Resumen general</h2>
-    <div class="summary-tiles" id="informeTiles"></div>
-    <div class="hint" id="informeNota" style="margin-top:12px;"></div>
-  </div>
-
-  <div class="card" style="margin-top:18px;">
-    <h2><span class="dot"></span>Plaza por plaza</h2>
-    <div id="informePlazas"></div>
-  </div>
-
-  <div class="card" style="margin-top:18px;">
-    <h2><span class="dot"></span>Comentarios</h2>
-    <div id="informeObsTexto"></div>
-  </div>
+  <!-- El informe generado. Se dibuja entero desde el modelo; en papel sale solo esta parte. -->
+  <div id="infSalida"></div>
 </div>
 
 <footer id="mainFooter" class="no-print">
@@ -21266,6 +21386,971 @@ const ITEMIZADO_EPEC = [
     return previa.apply(this, arguments);
   };
   window.NORMAS_FICHAS = F;
+})();
+</script>
+
+<!-- ============================================================================================
+     CENTRO DE INFORMES — el motor (2026-09-06)
+     ============================================================================================
+     Pedido del usuario, textual: *"esa hoja tiene que ser para poder hacer informes de todas las
+     demás. Ejemplo: quiero hacer un informe de las 36 plazas, tendría que seleccionar esas plazas y
+     seleccionar que quiero hacer un informe del itemizado. También si quiero hacer un informe de un
+     personal y seleccionar y decir hacer el informe de su avance."*
+
+     CÓMO ESTÁ ARMADO. Hay un solo camino: elegir → `construir(cfg)` → MODELO → dibujar. El modelo
+     es una estructura chata (título, recuadros, avisos, secciones de tabla o de texto) que no sabe
+     nada de HTML. Sobre él hay cuatro salidas: pantalla, hoja de impresión, Word y Excel. Por eso
+     el papel, el .doc y la planilla nunca pueden decir cosas distintas: los cuatro leen lo mismo.
+
+     Agregar un informe nuevo es agregar una entrada en TIPOS con su `construir`. Nada más.
+
+     De dónde salen los datos: este bloque SOLO LEE. `avanceObras`, `ordenesTrabajo`,
+     `stockMovimientos` e `historial` son del bloque de la Calculadora; los cálculos de plata y de
+     puntos se piden prestados a quien ya los hace bien (`calcularValorPlaza`, `window.puntosDeOrden`,
+     `window.CO`, `calcularBalancePlaza`), para no tener dos cuentas distintas del mismo número.
+     ============================================================================================ -->
+<script>
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const esc = s => (typeof escHtml === 'function') ? escHtml(s) : String(s == null ? '' : s);
+  const leer = (f, def) => { try { const v = f(); return v == null ? def : v; } catch(e){ return def; } };
+  const obras = ()=> leer(()=> avanceObras, []) || [];
+  const ots   = ()=> leer(()=> ordenesTrabajo, []) || [];
+  const movs  = ()=> (leer(()=> window.stockMovimientos, []) || []).filter(m=>!m.anulado);
+  const comps = ()=> leer(()=> (window.historialCompartido || historial), []) || [];
+  const nomina= ()=> leer(()=> personal, []) || [];
+  const n2 = v => { const x = Number(v); return isFinite(x) ? x : 0; };
+  const nf = (v, d=2)=> (typeof fmt === 'function') ? fmt(v, d) : String(v);
+  const nEnt = v => nf(v, Number.isInteger(n2(v)) ? 0 : 2);
+  const fCorta = f => (typeof formatFechaCorta === 'function' && f) ? formatFechaCorta(f) : (f || '—');
+  const hoyISO = ()=> (typeof fechaAISO === 'function') ? fechaAISO(new Date()) : new Date().toISOString().slice(0,10);
+  const plata = v => '$ ' + n2(v).toLocaleString('es-AR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const baseMod = ()=> (typeof window.epecBaseEf === 'function') ? window.epecBaseEf() : 0;
+  const conIva  = ()=> (typeof window.epecConIva === 'function') ? !!window.epecConIva() : false;
+  const K    = id => (typeof window.epecItemK    === 'function') ? window.epecItemK(id) : 0;
+  const DESC = id => (typeof window.epecItemDesc === 'function') ? window.epecItemDesc(id) : '';
+  const UN   = id => (typeof window.epecItemUn   === 'function') ? window.epecItemUn(id) : '';
+
+  // Los ítems de una plaza, las dos listas juntas y en el orden del pliego — el mismo criterio que
+  // usa el Itemizado 2026, para que los totales coincidan renglón por renglón.
+  function itemsDe(a){
+    const out = [];
+    (a.valorItems||[]).forEach(v=>{ if(K(v.itemPliego) || DESC(v.itemPliego)) out.push({ id:String(v.itemPliego), v, prov:false }); });
+    (a.valorItemsEpec||[]).forEach(v=>{ if(K(v.itemEpec) || DESC(v.itemEpec)) out.push({ id:String(v.itemEpec), v, prov:true }); });
+    return out.sort((x,y)=> parseFloat(x.id) - parseFloat(y.id));
+  }
+  function valorDe(a){
+    if(typeof calcularValorPlaza === 'function'){ try{ return calcularValorPlaza(a); }catch(e){} }
+    let kT = 0, kA = 0;
+    itemsDe(a).forEach(f=>{ const k = K(f.id), c = n2(f.v.cantidad);
+      kT += c * k; kA += Math.min(n2(f.v.cantidadAvanzada), c) * k; });
+    const b = baseMod();
+    return { kTotal:kT, kAvanzado:kA, presupuesto:kT*b, avanzado:kA*b, base:b,
+             pctValor: kT > 0 ? Math.round(kA/kT*100) : 0 };
+  }
+  const pctObra = a => (typeof calcularAvanceEtapasPct === 'function') ? calcularAvanceEtapasPct(a) : 0;
+  const situDe  = a => a.situacion || ((typeof situacionSugerida === 'function') ? situacionSugerida(a) : '—');
+
+  // ==========================================================================================
+  // QUÉ INFORMES HAY
+  // ==========================================================================================
+  const TEMAS = [
+    { id:'plazas',   ico:'🏛', txt:'Plazas y obras' },
+    { id:'personal', ico:'👷', txt:'Personal' },
+    { id:'ordenes',  ico:'📋', txt:'Órdenes de trabajo' },
+    { id:'panol',    ico:'📦', txt:'Pañol' },
+  ];
+
+  // `sel` dice sobre qué se elige; `fechas` si el informe es de un período; `secciones` son los
+  // pedazos que se pueden tildar. `construir` recibe {items, desde, hasta, fecha, periodo, obs, sec}.
+  const TIPOS = [
+    { id:'plazas-avance', tema:'plazas', txt:'Avance de obra', sel:'plazas', fechas:false,
+      hint:'Cómo viene cada plaza: cuánto está hecho, qué falta, para cuándo, si ya se prendió y si pasó la inspección. Es el informe para presentar a EPEC o a la Municipalidad.',
+      secciones:[['resumen','Resumen por situación',1],['detalle','Detalle plaza por plaza',1],['obs','Observaciones',1]],
+      construir: infAvance },
+    { id:'plazas-itemizado', tema:'plazas', txt:'Itemizado y certificación', sel:'plazas', fechas:false,
+      hint:'Lo que se cobra: módulos (K), plata contratada y certificada de cada plaza, y el total. Es el informe de las 36 plazas que pediste.',
+      secciones:[['resumen','Resumen por plaza',1],['detalle','Detalle ítem por ítem de cada plaza',1],['consolidado','Consolidado por ítem (todas juntas)',0]],
+      construir: infItemizado },
+    { id:'plazas-conforme', tema:'plazas', txt:'Conforme a obra', sel:'plazas', fechas:false,
+      hint:'Proyecto contra final: qué se fijó al principio, qué se ajustó durante la obra, con qué motivo y con qué orden de trabajo. Solo sale completo en las plazas con el itemizado de proyecto fijado.',
+      secciones:[['resumen','Resumen proyecto vs. conforme a obra',1],['ajustes','Los ajustes, uno por uno',1]],
+      construir: infConforme },
+    { id:'plazas-materiales', tema:'plazas', txt:'Materiales del cómputo', sel:'plazas', fechas:false,
+      hint:'Qué material lleva cada plaza según la Calculadora, cuánto salió del pañol y qué falta entregar.',
+      secciones:[['resumen','Resumen por plaza',1],['faltan','Lo que falta entregar',1],['detalle','Detalle material por material',0]],
+      construir: infMateriales },
+    { id:'personal-produccion', tema:'personal', txt:'Producción y avance', sel:'personas', fechas:true,
+      hint:'Qué produjo cada persona en el período: puntos, días trabajados, en qué plazas y qué tareas. Sale de las órdenes de trabajo cerradas.',
+      secciones:[['resumen','Resumen por persona',1],['plazas','En qué plazas trabajó cada uno',1],['tareas','Qué tareas hizo cada uno',0],['ordenes','Las órdenes, una por una',0]],
+      construir: infPersonal },
+    { id:'ordenes-listado', tema:'ordenes', txt:'Órdenes de trabajo', sel:'plazas', fechas:true,
+      hint:'Las órdenes del período: plaza, etapa, cuadrilla, estado y qué se cargó al cerrarlas. Si no marcás ninguna plaza, salen todas.',
+      secciones:[['resumen','Resumen por estado y por plaza',1],['detalle','Detalle de cada orden',1]],
+      construir: infOrdenes },
+    { id:'panol-movimientos', tema:'panol', txt:'Movimientos de pañol', sel:'plazas', fechas:true,
+      hint:'Entradas y salidas del pañol en el período. Si marcás plazas, salen solo los movimientos con ese destino.',
+      secciones:[['resumen','Resumen por material',1],['detalle','Movimiento por movimiento',1]],
+      construir: infPanol },
+  ];
+  const tipoDe = id => TIPOS.find(t=>t.id === id) || TIPOS[0];
+
+  // ==========================================================================================
+  // ESTADO DE LA PANTALLA
+  // ==========================================================================================
+  const cfg = { tema:'plazas', tipo:'plazas-avance', sel:{}, filtro:'', busca:'', sec:{} };
+  let modelo = null;
+
+  function seccionesPorDefecto(t){
+    const s = {};
+    (t.secciones||[]).forEach(([k,,def])=>{ s[k] = !!def; });
+    return s;
+  }
+  cfg.sec = seccionesPorDefecto(tipoDe(cfg.tipo));
+
+  // ---- El universo elegible según el tipo ----
+  // Devuelve [{id, nombre, sub, dato}]. Para «personas», la lista sale de quienes tienen producción
+  // en el período más la nómina del equipo, para que se pueda pedir el informe de alguien aunque
+  // ese período le haya quedado en cero (y el informe lo diga).
+  function universo(){
+    const t = tipoDe(cfg.tipo);
+    if(t.sel === 'personas'){
+      const vistos = new Map();
+      ots().forEach(o=>{
+        (o.personal||[]).forEach(p=>{ const n = String(p.nombre||'').trim(); if(n && !vistos.has(n)) vistos.set(n, p.rol||''); });
+      });
+      nomina().forEach(p=>{ const n = String(p.nombre||'').trim(); if(n && !vistos.has(n)) vistos.set(n, p.rol||''); });
+      return [...vistos.entries()].sort((a,b)=>a[0].localeCompare(b[0]))
+        .map(([n, rol])=>({ id:n, nombre:n, sub:rol || 'sin rol cargado', dato:'' }));
+    }
+    return obras().slice().sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||'')))
+      .map(a=>{
+        const v = valorDe(a);
+        return { id:String(a.id), nombre:a.nombre || '(sin nombre)',
+                 sub: (a.obraId ? 'ID ' + a.obraId : 'sin ID') + (a.barrio ? ' · ' + a.barrio : '') + ' · ' + situDe(a),
+                 dato: v.kTotal > 0 ? nf(v.kTotal,2) + ' K' : (pctObra(a) + '%') };
+      });
+  }
+
+  // ---- Filtros rápidos ----
+  const FILTROS_PLAZA = [
+    { id:'', txt:'Todas' },
+    { id:'hechas', txt:'Las 36 ya ejecutadas', ok:a=>{
+        const ids = new Set(); (window.PLAZAS_HECHAS||[]).forEach(p=>(p.ids||[]).forEach(x=>ids.add(String(x).trim())));
+        return ids.has(String(a.obraId||'').trim()); } },
+    { id:'conItems', txt:'Con ítems cargados', ok:a=> ((a.valorItems||[]).length + (a.valorItemsEpec||[]).length) > 0 },
+    { id:'enObra', txt:'En obra', ok:a=> /obra/i.test(situDe(a)) },
+    { id:'fin', txt:'Finalizadas', ok:a=> /^Finalizada/.test(situDe(a)) },
+    { id:'fijadas', txt:'Con proyecto fijado', ok:a=> !!(window.CO && window.CO.estado(a).fijado) },
+  ];
+  function pasaFiltro(item){
+    const t = tipoDe(cfg.tipo);
+    if(t.sel !== 'plazas' || !cfg.filtro) return true;
+    const f = FILTROS_PLAZA.find(x=>x.id === cfg.filtro);
+    if(!f || !f.ok) return true;
+    const a = obras().find(x=>String(x.id) === item.id);
+    return a ? !!f.ok(a) : true;
+  }
+  function pasaBusca(item){
+    const q = cfg.busca.trim().toLowerCase();
+    if(!q) return true;
+    return (item.nombre + ' ' + item.sub).toLowerCase().includes(q);
+  }
+  const visibles = ()=> universo().filter(x=>pasaFiltro(x) && pasaBusca(x));
+  const elegidos = ()=> universo().filter(x=>cfg.sel[x.id]);
+
+  // ==========================================================================================
+  // LOS CONSTRUCTORES — cada uno devuelve el MODELO del informe
+  // ==========================================================================================
+  const tabla = (tit, hint, cols, filas, pie)=> ({ tipo:'tabla', tit, hint, cols, filas, pie: pie||null });
+  const texto = (tit, parrafos)=> ({ tipo:'texto', tit, parrafos: parrafos.filter(Boolean) });
+
+  // ---- 1. Avance de obra ----
+  function infAvance(o){
+    const filas = o.items.map((a,i)=>({ a, n:i+1 }));
+    const m = { titulo:'Informe de avance de obra',
+                subtitulo:`${filas.length} plaza(s) · ${o.periodo}`,
+                tiles:[], avisos:[], secciones:[] };
+    const porSit = {};
+    filas.forEach(f=>{ const s = situDe(f.a); porSit[s] = (porSit[s]||0) + 1; });
+    const pctProm = filas.length ? Math.round(filas.reduce((t,f)=>t + pctObra(f.a), 0) / filas.length) : 0;
+    m.tiles = [
+      { n: filas.length, l:'Plazas en el informe', c:'' },
+      { n: filas.filter(f=>/^Finalizada/.test(situDe(f.a))).length, l:'Finalizadas', c:'verde' },
+      { n: filas.filter(f=>/obra/i.test(situDe(f.a))).length, l:'En obra', c:'azul' },
+      { n: pctProm + '%', l:'Avance promedio', c:'' },
+    ];
+    if(o.sec.resumen){
+      m.secciones.push(tabla('Resumen por situación', null,
+        [{t:'Situación'},{t:'Plazas', num:true}],
+        Object.keys(porSit).sort().map(s=>[s, String(porSit[s])]),
+        [['Total de plazas relevadas', String(filas.length)]]));
+    }
+    if(o.sec.detalle){
+      m.secciones.push(tabla('Detalle plaza por plaza', null,
+        [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},{t:'Situación'},{t:'Qué falta'},
+         {t:'Fecha estimada', w:'92px'},{t:'Encendido', w:'110px'},{t:'Inspección', w:'110px'},{t:'Avance', num:true, w:'62px'}],
+        filas.map(f=>{
+          const a = f.a;
+          return [String(f.n), a.nombre||'', String(a.obraId||'—'), situDe(a),
+                  (a.pendiente||'').trim() || ((typeof pendienteSugerido === 'function') ? pendienteSugerido(a) : '—'),
+                  a.fechaEstimada ? fCorta(a.fechaEstimada) : '—',
+                  (typeof textoEncendido === 'function') ? textoEncendido(a) : '—',
+                  (typeof textoInspeccion === 'function') ? textoInspeccion(a) : '—',
+                  pctObra(a) + '%'];
+        })));
+    }
+    if(o.sec.obs){
+      let txt = o.obs;
+      if(!txt && typeof observacionesSugeridas === 'function'){
+        try{ txt = observacionesSugeridas(filas.map((f,i)=>({
+          n:i+1, nombre:f.a.nombre||'', obraId:String(f.a.obraId||'—'), situacion:situDe(f.a),
+          encendido:(typeof textoEncendido === 'function') ? textoEncendido(f.a) : '' }))); }catch(e){}
+      }
+      m.secciones.push(texto('Observaciones', (txt || 'Sin observaciones particulares para este período.').split('\n\n')));
+    }
+    return m;
+  }
+
+  // ---- 2. Itemizado y certificación ----
+  function infItemizado(o){
+    const base = baseMod(), iva = conIva();
+    const m = { titulo:'Informe de itemizado y certificación',
+                subtitulo:`${o.items.length} plaza(s) · ANEXO I — LPE 5589 · SIC 21760` +
+                          (base > 0 ? ` · módulo ${plata(base)} ${iva?'con IVA':'sin IVA'}` : ' · valor del módulo sin cargar'),
+                tiles:[], avisos:[], secciones:[] };
+    if(base <= 0) m.avisos.push('El <b>valor del módulo</b> no está cargado en el Itemizado 2026, así que el informe sale en <b>K (módulos)</b> y las columnas de plata van en cero. Cargalo en la pestaña Obras → Itemizado 2026 y volvé a generar.');
+
+    let kT = 0, kA = 0, sinItems = 0;
+    const filas = o.items.map((a,i)=>{
+      const v = valorDe(a);
+      kT += v.kTotal; kA += v.kAvanzado;
+      const nIt = itemsDe(a).length;
+      if(!nIt) sinItems++;
+      return { a, n:i+1, v, nIt };
+    });
+    m.tiles = [
+      { n: nf(kT,2), l:'Módulos (K) contratados', c:'' },
+      { n: nf(kA,2), l:'Módulos certificados', c:'verde' },
+      { n: kT > 0 ? Math.round(kA/kT*100) + '%' : '0%', l:'Certificado', c:'azul' },
+      { n: base > 0 ? plata(kT*base) : '—', l:'Contratado' + (iva?' (c/IVA)':' (s/IVA)'), c:'' },
+    ];
+    if(sinItems) m.avisos.push(`<b>${sinItems}</b> de las plazas elegidas <b>no tienen ningún ítem cargado</b>: entran al informe en cero. Traeles las cantidades desde el Itemizado 2026.`);
+
+    if(o.sec.resumen){
+      m.secciones.push(tabla('Resumen por plaza', 'Una fila por plaza, con sus módulos y su plata.',
+        [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},{t:'Ítems', num:true, w:'56px'},
+         {t:'K contratado', num:true},{t:'K certificado', num:true},
+         {t:'Contratado', num:true},{t:'Certificado', num:true},{t:'%', num:true, w:'52px'}],
+        filas.map(f=>[String(f.n), f.a.nombre||'', String(f.a.obraId||'—'), String(f.nIt),
+                      nf(f.v.kTotal,2), nf(f.v.kAvanzado,2),
+                      base>0?plata(f.v.presupuesto):'—', base>0?plata(f.v.avanzado):'—',
+                      (f.v.kTotal>0?Math.round(f.v.kAvanzado/f.v.kTotal*100):0) + '%']),
+        [['', 'TOTAL', '', String(filas.reduce((t,f)=>t+f.nIt,0)), nf(kT,2), nf(kA,2),
+          base>0?plata(kT*base):'—', base>0?plata(kA*base):'—',
+          (kT>0?Math.round(kA/kT*100):0) + '%']]));
+    }
+
+    if(o.sec.detalle){
+      filas.forEach(f=>{
+        const its = itemsDe(f.a);
+        const sub = `ID ${f.a.obraId||'—'}${f.a.barrio?' · '+f.a.barrio:''} — ${nf(f.v.kTotal,2)} K contratados`;
+        if(!its.length){
+          m.secciones.push(texto(`${f.a.nombre||'(sin nombre)'}`, [sub, 'Esta plaza no tiene ítems cargados en el itemizado.']));
+          return;
+        }
+        m.secciones.push(tabla(f.a.nombre || '(sin nombre)', sub,
+          [{t:'Ítem', w:'56px'},{t:'Descripción'},{t:'Un.', w:'46px'},{t:'K', num:true, w:'56px'},
+           {t:'Contratada', num:true, w:'80px'},{t:'Hecha', num:true, w:'70px'},
+           {t:'Subtotal', num:true},{t:'Certificado', num:true}],
+          its.map(it=>{
+            const k = K(it.id), c = n2(it.v.cantidad), ca = Math.min(n2(it.v.cantidadAvanzada), c);
+            // El id va limpio: la descripción de los 83.1–89 ya empieza con «Provisión de…», así
+            // que marcarlos otra vez en la columna del número sería repetir lo mismo dos veces.
+            return [it.id, DESC(it.id), UN(it.id), nf(k,2),
+                    nEnt(c), nEnt(ca),
+                    base>0?plata(c*k*base):nf(c*k,2)+' K', base>0?plata(ca*k*base):nf(ca*k,2)+' K'];
+          }),
+          [['', 'Total de la plaza', '', '', '', '',
+            base>0?plata(f.v.presupuesto):nf(f.v.kTotal,2)+' K',
+            base>0?plata(f.v.avanzado):nf(f.v.kAvanzado,2)+' K']]));
+      });
+    }
+
+    if(o.sec.consolidado){
+      const acum = new Map();
+      o.items.forEach(a=> itemsDe(a).forEach(it=>{
+        const g = acum.get(it.id) || { id:it.id, cant:0, av:0, plazas:0 };
+        g.cant += n2(it.v.cantidad); g.av += Math.min(n2(it.v.cantidadAvanzada), n2(it.v.cantidad));
+        g.plazas++; acum.set(it.id, g);
+      }));
+      const cons = [...acum.values()].sort((a,b)=> parseFloat(a.id) - parseFloat(b.id));
+      m.secciones.push(tabla('Consolidado por ítem', 'La cantidad de todas las plazas elegidas, sumada ítem por ítem.',
+        [{t:'Ítem', w:'56px'},{t:'Descripción'},{t:'Un.', w:'46px'},{t:'K', num:true, w:'56px'},
+         {t:'Plazas', num:true, w:'56px'},{t:'Cantidad', num:true},{t:'Hecha', num:true},
+         {t:'Módulos', num:true},{t:'Importe', num:true}],
+        cons.map(g=>{ const k = K(g.id);
+          return [g.id, DESC(g.id), UN(g.id), nf(k,2), String(g.plazas), nEnt(g.cant), nEnt(g.av),
+                  nf(g.cant*k,2), base>0?plata(g.cant*k*base):'—']; }),
+        [['', 'TOTAL', '', '', String(o.items.length), '', '', nf(kT,2), base>0?plata(kT*base):'—']]));
+    }
+    return m;
+  }
+
+  // ---- 3. Conforme a obra ----
+  function infConforme(o){
+    const CO = window.CO, base = baseMod();
+    const m = { titulo:'Informe de conforme a obra',
+                subtitulo:`${o.items.length} plaza(s) · proyecto contra ejecutado`,
+                tiles:[], avisos:[], secciones:[] };
+    if(!CO){ m.avisos.push('El módulo de conforme a obra no está disponible en esta versión del archivo.'); return m; }
+    let kProy = 0, kVig = 0, nFij = 0, nCerr = 0, nAj = 0;
+    const filas = o.items.map((a,i)=>{
+      const e = CO.estado(a);
+      const p = e.fijado ? CO.modulosProyecto(a) : 0;
+      const v = CO.modulosVigentes(a);
+      const aj = (a.coAjustes||[]).length;
+      if(e.fijado){ nFij++; kProy += p; }
+      if(e.cerrado) nCerr++;
+      nAj += aj; kVig += v;
+      return { a, n:i+1, e, p, v, aj, dif: e.fijado ? v - p : null };
+    });
+    m.tiles = [
+      { n: nFij + '/' + filas.length, l:'Con proyecto fijado', c: nFij === filas.length ? 'verde' : 'ambar' },
+      { n: nCerr, l:'Conforme a obra cerrado', c:'verde' },
+      { n: nAj, l:'Ajustes registrados', c:'azul' },
+      { n: (kVig - kProy >= 0 ? '+' : '') + nf(kVig - kProy, 2), l:'Diferencia en módulos', c: (kVig-kProy) > 0 ? 'verde' : ((kVig-kProy) < 0 ? 'rojo' : '') },
+    ];
+    const sinFijar = filas.filter(f=>!f.e.fijado);
+    if(sinFijar.length) m.avisos.push(`<b>${sinFijar.length}</b> plaza(s) <b>sin el itemizado de proyecto fijado</b>: de ésas no hay contra qué comparar, así que la columna de proyecto va vacía. Se fija desde el Itemizado 2026 de cada plaza (${sinFijar.slice(0,4).map(f=>esc(f.a.nombre||'')).join(', ')}${sinFijar.length>4?'…':''}).`);
+
+    if(o.sec.resumen){
+      m.secciones.push(tabla('Proyecto contra conforme a obra', 'La diferencia es lo que se agregó o se sacó durante la obra.',
+        [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},{t:'Estado'},
+         {t:'K proyecto', num:true},{t:'K conforme a obra', num:true},{t:'Diferencia', num:true},
+         {t:'$ diferencia', num:true},{t:'Ajustes', num:true, w:'62px'}],
+        filas.map(f=>[String(f.n), f.a.nombre||'', String(f.a.obraId||'—'),
+                      f.e.cerrado ? 'Cerrado' : (f.e.fijado ? 'Proyecto fijado' : 'Sin fijar'),
+                      f.e.fijado ? nf(f.p,2) : '—', nf(f.v,2),
+                      f.dif == null ? '—' : (f.dif >= 0 ? '+' : '') + nf(f.dif,2),
+                      (f.dif == null || base <= 0) ? '—' : (f.dif >= 0 ? '+' : '') + plata(f.dif*base),
+                      String(f.aj)]),
+        [['', 'TOTAL', '', '', nf(kProy,2), nf(kVig,2),
+          (kVig-kProy >= 0 ? '+' : '') + nf(kVig-kProy,2),
+          base>0 ? ((kVig-kProy>=0?'+':'') + plata((kVig-kProy)*base)) : '—', String(nAj)]]));
+    }
+    if(o.sec.ajustes){
+      const todos = [];
+      o.items.forEach(a=> (a.coAjustes||[]).forEach(x=> todos.push({ a, x })));
+      todos.sort((p,q)=> String(p.x.fecha||'').localeCompare(String(q.x.fecha||'')));
+      if(!todos.length){
+        m.secciones.push(texto('Los ajustes, uno por uno', ['No hay ningún ajuste registrado en las plazas elegidas.']));
+      } else {
+        m.secciones.push(tabla('Los ajustes, uno por uno', 'Cada cambio contra el itemizado de proyecto, con su motivo y su orden de trabajo.',
+          [{t:'Fecha', w:'86px'},{t:'Plaza'},{t:'Ítem'},{t:'Cambio', num:true, w:'78px'},
+           {t:'$', num:true},{t:'Motivo'},{t:'OT', w:'80px'},{t:'Detalle'}],
+          todos.map(({a,x})=>{
+            const idIt = String(x.itemId != null ? x.itemId : (x.clave||'').slice(2).replace(/_/g,'.'));
+            const d = n2(x.delta);
+            return [fCorta(x.fecha), a.nombre||'', 'Ítem ' + idIt + ' — ' + (DESC(idIt) || x.itemTxt || ''),
+                    (d>=0?'+':'') + nEnt(d),
+                    base>0 ? ((d>=0?'+':'') + plata(d*K(idIt)*base)) : '—',
+                    x.motivo||'—', x.otNumero||'—', x.detalle||''];
+          })));
+      }
+    }
+    return m;
+  }
+
+  // ---- 4. Materiales del cómputo ----
+  function infMateriales(o){
+    const m = { titulo:'Informe de materiales', subtitulo:`${o.items.length} plaza(s) · calculado contra entregado`,
+                tiles:[], avisos:[], secciones:[] };
+    if(typeof calcularBalancePlaza !== 'function'){
+      m.avisos.push('El balance de materiales no está disponible en esta versión del archivo.'); return m;
+    }
+    const datos = o.items.map((a,i)=>{
+      let bal = { filas:[] };
+      try{ bal = calcularBalancePlaza(a) || { filas:[] }; }catch(e){}
+      const nec = (bal.filas||[]).filter(f=> f.calc != null && f.calc > 0);
+      const faltan = nec.filter(f=> !((f.entr||0) + 0.001 >= f.calc));
+      return { a, n:i+1, nec, faltan, pct: nec.length ? Math.round((nec.length-faltan.length)/nec.length*100) : 0 };
+    });
+    const completas = datos.filter(d=>d.nec.length && !d.faltan.length).length;
+    const sinLista = datos.filter(d=>!d.nec.length).length;
+    m.tiles = [
+      { n: datos.length, l:'Plazas en el informe', c:'' },
+      { n: completas, l:'Con el material completo', c:'verde' },
+      { n: datos.reduce((t,d)=>t+d.faltan.length,0), l:'Renglones faltantes', c:'ambar' },
+      { n: sinLista, l:'Sin lista de materiales', c: sinLista ? 'rojo' : '' },
+    ];
+    if(sinLista) m.avisos.push(`<b>${sinLista}</b> plaza(s) no tienen cargada su lista de materiales, así que no hay contra qué comparar. Calculalas en la Calculadora y registralas.`);
+
+    if(o.sec.resumen){
+      m.secciones.push(tabla('Resumen por plaza', null,
+        [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},
+         {t:'Renglones', num:true},{t:'Entregados', num:true},{t:'Faltan', num:true},{t:'Cubierto', num:true, w:'70px'}],
+        datos.map(d=>[String(d.n), d.a.nombre||'', String(d.a.obraId||'—'),
+                      d.nec.length ? String(d.nec.length) : 'sin lista',
+                      String(d.nec.length - d.faltan.length), String(d.faltan.length),
+                      d.nec.length ? d.pct + '%' : '—'])));
+    }
+    if(o.sec.faltan){
+      const filas = [];
+      datos.forEach(d=> d.faltan.forEach(f=> filas.push([d.a.nombre||'', String(f.desc||''),
+        nEnt(f.calc), nEnt(f.entr||0), nEnt(n2(f.calc) - n2(f.entr||0)), String(f.un||'')])));
+      m.secciones.push(filas.length
+        ? tabla('Lo que falta entregar', 'Material que la plaza necesita y que todavía no salió del pañol.',
+            [{t:'Plaza'},{t:'Material'},{t:'Necesita', num:true},{t:'Entregado', num:true},{t:'Falta', num:true},{t:'Un.', w:'56px'}], filas)
+        : texto('Lo que falta entregar', ['No falta entregar nada: todas las plazas elegidas tienen su material completo.']));
+    }
+    if(o.sec.detalle){
+      datos.forEach(d=>{
+        if(!d.nec.length) return;
+        m.secciones.push(tabla(d.a.nombre || '(sin nombre)', `ID ${d.a.obraId||'—'} — ${d.nec.length} renglón(es)`,
+          [{t:'Material'},{t:'Necesita', num:true},{t:'Entregado', num:true},{t:'Diferencia', num:true},{t:'Un.', w:'56px'}],
+          d.nec.map(f=>[String(f.desc||''), nEnt(f.calc), nEnt(f.entr||0),
+                        nEnt(n2(f.entr||0) - n2(f.calc)), String(f.un||'')])));
+      });
+    }
+    return m;
+  }
+
+  // ---- 5. Producción del personal ----
+  function infPersonal(o){
+    const m = { titulo:'Informe de producción del personal',
+                subtitulo:`${o.items.length} persona(s) · ${o.rangoTxt}`,
+                tiles:[], avisos:[], secciones:[] };
+    const nombres = new Set(o.items.map(x=>x.id));
+    const cerradas = ots().filter(x=>{
+      const f = (x.cierre && x.cierre.fecha) || x.fecha || '';
+      if(!x.cierre || !x.cierre.cantidades || !Object.keys(x.cierre.cantidades).length) return false;
+      return dentro(f, o.desde, o.hasta);
+    });
+    const abiertas = ots().filter(x=> dentro((x.cierre&&x.cierre.fecha)||x.fecha||'', o.desde, o.hasta)
+                                   && !(x.cierre && x.cierre.cantidades && Object.keys(x.cierre.cantidades).length)).length;
+    const gente = new Map();
+    o.items.forEach(p=> gente.set(p.id, { nombre:p.id, rol:p.sub, pts:0, dias:new Set(), plazas:new Map(), tareas:new Map(), ordenes:[], aMano:false }));
+    let ptsEquipo = 0;
+    cerradas.forEach(ot=>{
+      const p = (typeof window.puntosDeOrden === 'function') ? window.puntosDeOrden(ot) : null;
+      if(!p) return;
+      ptsEquipo += p.total;
+      const cuotaDe = pp => p.total > 0 ? pp.pts / p.total : 0;
+      (p.porPersona||[]).forEach(pp=>{
+        const n = String(pp.nombre||'').trim();
+        if(!n || !nombres.has(n)) return;
+        const g = gente.get(n);
+        g.pts += pp.pts;
+        if(pp.aMano) g.aMano = true;
+        if(pp.rol) g.rol = pp.rol;
+        const f = p.fecha || ot.fecha; if(f) g.dias.add(f);
+        const nomPlaza = ot.plazaNombre || '(sin plaza)';
+        const pl = g.plazas.get(nomPlaza) || { pts:0, dias:new Set() };
+        pl.pts += pp.pts; if(f) pl.dias.add(f);
+        g.plazas.set(nomPlaza, pl);
+        g.ordenes.push({ numero:ot.numero||'', fecha:f||'', plaza:nomPlaza, etapa:ot.etapaLabel||'', pts:pp.pts });
+        const cuota = cuotaDe(pp);
+        (p.renglones||[]).forEach(rg=>{
+          const t = g.tareas.get(rg.tarea) || { cant:0, un:rg.un, pts:0 };
+          t.cant += rg.cant; t.pts += rg.pts * cuota;
+          g.tareas.set(rg.tarea, t);
+        });
+      });
+    });
+    const personas = [...gente.values()].sort((a,b)=> b.pts - a.pts);
+    const ptsSel = personas.reduce((t,g)=>t+g.pts, 0);
+    const diasSel = new Set(); personas.forEach(g=> g.dias.forEach(d=>diasSel.add(d)));
+    m.tiles = [
+      { n: nf(ptsSel, Number.isInteger(ptsSel)?0:1), l:'Puntos de los elegidos', c:'' },
+      { n: personas.filter(g=>g.pts>0).length + '/' + personas.length, l:'Con producción', c:'azul' },
+      { n: diasSel.size, l:'Días con trabajo cargado', c:'' },
+      { n: cerradas.length, l:'Órdenes cerradas del período', c:'verde' },
+    ];
+    m.avisos.push('⚖ <b>Cómo leer estos números.</b> Miden lo que produjo la <b>cuadrilla</b>, repartido según el peso de cada rol. Cuando tres personas arman nueve tableritos juntas, nadie puede decir cuál hizo cuál: el reparto es una convención, no una medición. Sirve para ver el ritmo del equipo y comparar períodos. <b>No alcanza, solo, para decidir un sueldo o una sanción.</b>');
+    if(abiertas) m.avisos.push(`Hay <b>${abiertas}</b> orden(es) de este período <b>sin cerrar</b>: su trabajo todavía no le suma a nadie.`);
+    const enCero = personas.filter(g=>g.pts <= 0);
+    if(enCero.length) m.avisos.push(`Sin producción cargada en el período: <b>${enCero.map(g=>esc(g.nombre)).join(', ')}</b>. Puede ser que no haya trabajado, o que las órdenes de esos días estén sin cerrar.`);
+
+    if(o.sec.resumen){
+      m.secciones.push(tabla('Resumen por persona', 'Ordenado por puntos.',
+        [{t:'Persona'},{t:'Rol'},{t:'Puntos', num:true},{t:'Días', num:true, w:'60px'},
+         {t:'Plazas', num:true, w:'62px'},{t:'Órdenes', num:true, w:'70px'},
+         {t:'Puntos/día', num:true, w:'82px'},{t:'% del grupo', num:true, w:'80px'}],
+        personas.map(g=>[g.nombre, g.rol||'—', nf(g.pts,1), String(g.dias.size), String(g.plazas.size),
+                         String(g.ordenes.length), g.dias.size ? nf(g.pts/g.dias.size,1) : '—',
+                         ptsSel>0 ? Math.round(g.pts/ptsSel*100) + '%' : '0%']),
+        [['TOTAL', '', nf(ptsSel,1), String(diasSel.size), '', String(personas.reduce((t,g)=>t+g.ordenes.length,0)), '', '100%']]));
+    }
+    if(o.sec.plazas){
+      const filas = [];
+      personas.forEach(g=> [...g.plazas.entries()].sort((a,b)=>b[1].pts-a[1].pts)
+        .forEach(([nom, pl])=> filas.push([g.nombre, nom, nf(pl.pts,1), String(pl.dias.size),
+                                           g.pts>0 ? Math.round(pl.pts/g.pts*100) + '%' : '0%'])));
+      m.secciones.push(filas.length
+        ? tabla('En qué plazas trabajó cada uno', null,
+            [{t:'Persona'},{t:'Plaza'},{t:'Puntos', num:true},{t:'Días', num:true, w:'60px'},{t:'% de su trabajo', num:true, w:'110px'}], filas)
+        : texto('En qué plazas trabajó cada uno', ['Sin producción cargada en el período.']));
+    }
+    if(o.sec.tareas){
+      const filas = [];
+      personas.forEach(g=> [...g.tareas.entries()].sort((a,b)=>b[1].pts-a[1].pts)
+        .forEach(([tar, t])=> filas.push([g.nombre, tar, nEnt(t.cant), t.un||'', nf(t.pts,1)])));
+      m.secciones.push(filas.length
+        ? tabla('Qué tareas hizo cada uno', 'La cantidad es la de la cuadrilla, no una porción por persona: nadie arma 3,8 tableritos. Los puntos sí van repartidos.',
+            [{t:'Persona'},{t:'Tarea'},{t:'Cantidad', num:true},{t:'Un.', w:'70px'},{t:'Puntos', num:true}], filas)
+        : texto('Qué tareas hizo cada uno', ['Sin producción cargada en el período.']));
+    }
+    if(o.sec.ordenes){
+      const filas = [];
+      personas.forEach(g=> g.ordenes.slice().sort((a,b)=>String(a.fecha).localeCompare(String(b.fecha)))
+        .forEach(x=> filas.push([g.nombre, fCorta(x.fecha), x.numero||'—', x.plaza, x.etapa||'—', nf(x.pts,1)])));
+      m.secciones.push(filas.length
+        ? tabla('Las órdenes, una por una', null,
+            [{t:'Persona'},{t:'Fecha', w:'86px'},{t:'OT', w:'80px'},{t:'Plaza'},{t:'Etapa'},{t:'Puntos', num:true}], filas)
+        : texto('Las órdenes, una por una', ['Sin órdenes cerradas en el período.']));
+    }
+    return m;
+  }
+
+  // ---- 6. Órdenes de trabajo ----
+  function infOrdenes(o){
+    const idsPlaza = new Set(o.items.map(x=>x.id));
+    const lista = ots().filter(x=>{
+      if(!dentro((x.cierre&&x.cierre.fecha) || x.fecha || '', o.desde, o.hasta)) return false;
+      if(!idsPlaza.size) return true;
+      return idsPlaza.has(String(x.plazaId));
+    }).sort((a,b)=> String(a.fecha||'').localeCompare(String(b.fecha||'')));
+    const m = { titulo:'Informe de órdenes de trabajo',
+                subtitulo:`${lista.length} orden(es) · ${o.rangoTxt}` + (idsPlaza.size ? ` · ${idsPlaza.size} plaza(s)` : ' · todas las plazas'),
+                tiles:[], avisos:[], secciones:[] };
+    const cerr = lista.filter(x=> x.cierre && x.cierre.cantidades && Object.keys(x.cierre.cantidades).length);
+    const porEstado = {}, porPlaza = {};
+    lista.forEach(x=>{
+      const e = x.estado || 'Emitida'; porEstado[e] = (porEstado[e]||0) + 1;
+      const p = x.plazaNombre || '(sin plaza)';
+      porPlaza[p] = porPlaza[p] || { n:0, cerradas:0, pts:0 };
+      porPlaza[p].n++;
+      if(x.cierre && x.cierre.cantidades){
+        porPlaza[p].cerradas++;
+        const pu = (typeof window.puntosDeOrden === 'function') ? window.puntosDeOrden(x) : null;
+        if(pu) porPlaza[p].pts += pu.total;
+      }
+    });
+    m.tiles = [
+      { n: lista.length, l:'Órdenes del período', c:'' },
+      { n: cerr.length, l:'Cerradas', c:'verde' },
+      { n: lista.length - cerr.length, l:'Sin cerrar', c: (lista.length - cerr.length) ? 'ambar' : '' },
+      { n: Object.keys(porPlaza).length, l:'Plazas tocadas', c:'azul' },
+    ];
+    if(!lista.length) m.avisos.push('No hay ninguna orden en el período elegido. Probá con otras fechas.');
+
+    if(o.sec.resumen){
+      m.secciones.push(tabla('Por estado', null, [{t:'Estado'},{t:'Órdenes', num:true}],
+        Object.keys(porEstado).sort().map(e=>[e, String(porEstado[e])]),
+        [['Total', String(lista.length)]]));
+      m.secciones.push(tabla('Por plaza', null,
+        [{t:'Plaza'},{t:'Órdenes', num:true},{t:'Cerradas', num:true},{t:'Puntos', num:true}],
+        Object.keys(porPlaza).sort().map(p=>[p, String(porPlaza[p].n), String(porPlaza[p].cerradas), nf(porPlaza[p].pts,1)])));
+    }
+    if(o.sec.detalle){
+      m.secciones.push(lista.length
+        ? tabla('Detalle de cada orden', null,
+            [{t:'Fecha', w:'86px'},{t:'OT', w:'80px'},{t:'Plaza'},{t:'Etapa'},{t:'Cuadrilla'},
+             {t:'Estado', w:'88px'},{t:'Puntos', num:true, w:'66px'},{t:'Notas'}],
+            lista.map(x=>{
+              const pu = (x.cierre && x.cierre.cantidades && typeof window.puntosDeOrden === 'function') ? window.puntosDeOrden(x) : null;
+              const quien = (x.personal||[]).map(p=>p.nombre).filter(Boolean).join(', ') || x.cuadrilla || '—';
+              return [fCorta(x.fecha), String(x.numero||'—'), x.plazaNombre||'(sin plaza)',
+                      x.etapaLabel||'—', quien, x.estado||'Emitida',
+                      pu ? nf(pu.total,1) : '—',
+                      (x.cierre && x.cierre.obs) || x.notas || ''];
+            }))
+        : texto('Detalle de cada orden', ['Sin órdenes en el período.']));
+    }
+    return m;
+  }
+
+  // ---- 7. Movimientos de pañol ----
+  function infPanol(o){
+    const nombresPlaza = new Set(o.items.map(x=>{
+      const a = obras().find(y=>String(y.id) === x.id); return a ? String(a.nombre||'').trim().toLowerCase() : '';
+    }).filter(Boolean));
+    const lista = movs().filter(mv=>{
+      if(!dentro(mv.fecha || '', o.desde, o.hasta)) return false;
+      if(!nombresPlaza.size) return true;
+      const dst = String(mv.destino || '').trim().toLowerCase();
+      return [...nombresPlaza].some(n=> dst.includes(n) || n.includes(dst));
+    }).sort((a,b)=> String(a.fecha||'').localeCompare(String(b.fecha||'')));
+    const m = { titulo:'Informe de movimientos de pañol',
+                subtitulo:`${lista.length} movimiento(s) · ${o.rangoTxt}` + (nombresPlaza.size ? ` · ${nombresPlaza.size} plaza(s)` : ' · todos los destinos'),
+                tiles:[], avisos:[], secciones:[] };
+    const ent = lista.filter(x=>x.tipo === 'entrada'), sal = lista.filter(x=>x.tipo !== 'entrada');
+    const porMat = new Map();
+    lista.forEach(x=>{
+      const g = porMat.get(x.codigo) || { codigo:x.codigo, desc:x.desc||'', un:x.un||'', ent:0, sal:0 };
+      if(x.tipo === 'entrada') g.ent += n2(x.cantidad); else g.sal += n2(x.cantidad);
+      porMat.set(x.codigo, g);
+    });
+    m.tiles = [
+      { n: lista.length, l:'Movimientos', c:'' },
+      { n: ent.length, l:'Entradas', c:'verde' },
+      { n: sal.length, l:'Salidas', c:'azul' },
+      { n: porMat.size, l:'Materiales distintos', c:'' },
+    ];
+    if(!lista.length) m.avisos.push('No hay movimientos en el período elegido.');
+    if(o.sec.resumen){
+      const filas = [...porMat.values()].sort((a,b)=> String(a.desc).localeCompare(String(b.desc)))
+        .map(g=>[String(g.codigo), g.desc, g.un, nEnt(g.ent), nEnt(g.sal), nEnt(g.ent - g.sal)]);
+      m.secciones.push(filas.length
+        ? tabla('Resumen por material', 'El neto es lo que entró menos lo que salió en el período — no es el stock actual.',
+            [{t:'Código', w:'72px'},{t:'Material'},{t:'Un.', w:'56px'},{t:'Entradas', num:true},{t:'Salidas', num:true},{t:'Neto', num:true}], filas)
+        : texto('Resumen por material', ['Sin movimientos en el período.']));
+    }
+    if(o.sec.detalle){
+      m.secciones.push(lista.length
+        ? tabla('Movimiento por movimiento', null,
+            [{t:'Fecha', w:'86px'},{t:'Tipo', w:'70px'},{t:'Código', w:'72px'},{t:'Material'},
+             {t:'Cantidad', num:true},{t:'Un.', w:'56px'},{t:'Destino / proveedor'},{t:'Quién'}],
+            lista.map(x=>[fCorta(x.fecha), x.tipo === 'entrada' ? 'Entrada' : 'Salida', String(x.codigo||''),
+                          x.desc||'', nEnt(x.cantidad), x.un||'',
+                          x.destino || x.proveedor || '—', x.retiradoPor || x.usuario || '—']))
+        : texto('Movimiento por movimiento', ['Sin movimientos en el período.']));
+    }
+    return m;
+  }
+
+  const dentro = (f, d, h)=>{
+    const s = String(f||'').slice(0,10);
+    if(!s) return !d && !h;
+    if(d && s < d) return false;
+    if(h && s > h) return false;
+    return true;
+  };
+
+  // ==========================================================================================
+  // ARMAR EL MODELO
+  // ==========================================================================================
+  function construir(){
+    const t = tipoDe(cfg.tipo);
+    const els = elegidos();
+    const items = t.sel === 'plazas' ? els.map(x=> obras().find(a=>String(a.id) === x.id)).filter(Boolean) : els;
+    const desde = ($('infDesde')||{}).value || '';
+    const hasta = ($('infHasta')||{}).value || '';
+    const rangoTxt = (desde || hasta)
+      ? `del ${desde ? fCorta(desde) : 'inicio'} al ${hasta ? fCorta(hasta) : 'hoy'}`
+      : 'todo el período cargado';
+    const o = { items, desde, hasta, rangoTxt,
+                fecha: ($('informeFecha')||{}).value || hoyISO(),
+                periodo: ($('informePeriodo')||{}).value || 'A la fecha',
+                obs: (($('informeObs')||{}).value || '').trim(),
+                sec: { ...cfg.sec } };
+    const m = t.construir(o);
+    m.fecha = o.fecha;
+    m.tipoTxt = t.txt;
+    if(o.obs && t.id !== 'plazas-avance') m.secciones.push(texto('Comentarios', o.obs.split('\n\n')));
+    return m;
+  }
+
+  // ==========================================================================================
+  // SALIDA 1 — PANTALLA
+  // ==========================================================================================
+  function htmlSecciones(m){
+    return (m.secciones||[]).map(s=>{
+      if(s.tipo === 'texto'){
+        return `<div class="inf-sec"><div class="inf-sec-tit">${esc(s.tit)}</div>
+          <div class="inf-texto">${(s.parrafos||[]).map(p=>`<p>${esc(p)}</p>`).join('')}</div></div>`;
+      }
+      const th = (s.cols||[]).map(c=>`<th class="${c.num?'num':''}"${c.w?` style="width:${c.w}"`:''}>${esc(c.t)}</th>`).join('');
+      const tb = (s.filas||[]).map(f=>`<tr>${f.map((v,i)=>{
+        const c = (s.cols||[])[i] || {};
+        return `<td class="${c.num?'num':''}">${esc(v)}</td>`;
+      }).join('')}</tr>`).join('');
+      const tf = (s.pie||[]).map(f=>`<tr>${f.map((v,i)=>{
+        const c = (s.cols||[])[i] || {};
+        return `<td class="${c.num?'num':''}">${esc(v)}</td>`;
+      }).join('')}</tr>`).join('');
+      return `<div class="inf-sec">
+        <div class="inf-sec-tit">${esc(s.tit)}</div>
+        ${s.hint ? `<div class="inf-sec-hint">${esc(s.hint)}</div>` : ''}
+        <div style="overflow-x:auto;"><table class="inf-tabla">
+          <thead><tr>${th}</tr></thead><tbody>${tb || `<tr><td colspan="${(s.cols||[]).length}" style="text-align:center;">Sin datos.</td></tr>`}</tbody>
+          ${tf ? `<tfoot>${tf}</tfoot>` : ''}
+        </table></div>
+      </div>`;
+    }).join('');
+  }
+
+  function pintar(m){
+    const cont = $('infSalida');
+    if(!cont) return;
+    cont.innerHTML = `<div class="card inf-doc">
+      <div class="inf-membrete">
+        ${typeof LOGO_EMA_SVG === 'string' ? LOGO_EMA_SVG : ''}
+        <div class="inf-membrete-txt">
+          <div class="inf-marca">EMA Servicios · Alumbrado público</div>
+          <h1>${esc(m.titulo)}</h1>
+          <div class="inf-sub">${esc(m.subtitulo)} · Emitido el ${esc(fCorta(m.fecha))}</div>
+        </div>
+      </div>
+      <div class="inf-acc no-print">
+        <button type="button" class="btn-primary" id="infPdf" style="padding:9px 16px; font-size:13px;">🖨 Imprimir / PDF</button>
+        <button type="button" class="btn-ghost" id="infWord" style="padding:9px 16px; font-size:13px;">⬇ Word</button>
+        <button type="button" class="btn-ghost" id="infExcel" style="padding:9px 16px; font-size:13px;">⬇ Excel</button>
+      </div>
+      ${(m.tiles||[]).length ? `<div class="inf-tiles">${m.tiles.map(t=>
+        `<div class="inf-tile"><div class="inf-num ${t.c||''}">${esc(t.n)}</div><div class="inf-lbl">${esc(t.l)}</div></div>`).join('')}</div>` : ''}
+      ${(m.avisos||[]).map(a=>`<div class="inf-aviso">${a}</div>`).join('')}
+      ${htmlSecciones(m)}
+    </div>`;
+    $('infPdf').addEventListener('click', ()=> aPapel(m));
+    $('infWord').addEventListener('click', ()=> aWord(m));
+    $('infExcel').addEventListener('click', ()=> aExcel(m));
+    cont.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  // ==========================================================================================
+  // SALIDA 2 — HOJA DE IMPRESIÓN
+  // ==========================================================================================
+  function cuerpoPapel(m){
+    const tiles = (m.tiles||[]).length
+      ? `<table style="margin-bottom:12px;"><tr>${m.tiles.map(t=>`<td style="text-align:center;"><b style="font-size:17px;">${esc(t.n)}</b><br><span style="font-size:10px; color:#5b7a70;">${esc(t.l)}</span></td>`).join('')}</tr></table>` : '';
+    const avisos = (m.avisos||[]).map(a=>`<p style="border-left:3px solid #d9a441; padding-left:8px; font-size:10.5px; margin:0 0 6px;">${a}</p>`).join('');
+    const secs = (m.secciones||[]).map(s=>{
+      if(s.tipo === 'texto'){
+        return `<h2 style="font-size:14px; margin:16px 0 6px;">${esc(s.tit)}</h2>` +
+               (s.parrafos||[]).map(p=>`<p style="margin:0 0 7px;">${esc(p)}</p>`).join('');
+      }
+      const th = (s.cols||[]).map(c=>`<th${c.num?' style="text-align:right;"':''}>${esc(c.t)}</th>`).join('');
+      const tb = (s.filas||[]).map(f=>`<tr>${f.map((v,i)=>{
+        const c = (s.cols||[])[i] || {};
+        return `<td${c.num?' style="text-align:right;"':''}>${esc(v)}</td>`; }).join('')}</tr>`).join('');
+      const tf = (s.pie||[]).map(f=>`<tr>${f.map((v,i)=>{
+        const c = (s.cols||[])[i] || {};
+        return `<td style="font-weight:700;${c.num?'text-align:right;':''}">${esc(v)}</td>`; }).join('')}</tr>`).join('');
+      return `<h2 style="font-size:14px; margin:16px 0 4px;">${esc(s.tit)}</h2>` +
+        (s.hint ? `<div style="font-size:10.5px; color:#5b7a70; margin-bottom:5px;">${esc(s.hint)}</div>` : '') +
+        `<table><thead><tr>${th}</tr></thead><tbody>${tb || `<tr><td colspan="${(s.cols||[]).length}" style="text-align:center;">Sin datos.</td></tr>`}</tbody>${tf?`<tfoot>${tf}</tfoot>`:''}</table>`;
+    }).join('');
+    return `<div class="sub">${esc(m.subtitulo)}</div>${tiles}${avisos}${secs}`;
+  }
+  function aPapel(m){
+    if(typeof abrirHojaImpresion === 'function') abrirHojaImpresion(m.titulo, cuerpoPapel(m));
+    else window.print();
+  }
+
+  // ==========================================================================================
+  // SALIDA 3 — WORD  (un .doc que por dentro es HTML: Word lo abre y queda editable)
+  // ==========================================================================================
+  function aWord(m){
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="utf-8"><title>${esc(m.titulo)}</title>
+    <style>
+      body{font-family:Calibri,Arial,sans-serif; font-size:10.5pt; color:#183028;}
+      h1{font-size:16pt; margin:0 0 2px;} h2{font-size:12pt; margin:14px 0 5px;}
+      .marca{font-size:8.5pt; letter-spacing:1px; color:#5b7a70; font-weight:bold;}
+      .sub{color:#5b7a70; font-size:9pt; margin-bottom:10px;}
+      table{border-collapse:collapse; width:100%; margin-top:6px;}
+      th,td{border:1px solid #cddbd6; padding:4px 6px; font-size:9pt; text-align:left; vertical-align:top;}
+      th{background:#eef5f2; font-weight:bold;}
+      tfoot td{font-weight:bold; background:#f3f8f6;}
+    </style></head><body>
+    <div class="marca">EMA SERVICIOS · ALUMBRADO PÚBLICO</div>
+    <h1>${esc(m.titulo)}</h1>
+    ${cuerpoPapel(m)}
+    <p style="margin-top:16px; font-size:8.5pt; color:#5b7a70;">Generado desde la herramienta de EMA Servicios el ${esc(fCorta(m.fecha))}.</p>
+    </body></html>`;
+    bajar(html, nombreArchivo(m, 'doc'), 'application/msword');
+  }
+
+  // ==========================================================================================
+  // SALIDA 4 — EXCEL  (CSV con BOM: Excel lo abre directo y respeta los acentos)
+  // ==========================================================================================
+  function aExcel(m){
+    const q = v => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
+    let csv = q(m.titulo) + '\n' + q(m.subtitulo) + '\n' + q('Emitido el ' + fCorta(m.fecha)) + '\n\n';
+    if((m.tiles||[]).length){
+      csv += 'RESUMEN\n';
+      m.tiles.forEach(t=>{ csv += q(t.l) + ',' + q(t.n) + '\n'; });
+      csv += '\n';
+    }
+    (m.secciones||[]).forEach(s=>{
+      csv += q(s.tit.toUpperCase()) + '\n';
+      if(s.tipo === 'texto'){ (s.parrafos||[]).forEach(p=>{ csv += q(p) + '\n'; }); csv += '\n'; return; }
+      csv += (s.cols||[]).map(c=>q(c.t)).join(',') + '\n';
+      (s.filas||[]).forEach(f=>{ csv += f.map(q).join(',') + '\n'; });
+      (s.pie||[]).forEach(f=>{ csv += f.map(q).join(',') + '\n'; });
+      csv += '\n';
+    });
+    bajar('﻿' + csv, nombreArchivo(m, 'csv'), 'text/csv;charset=utf-8;');
+  }
+
+  const nombreArchivo = (m, ext)=> `Informe_${String(m.tipoTxt||'').replace(/[^\wáéíóúñÁÉÍÓÚÑ]+/g,'_')}_${m.fecha}.${ext}`;
+  function bajar(contenido, nombre, tipo){
+    if(typeof descargarArchivo === 'function'){ descargarArchivo(contenido, nombre, tipo); return; }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([contenido], { type:tipo }));
+    a.download = nombre; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+  }
+
+  // ==========================================================================================
+  // LA PANTALLA DEL ARMADOR
+  // ==========================================================================================
+  function pintarTemas(){
+    const c = $('infTemas'); if(!c) return;
+    c.innerHTML = TEMAS.map(t=>{
+      const n = TIPOS.filter(x=>x.tema === t.id).length;
+      return `<button type="button" class="inf-chip${cfg.tema===t.id?' on':''}" data-tema="${t.id}">${t.ico} ${esc(t.txt)} <small>${n}</small></button>`;
+    }).join('');
+  }
+  function pintarTipos(){
+    const c = $('infTipos'); if(!c) return;
+    const lista = TIPOS.filter(t=>t.tema === cfg.tema);
+    c.innerHTML = lista.map(t=>`<button type="button" class="inf-chip${cfg.tipo===t.id?' on':''}" data-tipo="${t.id}">${esc(t.txt)}</button>`).join('');
+    const h = $('infTipoHint');
+    const t = tipoDe(cfg.tipo);
+    if(h) h.innerHTML = esc(t.hint);
+  }
+  function pintarSeleccion(){
+    const t = tipoDe(cfg.tipo);
+    const tit = $('infSelTit');
+    if(tit) tit.textContent = t.sel === 'personas' ? '¿De qué personas?'
+      : (t.id === 'ordenes-listado' || t.id === 'panol-movimientos') ? '¿De qué plazas? (si no marcás ninguna, salen todas)' : '¿De qué plazas?';
+    const fc = $('infFiltros');
+    if(fc) fc.innerHTML = t.sel === 'plazas'
+      ? FILTROS_PLAZA.map(f=>`<button type="button" class="inf-chip${cfg.filtro===f.id?' on':''}" data-filtro="${f.id}">${esc(f.txt)}</button>`).join('')
+      : '';
+    const lista = $('infLista'); if(!lista) return;
+    const vis = visibles();
+    lista.innerHTML = vis.length ? vis.map(x=>`<label class="inf-item">
+        <input type="checkbox" class="inf-chk" data-id="${esc(x.id)}" ${cfg.sel[x.id]?'checked':''}>
+        <span class="inf-item-nom"><b>${esc(x.nombre)}</b><div class="inf-item-sub">${esc(x.sub)}</div></span>
+        <span class="inf-item-dato">${esc(x.dato)}</span>
+      </label>`).join('')
+      : `<div class="inf-vacio">${t.sel === 'personas'
+          ? 'Todavía no hay personal cargado. Andá a <b>Equipo → Personal</b> y cargá la nómina, o emití una orden de trabajo con su cuadrilla.'
+          : 'No hay plazas que coincidan. Probá con otro filtro o limpiá la búsqueda.'}</div>`;
+    const n = Object.keys(cfg.sel).filter(k=>cfg.sel[k]).length;
+    const msg = $('infSelMsg');
+    if(msg) msg.innerHTML = n
+      ? `<b>${n}</b> ${t.sel==='personas'?'persona(s)':'plaza(s)'} marcada(s)${vis.length !== universo().length ? ` · se están mostrando ${vis.length} de ${universo().length}` : ''}.`
+      : ((t.id === 'ordenes-listado' || t.id === 'panol-movimientos')
+          ? 'Sin marcar nada, el informe sale con todas.'
+          : `Marcá al menos ${t.sel==='personas'?'una persona':'una plaza'} para generar el informe.`);
+  }
+  function pintarOpciones(){
+    const t = tipoDe(cfg.tipo);
+    const mostrar = (id, si)=>{ const e = $(id); if(e) e.style.display = si ? '' : 'none'; };
+    mostrar('infCampoDesde', t.fechas);
+    mostrar('infCampoHasta', t.fechas);
+    mostrar('infCampoPeriodo', !t.fechas);
+    const sc = $('infSecciones');
+    if(sc) sc.innerHTML = (t.secciones||[]).map(([k,txt])=>
+      `<label><input type="checkbox" class="inf-sec-chk" data-sec="${k}" ${cfg.sec[k]?'checked':''}> ${esc(txt)}</label>`).join('');
+    const hint = $('infGenerarHint');
+    const n = Object.keys(cfg.sel).filter(x=>cfg.sel[x]).length;
+    if(hint) hint.textContent = n
+      ? `${t.txt} · ${n} ${t.sel==='personas'?'persona(s)':'plaza(s)'}`
+      : ((t.id === 'ordenes-listado' || t.id === 'panol-movimientos') ? `${t.txt} · todas` : 'Falta elegir sobre quiénes');
+  }
+  function pintarTodo(){ pintarTemas(); pintarTipos(); pintarSeleccion(); pintarOpciones(); }
+
+  function generar(){
+    const t = tipoDe(cfg.tipo);
+    const n = Object.keys(cfg.sel).filter(x=>cfg.sel[x]).length;
+    const puedeVacio = t.id === 'ordenes-listado' || t.id === 'panol-movimientos';
+    if(!n && !puedeVacio){
+      alert(`Elegí al menos ${t.sel === 'personas' ? 'una persona' : 'una plaza'} en el paso 3 para armar el informe.`);
+      const p = $('infPasoSel'); if(p) p.scrollIntoView({ behavior:'smooth', block:'center' });
+      return;
+    }
+    try{ modelo = construir(); }
+    catch(e){
+      console.error(e);
+      const cont = $('infSalida');
+      if(cont) cont.innerHTML = `<div class="card"><div class="inf-nada">No se pudo armar el informe: ${esc(e.message||e)}.<br>Probá con otra selección, o avisá qué informe intentaste hacer.</div></div>`;
+      return;
+    }
+    pintar(modelo);
+  }
+
+  // ---- Toques ----
+  function inicializar(){
+    if(!$('infArmador')) return;
+    const f = $('informeFecha'); if(f && !f.value) f.value = hoyISO();
+    // Por defecto, el último mes: es el período que más se pide y evita informes vacíos.
+    const d = $('infDesde'), h = $('infHasta');
+    if(h && !h.value) h.value = hoyISO();
+    if(d && !d.value){ const x = new Date(); x.setMonth(x.getMonth() - 1); d.value = (typeof fechaAISO === 'function') ? fechaAISO(x) : x.toISOString().slice(0,10); }
+
+    $('infTemas').addEventListener('click', e=>{
+      const b = e.target.closest('[data-tema]'); if(!b) return;
+      cfg.tema = b.dataset.tema;
+      const primero = TIPOS.find(t=>t.tema === cfg.tema);
+      if(primero){ cfg.tipo = primero.id; cfg.sec = seccionesPorDefecto(primero); }
+      cfg.sel = {}; cfg.filtro = ''; cfg.busca = '';
+      const q = $('infBuscar'); if(q) q.value = '';
+      pintarTodo();
+    });
+    $('infTipos').addEventListener('click', e=>{
+      const b = e.target.closest('[data-tipo]'); if(!b) return;
+      const antes = tipoDe(cfg.tipo);
+      cfg.tipo = b.dataset.tipo;
+      const t = tipoDe(cfg.tipo);
+      cfg.sec = seccionesPorDefecto(t);
+      if(antes.sel !== t.sel){ cfg.sel = {}; cfg.filtro = ''; }
+      pintarTipos(); pintarSeleccion(); pintarOpciones();
+    });
+    $('infFiltros').addEventListener('click', e=>{
+      const b = e.target.closest('[data-filtro]'); if(!b) return;
+      cfg.filtro = b.dataset.filtro; pintarSeleccion();
+    });
+    $('infLista').addEventListener('change', e=>{
+      const c = e.target.closest('.inf-chk'); if(!c) return;
+      if(c.checked) cfg.sel[c.dataset.id] = true; else delete cfg.sel[c.dataset.id];
+      const msg = $('infSelMsg'); if(msg) pintarSeleccionMsg();
+      pintarOpciones();
+    });
+    function pintarSeleccionMsg(){
+      const t = tipoDe(cfg.tipo);
+      const n = Object.keys(cfg.sel).filter(k=>cfg.sel[k]).length;
+      const vis = visibles().length, tot = universo().length;
+      const msg = $('infSelMsg');
+      if(msg) msg.innerHTML = n
+        ? `<b>${n}</b> ${t.sel==='personas'?'persona(s)':'plaza(s)'} marcada(s)${vis !== tot ? ` · se están mostrando ${vis} de ${tot}` : ''}.`
+        : ((t.id === 'ordenes-listado' || t.id === 'panol-movimientos')
+            ? 'Sin marcar nada, el informe sale con todas.'
+            : `Marcá al menos ${t.sel==='personas'?'una persona':'una plaza'} para generar el informe.`);
+    }
+    $('infBuscar').addEventListener('input', e=>{ cfg.busca = e.target.value || ''; pintarSeleccion(); });
+    // «Marcar todas» y «Ninguna» trabajan sobre lo que se está viendo, no sobre el universo entero:
+    // si hay un filtro puesto, marcar todas tiene que marcar ese grupo y no las 244.
+    $('infTodas').addEventListener('click', ()=>{ visibles().forEach(x=>{ cfg.sel[x.id] = true; }); pintarSeleccion(); pintarOpciones(); });
+    $('infNinguna').addEventListener('click', ()=>{ visibles().forEach(x=>{ delete cfg.sel[x.id]; }); pintarSeleccion(); pintarOpciones(); });
+    $('infSecciones').addEventListener('change', e=>{
+      const c = e.target.closest('.inf-sec-chk'); if(!c) return;
+      cfg.sec[c.dataset.sec] = c.checked;
+    });
+    $('infGenerar').addEventListener('click', generar);
+    $('infReset').addEventListener('click', ()=>{
+      cfg.tema = 'plazas'; cfg.tipo = 'plazas-avance'; cfg.sel = {}; cfg.filtro = ''; cfg.busca = '';
+      cfg.sec = seccionesPorDefecto(tipoDe(cfg.tipo));
+      const q = $('infBuscar'); if(q) q.value = '';
+      const s = $('infSalida'); if(s) s.innerHTML = '';
+      pintarTodo();
+    });
+    pintarTodo();
+  }
+
+  // La lista de plazas y de gente cambia sola cuando llega algo de la nube: se vuelve a dibujar el
+  // paso 3, pero SIN tocar lo que el usuario ya marcó ni el informe que tenga en pantalla.
+  window.INF = { pintarTodo, pintarSeleccion, construir, TIPOS,
+                 refrescar: ()=>{ if($('infArmador') && document.getElementById('viewInforme').style.display !== 'none') pintarSeleccion(); } };
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inicializar);
+  else inicializar();
 })();
 </script>
 
