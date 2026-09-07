@@ -2051,6 +2051,8 @@
   .it-repetidos > b{ display:block; font-size:13.5px; margin-bottom:4px; }
   .it-repetidos div{ margin-top:3px; }
   .it-repetidos .hint{ color:#a33; }
+  .it-certif-sel{ align-items:center; }
+  .it-certif-sel select{ font-size:12.5px; padding:7px 10px; }
   .it-previa-dudas{ margin-top:12px; border-radius:10px; padding:10px 14px; font-size:12.5px; line-height:1.55;
                     background:rgba(245,158,11,.12); color:#6b5312; }
   .it-previa-dudas ul{ margin:6px 0 0; padding-left:20px; }
@@ -2670,7 +2672,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 13:50 · 50c9e3</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 14:29 · 9b4dda</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -20452,18 +20454,32 @@ const ITEMIZADO_EPEC = [
           ? `Hay un cómputo de <b>${esc(hay.nombre)}</b>${hay.id?` (ID ${esc(hay.id)})`:''} para traer. Se ve primero y se aplica si estás de acuerdo.`
           : '<span style="color:var(--amber)">No encontramos un cómputo de la Calculadora para esta plaza (buscamos por ID de obra y por nombre).</span>'}</span>
       </div>`;
-      // La segunda fuente: lo que YA SE CERTIFICÓ en la Municipalidad (2026-09-07). Solo aparece
-      // si esta plaza está en la planilla; si no, no tiene sentido ofrecer un botón que no hace nada.
-      const cert = (typeof window.certifDePlaza === 'function') ? window.certifDePlaza(a) : null;
-      if(cert){
-        const n = Object.keys(cert.it || {}).length;
-        const herm = (typeof window.certifHermanas === 'function') ? window.certifHermanas(a, obras()) : [];
+      // La segunda fuente: lo que YA SE CERTIFICÓ en la Municipalidad (2026-09-07).
+      // El botón va SIEMPRE. Si la plaza cruza sola con una hoja, dice con cuál y cómo la encontró;
+      // si no cruza, en vez de desaparecer ofrece un selector para elegir la hoja a mano. Antes se
+      // escondía cuando el cruce fallaba, y el usuario se quedaba sin saber por qué: *"ya no está
+      // la base para extraer de otra plaza de muni para que se autocomplete"*.
+      if(typeof window.certifDePlaza === 'function'){
+        const cert = window.certifDePlaza(a);
+        const como = (typeof window.certifComoCruzo === 'function') ? window.certifComoCruzo(a) : '';
+        const hojas = (typeof window.certifHojas === 'function') ? window.certifHojas() : [];
+        const herm = (cert && typeof window.certifHermanas === 'function') ? window.certifHermanas(a, obras()) : [];
+        const n = cert ? Object.keys(cert.it || {}).length : 0;
+        const opciones = `<option value="">— elegir la hoja del certificado —</option>` + hojas.map(x=>
+          `<option value="${esc(x.n)}"${cert && cert.n === x.n ? ' selected' : ''}>${esc(x.n)}${x.ids?` · ID ${esc(x.ids)}`:''} · ${x.items} ítem(s)</option>`).join('');
         h += `<div class="it-traer no-print">
-          <button type="button" class="btn-auto ep-certif-btn" style="margin:0;" ${dis}>📋 Traer lo certificado en la Municipalidad</button>
-          <span class="hint" style="margin:0;">${n
-            ? `La planilla de la Municipalidad tiene <b>${n} ítem(s)</b> certificados para <b>${esc(cert.n)}</b>, y la herramienta le agrega la <b>provisión que puso EMA</b> y lo que se hizo sin certificar.`
-              + (herm.length ? ` <b style="color:#c74a4a">OJO: esa hoja cubre ${herm.length + 1} plazas juntas (${esc([a, ...herm].map(x=>x.nombre||'').join(' + '))}). Cargala en UNA sola o vas a contar todo ${herm.length + 1} veces.</b>` : '')
-            : `<span style="color:var(--amber)">La hoja de <b>${esc(cert.n)}</b> existe en la planilla pero está <b>vacía</b>.</span>`}</span>
+          <button type="button" class="btn-auto ep-certif-btn" style="margin:0;" ${cert && n ? '' : 'disabled'} ${dis}>📋 Traer lo certificado en la Municipalidad</button>
+          <span class="hint" style="margin:0;">${cert
+            ? (n
+                ? `Cruzó con la hoja <b>${esc(cert.n)}</b> <small>(${esc(como||'')})</small>: <b>${n} ítem(s)</b> certificados, y la herramienta le agrega la <b>provisión que puso EMA</b> y lo que se hizo sin certificar.`
+                  + (herm.length ? ` <b style="color:#c74a4a">OJO: esa hoja cubre ${herm.length + 1} plazas juntas (${esc([a, ...herm].map(x=>x.nombre||'').join(' + '))}). Cargala en UNA sola o vas a contar todo ${herm.length + 1} veces.</b>` : '')
+                : `<span style="color:var(--amber)">La hoja de <b>${esc(cert.n)}</b> existe en la planilla pero está <b>vacía</b>.</span>`)
+            : `<span style="color:var(--amber)">Esta plaza <b>no cruzó sola</b> con ninguna hoja del certificado (se busca por ID de obra y por nombre). <b>Elegila del listado</b> y queda guardada para esta plaza.</span>`}</span>
+        </div>
+        <div class="it-traer no-print it-certif-sel">
+          <span class="hint" style="margin:0; flex:0 0 auto;">Hoja del certificado:</span>
+          <select class="ep-certif-hoja" ${dis} style="margin:0; width:auto; max-width:100%;">${opciones}</select>
+          ${a.certifHoja ? `<button type="button" class="btn-ghost ep-certif-auto" style="margin:0; padding:6px 12px; font-size:12.5px;" ${dis}>↺ Volver al cruce automático</button>` : ''}
         </div>`;
       }
     }
@@ -20647,6 +20663,17 @@ const ITEMIZADO_EPEC = [
         }
         armarPrevia(a); renderEpec(); return;
       }
+      // Elegir a mano con qué hoja del certificado cruza esta plaza (2026-09-07).
+      const certAuto = e.target.closest('.ep-certif-auto');
+      if(certAuto){
+        const card = certAuto.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        delete a.certifHoja;
+        if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        delete previa[a.id];
+        renderEpec(); return;
+      }
+
       // Unificar los renglones repetidos de una plaza (2026-09-07).
       const unif = e.target.closest('.ep-unificar-btn');
       if(unif){
@@ -20853,6 +20880,19 @@ const ITEMIZADO_EPEC = [
     });
     panelEp.addEventListener('change', (e)=>{
       if(e.target.id === 'epecSoloConItems') renderEpec();
+      // El selector de hoja del certificado: se guarda con la plaza y manda sobre el cruce automático.
+      const selHoja = e.target.closest('.ep-certif-hoja');
+      if(selHoja){
+        const card = selHoja.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec);
+        if(a){
+          if(selHoja.value) a.certifHoja = selHoja.value; else delete a.certifHoja;
+          if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+          delete previa[a.id];
+          renderEpec();
+        }
+        return;
+      }
       // ---- El único interruptor de IVA (2026-09-07) ----
       // Hace las dos cosas que antes hacían dos controles distintos:
       //   1. reescribe el módulo en la unidad nueva (el número NO cambia, cambia cómo se escribe);
@@ -22668,17 +22708,64 @@ const ITEMIZADO_EPEC = [
   // Lo que NO se puede resolver acá es que CUATRO hojas cubren DOS plazas juntas (5001-5002,
   // 6240-6241, 12022-12001, 4724-4725). Ésas matchean bien las dos veces, y se avisa aparte.
   const claveNombre = s => sinAcento(s).replace(/^PLAZA\s+/, '').trim();
+  const sinCeros = s => String(s||'').trim().replace(/^0+/, '') || String(s||'').trim();
+  // El cruce va en escalones, del más seguro al más flojo, y en cada uno solo acepta si el
+  // resultado es ÚNICO. Endurecerlo de golpe (2026-09-07) dejó sin botón a las plazas cuyo ID no
+  // coincidía letra por letra —«02» contra «2», «AP4724V2» contra «4724»—, y el usuario avisó:
+  // *"ya no está la base para extraer de otra plaza de muni para que se autocomplete"*.
+  // Además de esto, cada plaza puede tener una hoja ELEGIDA A MANO, que gana sobre todo lo demás.
   function certifDe(a){
     if(!a) return null;
-    const id = String(a.obraId||'').trim();
-    if(id){
-      const p = CERTIF.plazas.find(x=>x.ids.indexOf(id) >= 0);
-      return p || null;                    // con ID que no figura: no se adivina por nombre
+    // 0) lo que el usuario eligió a mano manda siempre
+    if(a.certifHoja){
+      const m = CERTIF.plazas.find(x=>x.n === a.certifHoja);
+      if(m) return m;
     }
+    const idTxt = String(a.obraId||'').trim();
+    if(idTxt){
+      // 1) el ID igual, igualito
+      let p = CERTIF.plazas.find(x=>x.ids.indexOf(idTxt) >= 0);
+      if(p) return p;
+      // 2) el mismo ID sin los ceros de adelante: «02» es el «2»
+      p = CERTIF.plazas.find(x=>x.ids.some(y=>sinCeros(y) === sinCeros(idTxt)));
+      if(p) return p;
+    }
+    // 3) el nombre EXACTO (sin acentos ni el «Plaza» de adelante) y que sea el único
     const nom = claveNombre(a.nombre);
-    if(!nom) return null;
-    const iguales = CERTIF.plazas.filter(x=>claveNombre(x.n) === nom);
-    return iguales.length === 1 ? iguales[0] : null;   // si el nombre pesca dos, no se elige ninguna
+    if(nom){
+      const ig = CERTIF.plazas.filter(x=>claveNombre(x.n) === nom);
+      if(ig.length === 1) return ig[0];
+    }
+    // 4) último recurso: los números de 3 cifras o más que aparezcan en el ID o en el nombre
+    //    («AP4724V2 MALVAVISCO» → 4724). Solo vale si dan UNA sola hoja: si dan dos, no se elige.
+    //    El mínimo de 3 cifras evita que un «V2» pesque la hoja del ID 2.
+    const nums = [...new Set(
+      [...(idTxt.match(/\d+/g) || []), ...(String(a.nombre||'').match(/\d+/g) || [])]
+        .map(sinCeros).filter(x=>x.length >= 3))];
+    if(nums.length){
+      const cand = CERTIF.plazas.filter(x=>x.ids.some(y=>nums.indexOf(sinCeros(y)) >= 0));
+      if(cand.length === 1) return cand[0];
+    }
+    return null;
+  }
+  // Cómo se cruzó, para poder decirlo en pantalla.
+  function certifComoCruzo(a){
+    if(!a) return null;
+    if(a.certifHoja && CERTIF.plazas.some(x=>x.n === a.certifHoja)) return 'a mano';
+    const p = certifDe(a); if(!p) return null;
+    const idTxt = String(a.obraId||'').trim();
+    if(idTxt && p.ids.indexOf(idTxt) >= 0) return 'por el ID de obra';
+    if(idTxt && p.ids.some(y=>sinCeros(y) === sinCeros(idTxt))) return 'por el ID de obra (sin los ceros de adelante)';
+    if(claveNombre(a.nombre) === claveNombre(p.n)) return 'por el nombre';
+    return 'por el número que aparece en el ID o en el nombre';
+  }
+  // La lista completa de hojas, para el selector de «elegir a mano».
+  // Solo las hojas que TIENEN cantidades: ofrecer las cuatro vacías (Hípica, Vicor, San Cayetano y
+  // Aycardoz) sería ofrecer algo que no trae nada.
+  function certifHojas(){
+    return CERTIF.plazas.filter(x=>Object.keys(x.it).length)
+      .map(x=>({ n:x.n, ids:x.ids.join(' / '), items:Object.keys(x.it).length }))
+      .sort((p,q)=>p.n.localeCompare(q.n, 'es'));
   }
   // Las OTRAS plazas de la herramienta que caen en la misma hoja del certificado. Si hay alguna, las
   // cantidades de esa hoja son el TOTAL de todas juntas y cargarlas en cada una las cuenta dos veces.
@@ -22754,6 +22841,8 @@ const ITEMIZADO_EPEC = [
   window.CERTIF_MUNI   = CERTIF;
   window.certifDePlaza = certifDe;
   window.certifHermanas = certifHermanas;
+  window.certifComoCruzo = certifComoCruzo;
+  window.certifHojas     = certifHojas;
 
   // ==========================================================================================
   // ESTADO DE LA PANTALLA
