@@ -634,6 +634,17 @@
   .prov-op span{ display:block; line-height:1.35; }
   .prov-op small{ display:block; font-size:11.5px; color:var(--text-soft); margin-top:2px; }
   .prov-op:has(input:checked){ border-color:var(--teal-dark); background:rgba(126,198,230,.10); }
+  /* El ítem del Anexo I al lado de cada casillero de retiro (2026-09-07): sirve para elegir bien. */
+  .ret-it{ font-weight:600; font-size:11.5px; color:var(--text-soft); background:var(--bg-soft);
+           border:1px solid var(--line); border-radius:999px; padding:1px 8px; margin-left:7px;
+           font-variant-numeric:tabular-nums; white-space:nowrap; }
+  /* Elementos interiores del tablero y empalmes (2026-09-07). Son 18 casilleros: en una sola
+     columna la tarjeta medía media pantalla, así que van en rejilla y agrupados por familia. */
+  .tab-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:2px 18px; margin-top:6px; }
+  .tab-grid label{ margin-top:12px; }
+  .tab-fam{ grid-column:1/-1; margin:14px 0 0; font-size:12px; font-weight:700; letter-spacing:.04em;
+            text-transform:uppercase; color:var(--text-soft); border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .tab-fam:first-child{ margin-top:0; }
   .computo-provision{ display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; margin:0 0 14px; padding:9px 12px;
                       border:1px dashed var(--line); border-radius:8px; font-size:12.5px; color:var(--text-soft); }
   .computo-provision b{ color:var(--navy); }
@@ -2362,6 +2373,10 @@
   .ep-base-fila{ display:flex; align-items:center; gap:8px; }
   .ep-base-fila span{ font-size:13px; color:var(--text-soft); }
   .ep-base-fila input{ width:150px; margin:0; text-align:right; font-weight:700; }
+  .ep-base-fila select{ width:auto; margin:0; padding:8px 10px; font-size:13px; font-weight:600; }
+  /* Los dos números siempre a la vista, para que nadie confunda uno con el otro (2026-09-07). */
+  .ep-base-eq{ font-size:12px; color:var(--text-soft); margin-top:7px; font-variant-numeric:tabular-nums; }
+  .ep-base-eq b{ color:var(--navy); }
   .ep-base .hint{ flex:1 1 260px; min-width:0; }
   .ep-pesos{ font-size:11px; color:var(--text-soft); font-weight:600; margin-top:1px;
              font-variant-numeric:tabular-nums; }
@@ -2615,7 +2630,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 08:20 · 2761e7</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 09:50 · 258bc6</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3063,8 +3078,23 @@
             <label class="switch"><input type="checkbox" id="toggleRetiros" checked><span class="slider"></span></label>
           </div>
         </div>
-        <label>Columnas existentes a retirar</label>
+        <!-- Qué se retira, separado por material (2026-09-07). Antes había un solo casillero
+             «Columnas existentes a retirar» y el cómputo lo mandaba siempre al ítem 46, que es el de
+             columna METÁLICA. Pero el Anexo I tiene tres ítems distintos y no valen lo mismo: el 47
+             (poste de hormigón) paga casi el doble que el 46. Pedido del usuario:
+             *"en la calculadora agregá qué tipo de columna se retira para seleccionar mientras voy
+             llenando; poné las que te tira el itemizado, que va a ser lo mejor"*.
+             El id `retiroCol` se conserva a propósito: los cómputos ya guardados lo tienen, y ya
+             significaban «metálica» (iban al 46). Así ninguno cambia de sentido al abrirlo. -->
+        <label>Columnas <b>metálicas</b> a retirar <span class="ret-it">ítem 46 · 0,81 K</span></label>
         <input type="number" id="retiroCol" min="0" value="0">
+
+        <label>Postes de <b>hormigón armado</b> a retirar <span class="ret-it">ítem 47 · 1,40 K</span></label>
+        <input type="number" id="retiroPosteH" min="0" value="0">
+
+        <label>Postes de <b>madera</b> a retirar <span class="ret-it">ítem 48 · 0,78 K</span></label>
+        <input type="number" id="retiroPosteM" min="0" value="0">
+        <div class="hint" style="margin-top:2px;">Los tres son ítems distintos del Anexo I y <b>no valen lo mismo</b>: retirar un poste de hormigón paga <b>1,40 K</b> y una columna metálica <b>0,81 K</b>. Los tres incluyen la desconexión, el retiro de los conductores y el traslado al depósito de la EPEC.</div>
 
         <label>Tableros existentes a retirar</label>
         <input type="number" id="retiroTab" min="0" value="0">
@@ -3078,6 +3108,102 @@
           <label style="margin:0;" for="podaCheck">Incluir poda de arboleda</label>
         </div>
         <input type="number" id="podaCant" min="0" value="0" style="margin-top:8px;" disabled placeholder="Cantidad de árboles">
+      </div>
+
+      <!-- ============================================================================
+           TABLERO — ELEMENTOS INTERIORES  (2026-09-07)
+           Pedido del usuario, textual: *"hay plazas que son viejas que tienen a restaurar esas
+           cosas; cuando lleno la calculadora no están... agregalas a la calculadora para calcular
+           las plazas exactas y me cierre el itemizado"*.
+           El Anexo I tasa uno por uno los elementos que van ADENTRO del tablero (ítems 50 a 67 y
+           70). En una plaza nueva vienen con el tablero armado, pero en una plaza VIEJA a restaurar
+           se cambian de a uno y cada uno tiene su ítem y su precio — un diferencial tetrapolar solo
+           vale 2,91 K. Hasta hoy no había dónde cargarlos y había que escribirlos a mano en el
+           itemizado, o directamente se perdían.
+           OJO: el ítem 64 (fotocontrol) NO está acá a propósito. La sección «Tablero y acometida»
+           ya lo emite y el itemizado ya lo carga: ponerlo dos veces lo cobraría dos veces. ==== -->
+      <div class="card" id="cardTabElem">
+        <div class="card-header-row">
+          <h2><span class="dot"></span>Tablero — elementos interiores</h2>
+          <div class="toggle-wrap">
+            <span class="toggle-txt">Incluir esta tarea</span>
+            <label class="switch"><input type="checkbox" id="toggleTabElem"><span class="slider"></span></label>
+          </div>
+        </div>
+        <div class="hint" style="margin-top:0;">Lo que va <b>adentro</b> del gabinete y el Anexo I paga por separado (ítems <b>50 a 67</b> y <b>70</b>). En una plaza <b>nueva</b> normalmente se deja apagado: el tablero viene armado y se cobra por el ítem 9 o 10. Se usa en las plazas <b>viejas a restaurar</b>, donde se reemplazan elementos sueltos. Cargá solo lo que se coloca de verdad.</div>
+        <div class="tab-grid">
+          <div class="tab-fam">Termomagnéticos</div>
+          <label>Tetrapolar, hasta 25 A <span class="ret-it">ítem 50 · 0,80 K</span></label>
+          <input type="number" id="tabTermoTetraH" min="0" value="0">
+          <label>Tetrapolar, mayor a 25 A <span class="ret-it">ítem 51 · 0,86 K</span></label>
+          <input type="number" id="tabTermoTetraM" min="0" value="0">
+          <label>Tripolar, hasta 25 A <span class="ret-it">ítem 52 · 0,71 K</span></label>
+          <input type="number" id="tabTermoTriH" min="0" value="0">
+          <label>Tripolar, mayor a 25 A <span class="ret-it">ítem 53 · 0,76 K</span></label>
+          <input type="number" id="tabTermoTriM" min="0" value="0">
+          <label>Bipolar, hasta 25 A <span class="ret-it">ítem 54 · 0,65 K</span></label>
+          <input type="number" id="tabTermoBiH" min="0" value="0">
+          <label>Bipolar, mayor a 25 A <span class="ret-it">ítem 55 · 0,72 K</span></label>
+          <input type="number" id="tabTermoBiM" min="0" value="0">
+          <label>Unipolar, hasta 25 A <span class="ret-it">ítem 56 · 0,73 K</span></label>
+          <input type="number" id="tabTermoUniH" min="0" value="0">
+          <label>Unipolar, mayor a 25 A <span class="ret-it">ítem 57 · 0,85 K</span></label>
+          <input type="number" id="tabTermoUniM" min="0" value="0">
+
+          <div class="tab-fam">Diferenciales y contactores</div>
+          <label>Diferencial bipolar 250 V/40 A clase A <span class="ret-it">ítem 58 · 2,53 K</span></label>
+          <input type="number" id="tabDifBi" min="0" value="0">
+          <label>Diferencial tetrapolar 250 V/40 A clase A <span class="ret-it">ítem 59 · 2,91 K</span></label>
+          <input type="number" id="tabDifTetra" min="0" value="0">
+          <label>Contactor tripolar 380 V, hasta 25 A <span class="ret-it">ítem 60 · 1,00 K</span></label>
+          <input type="number" id="tabContH" min="0" value="0">
+          <label>Contactor tripolar 380 V, mayor a 25 A <span class="ret-it">ítem 61 · 1,24 K</span></label>
+          <input type="number" id="tabContM" min="0" value="0">
+
+          <div class="tab-fam">Borneras, comando y accesorios del tablero</div>
+          <label>Bornera BPN 4 mm² – 2,5 mm² <span class="ret-it">ítem 62 · 0,43 K</span></label>
+          <input type="number" id="tabBpn4" min="0" value="0">
+          <label>Bornera BPN 10 mm² – 6 mm² <span class="ret-it">ítem 63 · 0,45 K</span></label>
+          <input type="number" id="tabBpn10" min="0" value="0">
+          <label>Reloj temporizador programable (4 programas) <span class="ret-it">ítem 65 · 1,57 K</span></label>
+          <input type="number" id="tabReloj" min="0" value="0">
+          <label>Base portafusible NH 20–125 A / 500 V <span class="ret-it">ítem 66 · 0,63 K</span></label>
+          <input type="number" id="tabBaseNH" min="0" value="0">
+          <label>Fusible NH 20 A – 100 A <span class="ret-it">ítem 67 · 0,42 K</span></label>
+          <input type="number" id="tabFusNH" min="0" value="0">
+          <label>Tomacorriente 2×10 A tipo Mignon <span class="ret-it">ítem 70 · 0,18 K</span></label>
+          <input type="number" id="tabToma" min="0" value="0">
+        </div>
+        <div class="hint" style="margin-top:12px;">El <b>fotocontrol (ítem 64)</b> no está en esta lista <b>a propósito</b>: lo emite la sección «Tablero y acometida» y el itemizado ya lo carga desde ahí. Si estuviera también acá, se cobraría dos veces.</div>
+        <div class="hint" style="margin-top:6px;">Las <b>borneras BPN de esta tarjeta son las del tablero general</b>. Las de la <b>caja de cada columna</b> no se cargan acá: en el Anexo I quedan adentro del ítem de la columna (1 a 8) o del ítem 42 — ver el «Control de cobertura».</div>
+      </div>
+
+      <!-- ============================================================================
+           EMPALMES Y MEDICIONES  (2026-09-07)
+           Los ítems 78, 79 y 80 no tenían dónde cargarse. En una plaza vieja son la regla: se
+           corta un troncal existente y se empalma con resina, y hay que medir la aislación del
+           conductor subterráneo. El 80 se certifica CADA 100 METROS, no por medición: acá se
+           cargan los metros y la herramienta hace la cuenta. ============================== -->
+      <div class="card" id="cardEmpalmes">
+        <div class="card-header-row">
+          <h2><span class="dot"></span>Empalmes y mediciones</h2>
+          <div class="toggle-wrap">
+            <span class="toggle-txt">Incluir esta tarea</span>
+            <label class="switch"><input type="checkbox" id="toggleEmpalmes"><span class="slider"></span></label>
+          </div>
+        </div>
+        <div class="hint" style="margin-top:0;">Típico de <b>plazas viejas</b>: se empalma sobre un troncal que ya está tendido y se mide la aislación de lo que queda enterrado.</div>
+
+        <label>Empalmes rectos con resina, <b>4×2,5 a 4×6 mm²</b> <span class="ret-it">ítem 78 · 4,13 K</span></label>
+        <input type="number" id="empChico" min="0" value="0">
+
+        <label>Empalmes rectos con resina, <b>4×10 a 3×35+1×16 mm²</b> <span class="ret-it">ítem 79 · 4,20 K</span></label>
+        <input type="number" id="empGrande" min="0" value="0">
+        <div class="hint" style="margin-top:2px;">Los dos son subterráneos y con resina; lo único que los separa es la sección de los cables que se unen. Un empalme vale <b>más de 4 K</b>: no se pierde ninguno.</div>
+
+        <label>Metros de conductor subterráneo a <b>medir aislación</b> <span class="ret-it">ítem 80 · 1,04 K cada 100 m</span></label>
+        <input type="number" id="medAislMl" min="0" step="0.01" value="0">
+        <div class="hint" style="margin-top:2px;">Se cargan los <b>metros</b>, no las mediciones: el ítem 80 dice «cada 100 metros lineales», así que el itemizado divide por 100 solo. Ejemplo: 350 m → <b>3,50</b> unidades del ítem 80.</div>
       </div>
 
       <!-- ¿Quién pone el material? (2026-09-06). Los ítems 1 a 9 del Anexo I pagan el trabajo pero
@@ -3502,20 +3628,29 @@
       </div>
       <div class="ep-base no-print">
         <div>
-          <label style="margin-top:0;">Valor del módulo <span style="font-weight:400;color:var(--text-soft);">— sin IVA</span></label>
+          <!-- El número se puede escribir CON o SIN IVA (2026-09-07). El precio de oferta que
+               definió EMA es el de CON IVA ($358.313,00), así que ése viene elegido por defecto: si
+               hubiera que escribir siempre el neto, alguien iba a cargar 358.313 como si fuera sin
+               IVA y toda la plata de la app saldría 21 % de más. Adentro se guarda siempre el neto. -->
+          <label style="margin-top:0;">Valor del módulo</label>
           <div class="ep-base-fila">
             <span>$</span>
-            <input type="number" id="epecBase" min="0" step="any" placeholder="281998.71">
-            <span class="it-un">por módulo</span>
+            <input type="number" id="epecBase" min="0" step="any" placeholder="358313.00">
+            <select id="epecBaseIva" title="Decí si el número que estás escribiendo lleva el IVA adentro o no">
+              <option value="con" selected>con IVA</option>
+              <option value="sin">sin IVA</option>
+            </select>
             <button type="button" class="btn-auto" id="epecBaseBtn" style="margin:0;">Guardar</button>
           </div>
+          <div class="ep-base-eq" id="epecBaseEq"></div>
           <label class="it-chk" style="margin-top:9px;"><input type="checkbox" id="epecIva"> Mostrar los importes <b>con IVA</b> (21 %)</label>
         </div>
         <div class="hint" style="margin:0;">El <b>K</b> de cada ítem es <b>cuántos módulos vale</b>: el precio unitario es K × módulo.<br>
-          Arranca en <b>$281.998,71</b>, que es el <b>módulo oficial sin IVA</b>: sale del presupuesto oficial del pliego
-          ($12.066.848.751,97 con IVA, Art. 4) dividido por los 35.364 módulos (Art. 04) y neteado del 21 %.
-          <b>El pliego no publica el precio del módulo</b> —el Art. 05 lo deja en blanco porque lo pone el oferente—,
-          así que cuando definan el precio de oferta, cambialo acá y queda para todo el equipo.
+          El módulo es <b>$358.313,00 con IVA</b> = <b>$296.126,45 sin IVA</b>, que es el <b>precio de oferta</b> de EMA.
+          <b>El pliego no publica el precio del módulo</b>: el Art. 05 lo deja en blanco porque lo pone el oferente.
+          Como referencia, el <b>módulo oficial</b> que se deduce del presupuesto del pliego ($12.066.848.751,97 con IVA, Art. 4,
+          ÷ 35.364 módulos, Art. 04) da <b>$341.218,44 con IVA</b>: el nuestro está <b>5,01 % por encima</b>.
+          Si hay redeterminación, se cambia acá y queda para todo el equipo.
           Si lo dejás en cero, los totales vuelven a mostrarse en coeficientes.</div>
       </div>
       <div class="ep-renglones no-print" id="epecRenglones"></div>
@@ -5324,6 +5459,8 @@ const SECTION_CARD = {
   toggleTablero:'cardTablero',
   toggleCruce:'cardCruce',
   toggleRetiros:'cardRetiros',
+  toggleTabElem:'cardTabElem',      // elementos interiores del tablero (2026-09-07)
+  toggleEmpalmes:'cardEmpalmes',    // empalmes 78/79 y medición de aislación 80 (2026-09-07)
 };
 function actualizarSeccionEstado(toggleId){
   const toggleEl = document.getElementById(toggleId);
@@ -12051,7 +12188,7 @@ function restaurarFormulario(snap){
   try{ actualizarResumenCircuitos(); }catch(e){}
 
   // Los interruptores de sección abren/cierran su panel desde el evento `change`.
-  ['toggleColumnas','toggleVinculos','toggleCableado','toggleCivil','toggleTablero','toggleCruce','toggleRetiros']
+  ['toggleColumnas','toggleVinculos','toggleCableado','toggleCivil','toggleTablero','toggleCruce','toggleRetiros','toggleTabElem','toggleEmpalmes']
     .forEach(id=>{ const el = document.getElementById(id); if(el) el.dispatchEvent(new Event('change', {bubbles:true})); });
   return true;
 }
@@ -12108,8 +12245,12 @@ function calcular(){
   const tableroOn = document.getElementById('toggleTablero').checked;
   const cruceOn = document.getElementById('toggleCruce').checked;
   const retirosOn = document.getElementById('toggleRetiros').checked;
+  // Secciones nuevas del 07/09/2026 (plazas viejas a restaurar). Vienen apagadas por defecto: en
+  // una plaza nueva el tablero se cobra armado por el ítem 9 o 10 y no hay empalmes.
+  const tabElemOn  = !!(document.getElementById('toggleTabElem')  || {}).checked;
+  const empalmesOn = !!(document.getElementById('toggleEmpalmes') || {}).checked;
 
-  if(!colOn && !vincOn && !cableOn && !civilOn && !tableroOn && !cruceOn && !retirosOn){
+  if(!colOn && !vincOn && !cableOn && !civilOn && !tableroOn && !cruceOn && !retirosOn && !tabElemOn && !empalmesOn){
     if(!window.__calcSilencioso) alert('Activá al menos una sección con el interruptor «Incluir esta tarea» para calcular.');
     return null;
   }
@@ -13583,13 +13724,74 @@ function calcular(){
     const podaOn = document.getElementById('podaCheck').checked;
     const podaCant = podaOn ? (parseInt(document.getElementById('podaCant').value) || 0) : 0;
 
+    // Cada material tiene su ítem y su precio (2026-09-07). Antes salía un renglón genérico
+    // «Retiro de columna existente» que la cobertura ni siquiera reconocía, y que siempre se
+    // certificaba con el 46 aunque lo retirado fuera un poste de hormigón, que paga 1,40 K.
+    const retiroPosteH = leerN('retiroPosteH');
+    const retiroPosteM = leerN('retiroPosteM');
     const itemsRetiro = [];
-    if(retiroCol > 0) itemsRetiro.push({desc:'Retiro de columna existente (desconexión, traslado a depósito)', cant:retiroCol, un:'Un.', ref:'Ítem 46'});
+    if(retiroCol > 0) itemsRetiro.push({desc:'Retiro de columna metálica de A°P° en mal estado — desconexión, retiro de conductores, tapado y traslado al depósito de la EPEC', cant:retiroCol, un:'Un.', ref:'Ítem 46'});
+    if(retiroPosteH > 0) itemsRetiro.push({desc:'Retiro de poste de hormigón armado de A°P° en mal estado — desconexión, retiro de conductores y traslado al depósito de la EPEC', cant:retiroPosteH, un:'Un.', ref:'Ítem 47'});
+    if(retiroPosteM > 0) itemsRetiro.push({desc:'Retiro de poste de madera de A°P° en mal estado — desconexión, retiro de conductores y traslado al depósito de la EPEC', cant:retiroPosteM, un:'Un.', ref:'Ítem 48'});
     if(retiroTab > 0) itemsRetiro.push({desc:'Desconexión, desmantelamiento y retiro de tablero existente', cant:retiroTab, un:'Un.', ref:'Ítem 49'});
     const retiroLum = leerN('retiroLum');
     if(retiroLum > 0) itemsRetiro.push({...T, desc:'Retiro de luminaria de A°P° existente — incluye el traslado al depósito de la Municipalidad', cant:retiroLum, un:'Un.', ref:'Ítem 45'});
     if(podaOn && podaCant>0) itemsRetiro.push({desc:'Poda de arboleda', cant:podaCant, un:'Un.', ref:'Ítem 82 / AP-TC-025'});
     if(itemsRetiro.length) secciones.push({titulo:'RETIROS Y OTRAS TAREAS', items:itemsRetiro});
+  }
+
+  // ---------------- Tablero: elementos interiores (2026-09-07) ----------------
+  // Ítems 50 a 67 y 70 del Anexo I. Cada renglón lleva su ítem escrito en `ref`, y el itemizado lo
+  // lee de ahí: así no hay que mantener una expresión regular por cada uno de los 18.
+  // El ítem 64 (fotocontrol) NO se emite acá: ya sale de «Tablero y acometida».
+  const TAB_ELEM = [
+    { id:'tabTermoTetraH', item:50, desc:'Termomagnético tetrapolar 380 V, hasta 25 A — protección del tablero' },
+    { id:'tabTermoTetraM', item:51, desc:'Termomagnético tetrapolar 380 V, mayor a 25 A — protección del tablero' },
+    { id:'tabTermoTriH',   item:52, desc:'Termomagnético tripolar 380 V, hasta 25 A — protección del tablero' },
+    { id:'tabTermoTriM',   item:53, desc:'Termomagnético tripolar 380 V, mayor a 25 A — protección del tablero' },
+    { id:'tabTermoBiH',    item:54, desc:'Termomagnético bipolar 380 V, hasta 25 A — protección del tablero' },
+    { id:'tabTermoBiM',    item:55, desc:'Termomagnético bipolar 380 V, mayor a 25 A — protección del tablero' },
+    { id:'tabTermoUniH',   item:56, desc:'Termomagnético unipolar 380 V, hasta 25 A — protección del tablero' },
+    { id:'tabTermoUniM',   item:57, desc:'Termomagnético unipolar 380 V, mayor a 25 A — protección del tablero' },
+    { id:'tabDifBi',       item:58, desc:'Diferencial bipolar 250 V / 40 A, clase A — protección del tablero' },
+    { id:'tabDifTetra',    item:59, desc:'Diferencial tetrapolar 250 V / 40 A, clase A — protección del tablero' },
+    { id:'tabContH',       item:60, desc:'Contactor tripolar 380 V, hasta 25 A — comando del tablero' },
+    { id:'tabContM',       item:61, desc:'Contactor tripolar 380 V, mayor a 25 A — comando del tablero' },
+    { id:'tabBpn4',        item:62, desc:'Bornera BPN del tablero 4 mm² – 2,5 mm² (RSTN+T) — borne de paso del tablero general' },
+    { id:'tabBpn10',       item:63, desc:'Bornera BPN del tablero 10 mm² – 6 mm² (RSTN+T) — borne de paso del tablero general' },
+    { id:'tabReloj',       item:65, desc:'Reloj temporizador mecánico programable de 4 programas, para riel DIN' },
+    { id:'tabBaseNH',      item:66, desc:'Base portafusible NH 20–125 A / 500 V' },
+    { id:'tabFusNH',       item:67, desc:'Fusible NH 20 A – 100 A' },
+    { id:'tabToma',        item:70, desc:'Tomacorriente 2×10 A tipo Mignon' },
+  ];
+  if(tabElemOn){
+    const itemsTabElem = [];
+    TAB_ELEM.forEach(x=>{
+      const n = leerN(x.id);
+      if(n > 0) itemsTabElem.push({desc:x.desc, cant:n, un:'Un.', ref:`Ítem ${x.item}`});
+    });
+    if(itemsTabElem.length){
+      tareasIncluidas.push('Elementos de tablero');
+      itemsTabElem.push({desc:'ℹ El <b>fotocontrol</b> no se cuenta acá: sale de la sección «Tablero y acometida» y el itemizado lo carga por el <b>ítem 64</b> desde ese renglón. Si estuviera en los dos lados se cobraría dos veces.', cant:'—', un:'—', ref:'Criterio de la herramienta'});
+      itemsTabElem.push({desc:'ℹ Estas <b>borneras BPN son las del tablero general</b>. Las de la caja de cada columna no se cargan por los ítems 62 y 63: en el Anexo I esos dos figuran bajo «ELEMENTOS DE TABLERO», y las de la columna ya están adentro del ítem de la columna (1 a 8) o del <b>ítem 42</b>, que las nombra textualmente. <b>Verificarlo con la Inspección antes de certificar.</b>', cant:'—', un:'—', ref:'Anexo I · ítems 62, 63 y 42'});
+      secciones.push({titulo:'TABLERO — ELEMENTOS INTERIORES', items:itemsTabElem});
+    }
+  }
+
+  // ---------------- Empalmes y mediciones (2026-09-07) ----------------
+  if(empalmesOn){
+    const itemsEmp = [];
+    const empChico = leerN('empChico'), empGrande = leerN('empGrande'), medMl = leerN('medAislMl');
+    if(empChico > 0)  itemsEmp.push({desc:'Empalme recto con resina, 4×2,5 a 4×6 mm², subterráneo', cant:empChico, un:'Un.', ref:'Ítem 78'});
+    if(empGrande > 0) itemsEmp.push({desc:'Empalme recto con resina, 4×10 a 3×35+1×16 mm², subterráneo', cant:empGrande, un:'Un.', ref:'Ítem 79'});
+    if(medMl > 0){
+      itemsEmp.push({desc:`Medición de resistencia de aislación de conductor subterráneo — se certifica <b>cada 100 m</b>: ${fmt(medMl,2)} m son <b>${fmt(medMl/100,2)}</b> unidad(es) del ítem 80`,
+                     cant:medMl, un:'m', ref:'Ítem 80'});
+    }
+    if(itemsEmp.length){
+      tareasIncluidas.push('Empalmes y mediciones');
+      secciones.push({titulo:'EMPALMES Y MEDICIONES', items:itemsEmp});
+    }
   }
 
   if(secciones.length === 0){
@@ -17245,9 +17447,31 @@ function poblarParteObraDatalist(){
 
     // ---------- Retiros y poda ----------
     if(on('toggleRetiros')){
-      push(46, numC('retiroCol'), `${numC('retiroCol')} columna(s) a retirar`);
+      push(46, numC('retiroCol'), `${numC('retiroCol')} columna(s) metálica(s) a retirar`);
+      push(47, numC('retiroPosteH'), `${numC('retiroPosteH')} poste(s) de hormigón armado a retirar`);
+      push(48, numC('retiroPosteM'), `${numC('retiroPosteM')} poste(s) de madera a retirar`);
       push(49, numC('retiroTab'), `${numC('retiroTab')} tablero(s) a retirar`);
       if(on('podaCheck')) push(82, numC('podaCant'), `${numC('podaCant')} árbol(es) a podar`);
+    }
+
+    // ---------- Tablero: elementos interiores, y empalmes y mediciones (2026-09-07) ----------
+    // Estas dos secciones son casilleros sueltos, así que desde la foto del formulario se leen
+    // igual de bien que desde el listado de materiales.
+    if(on('toggleTabElem')){
+      [['tabTermoTetraH',50],['tabTermoTetraM',51],['tabTermoTriH',52],['tabTermoTriM',53],
+       ['tabTermoBiH',54],['tabTermoBiM',55],['tabTermoUniH',56],['tabTermoUniM',57],
+       ['tabDifBi',58],['tabDifTetra',59],['tabContH',60],['tabContM',61],
+       ['tabBpn4',62],['tabBpn10',63],['tabReloj',65],['tabBaseNH',66],['tabFusNH',67],['tabToma',70]]
+        .forEach(([id, item])=>{
+          const n = numC(id);
+          if(n > 0) push(item, n, `${fmt(n,0)} × ${(typeof window.epecItemDesc === 'function' ? window.epecItemDesc(String(item)) : '') || ('ítem ' + item)}`);
+        });
+    }
+    if(on('toggleEmpalmes')){
+      push(78, numC('empChico'),  `${numC('empChico')} empalme(s) recto(s) con resina de 4×2,5 a 4×6 mm²`);
+      push(79, numC('empGrande'), `${numC('empGrande')} empalme(s) recto(s) con resina de 4×10 a 3×35+1×16 mm²`);
+      const ml = numC('medAislMl');
+      if(ml > 0) push(80, ml / 100, `${fmt(ml,2)} m de conductor subterráneo medidos → ${fmt(ml/100,2)} unidad(es) del ítem 80, que se certifica cada 100 m`);
     }
 
     // ---------- Provisión 83.1–89 (2026-09-06): lo que se puede saber desde el formulario ----------
@@ -17308,6 +17532,22 @@ function poblarParteObraDatalist(){
         const cant = n2(it.cant != null ? it.cant : it.cantNecesaria, 0);
         if(!d) return;
 
+        // ---- Secciones nuevas del 07/09/2026: el renglón trae escrito su propio ítem ----
+        // «TABLERO — ELEMENTOS INTERIORES» (50-67 y 70) y «EMPALMES Y MEDICIONES» (78, 79, 80) las
+        // escribe la Calculadora con el ítem del Anexo I en la referencia de cada renglón. Se lee
+        // de ahí en vez de mantener 21 expresiones regulares que habría que tocar cada vez que
+        // cambie una redacción. Los renglones informativos (ℹ) no traen «Ítem N» y se ignoran solos.
+        if(T.indexOf('ELEMENTOS INTERIORES') >= 0 || T.indexOf('EMPALMES Y MEDICIONES') >= 0){
+          const mr = String(it.ref||'').match(/^[ÍI]tem\s+(\d{1,2})$/i);
+          if(mr){
+            const id = parseInt(mr[1], 10);
+            // El ítem 80 se certifica CADA 100 METROS LINEALES: el cómputo trae los metros.
+            if(id === 80) push(80, cant / 100, `${fmt(cant,2)} m de conductor subterráneo medidos → ${fmt(cant/100,2)} unidad(es) del ítem 80, que se certifica cada 100 m`);
+            else push(id, cant, `${fmt(cant,0)} × ${(typeof window.epecItemDesc === 'function' ? window.epecItemDesc(String(id)) : '') || d.split(' — ')[0]}`);
+          }
+          return;
+        }
+
         // ---- Columnas ----
         let m = d.match(/^Columna\s+(PRFV|met[aá]lica)\s+recta,?\s+([\d.,]+)\s*m/i);
         if(m){
@@ -17342,7 +17582,16 @@ function poblarParteObraDatalist(){
           }
           // Los metros de 3×1,5 (columna → luminaria) y de verde-amarillo 10 mm² (PAT) se anotan
           // por si su PROVISIÓN la hizo EMA (ítems 86 y 87). Su instalación va adentro de 1–8.
-          if(clave === '3x1.5') ctx.cable15 += cant;
+          if(clave === '3x1.5'){
+            ctx.cable15 += cant;
+            // ---- Ítem 30 (2026-09-07) ----
+            // El Anexo I tiene un ítem propio para este cable: «Provisión e instalación EN COLUMNA
+            // de Cable Cu 3×1,5 mm²», por metro. El control de cobertura ya lo marcaba como
+            // cubierto por el 30, pero «Traer las cantidades» no lo traía y había que cargarlo a
+            // mano: en una plaza de 6 columnas son 81 m ≈ 7,29 K que se perdían.
+            // La PROVISIÓN es aparte (ítem 86) y la decide la tarjeta «¿Quién pone el material?».
+            push(30, cant, `${fmt(cant,2)} m de cable 3×1,5 mm² instalado en columna (el ítem 30 paga la instalación; la provisión, si la puso EMA, va por el 86)`);
+          }
           if(clave === '1x10' && /verde/i.test(d)) ctx.cableVA += cant;
           return;   // el resto de los cables (subida 3×1,5, PAT, cruce) no van por estos ítems
         }
@@ -17382,6 +17631,17 @@ function poblarParteObraDatalist(){
         if(m){ if(parseInt(m[1],10) >= 150) ctx.lum180 += cant; else ctx.lum75 += cant; return; }
         if(/^Medici[oó]n de resistencia de PAT/i.test(d)){ push(81, cant, `${fmt(cant,0)} medición(es) de resistencia de PAT`); return; }
         if(/^Apoya escalera/i.test(d)){ push(73, cant, `${fmt(cant,0)} apoya escalera con herrajes`); return; }
+        // ---- Bajada del tablero aéreo: caño, fleje y hebilla (2026-09-07) ----
+        // Los tres tienen ítem propio en el Anexo I (76, 71 y 72) y el control de cobertura ya los
+        // reconocía, pero el itemizado no los traía. El FLEJE es el único que cambia de unidad: el
+        // cómputo lo mide en METROS y el ítem 71 se paga por rollo de 3 m, así que se divide.
+        if(/^Ca[ñn]o de bajada doble aislaci[oó]n/i.test(d)){ push(76, cant, `${fmt(cant,0)} caño de bajada doble aislación Ø2", L = 4 m`); return; }
+        if(/^Fleje de acero inoxidable/i.test(d)){
+          const rollos = Math.ceil(cant / 3);
+          push(71, rollos, `${fmt(cant,2)} m de fleje inoxidable = ${rollos} unidad(es) del ítem 71, que se paga por largo de 3 m`);
+          return;
+        }
+        if(/^Hebilla de acero inoxidable/i.test(d)){ push(72, cant, `${fmt(cant,0)} hebilla(s) de acero inoxidable AISI 304 3/4"`); return; }
         if(/^Tomacable/i.test(d)){ push(74, cant, `${fmt(cant,0)} tomacable WGC/TGC`); return; }
         if(/^Fotocontrol/i.test(d)){ push(64, cant, `${fmt(cant,0)} fotocontrol`); return; }
         // ---- Columnas EXISTENTES reutilizadas (sección nueva del 06/09/2026) ----
@@ -17391,7 +17651,13 @@ function poblarParteObraDatalist(){
         if(/^Aplomado/i.test(d)){ push(43, cant, `${fmt(cant,0)} columna(s) a aplomar`); return; }
         if(/^Montaje, conexionado y energizaci[oó]n de luminaria LED sobre columna existente/i.test(d)){ push(44, cant, `${fmt(cant,0)} luminaria(s) sobre columna existente`); return; }
         // ---- Retiros y poda ----
-        if(/^Retiro de columna/i.test(d)){ push(46, cant, `${fmt(cant,0)} columna(s) a retirar`); return; }
+        // Cada material a su ítem (2026-09-07). El orden importa: «poste de hormigón» y «poste de
+        // madera» se miran ANTES que el genérico, y el genérico viejo («Retiro de columna
+        // existente», de los cómputos anteriores a hoy) sigue cayendo en el 46, que es lo que
+        // siempre significó.
+        if(/^Retiro de poste de hormig[oó]n/i.test(d)){ push(47, cant, `${fmt(cant,0)} poste(s) de hormigón armado a retirar`); return; }
+        if(/^Retiro de poste de madera/i.test(d)){ push(48, cant, `${fmt(cant,0)} poste(s) de madera a retirar`); return; }
+        if(/^Retiro de columna/i.test(d)){ push(46, cant, `${fmt(cant,0)} columna(s) metálica(s) a retirar`); return; }
         if(/^Retiro de luminaria/i.test(d)){ push(45, cant, `${fmt(cant,0)} luminaria(s) a retirar`); return; }
         if(/retiro de tablero existente/i.test(d)){ push(49, cant, `${fmt(cant,0)} tablero(s) a retirar`); return; }
         if(/^Poda/i.test(d)){ push(82, cant, `${fmt(cant,0)} árbol(es) a podar`); return; }
@@ -18414,20 +18680,32 @@ const ITEMIZADO_EPEC = [
     const it = itemEpec(id);
     return !!it && it.cat.indexOf('eventualidad') >= 0;
   };
-  // El valor del MÓDULO, confirmado por el usuario el 03/09/2026: $ 281.988,00.
-  // El coeficiente K de cada ítem es la cantidad de módulos que vale ese ítem, así que el precio
-  // unitario es K × módulo. Queda editable: en cada redeterminación se cambia acá y vale para todos.
-  // ---- El valor del módulo (revisado contra el pliego, 2026-09-05) ----
-  // El pliego de la LPE 5589 no publica el precio del módulo: el Art. 05 lo deja en blanco («El precio
-  // del Módulo base descripto en este Artículo tiene el precio de K = 1 = ($) ……») porque lo pone el
-  // oferente. Lo que sí publica es el PRESUPUESTO OFICIAL —$12.066.848.751,97 IVA incluido (Art. 4 del
-  // Pliego Particular)— y la cantidad total de módulos —35.364 (Art. 04 del Pliego Técnico)—. De ahí
-  // sale el módulo oficial:
-  //     12.066.848.751,97 ÷ 35.364 = $341.218,44 con IVA  →  ÷ 1,21 = $281.998,71 sin IVA
-  // El usuario había pasado $281.988: son $10,71 de diferencia, o sea el mismo número redondeado. Se
-  // toma el oficial sin IVA como valor de arranque, y se puede cambiar cuando definan el precio de
-  // oferta (que es el que realmente van a cobrar).
-  const MODULO_EPEC = 281998.71;
+  // ============================================================
+  // EL VALOR DEL MÓDULO  —  $358.313,00 CON IVA  (definido por EMA el 07/09/2026)
+  // ============================================================
+  // El coeficiente K de cada ítem es cuántos módulos vale ese ítem: el precio unitario es K × módulo.
+  //
+  // El pliego de la LPE 5589 NO publica el precio del módulo: el Art. 05 lo deja en blanco («El
+  // precio del Módulo base descripto en este Artículo tiene el precio de K = 1 = ($) ……») porque lo
+  // pone el oferente. Hasta el 06/09/2026 la herramienta arrancaba con el módulo OFICIAL deducido
+  // del presupuesto del pliego ($12.066.848.751,97 con IVA ÷ 35.364 módulos = $341.218,44 con IVA =
+  // $281.998,71 sin IVA). Ese era un valor de referencia, no el de oferta.
+  //
+  // Ahora hay precio de oferta y es el que se va a cobrar: **$358.313,00 CON IVA**.
+  // Adentro se guarda SIEMPRE el neto, porque el IVA es solo cómo se muestran los importes:
+  //     358.313,00 ÷ 1,21 = $296.126,45 sin IVA      (y 296.126,45 × 1,21 = $358.313,00)
+  // Está un 5,01 % por encima del módulo oficial del pliego, que es un dato para tener a mano
+  // cuando se discuta una redeterminación.
+  //
+  // Se cambia desde la pantalla y queda para todo el equipo; ahí se puede escribir el número CON o
+  // SIN IVA, que es lo que evitaba el error de cargar uno por el otro.
+  // Se guarda el cociente EXACTO, no el neto redondeado a dos decimales. Con 296.126,45 clavado, el
+  // total de 100 K con IVA daba $35.831.300,45 en vez de $35.831.300,00 — 45 centavos de más que
+  // crecen con la obra (a 993 K son $4,47). El número que se muestra sin IVA es igual —$296.126,45—,
+  // pero así la plata CON IVA cierra exacta contra el módulo cotizado, que es el que se certifica.
+  const MODULO_EPEC_CON_IVA = 358313.00;        // el número tal cual lo definió EMA
+  const MODULO_EPEC = MODULO_EPEC_CON_IVA / 1.21;   // $296.126,4462… → se muestra $296.126,45
+  const MODULO_OFICIAL_SIN_IVA = 281998.71;     // el deducido del presupuesto del pliego, de referencia
   const IVA_EPEC = 0.21;
   const PRESUPUESTO_OFICIAL = 12066848751.97;   // Art. 4 Pliego Particular, IVA incluido
   const MODULOS_TOTALES = 35364;                // Art. 04 Pliego de Especificaciones Técnicas
@@ -18443,6 +18721,39 @@ const ITEMIZADO_EPEC = [
     try{ const el = document.getElementById('epecIva'); return !!(el && el.checked); }catch(e){ return false; }
   }
   function baseEf(){ return epecBase * (ivaEncendido() ? (1 + IVA_EPEC) : 1); }
+
+  // ---- Escribir el módulo con o sin IVA (2026-09-07) ----
+  // El precio de oferta que maneja EMA es el de CON IVA ($358.313,00). Si el casillero obligara a
+  // escribir el neto, tarde o temprano alguien pega 358.313 ahí y toda la plata de la app sale 21 %
+  // de más, sin que nada lo avise. Así que el casillero pregunta qué número se está escribiendo, y
+  // abajo se ven SIEMPRE los dos, que es lo que hace imposible confundirlos.
+  function baseCampoConIva(){
+    try{ const s = document.getElementById('epecBaseIva'); return !s || s.value === 'con'; }catch(e){ return true; }
+  }
+  function baseNetaDelCampo(){
+    const v = n2((document.getElementById('epecBase')||{}).value);
+    if(!(v > 0)) return 0;
+    return baseCampoConIva() ? v / (1 + IVA_EPEC) : v;
+  }
+  // Escribe en el casillero un valor NETO, respetando cómo esté puesto el selector.
+  function ponerBaseEnCampo(neto){
+    const inp = document.getElementById('epecBase');
+    if(!inp) return;
+    inp.value = neto > 0 ? (baseCampoConIva() ? Math.round(neto * (1 + IVA_EPEC) * 100) / 100
+                                              : Math.round(neto * 100) / 100) : '';
+  }
+  // La equivalencia debajo del casillero: los dos números, siempre.
+  function pintarBaseEq(){
+    const eq = document.getElementById('epecBaseEq');
+    if(!eq) return;
+    const neto = baseNetaDelCampo();
+    if(!(neto > 0)){
+      eq.innerHTML = 'Sin valor de módulo los totales se muestran en <b>coeficientes (K)</b>, no en pesos.';
+      return;
+    }
+    eq.innerHTML = `Son <b>${plata(neto * (1 + IVA_EPEC))} con IVA</b> = <b>${plata(neto)} sin IVA</b>. ` +
+      `Adentro se guarda el neto: el interruptor de abajo solo cambia cómo se muestran los importes.`;
+  }
 
   // ============================================================
   // QUÉ PAGA EL ÍTEM vs QUÉ SE PONE EN OBRA (2026-09-06)
@@ -18764,7 +19075,8 @@ const ITEMIZADO_EPEC = [
     const d = window.__preciosNube;
     if(d && d.baseEpec != null) epecBase = n2(d.baseEpec);
     const inp = document.getElementById('epecBase');
-    if(inp && document.activeElement !== inp) inp.value = epecBase > 0 ? epecBase : '';
+    // Lo que llega de la nube es el NETO; se escribe en la unidad que tenga puesta el selector.
+    if(inp && document.activeElement !== inp) ponerBaseEnCampo(epecBase);
     renderEpec();
   };
 
@@ -18895,7 +19207,11 @@ const ITEMIZADO_EPEC = [
         <b>Presupuesto oficial de la licitación: ${plata(PRESUPUESTO_OFICIAL)} IVA incluido</b> (Art. 4 del Pliego Particular)
         · ${fmt(MODULOS_TOTALES,0)} módulos · ${plata(PRESUPUESTO_OFICIAL/MODULOS_TOTALES)} el módulo con IVA
         · ${plata(PRESUPUESTO_OFICIAL/MODULOS_TOTALES/(1+IVA_EPEC))} sin IVA.
-        Los importes de acá arriba salen del módulo que tengas cargado, ${ivaEncendido()?'<b>con IVA</b>':'<b>sin IVA</b>'}.</div>`;
+        Ése es el módulo <b>del pliego</b>, de referencia. Los importes de acá arriba salen del <b>módulo cargado</b>
+        —${epecBase>0 ? `<b>${plata(epecBase*(1+IVA_EPEC))} con IVA</b>` : 'todavía sin cargar'}—,
+        mostrados ${ivaEncendido()?'<b>con IVA</b>':'<b>sin IVA</b>'}.${epecBase>0 ? `
+        La oferta está <b>${fmt((epecBase*(1+IVA_EPEC))/(PRESUPUESTO_OFICIAL/MODULOS_TOTALES)*100-100, 2)} %</b>
+        ${epecBase*(1+IVA_EPEC) >= PRESUPUESTO_OFICIAL/MODULOS_TOTALES ? 'por encima' : 'por debajo'} del oficial.` : ''}</div>`;
     cont.innerHTML = todo + RENGLONES.map(r=>{
       const ya = yaCargadas(r.id);
       return `<button type="button" class="ep-reng${renglonElegido===r.id?' activo':''}" data-reng="${r.id}">
@@ -19070,11 +19386,30 @@ const ITEMIZADO_EPEC = [
       porque:'Sujeción del caño de bajada: entra en el ítem de acometida o de instalación del tablero.' },
 
     // ---------- Tablerito de columna ----------
-    { re:/^Portafusible tabaquera/i, tipo:'item', item:69, porque:'Ítem 69: portafusible tabaquera con fusible de 1 A, 6 A o 10 A.' },
-    { re:/^(Fusible cil[ií]ndrico|FUSIBLE CILINDRICO|Fusible cer[aá]mico|FUSIBLE CERAMICO)/i, tipo:'item', item:68,
-      porque:'Ítem 68: fusible cerámico de 2 A a 10 A. Cubre tanto el de 2 A como el de 4 A.' },
-    { re:/^Bornera BPN 4/i, tipo:'item', item:62, porque:'Ítem 62: bornera BPN (para RSTN+T) de 4 mm² – 2,5 mm².' },
-    { re:/^Bornera BPN (6|10)/i, tipo:'item', item:63, porque:'Ítem 63: bornera BPN (para RSTN+T) de 10 mm² – 6 mm².' },
+    // ⚠ CRITERIO DEL 07/09/2026, decidido por el usuario: los ítems 62, 63, 68 y 69 NO se cobran
+    // por las borneras, fusibles y portafusibles de la caja de CADA COLUMNA — quedan adentro del
+    // ítem de la columna. Antes salían como «tiene su ítem» y eso invitaba a certificarlos aparte:
+    // en una plaza de 6 columnas nuevas + 3 existentes son 25,95 K ≈ $9,3 M con IVA cobrados dos
+    // veces, que es exactamente lo que hace que una certificación se caiga en la revisión.
+    // Los tres fundamentos:
+    //   1) En el Anexo I los ítems 62 y 63 figuran bajo el título «ELEMENTOS DE TABLERO».
+    //   2) El ítem 42 dice textual, para la columna metálica existente: «Incluye borneras aisladas
+    //      tipo BPN, seccionador portafusible para riel din, fusibles cerámicos 2/4 amper».
+    //   3) Los ítems 1 a 8 pagan la columna con «cableado interno y conexionado completo».
+    // Los del TABLERO GENERAL sí se cobran: van por la tarjeta «Tablero — elementos interiores» de
+    // la Calculadora, y sus renglones empiezan con «Bornera BPN del tablero», que se mira ANTES.
+    { re:/^Bornera BPN del tablero\s+4/i, tipo:'item', item:62,
+      porque:'Ítem 62: bornera BPN (para RSTN+T) de 4 mm² – 2,5 mm². En el Anexo I está bajo «ELEMENTOS DE TABLERO», así que se cobra por las del <b>tablero general</b>.' },
+    { re:/^Bornera BPN del tablero\s+(6|10)/i, tipo:'item', item:63,
+      porque:'Ítem 63: bornera BPN (para RSTN+T) de 10 mm² – 6 mm². En el Anexo I está bajo «ELEMENTOS DE TABLERO», así que se cobra por las del <b>tablero general</b>.' },
+    { re:/^Portafusible tabaquera/i, tipo:'dentro', item:'1-8 / 42',
+      porque:'⚠️ <b>Verificar siempre antes de certificar.</b> El portafusible de la caja de columna queda adentro del ítem de la columna: el <b>ítem 42</b> dice textual «Incluye borneras aisladas tipo BPN, <b>seccionador portafusible para riel din</b>, fusibles cerámicos 2/4 amper», y los ítems 1 a 8 pagan la columna con su cableado interno y conexionado completo. El <b>ítem 69</b> se reserva para el tablero. Si la Inspección acepta certificarlo aparte, cargalo a mano.' },
+    { re:/^(Fusible cil[ií]ndrico|FUSIBLE CILINDRICO|Fusible cer[aá]mico|FUSIBLE CERAMICO)/i, tipo:'dentro', item:'1-8 / 42',
+      porque:'⚠️ <b>Verificar siempre antes de certificar.</b> El <b>ítem 42</b> nombra los «fusibles cerámicos 2/4 amper» entre lo que ya incluye, y en columna nueva van adentro del ítem 1 a 8. El <b>ítem 68</b> se reserva para el tablero. Si la Inspección acepta certificarlo aparte, cargalo a mano.' },
+    { re:/^Bornera BPN 4/i, tipo:'dentro', item:'1-8 / 42',
+      porque:'⚠️ <b>Verificar siempre antes de certificar.</b> Las BPN de la caja de columna las nombra el <b>ítem 42</b> («Incluye borneras aisladas tipo BPN…»), y en el Anexo I el <b>ítem 62</b> figura bajo «ELEMENTOS DE TABLERO». Para el tablero general sí se cobra: cargalo en «Tablero — elementos interiores».' },
+    { re:/^Bornera BPN (6|10)/i, tipo:'dentro', item:'1-8 / 42',
+      porque:'⚠️ <b>Verificar siempre antes de certificar.</b> Las BPN de la caja de columna las nombra el <b>ítem 42</b> («Incluye borneras aisladas tipo BPN…»), y en el Anexo I el <b>ítem 63</b> figura bajo «ELEMENTOS DE TABLERO». Para el tablero general sí se cobra: cargalo en «Tablero — elementos interiores».' },
     { re:/^(Puente fijo|Separador para borne|Puntera terminal)/i, tipo:'falta', item:null,
       porque:'El puente peine, el separador y las punteras TIFF no tienen ítem propio. El ítem 42 los nombra, pero solo para acometida nueva en columna metálica EXISTENTE; para columna nueva no aparecen. A confirmar con la Inspección.' },
     // ---------- Columnas EXISTENTES reutilizadas (sección de la Calculadora del 06/09/2026) ----------
@@ -19106,11 +19441,17 @@ const ITEMIZADO_EPEC = [
 
     // ---------- Retiros y poda ----------
     { re:/^Retiro de luminaria/i, tipo:'item', item:45, porque:'Ítem 45, incluye el traslado al depósito de la EPEC.' },
-    // La Calculadora escribe «Retiro de columna EXISTENTE (desconexión, traslado a depósito)», no
-    // «metálica»: con la regla vieja el renglón caía en «no está en el itemizado» aunque el propio
-    // cómputo lo marcaba con «Ítem 46». Reportado por el usuario el 07/09/2026 y corregido acá.
+    // Desde el 07/09/2026 la Calculadora pregunta de qué material es lo que se retira y escribe el
+    // renglón con su nombre, así que cada uno cae en SU ítem. Las dos reglas de poste van primero
+    // porque el genérico de abajo también los agarraría.
+    // El genérico sigue en el 46 por los cómputos VIEJOS, que decían «Retiro de columna existente»
+    // sin material y siempre significaron metálica.
+    { re:/^Retiro de poste de hormig[oó]n/i, tipo:'item', item:47,
+      porque:'Ítem 47: retiro de poste de hormigón armado de A°P° en mal estado (1,40 K). Incluye desconexión, retiro de conductores y traslado al depósito de la EPEC.' },
+    { re:/^Retiro de poste de madera/i, tipo:'item', item:48,
+      porque:'Ítem 48: retiro de poste de madera de A°P° en mal estado (0,78 K). Incluye desconexión, retiro de conductores y traslado al depósito de la EPEC.' },
     { re:/^Retiro de columna/i, tipo:'item', item:46,
-      porque:'Ítem 46, incluye desconexión, retiro de conductores, tapado y traslado al depósito de la EPEC. <b>Ojo con cuál corresponde:</b> el 46 es para columna <b>metálica</b> (0,81 K). Si lo que se retira es un <b>poste de hormigón armado</b> va el <b>ítem 47</b> (1,40 K) y si es de <b>madera</b> el <b>ítem 48</b> (0,78 K). La Calculadora no distingue el material, así que verificalo antes de certificar.' },
+      porque:'Ítem 46: retiro de columna <b>metálica</b> de A°P° en mal estado (0,81 K). Incluye desconexión, retiro de conductores, tapado y traslado al depósito de la EPEC. Si el cómputo es <b>anterior al 07/09/2026</b> el renglón decía solo «Retiro de columna existente», sin material: verificá que lo retirado haya sido metálico y no un poste de hormigón (ítem 47, 1,40 K) o de madera (ítem 48).' },
     { re:/^Retiro de poste de hormig[oó]n/i, tipo:'item', item:47, porque:'Ítem 47.' },
     { re:/^Retiro de poste de madera/i, tipo:'item', item:48, porque:'Ítem 48.' },
     { re:/^(Desconexi[oó]n|Retiro de tablero|Desmantelamiento)/i, tipo:'item', item:49,
@@ -19476,10 +19817,11 @@ const ITEMIZADO_EPEC = [
     if(!cont) return;
     try{ pintarRenglones(); pintarPlazasLicitacion(); renderHechas(); renderCobertura(); }catch(e){}
     // Que el casillero muestre el módulo con el que se está calculando, sin pisar lo que
-    // alguien esté tipeando en ese momento.
+    // alguien esté tipeando en ese momento. Se escribe según cómo esté el selector con/sin IVA.
     const inpBase = document.getElementById('epecBase');
     if(inpBase && document.activeElement !== inpBase && inpBase.value === '' && epecBase > 0)
-      inpBase.value = epecBase;
+      ponerBaseEnCampo(epecBase);
+    pintarBaseEq();
 
     const busca = ((document.getElementById('epecBuscar')||{}).value||'').toLowerCase().trim();
     const soloCon = (document.getElementById('epecSoloConItems')||{}).checked;
@@ -19901,16 +20243,20 @@ const ITEMIZADO_EPEC = [
       }
 
       if(e.target.id === 'epecBaseBtn'){
-        epecBase = n2(document.getElementById('epecBase').value);
+        // Lo que se escribe puede venir con IVA o sin IVA; adentro se guarda SIEMPRE el neto.
+        epecBase = baseNetaDelCampo();
         const msg = document.getElementById('epecBaseMsg');
         aplicarPrecios();
         try{
           if(!puedeEditar()) throw new Error('sin sesión');
           await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase,
                                           ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
+          // El mensaje repite los DOS números a propósito: si alguien eligió mal la unidad, lo ve
+          // acá mismo antes de que toda la plata de la app salga 21 % corrida (2026-09-07).
           if(msg){ msg.style.color='var(--teal-dark)';
-            msg.textContent = epecBase>0 ? `✔ Guardado: el módulo vale ${plata(epecBase)}, para todo el equipo.`
-                                         : '✔ Guardado. Sin valor de módulo, los totales vuelven a mostrarse en coeficientes.'; }
+            msg.innerHTML = epecBase>0
+              ? `✔ Guardado para todo el equipo: el módulo vale <b>${plata(epecBase*(1+IVA_EPEC))} con IVA</b> = <b>${plata(epecBase)} sin IVA</b>. Si no era ése, cambiá el selector de al lado y guardá de nuevo.`
+              : '✔ Guardado. Sin valor de módulo, los totales vuelven a mostrarse en coeficientes.'; }
         }catch(err){
           if(msg){ msg.style.color='var(--amber)';
             msg.textContent='Se aplicó acá, pero para que lo vea todo el equipo hay que iniciar sesión.'; }
@@ -20007,7 +20353,18 @@ const ITEMIZADO_EPEC = [
       if(e.target.id === 'epecSoloConItems') renderEpec();
       // El IVA es solo cómo se muestran los importes: se recalcula todo lo que tenga plata a la vista.
       if(e.target.id === 'epecIva'){ renderEpec(); try{ renderTablaK(); }catch(err){} }
+      // Cambiar «con IVA / sin IVA» del casillero NO cambia el módulo: reescribe el mismo valor en
+      // la otra unidad, para que se vea cuánto es. Nada se guarda hasta tocar «Guardar».
+      if(e.target.id === 'epecBaseIva'){
+        const inp = document.getElementById('epecBase');
+        const v = n2(inp && inp.value);
+        // El número que estaba escrito era en la unidad ANTERIOR: se pasa a la nueva.
+        if(v > 0) inp.value = Math.round((baseCampoConIva() ? v * (1 + IVA_EPEC) : v / (1 + IVA_EPEC)) * 100) / 100;
+        pintarBaseEq();
+      }
     });
+    // Mientras se escribe, la equivalencia se actualiza sola: los dos números siempre a la vista.
+    panelEp.addEventListener('input', (e)=>{ if(e.target.id === 'epecBase') pintarBaseEq(); });
     // Elegir el renglón recorta la lista de plazas de la licitación.
     panelEp.addEventListener('click', async (e)=>{
       // El atajo del control de cobertura: carga el renglón como ítem propio, con nombre y unidad ya
@@ -21351,7 +21708,7 @@ const ITEMIZADO_EPEC = [
   G({ id:'Pegote', grupo:'Glosario', tit:'Pegote de hormigón pobre', que:'El bloque de hormigón pobre de 1 m de largo que se tira sobre el cable ya tapado con arena, para que no lo puedan levantar (antivandalismo). El AP-TC-001 los pone al inicio, medio y fin de cada vano; los proyectos, cada 5 o 10 m. Si el cable va en PEAD, solo en las acometidas a las columnas.', usa:'Obra civil: m³ de hormigón pobre.', ojo:'El ítem de zanjeo cita el plano pero <b>no los nombra</b> entre los materiales.', rel:['AP-TC-001'], tags:'pegote hormigon pobre vandalismo zanja tendido' });
   G({ id:'Torta', grupo:'Glosario', tit:'Torta / contrabase de mortero', que:'El aro de mortero cementicio en la base de la columna metálica que protege el bloquete de PAT y deja visible la mitad superior de la banderita. Va en metálicas (nuevas y existentes), <b>no en PRFV</b> (solo sellado de base). Era el 12.5 del pliego viejo; los ítems 1 a 4 del Anexo I la incluyen.', usa:'Obra civil (metálica) y «Columnas existentes».', rel:['AP-TC-005'], tags:'torta contrabase mortero base columna' });
   G({ id:'Vínculo', grupo:'Glosario', tit:'Vínculo / acople / capuchón', que:'La pieza que calza en la punta de la columna y sostiene los brazos con las luminarias. Se nombra por cuántos artefactos lleva (simple, doble, triple, cuádruple) y el largo del brazo (400, 1000, 1500, 1025 mm).', usa:'Sección Vínculos.', rel:['AP-C-008','AP-C-040'], tags:'vinculo acople capuchon brazo' });
-  G({ id:'Módulo (K)', grupo:'Glosario', tit:'Módulo y coeficiente K del Itemizado 2026', que:'El pliego LPE 5589 no publica precios: cada ítem vale <b>K módulos</b>, y el módulo (K = 1) es la PAT completa de una columna metálica de 7 m con un brazo y luminaria (Art. 05, s/ AP-TC-005/006). Módulo oficial sin IVA: <b>$ 281.998,71</b> (presupuesto $ 12.066.848.751,97 con IVA ÷ 35.364 módulos ÷ 1,21).', usa:'Itemizado 2026 y la valorización de cada plaza.', rel:['AP-TC-005'], tags:'modulo K coeficiente precio 281998 35364' });
+  G({ id:'Módulo (K)', grupo:'Glosario', tit:'Módulo y coeficiente K del Itemizado 2026', que:'El pliego LPE 5589 no publica precios: cada ítem vale <b>K módulos</b>, y el módulo (K = 1) es la PAT completa de una columna metálica de 7 m con un brazo y luminaria (Art. 05, s/ AP-TC-005/006). Módulo de EMA (precio de oferta, 07/09/2026): <b>$ 358.313,00 con IVA</b> = <b>$ 296.126,45 sin IVA</b>. De referencia, el módulo <b>oficial</b> que se deduce del pliego da $ 341.218,44 con IVA (presupuesto $ 12.066.848.751,97 ÷ 35.364 módulos): el nuestro está 5,01 % por encima.', usa:'Itemizado 2026 y la valorización de cada plaza.', rel:['AP-TC-005'], tags:'modulo K coeficiente precio 358313 296126 341218 35364 iva oferta' });
   G({ id:'Datos garantizados', grupo:'Glosario', tit:'Planilla de datos garantizados', que:'El formulario tipo de la D.G.A.P. que viene en cada proyecto ejecutivo: una columna «Solicitado» (lo que exige) y una «Ofrecido» <b>en blanco que llena la contratista</b>. De ahí salen las normas, valores y marcas admitidas de cables, jabalinas, gabinetes, fotocontrol y elementos del tablero. Es documentación que <b>hay que presentar</b>.', usa:'Sección «Marcas y normas admitidas» del cómputo (detrás de «Ver explicaciones»).', tags:'datos garantizados planilla marcas admitidas solicitado ofrecido' });
   G({ id:'ETG', grupo:'Glosario', tit:'Especificaciones Técnicas Generales (ETG 2022)', que:'El marco técnico general de la Dirección de Alumbrado (Anexo II del pliego, 2022). Capítulos que la calculadora cita: 2.2/2.3 hormigón H-13 elaborado · 5.2 cable concéntrico en aéreo · 14.1 a 14.4 puesta a tierra (jabalinas hasta 3 por punto, bloquete de latón soldado, terminal banderita, PAT del artefacto con 3×1,5) · 16.1 acrílico obligatorio y caja a 2,50 m · 26.3 shorting cup.', usa:'Notas ℹ y ⚠ de casi todas las secciones.', tags:'etg especificaciones tecnicas generales capitulo' });
 
