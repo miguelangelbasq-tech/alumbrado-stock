@@ -2395,6 +2395,12 @@
   .ep-base-fila select{ width:auto; margin:0; padding:8px 10px; font-size:13px; font-weight:600; }
   /* Los dos números siempre a la vista, para que nadie confunda uno con el otro (2026-09-07). */
   .ep-base-eq{ font-size:12px; color:var(--text-soft); margin-top:7px; font-variant-numeric:tabular-nums; }
+  /* El único interruptor de IVA (2026-09-07): vale para el módulo y para todos los importes. */
+  .ep-iva-fila{ display:flex; align-items:center; gap:8px; margin-top:11px; flex-wrap:wrap; }
+  .ep-iva-tit{ font-size:13px; font-weight:700; color:var(--navy); }
+  .ep-iva-fila select{ width:auto; margin:0; padding:8px 10px; font-size:13px; font-weight:700; }
+  .ep-base-eq .ep-ojo{ display:block; margin-top:5px; padding:7px 10px; border-radius:8px;
+                       background:rgba(199,74,74,.10); border:1px solid #c74a4a; color:#a33; font-weight:600; }
   .ep-base-eq b{ color:var(--navy); }
   .ep-base .hint{ flex:1 1 260px; min-width:0; }
   .ep-pesos{ font-size:11px; color:var(--text-soft); font-weight:600; margin-top:1px;
@@ -2649,7 +2655,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 10:29 · f9cb4b</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 11:07 · f542ca</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3664,25 +3670,47 @@
       </div>
       <div class="ep-base no-print">
         <div>
-          <!-- El número se puede escribir CON o SIN IVA (2026-09-07). El precio de oferta que
-               definió EMA es el de CON IVA ($358.313,00), así que ése viene elegido por defecto: si
-               hubiera que escribir siempre el neto, alguien iba a cargar 358.313 como si fuera sin
-               IVA y toda la plata de la app saldría 21 % de más. Adentro se guarda siempre el neto. -->
-          <label style="margin-top:0;">Valor del módulo</label>
+          <!-- ============================================================================
+               UN SOLO INTERRUPTOR DE IVA (2026-09-07)
+               Pedido del usuario, textual: *"tengo dos carteles con IVA y sin IVA, dejá uno solo,
+               verificá eso"*. Y tenía razón: había un selector para decir en qué unidad estabas
+               escribiendo el módulo, y abajo un tilde aparte para mostrar los importes con IVA.
+               Dos controles para la misma idea, que además podían quedar en desacuerdo (escribir
+               «con IVA» y ver todo «sin IVA»), que es la mejor forma de leer mal un total.
+               Ahora es UNO: «Agregar IVA (21 %)». Manda las dos cosas a la vez — en qué unidad se
+               escribe y se lee el módulo, y en qué unidad se muestran TODOS los importes.
+               Arranca en SIN IVA, por indicación del usuario (07/09/2026): *"358.313 este valor ya
+               está con el IVA; vos tenés que poner el valor que no está con IVA, o sea restarle el
+               IVA, y luego poner la opción de agregar IVA"*. Así el número de arriba es el módulo
+               de verdad —el neto, $296.126,45— y el IVA es algo que se agrega, no algo que ya
+               viene puesto. Adentro nunca cambió: el módulo siempre se guardó neto.
+               ============================================================================== -->
+          <label style="margin-top:0;">Valor del módulo <span style="font-weight:600;color:var(--text-soft)" id="epecBaseUn">— sin IVA</span></label>
           <div class="ep-base-fila">
             <span>$</span>
-            <input type="number" id="epecBase" min="0" step="any" placeholder="358313.00">
-            <select id="epecBaseIva" title="Decí si el número que estás escribiendo lleva el IVA adentro o no">
-              <option value="con" selected>con IVA</option>
-              <option value="sin">sin IVA</option>
-            </select>
+            <!-- type=text a propósito (2026-09-07): con type=number el navegador toma el PUNTO como
+                 coma decimal, así que escribir «358.313» —como se escribe en la Argentina— se
+                 guardaba como $ 358,31 y toda la plata de la app quedaba mil veces más chica. Le
+                 pasó al usuario. Ahora se acepta 358.313,00 · 358313 · 358313,00 y se avisa si el
+                 número queda absurdamente bajo. -->
+            <input type="text" id="epecBase" inputmode="decimal" autocomplete="off" placeholder="296.126,45">
             <button type="button" class="btn-auto" id="epecBaseBtn" style="margin:0;">Guardar</button>
           </div>
           <div class="ep-base-eq" id="epecBaseEq"></div>
-          <label class="it-chk" style="margin-top:9px;"><input type="checkbox" id="epecIva"> Mostrar los importes <b>con IVA</b> (21 %)</label>
+          <div class="ep-iva-fila">
+            <select id="epecBaseIva" title="El módulo se guarda y se calcula SIN IVA. Con esto se le agrega el 21 % —arriba y en todos los importes— para ver los números como se facturan.">
+              <option value="sin" selected>Sin IVA — el módulo neto</option>
+              <option value="con">Agregar IVA (21 %)</option>
+            </select>
+            <!-- El tilde viejo sigue existiendo, escondido, y en espejo con el selector: hay código
+                 y cómputos guardados que preguntan por él. Lo que se ve es uno solo. -->
+            <input type="checkbox" id="epecIva" hidden aria-hidden="true" tabindex="-1">
+          </div>
+          <div class="hint" id="epecIvaHint" style="margin-top:6px;"></div>
         </div>
         <div class="hint" style="margin:0;">El <b>K</b> de cada ítem es <b>cuántos módulos vale</b>: el precio unitario es K × módulo.<br>
-          El módulo es <b>$358.313,00 con IVA</b> = <b>$296.126,45 sin IVA</b>, que es el <b>precio de oferta</b> de EMA.
+          El módulo es <b>$296.126,45 sin IVA</b>, que con el 21 % da los <b>$358.313,00 con IVA</b> del <b>precio de oferta</b> de EMA.
+          Adentro se guarda y se calcula <b>siempre el neto</b>; el IVA se agrega para mostrar.
           <b>El pliego no publica el precio del módulo</b>: el Art. 05 lo deja en blanco porque lo pone el oferente.
           Como referencia, el <b>módulo oficial</b> que se deduce del presupuesto del pliego ($12.066.848.751,97 con IVA, Art. 4,
           ÷ 35.364 módulos, Art. 04) da <b>$341.218,44 con IVA</b>: el nuestro está <b>5,01 % por encima</b>.
@@ -18807,42 +18835,97 @@ const ITEMIZADO_EPEC = [
   let epecBase = MODULO_EPEC;
   // Los importes se calculan SIEMPRE con el módulo neto; el IVA es solo cómo se muestran. Así el
   // número que se guarda no depende de cómo esté el interruptor cuando alguien lo mira.
-  function ivaEncendido(){
-    try{ const el = document.getElementById('epecIva'); return !!(el && el.checked); }catch(e){ return false; }
+  // ---- UN SOLO interruptor de IVA (2026-09-07) ----
+  // Antes había dos: un selector para decir en qué unidad se escribía el módulo y un tilde aparte
+  // para mostrar los importes con IVA. Podían quedar en desacuerdo. Ahora manda uno solo, el
+  // <select id="epecBaseIva">, y el tilde viejo queda escondido pero en espejo, porque hay código
+  // (y pruebas, y cómputos guardados) que lo consultan. La fuente de verdad es el selector.
+  function baseCampoConIva(){
+    try{
+      const s = document.getElementById('epecBaseIva');
+      if(s) return s.value === 'con';
+      const c = document.getElementById('epecIva');   // por si el selector todavía no está en el DOM
+      return !!(c && c.checked);
+    }catch(e){ return true; }
+  }
+  function ivaEncendido(){ return baseCampoConIva(); }
+  // Deja el tilde escondido igual que el selector, para que nada lea un estado viejo.
+  function espejarTildeIva(){
+    try{
+      const c = document.getElementById('epecIva'); if(c) c.checked = baseCampoConIva();
+      // La unidad vigente queda anotada en el propio selector: es contra esto que se compara para
+      // decidir si un `change` cambió algo de verdad o llegó repetido.
+      const s = document.getElementById('epecBaseIva'); if(s) s.dataset.unidad = s.value;
+    }catch(e){}
   }
   function baseEf(){ return epecBase * (ivaEncendido() ? (1 + IVA_EPEC) : 1); }
 
-  // ---- Escribir el módulo con o sin IVA (2026-09-07) ----
-  // El precio de oferta que maneja EMA es el de CON IVA ($358.313,00). Si el casillero obligara a
-  // escribir el neto, tarde o temprano alguien pega 358.313 ahí y toda la plata de la app sale 21 %
-  // de más, sin que nada lo avise. Así que el casillero pregunta qué número se está escribiendo, y
-  // abajo se ven SIEMPRE los dos, que es lo que hace imposible confundirlos.
-  function baseCampoConIva(){
-    try{ const s = document.getElementById('epecBaseIva'); return !s || s.value === 'con'; }catch(e){ return true; }
+  // ---- Leer un número escrito como se escribe acá (2026-09-07) ----
+  // El casillero era <input type="number"> y el navegador toma el PUNTO como coma decimal: escribir
+  // «358.313» —que es como se escribe trescientos cincuenta y ocho mil trescientos trece— quedaba
+  // guardado como $ 358,31 y toda la plata de la app salía mil veces más chica. Le pasó al usuario.
+  // Ahora entra como texto y se interpreta como se lee:
+  //   «358.313,00» → punto de miles y coma decimal      «358313,00» → coma decimal
+  //   «358.313»    → punto de miles (grupos de 3)       «296126.45» → punto decimal (no son grupos de 3)
+  function numeroAR(txt){
+    let s = String(txt == null ? '' : txt).replace(/[\s $]/g, '');
+    if(!s) return 0;
+    const neg = /^-/.test(s);
+    s = s.replace(/[^\d.,]/g, '');
+    if(!s) return 0;
+    const hayPunto = s.indexOf('.') >= 0, hayComa = s.indexOf(',') >= 0;
+    if(hayPunto && hayComa){
+      // El separador decimal es el ÚLTIMO que aparece; el otro es de miles.
+      s = (s.lastIndexOf(',') > s.lastIndexOf('.'))
+        ? s.replace(/\./g, '').replace(',', '.')
+        : s.replace(/,/g, '');
+    } else if(hayComa){
+      s = s.replace(/,/g, '.');
+    } else if(hayPunto){
+      // Solo puntos: son de miles si están cada 3 dígitos («358.313», «1.234.567»). Si no, decimal.
+      if(/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+    }
+    const v = parseFloat(s);
+    return isFinite(v) ? (neg ? -v : v) : 0;
   }
+  window.numeroAR = numeroAR;
   function baseNetaDelCampo(){
-    const v = n2((document.getElementById('epecBase')||{}).value);
+    const v = numeroAR((document.getElementById('epecBase')||{}).value);
     if(!(v > 0)) return 0;
     return baseCampoConIva() ? v / (1 + IVA_EPEC) : v;
   }
-  // Escribe en el casillero un valor NETO, respetando cómo esté puesto el selector.
+  // Escribe en el casillero un valor NETO, en la unidad del interruptor y con formato de acá.
   function ponerBaseEnCampo(neto){
     const inp = document.getElementById('epecBase');
     if(!inp) return;
-    inp.value = neto > 0 ? (baseCampoConIva() ? Math.round(neto * (1 + IVA_EPEC) * 100) / 100
-                                              : Math.round(neto * 100) / 100) : '';
+    if(!(neto > 0)){ inp.value = ''; return; }
+    const v = baseCampoConIva() ? neto * (1 + IVA_EPEC) : neto;
+    inp.value = (Math.round(v * 100) / 100).toLocaleString('es-AR', { minimumFractionDigits:2, maximumFractionDigits:2 });
   }
-  // La equivalencia debajo del casillero: los dos números, siempre.
+  // La equivalencia debajo del casillero: los dos números, siempre, y cuál se está usando.
   function pintarBaseEq(){
     const eq = document.getElementById('epecBaseEq');
+    const hint = document.getElementById('epecIvaHint');
+    const conIva = baseCampoConIva();
+    const un = document.getElementById('epecBaseUn');
+    if(un) un.textContent = conIva ? '— con IVA' : '— sin IVA';
+    if(hint) hint.innerHTML = conIva
+      ? 'Está <b>agregando el 21 %</b>: el número de arriba se lee y se escribe con IVA, y <b>todos los importes</b> del itemizado y de los informes se muestran con IVA. Es como se factura.'
+      : 'El módulo va <b>sin IVA</b>, que es el valor real con el que se calcula todo, y <b>todos los importes</b> se muestran netos. Los <b>$ 358.313,00</b> que cotizó EMA ya traen el IVA adentro: acá va el neto. Cambiá el selector para agregárselo.';
     if(!eq) return;
     const neto = baseNetaDelCampo();
     if(!(neto > 0)){
       eq.innerHTML = 'Sin valor de módulo los totales se muestran en <b>coeficientes (K)</b>, no en pesos.';
       return;
     }
-    eq.innerHTML = `Son <b>${plata(neto * (1 + IVA_EPEC))} con IVA</b> = <b>${plata(neto)} sin IVA</b>. ` +
-      `Adentro se guarda el neto: el interruptor de abajo solo cambia cómo se muestran los importes.`;
+    // Un módulo de tres cifras no existe: si sale eso, casi seguro se escribió «358.313» y el punto
+    // se leyó como coma decimal en la versión vieja, o falta un pedazo del número. Se avisa fuerte,
+    // porque un módulo mil veces más chico deja TODA la plata de la app mal sin que nada chille.
+    const raro = neto < 1000
+      ? `<span class="ep-ojo">⚠️ Ojo: un módulo de <b>${plata(neto)}</b> no puede ser. El módulo de EMA es de <b>seis cifras</b> ($ 358.313,00 con IVA). Si escribiste <b>358.313</b> y quedó esto, volvé a escribirlo y guardá — ahora el casillero entiende el punto como separador de miles.</span>`
+      : '';
+    eq.innerHTML = `El módulo es <b>${plata(neto)} sin IVA</b> y <b>${plata(neto * (1 + IVA_EPEC))} con IVA</b>. `
+      + `Se guarda y se calcula con el <b>neto</b>; ahora se está mostrando <b>${conIva ? 'con IVA' : 'sin IVA'}</b>.` + raro;
   }
 
   // ============================================================
@@ -19908,6 +19991,7 @@ const ITEMIZADO_EPEC = [
     try{ pintarRenglones(); pintarPlazasLicitacion(); renderHechas(); renderCobertura(); }catch(e){}
     // Que el casillero muestre el módulo con el que se está calculando, sin pisar lo que
     // alguien esté tipeando en ese momento. Se escribe según cómo esté el selector con/sin IVA.
+    espejarTildeIva();
     const inpBase = document.getElementById('epecBase');
     if(inpBase && document.activeElement !== inpBase && inpBase.value === '' && epecBase > 0)
       ponerBaseEnCampo(epecBase);
@@ -20337,19 +20421,27 @@ const ITEMIZADO_EPEC = [
         epecBase = baseNetaDelCampo();
         const msg = document.getElementById('epecBaseMsg');
         aplicarPrecios();
+        let enLaNube = true;
         try{
           if(!puedeEditar()) throw new Error('sin sesión');
           await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase,
                                           ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
-          // El mensaje repite los DOS números a propósito: si alguien eligió mal la unidad, lo ve
-          // acá mismo antes de que toda la plata de la app salga 21 % corrida (2026-09-07).
-          if(msg){ msg.style.color='var(--teal-dark)';
-            msg.innerHTML = epecBase>0
-              ? `✔ Guardado para todo el equipo: el módulo vale <b>${plata(epecBase*(1+IVA_EPEC))} con IVA</b> = <b>${plata(epecBase)} sin IVA</b>. Si no era ése, cambiá el selector de al lado y guardá de nuevo.`
-              : '✔ Guardado. Sin valor de módulo, los totales vuelven a mostrarse en coeficientes.'; }
-        }catch(err){
-          if(msg){ msg.style.color='var(--amber)';
-            msg.textContent='Se aplicó acá, pero para que lo vea todo el equipo hay que iniciar sesión.'; }
+        }catch(err){ enLaNube = false; }
+        // El aviso del número va SIEMPRE, haya sesión o no (2026-09-07): antes vivía adentro del
+        // `try`, así que sin sesión el único mensaje era «se aplicó acá» y un módulo mal cargado
+        // pasaba en silencio. Un módulo de tres cifras deja TODA la plata de la app mil veces más
+        // chica, y eso no se puede esconder atrás de un aviso de sesión.
+        if(msg){
+          const raro = epecBase > 0 && epecBase < 1000;
+          const cola = enLaNube ? '' : ' <b>Ojo:</b> se aplicó en este dispositivo, pero para que lo vea todo el equipo hay que iniciar sesión.';
+          msg.style.color = raro ? '#c74a4a' : (enLaNube ? 'var(--teal-dark)' : 'var(--amber)');
+          msg.innerHTML = (epecBase > 0
+            ? (raro
+                ? `⚠️ Guardado, pero <b>fijate</b>: quedó un módulo de <b>${plata(epecBase)} sin IVA</b>, y el de EMA es de <b>seis cifras</b> ($ 358.313,00 con IVA). Escribilo de nuevo — el casillero ya entiende «358.313,00» y «358313».`
+                // Repite los DOS números a propósito: si alguien eligió mal la unidad, lo ve acá
+                // mismo antes de que toda la plata de la app salga 21 % corrida.
+                : `${enLaNube ? '✔ Guardado para todo el equipo' : '✔ Guardado'}: el módulo vale <b>${plata(epecBase)} sin IVA</b> y <b>${plata(epecBase*(1+IVA_EPEC))} con IVA</b>. Si no era ése, cambiá el selector de IVA y guardá de nuevo.`)
+            : '✔ Guardado. Sin valor de módulo, los totales vuelven a mostrarse en coeficientes.') + cola;
         }
         renderEpec(); return;
       }
@@ -20441,16 +20533,28 @@ const ITEMIZADO_EPEC = [
     });
     panelEp.addEventListener('change', (e)=>{
       if(e.target.id === 'epecSoloConItems') renderEpec();
-      // El IVA es solo cómo se muestran los importes: se recalcula todo lo que tenga plata a la vista.
-      if(e.target.id === 'epecIva'){ renderEpec(); try{ renderTablaK(); }catch(err){} }
-      // Cambiar «con IVA / sin IVA» del casillero NO cambia el módulo: reescribe el mismo valor en
-      // la otra unidad, para que se vea cuánto es. Nada se guarda hasta tocar «Guardar».
+      // ---- El único interruptor de IVA (2026-09-07) ----
+      // Hace las dos cosas que antes hacían dos controles distintos:
+      //   1. reescribe el módulo en la unidad nueva (el número NO cambia, cambia cómo se escribe);
+      //   2. vuelve a dibujar todo lo que tenga plata a la vista, en esa misma unidad.
+      // Nada se guarda hasta tocar «Guardar»: el módulo que está adentro sigue siendo el neto.
       if(e.target.id === 'epecBaseIva'){
-        const inp = document.getElementById('epecBase');
-        const v = n2(inp && inp.value);
-        // El número que estaba escrito era en la unidad ANTERIOR: se pasa a la nueva.
-        if(v > 0) inp.value = Math.round((baseCampoConIva() ? v * (1 + IVA_EPEC) : v / (1 + IVA_EPEC)) * 100) / 100;
+        // El `change` puede llegar SIN que la unidad haya cambiado de verdad (lo dispara código
+        // nuestro, o el navegador al reelegir la misma opción). Si en ese caso se convirtiera
+        // igual, el módulo se dividiría por 1,21 cada vez y el valor se iría achicando solo.
+        // Por eso se recuerda cuál era la unidad y solo se convierte si realmente cambió (2026-09-07).
+        const ahora = baseCampoConIva() ? 'con' : 'sin';
+        const antes = e.target.dataset.unidad || (ahora === 'con' ? 'sin' : 'con');
+        e.target.dataset.unidad = ahora;
+        espejarTildeIva();
+        if(antes !== ahora){
+          const inp = document.getElementById('epecBase');
+          const v = numeroAR(inp && inp.value);
+          // El número que estaba escrito era en la unidad ANTERIOR: se pasa a la nueva.
+          if(v > 0) ponerBaseEnCampo(ahora === 'con' ? v : v / (1 + IVA_EPEC));
+        }
         pintarBaseEq();
+        renderEpec(); try{ renderTablaK(); }catch(err){}
       }
     });
     // Mientras se escribe, la equivalencia se actualiza sola: los dos números siempre a la vista.
