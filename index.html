@@ -2051,6 +2051,18 @@
   .it-repetidos > b{ display:block; font-size:13.5px; margin-bottom:4px; }
   .it-repetidos div{ margin-top:3px; }
   .it-repetidos .hint{ color:#a33; }
+  .it-borrar-plaza{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:16px;
+                    padding-top:12px; border-top:1px dashed var(--line); }
+  .it-borrar-plaza .ep-borrar-plaza{ margin:0; padding:7px 14px; font-size:12.5px;
+                                     color:var(--danger); border-color:rgba(199,74,74,.45); }
+  .it-borrar-plaza .ep-borrar-plaza:hover{ background:rgba(199,74,74,.08); }
+  .ep-certif-panel{ border-left:4px solid var(--teal-dark); }
+  .ep-certif-panel.ok{ border-left-color:var(--teal-dark); opacity:.85; }
+  .ep-certif-panel > b{ display:block; font-size:14px; color:var(--navy); }
+  .ep-certif-tabla{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .ep-certif-tabla th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em;
+                       color:var(--text-soft); padding:4px 6px; border-bottom:1px solid var(--line); }
+  .ep-certif-tabla td{ padding:6px; border-bottom:1px solid var(--border); vertical-align:middle; }
   .it-certif-sel{ align-items:center; }
   .it-certif-sel select{ font-size:12.5px; padding:7px 10px; }
   .it-previa-dudas{ margin-top:12px; border-radius:10px; padding:10px 14px; font-size:12.5px; line-height:1.55;
@@ -2672,7 +2684,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 14:29 · 9b4dda</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 15:17 · 11a12b</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3750,6 +3762,12 @@
     <!-- El total, siempre a la vista (2026-09-07). Va FUERA de la tarjeta plegable de arriba a
          propósito: adentro desaparecía apenas se cerraba esa tarjeta. -->
     <div id="epecTotalizador"></div>
+
+    <!-- Qué hojas del certificado de la Municipalidad quedaron sin plaza, y qué plazas quedaron sin
+         hoja. Es la respuesta a *"hay plazas que no me aparecen para sacar los datos de la Muni,
+         ¿por qué?"* (2026-09-07): en vez de tener que abrir plaza por plaza, acá se ve de una y se
+         asignan desde el mismo lugar. -->
+    <div id="epecCertifPanel"></div>
 
     <div id="epecLista"></div>
 
@@ -20241,6 +20259,67 @@ const ITEMIZADO_EPEC = [
         <button type="button" class="btn-ghost ep-mini" id="epecNingunaMarcar">Ninguna</button>
       </div>
     </div>`;
+    pintarPanelCertif(todas);
+  }
+
+  // ==========================================================================================
+  // QUÉ HOJAS DEL CERTIFICADO QUEDARON SIN PLAZA  (2026-09-07)
+  // ==========================================================================================
+  // Pedido del usuario: *"hay plazas que no me aparecen para sacar los datos de la Muni, ¿por qué?"*.
+  // La respuesta caso por caso ya está en cada tarjeta, pero hay que abrirlas una por una. Acá se
+  // ve todo junto: cuántas hojas ya tienen plaza, cuáles quedaron libres y qué plazas no cruzaron.
+  // Y se asigna desde el mismo lugar, sin ir a buscar la plaza.
+  function pintarPanelCertif(todas){
+    const cont = document.getElementById('epecCertifPanel');
+    if(!cont) return;
+    if(typeof window.certifHojas !== 'function' || typeof window.certifDePlaza !== 'function'){ cont.innerHTML = ''; return; }
+    const hojas = window.certifHojas();
+    if(!hojas.length || !todas.length){ cont.innerHTML = ''; return; }
+
+    const dueños = new Map();      // nombre de hoja -> plazas que la tienen
+    const sinHoja = [];
+    todas.forEach(a=>{
+      const p = window.certifDePlaza(a);
+      if(!p){ sinHoja.push(a); return; }
+      if(!dueños.has(p.n)) dueños.set(p.n, []);
+      dueños.get(p.n).push(a);
+    });
+    const libres = hojas.filter(h=>!dueños.has(h.n));
+    const asignadas = hojas.length - libres.length;
+
+    if(!libres.length && !sinHoja.length){
+      cont.innerHTML = `<div class="card no-print ep-certif-panel ok">
+        <b>📋 Certificado de la Municipalidad — las ${hojas.length} hojas están asignadas</b>
+        <div class="hint" style="margin:4px 0 0;">Cada hoja de la planilla tiene su plaza en la herramienta. En cada una podés tocar «📋 Traer lo certificado».</div>
+      </div>`;
+      return;
+    }
+
+    const opcionesPlazas = (hoja)=> `<option value="">— asignarle una plaza —</option>` +
+      todas.map(a=>`<option value="${esc(a.id)}">${esc(a.nombre||'(sin nombre)')}${a.obraId?` · ID ${esc(a.obraId)}`:''}</option>`).join('');
+
+    let h = `<div class="card no-print ep-certif-panel">
+      <b>📋 Certificado de la Municipalidad — ${asignadas} de ${hojas.length} hojas asignadas</b>
+      <div class="hint" style="margin:4px 0 8px;">Una plaza solo puede traer lo certificado si <b>cruza</b> con una hoja de la planilla. El cruce se hace por <b>ID de obra</b> y, si no, por <b>nombre</b>. Cuando el ID o el nombre no coinciden, hay que decirle cuál es — y se hace acá.</div>`;
+
+    if(libres.length){
+      h += `<div class="hint" style="margin:10px 0 4px; color:var(--amber);"><b>${libres.length} hoja(s) del certificado no están asignadas a ninguna plaza:</b></div>
+        <div class="tabla-scroll"><table class="ep-certif-tabla"><thead><tr>
+          <th>Hoja del certificado</th><th style="width:110px;">ID</th><th style="width:70px; text-align:right;">Ítems</th><th style="width:250px;">Plaza a la que corresponde</th>
+        </tr></thead><tbody>` +
+        libres.map(x=>`<tr>
+          <td><b>${esc(x.n)}</b></td>
+          <td>${esc(x.ids||'—')}</td>
+          <td style="text-align:right; font-family:var(--mono);">${x.items}</td>
+          <td><select class="ep-certif-asignar" data-hoja="${esc(x.n)}" style="margin:0; width:100%; font-size:12.5px; padding:6px 8px;">${opcionesPlazas(x.n)}</select></td>
+        </tr>`).join('') + `</tbody></table></div>`;
+    }
+    if(sinHoja.length){
+      h += `<div class="hint" style="margin:12px 0 0;"><b>${sinHoja.length} plaza(s) no cruzaron con ninguna hoja:</b> ${sinHoja.slice(0,12).map(a=>`${esc(a.nombre||'(sin nombre)')}${a.obraId?` <small>(ID ${esc(a.obraId)})</small>`:''}`).join(' · ')}${sinHoja.length>12?' …':''}.
+        <br>Si alguna de ellas es una de las hojas de arriba, elegila en la columna de la derecha. Si no está en el certificado —porque es una plaza nueva— está bien que no cruce.</div>`;
+    }
+    h += `</div>`;
+    cont.innerHTML = h;
   }
 
   function renderEpec(){
@@ -20489,7 +20568,15 @@ const ITEMIZADO_EPEC = [
       <button type="button" class="btn-auto ep-nuevo-btn" style="margin:0;" ${dis}>+ Agregar a esta plaza</button>
     </div>
     <div class="hint" style="margin-top:6px;">Se pueden agregar los <b>92 ítems</b> del ANEXO I. Los <b>83.1 a 89</b> son de provisión de materiales en caso de eventualidad: van solo si esos materiales los pone la contratista.</div>
-    <div class="hint ep-msg" style="margin-top:6px;"></div>`;
+    <div class="hint ep-msg" style="margin-top:6px;"></div>
+    <!-- Borrar la plaza, desde acá (2026-09-07). Existía solo en el tablero de Obras, y el usuario
+         trabaja el itemizado en esta pantalla: *"me gustaría un botón para eliminar plazas con un
+         cartel de «seguro que querés eliminar»"*. El cartel dice el nombre, el ID y CUÁNTO se
+         pierde, porque esto borra para todo el equipo y no se puede deshacer. -->
+    <div class="it-borrar-plaza no-print">
+      <button type="button" class="btn-ghost ep-borrar-plaza" ${dis}>🗑 Eliminar esta plaza</button>
+      <span class="hint" style="margin:0;">Borra la plaza entera —ítems, avance y todo lo cargado— <b>para todo el equipo</b>. Pide confirmación y <b>no se puede deshacer</b>.</span>
+    </div>`;
     h += bloqueSinItemHtml(a, dis);
     h += `</div>`;
     return h;
@@ -20672,6 +20759,38 @@ const ITEMIZADO_EPEC = [
         if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
         delete previa[a.id];
         renderEpec(); return;
+      }
+
+      // Eliminar la plaza desde el itemizado (2026-09-07).
+      const borrarPl = e.target.closest('.ep-borrar-plaza');
+      if(borrarPl){
+        const card = borrarPl.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        const nIt = (a.valorItems||[]).length + (a.valorItemsEpec||[]).length;
+        const v = (typeof calcularValorPlaza === 'function') ? calcularValorPlaza(a) : null;
+        const plataTxt = (v && v.presupuesto > 0) ? ` — ${fmt(v.kTotal,2)} K, ${plata(v.presupuesto)}` : '';
+        const aviso = `¿Seguro que querés eliminar «${a.nombre||'esta plaza'}»${a.obraId?` (ID ${a.obraId})`:''}?\n\n`
+          + `Se pierde TODO lo cargado en esta plaza: ${nIt} ítem(s) del itemizado${plataTxt}, el avance, las etapas y las observaciones.\n\n`
+          + `Se borra para TODO EL EQUIPO y NO SE PUEDE DESHACER.`;
+        if(!confirm(aviso)) return;
+        // Segunda vuelta: es un borrado que no se puede deshacer y borra para todos.
+        if(!confirm(`Última confirmación: se elimina «${a.nombre||''}» definitivamente.\n\n¿Confirmás?`)) return;
+        (async ()=>{
+          try{
+            if(typeof window.fbAvanceEliminar === 'function') await window.fbAvanceEliminar(a.id);
+            else throw new Error('sin conexión');
+          }catch(err){
+            alert('No se pudo eliminar la plaza (revisá tu conexión a internet y que hayas iniciado sesión).');
+            return;
+          }
+          const i = avanceObras.indexOf(a);
+          if(i >= 0) avanceObras.splice(i, 1);      // el listener de Firestore lo confirma después
+          delete previa[a.id];
+          renderEpec(); refrescarPantallasDeAvance();
+          try{ if(typeof renderAvanceTablero === 'function') renderAvanceTablero(); }catch(e2){}
+          try{ if(typeof renderAvanceDetalle === 'function') renderAvanceDetalle(); }catch(e2){}
+        })();
+        return;
       }
 
       // Unificar los renglones repetidos de una plaza (2026-09-07).
@@ -20880,6 +20999,18 @@ const ITEMIZADO_EPEC = [
     });
     panelEp.addEventListener('change', (e)=>{
       if(e.target.id === 'epecSoloConItems') renderEpec();
+      // Asignar una hoja suelta del certificado a una plaza, desde el panel de arriba (2026-09-07).
+      const asignar = e.target.closest('.ep-certif-asignar');
+      if(asignar){
+        const a = obras().find(x=>String(x.id) === asignar.value);
+        if(a){
+          a.certifHoja = asignar.dataset.hoja;
+          if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+          delete previa[a.id];
+          renderEpec();
+        }
+        return;
+      }
       // El selector de hoja del certificado: se guarda con la plaza y manda sobre el cruce automático.
       const selHoja = e.target.closest('.ep-certif-hoja');
       if(selHoja){
