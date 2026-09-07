@@ -2684,7 +2684,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 15:17 · 11a12b</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 15:56 · f3aea5</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -20310,7 +20310,8 @@ const ITEMIZADO_EPEC = [
         libres.map(x=>`<tr>
           <td><b>${esc(x.n)}</b></td>
           <td>${esc(x.ids||'—')}</td>
-          <td style="text-align:right; font-family:var(--mono);">${x.items}</td>
+          <td style="text-align:right; font-family:var(--mono);">${x.items}
+            <button type="button" class="btn-ghost ep-certif-ver" data-hoja="${esc(x.n)}" title="Ver qué lleva esta hoja" style="margin:0 0 0 6px; padding:2px 8px; font-size:11.5px;">👁</button></td>
           <td><select class="ep-certif-asignar" data-hoja="${esc(x.n)}" style="margin:0; width:100%; font-size:12.5px; padding:6px 8px;">${opcionesPlazas(x.n)}</select></td>
         </tr>`).join('') + `</tbody></table></div>`;
     }
@@ -20759,6 +20760,41 @@ const ITEMIZADO_EPEC = [
         if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
         delete previa[a.id];
         renderEpec(); return;
+      }
+
+      // Ver qué lleva una hoja del certificado, sin tener que asignarla antes (2026-09-07).
+      // Pedido del usuario: *"necesito sacar la info del Excel de lo que lleva esa plaza"*.
+      const verHoja = e.target.closest('.ep-certif-ver');
+      if(verHoja){
+        const c = (typeof window.certifContenido === 'function') ? window.certifContenido(verHoja.dataset.hoja) : null;
+        if(!c) return;
+        const base = baseEf();
+        const filas = c.filas.map(f=>`<tr>
+          <td style="font-family:var(--mono);">${esc(f.item)}</td>
+          <td>${esc(f.desc)}</td>
+          <td style="text-align:right; font-family:var(--mono);">${fmt(f.cant, Number.isInteger(f.cant)?0:2)} ${esc(f.un)}</td>
+          <td style="text-align:right; font-family:var(--mono);">${fmt(f.k,2)}</td>
+          <td style="text-align:right; font-family:var(--mono);">${fmt(f.kTot,2)} K</td>
+          ${base > 0 ? `<td style="text-align:right; font-family:var(--mono);">${plata(f.kTot*base)}</td>` : ''}
+        </tr>`).join('');
+        const html = `<h2 style="margin:0 0 2px;">${esc(c.n)}</h2>
+          <div style="color:var(--text-soft); font-size:12.5px; margin-bottom:10px;">
+            Hoja del certificado de la Municipalidad${c.ids.length?` · ID ${esc(c.ids.join(' / '))}`:''} · ${c.filas.length} ítem(s) certificados.
+            Son las cantidades <b>ya cobradas</b>, tal cual vinieron en la planilla.</div>
+          <div class="tabla-scroll"><table class="ep-certif-tabla"><thead><tr>
+            <th style="width:50px;">Ítem</th><th>Descripción</th><th style="width:110px; text-align:right;">Cantidad</th>
+            <th style="width:60px; text-align:right;">K</th><th style="width:90px; text-align:right;">Subtotal</th>
+            ${base > 0 ? `<th style="width:130px; text-align:right;">${epecConIva()?'Con IVA':'Sin IVA'}</th>` : ''}
+          </tr></thead><tbody>${filas}</tbody>
+          <tfoot><tr><td colspan="4" style="text-align:right;"><b>TOTAL</b></td>
+            <td style="text-align:right; font-family:var(--mono);"><b>${fmt(c.kTotal,2)} K</b></td>
+            ${base > 0 ? `<td style="text-align:right; font-family:var(--mono);"><b>${plata(c.kTotal*base)}</b></td>` : ''}
+          </tr></tfoot></table></div>
+          <div class="hint" style="margin-top:10px;">Esto es <b>solo lo que la planilla certificó</b>. Al traerlo a una plaza, la herramienta le agrega además la <b>provisión que puso EMA</b> (ítems 83 a 89) y lo que se hizo sin certificar.</div>
+          <div style="margin-top:12px;"><button type="button" class="btn-ghost" onclick="coCerrarVentana()">Cerrar</button></div>`;
+        if(window.CO && typeof window.CO.ventana === 'function') window.CO.ventana(html);
+        else if(typeof ventana === 'function') ventana(html);
+        return;
       }
 
       // Eliminar la plaza desde el itemizado (2026-09-07).
@@ -22194,7 +22230,10 @@ const ITEMIZADO_EPEC = [
   window.coCerrarVentana = cerrarVentana;
 
   window.CO = { estado, fijar, cerrar, reabrir, registrarAjuste, aplicarAjuste, cambiarCantidad, proyectoDe, ajustesDe, filasDe, modulosProyecto, modulosVigentes,
-                bandaHtml, columnasTh, columnasTd, refrescarFila, libroHtml, imprimir, timelineHtml, cierreOtHtml, cierreOtValidar, cierreOtAplicar, autoFijarPorOt, claveDe, MOTIVOS };
+                bandaHtml, columnasTh, columnasTd, refrescarFila, libroHtml, imprimir, timelineHtml, cierreOtHtml, cierreOtValidar, cierreOtAplicar, autoFijarPorOt, claveDe, MOTIVOS,
+                // La ventanita modal se comparte con el itemizado (para mirar una hoja del
+                // certificado sin salir de la pantalla) — 2026-09-07.
+                ventana, cerrarVentana };
 })();
 </script>
 
@@ -22782,46 +22821,66 @@ const ITEMIZADO_EPEC = [
   // Son 32 plazas con datos y 4 hojas vacías (Hípica, Vicor, San Cayetano y Aycardoz). Los números
   // están tal cual vinieron: acá no se corrigió ninguno. Este bloque es SOLO LECTURA — es el
   // espejo contra el que se compara lo que arma la Calculadora.
+  // ---- Los IDs y los alias de cada hoja (2026-09-07) ----
+  // Trece hojas de la planilla NO traen el ID en el título, así que solo podían cruzar por nombre y
+  // muchas quedaban sueltas. El usuario pidió corroborarlo: *"hay plazas que no podés coincidir con
+  // el Excel? Fijate el nombre y el ID"*.
+  // Descubrimiento: el número que llevan adelante algunas hojas («26-», «29-», «32-») es el ORDEN
+  // del ANEXO VI del pliego. Verificado contra los PDFs de proyecto que subió el usuario, que traen
+  // el número Y el ID escritos por él:
+  //   «17  ID3191» → orden 17 del ANEXO VI = ID 3191 ✔      «18  ID 3232» → orden 18 = 3232 ✔
+  //   «19  ID 3231» → orden 19 = 3231 ✔                     «20  ID 50015002» → orden 20 = 5001 ✔
+  //   «21AP6240 y 6241» → orden 21 = 6240 ✔                 «30 y 51 …Plaza Hipica» → 6461 y 6207 ✔
+  // Con eso salen: 26-CERRO COLORADO → D010 · 29-COLINAS DE BELLA VISTA → C001 (y el barrio del
+  // ANEXO VI se llama igual, doble confirmación) · 32-PLAZA VUELTA OBLIGADO → 4028.
+  // Y por el nombre del barrio en el ANEXO VI: HÍPICA → 6461/6207 (Jardines del Jockey, y es el
+  // nombre del PDF) · VICOR → 6039 · SAN CAYETANO → 7620 · MAIPÚ → 7081 (además hay un archivo
+  // «Comparto 7081 COMPLETO») · ESPERANZA → 6910.
+  // Quedan sin ID, porque no figuran en el ANEXO VI con ese nombre: CHAMICAL, KOCH, ROBERTO VIOLA,
+  // AYCARDOZ y LAS PALMAS (de «Las Palmas» hay ocho y no se puede elegir a ciegas). Ésas cruzan por
+  // nombre, y si no, se asignan a mano desde el panel del itemizado.
+  // `al` son los nombres con los que se la puede llamar: el de la planilla, las variantes conocidas
+  // («MALVADISCOS» está mal escrito en la hoja; la plaza es MALVAVISCO) y el barrio del ANEXO VI.
   const CERTIF = {
     fuente: 'CERTIF. PLAZAS ITEM MUNI.xlsx',
     fecha: '07/09/2026',
     plazas: [
-    { n:'SANTA ANA', ids:['4045'], it:{'2':3,'3':3,'11':12,'14':1,'18':145,'38':216,'41':1,'42':1,'43':1,'44':3,'45':2,'46':2,'82':1} },
-    { n:'JERUSALEN', ids:['4026'], it:{'1':1,'2':1,'3':2,'9':1,'11':10,'13':1,'15':186,'36':263,'41':5,'42':5,'43':5,'44':13,'45':5,'46':2,'73':1,'82':5} },
-    { n:'PARQUE LATINO', ids:['6072'], it:{'2':1,'3':3,'9':1,'11':15,'13':1,'15':162,'36':250,'41':3,'42':3,'43':3,'44':9,'45':3,'50':2,'59':2,'73':1,'82':5} },
-    { n:'PARQUE DEL AGUA', ids:['5909'], it:{'4':5,'9':1,'11':15,'13':1,'18':547,'36':185,'37':391,'41':4,'42':4,'43':4,'44':16,'45':28,'46':5,'49':1,'56':10,'73':1,'78':3} },
-    { n:'LA PLAZONA', ids:['5082'], it:{'3':2,'9':1,'11':8,'13':1,'15':191,'36':246,'41':4,'42':4,'43':4,'44':12,'45':4,'46':2,'50':1,'58':1,'73':1} },
-    { n:'LUIS VERNET', ids:['2'], it:{'2':1,'3':3,'9':1,'11':15,'13':1,'15':55,'17':5,'36':92,'45':3,'46':3,'50':1,'59':1,'73':1} },
-    { n:'NICOLAS AVELLANEDA', ids:['7161'], it:{'3':8,'4':1,'9':1,'11':15,'13':1,'18':157,'20':15,'36':256,'45':5,'46':4,'48':1,'51':1,'56':6,'73':1,'82':7} },
-    { n:'SOLDADO AERONAUTICO', ids:['1072'], it:{'6':18,'7':6,'9':1,'11':15,'13':1,'15':615,'36':431,'37':436,'45':11,'46':11,'47':1,'49':1,'50':1,'56':6,'73':1} },
-    { n:'JERONIMO CABRERA', ids:['1010'], it:{'2':11,'9':1,'11':10,'15':279,'36':390,'50':1,'56':6,'73':1,'76':1} },
-    { n:'PABLO BRACAMONTE', ids:['3114'], it:{'3':2,'9':1,'11':12,'13':1,'15':48,'36':65,'50':1,'58':1,'73':1} },
-    { n:'ELEODORO FIERRO CERRUTI', ids:['2063'], it:{'9':1,'11':15,'13':1,'18':95,'36':142,'41':4,'42':4,'43':4,'44':12,'50':2,'59':1,'73':1,'82':4} },
-    { n:'PASEO LA SOLIDARIDAD', ids:['3123'], it:{'1':2,'2':3,'3':3,'9':1,'11':10,'13':1,'15':165,'36':233,'73':1} },
-    { n:'EVARISTO FERNANDEZ', ids:['9074'], it:{'3':6,'15':230,'36':310,'41':6,'42':6,'43':3,'44':4,'45':2,'50':1,'51':1,'56':6,'71':1,'76':1} },
-    { n:'TIERRA DEL FUEGO', ids:['8074'], it:{'2':3,'3':2,'9':1,'11':15,'18':125,'36':160,'37':29,'45':1,'50':1,'59':1,'72':2,'73':1,'76':1} },
-    { n:'MARQUES DE SOBREMONTE', ids:['2051'], it:{'3':3,'9':1,'11':15,'13':1,'15':74,'17':10,'36':129,'41':1,'42':1,'43':1,'44':1,'45':3,'46':2,'50':1,'59':1,'73':1,'82':1} },
-    { n:'POETA LUGONES', ids:['2005'], it:{'1':2,'2':6,'9':2,'11':34,'13':2,'15':563,'17':30,'36':737,'38':70,'41':16,'42':16,'43':1,'44':32,'45':16,'50':2,'51':2,'56':12,'73':2,'82':16} },
-    { n:'ALBERTO PIO', ids:['3191'], it:{'3':1,'9':1,'11':15,'13':1,'15':204,'17':6,'36':297,'41':8,'42':8,'43':3,'44':24,'45':10,'46':3,'50':1,'56':6,'73':1,'82':3} },
-    { n:'NUEVO ARGUELLO', ids:['3232'], it:{'1':1,'3':3,'9':1,'11':8,'18':110,'36':134,'45':5,'46':2,'48':1,'50':1,'54':1,'73':1,'76':1} },
-    { n:'LA VIRGEN', ids:['3231'], it:{'3':7,'9':1,'11':23,'13':1,'18':179,'36':250,'45':6,'46':5,'50':1,'51':1,'59':1,'73':1} },
-    { n:'LOS TARTAROS', ids:['5001','5002'], it:{'3':6,'9':1,'11':8,'18':104,'36':172,'45':11,'46':5,'50':1,'59':1,'73':1,'76':1} },
-    { n:'CABILDO', ids:['6240','6241'], it:{'3':11,'9':1,'11':15,'13':1,'15':330,'17':18,'21':12,'36':320,'37':156,'45':10,'46':5,'73':1} },
-    { n:'RENACIMIENTO', ids:['12022','12001'], it:{'2':4,'3':8,'9':1,'11':15,'13':1,'18':366,'21':30,'37':253,'38':236,'45':12,'46':4,'48':1,'73':1} },
-    { n:'MALVADISCOS', ids:['4724','4725'], it:{'2':2,'3':12,'9':1,'11':15,'13':1,'15':365,'36':391,'37':116,'45':14,'46':14,'48':1,'73':1} },
-    { n:'CERRO COLORADO', ids:[], it:{'6':1,'7':8,'9':1,'11':15,'13':1,'15':189,'36':71,'37':235,'46':3,'73':1,'75':3,'81':3} },
-    { n:'COLINAS DE BELLA VISTA', ids:[], it:{'6':1,'7':4,'9':1,'11':3,'13':1,'18':102,'36':154,'46':2,'73':1,'75':3,'76':1,'81':3} },
-    { n:'PLAZA VUELTA OBLIGADO', ids:[], it:{'6':2,'7':11,'9':1,'11':5,'13':1,'15':414.26,'21':9,'38':568,'46':4,'49':1,'73':1,'75':4,'81':4} },
-    { n:'PLAZA CHAMICAL', ids:[], it:{'2':1,'3':6,'9':1,'11':18,'13':1,'15':195,'36':121,'37':150,'48':6,'73':1,'75':3,'81':3} },
-    { n:'PLAZA KOCH', ids:[], it:{'6':2,'7':1,'9':1,'11':12,'13':1,'15':40,'36':71,'46':2,'73':1,'75':2,'81':2} },
-    { n:'PLAZA ROBERTO VIOLA', ids:[], it:{'6':2,'7':1,'9':1,'11':18,'13':1,'15':63,'36':110,'46':3,'47':1,'73':1,'75':2,'81':1} },
-    { n:'PLAZA MAIPU', ids:[], it:{'7':5,'9':1,'11':12,'13':1,'15':120,'36':183,'46':4,'49':1,'73':1,'75':2,'81':2} },
-    { n:'PLAZA ESPERANZA', ids:[], it:{'7':3,'9':1,'11':5,'15':60,'36':93,'46':2,'73':1,'75':2,'81':2} },
-    { n:'PLAZA LAS PALMAS', ids:[], it:{'6':2,'7':5,'9':1,'11':13,'13':1,'15':170,'37':250,'46':5,'73':1,'75':3,'81':3} },
-    { n:'PLAZA HIPICA', ids:[], it:{} },
-    { n:'PLAZA VICOR', ids:[], it:{} },
-    { n:'PLAZA SAN CAYETANO', ids:[], it:{} },
-    { n:'PLAZA AYCARDOZ', ids:[], it:{} },
+    { n:'SANTA ANA', ids:['4045'], al:['SANTA ANA','ALTOS DE SANTA ANA'], it:{'2':3,'3':3,'11':12,'14':1,'18':145,'38':216,'41':1,'42':1,'43':1,'44':3,'45':2,'46':2,'82':1} },
+    { n:'JERUSALEN', ids:['4026'], al:['JERUSALEN','LOS PLATANOS'], it:{'1':1,'2':1,'3':2,'9':1,'11':10,'13':1,'15':186,'36':263,'41':5,'42':5,'43':5,'44':13,'45':5,'46':2,'73':1,'82':5} },
+    { n:'PARQUE LATINO', ids:['6072'], al:['PARQUE LATINO'], it:{'2':1,'3':3,'9':1,'11':15,'13':1,'15':162,'36':250,'41':3,'42':3,'43':3,'44':9,'45':3,'50':2,'59':2,'73':1,'82':5} },
+    { n:'PARQUE DEL AGUA', ids:['5909'], al:['PARQUE DEL AGUA','PARQUE CAPITAL'], it:{'4':5,'9':1,'11':15,'13':1,'18':547,'36':185,'37':391,'41':4,'42':4,'43':4,'44':16,'45':28,'46':5,'49':1,'56':10,'73':1,'78':3} },
+    { n:'LA PLAZONA', ids:['5082'], al:['LA PLAZONA','MARIANO BALCARCE'], it:{'3':2,'9':1,'11':8,'13':1,'15':191,'36':246,'41':4,'42':4,'43':4,'44':12,'45':4,'46':2,'50':1,'58':1,'73':1} },
+    { n:'LUIS VERNET', ids:['2'], al:['LUIS VERNET'], it:{'2':1,'3':3,'9':1,'11':15,'13':1,'15':55,'17':5,'36':92,'45':3,'46':3,'50':1,'59':1,'73':1} },
+    { n:'NICOLAS AVELLANEDA', ids:['7161'], al:['NICOLAS AVELLANEDA'], it:{'3':8,'4':1,'9':1,'11':15,'13':1,'18':157,'20':15,'36':256,'45':5,'46':4,'48':1,'51':1,'56':6,'73':1,'82':7} },
+    { n:'SOLDADO AERONAUTICO', ids:['1072'], al:['SOLDADO AERONAUTICO','PARQUE JORGE NEWBERY'], it:{'6':18,'7':6,'9':1,'11':15,'13':1,'15':615,'36':431,'37':436,'45':11,'46':11,'47':1,'49':1,'50':1,'56':6,'73':1} },
+    { n:'JERONIMO CABRERA', ids:['1010'], al:['JERONIMO CABRERA','ALTA CORDOBA'], it:{'2':11,'9':1,'11':10,'15':279,'36':390,'50':1,'56':6,'73':1,'76':1} },
+    { n:'PABLO BRACAMONTE', ids:['3114'], al:['PABLO BRACAMONTE','COLINAS DEL CERRO'], it:{'3':2,'9':1,'11':12,'13':1,'15':48,'36':65,'50':1,'58':1,'73':1} },
+    { n:'ELEODORO FIERRO CERRUTI', ids:['2063'], al:['ELEODORO FIERRO CERRUTI'], it:{'9':1,'11':15,'13':1,'18':95,'36':142,'41':4,'42':4,'43':4,'44':12,'50':2,'59':1,'73':1,'82':4} },
+    { n:'PASEO LA SOLIDARIDAD', ids:['3123'], al:['PASEO LA SOLIDARIDAD','ALEJANDRO CENTENO'], it:{'1':2,'2':3,'3':3,'9':1,'11':10,'13':1,'15':165,'36':233,'73':1} },
+    { n:'EVARISTO FERNANDEZ', ids:['9074'], al:['EVARISTO FERNANDEZ','PARQUE LICEO 3 SECCION'], it:{'3':6,'15':230,'36':310,'41':6,'42':6,'43':3,'44':4,'45':2,'50':1,'51':1,'56':6,'71':1,'76':1} },
+    { n:'TIERRA DEL FUEGO', ids:['8074'], al:['TIERRA DEL FUEGO','LOS PINOS'], it:{'2':3,'3':2,'9':1,'11':15,'18':125,'36':160,'37':29,'45':1,'50':1,'59':1,'72':2,'73':1,'76':1} },
+    { n:'MARQUES DE SOBREMONTE', ids:['2051'], al:['MARQUES DE SOBREMONTE'], it:{'3':3,'9':1,'11':15,'13':1,'15':74,'17':10,'36':129,'41':1,'42':1,'43':1,'44':1,'45':3,'46':2,'50':1,'59':1,'73':1,'82':1} },
+    { n:'POETA LUGONES', ids:['2005'], al:['POETA LUGONES'], it:{'1':2,'2':6,'9':2,'11':34,'13':2,'15':563,'17':30,'36':737,'38':70,'41':16,'42':16,'43':1,'44':32,'45':16,'50':2,'51':2,'56':12,'73':2,'82':16} },
+    { n:'ALBERTO PIO', ids:['3191'], al:['ALBERTO PIO','LOS BOULEVARES'], it:{'3':1,'9':1,'11':15,'13':1,'15':204,'17':6,'36':297,'41':8,'42':8,'43':3,'44':24,'45':10,'46':3,'50':1,'56':6,'73':1,'82':3} },
+    { n:'NUEVO ARGUELLO', ids:['3232'], al:['NUEVO ARGUELLO'], it:{'1':1,'3':3,'9':1,'11':8,'18':110,'36':134,'45':5,'46':2,'48':1,'50':1,'54':1,'73':1,'76':1} },
+    { n:'LA VIRGEN', ids:['3231'], al:['LA VIRGEN','NUEVO ARGUELLO'], it:{'3':7,'9':1,'11':23,'13':1,'18':179,'36':250,'45':6,'46':5,'50':1,'51':1,'59':1,'73':1} },
+    { n:'LOS TARTAROS', ids:['5001','5002'], al:['LOS TARTAROS','INDUSTRIAL OESTE','20 DE JUNIO'], it:{'3':6,'9':1,'11':8,'18':104,'36':172,'45':11,'46':5,'50':1,'59':1,'73':1,'76':1} },
+    { n:'CABILDO', ids:['6240','6241'], al:['CABILDO','AMPLIACION CABILDO'], it:{'3':11,'9':1,'11':15,'13':1,'15':330,'17':18,'21':12,'36':320,'37':156,'45':10,'46':5,'73':1} },
+    { n:'RENACIMIENTO', ids:['12022','12001'], al:['RENACIMIENTO'], it:{'2':4,'3':8,'9':1,'11':15,'13':1,'18':366,'21':30,'37':253,'38':236,'45':12,'46':4,'48':1,'73':1} },
+    { n:'MALVADISCOS', ids:['4724','4725'], al:['MALVADISCOS','MALVAVISCO','MALVAVISCOS','MALVADISCO','VALLE ESCONDIDO','JARDINES DEL VALLE'], it:{'2':2,'3':12,'9':1,'11':15,'13':1,'15':365,'36':391,'37':116,'45':14,'46':14,'48':1,'73':1} },
+    { n:'CERRO COLORADO', ids:['D010'], al:['CERRO COLORADO','BIALET MASSE'], it:{'6':1,'7':8,'9':1,'11':15,'13':1,'15':189,'36':71,'37':235,'46':3,'73':1,'75':3,'81':3} },
+    { n:'COLINAS DE BELLA VISTA', ids:['C001'], al:['COLINAS DE BELLA VISTA','BELLA VISTA'], it:{'6':1,'7':4,'9':1,'11':3,'13':1,'18':102,'36':154,'46':2,'73':1,'75':3,'76':1,'81':3} },
+    { n:'PLAZA VUELTA OBLIGADO', ids:['4028'], al:['VUELTA OBLIGADO','LOS PLATANOS'], it:{'6':2,'7':11,'9':1,'11':5,'13':1,'15':414.26,'21':9,'38':568,'46':4,'49':1,'73':1,'75':4,'81':4} },
+    { n:'PLAZA CHAMICAL', ids:[], al:['CHAMICAL'], it:{'2':1,'3':6,'9':1,'11':18,'13':1,'15':195,'36':121,'37':150,'48':6,'73':1,'75':3,'81':3} },
+    { n:'PLAZA KOCH', ids:[], al:['KOCH'], it:{'6':2,'7':1,'9':1,'11':12,'13':1,'15':40,'36':71,'46':2,'73':1,'75':2,'81':2} },
+    { n:'PLAZA ROBERTO VIOLA', ids:[], al:['ROBERTO VIOLA','VIOLA'], it:{'6':2,'7':1,'9':1,'11':18,'13':1,'15':63,'36':110,'46':3,'47':1,'73':1,'75':2,'81':1} },
+    { n:'PLAZA MAIPU', ids:['7081'], al:['MAIPU','MAIPU 1ERA SECCION','MAIPU 1RA SECCION'], it:{'7':5,'9':1,'11':12,'13':1,'15':120,'36':183,'46':4,'49':1,'73':1,'75':2,'81':2} },
+    { n:'PLAZA ESPERANZA', ids:['6910'], al:['ESPERANZA','LA ESPERANZA'], it:{'7':3,'9':1,'11':5,'15':60,'36':93,'46':2,'73':1,'75':2,'81':2} },
+    { n:'PLAZA LAS PALMAS', ids:[], al:['LAS PALMAS'], it:{'6':2,'7':5,'9':1,'11':13,'13':1,'15':170,'37':250,'46':5,'73':1,'75':3,'81':3} },
+    { n:'PLAZA HIPICA', ids:['6461','6207'], al:['HIPICA','JARDINES DEL JOCKEY','HIPICA JARDINES DEL JOCKEY'], it:{} },
+    { n:'PLAZA VICOR', ids:['6039'], al:['VICOR'], it:{} },
+    { n:'PLAZA SAN CAYETANO', ids:['7620'], al:['SAN CAYETANO'], it:{} },
+    { n:'PLAZA AYCARDOZ', ids:[], al:['AYCARDOZ','AICARDOZ'], it:{} },
     ],
   };
   // Cruce con las plazas de la herramienta: primero por ID de obra —una plaza puede tener dos, como
@@ -22861,10 +22920,11 @@ const ITEMIZADO_EPEC = [
       p = CERTIF.plazas.find(x=>x.ids.some(y=>sinCeros(y) === sinCeros(idTxt)));
       if(p) return p;
     }
-    // 3) el nombre EXACTO (sin acentos ni el «Plaza» de adelante) y que sea el único
+    // 3) el nombre EXACTO contra cualquiera de los ALIAS de la hoja (el de la planilla, las
+    //    variantes conocidas y el barrio del ANEXO VI), y que sea la única que coincide.
     const nom = claveNombre(a.nombre);
     if(nom){
-      const ig = CERTIF.plazas.filter(x=>claveNombre(x.n) === nom);
+      const ig = CERTIF.plazas.filter(x=>(x.al||[x.n]).some(y=>claveNombre(y) === nom));
       if(ig.length === 1) return ig[0];
     }
     // 4) último recurso: los números de 3 cifras o más que aparezcan en el ID o en el nombre
@@ -22877,7 +22937,38 @@ const ITEMIZADO_EPEC = [
       const cand = CERTIF.plazas.filter(x=>x.ids.some(y=>nums.indexOf(sinCeros(y)) >= 0));
       if(cand.length === 1) return cand[0];
     }
+    // 5) POR PARECIDO DE NOMBRE. Es el escalón más flojo, así que tiene DOS candados:
+    //    · la hoja tiene que ser única para ese nombre, y
+    //    · ninguna OTRA plaza de la herramienta puede parecerse a la misma hoja.
+    //    El segundo candado es el que evita que vuelva el problema del doble: «Plaza Cabildo Norte»
+    //    y «Cabildo Sur» se parecen las dos a la hoja «CABILDO», así que no gana ninguna y hay que
+    //    asignarla a mano. En cambio «Plaza Chamical (San Vicente)» es la única que se parece a
+    //    «CHAMICAL», y ésa sí cruza — avisada como parecido, para que se verifique.
+    if(nom){
+      const cand = hojaPorParecido(nom);
+      if(cand){
+        let otras = [];
+        try{
+          otras = (obras() || []).filter(x=> x && String(x.id) !== String(a.id)
+                    && hojaPorParecido(claveNombre(x.nombre)) === cand);
+        }catch(e){ otras = []; }
+        if(!otras.length) return cand;
+      }
+    }
     return null;
+  }
+  // A qué hoja se parece un nombre, si es a una sola. No mira las otras plazas: eso lo hace quien
+  // la llama, para no entrar en círculos.
+  function hojaPorParecido(nom){
+    if(!nom) return null;
+    const palabras = nom.split(' ').filter(p=>p.length >= 4 && ['PLAZA','PARQUE','PASEO'].indexOf(p) < 0);
+    if(!palabras.length) return null;
+    const cand = CERTIF.plazas.filter(x=>(x.al||[x.n]).some(y=>{
+      const c = claveNombre(y).split(' ').filter(p=>p.length >= 4);
+      if(!c.length) return false;
+      return c.every(p=>palabras.indexOf(p) >= 0) || palabras.every(p=>c.indexOf(p) >= 0);
+    }));
+    return cand.length === 1 ? cand[0] : null;
   }
   // Cómo se cruzó, para poder decirlo en pantalla.
   function certifComoCruzo(a){
@@ -22887,17 +22978,32 @@ const ITEMIZADO_EPEC = [
     const idTxt = String(a.obraId||'').trim();
     if(idTxt && p.ids.indexOf(idTxt) >= 0) return 'por el ID de obra';
     if(idTxt && p.ids.some(y=>sinCeros(y) === sinCeros(idTxt))) return 'por el ID de obra (sin los ceros de adelante)';
-    if(claveNombre(a.nombre) === claveNombre(p.n)) return 'por el nombre';
-    return 'por el número que aparece en el ID o en el nombre';
+    const nom = claveNombre(a.nombre);
+    if((p.al||[p.n]).some(y=>claveNombre(y) === nom)) return 'por el nombre';
+    const nums = [...new Set([...(idTxt.match(/\d+/g) || []), ...(String(a.nombre||'').match(/\d+/g) || [])]
+      .map(sinCeros).filter(x=>x.length >= 3))];
+    if(nums.length && p.ids.some(y=>nums.indexOf(sinCeros(y)) >= 0)) return 'por el número que aparece en el ID o en el nombre';
+    return '⚠ por PARECIDO de nombre — verificalo';
   }
   // La lista completa de hojas, para el selector de «elegir a mano».
   // Solo las hojas que TIENEN cantidades: ofrecer las cuatro vacías (Hípica, Vicor, San Cayetano y
   // Aycardoz) sería ofrecer algo que no trae nada.
   function certifHojas(){
     return CERTIF.plazas.filter(x=>Object.keys(x.it).length)
-      .map(x=>({ n:x.n, ids:x.ids.join(' / '), items:Object.keys(x.it).length }))
+      .map(x=>({ n:x.n, ids:x.ids.join(' / '), items:Object.keys(x.it).length, it:x.it }))
       .sort((p,q)=>p.n.localeCompare(q.n, 'es'));
   }
+  // Lo que lleva una hoja, renglón por renglón: ítem, descripción, unidad, cantidad y su K.
+  // Sirve para mirar el contenido de una hoja ANTES de asignarla a una plaza (2026-09-07).
+  window.certifContenido = function(nombreHoja){
+    const p = CERTIF.plazas.find(x=>x.n === nombreHoja);
+    if(!p) return null;
+    const filas = Object.keys(p.it).sort((x,y)=>parseFloat(x)-parseFloat(y)).map(it=>({
+      item: it, desc: DESC(it) || '(no está en el Anexo I)', un: UN(it) || '',
+      cant: n2(p.it[it]), k: K(it), kTot: K(it) * n2(p.it[it]),
+    }));
+    return { n:p.n, ids:p.ids, filas, kTotal: filas.reduce((t,f)=>t + f.kTot, 0) };
+  };
   // Las OTRAS plazas de la herramienta que caen en la misma hoja del certificado. Si hay alguna, las
   // cantidades de esa hoja son el TOTAL de todas juntas y cargarlas en cada una las cuenta dos veces.
   function certifHermanas(a, lista){
