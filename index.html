@@ -2655,7 +2655,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 11:07 · f542ca</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 11:28 · cbc52d</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -22264,6 +22264,100 @@ const ITEMIZADO_EPEC = [
 
   // `sel` dice sobre qué se elige; `fechas` si el informe es de un período; `secciones` son los
   // pedazos que se pueden tildar. `construir` recibe {items, desde, hasta, fecha, periodo, obs, sec}.
+  // ==========================================================================================
+  // EL CERTIFICADO DE LA MUNICIPALIDAD  (2026-09-07)
+  // ==========================================================================================
+  // El usuario mandó «CERTIF. PLAZAS ITEM MUNI.xlsx»: una hoja por plaza con las cantidades que se
+  // certificaron de verdad. Textual: *"te voy a pasar un Excel con todas las tareas que se hicieron
+  // en las plazas, a ver si te sirve; lo único es que eso está hecho con otro itemizado, no lo
+  // tomes en cuenta, solo tomá en cuenta lo que se hizo en cada plaza"*.
+  //
+  // Aclaración importante: NO es otro itemizado. Es exactamente el mismo Anexo I que usa esta
+  // herramienta —ítems 1 a 82, con las mismas descripciones palabra por palabra—. Lo único que le
+  // falta son los ítems 83 a 89 (la PROVISIÓN de columnas, tableros, luminarias, cables y
+  // jabalinas), que se agregaron después, en la Nota Aclaratoria N° 1 del 31/08/2026. Por eso ese
+  // Excel no los tiene: cuando se armó, no existían.
+  //
+  // Son 32 plazas con datos y 4 hojas vacías (Hípica, Vicor, San Cayetano y Aycardoz). Los números
+  // están tal cual vinieron: acá no se corrigió ninguno. Este bloque es SOLO LECTURA — es el
+  // espejo contra el que se compara lo que arma la Calculadora.
+  const CERTIF = {
+    fuente: 'CERTIF. PLAZAS ITEM MUNI.xlsx',
+    fecha: '07/09/2026',
+    plazas: [
+    { n:'SANTA ANA', ids:['4045'], it:{'2':3,'3':3,'11':12,'14':1,'18':145,'38':216,'41':1,'42':1,'43':1,'44':3,'45':2,'46':2,'82':1} },
+    { n:'JERUSALEN', ids:['4026'], it:{'1':1,'2':1,'3':2,'9':1,'11':10,'13':1,'15':186,'36':263,'41':5,'42':5,'43':5,'44':13,'45':5,'46':2,'73':1,'82':5} },
+    { n:'PARQUE LATINO', ids:['6072'], it:{'2':1,'3':3,'9':1,'11':15,'13':1,'15':162,'36':250,'41':3,'42':3,'43':3,'44':9,'45':3,'50':2,'59':2,'73':1,'82':5} },
+    { n:'PARQUE DEL AGUA', ids:['5909'], it:{'4':5,'9':1,'11':15,'13':1,'18':547,'36':185,'37':391,'41':4,'42':4,'43':4,'44':16,'45':28,'46':5,'49':1,'56':10,'73':1,'78':3} },
+    { n:'LA PLAZONA', ids:['5082'], it:{'3':2,'9':1,'11':8,'13':1,'15':191,'36':246,'41':4,'42':4,'43':4,'44':12,'45':4,'46':2,'50':1,'58':1,'73':1} },
+    { n:'LUIS VERNET', ids:['2'], it:{'2':1,'3':3,'9':1,'11':15,'13':1,'15':55,'17':5,'36':92,'45':3,'46':3,'50':1,'59':1,'73':1} },
+    { n:'NICOLAS AVELLANEDA', ids:['7161'], it:{'3':8,'4':1,'9':1,'11':15,'13':1,'18':157,'20':15,'36':256,'45':5,'46':4,'48':1,'51':1,'56':6,'73':1,'82':7} },
+    { n:'SOLDADO AERONAUTICO', ids:['1072'], it:{'6':18,'7':6,'9':1,'11':15,'13':1,'15':615,'36':431,'37':436,'45':11,'46':11,'47':1,'49':1,'50':1,'56':6,'73':1} },
+    { n:'JERONIMO CABRERA', ids:['1010'], it:{'2':11,'9':1,'11':10,'15':279,'36':390,'50':1,'56':6,'73':1,'76':1} },
+    { n:'PABLO BRACAMONTE', ids:['3114'], it:{'3':2,'9':1,'11':12,'13':1,'15':48,'36':65,'50':1,'58':1,'73':1} },
+    { n:'ELEODORO FIERRO CERRUTI', ids:['2063'], it:{'9':1,'11':15,'13':1,'18':95,'36':142,'41':4,'42':4,'43':4,'44':12,'50':2,'59':1,'73':1,'82':4} },
+    { n:'PASEO LA SOLIDARIDAD', ids:['3123'], it:{'1':2,'2':3,'3':3,'9':1,'11':10,'13':1,'15':165,'36':233,'73':1} },
+    { n:'EVARISTO FERNANDEZ', ids:['9074'], it:{'3':6,'15':230,'36':310,'41':6,'42':6,'43':3,'44':4,'45':2,'50':1,'51':1,'56':6,'71':1,'76':1} },
+    { n:'TIERRA DEL FUEGO', ids:['8074'], it:{'2':3,'3':2,'9':1,'11':15,'18':125,'36':160,'37':29,'45':1,'50':1,'59':1,'72':2,'73':1,'76':1} },
+    { n:'MARQUES DE SOBREMONTE', ids:['2051'], it:{'3':3,'9':1,'11':15,'13':1,'15':74,'17':10,'36':129,'41':1,'42':1,'43':1,'44':1,'45':3,'46':2,'50':1,'59':1,'73':1,'82':1} },
+    { n:'POETA LUGONES', ids:['2005'], it:{'1':2,'2':6,'9':2,'11':34,'13':2,'15':563,'17':30,'36':737,'38':70,'41':16,'42':16,'43':1,'44':32,'45':16,'50':2,'51':2,'56':12,'73':2,'82':16} },
+    { n:'ALBERTO PIO', ids:['3191'], it:{'3':1,'9':1,'11':15,'13':1,'15':204,'17':6,'36':297,'41':8,'42':8,'43':3,'44':24,'45':10,'46':3,'50':1,'56':6,'73':1,'82':3} },
+    { n:'NUEVO ARGUELLO', ids:['3232'], it:{'1':1,'3':3,'9':1,'11':8,'18':110,'36':134,'45':5,'46':2,'48':1,'50':1,'54':1,'73':1,'76':1} },
+    { n:'LA VIRGEN', ids:['3231'], it:{'3':7,'9':1,'11':23,'13':1,'18':179,'36':250,'45':6,'46':5,'50':1,'51':1,'59':1,'73':1} },
+    { n:'LOS TARTAROS', ids:['5001','5002'], it:{'3':6,'9':1,'11':8,'18':104,'36':172,'45':11,'46':5,'50':1,'59':1,'73':1,'76':1} },
+    { n:'CABILDO', ids:['6240','6241'], it:{'3':11,'9':1,'11':15,'13':1,'15':330,'17':18,'21':12,'36':320,'37':156,'45':10,'46':5,'73':1} },
+    { n:'RENACIMIENTO', ids:['12022','12001'], it:{'2':4,'3':8,'9':1,'11':15,'13':1,'18':366,'21':30,'37':253,'38':236,'45':12,'46':4,'48':1,'73':1} },
+    { n:'MALVADISCOS', ids:['4724','4725'], it:{'2':2,'3':12,'9':1,'11':15,'13':1,'15':365,'36':391,'37':116,'45':14,'46':14,'48':1,'73':1} },
+    { n:'CERRO COLORADO', ids:[], it:{'6':1,'7':8,'9':1,'11':15,'13':1,'15':189,'36':71,'37':235,'46':3,'73':1,'75':3,'81':3} },
+    { n:'COLINAS DE BELLA VISTA', ids:[], it:{'6':1,'7':4,'9':1,'11':3,'13':1,'18':102,'36':154,'46':2,'73':1,'75':3,'76':1,'81':3} },
+    { n:'PLAZA VUELTA OBLIGADO', ids:[], it:{'6':2,'7':11,'9':1,'11':5,'13':1,'15':414.26,'21':9,'38':568,'46':4,'49':1,'73':1,'75':4,'81':4} },
+    { n:'PLAZA CHAMICAL', ids:[], it:{'2':1,'3':6,'9':1,'11':18,'13':1,'15':195,'36':121,'37':150,'48':6,'73':1,'75':3,'81':3} },
+    { n:'PLAZA KOCH', ids:[], it:{'6':2,'7':1,'9':1,'11':12,'13':1,'15':40,'36':71,'46':2,'73':1,'75':2,'81':2} },
+    { n:'PLAZA ROBERTO VIOLA', ids:[], it:{'6':2,'7':1,'9':1,'11':18,'13':1,'15':63,'36':110,'46':3,'47':1,'73':1,'75':2,'81':1} },
+    { n:'PLAZA MAIPU', ids:[], it:{'7':5,'9':1,'11':12,'13':1,'15':120,'36':183,'46':4,'49':1,'73':1,'75':2,'81':2} },
+    { n:'PLAZA ESPERANZA', ids:[], it:{'7':3,'9':1,'11':5,'15':60,'36':93,'46':2,'73':1,'75':2,'81':2} },
+    { n:'PLAZA LAS PALMAS', ids:[], it:{'6':2,'7':5,'9':1,'11':13,'13':1,'15':170,'37':250,'46':5,'73':1,'75':3,'81':3} },
+    { n:'PLAZA HIPICA', ids:[], it:{} },
+    { n:'PLAZA VICOR', ids:[], it:{} },
+    { n:'PLAZA SAN CAYETANO', ids:[], it:{} },
+    { n:'PLAZA AYCARDOZ', ids:[], it:{} },
+    ],
+  };
+  // Cruce con las plazas de la herramienta: primero por ID de obra —una plaza puede tener dos, como
+  // «5001-5002»—, y si no, por nombre, sin acentos ni dobles espacios.
+  const sinAcento = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+                          .toUpperCase().replace(/\s+/g,' ').trim();
+  function certifDe(a){
+    if(!a) return null;
+    const id = String(a.obraId||'').trim();
+    if(id){ const p = CERTIF.plazas.find(x=>x.ids.indexOf(id) >= 0); if(p) return p; }
+    const nom = sinAcento(a.nombre);
+    if(!nom) return null;
+    return CERTIF.plazas.find(x=>{ const n = sinAcento(x.n); return n === nom || nom.indexOf(n) >= 0 || n.indexOf(nom) >= 0; }) || null;
+  }
+  // Por qué un renglón no coincide. Es la columna que pidió el usuario: *"cuáles son las
+  // diferencias y por qué"*. No adivina: cada motivo sale de algo que sabemos del Anexo I.
+  // El texto va PLANO: es una celda de tabla, y las celdas se escapan al dibujarse.
+  function porQueDifiere(it, cert, calc){
+    const id = String(it);
+    const prov = /^(8[3-9])(\.|$)/.test(id);
+    if(cert > 0 && calc > 0 && Math.abs(cert - calc) < 0.005)
+      return { cl:'ok', txt:'Coincide.' };
+    if(calc > 0 && cert <= 0){
+      if(prov) return { cl:'falta', txt:'Ítem de PROVISIÓN: no existía en el Anexo I con el que se armó ese certificado (se agregó el 31/08/2026). Si el material lo puso EMA, es plata a reclamar.' };
+      if(id === '30') return { cl:'falta', txt:'El cable 3×1,5 en columna tiene ítem propio y no se certificó en ninguna plaza. Se instaló en todas: es plata a reclamar.' };
+      if(['64','71','72','74','76','77'].indexOf(id) >= 0)
+        return { cl:'falta', txt:'Se instaló y tiene ítem propio, pero no se certificó. Verificalo contra el remito y reclamalo.' };
+      if(['62','63','68','69'].indexOf(id) >= 0)
+        return { cl:'ojo', txt:'OJO: son las borneras y portafusibles de la caja de columna, que quedaron adentro del ítem de columna (1-8 / 42) y el certificado tampoco los cobra. Si la Calculadora los trae, revisá de dónde salen.' };
+      return { cl:'falta', txt:'Está en la Calculadora y no en el certificado. Revisá si se certificó por otro ítem o si quedó sin cobrar.' };
+    }
+    if(cert > 0 && calc <= 0)
+      return { cl:'ojo', txt:'OJO: está certificado y la Calculadora no lo trae. O falta en el cómputo de la plaza, o falta tocar «Traer las cantidades».' };
+    const d = calc - cert;
+    return { cl:'dif', txt:`Cantidad distinta: la Calculadora dice ${nEnt(calc)} y el certificado ${nEnt(cert)} (${d>0?'+':''}${nEnt(d)}). Revisá cuál es la buena antes de certificar.` };
+  }
+
   const TIPOS = [
     { id:'plazas-avance', tema:'plazas', txt:'Avance de obra', sel:'plazas', fechas:false,
       hint:'Cómo viene cada plaza: cuánto está hecho, qué falta, para cuándo, si ya se prendió y si pasó la inspección. Es el informe para presentar a EPEC o a la Municipalidad.',
@@ -22275,6 +22369,12 @@ const ITEMIZADO_EPEC = [
                  ['detalle','Detalle ítem por ítem de cada plaza',1],['cantdet','Vínculos y cables, abiertos por tipo',0],
                  ['consolidado','Consolidado por ítem (todas juntas)',0]],
       construir: infItemizado },
+    { id:'plazas-certif', tema:'plazas', txt:'Certificado municipal vs. Calculadora', sel:'plazas', fechas:false,
+      hint:'Plaza por plaza y ítem por ítem: lo que se certificó en la planilla de la Municipalidad contra lo que tiene la Calculadora, la diferencia y el porqué de cada una. Es el informe para ver qué quedó sin cobrar.',
+      secciones:[['resumen','Resumen por plaza',1],['detalle','Detalle ítem por ítem de cada plaza',1],
+                 ['soloDif','Mostrar solo los ítems que NO coinciden',1],
+                 ['consolidado','Consolidado por ítem (todas juntas)',1],['sincruce','Plazas que no se pudieron cruzar',1]],
+      construir: infCertif },
     { id:'plazas-conforme', tema:'plazas', txt:'Conforme a obra', sel:'plazas', fechas:false,
       hint:'Proyecto contra final: qué se fijó al principio, qué se ajustó durante la obra, con qué motivo y con qué orden de trabajo. Solo sale completo en las plazas con el itemizado de proyecto fijado.',
       secciones:[['resumen','Resumen proyecto vs. conforme a obra',1],['ajustes','Los ajustes, uno por uno',1]],
@@ -22561,6 +22661,148 @@ const ITEMIZADO_EPEC = [
   }
 
   // ---- 3. Conforme a obra ----
+  // ==========================================================================================
+  // CERTIFICADO MUNICIPAL vs. CALCULADORA  (2026-09-07)
+  // ==========================================================================================
+  // Pedido del usuario, textual: *"un informe comparativo de cada plaza, plaza por plaza, ítem con
+  // ítem: vs lo de la calculadora nuestra vs lo del Excel, y cuáles son las diferencias y por qué"*.
+  //
+  // «Lo de la Calculadora» son los ítems que la plaza tiene CARGADOS en el Itemizado 2026 —lo que
+  // se va a certificar—, no lo que el cómputo podría traer. Si una plaza está en cero, se avisa:
+  // hay que tocarle «Traer las cantidades» antes de comparar, si no la diferencia es falsa.
+  function infCertif(o){
+    const base = baseMod(), iva = conIva();
+    const m = { titulo:'Certificado municipal contra la Calculadora',
+                subtitulo:`${o.items.length} plaza(s) · ANEXO I — LPE 5589 · SIC 21760 · certificado «${CERTIF.fuente}»` +
+                          (base > 0 ? ` · módulo ${plata(base)} ${iva?'con IVA':'sin IVA'}` : ' · valor del módulo sin cargar'),
+                tiles:[], avisos:[], secciones:[] };
+
+    // ---- Cruce ----
+    const cruzadas = [], sinCertif = [], vacias = [];
+    o.items.forEach((a,i)=>{
+      const c = certifDe(a);
+      if(!c){ sinCertif.push(a); return; }
+      const calc = {};
+      itemsDe(a).forEach(f=>{ calc[f.id] = n2(calc[f.id]) + n2(f.v.cantidad); });
+      if(!Object.keys(calc).length) vacias.push(a);
+      cruzadas.push({ a, c, calc, n: cruzadas.length + 1 });
+    });
+    const usadas = new Set(cruzadas.map(x=>x.c));
+    const noElegidas = CERTIF.plazas.filter(p=>!usadas.has(p) && Object.keys(p.it).length);
+
+    if(!cruzadas.length)
+      m.avisos.push('Ninguna de las plazas elegidas figura en el certificado de la Municipalidad. Se cruza por <b>ID de obra</b> y, si no, por nombre — fijate que el ID de la plaza coincida con el de la planilla.');
+    if(vacias.length)
+      m.avisos.push(`<b>${vacias.length}</b> plaza(s) elegida(s) <b>no tienen ningún ítem cargado</b> en el Itemizado 2026 (${vacias.slice(0,4).map(a=>a.nombre).join(', ')}${vacias.length>4?'…':''}). Contra el certificado van a salir TODAS como faltantes, y eso no es real: tocales «⟳ Traer las cantidades» antes de leer este informe.`);
+    if(base <= 0)
+      m.avisos.push('El <b>valor del módulo</b> no está cargado, así que el informe sale en <b>K (módulos)</b> y las columnas de plata van en cero.');
+    m.avisos.push('El certificado de la Municipalidad se armó <b>antes</b> de la Nota Aclaratoria N° 1 del 31/08/2026, que agregó los ítems <b>83 a 89</b> (la <b>provisión</b> de columnas, tableros, luminarias, cables y jabalinas). Por eso esos ítems aparecen siempre como diferencia a favor: no es un error del certificado, es que <b>todavía no se cobraron</b>.');
+
+    // ---- Una fila por ítem de cada plaza ----
+    const filaDe = (x)=>{
+      const ids = [...new Set([...Object.keys(x.c.it), ...Object.keys(x.calc)])]
+        .sort((p,q)=> parseFloat(p) - parseFloat(q));
+      return ids.map(it=>{
+        const cert = n2(x.c.it[it]), calc = n2(x.calc[it]);
+        const d = calc - cert, k = K(it);
+        return { it, cert, calc, d, k, kd: d * k, pq: porQueDifiere(it, cert, calc) };
+      });
+    };
+    cruzadas.forEach(x=>{ x.filas = filaDe(x); });
+
+    const sumK = (x, campo)=> x.filas.reduce((t,f)=> t + f[campo] * f.k, 0);
+    cruzadas.forEach(x=>{
+      x.kCert = sumK(x,'cert'); x.kCalc = sumK(x,'calc'); x.kDif = x.kCalc - x.kCert;
+      x.nDif = x.filas.filter(f=>f.pq.cl !== 'ok').length;
+    });
+    const tCert = cruzadas.reduce((t,x)=>t + x.kCert, 0);
+    const tCalc = cruzadas.reduce((t,x)=>t + x.kCalc, 0);
+    const tDif  = tCalc - tCert;
+
+    m.tiles = [
+      { n: N(tCert,'k'), l:'K certificados por la Muni', c:'' },
+      { n: N(tCalc,'k'), l:'K según la Calculadora', c:'azul' },
+      { n: mas(N(tDif,'k')), l:'Diferencia (K)', c: tDif > 0 ? 'verde' : (tDif < 0 ? 'rojo' : '') },
+      { n: base > 0 ? mas(N(tDif*base,'money')) : '—', l:'Diferencia' + (iva?' (c/IVA)':' (s/IVA)'), c: tDif > 0 ? 'verde' : (tDif < 0 ? 'rojo' : '') },
+    ];
+
+    if(o.sec.resumen && cruzadas.length){
+      m.secciones.push(tabla('Resumen por plaza',
+        'Una fila por plaza. La diferencia positiva es lo que la Calculadora tiene de más que el certificado — o sea, lo que faltaría cobrar.',
+        [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},
+         {t:'K certificado', num:true},{t:'K Calculadora', num:true},{t:'Diferencia (K)', num:true},
+         {t:'Diferencia ($)', num:true},{t:'Ítems que no coinciden', num:true, w:'80px'}],
+        cruzadas.map(x=>[N(x.n,'int'), x.a.nombre||'', String(x.a.obraId||'—'),
+                         N(x.kCert,'k'), N(x.kCalc,'k'), mas(N(x.kDif,'k')),
+                         base>0 ? mas(N(x.kDif*base,'money')) : '—', N(x.nDif,'int')]),
+        [['', 'TOTAL', '', N(tCert,'k'), N(tCalc,'k'), mas(N(tDif,'k')),
+          base>0 ? mas(N(tDif*base,'money')) : '—', N(cruzadas.reduce((t,x)=>t+x.nDif,0),'int')]]));
+    }
+
+    // ---- El detalle: ítem con ítem, plaza por plaza ----
+    if(o.sec.detalle){
+      const solo = !!o.sec.soloDif;
+      cruzadas.forEach(x=>{
+        const filas = solo ? x.filas.filter(f=>f.pq.cl !== 'ok') : x.filas;
+        if(!filas.length){
+          m.secciones.push(texto(`${x.n}. ${x.a.nombre||''}${x.a.obraId?' · ID '+x.a.obraId:''}`,
+            ['Todos los ítems coinciden con el certificado de la Municipalidad.']));
+          return;
+        }
+        m.secciones.push(tabla(`${x.n}. ${x.a.nombre||''}${x.a.obraId?' · ID '+x.a.obraId:''}`,
+          `Certificado: ${nf(x.kCert,2)} K · Calculadora: ${nf(x.kCalc,2)} K · diferencia ${x.kDif>0?'+':''}${nf(x.kDif,2)} K`
+            + (base>0 ? ` = ${x.kDif>0?'+':''}${plata(x.kDif*base)}` : '')
+            + (solo ? ` · se muestran solo los ${filas.length} ítem(s) que no coinciden, de ${x.filas.length}` : ''),
+          [{t:'Ítem', w:'46px'},{t:'Descripción'},{t:'Un.', w:'44px'},
+           {t:'Certificado', num:true},{t:'Calculadora', num:true},{t:'Dif.', num:true},
+           {t:'Dif. en K', num:true},{t:'Dif. en $', num:true},{t:'Por qué'}],
+          filas.map(f=>[String(f.it), DESC(f.it) || '(no está en el Anexo I)', UN(f.it) || '',
+                        N(f.cert,'cant'), N(f.calc,'cant'), mas(N(f.d,'cant')), mas(N(f.kd,'k')),
+                        base>0 ? mas(N(f.kd*base,'money')) : '—', f.pq.txt]),
+          [['', 'TOTAL de la plaza', '', N(x.kCert,'k'), N(x.kCalc,'k'), '', mas(N(x.kDif,'k')),
+            base>0 ? mas(N(x.kDif*base,'money')) : '—', '']],
+          { grupo:'Detalle por plaza', etiqueta:x.a.nombre||'(sin nombre)', etiquetaCol:'Plaza' }));
+      });
+    }
+
+    // ---- Consolidado: el mismo cuadro, sumando todas las plazas ----
+    if(o.sec.consolidado && cruzadas.length){
+      const acc = {};
+      cruzadas.forEach(x=>x.filas.forEach(f=>{
+        const r = acc[f.it] || (acc[f.it] = { it:f.it, cert:0, calc:0, k:f.k, plazas:0 });
+        r.cert += f.cert; r.calc += f.calc; if(f.pq.cl !== 'ok') r.plazas++;
+      }));
+      const filas = Object.values(acc).sort((p,q)=> parseFloat(p.it) - parseFloat(q.it))
+        .map(r=>({ ...r, d:r.calc - r.cert, kd:(r.calc - r.cert) * r.k }));
+      const soloD = o.sec.soloDif ? filas.filter(f=>Math.abs(f.d) > 0.005) : filas;
+      m.secciones.push(tabla('Consolidado por ítem — todas las plazas juntas',
+        'Dónde está la plata, ítem por ítem. Ordenado como el pliego.',
+        [{t:'Ítem', w:'46px'},{t:'Descripción'},{t:'Un.', w:'44px'},
+         {t:'Certificado', num:true},{t:'Calculadora', num:true},{t:'Dif.', num:true},
+         {t:'Dif. en K', num:true},{t:'Dif. en $', num:true},{t:'Plazas con diferencia', num:true, w:'70px'}],
+        soloD.map(f=>[String(f.it), DESC(f.it) || '(no está en el Anexo I)', UN(f.it) || '',
+                      N(f.cert,'cant'), N(f.calc,'cant'), mas(N(f.d,'cant')), mas(N(f.kd,'k')),
+                      base>0 ? mas(N(f.kd*base,'money')) : '—', N(f.plazas,'int')]),
+        [['', 'TOTAL', '', N(tCert,'k'), N(tCalc,'k'), '', mas(N(tDif,'k')),
+          base>0 ? mas(N(tDif*base,'money')) : '—', '']]));
+    }
+
+    // ---- Lo que no se pudo cruzar ----
+    if(o.sec.sincruce && (sinCertif.length || noElegidas.length)){
+      const filas = [];
+      sinCertif.forEach(a=>filas.push([String(a.obraId||'—'), a.nombre||'', 'Está en la herramienta',
+        'No figura en el certificado de la Municipalidad. O es una plaza nueva, o el ID no coincide con el de la planilla.']));
+      noElegidas.forEach(p=>filas.push([p.ids.join(' / ') || '—', p.n, 'Está en el certificado',
+        'No está entre las plazas elegidas, o la herramienta no tiene una plaza con ese ID ni con ese nombre.']));
+      CERTIF.plazas.filter(p=>!Object.keys(p.it).length).forEach(p=>filas.push([p.ids.join(' / ') || '—', p.n,
+        'Hoja vacía', 'La hoja existe en el Excel pero no tiene ninguna cantidad cargada.']));
+      if(filas.length) m.secciones.push(tabla('Plazas que no se pudieron cruzar',
+        'Para que una plaza se compare tiene que coincidir el ID de obra o el nombre.',
+        [{t:'ID', w:'90px'},{t:'Plaza'},{t:'Dónde está', w:'150px'},{t:'Qué pasa'}], filas));
+    }
+    return m;
+  }
+
   function infConforme(o){
     const CO = window.CO, base = baseMod();
     const m = { titulo:'Informe de conforme a obra',
