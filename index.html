@@ -2223,16 +2223,32 @@
   .bpnmet-tabla{ width:100%; border-collapse:collapse; font-size:12.5px; }
   .bpnmet-tabla th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-soft); padding:4px 6px; border-bottom:1px solid var(--border); white-space:nowrap; }
   .bpnmet-tabla th .bpncfg-chip{ vertical-align:middle; margin-right:4px; }
-  .bpnmet-tabla td{ padding:6px 4px; border-bottom:1px solid var(--border); vertical-align:middle; }
-  .bpnmet-tabla input.bpnmet-in{ width:54px; margin:0; padding:6px 4px; text-align:center; font-family:var(--mono); font-weight:700; }
+  .bpnmet-tabla td{ padding:6px 2px; border-bottom:1px solid var(--border); vertical-align:middle; text-align:center; }
+  .bpnmet-tabla td:first-child, .bpnmet-tabla th:first-child{ text-align:left; padding-left:4px; }
+  .bpnmet-tabla tfoot td{ border-top:2px solid var(--line); border-bottom:none; background:var(--bg-soft); font-weight:700; }
+  .bpnmet-tabla tfoot .bpnmet-tot{ color:var(--navy); font-size:12.5px; }
+  .bpnmet-tabla input.bpnmet-in{ width:44px; margin:0; padding:6px 2px; text-align:center; font-family:var(--mono); font-weight:700; }
+  .bpnmet-tabla th{ padding-left:2px; padding-right:2px; text-align:center; }
+  .bpnmet-tabla th .bpncfg-chip{ margin-right:2px; }
   .bpnmet-tabla input.bpnmet-in.tocado{ border-color:var(--amber); background:rgba(224,140,26,.10); }
   .bpnmet-tabla td.bpnmet-fus{ font-family:var(--mono); font-weight:700; white-space:nowrap; }
   .bpncfg{ display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:4px;
            border:1px dashed var(--border); border-radius:12px; padding:10px 14px; background:var(--panel); }
+  /* Qué armado se está viendo: PRFV o metálica (2026-09-07). Antes se veían los dos a la vez. */
+  .bpn-chip{ display:inline-block; margin-left:8px; padding:2px 10px; border-radius:999px;
+             font-size:11.5px; font-weight:700; letter-spacing:.02em; vertical-align:middle;
+             background:rgba(126,198,230,.16); border:1px solid var(--teal-dark); color:var(--navy); }
+  .bpn-chip.met{ background:rgba(224,140,26,.14); border-color:var(--amber); }
+  .bpn-chip small{ font-weight:500; color:var(--text-soft); }
+  .bpnmet-vinc{ font-size:11.5px; color:var(--text-soft); font-weight:500; line-height:1.35; }
+  .bpnmet-tot{ font-family:var(--mono); font-size:10.8px; color:var(--text-soft); line-height:1.35; letter-spacing:-.2px; }
+  .bpnmet-tabla tbody td:first-child{ min-width:118px; }
   .bpncfg-item{ display:flex; align-items:center; gap:9px; padding:4px 0; }
   .bpncfg-item + .bpncfg-item{ border-top:1px solid var(--border); }
+  /* El nombre puede ser largo («BPN verde (final de circuito)») y la tarjeta es angosta: que
+     envuelva en vez de meterse abajo del casillero (2026-09-07). */
   .bpncfg-lbl{ display:flex; align-items:baseline; gap:7px; flex:1 1 auto; min-width:0;
-               font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; }
+               font-size:13px; font-weight:600; color:var(--text); flex-wrap:wrap; line-height:1.35; }
   .bpncfg-lbl small{ font-weight:500; color:var(--text-soft); }
   .bpncfg-chip{ width:13px; height:13px; border-radius:3px; flex:0 0 auto; border:1px solid rgba(0,0,0,.22);
                 align-self:center; }
@@ -2370,7 +2386,10 @@
   /* ---- Itemizado EPEC (coeficientes) ---- */
   .ep-base{ display:flex; align-items:flex-end; gap:22px; flex-wrap:wrap; margin-top:16px;
             border:1px dashed var(--line); border-radius:12px; padding:12px 16px; background:var(--bg-soft); }
-  .ep-base-fila{ display:flex; align-items:center; gap:8px; }
+  /* En un celular de 390 px los cuatro controles ($ + número + con/sin IVA + Guardar) no entran en
+     una línea y empujaban la pantalla entera hacia el costado. Que envuelvan (2026-09-07). */
+  .ep-base-fila{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ep-base-fila input{ flex:1 1 120px; min-width:0; }
   .ep-base-fila span{ font-size:13px; color:var(--text-soft); }
   .ep-base-fila input{ width:150px; margin:0; text-align:right; font-weight:700; }
   .ep-base-fila select{ width:auto; margin:0; padding:8px 10px; font-size:13px; font-weight:600; }
@@ -2630,7 +2649,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 09:50 · 258bc6</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 10:29 · f9cb4b</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -2805,8 +2824,24 @@
         <select id="bpnCalibreManual"></select>
         <div class="hint">Se usa <b>solo</b> cuando la sección de Cableado está apagada. Si cargás los circuitos, este campo se ignora y la bornera se saca del calibre real que llega a cada columna.<br><br><b>La regla de la bornera de FASE (gris)</b>: cable de hasta <b>4 mm²</b> → BPN de <b>4 mm²</b> (ítem 62); cable de <b>más de 4 mm²</b> → BPN de <b>6 mm²</b> (ítem 63). Por eso un troncal de 6 mm² pide bornera de 6.<br>Si en el cómputo ves las dos medidas, es porque la plaza tiene tramos de distinto calibre: cada línea aclara para qué cable es. Las borneras <b>celeste (neutro) y verde (tierra) van siempre de 6 mm²</b> en columnas PRFV, cualquiera sea el cable.</div>
 
-        <label>Cómo se arma la caja de la columna <span style="font-weight:600;color:var(--text-soft)">(solo PRFV)</span></label>
-        <div class="hint" style="margin-top:0;margin-bottom:10px;">Estas cinco cantidades son las que usa el cómputo. Ya vienen cargadas con la forma que se usa hoy — si mañana cambia el armado, se cambian acá y listo, no hay que tocar nada más. Se guardan con el cómputo de esta plaza.</div>
+        <!-- ============================================================================
+             CÓMO SE ARMA LA CAJA DE LA COLUMNA  (reordenado el 07/09/2026)
+             Pedido del usuario, textual: *"revisemos bien la parte de portafusibles y BPN; la
+             forma de BPN de PRFV que aparezca solo cuando usamos columna de PRFV, para las
+             metálicas que me salga la opción según vínculos; ahora no está bien eso, revisalo,
+             que sea más prolijo todo"*.
+             Tenía razón: los DOS armados se veían al mismo tiempo. Con «Metálica» elegida seguían
+             a la vista los cinco casilleros de PRFV con un cartel que decía «no se aplican», y
+             abajo la tabla de metálicas — dos formas distintas de armar la misma caja en pantalla
+             a la vez, que es justo lo que confunde al que está cargando.
+             Ahora se ve UNA sola, la del tipo de columna elegido arriba, con su propia regla de
+             fusibles (que también es distinta y antes salía una sola para las dos).
+             Ojo: no cambió NADA de la cuenta. `bpnColCfg()` y `bpnMetCfg()` leen los mismos
+             casilleros con los mismos ids; lo único que cambió es cuál de los dos se muestra. ==-->
+        <label style="margin-bottom:0;">Cómo se arma la caja de la columna <span class="bpn-chip" id="bpnTipoChip">PRFV</span></label>
+
+        <div id="bpnPrfvPanel">
+        <div class="hint" style="margin-top:6px;margin-bottom:10px;">En <b>PRFV</b> el armado es <b>fijo por columna</b>, no depende del vínculo: estas cinco cantidades son las que usa el cómputo. Ya vienen cargadas con la forma que se usa hoy — si mañana cambia el armado, se cambian acá y listo, no hay que tocar nada más. Se guardan con el cómputo de esta plaza.</div>
         <div class="bpncfg">
           <div class="bpncfg-item">
             <span class="bpncfg-lbl"><i class="bpncfg-chip pf"></i>Portafusibles</span>
@@ -2836,18 +2871,19 @@
         </div>
         <div class="hint" id="bpnCfgResumen" style="margin-top:10px;"></div>
         <button type="button" id="bpnCfgResetBtn" class="btn-auto">↺ Volver a la forma de armado actual (2 · 3 · 3 · 2 / 3)</button>
+        <div class="hint" style="margin-top:10px;"><b>El fusible no se carga acá: sale solo.</b> Va <b>2 A por artefacto</b>, repartido entre los <b>2 portafusibles</b> de la columna — simple: un fusible de 2 A (el otro portafusible queda sin fusible) · doble: 2 A + 2 A · triple: 2 A + 4 A · cuádruple: 4 A + 4 A.</div>
+        </div>
 
         <!-- Armado de la caja en columna METÁLICA (2026-09-06): se llena solo según el vínculo (1 a 4
              artefactos) y el esquema de tierra (TT / TN-S), y cada casillero se puede corregir. -->
-        <div id="bpnMetPanel" style="display:none; margin-top:14px;">
-          <label>Cómo se arma la caja de la columna <span style="font-weight:600;color:var(--text-soft)">(Metálica)</span> — <span style="font-weight:600;color:var(--teal-dark)">se llena sola</span></label>
-          <div class="hint" style="margin-top:0;margin-bottom:8px;">Sale de los <b>constructivos</b> (AP-CC-014-A / AP-CC-016-C) según el <b>vínculo</b> de cada grupo y el <b>esquema de tierra</b> que elegiste arriba. Los casilleros se pueden corregir: lo que toques queda como <b>a mano</b> y se guarda con el cómputo; lo que no, se vuelve a calcular solo si cambiás el vínculo o el esquema.</div>
+        <div id="bpnMetPanel" style="display:none;">
+          <div class="hint" style="margin-top:6px;margin-bottom:8px;">En <b>metálica</b> el armado <b>depende del vínculo</b>: va una fila por cada vínculo que tenga la plaza. Sale de los <b>constructivos</b> (AP-CC-014-A / AP-CC-016-C) según los artefactos de ese vínculo y el <b>esquema de tierra</b> que elegiste arriba. Los casilleros se pueden corregir: lo que toques queda como <b>a mano</b> y se guarda con el cómputo; lo que no, se vuelve a calcular solo si cambiás el vínculo o el esquema.</div>
           <div id="bpnMetTabla"></div>
           <input type="hidden" id="bpnMetTocados" value="">
           <div class="hint" id="bpnMetRegla" style="margin-top:8px;"></div>
           <button type="button" id="bpnMetResetBtn" class="btn-auto">↺ Volver al automático</button>
+          <div class="hint" style="margin-top:10px;"><b>El fusible no se carga acá: sale solo.</b> En metálica va <b>1 portafusible por artefacto</b> y cada uno lleva su fusible de <b>2 A</b> — los mismos 2 A por artefacto que en PRFV, pero sin repartir. En esquema <b>TT</b> hay además una base para el neutro, y <b>ésa va sin fusible</b>.</div>
         </div>
-        <div class="hint"><b>El fusible no se carga acá: sale solo.</b> Va <b>2 A por artefacto</b>, repartido entre los portafusibles de esa columna — vínculo simple: un fusible de 2 A (el otro portafusible queda sin fusible); doble: 2 A + 2 A; triple: 2 A + 4 A; cuádruple: 4 A + 4 A.</div>
       </div>
 
       <div class="card" id="cardCableado">
@@ -5212,32 +5248,87 @@ function bpnMetCfg(lum){
 }
 window.bpnMetCfg = bpnMetCfg;
 // El panel: una fila por cada vínculo que tenga la plaza (por cantidad de artefactos).
+// ---- Una sola forma de armado a la vista (2026-09-07) ----
+// Hasta hoy los cinco casilleros de PRFV quedaban visibles aunque la columna fuera metálica, con
+// un cartel que decía «no se aplican», y justo abajo aparecía la tabla de metálicas: dos armados
+// distintos de la misma caja en pantalla al mismo tiempo. Ahora se muestra solo el del tipo
+// elegido arriba, y el chip del título dice cuál es. La cuenta no cambió: `bpnColCfg()` y
+// `bpnMetCfg()` leen exactamente los mismos casilleros de antes.
+function pintarPanelesBpn(){
+  const esMet = (document.getElementById('vincTipoCol')||{}).value === 'Metálica';
+  const prfv = document.getElementById('bpnPrfvPanel');
+  const met  = document.getElementById('bpnMetPanel');
+  if(prfv) prfv.style.display = esMet ? 'none' : '';
+  if(met)  met.style.display  = esMet ? '' : 'none';
+  const chip = document.getElementById('bpnTipoChip');
+  if(chip){
+    chip.className = 'bpn-chip' + (esMet ? ' met' : '');
+    chip.innerHTML = esMet ? 'Metálica <small>· según el vínculo</small>' : 'PRFV <small>· fijo por columna</small>';
+  }
+  return esMet;
+}
+window.pintarPanelesBpn = pintarPanelesBpn;
 function renderBpnMetPanel(forzar){
   const panel = document.getElementById('bpnMetPanel');
   const tabla = document.getElementById('bpnMetTabla');
+  const esMet = pintarPanelesBpn();
   if(!panel || !tabla) return;
-  const esMet = (document.getElementById('vincTipoCol')||{}).value === 'Metálica';
-  panel.style.display = esMet ? '' : 'none';
   if(!esMet) return;
   const esq = (typeof esquemaActual === 'function') ? esquemaActual() : 'TN-S';
-  const lums = [...new Set(vinculoGrupos.filter(g=>(g.columnas||0) > 0).map(g=>{ const v = VINCULOS.find(x=>x.id===g.tipo); return v ? v.lum : null; }).filter(Boolean))].sort((a,b)=>a-b);
-  const filas = lums.length ? lums : [3];
+  // Una fila por VÍNCULO de la plaza, con cuántas columnas lo llevan — así se ve de dónde sale
+  // cada número sin tener que subir a mirar los grupos.
+  const porLum = {};
+  vinculoGrupos.filter(g=>(g.columnas||0) > 0).forEach(g=>{
+    const v = VINCULOS.find(x=>x.id===g.tipo);
+    if(!v || !v.lum) return;
+    porLum[v.lum] = (porLum[v.lum] || 0) + (g.columnas || 0);
+  });
+  const filas = Object.keys(porLum).map(k=>parseInt(k,10)).sort((a,b)=>a-b);
   // Se redibuja solo si cambió qué filas van o el esquema: así no se pierde el foco mientras se tipea.
-  const clave = filas.join(',') + '|' + esq;
+  const clave = filas.map(l=>`${l}:${porLum[l]}`).join(',') + '|' + esq;
   if(!forzar && tabla.dataset.clave === clave && tabla.innerHTML) return;
   tabla.dataset.clave = clave;
+  if(!filas.length){
+    tabla.innerHTML = `<div class="hint" style="margin:0;">Todavía no hay ningún <b>grupo de vínculo</b> cargado arriba. Agregá uno y acá aparece la fila con su armado de caja — una por cada vínculo distinto que tenga la plaza.</div>`;
+    const r0 = document.getElementById('bpnMetRegla'); if(r0) r0.innerHTML = '';
+    return;
+  }
   const toc = bpnMetTocados();
-  const nombre = l=>({1:'Simple (1 artefacto)',2:'Doble (2 artefactos)',3:'Triple (3 artefactos)',4:'Cuádruple (4 artefactos)'})[l] || `${l} artefactos`;
+  const nombre = l=>({1:'Simple',2:'Doble',3:'Triple',4:'Cuádruple'})[l] || `${l} artefactos`;
   const celda = (l, campo, val)=>{
     const t = !!toc[`${l}_${campo}`];
     return `<td><input type="number" min="0" max="12" id="bpnMet_${l}_${campo}" class="bpnmet-in${t?' tocado':''}" value="${val}" title="${t?'Corregido a mano — con ↺ vuelve al automático':'Automático según el constructivo'}"></td>`;
   };
-  let h = `<div class="tabla-scroll"><table class="bpnmet-tabla"><thead><tr><th>Vínculo</th><th title="Portafusibles tabaquera 10 × 38"><i class="bpncfg-chip pf"></i>Portaf.</th><th title="Bornera BPN gris (fase)"><i class="bpncfg-chip gris"></i>Gris</th><th title="Bornera BPN celeste (neutro)"><i class="bpncfg-chip celeste"></i>Celeste</th><th title="Bornera BPN verde (tierra)"><i class="bpncfg-chip verde"></i>Verde</th><th>Fusibles</th></tr></thead><tbody>`;
+  // La tarjeta de la Calculadora es una columna angosta (unos 360 px útiles, tanto en la
+  // computadora como en el celular). Con siete columnas la tabla no entraba y el nombre del
+  // vínculo se partía en cinco renglones. Quedan CINCO columnas —el vínculo y los cuatro
+  // casilleros— y lo demás (columnas que lo llevan, fusibles y el total de esa fila) baja como
+  // subtítulo abajo del nombre, que es donde hay lugar. (2026-09-07)
+  let h = `<div class="tabla-scroll"><table class="bpnmet-tabla"><thead><tr><th>Vínculo</th>`
+        + `<th title="Portafusibles tabaquera 10 × 38"><i class="bpncfg-chip pf"></i>PF</th>`
+        + `<th title="Bornera BPN gris (fase)"><i class="bpncfg-chip gris"></i>Gris</th>`
+        + `<th title="Bornera BPN celeste (neutro)"><i class="bpncfg-chip celeste"></i>Cel.</th>`
+        + `<th title="Bornera BPN verde (tierra)"><i class="bpncfg-chip verde"></i>Ver.</th></tr></thead><tbody>`;
+  let tPf = 0, tGris = 0, tCel = 0, tVer = 0, tCol = 0, tFus = 0;
   filas.forEach(l=>{
     const c = bpnMetCfg(l);
-    h += `<tr><td><b>${nombre(l)}</b><div class="cierre-un">por columna · ${esq}</div></td>${celda(l,'pf',c.pf)}${celda(l,'gris',c.gris)}${celda(l,'celeste',c.celeste)}${celda(l,'verde',c.verde)}<td class="bpnmet-fus">${l} × 2 A${esq==='TT'?`<div class="cierre-un">la base del neutro va sin fusible</div>`:''}</td></tr>`;
+    const n = porLum[l];
+    tPf += c.pf*n; tGris += c.gris*n; tCel += c.celeste*n; tVer += c.verde*n; tCol += n; tFus += l*n;
+    h += `<tr><td><b>${nombre(l)}</b>`
+       + `<div class="bpnmet-vinc">${n} columna${n===1?'':'s'} · ${l} artefacto${l===1?'':'s'}</div>`
+       + `<div class="bpnmet-vinc">fusibles: ${l} × 2 A${esq==='TT' ? ' <span title="En TT la base del neutro no lleva fusible">(el neutro va sin fusible)</span>' : ''}</div>`
+       + `<div class="bpnmet-tot" title="Lo que suman las ${n} columna(s) de este vínculo: portafusibles · gris · celeste · verde">total ${c.pf*n} · ${c.gris*n} · ${c.celeste*n} · ${c.verde*n}</div></td>`
+       + `${celda(l,'pf',c.pf)}${celda(l,'gris',c.gris)}${celda(l,'celeste',c.celeste)}${celda(l,'verde',c.verde)}</tr>`;
   });
-  h += `</tbody></table></div>`;
+  h += `</tbody>`;
+  // El total de la plaza va en el PIE de la tabla, no como una fila más: así no se confunde con
+  // un vínculo y las pruebas que recorren los vínculos no lo cuentan como uno.
+  if(filas.length > 1)
+    h += `<tfoot><tr class="bpnmet-total"><td><b>Toda la plaza</b>`
+       + `<div class="bpnmet-vinc">${tCol} columna(s) metálica(s) · ${tFus} fusible(s) de 2 A</div></td>`
+       + `<td class="bpnmet-tot">${tPf}</td><td class="bpnmet-tot">${tGris}</td>`
+       + `<td class="bpnmet-tot">${tCel}</td><td class="bpnmet-tot">${tVer}</td></tr></tfoot>`;
+  h += `</table></div>`;
   tabla.innerHTML = h;
   const regla = document.getElementById('bpnMetRegla');
   const hayMano = Object.keys(toc).length > 0;
@@ -6240,13 +6331,12 @@ function pintarBpnCfgResumen(){
   const el = document.getElementById('bpnCfgResumen');
   if(!el) return;
   const c = bpnColCfg();
-  const esPRFV = (document.getElementById('vincTipoCol')||{}).value === 'PRFV';
   const def = (c.pf===BPN_COL_DEF.pf && c.gris===BPN_COL_DEF.gris && c.celeste===BPN_COL_DEF.celeste
                && c.verde===BPN_COL_DEF.verde && c.verdeFinal===BPN_COL_DEF.verdeFinal);
-  el.innerHTML = !esPRFV
-    ? 'La columna elegida es <b>metálica</b>: estos cinco casilleros no se aplican. El armado de la caja metálica está <b>acá abajo</b>, y se llena solo según el vínculo y el esquema TT / TN-S.'
-    : `Cada columna lleva <b>${c.pf} portafusible${c.pf===1?'':'s'}</b>, <b>${c.gris} gris</b>, <b>${c.celeste} celeste</b> y <b>${c.verde} verde</b> — <b>${c.verdeFinal} verdes</b> si es final de circuito.` +
-      (def ? '' : ' <b style="color:#c77b18">Cambiado respecto de la forma de armado actual.</b>');
+  // Desde el 07/09/2026 esta tarjeta solo se ve con columna de PRFV, así que ya no hace falta el
+  // cartel de «la columna es metálica, esto no se aplica»: directamente no está en pantalla.
+  el.innerHTML = `Cada columna lleva <b>${c.pf} portafusible${c.pf===1?'':'s'}</b>, <b>${c.gris} gris</b>, <b>${c.celeste} celeste</b> y <b>${c.verde} verde</b> — <b>${c.verdeFinal} verdes</b> si es final de circuito.`
+    + (def ? '' : ' <b style="color:#c77b18">Cambiado respecto de la forma de armado actual.</b>');
 }
 (function(){
   const b = document.getElementById('bpnCfgResetBtn');
