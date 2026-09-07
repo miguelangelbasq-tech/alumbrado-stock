@@ -2039,6 +2039,13 @@
   /* La previa del certificado de la Municipalidad se distingue de la de la Calculadora a simple
      vista: son dos fuentes distintas y no conviene confundirlas (2026-09-07). */
   .it-previa.it-previa-cert{ border-color:var(--amber); background:rgba(224,140,26,.06); }
+  .it-previa-grupo{ margin:14px 0 2px; padding:8px 12px; border-radius:9px; font-size:12.5px; line-height:1.45;
+                    background:rgba(15,42,71,.05); border-left:3px solid var(--navy); color:var(--text-soft); }
+  .it-previa-grupo:first-child{ margin-top:0; }
+  .it-previa-grupo b{ display:block; font-size:13px; color:var(--navy); margin-bottom:2px; }
+  .it-previa-grupo-prov{ background:rgba(126,198,230,.14); border-left-color:var(--teal-dark); }
+  .it-previa-grupo-falta{ background:rgba(224,140,26,.13); border-left-color:var(--amber); }
+  .it-previa-fila.it-previa-agregado{ border-style:dashed; }
   .it-previa-dudas{ margin-top:12px; border-radius:10px; padding:10px 14px; font-size:12.5px; line-height:1.55;
                     background:rgba(245,158,11,.12); color:#6b5312; }
   .it-previa-dudas ul{ margin:6px 0 0; padding-left:20px; }
@@ -2658,7 +2665,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 11:55 · 9232f8</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 12:18 · a9720f</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -17972,14 +17979,89 @@ function poblarParteObraDatalist(){
       previa[a.id] = { error:'Esta plaza no figura en el certificado de la Municipalidad. Se busca por ID de obra y, si no, por nombre — fijate que coincidan con los de la planilla.' };
       return;
     }
+    const un = it => (typeof epecItemUn === 'function' ? epecItemUn(it) : '') || '';
+    const nn = v => fmt(v, Number.isInteger(v) ? 0 : 2);
     const filas = Object.keys(p.it).sort((x,y)=> parseFloat(x) - parseFloat(y)).map(it=>({
-      item: it, cantidad: n2(p.it[it]),
-      motivo: `Certificado por la Municipalidad: ${fmt(n2(p.it[it]), Number.isInteger(n2(p.it[it]))?0:2)} ${(typeof epecItemUn==='function' ? epecItemUn(it) : '') || ''}`.trim(),
+      item: it, cantidad: n2(p.it[it]), grupo:'cert',
+      motivo: `Certificado por la Municipalidad: ${nn(n2(p.it[it]))} ${un(it)}`.trim(),
     }));
     const dudas = [];
-    dudas.push('Esta planilla se armó <b>antes</b> de la Nota Aclaratoria N° 1 del 31/08/2026, que agregó los ítems <b>83 a 89</b> (la <b>provisión</b> de columnas, luminarias, cables, jabalinas y tablero aéreo). Por eso no los trae. Si esos materiales los puso EMA, hay que agregarlos aparte — con «⟳ Traer las cantidades de la Calculadora» o a mano.');
-    dudas.push('Son las cantidades <b>ya certificadas</b>, no lo que la Calculadora dice que corresponde. Si querés ver en qué se diferencian, está el informe <b>«Certificado municipal vs. Calculadora»</b> en la pantalla de Informes.');
-    previa[a.id] = { filas, dudas, certif:true, fuente:C.fuente,
+
+    // ==========================================================================================
+    // LO QUE EL CERTIFICADO NO TIENE Y SÍ SE HIZO  (2026-09-07)
+    // ==========================================================================================
+    // Pedido del usuario, textual: *"lo que falta es que lo corrija, porque ellos no nos proveen
+    // nada excepto lo que te dije: el cable 3×1,5, el 1×10 y las luminarias. O sea, pongámoslo a
+    // extraer ya completo, bien identificado"*.
+    //
+    // La regla es la que él fijó y ya usa toda la herramienta: EPEC provee SOLO los artefactos, el
+    // cable 3×1,5 y el verde-amarillo de 10 mm². Todo lo demás —columnas, tableros, jabalinas— lo
+    // puso EMA, y desde el Anexo I del 31/08/2026 se cobra aparte por los ítems 83 a 89.
+    // Esa planilla es anterior: no los tiene. Así que se agregan acá, calculados desde lo que la
+    // propia planilla certifica, y marcados aparte para que se vea qué salió de dónde.
+    //
+    // Todos los renglones agregados vienen TILDADOS pero se pueden destildar uno por uno: son una
+    // propuesta con su cuenta a la vista, no una decisión tomada.
+    const g = it => n2(p.it[it]);
+    const met7  = g(1) + g(2) + g(3), met10 = g(4);
+    const prfv7 = g(5) + g(6) + g(7), prfv10 = g(8);
+    const tabAereo = g(9);
+    const agregar = (item, cant, motivo, grupo)=>{
+      if(!(cant > 0.0001)) return;
+      const ya = filas.find(f=>f.item === String(item));
+      if(ya) return;                       // si el certificado ya lo trae, manda el certificado
+      filas.push({ item:String(item), cantidad:Math.round(cant * 100) / 100, motivo, grupo });
+    };
+
+    // ---- 1. PROVISIÓN: lo que puso EMA (ítems 83 a 89) ----
+    agregar('83.1', met7,  `${nn(met7)} columna(s) metálica(s) de 7 m del certificado (ítems 1, 2 y 3). La provisión la puso EMA: EPEC solo entrega artefactos y los dos cables.`, 'prov');
+    agregar('83.2', met10, `${nn(met10)} columna(s) metálica(s) de 10 m del certificado (ítem 4). La provisión la puso EMA.`, 'prov');
+    agregar('84.1', prfv7, `${nn(prfv7)} columna(s) de PRFV de 7 m del certificado (ítems 5, 6 y 7). La provisión la puso EMA.`, 'prov');
+    agregar('84.2', prfv10,`${nn(prfv10)} columna(s) de PRFV de 10 m del certificado (ítem 8). La provisión la puso EMA.`, 'prov');
+    agregar(89, tabAereo,  `${nn(tabAereo)} tablero(s) aéreo(s) del certificado (ítem 9). El gabinete lo compró EMA: el ítem 9 paga la instalación, no la provisión.`, 'prov');
+    // Jabalinas: en metálica va una por columna y su PAT está adentro del ítem 1-4 y del 42, así que
+    // ésas NO figuran en el ítem 75 del certificado; las que sí figuran son las que se cobraron
+    // aparte (PRFV y tablero). Se suman las tres fuentes, sin repetir.
+    const jab = met7 + met10 + g(42) + g(75);
+    agregar(88, jab, `${nn(jab)} jabalina(s): ${nn(met7 + met10)} por las columnas metálicas nuevas (su PAT va adentro del ítem 1-4), ${nn(g(42))} por las acometidas nuevas del ítem 42, y ${nn(g(75))} que el certificado ya cobró por el ítem 75. La provisión la puso EMA. VERIFICALO contra el remito antes de certificar.`, 'prov');
+
+    // ---- 2. LO QUE SE HIZO Y NO SE CERTIFICÓ ----
+    // El cable 3×1,5 lo PROVEE EPEC (por eso no va el ítem 86), pero la INSTALACIÓN en columna es el
+    // ítem 30 y la hizo EMA. Los metros salen de la fórmula ya verificada contra seis cómputos
+    // oficiales: L = (altura libre − altura de la caja) + brazo + 0,60, con la caja a 2,50 m en
+    // metálica y a 3,50 m en PRFV. Los ítems 1-3 y 5-7 llevan brazos de 0,425 m; el 4 y el 8, de 1,025 m.
+    const L = (brazo, alt, tipo)=> (typeof cableSubidaPorArtefacto === 'function')
+      ? cableSubidaPorArtefacto(brazo, alt, tipo)
+      : Math.max(0, alt - (tipo === 'PRFV' ? 3.5 : 2.5)) + brazo + 0.6;
+    const m315 =
+        (g(1) + 2*g(2) + 3*g(3)) * L(0.425, 7,  'Metálica')
+      + 4*g(4)                   * L(1.025, 10, 'Metálica')
+      + (g(5) + 2*g(6) + 3*g(7)) * L(0.425, 7,  'PRFV')
+      + 4*g(8)                   * L(1.025, 10, 'PRFV')
+      + g(44)                    * L(0.425, 7,  'Metálica');   // luminarias sobre columna existente
+    agregar(30, m315 - g(30), `${nn(Math.round(m315*100)/100)} m de cable 3×1,5 subiendo a los artefactos. El cable lo da EPEC, pero la INSTALACIÓN en columna es el ítem 30 y la hizo EMA. Sale de la fórmula (altura − caja) + brazo + 0,60, verificada contra seis cómputos oficiales.`, 'falta');
+    agregar(64, tabAereo - g(64), `Un fotocontrol por cada uno de los ${nn(tabAereo)} tablero(s) aéreo(s) del certificado. No está certificado en esta plaza.`, 'falta');
+    agregar(76, tabAereo - g(76), `Un caño de bajada Ø2" por cada tablero aéreo (${nn(tabAereo)}).`, 'falta');
+    agregar(71, tabAereo - g(71), `Un largo de fleje inoxidable de 3 m por cada tablero aéreo (${nn(tabAereo)}), para sujetar el caño de bajada.`, 'falta');
+    agregar(72, tabAereo * 3 - g(72), `Tres hebillas inoxidables por tablero aéreo (${nn(tabAereo)} × 3), una por vuelta de fleje.`, 'falta');
+    agregar(74, g(75) - g(74), `Un tomacable por cada una de las ${nn(g(75))} jabalina(s) que el certificado cobró por el ítem 75. Las de columna metálica no van: su PAT está adentro del ítem 1-4.`, 'falta');
+
+    // Ordenado por GRUPO y, adentro de cada uno, por número de ítem. Si se ordenara todo junto por
+    // número, los agregados quedarían intercalados entre los certificados y el encabezado de cada
+    // grupo aparecería varias veces — que es justo lo contrario de «bien identificado».
+    // En el itemizado de la plaza igual terminan en el orden del pliego: esto es solo la revisión.
+    const ORDEN = { cert:0, prov:1, falta:2 };
+    filas.sort((x,y)=> (ORDEN[x.grupo] - ORDEN[y.grupo]) || (parseFloat(x.item) - parseFloat(y.item)));
+    const nProv  = filas.filter(f=>f.grupo === 'prov').length;
+    const nFalta = filas.filter(f=>f.grupo === 'falta').length;
+
+    if(nProv) dudas.push(`Se agregaron <b>${nProv} ítem(s) de PROVISIÓN</b> (83 a 89) que esa planilla no podía tener: se armó <b>antes</b> de la Nota Aclaratoria N° 1 del 31/08/2026, que los creó. Van porque <b>EPEC solo provee los artefactos, el cable 3×1,5 y el verde-amarillo de 10 mm²</b> — las columnas, el tablero y las jabalinas las puso EMA. Si en esta plaza fue distinto, destildalos.`);
+    if(nFalta) dudas.push(`Se agregaron <b>${nFalta} ítem(s) que se hicieron y no se certificaron</b>, calculados desde lo que la propia planilla dice. Cada uno explica de dónde sale su cantidad — miralos uno por uno antes de aplicar.`);
+    dudas.push('<b>NO se agregaron</b> los ítems <b>85.1/85.2 (luminarias)</b>, <b>86 (cable 3×1,5)</b> ni <b>87 (verde-amarillo 10 mm²)</b>: ésos son los tres materiales que <b>provee EPEC</b>, así que su provisión no se cobra. Si en alguna plaza los puso EMA, agregalos a mano.');
+    dudas.push('Los renglones del certificado van <b>tal cual vinieron</b>: no se corrigió ninguno. Lo agregado está marcado aparte y se puede destildar de a uno.');
+    dudas.push('Si querés ver plaza por plaza en qué se diferencia lo certificado de lo que corresponde, está el informe <b>«Certificado municipal vs. Calculadora»</b> en la pantalla de Informes.');
+
+    previa[a.id] = { filas, dudas, certif:true, fuente:C.fuente, nProv, nFalta,
                      computo:{ nombre:p.n, id:p.ids.join(' / '), fecha:C.fecha } };
     const yaCargados = {};
     (a.valorItems||[]).forEach(v=>{ if(v.itemPliego) yaCargados[v.itemPliego] = n2(v.cantidad); });
@@ -18006,17 +18088,32 @@ function poblarParteObraDatalist(){
       <div class="hint" style="margin-top:0;">${p.certif
         ? `Hoja <b>${esc(h.nombre)}</b>${h.id?` (ID ${esc(h.id)})`:''} de la planilla <b>${esc(p.fuente||'')}</b>. Son las cantidades <b>que ya se certificaron</b>, tal cual vinieron: acá no se corrigió ninguna.`
         : `Cómputo de <b>${esc(h.nombre)}</b>${h.id?` (ID ${esc(h.id)})`:''}, calculado el ${esc((typeof formatFechaCorta==='function'&&h.fecha)?formatFechaCorta(h.fecha):(h.fecha||'—'))}${p.fuente?` · leído de ${esc(p.fuente)}`:''}.`}</div>
-      <div class="it-previa-resumen"><b>Encontramos ${p.filas.length} ítem(s) para cargar.</b> Miralos, destildá lo que no corresponda y, si está bien, tocá «Aplicar a la plaza». <b>Las cantidades ya hechas no se tocan.</b></div>`;
+      <div class="it-previa-resumen"><b>Encontramos ${p.filas.length} ítem(s) para cargar.</b>${p.certif && (p.nProv || p.nFalta)
+        ? ` De ésos, <b>${p.filas.length - (p.nProv||0) - (p.nFalta||0)}</b> salen del certificado tal cual, <b>${p.nProv||0}</b> son la <b>provisión</b> que puso EMA y <b>${p.nFalta||0}</b> se hicieron y <b>no se certificaron</b>.` : ''} Miralos, destildá lo que no corresponda y, si está bien, tocá «Aplicar a la plaza». <b>Las cantidades ya hechas no se tocan.</b></div>`;
     if(!p.filas.length){
       x += `<div class="hint" style="color:var(--amber);">${p.certif ? 'Esa hoja del certificado no tiene ninguna cantidad cargada.' : 'Ese cómputo no tiene nada que se pueda pasar al itemizado.'}</div>`;
     } else {
+      // Tres grupos, cada uno con su encabezado: lo que dice el certificado, la provisión que puso
+      // EMA, y lo que se hizo sin certificar. Pedido del usuario: *"bien identificado"* (2026-09-07).
+      const GRUPOS = {
+        cert:  { t:'Lo que dice el certificado de la Municipalidad', s:'Tal cual vino la planilla — acá no se corrigió ningún número.' },
+        prov:  { t:'Provisión de los materiales que puso EMA — ítems 83 a 89', s:'EPEC solo provee los artefactos, el cable 3×1,5 y el verde-amarillo de 10 mm². Lo demás lo puso EMA y se cobra aparte. Esa planilla no los tiene porque es anterior al 31/08/2026.' },
+        falta: { t:'Se hizo y no se certificó', s:'Calculado desde lo que la propia planilla dice. Cada renglón explica de dónde sale su cantidad.' },
+      };
+      let grupoActual = null;
       x += `<div class="it-previa-filas">` + p.filas.map((fl,i)=>{
         const it = itemDe(fl.item) || (typeof itemEpec === 'function' ? itemEpec(fl.item) : null);   // 83.1–89 viven solo en el Anexo I
         const ev = typeof esEventualidad === 'function' && esEventualidad(fl.item);
-        return `<label class="it-previa-fila${ev?' it-previa-prov':''}">
+        let cab = '';
+        if(fl.grupo && fl.grupo !== grupoActual && GRUPOS[fl.grupo]){
+          grupoActual = fl.grupo;
+          cab = `<div class="it-previa-grupo it-previa-grupo-${fl.grupo}">
+            <b>${esc(GRUPOS[fl.grupo].t)}</b><div>${esc(GRUPOS[fl.grupo].s)}</div></div>`;
+        }
+        return cab + `<label class="it-previa-fila${ev?' it-previa-prov':''}${fl.grupo && fl.grupo!=='cert' ? ' it-previa-agregado' : ''}">
           <input type="checkbox" class="it-previa-chk" data-i="${i}" ${fl.tildada?'checked':''}>
           <div>
-            <b>Ítem ${fl.item} — ${esc(it?it.desc:'?')}</b>${ev?' <span class="it-badge it-badge-prov" title="Provisión de material: se cobra porque lo puso EMA">provisión</span>':''}
+            <b>Ítem ${fl.item} — ${esc(it?it.desc:'?')}</b>${ev?' <span class="it-badge it-badge-prov" title="Provisión de material: se cobra porque lo puso EMA">provisión</span>':''}${fl.grupo==='falta'?' <span class="it-badge it-badge-amb" title="Lo agregó la herramienta: no está en el certificado">agregado</span>':''}
             <div class="it-cat">${esc(fl.motivo)}</div>
           </div>
           <div class="it-previa-cant">
@@ -20469,7 +20566,7 @@ const ITEMIZADO_EPEC = [
         const msg = document.querySelector(`.it-plaza[data-epec="${CSS.escape(String(a.id))}"] .ep-msg`);
         if(msg){ msg.style.color='var(--teal-dark)';
           msg.textContent = eraCertif
-            ? `✔ Se cargaron ${n} ítem(s) del certificado de la Municipalidad. Ojo: no incluye los ítems 83 a 89 de provisión.`
+            ? `✔ Se cargaron ${n} ítem(s): lo certificado por la Municipalidad más la provisión que puso EMA y lo que se hizo sin certificar. Revisalo antes de presentarlo.`
             : `✔ Se cargaron ${n} ítem(s) desde la Calculadora. Revisá las cantidades antes de certificar.`; }
         return;
       }
