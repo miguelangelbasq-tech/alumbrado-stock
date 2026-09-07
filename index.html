@@ -2566,7 +2566,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-06 20:49 · ae528d</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-06 21:47 · ad522d</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -21432,6 +21432,30 @@ const ITEMIZADO_EPEC = [
   const DESC = id => (typeof window.epecItemDesc === 'function') ? window.epecItemDesc(id) : '';
   const UN   = id => (typeof window.epecItemUn   === 'function') ? window.epecItemUn(id) : '';
 
+  // ---- Celdas con número adentro (2026-09-06) ----
+  // Una celda del informe puede ser texto pelado o un NÚMERO con su formato. El número crudo viaja
+  // hasta el Excel; el texto ya formateado es el que se ve en pantalla, en el papel y en el Word.
+  // Sin esto, la planilla recibía «$ 66.238.981,20» como TEXTO: no se podía sumar, ni ordenar, ni
+  // meter en una fórmula — que es justamente para lo que uno se baja un Excel.
+  // `fmt` es la clave del formato que después aplica la planilla: k · money · pts · int · cant · pct.
+  function N(v, tipo){
+    const n = n2(v);
+    const fmt = tipo || 'k';
+    let txt;
+    if(fmt === 'money')     txt = plata(n);
+    else if(fmt === 'pct')  txt = Math.round(n * 100) + '%';
+    else if(fmt === 'int')  txt = nf(n, 0);
+    else if(fmt === 'cant') txt = nEnt(n);
+    else if(fmt === 'pts')  txt = nf(n, 1);
+    else                    txt = nf(n, 2);
+    return { n, fmt, txt };
+  }
+  const celTxt = c => (c && typeof c === 'object') ? String(c.txt == null ? '' : c.txt) : String(c == null ? '' : c);
+  const celNum = c => (c && typeof c === 'object' && typeof c.n === 'number' && isFinite(c.n)) ? c : null;
+  // Un «+» adelante cuando el número es positivo: en una columna de diferencias, +3 y −3 se tienen
+  // que distinguir de una ojeada. El número que va al Excel sigue siendo el número, con su signo.
+  const mas = c => ({ ...c, txt: (c.n > 0 ? '+' : '') + c.txt });
+
   // Los ítems de una plaza, las dos listas juntas y en el orden del pliego — el mismo criterio que
   // usa el Itemizado 2026, para que los totales coincidan renglón por renglón.
   function itemsDe(a){
@@ -21563,7 +21587,10 @@ const ITEMIZADO_EPEC = [
   // ==========================================================================================
   // LOS CONSTRUCTORES — cada uno devuelve el MODELO del informe
   // ==========================================================================================
-  const tabla = (tit, hint, cols, filas, pie)=> ({ tipo:'tabla', tit, hint, cols, filas, pie: pie||null });
+  // `op` es opcional: {grupo, etiqueta, etiquetaCol}. Solo lo mira el Excel, para juntar en UNA hoja
+  // las secciones que tienen la misma forma (ej. el detalle de cada plaza) con una columna adelante
+  // que dice de cuál es cada fila. En pantalla y en el papel siguen saliendo separadas.
+  const tabla = (tit, hint, cols, filas, pie, op)=> ({ tipo:'tabla', tit, hint, cols, filas, pie: pie||null, ...(op||{}) });
   const texto = (tit, parrafos)=> ({ tipo:'texto', tit, parrafos: parrafos.filter(Boolean) });
 
   // ---- 1. Avance de obra ----
@@ -21576,16 +21603,16 @@ const ITEMIZADO_EPEC = [
     filas.forEach(f=>{ const s = situDe(f.a); porSit[s] = (porSit[s]||0) + 1; });
     const pctProm = filas.length ? Math.round(filas.reduce((t,f)=>t + pctObra(f.a), 0) / filas.length) : 0;
     m.tiles = [
-      { n: filas.length, l:'Plazas en el informe', c:'' },
-      { n: filas.filter(f=>/^Finalizada/.test(situDe(f.a))).length, l:'Finalizadas', c:'verde' },
-      { n: filas.filter(f=>/obra/i.test(situDe(f.a))).length, l:'En obra', c:'azul' },
-      { n: pctProm + '%', l:'Avance promedio', c:'' },
+      { n: N(filas.length,'int'), l:'Plazas en el informe', c:'' },
+      { n: N(filas.filter(f=>/^Finalizada/.test(situDe(f.a))).length,'int'), l:'Finalizadas', c:'verde' },
+      { n: N(filas.filter(f=>/obra/i.test(situDe(f.a))).length,'int'), l:'En obra', c:'azul' },
+      { n: N(pctProm/100,'pct'), l:'Avance promedio', c:'' },
     ];
     if(o.sec.resumen){
       m.secciones.push(tabla('Resumen por situación', null,
         [{t:'Situación'},{t:'Plazas', num:true}],
-        Object.keys(porSit).sort().map(s=>[s, String(porSit[s])]),
-        [['Total de plazas relevadas', String(filas.length)]]));
+        Object.keys(porSit).sort().map(s=>[s, N(porSit[s],'int')]),
+        [['Total de plazas relevadas', N(filas.length,'int')]]));
     }
     if(o.sec.detalle){
       m.secciones.push(tabla('Detalle plaza por plaza', null,
@@ -21593,12 +21620,12 @@ const ITEMIZADO_EPEC = [
          {t:'Fecha estimada', w:'92px'},{t:'Encendido', w:'110px'},{t:'Inspección', w:'110px'},{t:'Avance', num:true, w:'62px'}],
         filas.map(f=>{
           const a = f.a;
-          return [String(f.n), a.nombre||'', String(a.obraId||'—'), situDe(a),
+          return [N(f.n,'int'), a.nombre||'', String(a.obraId||'—'), situDe(a),
                   (a.pendiente||'').trim() || ((typeof pendienteSugerido === 'function') ? pendienteSugerido(a) : '—'),
                   a.fechaEstimada ? fCorta(a.fechaEstimada) : '—',
                   (typeof textoEncendido === 'function') ? textoEncendido(a) : '—',
                   (typeof textoInspeccion === 'function') ? textoInspeccion(a) : '—',
-                  pctObra(a) + '%'];
+                  N(pctObra(a)/100,'pct')];
         })));
     }
     if(o.sec.obs){
@@ -21631,10 +21658,10 @@ const ITEMIZADO_EPEC = [
       return { a, n:i+1, v, nIt };
     });
     m.tiles = [
-      { n: nf(kT,2), l:'Módulos (K) contratados', c:'' },
-      { n: nf(kA,2), l:'Módulos certificados', c:'verde' },
-      { n: kT > 0 ? Math.round(kA/kT*100) + '%' : '0%', l:'Certificado', c:'azul' },
-      { n: base > 0 ? plata(kT*base) : '—', l:'Contratado' + (iva?' (c/IVA)':' (s/IVA)'), c:'' },
+      { n: N(kT,'k'), l:'Módulos (K) contratados', c:'' },
+      { n: N(kA,'k'), l:'Módulos certificados', c:'verde' },
+      { n: N(kT > 0 ? kA/kT : 0,'pct'), l:'Certificado', c:'azul' },
+      { n: base > 0 ? N(kT*base,'money') : '—', l:'Contratado' + (iva?' (c/IVA)':' (s/IVA)'), c:'' },
     ];
     if(sinItems) m.avisos.push(`<b>${sinItems}</b> de las plazas elegidas <b>no tienen ningún ítem cargado</b>: entran al informe en cero. Traeles las cantidades desde el Itemizado 2026.`);
 
@@ -21643,13 +21670,13 @@ const ITEMIZADO_EPEC = [
         [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},{t:'Ítems', num:true, w:'56px'},
          {t:'K contratado', num:true},{t:'K certificado', num:true},
          {t:'Contratado', num:true},{t:'Certificado', num:true},{t:'%', num:true, w:'52px'}],
-        filas.map(f=>[String(f.n), f.a.nombre||'', String(f.a.obraId||'—'), String(f.nIt),
-                      nf(f.v.kTotal,2), nf(f.v.kAvanzado,2),
-                      base>0?plata(f.v.presupuesto):'—', base>0?plata(f.v.avanzado):'—',
-                      (f.v.kTotal>0?Math.round(f.v.kAvanzado/f.v.kTotal*100):0) + '%']),
-        [['', 'TOTAL', '', String(filas.reduce((t,f)=>t+f.nIt,0)), nf(kT,2), nf(kA,2),
-          base>0?plata(kT*base):'—', base>0?plata(kA*base):'—',
-          (kT>0?Math.round(kA/kT*100):0) + '%']]));
+        filas.map(f=>[N(f.n,'int'), f.a.nombre||'', String(f.a.obraId||'—'), N(f.nIt,'int'),
+                      N(f.v.kTotal,'k'), N(f.v.kAvanzado,'k'),
+                      base>0?N(f.v.presupuesto,'money'):'—', base>0?N(f.v.avanzado,'money'):'—',
+                      N(f.v.kTotal>0 ? f.v.kAvanzado/f.v.kTotal : 0,'pct')]),
+        [['', 'TOTAL', '', N(filas.reduce((t,f)=>t+f.nIt,0),'int'), N(kT,'k'), N(kA,'k'),
+          base>0?N(kT*base,'money'):'—', base>0?N(kA*base,'money'):'—',
+          N(kT>0 ? kA/kT : 0,'pct')]]));
     }
 
     if(o.sec.detalle){
@@ -21668,13 +21695,16 @@ const ITEMIZADO_EPEC = [
             const k = K(it.id), c = n2(it.v.cantidad), ca = Math.min(n2(it.v.cantidadAvanzada), c);
             // El id va limpio: la descripción de los 83.1–89 ya empieza con «Provisión de…», así
             // que marcarlos otra vez en la columna del número sería repetir lo mismo dos veces.
-            return [it.id, DESC(it.id), UN(it.id), nf(k,2),
-                    nEnt(c), nEnt(ca),
-                    base>0?plata(c*k*base):nf(c*k,2)+' K', base>0?plata(ca*k*base):nf(ca*k,2)+' K'];
+            return [it.id, DESC(it.id), UN(it.id), N(k,'k'),
+                    N(c,'cant'), N(ca,'cant'),
+                    base>0?N(c*k*base,'money'):N(c*k,'k'), base>0?N(ca*k*base,'money'):N(ca*k,'k')];
           }),
           [['', 'Total de la plaza', '', '', '', '',
-            base>0?plata(f.v.presupuesto):nf(f.v.kTotal,2)+' K',
-            base>0?plata(f.v.avanzado):nf(f.v.kAvanzado,2)+' K']]));
+            base>0?N(f.v.presupuesto,'money'):N(f.v.kTotal,'k'),
+            base>0?N(f.v.avanzado,'money'):N(f.v.kAvanzado,'k')]],
+          // Las hojas de detalle son todas de la misma forma: en el Excel se juntan en UNA sola
+          // hoja con una columna «Plaza» adelante, que es lo que sirve para tablas dinámicas.
+          { grupo:'Detalle por plaza', etiqueta:f.a.nombre || '(sin nombre)', etiquetaCol:'Plaza' }));
       });
     }
 
@@ -21691,9 +21721,9 @@ const ITEMIZADO_EPEC = [
          {t:'Plazas', num:true, w:'56px'},{t:'Cantidad', num:true},{t:'Hecha', num:true},
          {t:'Módulos', num:true},{t:'Importe', num:true}],
         cons.map(g=>{ const k = K(g.id);
-          return [g.id, DESC(g.id), UN(g.id), nf(k,2), String(g.plazas), nEnt(g.cant), nEnt(g.av),
-                  nf(g.cant*k,2), base>0?plata(g.cant*k*base):'—']; }),
-        [['', 'TOTAL', '', '', String(o.items.length), '', '', nf(kT,2), base>0?plata(kT*base):'—']]));
+          return [g.id, DESC(g.id), UN(g.id), N(k,'k'), N(g.plazas,'int'), N(g.cant,'cant'), N(g.av,'cant'),
+                  N(g.cant*k,'k'), base>0?N(g.cant*k*base,'money'):'—']; }),
+        [['', 'TOTAL', '', '', N(o.items.length,'int'), '', '', N(kT,'k'), base>0?N(kT*base,'money'):'—']]));
     }
     return m;
   }
@@ -21718,9 +21748,9 @@ const ITEMIZADO_EPEC = [
     });
     m.tiles = [
       { n: nFij + '/' + filas.length, l:'Con proyecto fijado', c: nFij === filas.length ? 'verde' : 'ambar' },
-      { n: nCerr, l:'Conforme a obra cerrado', c:'verde' },
-      { n: nAj, l:'Ajustes registrados', c:'azul' },
-      { n: (kVig - kProy >= 0 ? '+' : '') + nf(kVig - kProy, 2), l:'Diferencia en módulos', c: (kVig-kProy) > 0 ? 'verde' : ((kVig-kProy) < 0 ? 'rojo' : '') },
+      { n: N(nCerr,'int'), l:'Conforme a obra cerrado', c:'verde' },
+      { n: N(nAj,'int'), l:'Ajustes registrados', c:'azul' },
+      { n: mas(N(kVig - kProy,'k')), l:'Diferencia en módulos', c: (kVig-kProy) > 0 ? 'verde' : ((kVig-kProy) < 0 ? 'rojo' : '') },
     ];
     const sinFijar = filas.filter(f=>!f.e.fijado);
     if(sinFijar.length) m.avisos.push(`<b>${sinFijar.length}</b> plaza(s) <b>sin el itemizado de proyecto fijado</b>: de ésas no hay contra qué comparar, así que la columna de proyecto va vacía. Se fija desde el Itemizado 2026 de cada plaza (${sinFijar.slice(0,4).map(f=>esc(f.a.nombre||'')).join(', ')}${sinFijar.length>4?'…':''}).`);
@@ -21730,15 +21760,14 @@ const ITEMIZADO_EPEC = [
         [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},{t:'Estado'},
          {t:'K proyecto', num:true},{t:'K conforme a obra', num:true},{t:'Diferencia', num:true},
          {t:'$ diferencia', num:true},{t:'Ajustes', num:true, w:'62px'}],
-        filas.map(f=>[String(f.n), f.a.nombre||'', String(f.a.obraId||'—'),
+        filas.map(f=>[N(f.n,'int'), f.a.nombre||'', String(f.a.obraId||'—'),
                       f.e.cerrado ? 'Cerrado' : (f.e.fijado ? 'Proyecto fijado' : 'Sin fijar'),
-                      f.e.fijado ? nf(f.p,2) : '—', nf(f.v,2),
-                      f.dif == null ? '—' : (f.dif >= 0 ? '+' : '') + nf(f.dif,2),
-                      (f.dif == null || base <= 0) ? '—' : (f.dif >= 0 ? '+' : '') + plata(f.dif*base),
-                      String(f.aj)]),
-        [['', 'TOTAL', '', '', nf(kProy,2), nf(kVig,2),
-          (kVig-kProy >= 0 ? '+' : '') + nf(kVig-kProy,2),
-          base>0 ? ((kVig-kProy>=0?'+':'') + plata((kVig-kProy)*base)) : '—', String(nAj)]]));
+                      f.e.fijado ? N(f.p,'k') : '—', N(f.v,'k'),
+                      f.dif == null ? '—' : mas(N(f.dif,'k')),
+                      (f.dif == null || base <= 0) ? '—' : mas(N(f.dif*base,'money')),
+                      N(f.aj,'int')]),
+        [['', 'TOTAL', '', '', N(kProy,'k'), N(kVig,'k'), mas(N(kVig-kProy,'k')),
+          base>0 ? mas(N((kVig-kProy)*base,'money')) : '—', N(nAj,'int')]]));
     }
     if(o.sec.ajustes){
       const todos = [];
@@ -21754,8 +21783,7 @@ const ITEMIZADO_EPEC = [
             const idIt = String(x.itemId != null ? x.itemId : (x.clave||'').slice(2).replace(/_/g,'.'));
             const d = n2(x.delta);
             return [fCorta(x.fecha), a.nombre||'', 'Ítem ' + idIt + ' — ' + (DESC(idIt) || x.itemTxt || ''),
-                    (d>=0?'+':'') + nEnt(d),
-                    base>0 ? ((d>=0?'+':'') + plata(d*K(idIt)*base)) : '—',
+                    mas(N(d,'cant')), base>0 ? mas(N(d*K(idIt)*base,'money')) : '—',
                     x.motivo||'—', x.otNumero||'—', x.detalle||''];
           })));
       }
@@ -21780,10 +21808,10 @@ const ITEMIZADO_EPEC = [
     const completas = datos.filter(d=>d.nec.length && !d.faltan.length).length;
     const sinLista = datos.filter(d=>!d.nec.length).length;
     m.tiles = [
-      { n: datos.length, l:'Plazas en el informe', c:'' },
-      { n: completas, l:'Con el material completo', c:'verde' },
-      { n: datos.reduce((t,d)=>t+d.faltan.length,0), l:'Renglones faltantes', c:'ambar' },
-      { n: sinLista, l:'Sin lista de materiales', c: sinLista ? 'rojo' : '' },
+      { n: N(datos.length,'int'), l:'Plazas en el informe', c:'' },
+      { n: N(completas,'int'), l:'Con el material completo', c:'verde' },
+      { n: N(datos.reduce((t,d)=>t+d.faltan.length,0),'int'), l:'Renglones faltantes', c:'ambar' },
+      { n: N(sinLista,'int'), l:'Sin lista de materiales', c: sinLista ? 'rojo' : '' },
     ];
     if(sinLista) m.avisos.push(`<b>${sinLista}</b> plaza(s) no tienen cargada su lista de materiales, así que no hay contra qué comparar. Calculalas en la Calculadora y registralas.`);
 
@@ -21791,15 +21819,15 @@ const ITEMIZADO_EPEC = [
       m.secciones.push(tabla('Resumen por plaza', null,
         [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},
          {t:'Renglones', num:true},{t:'Entregados', num:true},{t:'Faltan', num:true},{t:'Cubierto', num:true, w:'70px'}],
-        datos.map(d=>[String(d.n), d.a.nombre||'', String(d.a.obraId||'—'),
-                      d.nec.length ? String(d.nec.length) : 'sin lista',
-                      String(d.nec.length - d.faltan.length), String(d.faltan.length),
-                      d.nec.length ? d.pct + '%' : '—'])));
+        datos.map(d=>[N(d.n,'int'), d.a.nombre||'', String(d.a.obraId||'—'),
+                      d.nec.length ? N(d.nec.length,'int') : 'sin lista',
+                      N(d.nec.length - d.faltan.length,'int'), N(d.faltan.length,'int'),
+                      d.nec.length ? N(d.pct/100,'pct') : '—'])));
     }
     if(o.sec.faltan){
       const filas = [];
       datos.forEach(d=> d.faltan.forEach(f=> filas.push([d.a.nombre||'', String(f.desc||''),
-        nEnt(f.calc), nEnt(f.entr||0), nEnt(n2(f.calc) - n2(f.entr||0)), String(f.un||'')])));
+        N(f.calc,'cant'), N(f.entr||0,'cant'), N(n2(f.calc) - n2(f.entr||0),'cant'), String(f.un||'')])));
       m.secciones.push(filas.length
         ? tabla('Lo que falta entregar', 'Material que la plaza necesita y que todavía no salió del pañol.',
             [{t:'Plaza'},{t:'Material'},{t:'Necesita', num:true},{t:'Entregado', num:true},{t:'Falta', num:true},{t:'Un.', w:'56px'}], filas)
@@ -21810,8 +21838,9 @@ const ITEMIZADO_EPEC = [
         if(!d.nec.length) return;
         m.secciones.push(tabla(d.a.nombre || '(sin nombre)', `ID ${d.a.obraId||'—'} — ${d.nec.length} renglón(es)`,
           [{t:'Material'},{t:'Necesita', num:true},{t:'Entregado', num:true},{t:'Diferencia', num:true},{t:'Un.', w:'56px'}],
-          d.nec.map(f=>[String(f.desc||''), nEnt(f.calc), nEnt(f.entr||0),
-                        nEnt(n2(f.entr||0) - n2(f.calc)), String(f.un||'')])));
+          d.nec.map(f=>[String(f.desc||''), N(f.calc,'cant'), N(f.entr||0,'cant'),
+                        N(n2(f.entr||0) - n2(f.calc),'cant'), String(f.un||'')]),
+          null, { grupo:'Detalle por plaza', etiqueta:d.a.nombre || '(sin nombre)', etiquetaCol:'Plaza' }));
       });
     }
     return m;
@@ -21863,10 +21892,10 @@ const ITEMIZADO_EPEC = [
     const ptsSel = personas.reduce((t,g)=>t+g.pts, 0);
     const diasSel = new Set(); personas.forEach(g=> g.dias.forEach(d=>diasSel.add(d)));
     m.tiles = [
-      { n: nf(ptsSel, Number.isInteger(ptsSel)?0:1), l:'Puntos de los elegidos', c:'' },
+      { n: N(ptsSel,'pts'), l:'Puntos de los elegidos', c:'' },
       { n: personas.filter(g=>g.pts>0).length + '/' + personas.length, l:'Con producción', c:'azul' },
-      { n: diasSel.size, l:'Días con trabajo cargado', c:'' },
-      { n: cerradas.length, l:'Órdenes cerradas del período', c:'verde' },
+      { n: N(diasSel.size,'int'), l:'Días con trabajo cargado', c:'' },
+      { n: N(cerradas.length,'int'), l:'Órdenes cerradas del período', c:'verde' },
     ];
     m.avisos.push('⚖ <b>Cómo leer estos números.</b> Miden lo que produjo la <b>cuadrilla</b>, repartido según el peso de cada rol. Cuando tres personas arman nueve tableritos juntas, nadie puede decir cuál hizo cuál: el reparto es una convención, no una medición. Sirve para ver el ritmo del equipo y comparar períodos. <b>No alcanza, solo, para decidir un sueldo o una sanción.</b>');
     if(abiertas) m.avisos.push(`Hay <b>${abiertas}</b> orden(es) de este período <b>sin cerrar</b>: su trabajo todavía no le suma a nadie.`);
@@ -21878,16 +21907,16 @@ const ITEMIZADO_EPEC = [
         [{t:'Persona'},{t:'Rol'},{t:'Puntos', num:true},{t:'Días', num:true, w:'60px'},
          {t:'Plazas', num:true, w:'62px'},{t:'Órdenes', num:true, w:'70px'},
          {t:'Puntos/día', num:true, w:'82px'},{t:'% del grupo', num:true, w:'80px'}],
-        personas.map(g=>[g.nombre, g.rol||'—', nf(g.pts,1), String(g.dias.size), String(g.plazas.size),
-                         String(g.ordenes.length), g.dias.size ? nf(g.pts/g.dias.size,1) : '—',
-                         ptsSel>0 ? Math.round(g.pts/ptsSel*100) + '%' : '0%']),
-        [['TOTAL', '', nf(ptsSel,1), String(diasSel.size), '', String(personas.reduce((t,g)=>t+g.ordenes.length,0)), '', '100%']]));
+        personas.map(g=>[g.nombre, g.rol||'—', N(g.pts,'pts'), N(g.dias.size,'int'), N(g.plazas.size,'int'),
+                         N(g.ordenes.length,'int'), g.dias.size ? N(g.pts/g.dias.size,'pts') : '—',
+                         N(ptsSel>0 ? g.pts/ptsSel : 0,'pct')]),
+        [['TOTAL', '', N(ptsSel,'pts'), N(diasSel.size,'int'), '', N(personas.reduce((t,g)=>t+g.ordenes.length,0),'int'), '', N(1,'pct')]]));
     }
     if(o.sec.plazas){
       const filas = [];
       personas.forEach(g=> [...g.plazas.entries()].sort((a,b)=>b[1].pts-a[1].pts)
-        .forEach(([nom, pl])=> filas.push([g.nombre, nom, nf(pl.pts,1), String(pl.dias.size),
-                                           g.pts>0 ? Math.round(pl.pts/g.pts*100) + '%' : '0%'])));
+        .forEach(([nom, pl])=> filas.push([g.nombre, nom, N(pl.pts,'pts'), N(pl.dias.size,'int'),
+                                           N(g.pts>0 ? pl.pts/g.pts : 0,'pct')])));
       m.secciones.push(filas.length
         ? tabla('En qué plazas trabajó cada uno', null,
             [{t:'Persona'},{t:'Plaza'},{t:'Puntos', num:true},{t:'Días', num:true, w:'60px'},{t:'% de su trabajo', num:true, w:'110px'}], filas)
@@ -21896,7 +21925,7 @@ const ITEMIZADO_EPEC = [
     if(o.sec.tareas){
       const filas = [];
       personas.forEach(g=> [...g.tareas.entries()].sort((a,b)=>b[1].pts-a[1].pts)
-        .forEach(([tar, t])=> filas.push([g.nombre, tar, nEnt(t.cant), t.un||'', nf(t.pts,1)])));
+        .forEach(([tar, t])=> filas.push([g.nombre, tar, N(t.cant,'cant'), t.un||'', N(t.pts,'pts')])));
       m.secciones.push(filas.length
         ? tabla('Qué tareas hizo cada uno', 'La cantidad es la de la cuadrilla, no una porción por persona: nadie arma 3,8 tableritos. Los puntos sí van repartidos.',
             [{t:'Persona'},{t:'Tarea'},{t:'Cantidad', num:true},{t:'Un.', w:'70px'},{t:'Puntos', num:true}], filas)
@@ -21905,7 +21934,7 @@ const ITEMIZADO_EPEC = [
     if(o.sec.ordenes){
       const filas = [];
       personas.forEach(g=> g.ordenes.slice().sort((a,b)=>String(a.fecha).localeCompare(String(b.fecha)))
-        .forEach(x=> filas.push([g.nombre, fCorta(x.fecha), x.numero||'—', x.plaza, x.etapa||'—', nf(x.pts,1)])));
+        .forEach(x=> filas.push([g.nombre, fCorta(x.fecha), x.numero||'—', x.plaza, x.etapa||'—', N(x.pts,'pts')])));
       m.secciones.push(filas.length
         ? tabla('Las órdenes, una por una', null,
             [{t:'Persona'},{t:'Fecha', w:'86px'},{t:'OT', w:'80px'},{t:'Plaza'},{t:'Etapa'},{t:'Puntos', num:true}], filas)
@@ -21939,20 +21968,20 @@ const ITEMIZADO_EPEC = [
       }
     });
     m.tiles = [
-      { n: lista.length, l:'Órdenes del período', c:'' },
-      { n: cerr.length, l:'Cerradas', c:'verde' },
-      { n: lista.length - cerr.length, l:'Sin cerrar', c: (lista.length - cerr.length) ? 'ambar' : '' },
-      { n: Object.keys(porPlaza).length, l:'Plazas tocadas', c:'azul' },
+      { n: N(lista.length,'int'), l:'Órdenes del período', c:'' },
+      { n: N(cerr.length,'int'), l:'Cerradas', c:'verde' },
+      { n: N(lista.length - cerr.length,'int'), l:'Sin cerrar', c: (lista.length - cerr.length) ? 'ambar' : '' },
+      { n: N(Object.keys(porPlaza).length,'int'), l:'Plazas tocadas', c:'azul' },
     ];
     if(!lista.length) m.avisos.push('No hay ninguna orden en el período elegido. Probá con otras fechas.');
 
     if(o.sec.resumen){
       m.secciones.push(tabla('Por estado', null, [{t:'Estado'},{t:'Órdenes', num:true}],
-        Object.keys(porEstado).sort().map(e=>[e, String(porEstado[e])]),
-        [['Total', String(lista.length)]]));
+        Object.keys(porEstado).sort().map(e=>[e, N(porEstado[e],'int')]),
+        [['Total', N(lista.length,'int')]]));
       m.secciones.push(tabla('Por plaza', null,
         [{t:'Plaza'},{t:'Órdenes', num:true},{t:'Cerradas', num:true},{t:'Puntos', num:true}],
-        Object.keys(porPlaza).sort().map(p=>[p, String(porPlaza[p].n), String(porPlaza[p].cerradas), nf(porPlaza[p].pts,1)])));
+        Object.keys(porPlaza).sort().map(p=>[p, N(porPlaza[p].n,'int'), N(porPlaza[p].cerradas,'int'), N(porPlaza[p].pts,'pts')])));
     }
     if(o.sec.detalle){
       m.secciones.push(lista.length
@@ -21964,7 +21993,7 @@ const ITEMIZADO_EPEC = [
               const quien = (x.personal||[]).map(p=>p.nombre).filter(Boolean).join(', ') || x.cuadrilla || '—';
               return [fCorta(x.fecha), String(x.numero||'—'), x.plazaNombre||'(sin plaza)',
                       x.etapaLabel||'—', quien, x.estado||'Emitida',
-                      pu ? nf(pu.total,1) : '—',
+                      pu ? N(pu.total,'pts') : '—',
                       (x.cierre && x.cierre.obs) || x.notas || ''];
             }))
         : texto('Detalle de cada orden', ['Sin órdenes en el período.']));
@@ -21994,15 +22023,15 @@ const ITEMIZADO_EPEC = [
       porMat.set(x.codigo, g);
     });
     m.tiles = [
-      { n: lista.length, l:'Movimientos', c:'' },
-      { n: ent.length, l:'Entradas', c:'verde' },
-      { n: sal.length, l:'Salidas', c:'azul' },
-      { n: porMat.size, l:'Materiales distintos', c:'' },
+      { n: N(lista.length,'int'), l:'Movimientos', c:'' },
+      { n: N(ent.length,'int'), l:'Entradas', c:'verde' },
+      { n: N(sal.length,'int'), l:'Salidas', c:'azul' },
+      { n: N(porMat.size,'int'), l:'Materiales distintos', c:'' },
     ];
     if(!lista.length) m.avisos.push('No hay movimientos en el período elegido.');
     if(o.sec.resumen){
       const filas = [...porMat.values()].sort((a,b)=> String(a.desc).localeCompare(String(b.desc)))
-        .map(g=>[String(g.codigo), g.desc, g.un, nEnt(g.ent), nEnt(g.sal), nEnt(g.ent - g.sal)]);
+        .map(g=>[String(g.codigo), g.desc, g.un, N(g.ent,'cant'), N(g.sal,'cant'), N(g.ent - g.sal,'cant')]);
       m.secciones.push(filas.length
         ? tabla('Resumen por material', 'El neto es lo que entró menos lo que salió en el período — no es el stock actual.',
             [{t:'Código', w:'72px'},{t:'Material'},{t:'Un.', w:'56px'},{t:'Entradas', num:true},{t:'Salidas', num:true},{t:'Neto', num:true}], filas)
@@ -22014,7 +22043,7 @@ const ITEMIZADO_EPEC = [
             [{t:'Fecha', w:'86px'},{t:'Tipo', w:'70px'},{t:'Código', w:'72px'},{t:'Material'},
              {t:'Cantidad', num:true},{t:'Un.', w:'56px'},{t:'Destino / proveedor'},{t:'Quién'}],
             lista.map(x=>[fCorta(x.fecha), x.tipo === 'entrada' ? 'Entrada' : 'Salida', String(x.codigo||''),
-                          x.desc||'', nEnt(x.cantidad), x.un||'',
+                          x.desc||'', N(x.cantidad,'cant'), x.un||'',
                           x.destino || x.proveedor || '—', x.retiradoPor || x.usuario || '—']))
         : texto('Movimiento por movimiento', ['Sin movimientos en el período.']));
     }
@@ -22065,11 +22094,11 @@ const ITEMIZADO_EPEC = [
       const th = (s.cols||[]).map(c=>`<th class="${c.num?'num':''}"${c.w?` style="width:${c.w}"`:''}>${esc(c.t)}</th>`).join('');
       const tb = (s.filas||[]).map(f=>`<tr>${f.map((v,i)=>{
         const c = (s.cols||[])[i] || {};
-        return `<td class="${c.num?'num':''}">${esc(v)}</td>`;
+        return `<td class="${c.num?'num':''}">${esc(celTxt(v))}</td>`;
       }).join('')}</tr>`).join('');
       const tf = (s.pie||[]).map(f=>`<tr>${f.map((v,i)=>{
         const c = (s.cols||[])[i] || {};
-        return `<td class="${c.num?'num':''}">${esc(v)}</td>`;
+        return `<td class="${c.num?'num':''}">${esc(celTxt(v))}</td>`;
       }).join('')}</tr>`).join('');
       return `<div class="inf-sec">
         <div class="inf-sec-tit">${esc(s.tit)}</div>
@@ -22100,7 +22129,7 @@ const ITEMIZADO_EPEC = [
         <button type="button" class="btn-ghost" id="infExcel" style="padding:9px 16px; font-size:13px;">⬇ Excel</button>
       </div>
       ${(m.tiles||[]).length ? `<div class="inf-tiles">${m.tiles.map(t=>
-        `<div class="inf-tile"><div class="inf-num ${t.c||''}">${esc(t.n)}</div><div class="inf-lbl">${esc(t.l)}</div></div>`).join('')}</div>` : ''}
+        `<div class="inf-tile"><div class="inf-num ${t.c||''}">${esc(celTxt(t.n))}</div><div class="inf-lbl">${esc(t.l)}</div></div>`).join('')}</div>` : ''}
       ${(m.avisos||[]).map(a=>`<div class="inf-aviso">${a}</div>`).join('')}
       ${htmlSecciones(m)}
     </div>`;
@@ -22115,7 +22144,7 @@ const ITEMIZADO_EPEC = [
   // ==========================================================================================
   function cuerpoPapel(m){
     const tiles = (m.tiles||[]).length
-      ? `<table style="margin-bottom:12px;"><tr>${m.tiles.map(t=>`<td style="text-align:center;"><b style="font-size:17px;">${esc(t.n)}</b><br><span style="font-size:10px; color:#5b7a70;">${esc(t.l)}</span></td>`).join('')}</tr></table>` : '';
+      ? `<table style="margin-bottom:12px;"><tr>${m.tiles.map(t=>`<td style="text-align:center;"><b style="font-size:17px;">${esc(celTxt(t.n))}</b><br><span style="font-size:10px; color:#5b7a70;">${esc(t.l)}</span></td>`).join('')}</tr></table>` : '';
     const avisos = (m.avisos||[]).map(a=>`<p style="border-left:3px solid #d9a441; padding-left:8px; font-size:10.5px; margin:0 0 6px;">${a}</p>`).join('');
     const secs = (m.secciones||[]).map(s=>{
       if(s.tipo === 'texto'){
@@ -22125,10 +22154,10 @@ const ITEMIZADO_EPEC = [
       const th = (s.cols||[]).map(c=>`<th${c.num?' style="text-align:right;"':''}>${esc(c.t)}</th>`).join('');
       const tb = (s.filas||[]).map(f=>`<tr>${f.map((v,i)=>{
         const c = (s.cols||[])[i] || {};
-        return `<td${c.num?' style="text-align:right;"':''}>${esc(v)}</td>`; }).join('')}</tr>`).join('');
+        return `<td${c.num?' style="text-align:right;"':''}>${esc(celTxt(v))}</td>`; }).join('')}</tr>`).join('');
       const tf = (s.pie||[]).map(f=>`<tr>${f.map((v,i)=>{
         const c = (s.cols||[])[i] || {};
-        return `<td style="font-weight:700;${c.num?'text-align:right;':''}">${esc(v)}</td>`; }).join('')}</tr>`).join('');
+        return `<td style="font-weight:700;${c.num?'text-align:right;':''}">${esc(celTxt(v))}</td>`; }).join('')}</tr>`).join('');
       return `<h2 style="font-size:14px; margin:16px 0 4px;">${esc(s.tit)}</h2>` +
         (s.hint ? `<div style="font-size:10.5px; color:#5b7a70; margin-bottom:5px;">${esc(s.hint)}</div>` : '') +
         `<table><thead><tr>${th}</tr></thead><tbody>${tb || `<tr><td colspan="${(s.cols||[]).length}" style="text-align:center;">Sin datos.</td></tr>`}</tbody>${tf?`<tfoot>${tf}</tfoot>`:''}</table>`;
@@ -22165,25 +22194,265 @@ const ITEMIZADO_EPEC = [
   }
 
   // ==========================================================================================
-  // SALIDA 4 — EXCEL  (CSV con BOM: Excel lo abre directo y respeta los acentos)
+  // SALIDA 4 — EXCEL DE VERDAD (.xlsx)
   // ==========================================================================================
-  function aExcel(m){
-    const q = v => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
-    let csv = q(m.titulo) + '\n' + q(m.subtitulo) + '\n' + q('Emitido el ' + fCorta(m.fecha)) + '\n\n';
-    if((m.tiles||[]).length){
-      csv += 'RESUMEN\n';
-      m.tiles.forEach(t=>{ csv += q(t.l) + ',' + q(t.n) + '\n'; });
-      csv += '\n';
-    }
-    (m.secciones||[]).forEach(s=>{
-      csv += q(s.tit.toUpperCase()) + '\n';
-      if(s.tipo === 'texto'){ (s.parrafos||[]).forEach(p=>{ csv += q(p) + '\n'; }); csv += '\n'; return; }
-      csv += (s.cols||[]).map(c=>q(c.t)).join(',') + '\n';
-      (s.filas||[]).forEach(f=>{ csv += f.map(q).join(',') + '\n'; });
-      (s.pie||[]).forEach(f=>{ csv += f.map(q).join(',') + '\n'; });
-      csv += '\n';
+  // Hasta el 06/09/2026 acá se bajaba un CSV, y en Excel en español salía mal por DOS motivos, los
+  // dos reales (reportado por el usuario: *"sale tan improlijo, solo como números al azar"*):
+  //
+  //   1. El separador de listas en la configuración regional argentina es el PUNTO Y COMA, no la
+  //      coma. Un CSV separado por comas abre con TODAS las columnas apiladas dentro de la A: una
+  //      sola columna con todo el renglón adentro. Eso es lo que se veía.
+  //   2. Los números iban entre comillas —«"234,90"», «"$ 66.238.981,20"»— así que aterrizaban como
+  //      TEXTO. No se podían sumar, ni ordenar, ni meter en una fórmula. Justo para lo que uno se
+  //      baja un Excel.
+  //
+  // Un .xlsx no tiene ninguno de los dos problemas: las columnas SON columnas y los números SON
+  // números, con su formato aplicado por Excel según la configuración de cada máquina (así el mismo
+  // archivo se ve bien acá y en cualquier otro lado).
+  //
+  // Se arma a mano, sin librerías ni CDN: un .xlsx es un ZIP de archivos XML. El ZIP se escribe en
+  // modo STORE (sin comprimir) con su CRC-32 — que es lo único que hace falta para que el archivo
+  // sea válido. Pesa un poco más que uno comprimido y no importa: son planillas de unos pocos
+  // cientos de filas.
+  //
+  // Además: las secciones que tienen la MISMA forma (el detalle de cada plaza, por ejemplo) se
+  // juntan en UNA hoja con una columna «Plaza» adelante, en vez de hacer 36 hojas. Eso es lo que
+  // sirve para filtrar y para armar una tabla dinámica.
+
+  const CRC_TABLA = (()=>{
+    const t = new Uint32Array(256);
+    for(let i = 0; i < 256; i++){ let c = i; for(let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); t[i] = c >>> 0; }
+    return t;
+  })();
+  const crc32 = b => { let c = -1; for(let i = 0; i < b.length; i++) c = (c >>> 8) ^ CRC_TABLA[(c ^ b[i]) & 0xFF]; return (c ^ -1) >>> 0; };
+  const utf8 = s => new TextEncoder().encode(s);
+  const u16 = n => [n & 255, (n >>> 8) & 255];
+  const u32 = n => [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255];
+
+  function zip(archivos){
+    const trozos = [], central = [];
+    let off = 0;
+    const d = new Date();
+    const hora = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF;
+    const dia  = ((((d.getFullYear() - 1980) & 0x7F) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+    archivos.forEach(f=>{
+      const nom = utf8(f.nombre), dat = f.datos, c = crc32(dat), n = dat.length;
+      const loc = new Uint8Array([].concat([0x50,0x4B,0x03,0x04], u16(20), u16(0x0800), u16(0), u16(hora), u16(dia),
+                                           u32(c), u32(n), u32(n), u16(nom.length), u16(0)));
+      trozos.push(loc, nom, dat);
+      central.push({ cab: new Uint8Array([].concat([0x50,0x4B,0x01,0x02], u16(20), u16(20), u16(0x0800), u16(0),
+                                                    u16(hora), u16(dia), u32(c), u32(n), u32(n), u16(nom.length),
+                                                    u16(0), u16(0), u16(0), u16(0), u32(0), u32(off))), nom });
+      off += loc.length + nom.length + n;
     });
-    bajar('﻿' + csv, nombreArchivo(m, 'csv'), 'text/csv;charset=utf-8;');
+    const cd = [];
+    let cdLen = 0;
+    central.forEach(x=>{ cd.push(x.cab, x.nom); cdLen += x.cab.length + x.nom.length; });
+    const fin = new Uint8Array([].concat([0x50,0x4B,0x05,0x06], u16(0), u16(0),
+                                         u16(archivos.length), u16(archivos.length), u32(cdLen), u32(off), u16(0)));
+    const todo = trozos.concat(cd, [fin]);
+    const out = new Uint8Array(todo.reduce((t,x)=> t + x.length, 0));
+    let p = 0; todo.forEach(x=>{ out.set(x, p); p += x.length; });
+    return out;
+  }
+
+  const xmlEsc = s => String(s == null ? '' : s)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const colLetra = i => { let s = '', n = i + 1; while(n > 0){ const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); } return s; };
+
+  // Los estilos. El índice de cada uno es su posición en <cellXfs>, y es lo que se pone en s="".
+  // Los códigos de formato usan punto y coma internos del estándar (punto decimal, coma de miles):
+  // Excel los muestra según la configuración regional, así que en una máquina argentina el
+  // #,##0.00 se ve «1.234,56». Es la forma correcta de que el archivo sea portable.
+  const EST = { txt:0, cab:1, txtB:2, k:3, money:4, pts:5, int:6, cant:7, pct:8,
+                bTxt:9, bK:10, bMoney:11, bPts:12, bInt:13, bCant:14, bPct:15, titulo:16, sub:17, seccion:18 };
+  const ESTILO_DE = { k:EST.k, money:EST.money, pts:EST.pts, int:EST.int, cant:EST.cant, pct:EST.pct };
+  const ESTILO_NEGRITA_DE = { k:EST.bK, money:EST.bMoney, pts:EST.bPts, int:EST.bInt, cant:EST.bCant, pct:EST.bPct };
+
+  const STYLES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<numFmts count="6">
+<numFmt numFmtId="164" formatCode="#,##0.00"/>
+<numFmt numFmtId="165" formatCode="&quot;$&quot;\\ #,##0.00"/>
+<numFmt numFmtId="166" formatCode="#,##0.0"/>
+<numFmt numFmtId="167" formatCode="#,##0"/>
+<numFmt numFmtId="168" formatCode="0%"/>
+<numFmt numFmtId="169" formatCode="#,##0.##"/>
+</numFmts>
+<fonts count="5">
+<font><sz val="11"/><name val="Calibri"/><color rgb="FF183028"/></font>
+<font><b/><sz val="11"/><name val="Calibri"/><color rgb="FF183028"/></font>
+<font><b/><sz val="11"/><name val="Calibri"/><color rgb="FFFFFFFF"/></font>
+<font><b/><sz val="15"/><name val="Calibri"/><color rgb="FF13324B"/></font>
+<font><sz val="10"/><name val="Calibri"/><color rgb="FF5B7A70"/></font>
+</fonts>
+<fills count="4">
+<fill><patternFill patternType="none"/></fill>
+<fill><patternFill patternType="gray125"/></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FF13324B"/><bgColor indexed="64"/></patternFill></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FFE8F1F6"/><bgColor indexed="64"/></patternFill></fill>
+</fills>
+<borders count="2">
+<border><left/><right/><top/><bottom/><diagonal/></border>
+<border><left style="thin"><color rgb="FFCDDBD6"/></left><right style="thin"><color rgb="FFCDDBD6"/></right><top style="thin"><color rgb="FFCDDBD6"/></top><bottom style="thin"><color rgb="FFCDDBD6"/></bottom><diagonal/></border>
+</borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="19">
+<xf numFmtId="0" fontId="0" fillId="0" borderId="1" applyBorder="1"/>
+<xf numFmtId="0" fontId="2" fillId="2" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="1" fillId="0" borderId="1" applyFont="1" applyBorder="1"/>
+<xf numFmtId="164" fontId="0" fillId="0" borderId="1" applyNumberFormat="1" applyBorder="1"/>
+<xf numFmtId="165" fontId="0" fillId="0" borderId="1" applyNumberFormat="1" applyBorder="1"/>
+<xf numFmtId="166" fontId="0" fillId="0" borderId="1" applyNumberFormat="1" applyBorder="1"/>
+<xf numFmtId="167" fontId="0" fillId="0" borderId="1" applyNumberFormat="1" applyBorder="1"/>
+<xf numFmtId="169" fontId="0" fillId="0" borderId="1" applyNumberFormat="1" applyBorder="1"/>
+<xf numFmtId="168" fontId="0" fillId="0" borderId="1" applyNumberFormat="1" applyBorder="1"/>
+<xf numFmtId="0" fontId="1" fillId="3" borderId="1" applyFont="1" applyFill="1" applyBorder="1"/>
+<xf numFmtId="164" fontId="1" fillId="3" borderId="1" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>
+<xf numFmtId="165" fontId="1" fillId="3" borderId="1" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>
+<xf numFmtId="166" fontId="1" fillId="3" borderId="1" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>
+<xf numFmtId="167" fontId="1" fillId="3" borderId="1" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>
+<xf numFmtId="169" fontId="1" fillId="3" borderId="1" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>
+<xf numFmtId="168" fontId="1" fillId="3" borderId="1" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>
+<xf numFmtId="0" fontId="3" fillId="0" borderId="0" applyFont="1"/>
+<xf numFmtId="0" fontId="4" fillId="0" borderId="0" applyFont="1"/>
+<xf numFmtId="0" fontId="1" fillId="0" borderId="0" applyFont="1"/>
+</cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+
+  // Una celda de la hoja: {v, s, num}
+  function celdaXml(ref, c, estiloTexto, negrita){
+    const n = celNum(c);
+    if(n){
+      const s = (negrita ? ESTILO_NEGRITA_DE : ESTILO_DE)[n.fmt] != null
+        ? (negrita ? ESTILO_NEGRITA_DE : ESTILO_DE)[n.fmt] : EST.txt;
+      return `<c r="${ref}" s="${s}"><v>${n.n}</v></c>`;
+    }
+    const t = celTxt(c);
+    if(t === '') return `<c r="${ref}" s="${estiloTexto}"/>`;
+    return `<c r="${ref}" s="${estiloTexto}" t="inlineStr"><is><t xml:space="preserve">${xmlEsc(t)}</t></is></c>`;
+  }
+
+  // Junta las secciones que comparten `grupo` en una sola hoja, con una columna adelante que dice
+  // de cuál venía cada fila. Las que no tienen `grupo` van cada una a su hoja.
+  function hojasDelModelo(m){
+    const hojas = [];
+    const grupos = new Map();
+    (m.secciones||[]).forEach(s=>{
+      if(s.tipo !== 'tabla' || !s.grupo){ hojas.push({ nombre:s.tit, secs:[s] }); return; }
+      if(!grupos.has(s.grupo)){ const h = { nombre:s.grupo, secs:[], junta:true }; grupos.set(s.grupo, h); hojas.push(h); }
+      grupos.get(s.grupo).secs.push(s);
+    });
+    return hojas;
+  }
+
+  function hojaXml(titulo, subtitulo, secs, junta){
+    const filas = [];
+    let r = 0;
+    const anchos = [];
+    const anchoDe = (i, txt)=>{ const l = Math.min(52, Math.max(9, String(txt||'').length + 2)); if(!anchos[i] || anchos[i] < l) anchos[i] = l; };
+    const pushSimple = (celdas, estiloTexto, negrita)=>{
+      r++;
+      const xs = celdas.map((c,i)=>{ anchoDe(i, celTxt(c)); return celdaXml(colLetra(i) + r, c, estiloTexto, negrita); }).join('');
+      filas.push(`<row r="${r}">${xs}</row>`);
+    };
+    pushSimple([titulo], EST.titulo);
+    if(subtitulo) pushSimple([subtitulo], EST.sub);
+    r++; filas.push(`<row r="${r}"/>`);
+
+    // La fila donde quedan los encabezados: es la que se congela, así que hay que saber cuál es de
+    // verdad y no adivinarla — con una hoja de 300 filas, perder de vista qué columna es cuál es
+    // exactamente lo que hace que una planilla no se pueda usar.
+    let filaCab = 0;
+    secs.forEach((s, iSec)=>{
+      if(iSec > 0){ r++; filas.push(`<row r="${r}"/>`); }
+      if(s.tipo === 'texto'){
+        if(secs.length > 1) pushSimple([s.tit], EST.seccion);
+        (s.parrafos||[]).forEach(p=> pushSimple([p], EST.txt));
+        return;
+      }
+      // El título de la sección solo se repite cuando la hoja tiene más de una: si es la única, el
+      // subtítulo de arriba ya lo dice y ponerlo dos veces es ruido.
+      if(!junta && secs.length > 1) pushSimple([s.tit], EST.seccion);
+      const extra = junta ? [{ t: s.etiquetaCol || 'De' }] : [];
+      const cols = extra.concat(s.cols || []);
+      if(!junta || iSec === 0){ pushSimple(cols.map(c=>c.t), EST.cab); if(!filaCab) filaCab = r; }
+      const pre = junta ? [s.etiqueta || ''] : [];
+      (s.filas||[]).forEach(f=> pushSimple(pre.concat(f), EST.txt, false));
+      (s.pie||[]).forEach(f=> pushSimple(pre.concat(f), EST.bTxt, true));
+    });
+
+    const colsXml = anchos.length
+      ? `<cols>${anchos.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols>` : '';
+    const panel = filaCab
+      ? `<pane ySplit="${filaCab}" topLeftCell="A${filaCab+1}" activePane="bottomLeft" state="frozen"/>` : '';
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<sheetViews><sheetView workbookViewId="0">${panel}</sheetView></sheetViews>
+<sheetFormatPr defaultRowHeight="15"/>
+${colsXml}
+<sheetData>${filas.join('')}</sheetData>
+</worksheet>`;
+  }
+
+  const nombreHoja = (txt, usados)=>{
+    let n = String(txt || 'Hoja').replace(/[\[\]:*?\/\\]/g, ' ').replace(/\s+/g,' ').trim().slice(0, 31) || 'Hoja';
+    const base = n; let i = 2;
+    while(usados.has(n.toLowerCase())){ n = (base.slice(0, 27) + ' ' + i++); }
+    usados.add(n.toLowerCase());
+    return n;
+  };
+
+  function aExcel(m){
+    const usados = new Set();
+    const hojas = [];
+    // Hoja 1: la portada con los recuadros y los avisos. Es la que se ve al abrir el archivo.
+    const portada = [{ tipo:'tabla', tit:'Resumen', cols:[{t:'Dato'},{t:'Valor'}],
+                       filas:(m.tiles||[]).map(t=>[t.l, t.n]), pie:null }];
+    if((m.avisos||[]).length){
+      portada.push({ tipo:'texto', tit:'Avisos',
+                     parrafos:(m.avisos||[]).map(a=> String(a).replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim()) });
+    }
+    hojas.push({ nombre: nombreHoja('Resumen', usados),
+                 xml: hojaXml(m.titulo, m.subtitulo + ' · Emitido el ' + fCorta(m.fecha), portada, false) });
+    hojasDelModelo(m).forEach(h=>{
+      hojas.push({ nombre: nombreHoja(h.nombre, usados), xml: hojaXml(m.titulo, h.nombre, h.secs, !!h.junta) });
+    });
+
+    const rels = hojas.map((h,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('');
+    const arch = [
+      { nombre:'[Content_Types].xml', datos: utf8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+${hojas.map((h,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}
+</Types>`) },
+      { nombre:'_rels/.rels', datos: utf8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`) },
+      { nombre:'xl/workbook.xml', datos: utf8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<sheets>${hojas.map((h,i)=>`<sheet name="${xmlEsc(h.nombre)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets>
+</workbook>`) },
+      { nombre:'xl/_rels/workbook.xml.rels', datos: utf8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`) },
+      { nombre:'xl/styles.xml', datos: utf8(STYLES_XML) },
+    ].concat(hojas.map((h,i)=>({ nombre:`xl/worksheets/sheet${i+1}.xml`, datos: utf8(h.xml) })));
+
+    const bytes = zip(arch);
+    const blob = new Blob([bytes], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = nombreArchivo(m, 'xlsx');
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 600);
   }
 
   const nombreArchivo = (m, ext)=> `Informe_${String(m.tipoTxt||'').replace(/[^\wáéíóúñÁÉÍÓÚÑ]+/g,'_')}_${m.fecha}.${ext}`;
