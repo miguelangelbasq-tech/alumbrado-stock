@@ -2036,6 +2036,9 @@
   .it-badge-amb{ background:rgba(245,158,11,.18); color:#92610a; }
   .it-badge-prov{ background:rgba(126,198,230,.25); color:var(--navy); margin-left:6px; }
   .it-previa-fila.it-previa-prov{ background:rgba(126,198,230,.07); }
+  /* La previa del certificado de la Municipalidad se distingue de la de la Calculadora a simple
+     vista: son dos fuentes distintas y no conviene confundirlas (2026-09-07). */
+  .it-previa.it-previa-cert{ border-color:var(--amber); background:rgba(224,140,26,.06); }
   .it-previa-dudas{ margin-top:12px; border-radius:10px; padding:10px 14px; font-size:12.5px; line-height:1.55;
                     background:rgba(245,158,11,.12); color:#6b5312; }
   .it-previa-dudas ul{ margin:6px 0 0; padding-left:20px; }
@@ -2655,7 +2658,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 11:28 · cbc52d</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 11:55 · 9232f8</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -17952,18 +17955,60 @@ function poblarParteObraDatalist(){
     previa[a.id] = { ...r, computo:h || { nombre:a.nombre, id:a.obraId, fecha:a.creado } };
   }
 
+  // ---- Traer lo que YA SE CERTIFICÓ en la Municipalidad (2026-09-07) ----
+  // El usuario mandó la planilla «CERTIF. PLAZAS ITEM MUNI.xlsx» con lo que se certificó plaza por
+  // plaza, y preguntó dónde estaban cargadas. Estaban solo adentro del informe comparativo: se
+  // podían MIRAR pero no traer. Con esto se traen igual que las de la Calculadora — se ven primero,
+  // se destilda lo que no va, y recién ahí se aplican.
+  // Los datos viven en el módulo de informes (window.CERTIF_MUNI), que es de solo lectura.
+  function armarPreviaCertif(a){
+    const C = window.CERTIF_MUNI, buscar = window.certifDePlaza;
+    if(!C || typeof buscar !== 'function'){
+      previa[a.id] = { error:'El certificado de la Municipalidad no está disponible en esta versión.' };
+      return;
+    }
+    const p = buscar(a);
+    if(!p){
+      previa[a.id] = { error:'Esta plaza no figura en el certificado de la Municipalidad. Se busca por ID de obra y, si no, por nombre — fijate que coincidan con los de la planilla.' };
+      return;
+    }
+    const filas = Object.keys(p.it).sort((x,y)=> parseFloat(x) - parseFloat(y)).map(it=>({
+      item: it, cantidad: n2(p.it[it]),
+      motivo: `Certificado por la Municipalidad: ${fmt(n2(p.it[it]), Number.isInteger(n2(p.it[it]))?0:2)} ${(typeof epecItemUn==='function' ? epecItemUn(it) : '') || ''}`.trim(),
+    }));
+    const dudas = [];
+    dudas.push('Esta planilla se armó <b>antes</b> de la Nota Aclaratoria N° 1 del 31/08/2026, que agregó los ítems <b>83 a 89</b> (la <b>provisión</b> de columnas, luminarias, cables, jabalinas y tablero aéreo). Por eso no los trae. Si esos materiales los puso EMA, hay que agregarlos aparte — con «⟳ Traer las cantidades de la Calculadora» o a mano.');
+    dudas.push('Son las cantidades <b>ya certificadas</b>, no lo que la Calculadora dice que corresponde. Si querés ver en qué se diferencian, está el informe <b>«Certificado municipal vs. Calculadora»</b> en la pantalla de Informes.');
+    previa[a.id] = { filas, dudas, certif:true, fuente:C.fuente,
+                     computo:{ nombre:p.n, id:p.ids.join(' / '), fecha:C.fecha } };
+    const yaCargados = {};
+    (a.valorItems||[]).forEach(v=>{ if(v.itemPliego) yaCargados[v.itemPliego] = n2(v.cantidad); });
+    (a.valorItemsEpec||[]).forEach(v=>{ if(v.itemEpec) yaCargados[String(v.itemEpec)] = n2(v.cantidad); });
+    filas.forEach(fl=>{
+      fl.anterior = yaCargados[fl.item];
+      fl.cambia = fl.anterior != null && Math.abs(fl.anterior - fl.cantidad) > 0.001;
+      fl.nueva  = fl.anterior == null;
+      fl.tildada = true;
+    });
+  }
+
   function htmlPrevia(a){
     const p = previa[a.id];
     if(!p) return '';
     if(p.error) return `<div class="it-previa"><div class="hint" style="margin-top:0; color:var(--danger);">${esc(p.error)}</div>
       <div class="it-previa-pie"><button type="button" class="btn-ghost it-previa-cerrar">Cerrar</button></div></div>`;
     const h = p.computo;
-    let x = `<div class="it-previa">
-      <div class="it-previa-tit">Lo que trae el cómputo de la Calculadora</div>
-      <div class="hint" style="margin-top:0;">Cómputo de <b>${esc(h.nombre)}</b>${h.id?` (ID ${esc(h.id)})`:''}, calculado el ${esc((typeof formatFechaCorta==='function'&&h.fecha)?formatFechaCorta(h.fecha):(h.fecha||'—'))}${p.fuente?` · leído de ${esc(p.fuente)}`:''}.</div>
+    // La previa se usa para las DOS fuentes: el cómputo de la Calculadora y el certificado de la
+    // Municipalidad (2026-09-07). Cambia el encabezado, nada más — las filas, el tildado, el
+    // «Aplicar a la plaza» y el respeto por lo ya hecho son exactamente los mismos.
+    let x = `<div class="it-previa${p.certif?' it-previa-cert':''}">
+      <div class="it-previa-tit">${p.certif ? 'Lo que se certificó en la Municipalidad' : 'Lo que trae el cómputo de la Calculadora'}</div>
+      <div class="hint" style="margin-top:0;">${p.certif
+        ? `Hoja <b>${esc(h.nombre)}</b>${h.id?` (ID ${esc(h.id)})`:''} de la planilla <b>${esc(p.fuente||'')}</b>. Son las cantidades <b>que ya se certificaron</b>, tal cual vinieron: acá no se corrigió ninguna.`
+        : `Cómputo de <b>${esc(h.nombre)}</b>${h.id?` (ID ${esc(h.id)})`:''}, calculado el ${esc((typeof formatFechaCorta==='function'&&h.fecha)?formatFechaCorta(h.fecha):(h.fecha||'—'))}${p.fuente?` · leído de ${esc(p.fuente)}`:''}.`}</div>
       <div class="it-previa-resumen"><b>Encontramos ${p.filas.length} ítem(s) para cargar.</b> Miralos, destildá lo que no corresponda y, si está bien, tocá «Aplicar a la plaza». <b>Las cantidades ya hechas no se tocan.</b></div>`;
     if(!p.filas.length){
-      x += `<div class="hint" style="color:var(--amber);">Ese cómputo no tiene nada que se pueda pasar al itemizado.</div>`;
+      x += `<div class="hint" style="color:var(--amber);">${p.certif ? 'Esa hoja del certificado no tiene ninguna cantidad cargada.' : 'Ese cómputo no tiene nada que se pueda pasar al itemizado.'}</div>`;
     } else {
       x += `<div class="it-previa-filas">` + p.filas.map((fl,i)=>{
         const it = itemDe(fl.item) || (typeof itemEpec === 'function' ? itemEpec(fl.item) : null);   // 83.1–89 viven solo en el Anexo I
@@ -17987,8 +18032,9 @@ function poblarParteObraDatalist(){
       x += `<div class="it-previa-dudas"><b>⚠ Esto hay que revisarlo a mano:</b><ul>` +
            p.dudas.map(d=>`<li>${d}</li>`).join('') + `</ul></div>`;
     }
-    x += `<div class="it-previa-dudas it-previa-info"><b>La calculadora no puede saber esto — cargalo acá:</b><ul>` +
-         FALTA_A_MANO.map(d=>`<li>${d}</li>`).join('') + `</ul></div>`;
+    if(!p.certif)
+      x += `<div class="it-previa-dudas it-previa-info"><b>La calculadora no puede saber esto — cargalo acá:</b><ul>` +
+           FALTA_A_MANO.map(d=>`<li>${d}</li>`).join('') + `</ul></div>`;
     x += `<div class="it-previa-pie">
       <button type="button" class="btn-ghost it-previa-cerrar">Cancelar</button>
       <button type="button" class="btn-primary it-previa-aplicar" style="width:auto; margin:0; padding:10px 18px;">Aplicar a la plaza</button>
@@ -18889,18 +18935,39 @@ const ITEMIZADO_EPEC = [
     return isFinite(v) ? (neg ? -v : v) : 0;
   }
   window.numeroAR = numeroAR;
+  // ---- El casillero NO puede redondear el módulo al guardarlo (2026-09-07) ----
+  // Lo encontró el usuario mirando un precio: el ítem 1 (K 3,89) le daba $ 1.393.837,59 y tenía que
+  // dar $ 1.393.837,57. Dos centavos, pero el motivo importa.
+  // 358.313 no se divide justo por 1,21: el neto exacto es 296.126,4462809917… Ese es el número que
+  // la app guarda y con el que calcula. Pero el CASILLERO lo muestra redondeado a dos decimales
+  // —296.126,45—, porque nadie quiere ver doce decimales. El problema era el viaje de vuelta: al
+  // tocar «Guardar», la app volvía a LEER el texto del casillero, o sea el redondeado, y lo
+  // guardaba. El módulo pasaba a ser 296.126,45 y su con IVA a 358.313,0045: $0,0045 de más por
+  // módulo, que en los 35.364 de la licitación son unos $158.
+  // La solución es no releer lo que la propia app escribió: junto al texto se anota el valor EXACTO
+  // que representa, y si el texto no se tocó, se guarda ese valor y no lo que dice la pantalla.
   function baseNetaDelCampo(){
-    const v = numeroAR((document.getElementById('epecBase')||{}).value);
+    const inp = document.getElementById('epecBase');
+    if(!inp) return 0;
+    // ¿El texto sigue siendo, letra por letra, el que escribió la app? Entonces vale el exacto.
+    if(inp.dataset.texto != null && inp.value === inp.dataset.texto){
+      const ex = parseFloat(inp.dataset.exacto);
+      if(isFinite(ex) && ex > 0) return ex;
+    }
+    const v = numeroAR(inp.value);
     if(!(v > 0)) return 0;
     return baseCampoConIva() ? v / (1 + IVA_EPEC) : v;
   }
   // Escribe en el casillero un valor NETO, en la unidad del interruptor y con formato de acá.
+  // Deja anotado el neto exacto que ese texto representa, para que el redondeo sea SOLO de pantalla.
   function ponerBaseEnCampo(neto){
     const inp = document.getElementById('epecBase');
     if(!inp) return;
-    if(!(neto > 0)){ inp.value = ''; return; }
+    if(!(neto > 0)){ inp.value = ''; delete inp.dataset.texto; delete inp.dataset.exacto; return; }
     const v = baseCampoConIva() ? neto * (1 + IVA_EPEC) : neto;
     inp.value = (Math.round(v * 100) / 100).toLocaleString('es-AR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    inp.dataset.texto  = inp.value;
+    inp.dataset.exacto = String(neto);
   }
   // La equivalencia debajo del casillero: los dos números, siempre, y cuál se está usando.
   function pintarBaseEq(){
@@ -18924,8 +18991,14 @@ const ITEMIZADO_EPEC = [
     const raro = neto < 1000
       ? `<span class="ep-ojo">⚠️ Ojo: un módulo de <b>${plata(neto)}</b> no puede ser. El módulo de EMA es de <b>seis cifras</b> ($ 358.313,00 con IVA). Si escribiste <b>358.313</b> y quedó esto, volvé a escribirlo y guardá — ahora el casillero entiende el punto como separador de miles.</span>`
       : '';
+    // Cuando el neto no entra en dos decimales, se dice — si no, alguien ve «296.126,45», lo vuelve
+    // a escribir así y pierde los decimales sin enterarse (fue justo lo que pasó).
+    const largo = Math.abs(neto - Math.round(neto * 100) / 100) > 1e-9
+      ? ` El neto exacto es <b>${neto.toLocaleString('es-AR',{minimumFractionDigits:2, maximumFractionDigits:6})}</b>: se guarda entero, con todos sus decimales, para que el total con IVA cierre clavado en ${plata(neto*(1+IVA_EPEC))}.`
+      : '';
     eq.innerHTML = `El módulo es <b>${plata(neto)} sin IVA</b> y <b>${plata(neto * (1 + IVA_EPEC))} con IVA</b>. `
-      + `Se guarda y se calcula con el <b>neto</b>; ahora se está mostrando <b>${conIva ? 'con IVA' : 'sin IVA'}</b>.` + raro;
+      + `Se guarda y se calcula con el <b>neto</b>; ahora se está mostrando <b>${conIva ? 'con IVA' : 'sin IVA'}</b>.`
+      + largo + raro;
   }
 
   // ============================================================
@@ -20177,6 +20250,18 @@ const ITEMIZADO_EPEC = [
           ? `Hay un cómputo de <b>${esc(hay.nombre)}</b>${hay.id?` (ID ${esc(hay.id)})`:''} para traer. Se ve primero y se aplica si estás de acuerdo.`
           : '<span style="color:var(--amber)">No encontramos un cómputo de la Calculadora para esta plaza (buscamos por ID de obra y por nombre).</span>'}</span>
       </div>`;
+      // La segunda fuente: lo que YA SE CERTIFICÓ en la Municipalidad (2026-09-07). Solo aparece
+      // si esta plaza está en la planilla; si no, no tiene sentido ofrecer un botón que no hace nada.
+      const cert = (typeof window.certifDePlaza === 'function') ? window.certifDePlaza(a) : null;
+      if(cert){
+        const n = Object.keys(cert.it || {}).length;
+        h += `<div class="it-traer no-print">
+          <button type="button" class="btn-auto ep-certif-btn" style="margin:0;" ${dis}>📋 Traer lo certificado en la Municipalidad</button>
+          <span class="hint" style="margin:0;">${n
+            ? `La planilla de la Municipalidad tiene <b>${n} ítem(s)</b> certificados para <b>${esc(cert.n)}</b>. Son las cantidades <b>ya cobradas</b>, no las que calcula la herramienta — no traen los ítems 83 a 89 de provisión.`
+            : `<span style="color:var(--amber)">La hoja de <b>${esc(cert.n)}</b> existe en la planilla pero está <b>vacía</b>.</span>`}</span>
+        </div>`;
+      }
     }
     h += `<div class="it-agregar no-print">
       <select class="ep-nuevo-sel" ${dis}>${opcionesTodoElPliegoHTML()}</select>
@@ -20358,6 +20443,17 @@ const ITEMIZADO_EPEC = [
         }
         armarPrevia(a); renderEpec(); return;
       }
+      // La misma puerta, pero desde el certificado de la Municipalidad (2026-09-07).
+      const epCertif = e.target.closest('.ep-certif-btn');
+      if(epCertif){
+        const card = epCertif.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        if(window.CO && window.CO.estado(a).fijado){
+          alert('El itemizado de proyecto de esta plaza ya está fijado: traer las cantidades del certificado lo pisaría sin dejar rastro.\n\nLos cambios se cargan como ajustes (cambiando la cantidad en el renglón, o con «＋ Ajuste a mano»), con su motivo.');
+          return;
+        }
+        armarPreviaCertif(a); renderEpec(); return;
+      }
       const epPrevCerrar = e.target.closest('.it-previa-cerrar');
       if(epPrevCerrar){
         const card = epPrevCerrar.closest('.it-plaza');
@@ -20367,10 +20463,14 @@ const ITEMIZADO_EPEC = [
       if(epPrevAplicar){
         const card = epPrevAplicar.closest('.it-plaza');
         const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        const eraCertif = !!(previa[a.id] && previa[a.id].certif);
         const n = aplicarPrevia(a);
         renderEpec(); refrescarPantallasDeAvance();
         const msg = document.querySelector(`.it-plaza[data-epec="${CSS.escape(String(a.id))}"] .ep-msg`);
-        if(msg){ msg.style.color='var(--teal-dark)'; msg.textContent = `✔ Se cargaron ${n} ítem(s) desde la Calculadora. Revisá las cantidades antes de certificar.`; }
+        if(msg){ msg.style.color='var(--teal-dark)';
+          msg.textContent = eraCertif
+            ? `✔ Se cargaron ${n} ítem(s) del certificado de la Municipalidad. Ojo: no incluye los ítems 83 a 89 de provisión.`
+            : `✔ Se cargaron ${n} ítem(s) desde la Calculadora. Revisá las cantidades antes de certificar.`; }
         return;
       }
 
@@ -20548,10 +20648,20 @@ const ITEMIZADO_EPEC = [
         e.target.dataset.unidad = ahora;
         espejarTildeIva();
         if(antes !== ahora){
+          // El módulo NO se vuelve a leer redondeado de la pantalla: si el texto sigue siendo el que
+          // escribió la app, vale el neto exacto que quedó anotado al lado. Si no, se interpreta lo
+          // que está escrito, que venía en la unidad ANTERIOR (2026-09-07).
           const inp = document.getElementById('epecBase');
-          const v = numeroAR(inp && inp.value);
-          // El número que estaba escrito era en la unidad ANTERIOR: se pasa a la nueva.
-          if(v > 0) ponerBaseEnCampo(ahora === 'con' ? v : v / (1 + IVA_EPEC));
+          let neto = null;
+          if(inp && inp.dataset.texto != null && inp.value === inp.dataset.texto){
+            const ex = parseFloat(inp.dataset.exacto);
+            if(isFinite(ex) && ex > 0) neto = ex;
+          }
+          if(neto == null){
+            const v = numeroAR(inp && inp.value);
+            if(v > 0) neto = (antes === 'con') ? v / (1 + IVA_EPEC) : v;
+          }
+          if(neto > 0) ponerBaseEnCampo(neto);
         }
         pintarBaseEq();
         renderEpec(); try{ renderTablaK(); }catch(err){}
@@ -22397,6 +22507,10 @@ const ITEMIZADO_EPEC = [
       construir: infPanol },
   ];
   const tipoDe = id => TIPOS.find(t=>t.id === id) || TIPOS[0];
+  // El certificado se comparte con el Itemizado 2026, que lo usa para el botón «Traer lo
+  // certificado en la Municipalidad». Sale de acá porque acá vive el dato (2026-09-07).
+  window.CERTIF_MUNI   = CERTIF;
+  window.certifDePlaza = certifDe;
 
   // ==========================================================================================
   // ESTADO DE LA PANTALLA
