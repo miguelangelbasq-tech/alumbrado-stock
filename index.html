@@ -2766,7 +2766,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-08 10:37 · cdad83</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-08 12:08 · 0e7a12</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -9946,6 +9946,16 @@ function plazaYaRegistrada(nombre, obraId){
   if(k){
     const ig = avanceObras.filter(a => clave(a.nombre) === k);
     if(ig.length === 1) return ig[0];
+  }
+  // 4) por la hoja del certificado: si el cómputo («ELEODORO FIERRO», sin ID) cruza con una hoja y
+  //    hay UNA sola plaza del tablero que cruza con esa misma hoja («ELEODORO FIERRO CERRUTI»,
+  //    2063), es ésa. Con dos plazas en la misma hoja no se elige.
+  if(typeof window.certifDePlaza === 'function'){
+    const hoja = window.certifDePlaza({ id:'?', nombre, obraId });
+    if(hoja){
+      const mismas = avanceObras.filter(a => window.certifDePlaza(a) === hoja);
+      if(mismas.length === 1) return mismas[0];
+    }
   }
   return null;
 }
@@ -20634,6 +20644,40 @@ const ITEMIZADO_EPEC = [
   }
   window.plazasRepetidas = plazasRepetidas;
 
+  // Qué queda y qué se borra de un grupo de repetidas, y qué hereda la que queda (2026-09-08).
+  // Se queda la que MÁS ÍTEMS tiene (empate: la que tiene cómputo de la Calculadora adentro; después
+  // la más nueva). Hereda de las otras lo que a ella le falta: los IDs que no tenía (los del
+  // certificado van primero), el estado si el suyo era Pendiente o vacío, la hoja del certificado,
+  // el barrio, la dirección y el pin del mapa.
+  function planUnificarGrupo(g){
+    const conCantidad = a => cuentasEpec(a).items;
+    const conComputo = a => ((a.secciones||[]).some(s=> (s.items||[]).length) ? 1 : 0);
+    const ord = g.plazas.slice().sort((x,y)=> conCantidad(y) - conCantidad(x) || conComputo(y) - conComputo(x)
+      || String(y.creado||'').localeCompare(String(x.creado||'')));
+    const queda = ord[0], borrar = ord.slice(1);
+    const cambios = {};
+    // IDs: los de la hoja del certificado primero, después los propios, después los de las otras.
+    const hoja = (typeof window.certifDePlaza === 'function') ? window.certifDePlaza(queda) : null;
+    const idsN = new Set(); const idsTxt = [];
+    const agregar = (v)=> String(v||'').split(/[\/,;·|]+|\s+|(?<=\d)-(?=\d)/).map(x=>x.trim()).filter(Boolean).forEach(tok=>{
+      const n = idsDePlaza(tok)[0]; if(n && !idsN.has(n)){ idsN.add(n); idsTxt.push(tok.toUpperCase()); }
+    });
+    if(hoja) (hoja.ids||[]).forEach(agregar);
+    agregar(queda.obraId); borrar.forEach(b=> agregar(b.obraId));
+    const idsFinal = idsTxt.join(' / ');
+    if(idsFinal && idsFinal !== String(queda.obraId||'').trim()) cambios.obraId = idsFinal;
+    // Estado: el mejor que haya en el grupo (Finalizada > En curso > el resto), si el de la que queda es flojo.
+    const peso = e => /finaliz/i.test(e||'') ? 3 : (/en curso|en obra/i.test(e||'') ? 2 : (e ? 1 : 0));
+    let estadoFinal = queda.estado || '';
+    borrar.forEach(b=>{ if(peso(b.estado) > peso(estadoFinal)) estadoFinal = b.estado; });
+    if(estadoFinal !== (queda.estado||'')) cambios.estado = estadoFinal;
+    ['certifHoja','barrio','direccion','lat','lng','fechaEncendido','renglon'].forEach(k=>{
+      if(queda[k] == null || queda[k] === '' ){ const d = borrar.find(b=> b[k] != null && b[k] !== ''); if(d) cambios[k] = d[k]; }
+    });
+    return { queda, borrar, cambios, idsFinal, estadoFinal };
+  }
+  window.planUnificarGrupo = planUnificarGrupo;
+
   function pintarPanelCertif(todas){
     const cont = document.getElementById('epecCertifPanel');
     if(!cont) return;
@@ -20657,7 +20701,11 @@ const ITEMIZADO_EPEC = [
     const repes = plazasRepetidas(todas);
     const avisoRepes = repes.length ? `<div class="card no-print ep-repes">
       <b>⚠ ${repes.length} plaza(s) parecen estar cargadas dos veces</b>
-      <div class="hint" style="margin:4px 0 8px;">Tienen el <b>mismo ID de obra</b>, el <b>mismo nombre</b> o cruzan con la <b>misma hoja del certificado</b>. Una plaza repetida se duplica en el Mapa, en las órdenes de trabajo, en el balance y en el total del itemizado —<b>suma dos veces</b>—. En cada grupo, la primera es la que más cargado tiene: mirá que sea la buena y borrá la otra. Si son dos plazas distintas de verdad (dos hermanas con IDs distintos), dejalas.</div>
+      <div class="hint" style="margin:4px 0 8px;">Tienen el <b>mismo ID de obra</b>, el <b>mismo nombre</b> o cruzan con la <b>misma hoja del certificado</b>. Una plaza repetida <b>suma dos veces</b> en el total, en el Mapa, en las órdenes y en el balance. En cada grupo, la primera es la que más cargado tiene.</div>
+      <div class="ep-cargar-todo" style="margin-bottom:8px;">
+        <button type="button" class="btn-primary ep-repes-unificar" style="width:auto; margin:0; padding:10px 16px;">🧹 Dejar una sola de cada una</button>
+        <span class="hint">De cada grupo se queda <b>la que más ítems tiene</b> (la que se llenó con la Calculadora), le pasa lo que a la otra le sobra —el segundo ID, el estado, la hoja del certificado, el barrio— y <b>borra las demás</b>. Pide confirmación y muestra qué queda y qué se borra antes de tocar nada.</span>
+      </div>
       ${repes.map(g=>{ const ord = g.plazas.slice().sort((x,y)=> cuentasEpec(y).items - cuentasEpec(x).items); return `<div class="ep-repe-grupo">
         <div class="ep-repe-tit">${esc(ord[0].nombre || '(sin nombre)')} <span style="font-weight:500; text-transform:none; letter-spacing:0;">— comparten ${esc(g.motivos.join(' y '))}</span></div>
         ${ord.map((a,i)=>{ const c = cuentasEpec(a); const pes = enPesos(c.contratado); return `<div class="ep-repe-fila">
@@ -20796,7 +20844,9 @@ const ITEMIZADO_EPEC = [
     const ocultas = soloCon ? todas.filter(a=>!cuentasEpec(a).items).length : 0;
     const edit = puedeEditar();
     let extra = '';
-    if(ultimas.length){
+    // (2026-09-08) La tarjeta sale SOLO cuando hay alguna calculada sin registrar: con todas
+    // registradas era una lista de cinco plazas que no servía para nada —*"todo esto no me sirve"*—.
+    if(ultimas.length && pendientes.length){
       const filaRec = ({h,i,reg})=>{
         const escondida = reg && ((soloCon && !cuentasEpec(reg).items) || (busca && !lista.some(a=>a.id===reg.id)));
         return `<div class="ep-pend" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:8px 0; border-top:1px solid var(--border);">
@@ -21372,6 +21422,50 @@ const ITEMIZADO_EPEC = [
           renderEpec(); refrescarPantallasDeAvance();
           try{ if(typeof renderAvanceTablero === 'function') renderAvanceTablero(); }catch(e2){}
           try{ if(typeof renderAvanceDetalle === 'function') renderAvanceDetalle(); }catch(e2){}
+        })();
+        return;
+      }
+
+      // Dejar una sola plaza de cada grupo repetido (2026-09-08). El usuario: *"dejame solo las 36,
+      // como si se hubiese llenado por la Calculadora; no me dejes repetidas"*.
+      const unifPl = e.target.closest('.ep-repes-unificar');
+      if(unifPl){
+        if(!puedeEditar()){ alert('Para borrar plazas hay que iniciar sesión.'); return; }
+        const grupos = plazasRepetidas(obras());
+        if(!grupos.length){ alert('No hay plazas repetidas.'); return; }
+        const plan = grupos.map(g=> planUnificarGrupo(g));
+        const txt = `Se van a unificar ${plan.length} grupo(s) de plazas repetidas:\n\n`
+          + plan.map(pl=> `• QUEDA «${pl.queda.nombre}»${pl.idsFinal?` (ID ${pl.idsFinal})`:''} — ${cuentasEpec(pl.queda).items} ítem(s)${pl.estadoFinal && pl.estadoFinal !== pl.queda.estado ? `, pasa a ${pl.estadoFinal}` : ''}\n`
+                        + pl.borrar.map(b=> `    ✗ se borra «${b.nombre}»${b.obraId?` (ID ${b.obraId})`:''} — ${cuentasEpec(b).items} ítem(s)`).join('\n')).join('\n\n')
+          + `\n\nLas que se borran se pierden para TODO EL EQUIPO y NO SE PUEDE DESHACER. ¿Seguimos?`;
+        if(!confirm(txt)) return;
+        unifPl.disabled = true; unifPl.textContent = '⏳ Unificando…';
+        (async ()=>{
+          const res = { quedan:[], borradas:[], errores:[] };
+          for(const pl of plan){
+            try{
+              // Primero se borran las de más en la nube; si alguna falla, no se toca la que queda.
+              for(const b of pl.borrar){
+                if(typeof window.fbAvanceEliminar !== 'function') throw new Error('sin conexión');
+                await window.fbAvanceEliminar(b.id);
+                const i = avanceObras.indexOf(b); if(i >= 0) avanceObras.splice(i, 1);
+                delete previa[b.id]; res.borradas.push(b.nombre||'(sin nombre)');
+              }
+              Object.assign(pl.queda, pl.cambios);
+              if(typeof guardarAvanceObras === 'function') await guardarAvanceObras(pl.queda);
+              res.quedan.push(pl.queda.nombre||'(sin nombre)');
+            }catch(err){
+              console.error('unificar plazas:', err);
+              res.errores.push(pl.queda.nombre||'(sin nombre)');
+            }
+          }
+          renderEpec(); refrescarPantallasDeAvance();
+          try{ if(typeof renderAvanceTablero === 'function') renderAvanceTablero(); }catch(e2){}
+          try{ if(typeof renderAvanceDetalle === 'function') renderAvanceDetalle(); }catch(e2){}
+          const total = obras().length;
+          alert(`Listo.\n\nQuedaron (${res.quedan.length}): ${res.quedan.join(', ') || '—'}\n\nBorradas (${res.borradas.length}): ${res.borradas.join(', ') || '—'}`
+            + (res.errores.length ? `\n\nNo se pudo con (${res.errores.length}): ${res.errores.join(', ')} — revisá la conexión y volvé a tocar el botón.` : '')
+            + `\n\nEl tablero queda con ${total} plaza(s).`);
         })();
         return;
       }
