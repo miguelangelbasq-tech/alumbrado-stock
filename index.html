@@ -2745,7 +2745,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-07 18:43 · c4bb6c</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-08 07:45 · fbbcfe</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -9836,13 +9836,35 @@ window.cerrarAltaPlaza = cerrarAltaPlaza;
 window.altaPlazaConfirmar = altaPlazaConfirmar;
 
 // ¿Esta plaza (por nombre o por ID de obra) ya está registrada?
+// Hasta el 07/09/2026 comparaba letra por letra, y por eso decía «todavía no está en el tablero»
+// a plazas que SÍ estaban: el mismo problema que había con Aycardoz. En la Calculadora la obra se
+// escribe «AYCARDOZ» y en el tablero está como «Plaza Aycardoz»; o el ID se cargó «07654» y en el
+// tablero figura «7654». Ahora va en escalones, del más seguro al más flojo, y los dos últimos
+// solo valen si dan UNA sola plaza (si hay dos parecidas no elige ninguna: mejor avisar de más que
+// dar por registrada la plaza equivocada).
 function plazaYaRegistrada(nombre, obraId){
+  const sinAc = t => String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/\s+/g,' ').trim();
+  const clave = t => sinAc(t).replace(/^PLAZA\s+/, '').trim();
+  const idLimpio = t => { const u = String(t||'').trim().toUpperCase(); return u.replace(/^([A-Z]*)0+(?=\d)/, '$1') || u; };
   const n = String(nombre||'').trim().toLowerCase();
   const oid = String(obraId||'').trim();
-  return avanceObras.find(a =>
+  // 1) el nombre o el ID igual, igualito — lo de siempre
+  let p = avanceObras.find(a =>
     (n && String(a.nombre||'').trim().toLowerCase() === n) ||
-    (oid && String(a.obraId||'').trim() === oid)
-  ) || null;
+    (oid && String(a.obraId||'').trim() === oid));
+  if(p) return p;
+  // 2) el mismo ID sin los ceros de adelante: «07654» es el «7654»
+  if(oid){
+    p = avanceObras.find(a => a.obraId && idLimpio(a.obraId) === idLimpio(oid));
+    if(p) return p;
+  }
+  // 3) el mismo nombre sin acentos, sin mayúsculas y sin el «Plaza» de adelante, si es único
+  const k = clave(nombre);
+  if(k){
+    const ig = avanceObras.filter(a => clave(a.nombre) === k);
+    if(ig.length === 1) return ig[0];
+  }
+  return null;
 }
 window.plazaYaRegistrada = plazaYaRegistrada;
 
@@ -20479,7 +20501,13 @@ const ITEMIZADO_EPEC = [
       return out;
     })();
     const pendientes = recientes.filter(x=>!x.reg);
-    const ultimas = recientes.slice(0, 5);
+    // Se muestran SIEMPRE todas las que faltan registrar, y después se completa hasta cinco con
+    // las que ya están. Antes el título contaba las pendientes de todo el historial pero la lista
+    // eran las cinco últimas calculadas, así que podía decir «3 sin registrar» y mostrar cinco que
+    // ya estaban: las tres quedaban nombradas y en ninguna parte. El usuario lo reportó el
+    // 07/09/2026: *"esto qué sería, ¿por qué me aparece?"*. Ahora el número del título es
+    // exactamente la cantidad de renglones ámbar que se ven abajo.
+    const ultimas = pendientes.concat(recientes.filter(x=>x.reg)).slice(0, Math.max(5, pendientes.length));
     const ocultas = soloCon ? todas.filter(a=>!cuentasEpec(a).items).length : 0;
     const edit = puedeEditar();
     let extra = '';
@@ -20499,7 +20527,9 @@ const ITEMIZADO_EPEC = [
       };
       extra += `<div class="card" style="border:1px solid ${pendientes.length ? 'var(--amber)' : 'var(--border)'}; background:${pendientes.length ? 'rgba(240,183,74,0.08)' : 'var(--card)'};">
         <h2 style="margin-top:0;"><span class="dot" style="background:${pendientes.length ? 'var(--amber)' : 'var(--teal-dark)'}"></span>Últimas plazas calculadas en la Calculadora${pendientes.length ? ` — ${pendientes.length} sin registrar` : ''}</h2>
-        <div class="hint" style="margin-top:0;"><b>El itemizado lista las plazas del tablero</b>, y una plaza calculada entra al tablero cuando se <b>registra</b>. Acá ves en qué está cada una de las últimas que calculaste: si falta registrarla, se hace desde acá y en el mismo paso te trae las cantidades; si ya está, se abre con un toque.</div>
+        <div class="hint" style="margin-top:0;"><b>El itemizado lista las plazas del tablero</b>, y una plaza calculada entra al tablero cuando se <b>registra</b>. ${pendientes.length
+          ? `Abajo están <b>las ${pendientes.length} que falta registrar</b> —el botón las registra y en el mismo paso les trae las cantidades— y después las últimas que ya están, para abrirlas de un toque.`
+          : 'Están todas registradas: acá quedan las últimas que calculaste, para abrirlas de un toque.'}</div>
         ${ultimas.map(filaRec).join('')}
         ${(!edit && pendientes.length) ? '<div class="hint" style="color:var(--amber);">Para registrar hay que iniciar sesión (pestaña Pañol).</div>' : ''}
       </div>`;
