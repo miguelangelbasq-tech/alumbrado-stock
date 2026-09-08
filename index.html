@@ -1973,7 +1973,19 @@
   .it-ver-meta{ font-size:12px; color:var(--text-soft); margin-top:5px; line-height:1.5; }
   .it-ver-meta b{ color:var(--navy); }
   .it-ver-caja .it-exp-l{ font-size:12px; }
-  @media print{ #itVerFondo{ display:none !important; } .it-ref{ border:none; background:none; color:inherit; padding:0; } }
+  /* El título del renglón es un botón que abre la ficha del ítem (2026-09-08). Se ve como el texto
+     de siempre, con una «ⓘ» chiquita al lado, y en el papel sale como texto plano. */
+  .it-tit-btn{ background:none; border:none; padding:0; margin:0; font:inherit; color:inherit; text-align:left;
+    cursor:pointer; border-radius:6px; display:inline; line-height:inherit; }
+  .it-tit-btn:hover b, .it-tit-btn:hover{ color:var(--teal-dark); }
+  .it-tit-i{ font-size:11px; color:var(--teal-dark); opacity:.75; margin-left:2px; font-weight:700; }
+  .it-tit-btn:hover .it-tit-i{ opacity:1; }
+  .it-ver-texto{ margin-top:12px; padding:10px 12px; background:var(--panel); border:1px solid var(--border); border-left:3px solid var(--teal-dark);
+    border-radius:10px; font-size:13px; line-height:1.55; color:var(--text); }
+  .it-ver-texto-tit{ font-size:11px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--teal-dark); margin-bottom:5px; }
+  .it-exp-texto{ margin-top:8px; padding:8px 10px; background:rgba(2,132,199,.05); border-left:3px solid var(--teal-dark); border-radius:0 8px 8px 0;
+    font-size:12.5px; line-height:1.5; }
+  @media print{ #itVerFondo{ display:none !important; } .it-ref{ border:none; background:none; color:inherit; padding:0; } .it-tit-i{ display:none; } }
 
   /* ---- Trabajos sin ítem en el pliego (2026-09-06) ---- */
   .si-caja{ margin-top:14px; padding:12px 14px; border-radius:10px;
@@ -2079,6 +2091,15 @@
                                      color:var(--danger); border-color:rgba(199,74,74,.45); }
   .it-borrar-plaza .ep-borrar-plaza:hover{ background:rgba(199,74,74,.08); }
   .ep-certif-panel{ border-left:4px solid var(--teal-dark); }
+  /* Aviso de plazas repetidas (2026-09-08) */
+  .ep-repes{ border-left:4px solid var(--danger); }
+  .ep-repes > b{ display:block; font-size:14px; color:var(--danger); }
+  .ep-repe-grupo{ border:1px solid var(--border); border-radius:10px; padding:8px 10px; margin-top:8px; background:var(--panel); }
+  .ep-repe-tit{ font-size:11.5px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--text-soft); }
+  .ep-repe-fila{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:6px 0; border-top:1px solid var(--border); }
+  .ep-repe-grupo .ep-repe-fila:first-of-type{ border-top:none; }
+  .ep-repe-buena{ display:inline-block; margin-left:6px; padding:1px 7px; border-radius:999px; font-size:10.5px; font-weight:700;
+    background:rgba(46,158,87,.14); color:#2e9e57; letter-spacing:.3px; text-transform:uppercase; vertical-align:middle; }
   .ep-certif-panel.ok{ border-left-color:var(--teal-dark); opacity:.85; }
   .ep-certif-panel > b{ display:block; font-size:14px; color:var(--navy); }
   .ep-certif-tabla{ width:100%; border-collapse:collapse; font-size:12.5px; }
@@ -2745,7 +2766,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-08 07:45 · fbbcfe</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-08 10:37 · cdad83</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -6762,36 +6783,61 @@ function pbExtras(ph){
 }
 
 // Junta las tres fuentes en una sola lista buscable, sin repetir.
+// (2026-09-08) El usuario: *"a veces te aparecen dos nombres de la misma plaza; lo que tiene que
+// mandar es el ID, que son únicos. Hay plazas que tienen dos IDs: en ese caso tendría que salir la
+// misma con cualquiera de los dos que busques"*. Antes el «ya la vi» comparaba el obraId entero
+// («D010 / D10» no era «D010») y solo por ID: una plaza del tablero con el ID escrito distinto, o
+// sin ID y con el nombre un poco distinto, salía dos veces. Ahora la identidad es la misma que en
+// el resto de la herramienta (`idsDePlaza` / `claveNombrePlaza`): cualquiera de sus IDs —sin los
+// ceros de adelante— o el nombre normalizado; y a cada plaza ya ejecutada se le suman los IDs que
+// le conoce el certificado de la Municipalidad (Hípica es 6461 Y 6207), así sale una sola vez y se
+// encuentra con los dos.
 function pbCatalogo(){
   const out = [];
-  const vistos = new Set();
+  const vistos = new Set();          // IDs normalizados ya tomados
+  const nombresVistos = new Set();   // nombres normalizados ya tomados
   const hechas = (window.PLAZAS_HECHAS || []);
   const lic    = (window.PLAZAS_LICITACION || []);
   const enTablero = (typeof avanceObras !== 'undefined' && Array.isArray(avanceObras)) ? avanceObras : [];
+  const certif = (typeof window.certifTodas === 'function') ? (window.certifTodas() || []) : [];
+  const idn = (typeof idsDePlaza === 'function') ? idsDePlaza
+            : (v)=> String(v||'').split(/[\/,;·|]+|\s+/).filter(Boolean).map(x=>x.toUpperCase());
+  const kn  = (typeof claveNombrePlaza === 'function') ? claveNombrePlaza
+            : (v)=> String(v||'').toUpperCase().replace(/^PLAZA\s+/,'').trim();
+  const marcar = (ids, nombres)=>{
+    ids.forEach(i=> idn(i).forEach(x=> vistos.add(x)));
+    nombres.forEach(n=>{ const k = kn(n); if(k) nombresVistos.add(k); });
+  };
+  const yaVisto = (ids, nombre)=>
+    ids.some(i=> idn(i).some(x=> vistos.has(x))) || (!!kn(nombre) && nombresVistos.has(kn(nombre)));
 
-  // 1) Las 36 ya ejecutadas — son las que más datos traen, van primero.
+  // 1) Las 36 ya ejecutadas — son las que más datos traen, van primero. Cada una con TODOS sus IDs:
+  //    los de la planilla vieja más los de su hoja del certificado.
   hechas.forEach(ph=>{
-    const ids = (ph.ids||[]).filter(Boolean);
-    const key = 'H|' + ph.n;
-    if(vistos.has(key)) return; vistos.add(key);
-    ids.forEach(id=>vistos.add('ID|'+id));
-    out.push({ fuente:'hecha', nombre:ph.n, id:ids.join(' / '), ids, barrio:ph.barrio||'',
+    const ids = (ph.ids||[]).filter(Boolean).map(String);
+    const hj = certif.find(x=> ids.some(i=> x.ids.some(y=> idn(y)[0] === idn(i)[0]))
+                            || [x.n].concat(x.al||[]).some(a=> kn(a) === kn(ph.n)));
+    if(hj) hj.ids.forEach(i=>{ if(!ids.some(j=> idn(j)[0] === idn(i)[0])) ids.push(String(i)); });
+    if(yaVisto(ids, ph.n)) return;
+    marcar(ids, [ph.n].concat(hj ? [hj.n].concat(hj.al||[]) : []));
+    out.push({ fuente:'hecha', nombre:ph.n, id:ids.join(' / '), ids, idsN:ids.flatMap(idn), barrio:ph.barrio||'',
                zona:ph.z||'', mod:ph.mod||0, obra:!!ph.obra, ph });
   });
-  // 2) Las 244 de la licitación que no estén ya arriba.
+  // 2) Las 244 de la licitación que no estén ya arriba (por ID: es lo único que trae).
   lic.forEach(p=>{
     const id = String(p[1]);
-    if(vistos.has('ID|'+id)) return; vistos.add('ID|'+id);
-    out.push({ fuente:'licitacion', nombre:p[2], id, ids:[id], barrio:p[2],
+    if(yaVisto([id], '')) return;
+    marcar([id], []);
+    out.push({ fuente:'licitacion', nombre:p[2], id, ids:[id], idsN:idn(id), barrio:p[2],
                zona:p[5]||'', lat:p[3], lng:p[4], nro:p[0] });
   });
-  // 3) Las del tablero que no sean ninguna de las anteriores.
+  // 3) Las del tablero que no sean ninguna de las anteriores: por cualquiera de sus IDs o por nombre.
   enTablero.forEach(a=>{
     const id = String(a.obraId||'').trim();
-    if(id && vistos.has('ID|'+id)) return;
-    const key = 'T|' + (a.nombre||a.id);
-    if(vistos.has(key)) return; vistos.add(key);
-    out.push({ fuente:'tablero', nombre:a.nombre||'(sin nombre)', id, ids:id?[id]:[],
+    const ids = idn(id);
+    if(yaVisto(ids, a.nombre)) return;
+    marcar(ids, [a.nombre]);
+    out.push({ fuente:'tablero', nombre:a.nombre||'(sin nombre)', id, ids:id?[id]:[], idsN:ids,
                barrio:a.barrio||'', zona:'', obraRef:a });
   });
   return out;
@@ -6814,13 +6860,21 @@ function pbRenderLista(q){
   const t = pbNorm(q).trim();
   if(t.length < 2){ cont.style.display='none'; cont.innerHTML=''; pbResultados=[]; return; }
   const todos = pbCatalogo();
+  // El ID se busca contra TODOS los de la plaza («6461 / 6207» se encuentra con cualquiera), y
+  // también sin los ceros de adelante («0002» y «2» son el mismo).
+  const tId = t.replace(/^([a-z]*)0+(?=\d)/, '$1');
+  // Si lo escrito traía ceros adelante («0002», «D010») es un ID entero: se compara exacto, para
+  // que el «2» que queda no pesque a todas las plazas que tengan un 2 en el ID.
+  const porId = (p)=> pbNorm(p.id).includes(t)
+    || (p.idsN||[]).some(x=> tId !== t ? pbNorm(x) === tId : pbNorm(x).includes(t));
   const hits = todos.filter(p =>
-    pbNorm(p.nombre).includes(t) || pbNorm(p.barrio).includes(t) || pbNorm(p.id).includes(t)
+    pbNorm(p.nombre).includes(t) || pbNorm(p.barrio).includes(t) || porId(p)
   );
   // Primero las que arrancan con lo escrito, después las que lo contienen.
   hits.sort((a,b)=>{
-    const ap = pbNorm(a.nombre).startsWith(t) || pbNorm(a.id).startsWith(t) ? 0 : 1;
-    const bp = pbNorm(b.nombre).startsWith(t) || pbNorm(b.id).startsWith(t) ? 0 : 1;
+    const arr = (p)=> pbNorm(p.nombre).startsWith(t) || (p.idsN||[p.id]).some(x=> pbNorm(x).startsWith(tId));
+    const ap = arr(a) ? 0 : 1;
+    const bp = arr(b) ? 0 : 1;
     if(ap !== bp) return ap - bp;
     const orden = { hecha:0, tablero:1, licitacion:2 };
     if(orden[a.fuente] !== orden[b.fuente]) return orden[a.fuente] - orden[b.fuente];
@@ -9835,6 +9889,34 @@ window.abrirAltaPlaza = abrirAltaPlaza;
 window.cerrarAltaPlaza = cerrarAltaPlaza;
 window.altaPlazaConfirmar = altaPlazaConfirmar;
 
+// ---- Identidad de una plaza: los IDs y el nombre, comparados con criterio (2026-09-08) ----
+// El usuario avisó: *"me está volviendo a pasar que se carga dos veces una plaza"*. La causa era
+// que cada pantalla comparaba a su manera. En particular, «⚡ Cargar las 36 del certificado» guarda
+// el obraId con los DOS IDs pegados —«D010 / D10», «4028 / 4029»— y el otro botón, el de «Las 36 ya
+// ejecutadas», preguntaba si el obraId era exactamente «D010»: como no lo era, daba de alta la
+// plaza otra vez. Cinco plazas se duplicaban si se tocaban los dos botones.
+// Estas tres funciones son ahora el ÚNICO criterio, y las usan todas las altas.
+function idsDePlaza(v){          // «D010 / D10» → ['D010','D10'] · «4028-4029» → ['4028','4029']
+  const out = String(v||'').split(/[\/,;·|]+|\s+|(?<=\d)-(?=\d)/).map(x=>x.trim()).filter(Boolean)
+    .map(x=>{ const u = x.toUpperCase(); return u.replace(/^([A-Z]*)0+(?=\d)/, '$1') || u; });
+  return [...new Set(out)];   // «D010 / D10» son el mismo ID escrito de dos formas
+}
+function claveNombrePlaza(v){    // «Plaza Cerro Colorado» → «CERRO COLORADO»
+  return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()
+    .replace(/\s+/g,' ').trim().replace(/^PLAZA\s+/, '').trim();
+}
+// ¿La plaza `a` del tablero es la misma que esto (una lista de IDs y una lista de nombres/alias)?
+// Primero por ID —lo seguro—, y si no, por nombre exacto normalizado.
+function esLaMismaPlaza(a, ids, nombres){
+  if(!a) return false;
+  const mios = idsDePlaza(a.obraId);
+  const otros = (ids||[]).flatMap(idsDePlaza);
+  if(mios.length && otros.some(x=>mios.includes(x))) return true;
+  const k = claveNombrePlaza(a.nombre);
+  return !!k && (nombres||[]).some(n=>claveNombrePlaza(n) === k);
+}
+window.idsDePlaza = idsDePlaza; window.claveNombrePlaza = claveNombrePlaza; window.esLaMismaPlaza = esLaMismaPlaza;
+
 // ¿Esta plaza (por nombre o por ID de obra) ya está registrada?
 // Hasta el 07/09/2026 comparaba letra por letra, y por eso decía «todavía no está en el tablero»
 // a plazas que SÍ estaban: el mismo problema que había con Aycardoz. En la Calculadora la obra se
@@ -9845,7 +9927,6 @@ window.altaPlazaConfirmar = altaPlazaConfirmar;
 function plazaYaRegistrada(nombre, obraId){
   const sinAc = t => String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/\s+/g,' ').trim();
   const clave = t => sinAc(t).replace(/^PLAZA\s+/, '').trim();
-  const idLimpio = t => { const u = String(t||'').trim().toUpperCase(); return u.replace(/^([A-Z]*)0+(?=\d)/, '$1') || u; };
   const n = String(nombre||'').trim().toLowerCase();
   const oid = String(obraId||'').trim();
   // 1) el nombre o el ID igual, igualito — lo de siempre
@@ -9853,9 +9934,11 @@ function plazaYaRegistrada(nombre, obraId){
     (n && String(a.nombre||'').trim().toLowerCase() === n) ||
     (oid && String(a.obraId||'').trim() === oid));
   if(p) return p;
-  // 2) el mismo ID sin los ceros de adelante: «07654» es el «7654»
+  // 2) el mismo ID sin los ceros de adelante: «07654» es el «7654». Y si el obraId trae DOS IDs
+  //    («D010 / D10», como los que escribe «Cargar las 36»), alcanza con que coincida uno.
   if(oid){
-    p = avanceObras.find(a => a.obraId && idLimpio(a.obraId) === idLimpio(oid));
+    const busco = idsDePlaza(oid);
+    p = avanceObras.find(a => { const m = idsDePlaza(a.obraId); return m.length && busco.some(x=>m.includes(x)); });
     if(p) return p;
   }
   // 3) el mismo nombre sin acentos, sin mayúsculas y sin el «Plaza» de adelante, si es único
@@ -19319,6 +19402,117 @@ const ITEMIZADO_EPEC = [
   // que se cobra— no coincide con lo que efectivamente se instala. El ítem NO se cambia: se
   // certifica con el que corresponde, pero al lado queda escrito qué se puso, para que quien
   // firme el certificado sepa exactamente qué está aprobando y no aparezca una sorpresa después.
+
+  // ============================================================
+  // EL TEXTO COMPLETO DE CADA ÍTEM  (2026-09-08)
+  // ============================================================
+  // Pedido del usuario: *"cuando hago clic al ítem debería decirme todo lo que incluye ese ítem;
+  // ejemplo, ítem 1: toda la descripción de ese ítem"*. La descripción corta de arriba sirve para
+  // la tabla; ésta es la del pliego, palabra por palabra, para saber qué paga y qué no.
+  // FUENTE: la planilla «ITEMIZADO PLAZAS 17/06/2026» (ítems 1 a 82, cuyo texto es el mismo del
+  // Anexo I de la Nota Aclaratoria N° 1, ítem por ítem), con las diferencias propias del Anexo I de
+  // EPEC ya aplicadas: la luminaria (y la columna de PRFV) las provee la EPEC S.A.U. y no la
+  // Municipalidad; el tablero aéreo es s/AP T 008; el fusible cerámico del 68 es de 2 A - 10 A; y
+  // los ítems 1-8, 9, 30, 42, 75 y 77 cierran con «no incluye la provisión de los materiales
+  // aportados en los ítems …», que es lo que habilita a cobrar el 83.1-89 cuando el material lo
+  // puso la contratista. Los 83.1 a 89 no tienen texto largo en el Anexo I —son un renglón—; acá se
+  // les agrega la aclaración de para qué sirven.
+  const DESC_ANEXO_I = {
+    "1": "Relevamiento, ingeniería, marcado, excavación, fundación de hormigón; torta, provisión, traslado, izaje y posicionamiento de columna metálica de 7 metros de altura libre con un capuchón y un brazo de 0,425 metros; instalación completa de puesta a tierra y su medición; acometida subterránea; el montaje, conexionado y energización de luminaria tecnología LED, reparación del terreno/veredas/limpieza del área afectada; poda de arboleda y otras tareas necesarias para la puesta a punto y en servicio de las instalaciones, en el área a iluminar. s/PLANO AP C 005 TIPO C / AP C 008 (1/3). La luminaria LED será provista por la EPEC S.A.U. No incluye la provisión de los materiales aportados en los ítems 88, 87, 83.1, 86 y 85.1.",
+    "2": "Relevamiento, ingeniería, marcado, excavación, fundación de hormigón; torta, provisión, traslado, izaje y posicionamiento de columna metálica de 7 metros de altura libre con un capuchón y dos brazos de 0,425 metros; instalación completa de puesta a tierra y su medición; acometida subterránea; el montaje, conexionado y energización de luminaria tecnología LED, reparación del terreno/veredas/limpieza del área afectada; poda de arboleda y otras tareas necesarias para la puesta a punto y en servicio de las instalaciones, en el área a iluminar. s/PLANO AP C 005 TIPO C / AP C 008 (2/3). La luminaria LED será provista por la EPEC S.A.U. No incluye la provisión de los materiales aportados en los ítems 88, 87, 83.1, 86 y 85.1.",
+    "3": "Relevamiento, ingeniería, marcado, excavación, fundación de hormigón; torta, provisión, traslado, izaje y posicionamiento de columna metálica de 7 metros de altura libre con un capuchón y tres brazos de 0,425 metros; instalación completa de puesta a tierra y su medición; acometida subterránea; el montaje, conexionado y energización de luminaria tecnología LED, reparación del terreno/veredas/limpieza del área afectada; poda de arboleda y otras tareas necesarias para la puesta a punto y en servicio de las instalaciones, en el área a iluminar. s/PLANO AP C 005 TIPO C / AP C 008 (3/3). La luminaria LED será provista por la EPEC S.A.U. No incluye la provisión de los materiales aportados en los ítems 88, 87, 83.1, 86 y 85.1.",
+    "4": "Relevamiento, ingeniería, marcado, excavación, fundación de hormigón; torta, provisión, traslado, izaje y posicionamiento de columna metálica de 10 metros de altura libre con un capuchón y cuatro brazos de 1,025 metros; instalación completa de puesta a tierra y su medición; acometida subterránea; el montaje, conexionado y energización de luminaria tecnología LED, reparación del terreno/veredas/limpieza del área afectada; poda de arboleda y otras tareas necesarias para la puesta a punto y en servicio de las instalaciones, en el área a iluminar. s/PLANO AP C 005 TIPO F / AP C 040. La luminaria LED será provista por la EPEC S.A.U. No incluye la provisión de los materiales aportados en los ítems 88, 87, 83.2, 86 y 85.2.",
+    "5": "Relevamiento, ingeniería, marcado, excavación, fundación de hormigón; provisión, traslado, izaje y posicionamiento de columna PRFV de 7 metros de altura libre con un capuchón y un brazo de 0,425 metros; acometida subterránea; el montaje, conexionado y energización de luminaria tecnología LED, reparación del terreno/veredas/limpieza del área afectada; poda de arboleda y otras tareas necesarias para la puesta a punto y en servicio de las instalaciones, en el área a iluminar. s/PLANO AP C 033 TIPO A / AP C 008 (1/3). La luminaria LED y la columna de PRFV serán provistas por la EPEC S.A.U. No incluye la provisión de los materiales aportados en los ítems 85.1, 84.1 y 86.",
+    "6": "Relevamiento, ingeniería, marcado, excavación, fundación de hormigón; provisión, traslado, izaje y posicionamiento de columna PRFV de 7 metros de altura libre con un capuchón y dos brazos de 0,425 metros; acometida subterránea; el montaje, conexionado y energización de luminaria tecnología LED, reparación del terreno/veredas/limpieza del área afectada; poda de arboleda y otras tareas necesarias para la puesta a punto y en servicio de las instalaciones, en el área a iluminar. s/PLANO AP C 033 TIPO A / AP C 008 (2/3). La luminaria LED y la columna de PRFV serán provistas por la EPEC S.A.U. No incluye la provisión de los materiales aportados en los ítems 85.1, 84.1 y 86.",
+    "7": "Relevamiento, ingeniería, marcado, excavación, fundación de hormigón; provisión, traslado, izaje y posicionamiento de columna PRFV de 7 metros de altura libre con un capuchón y tres brazos de 0,425 metros; acometida subterránea; el montaje, conexionado y energización de luminaria tecnología LED, reparación del terreno/veredas/limpieza del área afectada; poda de arboleda y otras tareas necesarias para la puesta a punto y en servicio de las instalaciones, en el área a iluminar. s/PLANO AP C 033 TIPO A / AP C 008 (3/3). La luminaria LED y la columna de PRFV serán provistas por la EPEC S.A.U. No incluye la provisión de los materiales aportados en los ítems 85.1, 84.1 y 86.",
+    "8": "Relevamiento, ingeniería, marcado, excavación, fundación de hormigón; provisión, traslado, izaje y posicionamiento de columna PRFV de 10 metros de altura libre con un capuchón y cuatro brazos de 1,025 metros; acometida subterránea; el montaje, conexionado y energización de luminaria tecnología LED, reparación del terreno/veredas/limpieza del área afectada; poda de arboleda y otras tareas necesarias para la puesta a punto y en servicio de las instalaciones, en el área a iluminar. s/PLANO AP C 033 TIPO B / AP C 040. La luminaria LED y la columna de PRFV serán provistas por la EPEC S.A.U. No incluye la provisión de los materiales aportados en los ítems 85.2, 84.2 y 86.",
+    "9": "Provisión e instalación de nuevo tablero de medición, protección y comando aéreo (TA°P°) con salidas a circuitos subterráneos, conforme a ET y planos. Incluye: equipamiento interno, programación, certificación y puesta en servicio. No incluye: poste de hormigón armado, acometida de energía y medidor. s/PLANO AP T 008 (sin circuito auxiliar de mantenimiento). No incluye la provisión del tablero aportado en el ítem 89.",
+    "10": "Provisión e instalación de nuevo tablero de medición, protección y comando a nivel (TA°P°) con salidas a circuitos subterráneos, conforme a ET y planos. Incluye: base de mampostería, equipamiento interno, programación, certificación y puesta en servicio. No incluye: acometida de energía y medidor. s/PLANO AP T 002 (sin circuito auxiliar de mantenimiento).",
+    "11": "Provisión y tendido de acometida aérea de vinculación entre la red de distribución de la EPEC y el TA°P° (tablero de medición, protección y comando), por metro lineal. Los cables de acometida permitidos: aislados en XLPE, de Al/Al s/IRAM 2263-63002 y de Cu s/IRAM 2164-62266 (XLPE/LSZH).",
+    "12": "Provisión y tendido de acometida subterránea de vinculación entre la red de distribución de la EPEC y el TA°P° (tablero de medición, protección y comando), por metro lineal. Incluye: reposición de vereda. Los cables de acometida permitidos: de Cu, XLPE y vaina de PVC, s/IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "13": "Provisión e instalación de apoyo de PRFV hl = 8 m - Ro 1050. Incluye base / suelo-cemento s/suelo. s/PLANO AP T 018. Utilizado para soportar el tablero de protección, comando y medición.",
+    "14": "Provisión e instalación de apoyo de PRFV hl = 8 m - Ro 550. Incluye tablero de transición, base / suelo-cemento s/suelo. s/PLANO AP Tt 003 y Tt 002-001. Utilizado para soportar tableros de transición.",
+    "15": "Zanjeo en vía pública sobre terreno natural (profundidad 0,60 m), por metro lineal. Incluye la mano de obra para el zanjeo, tapado, compactación y limpieza y los materiales: arena, ladrillo, malla de advertencia. s/PLANO AP TC 001.",
+    "16": "Zanjeo en vía pública sobre terreno con pisos de baldosas (profundidad 0,60 m), por metro lineal. Incluye la mano de obra y los materiales para la rotura, zanjeo, tapado, compactación, contrapiso, vereda y limpieza (arena, ladrillo, malla de advertencia, cemento, cal, baldosas, etc.). s/PLANO AP TC 001.",
+    "17": "Zanjeo en vía pública sobre terreno con pisos de hormigón (profundidad 0,60 m), por metro lineal. Incluye la mano de obra y los materiales para la rotura, zanjeo, tapado, compactación, contrapiso, hormigón y limpieza (arena, ladrillo, malla de advertencia, cemento, cal, piedra, hormigón, etc.). s/PLANO AP TC 001.",
+    "18": "Zanjeo en vía pública sobre terreno natural (profundidad 1,00 m), por metro lineal. Incluye la mano de obra para el zanjeo, tapado, compactación y limpieza y los materiales: arena, ladrillo, malla de advertencia. s/PLANO AP TC 001.",
+    "19": "Zanjeo en vía pública sobre terreno con pisos de baldosas (profundidad 1,00 m), por metro lineal. Incluye la mano de obra y los materiales para la rotura, zanjeo, tapado, compactación, contrapiso, vereda y limpieza (arena, ladrillo, malla de advertencia, cemento, cal, baldosas, etc.). s/PLANO AP TC 001.",
+    "20": "Zanjeo en vía pública sobre terreno con pisos de hormigón (profundidad 1,00 m), por metro lineal. Incluye la mano de obra y los materiales para la rotura, zanjeo, tapado, compactación, contrapiso, hormigón y limpieza (arena, ladrillo, malla de advertencia, cemento, cal, piedra, hormigón, etc.). s/PLANO AP TC 001.",
+    "21": "Cruce de calzada con tunelera en seco, en 1 (un) caño de PVC Ø160 mm. s/PLANO AP-TC-022.",
+    "22": "Ejecución de cruce de calle subterráneo a cielo abierto (calle de tierra), por metro lineal. Incluye la mano de obra y los materiales para los zanjeos, cañeros de PVC, tapado, compactación y limpieza (arena, malla de advertencia, caños de PVC, etc.). s/PLANO AP TC 002.",
+    "23": "Ejecución de cruce de calle subterráneo a cielo abierto (calle de hormigón armado), por metro lineal. Incluye la mano de obra y los materiales para la rotura, zanjeo, tapado, compactación, contrapiso, hormigón y limpieza (arena, malla de advertencia, cemento, cal, piedra, hormigón, caños de PVC, etc.). s/PLANO AP TC 002.",
+    "24": "Ejecución de cruce de calle subterráneo a cielo abierto (calle de carpeta asfáltica), por metro lineal. Incluye la mano de obra y los materiales para los zanjeos, cañeros de PVC, tapado, compactación, hormigón, reconstrucción de carpeta asfáltica y limpieza (arena, malla de advertencia, cemento, cal, piedra, hormigón, asfalto, caños de PVC, etc.). s/PLANO AP TC 002.",
+    "25": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 2×2,5 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "26": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 2×4 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "27": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 2×6 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "28": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 2×10 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "29": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 2×16 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "30": "Provisión e instalación en columna de Cable Cu aislado en XLPE y vaina de PVC, sección 3×1,5 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV. No incluye la provisión del cable aportado en el ítem 86.",
+    "31": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 3×2,5 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "32": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 3×4 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "33": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 3×6 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "34": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 3×10 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "35": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 3×16 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "36": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 4×2,5 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "37": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 4×4 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "38": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 4×6 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "39": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 4×10 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "40": "Provisión y tendido en zanja de Cable Cu aislado en XLPE y vaina de PVC, sección 4×16 mm², s/ IRAM 2178-1 - IEC 60502-1 - Tensión de servicio 0,6-1 kV.",
+    "41": "Reacondicionamiento de columna metálica existente. Incluye: limpieza, lijado y pintado.",
+    "42": "Provisión y ejecución de nueva acometida subterránea de columna metálica de AºPº apta para acometida subterránea. Incluye: borneras aisladas tipo BPN, seccionador portafusible para riel DIN, fusibles cerámicos de 2/4 A, terminales, tramo de conductor tipo Sintenax multipolar de 3×1,5 / 3×2,5 mm², conexionados y acrílico de protección. Instalación completa de puesta a tierra y su medición. No incluye la provisión de los materiales aportados en los ítems 87 y 88.",
+    "43": "Aplomado de columnas metálicas fuera de plomo.",
+    "44": "Montaje, conexionado y energización de luminaria LED sobre columna existente.",
+    "45": "Retiro de luminaria de AºPº existente. Incluye el traslado al depósito de la Municipalidad.",
+    "46": "Retiro de columna metálica de AºPº en mal estado. Incluye, además: desconexión, retiro de conductores, tapado y el traslado de la columna y sus accesorios al depósito de la Municipalidad.",
+    "47": "Retiro de poste de hormigón armado de AºPº en mal estado. Incluye, además: desconexión, retiro de conductores y el traslado del poste y sus accesorios al depósito de la Municipalidad.",
+    "48": "Retiro de poste de madera de AºPº en mal estado. Incluye, además: desconexión, retiro de conductores y el traslado del poste y sus accesorios al depósito de la Municipalidad.",
+    "49": "Desconexión, desmantelamiento y retiro de tablero de AºPº existente. Incluye: en caso de ser a nivel, la demolición de la base de mampostería; además, el traslado al depósito de la Municipalidad.",
+    "50": "Provisión e instalación de Interruptor automático termomagnético tetrapolar 380 V / hasta 25 A, tipo Schneider Electric / ABB o calidad similar o superior.",
+    "51": "Provisión e instalación de Interruptor automático termomagnético tetrapolar 380 V / mayor a 25 A, tipo Schneider Electric / ABB o calidad similar o superior.",
+    "52": "Provisión e instalación de Interruptor automático termomagnético tripolar 380 V / hasta 25 A, tipo Schneider Electric / ABB o calidad similar o superior.",
+    "53": "Provisión e instalación de Interruptor automático termomagnético tripolar 380 V / mayor a 25 A, tipo Schneider Electric / ABB o calidad similar o superior.",
+    "54": "Provisión e instalación de Interruptor automático termomagnético bipolar 380 V / hasta 25 A, tipo Schneider Electric / ABB o calidad similar o superior.",
+    "55": "Provisión e instalación de Interruptor automático termomagnético bipolar 380 V / mayor a 25 A, tipo Schneider Electric / ABB o calidad similar o superior.",
+    "56": "Provisión e instalación de Interruptor automático termomagnético unipolar 380 V / hasta 25 A, tipo Schneider Electric / ABB o calidad similar o superior.",
+    "57": "Provisión e instalación de Interruptor automático termomagnético unipolar 380 V / mayor a 25 A, tipo Schneider Electric / ABB o calidad similar o superior.",
+    "58": "Provisión e instalación de Interruptor automático diferencial bipolar 250 V / 40 A, clase A, sensibilidad hasta 300 mA, tipo Schneider Electric / ABB o calidad similar o superior.",
+    "59": "Provisión e instalación de Interruptor automático diferencial tetrapolar 250 V / 40 A, clase A, sensibilidad hasta 300 mA, tipo Schneider Electric / ABB o calidad similar o superior.",
+    "60": "Provisión e instalación de Contactor tripolar 380 V, bobina para 220 V, hasta 25 A, categoría AC1, tipo ABB o calidad similar o superior.",
+    "61": "Provisión e instalación de Contactor tripolar 380 V, bobina para 220 V, mayor a 25 A, categoría AC1, tipo ABB o calidad similar o superior.",
+    "62": "Provisión e instalación de Bornera BPN (para RSTN+T), 4 mm² - 2,5 mm².",
+    "63": "Provisión e instalación de Bornera BPN (para RSTN+T), 10 mm² - 6 mm².",
+    "64": "Provisión e instalación de Fotocontrol electromecánico/electrónico, apto para 10 A - 220 V, s/Norma IRAM AADL J20-24/25, tipo Lumnia o calidad superior.",
+    "65": "Provisión e instalación de reloj temporizador mecánico programable (4 programas) para riel DIN.",
+    "66": "Provisión e instalación de Base portafusible NH ACR 20 - 125 A / 500 V.",
+    "67": "Provisión e instalación de Fusible NH 20 A - 100 A.",
+    "68": "Provisión e instalación de Fusible cerámico 2 A - 10 A.",
+    "69": "Provisión e instalación de Portafusible tabaquera con fusible 1 A - 6 A - 10 A.",
+    "70": "Provisión e instalación de Tomacorriente 2×10 A tipo Mignon.",
+    "71": "Provisión e instalación de Fleje de acero inoxidable AISI 304, medidas 3/4\" × 0,7\" × 30\" (ancho × espesor × largo). Corresponde a un largo de 3 m.",
+    "72": "Provisión e instalación de Hebilla de acero inoxidable AISI 304, medida 3/4\".",
+    "73": "Provisión e instalación de Apoya escalera H 12 con herrajes para instalar.",
+    "74": "Provisión e instalación de Tomacable WGC / TGC.",
+    "75": "Provisión e instalación de Dispersor de Cu con alma de acero de Ø14,6 × 1500 mm, s/IRAM 2309. No incluye la provisión del dispersor aportado en el ítem 88.",
+    "76": "Provisión e instalación de Caño de doble aislación Ø2\", L = 4 m.",
+    "77": "Provisión e instalación de caño de HºGº. Incluye: jabalina, tomacable, terminal, cable de 1×10 mm² y su vinculación con el mismo. No incluye la provisión de los materiales aportados en los ítems 87 y 88.",
+    "78": "Provisión e instalación de Conjunto de empalme recto con resina colada para secciones de 4×2,5 mm² a 4×6 mm², para uso subterráneo, aislación 1,1 kV.",
+    "79": "Provisión e instalación de Conjunto de empalme recto con resina colada para secciones de 4×10 mm² a 3×35+1×16 mm², para uso subterráneo, aislación 1,1 kV.",
+    "80": "Medición de resistencia de aislación de conductor subterráneo existente (cada 100 metros lineales).",
+    "81": "Medición de resistencia de puesta a tierra (PAT).",
+    "82": "Poda de árboles s/plano AP-TC-025.",
+    "83.1": "Provisión de columna metálica recta de 7 metros de altura libre, conforme a la ET y a la planilla de datos garantizados. Material aportado por la contratista en caso de eventualidad; se certifica además del ítem 1, 2 o 3 de esa columna.",
+    "83.2": "Provisión de columna metálica recta de 10 metros de altura libre, conforme a la ET y a la planilla de datos garantizados. Material aportado por la contratista en caso de eventualidad; se certifica además del ítem 4.",
+    "84.1": "Provisión de columna de PRFV de 7 metros de altura libre, conforme a la ET. Material aportado por la contratista en caso de eventualidad; se certifica además del ítem 5, 6 o 7.",
+    "84.2": "Provisión de columna de PRFV de 10 metros de altura libre, conforme a la ET. Material aportado por la contratista en caso de eventualidad; se certifica además del ítem 8.",
+    "85.1": "Provisión de luminaria LED de 75 W, conforme a la ET. Material aportado por la contratista en caso de eventualidad (en esta obra la luminaria la provee la EPEC).",
+    "85.2": "Provisión de luminaria LED de 180 W, conforme a la ET. Material aportado por la contratista en caso de eventualidad (en esta obra la luminaria la provee la EPEC).",
+    "86": "Provisión de cable subterráneo de Cu aislado en XLPE y vaina de PVC, sección 3×1,5 mm², por metro. Material aportado por la contratista en caso de eventualidad.",
+    "87": "Provisión de cable de Cu verde-amarillo de 10 mm² (bloquete a jabalina), por metro. Material aportado por la contratista en caso de eventualidad.",
+    "88": "Provisión de jabalina (dispersor) de Cu con alma de acero de Ø14,6 × 1500 mm, s/IRAM 2309. Material aportado por la contratista en caso de eventualidad; una unidad por cada jabalina, se cobre o no el ítem 75.",
+    "89": "Provisión de tablero de medición, protección y comando aéreo, s/plano AP T 107, con su equipamiento interno. Material aportado por la contratista en caso de eventualidad; se certifica además del ítem 9."
+  };
+  const descAnexoI = (id)=> DESC_ANEXO_I[String(id)] || '';
+  window.epecItemTexto = descAnexoI;
   // ============================================================
   // QUÉ ES CADA ÍTEM — se abre al apretarlo (2026-09-06)
   // ============================================================
@@ -19516,16 +19710,18 @@ const ITEMIZADO_EPEC = [
       if(n.item)   extra += `<div class="it-exp-l"><b>Con qué ítem se certifica:</b> ${marcarRefsItems(n.item)}</div>`;
       if(n.cobro)  extra += `<div class="it-exp-l it-exp-plata"><b>Para el cobro:</b> ${marcarRefsItems(n.cobro)}</div>`;
     }
+    const texto = descAnexoI(it.id);
     fondo.querySelector('#itVerCuerpo').innerHTML = `
       <div class="it-ver-num">Ítem ${esc(it.id)}</div>
       <div class="it-ver-desc">${esc(it.desc)}</div>
       <div class="it-ver-meta">${esc(it.cat)} · se mide por <b>${esc(it.un)}</b> · <b>${fmt(it.k,2)} K</b>${precio}</div>
+      ${texto ? `<div class="it-ver-texto"><div class="it-ver-texto-tit">Lo que dice el ítem en el Anexo I — todo lo que incluye</div>${marcarRefsItems(esc(texto))}</div>` : ''}
       ${extra}`;
     fondo.style.display = 'flex';
   }
   // Un solo enganche para todos los botoncitos, estén donde estén (tabla, plaza o la propia ventana).
   document.addEventListener('click', (e)=>{
-    const r = e.target.closest('.it-ref');
+    const r = e.target.closest('.it-ref, .it-tit-btn');
     if(r){ e.preventDefault(); e.stopPropagation(); verItemVentana(r.dataset.ver); }
   });
 
@@ -19538,7 +19734,9 @@ const ITEMIZADO_EPEC = [
               : n.coincide === true  ? { cls:'ok',   txt:'Coincide con lo que se pone en obra' }
               : n.coincide === false ? { cls:'no',   txt:'NO coincide con lo que se pone en obra' }
               :                        { cls:'duda', txt:'A definir con la Inspección' };
+    const texto = descAnexoI(id);
     let cuerpo = `<div class="it-exp-ficha">${esc(it.desc)}<div class="it-exp-meta">${esc(it.cat)} · se mide por <b>${esc(it.un)}</b> · <b>${fmt(it.k,2)} K</b>${precio}</div></div>`;
+    if(texto) cuerpo += `<div class="it-exp-texto"><b>Lo que dice el ítem en el Anexo I — todo lo que incluye:</b> ${marcarRefsItems(esc(texto))}</div>`;
     cuerpo += `<div class="it-exp-est it-exp-${est.cls}">${est.cls==='ok'?'✓':(est.cls==='no'?'✗':'?')} ${est.txt}</div>`;
     if(n){
       if(n.obra)   cuerpo += `<div class="it-exp-l"><b>Lo que se pone en obra:</b> ${marcarRefsItems(n.obra)}</div>`;
@@ -20192,10 +20390,22 @@ const ITEMIZADO_EPEC = [
   // Da de alta en el tablero las que falten, vacías: el usuario las llena a mano.
   async function registrarHechas(){
     const msg = document.getElementById('hechasRegMsg');
-    const cargadas = new Set(obras().map(a=>String(a.obraId||'').trim()).filter(Boolean));
-    const porNombre = new Set(obras().map(a=>String(a.nombre||'').trim().toLowerCase()).filter(Boolean));
-    const faltan = PLAZAS_HECHAS.filter(h =>
-      !(h.ids||[]).some(i=>cargadas.has(String(i))) && !porNombre.has(String(h.n||'').trim().toLowerCase()));
+    // El criterio es el compartido (`esLaMismaPlaza`): por ID —aunque el obraId traiga los dos
+    // pegados, «D010 / D10»— y, si no, por nombre normalizado, sumando los nombres con los que la
+    // llama el certificado de la Municipalidad. Antes esto comparaba el obraId entero con un ID
+    // suelto, y por eso duplicaba 5 plazas si primero se había tocado «⚡ Cargar las 36».
+    const nombresDe = (h)=>{
+      const out = [h.n];
+      try{
+        const hj = (window.certifTodas ? window.certifTodas() : []).find(x=>
+          (h.ids||[]).some(i=>x.ids.some(y=>idsDePlaza(y).includes(idsDePlaza(i)[0]))) ||
+          [x.n].concat(x.al||[]).some(a=>claveNombrePlaza(a) === claveNombrePlaza(h.n)));
+        if(hj) out.push(hj.n, ...(hj.al||[]));
+      }catch(e){}
+      if(h.barrio) out.push(h.barrio);
+      return out;
+    };
+    const faltan = PLAZAS_HECHAS.filter(h => !obras().some(a=>esLaMismaPlaza(a, h.ids||[], nombresDe(h))));
     if(!faltan.length){ if(msg){ msg.style.color='#2e9e57'; msg.textContent='✔ Ya están las 36 registradas.'; } return; }
     if(!confirm(`Se van a dar de alta ${faltan.length} plaza(s) en el tablero de avance, con su nombre, su ID real y su barrio, pero SIN ítems: las cargás vos a mano.\n\n¿Seguimos?`)) return;
     if(typeof window.fbAvanceCrear !== 'function'){ if(msg){ msg.style.color='var(--danger)'; msg.textContent='No hay conexión con la base compartida.'; } return; }
@@ -20379,6 +20589,51 @@ const ITEMIZADO_EPEC = [
   // La respuesta caso por caso ya está en cada tarjeta, pero hay que abrirlas una por una. Acá se
   // ve todo junto: cuántas hojas ya tienen plaza, cuáles quedaron libres y qué plazas no cruzaron.
   // Y se asigna desde el mismo lugar, sin ir a buscar la plaza.
+  // ---- Plazas repetidas: encontrarlas y poder borrar la de más (2026-09-08) ----
+  // El usuario: *"me está volviendo a pasar que se carga dos veces una plaza"*. La causa ya está
+  // arreglada (los dos botones de alta usan el mismo criterio), pero las que YA quedaron duplicadas
+  // en la nube hay que poder verlas y limpiarlas. Dos plazas son la misma si comparten un ID de
+  // obra o si el nombre normalizado coincide —el mismo criterio de `esLaMismaPlaza`—.
+  function plazasRepetidas(todas){
+    const arr = (todas||[]).slice();
+    const n = arr.length;
+    // Unión de conjuntos: cada plaza arranca sola y se junta con otra cuando comparten algo.
+    const padre = arr.map((_,i)=>i);
+    const raiz = i => { while(padre[i] !== i){ padre[i] = padre[padre[i]]; i = padre[i]; } return i; };
+    const motivos = new Map();   // raíz -> Set de motivos
+    const unir = (i, j, motivo) => {
+      const a = raiz(i), b = raiz(j);
+      const m = new Set([...(motivos.get(a)||[]), ...(motivos.get(b)||[]), motivo]);
+      if(a !== b) padre[b] = a;
+      motivos.set(raiz(i), m);
+    };
+    const porClave = (fn, motivo) => {
+      const idx = new Map();
+      arr.forEach((a,i)=>{
+        let claves = [];
+        try{ claves = fn(a) || []; }catch(e){}
+        claves.filter(Boolean).forEach(k=>{
+          if(idx.has(k)) unir(idx.get(k), i, motivo); else idx.set(k, i);
+        });
+      });
+    };
+    // 1) el mismo ID de obra («D010 / D10» y «D10» comparten el D10)
+    porClave(a => (typeof idsDePlaza === 'function') ? idsDePlaza(a.obraId) : [], 'el mismo ID de obra');
+    // 2) el mismo nombre (sin acentos, sin «Plaza» de adelante)
+    porClave(a => { const k = (typeof claveNombrePlaza === 'function') ? claveNombrePlaza(a.nombre) : ''; return k ? [k] : []; }, 'el mismo nombre');
+    // 3) cruzan con la misma hoja del certificado de la Municipalidad («ELEODORO FIERRO» y
+    //    «ELEODORO FIERRO CERRUTI», o «PLAZA CHAMICAL-4063» y «PLAZA CHAMICAL»). Es el criterio más
+    //    flojo: dos plazas hermanas (Cabildo 6240 y 6241, por ejemplo) también caen acá, por eso
+    //    el motivo se muestra y se deja decidir.
+    porClave(a => { const p = (typeof window.certifDePlaza === 'function') ? window.certifDePlaza(a) : null; return p ? ['h:' + p.n] : []; }, 'la misma hoja del certificado');
+    const grupos = new Map();
+    arr.forEach((a,i)=>{ const r = raiz(i); if(!grupos.has(r)) grupos.set(r, []); grupos.get(r).push(a); });
+    const out = [];
+    grupos.forEach((g, r)=>{ if(g.length > 1) out.push({ plazas:g, motivos:[...(motivos.get(r)||[])] }); });
+    return out;
+  }
+  window.plazasRepetidas = plazasRepetidas;
+
   function pintarPanelCertif(todas){
     const cont = document.getElementById('epecCertifPanel');
     if(!cont) return;
@@ -20398,28 +20653,38 @@ const ITEMIZADO_EPEC = [
     const libres = hojas.filter(h=>!dueños.has(h.n));
     const asignadas = hojas.length - libres.length;
 
-    if(!libres.length && !sinHoja.length){
-      cont.innerHTML = `<div class="card no-print ep-certif-panel ok">
-        <b>📋 Certificado de la Municipalidad — las ${hojas.length} hojas están asignadas</b>
-        <div class="hint" style="margin:4px 0 0;">Cada hoja de la planilla tiene su plaza en la herramienta. En cada una podés tocar «📋 Traer lo certificado».</div>
-      </div>`;
-      return;
-    }
-
-    const opcionesPlazas = (hoja)=> `<option value="">— asignarle una plaza —</option>` +
-      todas.map(a=>`<option value="${esc(a.id)}">${esc(a.nombre||'(sin nombre)')}${a.obraId?` · ID ${esc(a.obraId)}`:''}</option>`).join('');
+    // ---- Aviso de plazas repetidas, arriba de todo ----
+    const repes = plazasRepetidas(todas);
+    const avisoRepes = repes.length ? `<div class="card no-print ep-repes">
+      <b>⚠ ${repes.length} plaza(s) parecen estar cargadas dos veces</b>
+      <div class="hint" style="margin:4px 0 8px;">Tienen el <b>mismo ID de obra</b>, el <b>mismo nombre</b> o cruzan con la <b>misma hoja del certificado</b>. Una plaza repetida se duplica en el Mapa, en las órdenes de trabajo, en el balance y en el total del itemizado —<b>suma dos veces</b>—. En cada grupo, la primera es la que más cargado tiene: mirá que sea la buena y borrá la otra. Si son dos plazas distintas de verdad (dos hermanas con IDs distintos), dejalas.</div>
+      ${repes.map(g=>{ const ord = g.plazas.slice().sort((x,y)=> cuentasEpec(y).items - cuentasEpec(x).items); return `<div class="ep-repe-grupo">
+        <div class="ep-repe-tit">${esc(ord[0].nombre || '(sin nombre)')} <span style="font-weight:500; text-transform:none; letter-spacing:0;">— comparten ${esc(g.motivos.join(' y '))}</span></div>
+        ${ord.map((a,i)=>{ const c = cuentasEpec(a); const pes = enPesos(c.contratado); return `<div class="ep-repe-fila">
+          <div style="flex:1 1 200px;"><b>${esc(a.nombre||'(sin nombre)')}</b>${a.obraId?` · ID ${esc(a.obraId)}`:' · <i>sin ID</i>'}${i === 0 && c.items ? ' <span class="ep-repe-buena">la más completa</span>' : ''}
+            <div class="it-cat">${c.items ? `${c.items} ítem(s) · ${fmtK(c.contratado)}${pes ? ' · ' + pes : ''}` : '<b style="color:var(--amber)">sin ítems</b>'}${a.estado?` · ${esc(a.estado)}`:''}</div></div>
+          <button type="button" class="btn-ghost ep-abrir-reg" data-plaza="${esc(a.id)}" style="padding:6px 12px; font-size:12.5px;">Abrirla →</button>
+          <button type="button" class="btn-ghost ep-borrar-plaza" data-plaza="${esc(a.id)}" style="padding:6px 12px; font-size:12.5px; color:var(--danger);">🗑 Borrar ésta</button>
+        </div>`; }).join('')}
+      </div>`; }).join('')}
+    </div>` : '';
 
     // Cuántas de las 36 hojas (vacías incluidas) tienen plaza con ítems cargados: es lo que decide
     // si vale la pena ofrecer «cargar todo de una».
     const todasHojas = (typeof window.certifTodas === 'function') ? window.certifTodas() : [];
     const conPlaza = todasHojas.filter(hj=>todas.some(a=>{ const p = window.certifDePlaza(a); return p && p.n === hj.n; }));
-    const conItems = todasHojas.filter(hj=>todas.some(a=>{ const p = window.certifDePlaza(a);
-      return p && p.n === hj.n && ((a.valorItems||[]).length || (a.valorItemsEpec||[]).length); }));
-    const faltanCargar = todasHojas.length - conItems.length;
+    // «Falta cargar» una hoja si su plaza no existe, o existe sin ítems y hay algo con qué
+    // llenarla: el certificado, o —en las que están en obra y no tienen certificado— un cómputo
+    // de la Calculadora. Una plaza en obra sin certificado y sin cómputo no cuenta: el botón no
+    // le podría dar nada (2026-09-08).
+    const faltanCargar = todasHojas.filter(hj=>{
+      const a = todas.find(x=>{ const p = window.certifDePlaza(x); return p && p.n === hj.n; });
+      if(!a) return true;
+      if((a.valorItems||[]).length || (a.valorItemsEpec||[]).length) return false;
+      if(hj.items) return true;
+      return !!computoDeLaPlaza(a);
+    }).length;
 
-    let h = `<div class="card no-print ep-certif-panel">
-      <b>📋 Certificado de la Municipalidad — ${asignadas} de ${hojas.length} hojas asignadas</b>
-      <div class="hint" style="margin:4px 0 8px;">Una plaza solo puede traer lo certificado si <b>cruza</b> con una hoja de la planilla. El cruce se hace por <b>ID de obra</b> y, si no, por <b>nombre</b>. Cuando el ID o el nombre no coinciden, hay que decirle cuál es — y se hace acá.</div>`;
     // ---- Cargar las 36 de una (2026-09-07) ----
     // Pedido del usuario: *"las 36 tendrían que estar cargadas: 31 finalizadas y las 5 que están en
     // obra —Hípica, Vicor, San Cayetano, Vuelta de Obligado y Aycardoz—, a las que igual se les
@@ -20427,13 +20692,33 @@ const ITEMIZADO_EPEC = [
     // existe, le pone el estado, y le trae el certificado corregido (o, a las que están en obra y
     // no tienen certificado, el cómputo de la Calculadora como precio inicial). Nunca pisa una
     // plaza que ya tenga ítems.
-    if(faltanCargar > 0){
-      h += `<div class="ep-cargar-todo">
+    // Va acá arriba a propósito (2026-09-08): antes se armaba más abajo y, cuando TODAS las hojas
+    // ya tenían plaza, la función salía antes por el atajo de «están todas asignadas» y el botón
+    // desaparecía — justo en el caso en que las plazas existen pero están vacías, que es cuando más
+    // sirve.
+    const botonCargarTodo = faltanCargar > 0
+      ? `<div class="ep-cargar-todo">
         <button type="button" class="btn-primary ep-cargar-todo-btn" style="width:auto; margin:0; padding:10px 16px;">⚡ Cargar las ${todasHojas.length} plazas del certificado de una</button>
         <span class="hint">Faltan <b>${faltanCargar}</b>: ${todasHojas.length - conPlaza.length} plaza(s) todavía no existen en la herramienta y se crean con su nombre, ID y estado; a las que no tienen ítems se les trae <b>el certificado corregido</b> (lo certificado + la provisión de EMA + lo no certificado). A las <b>5 en obra</b> sin certificado se les carga el cómputo de la Calculadora como <b>precio inicial</b>, si lo tienen. Lo que ya está cargado <b>no se toca</b>.</span>
+      </div>`
+      : '';
+
+    if(!libres.length && !sinHoja.length){
+      cont.innerHTML = avisoRepes + `<div class="card no-print ep-certif-panel ok">
+        <b>📋 Certificado de la Municipalidad — las ${hojas.length} hojas están asignadas</b>
+        <div class="hint" style="margin:4px 0 ${botonCargarTodo ? '8px' : '0'};">Cada hoja de la planilla tiene su plaza en la herramienta. En cada una podés tocar «📋 Traer lo certificado».</div>
+        ${botonCargarTodo}
       </div>`;
+      return;
     }
 
+    const opcionesPlazas = (hoja)=> `<option value="">— asignarle una plaza —</option>` +
+      todas.map(a=>`<option value="${esc(a.id)}">${esc(a.nombre||'(sin nombre)')}${a.obraId?` · ID ${esc(a.obraId)}`:''}</option>`).join('');
+
+    let h = avisoRepes + `<div class="card no-print ep-certif-panel">
+      <b>📋 Certificado de la Municipalidad — ${asignadas} de ${hojas.length} hojas asignadas</b>
+      <div class="hint" style="margin:4px 0 8px;">Una plaza solo puede traer lo certificado si <b>cruza</b> con una hoja de la planilla. El cruce se hace por <b>ID de obra</b> y, si no, por <b>nombre</b>. Cuando el ID o el nombre no coinciden, hay que decirle cuál es — y se hace acá.</div>
+      ${botonCargarTodo}`;
     if(libres.length){
       h += `<div class="hint" style="margin:10px 0 4px; color:var(--amber);"><b>${libres.length} hoja(s) del certificado no están asignadas a ninguna plaza:</b></div>
         <div class="tabla-scroll"><table class="ep-certif-tabla"><thead><tr>
@@ -20646,7 +20931,7 @@ const ITEMIZADO_EPEC = [
         const pct = cant > 0 ? Math.round(cav/cant*100) : 0;
         h += `<tr data-vid="${esc(f.ref.id)}" data-plaza="${esc(a.id)}" data-propio="${f.propio?1:0}" data-co="${coFijado?1:0}">
           <td>
-            <b>Ítem ${esc(it.id)} — ${esc(it.desc)}</b>
+            <button type="button" class="it-tit-btn" data-ver="${esc(it.id)}" title="Tocá para ver todo lo que incluye este ítem"><b>Ítem ${esc(it.id)} — ${esc(it.desc)}</b> <span class="it-tit-i">ⓘ</span></button>
             <div class="it-cat">${esc(it.cat)}</div>
             ${notaItemHtml(it.id, it)}
           </td>
@@ -20775,8 +21060,8 @@ const ITEMIZADO_EPEC = [
     const q = ((document.getElementById('epecBuscarItem')||{}).value||'').toLowerCase().trim();
     const filas = ITEMIZADO_EPEC.filter(it=> !q || (it.id+' '+it.desc+' '+it.cat).toLowerCase().includes(q));
     body.innerHTML = filas.map(it=>`<tr>
-      <td><b>${esc(it.id)}</b></td>
-      <td>${esc(it.desc)}<div class="it-cat">${esc(it.cat)}</div>${notaItemHtml(it.id, it)}</td>
+      <td><button type="button" class="it-ref" data-ver="${esc(it.id)}" title="Ver todo lo que incluye este ítem">${esc(it.id)}</button></td>
+      <td><button type="button" class="it-tit-btn" data-ver="${esc(it.id)}" title="Tocá para ver todo lo que incluye este ítem">${esc(it.desc)} <span class="it-tit-i">ⓘ</span></button><div class="it-cat">${esc(it.cat)}</div>${notaItemHtml(it.id, it)}</td>
       <td>${esc(it.un)}</td>
       <td class="qty"><b>${fmt(it.k,2)}</b>${epecBase>0?`<div class="ep-pesos">${plata(it.k*baseEf())}</div>`:''}</td>
     </tr>`).join('');
@@ -20932,7 +21217,15 @@ const ITEMIZADO_EPEC = [
         if(!hojas.length) return;
         // Plan: qué se va a hacer con cada hoja, para decirlo ANTES de tocar nada.
         const plan = hojas.map(hj=>{
-          const a = obras().find(x=>{ const p = window.certifDePlaza(x); return p && p.n === hj.n; });
+          // Dos redes: el cruce del certificado y, si ése no la encuentra, el criterio compartido
+          // por ID y nombre (que también mira los nombres de PLAZAS_HECHAS). Con una sola red se
+          // creaban plazas repetidas de las que ya estaban con otro nombre.
+          const nombresHoja = [hj.n, ...(hj.al||[])].concat(
+            (typeof PLAZAS_HECHAS !== 'undefined' ? PLAZAS_HECHAS : []).filter(ph=>
+              (ph.ids||[]).some(i=>hj.ids.some(y=>idsDePlaza(y).includes(idsDePlaza(i)[0]))) ||
+              [hj.n].concat(hj.al||[]).some(a=>claveNombrePlaza(a) === claveNombrePlaza(ph.n))).map(ph=>ph.n));
+          const a = obras().find(x=>{ const p = window.certifDePlaza(x); return p && p.n === hj.n; })
+                || obras().find(x=>esLaMismaPlaza(x, hj.ids, nombresHoja));
           const tiene = a ? ((a.valorItems||[]).length + (a.valorItemsEpec||[]).length) : 0;
           return { hj, a, tiene };
         });
@@ -21051,8 +21344,11 @@ const ITEMIZADO_EPEC = [
       // Eliminar la plaza desde el itemizado (2026-09-07).
       const borrarPl = e.target.closest('.ep-borrar-plaza');
       if(borrarPl){
+        // El botón vive en la tarjeta de la plaza y, desde el 08/09/2026, también en el aviso de
+        // plazas repetidas de arriba, donde no hay tarjeta: ahí trae la plaza en `data-plaza`.
         const card = borrarPl.closest('.it-plaza');
-        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        const idPl = borrarPl.dataset.plaza || (card ? card.dataset.epec : '');
+        const a = obras().find(x=>String(x.id)===String(idPl)); if(!a) return;
         const nIt = (a.valorItems||[]).length + (a.valorItemsEpec||[]).length;
         const v = (typeof calcularValorPlaza === 'function') ? calcularValorPlaza(a) : null;
         const plataTxt = (v && v.presupuesto > 0) ? ` — ${fmt(v.kTotal,2)} K, ${plata(v.presupuesto)}` : '';
@@ -23126,7 +23422,7 @@ const ITEMIZADO_EPEC = [
     { n:'SOLDADO AERONAUTICO', ids:['1072'], al:['SOLDADO AERONAUTICO','PARQUE JORGE NEWBERY'], it:{'6':18,'7':6,'9':1,'11':15,'13':1,'15':615,'36':431,'37':436,'45':11,'46':11,'47':1,'49':1,'50':1,'56':6,'73':1} },
     { n:'JERONIMO CABRERA', ids:['1010'], al:['JERONIMO CABRERA','ALTA CORDOBA'], it:{'2':11,'9':1,'11':10,'15':279,'36':390,'50':1,'56':6,'73':1,'76':1} },
     { n:'PABLO BRACAMONTE', ids:['3114'], al:['PABLO BRACAMONTE','COLINAS DEL CERRO'], it:{'3':2,'9':1,'11':12,'13':1,'15':48,'36':65,'50':1,'58':1,'73':1} },
-    { n:'ELEODORO FIERRO CERRUTI', ids:['2063'], al:['ELEODORO FIERRO CERRUTI'], it:{'9':1,'11':15,'13':1,'18':95,'36':142,'41':4,'42':4,'43':4,'44':12,'50':2,'59':1,'73':1,'82':4} },
+    { n:'ELEODORO FIERRO CERRUTI', ids:['2063'], al:['ELEODORO FIERRO CERRUTI','ELEODORO FIERRO','FIERRO CERRUTI'], it:{'9':1,'11':15,'13':1,'18':95,'36':142,'41':4,'42':4,'43':4,'44':12,'50':2,'59':1,'73':1,'82':4} },
     { n:'PASEO LA SOLIDARIDAD', ids:['3123'], al:['PASEO LA SOLIDARIDAD','ALEJANDRO CENTENO'], it:{'1':2,'2':3,'3':3,'9':1,'11':10,'13':1,'15':165,'36':233,'73':1} },
     { n:'EVARISTO FERNANDEZ', ids:['9074'], al:['EVARISTO FERNANDEZ','PARQUE LICEO 3 SECCION'], it:{'3':6,'15':230,'36':310,'41':6,'42':6,'43':3,'44':4,'45':2,'50':1,'51':1,'56':6,'71':1,'76':1} },
     { n:'TIERRA DEL FUEGO', ids:['8074'], al:['TIERRA DEL FUEGO','LOS PINOS'], it:{'2':3,'3':2,'9':1,'11':15,'18':125,'36':160,'37':29,'45':1,'50':1,'59':1,'72':2,'73':1,'76':1} },
@@ -23284,7 +23580,9 @@ const ITEMIZADO_EPEC = [
   }
   // TODAS las hojas, vacías incluidas: es lo que usa «cargar las 36 de una».
   window.certifTodas = function(){
-    return CERTIF.plazas.map(x=>({ n:x.n, ids:x.ids.slice(), items:Object.keys(x.it).length, obra:!!x.obra }));
+    // `al` (los nombres alternativos) va desde el 08/09/2026: lo necesitan los controles de
+    // duplicados, para saber que «ELEODORO FIERRO» y «ELEODORO FIERRO CERRUTI» son la misma.
+    return CERTIF.plazas.map(x=>({ n:x.n, ids:x.ids.slice(), al:(x.al||[]).slice(), items:Object.keys(x.it).length, obra:!!x.obra }));
   };
   // Lo que lleva una hoja, renglón por renglón: ítem, descripción, unidad, cantidad y su K.
   // Sirve para mirar el contenido de una hoja ANTES de asignarla a una plaza (2026-09-07).
@@ -23344,6 +23642,12 @@ const ITEMIZADO_EPEC = [
                  ['soloDif','Mostrar solo los ítems que NO coinciden',1],
                  ['consolidado','Consolidado por ítem (todas juntas)',1],['sincruce','Plazas que no se pudieron cruzar',1]],
       construir: infCertif },
+    { id:'plazas-ids', tema:'plazas', txt:'IDs de plazas que tenemos', sel:'plazas', fechas:false,
+      hint:'Cuántas plazas tenemos y con qué ID: el listado con todos los IDs (las que tienen dos, con los dos), por renglón de la licitación y por estado, más las que están sin ID y las que parecen repetidas. Es el informe para responder «¿cuántos IDs tenemos?».',
+      secciones:[['resumen','Resumen: cuántas plazas, cuántos IDs, por renglón y por estado',1],['listado','Listado completo, ID por ID',1],
+                 ['sinId','Plazas sin ID y IDs que no figuran en el ANEXO VI',1],['repetidas','Plazas que parecen repetidas',1],
+                 ['licitacion','Qué parte de los 244 IDs de la licitación tenemos',0]],
+      construir: infIds },
     { id:'plazas-conforme', tema:'plazas', txt:'Conforme a obra', sel:'plazas', fechas:false,
       hint:'Proyecto contra final: qué se fijó al principio, qué se ajustó durante la obra, con qué motivo y con qué orden de trabajo. Solo sale completo en las plazas con el itemizado de proyecto fijado.',
       secciones:[['resumen','Resumen proyecto vs. conforme a obra',1],['ajustes','Los ajustes, uno por uno',1]],
@@ -23793,6 +24097,113 @@ const ITEMIZADO_EPEC = [
       if(filas.length) m.secciones.push(tabla('Plazas que no se pudieron cruzar',
         'Para que una plaza se compare tiene que coincidir el ID de obra o el nombre.',
         [{t:'ID', w:'90px'},{t:'Plaza'},{t:'Dónde está', w:'150px'},{t:'Qué pasa'}], filas));
+    }
+    return m;
+  }
+
+  // ---- IDs de plazas que tenemos (2026-09-08) ----
+  // Pedido del usuario: *"en Informe agregame un ítem para hacer un informe de la cantidad de IDs
+  // que tenemos"*. Cada plaza del tablero, con TODOS sus IDs (los que trae el obraId, más los que
+  // le conoce el certificado —Hípica es 6461 y 6207—), cruzada contra el ANEXO VI para ponerle el
+  // barrio, el renglón y el n° de orden. Se cuentan plazas e IDs por separado, porque no es lo
+  // mismo: 36 plazas pueden ser 42 IDs.
+  function infIds(o){
+    const lic = (window.PLAZAS_LICITACION || []);
+    const licPorId = new Map();
+    const idn = (typeof idsDePlaza === 'function') ? idsDePlaza : (v)=> String(v||'').split(/[\/,;·|]+|\s+/).filter(Boolean).map(x=>x.toUpperCase());
+    lic.forEach(r=>{ idn(r[1]).forEach(x=> licPorId.set(x, r)); });
+    const ZONA = { A:'Renglón 1 · Zona A (Este)', B:'Renglón 2 · Zona B (Centro)', C:'Renglón 3 · Zona C (Oeste)' };
+    const EST = { finalizada:'Finalizada', en_obra:'En obra', pendiente:'Pendiente' };
+    const estadoDe = a => (typeof window.certifEstadoDe === 'function') ? window.certifEstadoDe(a) : 'pendiente';
+
+    const filas = o.items.map((a,i)=>{
+      const propios = idn(a.obraId);
+      const c = certifDe(a);
+      const ids = propios.slice();
+      if(c) c.ids.forEach(x=> idn(x).forEach(y=>{ if(ids.indexOf(y) < 0) ids.push(y); }));
+      const enLic = ids.map(x=> licPorId.get(x)).filter(Boolean);
+      const r = enLic[0] || null;
+      const v = valorDe(a);
+      return { a, n:i+1, ids, propios, deCertif: ids.filter(x=> propios.indexOf(x) < 0),
+               enLic: enLic.map(x=>String(x[1])), fueraLic: ids.filter(x=> !licPorId.has(x)),
+               barrio: r ? r[2] : (a.barrio || ''), zona: r ? r[5] : '', orden: enLic.map(x=>x[0]).join(' / '),
+               estado: estadoDe(a), items: itemsDe(a).length, k: v.kTotal, hoja: c ? c.n : '' };
+    });
+    const todosIds = filas.flatMap(f=>f.ids);
+    const idsDistintos = [...new Set(todosIds)];
+    const sinId = filas.filter(f=>!f.ids.length);
+    const conDos = filas.filter(f=>f.ids.length > 1);
+    const fueraLic = filas.filter(f=>f.fueraLic.length);
+    const repes = (typeof window.plazasRepetidas === 'function') ? window.plazasRepetidas(o.items) : [];
+    const porEstado = { finalizada:0, en_obra:0, pendiente:0 };
+    filas.forEach(f=>{ porEstado[f.estado] = (porEstado[f.estado]||0) + 1; });
+    const enLicDistintos = [...new Set(filas.flatMap(f=>f.enLic))];
+
+    const m = { titulo:'IDs de plazas que tenemos',
+                subtitulo:`${filas.length} plaza(s) elegida(s) · ${idsDistintos.length} ID(s) distintos · ANEXO VI de la LPE 5589 (${lic.length} plazas) · ${fCorta(hoyISO())}`,
+                tiles:[
+                  { n:N(filas.length,'int'), l:'Plazas en el tablero', c:'azul' },
+                  { n:N(idsDistintos.length,'int'), l:'IDs distintos', c:'verde' },
+                  { n:N(conDos.length,'int'), l:'Plazas con dos IDs', c:'' },
+                  { n:N(sinId.length,'int'), l:'Plazas sin ID', c: sinId.length ? 'ambar' : 'verde' },
+                  { n:N(repes.length,'int'), l:'Grupos que parecen repetidos', c: repes.length ? 'rojo' : 'verde' },
+                  { n:`${enLicDistintos.length} / ${lic.length}`, l:'IDs de la licitación cubiertos', c:'' },
+                ], avisos:[], secciones:[] };
+    if(sinId.length) m.avisos.push(`<b>${sinId.length}</b> plaza(s) <b>sin ID de obra</b>: ${sinId.slice(0,6).map(f=>f.a.nombre||'(sin nombre)').join(', ')}${sinId.length>6?'…':''}. Sin ID no cruzan con el certificado ni con el ANEXO VI; cargáselo desde la tarjeta de la plaza.`);
+    if(fueraLic.length) m.avisos.push(`<b>${fueraLic.length}</b> plaza(s) tienen un ID que <b>no figura en el ANEXO VI</b>: ${fueraLic.slice(0,6).map(f=>`${f.a.nombre} (${f.fueraLic.join(', ')})`).join(' · ')}${fueraLic.length>6?'…':''}. Puede ser un ID mal tipeado o una plaza fuera de la licitación.`);
+    if(repes.length) m.avisos.push(`<b>${repes.length}</b> grupo(s) de plazas que <b>parecen cargadas dos veces</b> (comparten ID, nombre u hoja del certificado). Están al final del informe; se limpian desde Obras → Itemizado 2026.`);
+    if(conDos.length) m.avisos.push(`<b>${conDos.length}</b> plaza(s) tienen <b>dos IDs</b> (dos plazas del ANEXO VI que se hicieron como una: ${conDos.slice(0,5).map(f=>`${f.a.nombre} = ${f.ids.join(' + ')}`).join(' · ')}${conDos.length>5?'…':''}). Por eso hay más IDs que plazas.`);
+
+    if(o.sec.resumen){
+      const zonas = ['A','B','C',''];
+      m.secciones.push(tabla('Por renglón de la licitación', 'El renglón sale del ANEXO VI según el ID. «Sin renglón» son las que no tienen ID o cuyo ID no figura.',
+        [{t:'Renglón'},{t:'Plazas', num:true, w:'70px'},{t:'IDs', num:true, w:'70px'},{t:'Finalizadas', num:true, w:'90px'},{t:'En obra', num:true, w:'80px'},{t:'Pendientes', num:true, w:'90px'},{t:'K cargados', num:true}],
+        zonas.map(z=>{
+          const fz = filas.filter(f=> (f.zona||'') === z);
+          return [ z ? ZONA[z] : 'Sin renglón (sin ID o fuera del ANEXO VI)', N(fz.length,'int'), N([...new Set(fz.flatMap(f=>f.ids))].length,'int'),
+                   N(fz.filter(f=>f.estado==='finalizada').length,'int'), N(fz.filter(f=>f.estado==='en_obra').length,'int'),
+                   N(fz.filter(f=>f.estado==='pendiente').length,'int'), N(fz.reduce((t,f)=>t+f.k,0),'k') ];
+        }).filter((r,i)=> i < 3 || r[1].n > 0),
+        [['TOTAL', N(filas.length,'int'), N(idsDistintos.length,'int'), N(porEstado.finalizada,'int'), N(porEstado.en_obra,'int'), N(porEstado.pendiente,'int'), N(filas.reduce((t,f)=>t+f.k,0),'k')]]));
+    }
+    if(o.sec.listado){
+      const ord = filas.slice().sort((x,y)=>{
+        const ox = parseInt((x.orden||'').split(' / ')[0]) || 9999, oy = parseInt((y.orden||'').split(' / ')[0]) || 9999;
+        return ox - oy || String(x.a.nombre||'').localeCompare(String(y.a.nombre||''));
+      });
+      m.secciones.push(tabla('Listado completo, ID por ID', 'Una fila por plaza, con todos sus IDs. «Orden» es el n° de orden en el ANEXO VI. Los IDs marcados con * los aporta el certificado de la Municipalidad, no el tablero.',
+        [{t:'N°', num:true, w:'40px'},{t:'Plaza'},{t:'ID(s)', w:'110px'},{t:'Barrio (ANEXO VI)'},{t:'Renglón', w:'70px'},{t:'Orden', w:'70px'},{t:'Estado', w:'86px'},{t:'Ítems', num:true, w:'56px'},{t:'K', num:true}],
+        ord.map((f,i)=>[N(i+1,'int'), f.a.nombre||'(sin nombre)',
+                        f.ids.length ? f.ids.map(x=> f.deCertif.indexOf(x) >= 0 ? x + '*' : x).join(' / ') : '— sin ID —',
+                        f.barrio||'—', f.zona ? 'R' + ({A:1,B:2,C:3}[f.zona]) + ' · ' + f.zona : '—', f.orden || '—',
+                        EST[f.estado]||'—', N(f.items,'int'), N(f.k,'k')]),
+        [['', 'TOTAL · ' + filas.length + ' plaza(s)', idsDistintos.length + ' ID(s)', '', '', '', '', N(filas.reduce((t,f)=>t+f.items,0),'int'), N(filas.reduce((t,f)=>t+f.k,0),'k')]]));
+    }
+    if(o.sec.sinId){
+      const parr = [];
+      if(!sinId.length && !fueraLic.length) parr.push('Todas las plazas elegidas tienen ID y todos los IDs figuran en el ANEXO VI de la licitación.');
+      if(sinId.length) parr.push(`<b>Sin ID (${sinId.length}):</b> ${sinId.map(f=>f.a.nombre||'(sin nombre)').join(' · ')}.`);
+      if(fueraLic.length) parr.push(`<b>Con un ID que no figura en el ANEXO VI (${fueraLic.length}):</b> ${fueraLic.map(f=>`${f.a.nombre} → ${f.fueraLic.join(', ')}`).join(' · ')}.`);
+      m.secciones.push(texto('Plazas sin ID y IDs que no figuran en el ANEXO VI', parr));
+    }
+    if(o.sec.repetidas){
+      if(!repes.length) m.secciones.push(texto('Plazas que parecen repetidas', ['Ninguna: no hay dos plazas que compartan ID, nombre ni hoja del certificado.']));
+      else m.secciones.push(tabla('Plazas que parecen repetidas', 'Comparten el ID de obra, el nombre o la hoja del certificado. La primera de cada grupo es la que más cargado tiene.',
+        [{t:'Grupo', w:'50px'},{t:'Plaza'},{t:'ID', w:'110px'},{t:'Estado', w:'86px'},{t:'Ítems', num:true, w:'56px'},{t:'K', num:true},{t:'Por qué'}],
+        repes.flatMap((g,gi)=> g.plazas.slice().sort((x,y)=> itemsDe(y).length - itemsDe(x).length).map((a,j)=>
+          [j === 0 ? N(gi+1,'int') : '', a.nombre||'(sin nombre)', String(a.obraId||'— sin ID —'), EST[estadoDe(a)]||'—', N(itemsDe(a).length,'int'), N(valorDe(a).kTotal,'k'), j === 0 ? g.motivos.join(' y ') : '']))));
+    }
+    if(o.sec.licitacion){
+      const tengo = new Set(enLicDistintos.flatMap(idn));
+      const porZona = ['A','B','C'].map(z=>{
+        const de = lic.filter(r=>r[5] === z);
+        const con = de.filter(r=> idn(r[1]).some(x=>tengo.has(x)));
+        return [ZONA[z], N(de.length,'int'), N(con.length,'int'), N(de.length - con.length,'int'), N(de.length ? con.length/de.length : 0,'pct')];
+      });
+      m.secciones.push(tabla('Qué parte de los 244 IDs de la licitación tenemos', 'Cuántos IDs del ANEXO VI ya están cargados como plaza en el tablero, por renglón.',
+        [{t:'Renglón'},{t:'IDs en el ANEXO VI', num:true},{t:'Los tenemos', num:true},{t:'Nos faltan', num:true},{t:'%', num:true, w:'60px'}],
+        porZona,
+        [['TOTAL', N(lic.length,'int'), N(enLicDistintos.length,'int'), N(lic.length - enLicDistintos.length,'int'), N(lic.length ? enLicDistintos.length/lic.length : 0,'pct')]]));
     }
     return m;
   }
