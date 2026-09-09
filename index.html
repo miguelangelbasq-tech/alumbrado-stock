@@ -1568,6 +1568,8 @@
   .inf-tabla tbody tr:nth-child(even){ background:var(--bg-soft); }
   .inf-tabla tfoot td{ font-weight:800; background:rgba(126,198,230,.14); color:var(--navy); }
   .inf-tabla tr.inf-sep td{ background:var(--panel); font-weight:800; color:var(--navy); }
+  .inf-tabla tbody tr.inf-fuera td, .inf-tabla tfoot tr.inf-fuera td{ background:rgba(224,140,26,.12) !important; color:#5c3d0b; }
+  @media print{ .inf-tabla tr.inf-fuera td{ background:#fff3e0 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
   .inf-texto p{ margin:0 0 9px; font-size:13.5px; line-height:1.6; }
   .inf-aviso{ border-left:4px solid var(--amber); background:rgba(240,183,74,.10); border-radius:0 8px 8px 0;
               padding:10px 14px; font-size:12.5px; line-height:1.55; margin-bottom:10px; }
@@ -2092,6 +2094,14 @@
   .it-borrar-plaza .ep-borrar-plaza:hover{ background:rgba(199,74,74,.08); }
   .ep-certif-panel{ border-left:4px solid var(--teal-dark); }
   /* Aviso de plazas repetidas (2026-09-08) */
+  /* Trabajos fuera del itemizado, adentro de la tabla (2026-09-08): otro color, propio importe. */
+  .it-tabla tr.ep-fila-fuera td{ background:rgba(224,140,26,.10); border-top:1px dashed rgba(224,140,26,.55); color:#5c3d0b; }
+  .it-tabla tr.ep-fila-fuera td .it-cat{ color:#8a5a17; }
+  .ep-fuera-tag{ display:inline-block; margin:0 6px 2px 0; padding:1px 7px; border-radius:999px; font-size:10px; font-weight:800;
+    letter-spacing:.4px; text-transform:uppercase; background:var(--amber); color:#fff; vertical-align:middle; }
+  .it-tabla tfoot tr.ep-fila-fuera-pie th{ background:rgba(224,140,26,.14); color:#5c3d0b; font-weight:700; }
+  .ep-fuera-nota{ font-weight:500; font-size:11px; color:var(--text-soft); }
+  @media print{ .it-tabla tr.ep-fila-fuera td, .it-tabla tfoot tr.ep-fila-fuera-pie th{ background:#fff3e0 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } .ep-fuera-tag{ background:#e08c1a !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
   .ep-repes{ border-left:4px solid var(--danger); }
   .ep-repes > b{ display:block; font-size:14px; color:var(--danger); }
   .ep-repe-grupo{ border:1px solid var(--border); border-radius:10px; padding:8px 10px; margin-top:8px; background:var(--panel); }
@@ -2766,7 +2776,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-08 12:08 · 0e7a12</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-08 14:48 · e803ae</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -20996,13 +21006,39 @@ const ITEMIZADO_EPEC = [
         </tr>`;
       });
       const c = cuentasEpec(a);
+      // Los trabajos que el pliego no contempla van en la MISMA tabla, de otro color y con su propio
+      // importe, pero NO suman al total de la plaza (2026-09-08). El usuario: *"cuando agrego un
+      // ítem aparte necesito que se agregue como al itemizado, de otro color y con su propio monto,
+      // no sumado a los demás"*. Se editan en la caja de abajo; acá se ven junto a los demás.
+      const fuera = (a.trabajosSinItem||[]).filter(t=>String(t.desc||'').trim());
+      const fueraTot = fuera.reduce((t,x)=> t + n2(x.cant) * n2(x.pu), 0);
+      const nCols = coFijado ? 6 : 4;
+      fuera.forEach(t=>{
+        const sub = n2(t.cant) * n2(t.pu);
+        h += `<tr class="ep-fila-fuera" data-sid="${esc(t.id)}">
+          <td><span class="ep-fuera-tag">No contado en el itemizado</span><b>${esc(t.desc)}</b>
+            <div class="it-cat">Trabajo que el pliego no contempla${t.item?` · se propuso el ítem ${esc(t.item)}`:''}${t.pedido?` · pidió: ${esc(t.pedido)}`:''}${t.fecha?` · ${esc(t.fecha)}`:''}</div></td>
+          <td class="qty"><b>—</b><div class="it-un">${plata(n2(t.pu))} / ${esc(t.un||'Un.')}</div></td>
+          ${coFijado ? '<td></td><td></td>' : ''}
+          <td class="qty">${fmt(n2(t.cant), Number.isInteger(n2(t.cant)) ? 0 : 2)} ${esc(t.un||'Un.')}</td>
+          <td class="qty">—</td>
+          <td class="qty"><b>${plata(sub)}</b>${epecBase>0?`<div class="ep-pesos">≈ ${fmt(sub/baseEf(),2)} K</div>`:''}</td>
+          <td class="qty">—</td>
+          <td class="qty">—</td>
+          <td class="no-print"></td>
+        </tr>`;
+      });
       h += `</tbody><tfoot><tr>
-        <th colspan="${coFijado?6:4}" style="text-align:right;">Total de la plaza</th>
+        <th colspan="${nCols}" style="text-align:right;">Total de la plaza${fuera.length ? ' <span class="ep-fuera-nota">(sin lo no contado)</span>' : ''}</th>
         <th class="qty">${fmtK(c.contratado)}${epecBase>0?`<div class="ep-pesos">${plata(c.contratado*baseEf())}</div>`:''}</th>
         <th class="qty">${fmtK(c.avanzado)}${epecBase>0?`<div class="ep-pesos">${plata(c.avanzado*baseEf())}</div>`:''}</th>
         <th class="qty" style="color:${colorPct(c.pct)}">${c.pct}%</th>
         <th class="no-print"></th>
-      </tr></tfoot></table></div>`;
+      </tr>${fuera.length ? `<tr class="ep-fila-fuera-pie">
+        <th colspan="${nCols}" style="text-align:right;">Fuera del itemizado — no contado arriba, se reclama aparte</th>
+        <th class="qty"><b>${plata(fueraTot)}</b>${epecBase>0?`<div class="ep-pesos">≈ ${fmt(fueraTot/baseEf(),2)} K</div>`:''}</th>
+        <th class="qty">—</th><th class="qty">—</th><th class="no-print"></th>
+      </tr>` : ''}</tfoot></table></div>`;
       if(CO) h += CO.libroHtml(a, dis);
     }
 
@@ -23902,34 +23938,46 @@ const ITEMIZADO_EPEC = [
                 tiles:[], avisos:[], secciones:[] };
     if(base <= 0) m.avisos.push('El <b>valor del módulo</b> no está cargado en el Itemizado 2026, así que el informe sale en <b>K (módulos)</b> y las columnas de plata van en cero. Cargalo en la pestaña Obras → Itemizado 2026 y volvé a generar.');
 
-    let kT = 0, kA = 0, sinItems = 0;
+    let kT = 0, kA = 0, sinItems = 0, fueraTot = 0, fueraN = 0;
+    // Los trabajos que el pliego no contempla («trabajos sin ítem») van con su propio importe y NO
+    // suman al contratado ni al certificado (2026-09-08). El usuario: *"tiene que salir como no
+    // contado en el itemizado, y el monto"*.
+    const fueraDe = a => (a.trabajosSinItem||[]).filter(t=>String(t.desc||'').trim())
+      .map(t=>({ ...t, sub: n2(t.cant) * n2(t.pu) }));
     const filas = o.items.map((a,i)=>{
       const v = valorDe(a);
       kT += v.kTotal; kA += v.kAvanzado;
       const nIt = itemsDe(a).length;
       if(!nIt) sinItems++;
-      return { a, n:i+1, v, nIt };
+      const fuera = fueraDe(a); const fueraPlata = fuera.reduce((t,x)=> t + x.sub, 0);
+      fueraTot += fueraPlata; fueraN += fuera.length;
+      return { a, n:i+1, v, nIt, fuera, fueraPlata };
     });
+    const hayFuera = fueraN > 0;
     m.tiles = [
       { n: N(kT,'k'), l:'Módulos (K) contratados', c:'' },
       { n: N(kA,'k'), l:'Módulos certificados', c:'verde' },
       { n: N(kT > 0 ? kA/kT : 0,'pct'), l:'Certificado', c:'azul' },
       { n: base > 0 ? N(kT*base,'money') : '—', l:'Contratado' + (iva?' (c/IVA)':' (s/IVA)'), c:'' },
     ];
+    if(hayFuera) m.tiles.push({ n: N(fueraTot,'money'), l:'No contado en el itemizado (aparte)', c:'ambar' });
     if(sinItems) m.avisos.push(`<b>${sinItems}</b> de las plazas elegidas <b>no tienen ningún ítem cargado</b>: entran al informe en cero. Traeles las cantidades desde el Itemizado 2026.`);
+    if(hayFuera) m.avisos.push(`Hay <b>${fueraN}</b> trabajo(s) que el pliego no contempla, por <b>${plata(fueraTot)}</b>, marcados <b>NO CONTADO EN EL ITEMIZADO</b>. Van con su propio importe y <b>no suman</b> al contratado ni al certificado: se reclaman aparte.`);
 
     if(o.sec.resumen){
-      m.secciones.push(tabla('Resumen por plaza', 'Una fila por plaza, con sus módulos y su plata.',
-        [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},{t:'Ítems', num:true, w:'56px'},
+      const colsRes = [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},{t:'Ítems', num:true, w:'56px'},
          {t:'K contratado', num:true},{t:'K certificado', num:true},
-         {t:'Contratado', num:true},{t:'Certificado', num:true},{t:'%', num:true, w:'52px'}],
+         {t:'Contratado', num:true},{t:'Certificado', num:true},{t:'%', num:true, w:'52px'}];
+      if(hayFuera) colsRes.push({t:'No contado (aparte)', num:true});
+      m.secciones.push(tabla('Resumen por plaza', 'Una fila por plaza, con sus módulos y su plata.' + (hayFuera ? ' La última columna es lo que el pliego no contempla: va aparte y no está sumado en las otras.' : ''),
+        colsRes,
         filas.map(f=>[N(f.n,'int'), f.a.nombre||'', String(f.a.obraId||'—'), N(f.nIt,'int'),
                       N(f.v.kTotal,'k'), N(f.v.kAvanzado,'k'),
                       base>0?N(f.v.presupuesto,'money'):'—', base>0?N(f.v.avanzado,'money'):'—',
-                      N(f.v.kTotal>0 ? f.v.kAvanzado/f.v.kTotal : 0,'pct')]),
+                      N(f.v.kTotal>0 ? f.v.kAvanzado/f.v.kTotal : 0,'pct')].concat(hayFuera ? [f.fueraPlata > 0 ? N(f.fueraPlata,'money') : '—'] : [])),
         [['', 'TOTAL', '', N(filas.reduce((t,f)=>t+f.nIt,0),'int'), N(kT,'k'), N(kA,'k'),
           base>0?N(kT*base,'money'):'—', base>0?N(kA*base,'money'):'—',
-          N(kT>0 ? kA/kT : 0,'pct')]]));
+          N(kT>0 ? kA/kT : 0,'pct')].concat(hayFuera ? [N(fueraTot,'money')] : [])]));
     }
 
     // ---- Cantidades de obra (2026-09-07) ----
@@ -23990,10 +24038,21 @@ const ITEMIZADO_EPEC = [
       filas.forEach(f=>{
         const its = itemsDe(f.a);
         const sub = `ID ${f.a.obraId||'—'}${f.a.barrio?' · '+f.a.barrio:''} — ${nf(f.v.kTotal,2)} K contratados`;
-        if(!its.length){
+        if(!its.length && !f.fuera.length){
           m.secciones.push(texto(`${f.a.nombre||'(sin nombre)'}`, [sub, 'Esta plaza no tiene ítems cargados en el itemizado.']));
           return;
         }
+        // Los trabajos fuera del itemizado van al final de la tabla, en ámbar, con su importe en
+        // pesos y sin K; el «Total de la plaza» no los incluye y tienen su propia fila de pie.
+        const filasFuera = f.fuera.map(t=>{
+          const r = ['—', 'NO CONTADO EN EL ITEMIZADO · ' + t.desc + (t.pedido ? ' (pidió: ' + t.pedido + ')' : ''), t.un || 'Un.', '—',
+                     N(n2(t.cant),'cant'), '—', N(t.sub,'money'), '—'];
+          r._cls = 'inf-fuera'; return r;
+        });
+        const pie = [['', 'Total de la plaza' + (f.fuera.length ? ' (sin lo no contado)' : ''), '', '', '', '',
+            base>0?N(f.v.presupuesto,'money'):N(f.v.kTotal,'k'),
+            base>0?N(f.v.avanzado,'money'):N(f.v.kAvanzado,'k')]];
+        if(f.fuera.length){ const pf = ['', 'No contado en el itemizado — se reclama aparte', '', '', '', '', N(f.fueraPlata,'money'), '—']; pf._cls = 'inf-fuera'; pie.push(pf); }
         m.secciones.push(tabla(f.a.nombre || '(sin nombre)', sub,
           [{t:'Ítem', w:'56px'},{t:'Descripción'},{t:'Un.', w:'46px'},{t:'K', num:true, w:'56px'},
            {t:'Contratada', num:true, w:'80px'},{t:'Hecha', num:true, w:'70px'},
@@ -24005,10 +24064,8 @@ const ITEMIZADO_EPEC = [
             return [it.id, DESC(it.id), UN(it.id), N(k,'k'),
                     N(c,'cant'), N(ca,'cant'),
                     base>0?N(c*k*base,'money'):N(c*k,'k'), base>0?N(ca*k*base,'money'):N(ca*k,'k')];
-          }),
-          [['', 'Total de la plaza', '', '', '', '',
-            base>0?N(f.v.presupuesto,'money'):N(f.v.kTotal,'k'),
-            base>0?N(f.v.avanzado,'money'):N(f.v.kAvanzado,'k')]],
+          }).concat(filasFuera),
+          pie,
           // Las hojas de detalle son todas de la misma forma: en el Excel se juntan en UNA sola
           // hoja con una columna «Plaza» adelante, que es lo que sirve para tablas dinámicas.
           { grupo:'Detalle por plaza', etiqueta:f.a.nombre || '(sin nombre)', etiquetaCol:'Plaza' }));
@@ -24031,6 +24088,16 @@ const ITEMIZADO_EPEC = [
           return [g.id, DESC(g.id), UN(g.id), N(k,'k'), N(g.plazas,'int'), N(g.cant,'cant'), N(g.av,'cant'),
                   N(g.cant*k,'k'), base>0?N(g.cant*k*base,'money'):'—']; }),
         [['', 'TOTAL', '', '', N(o.items.length,'int'), '', '', N(kT,'k'), base>0?N(kT*base,'money'):'—']]));
+    }
+    // ---- Lo no contado, todo junto ----
+    if(hayFuera && (o.sec.detalle || o.sec.consolidado || o.sec.resumen)){
+      const todos = [];
+      filas.forEach(f=> f.fuera.forEach(t=> todos.push({ f, t })));
+      m.secciones.push(tabla('No contado en el itemizado — trabajos que el pliego no contempla',
+        'Se hicieron en obra y no tienen ítem en el Anexo I. Van con su propio importe, NO suman al contratado ni al certificado, y se reclaman aparte.',
+        [{t:'Plaza'},{t:'Trabajo'},{t:'Cantidad', num:true, w:'80px'},{t:'Un.', w:'46px'},{t:'$ unitario', num:true},{t:'Importe', num:true},{t:'Quién lo pidió'},{t:'Fecha', w:'86px'},{t:'Ítem propuesto', w:'90px'}],
+        todos.map(({f,t})=>{ const r = [f.a.nombre||'', t.desc, N(n2(t.cant),'cant'), t.un||'Un.', N(n2(t.pu),'money'), N(t.sub,'money'), t.pedido||'—', t.fecha ? fCorta(t.fecha) : '—', t.item ? 'Ítem ' + t.item : '—']; r._cls = 'inf-fuera'; return r; }),
+        [(()=>{ const pf = ['TOTAL NO CONTADO', '', '', '', '', N(fueraTot,'money'), '', '', '']; pf._cls = 'inf-fuera'; return pf; })()]));
     }
     return m;
   }
@@ -24276,8 +24343,8 @@ const ITEMIZADO_EPEC = [
     if(o.sec.sinId){
       const parr = [];
       if(!sinId.length && !fueraLic.length) parr.push('Todas las plazas elegidas tienen ID y todos los IDs figuran en el ANEXO VI de la licitación.');
-      if(sinId.length) parr.push(`<b>Sin ID (${sinId.length}):</b> ${sinId.map(f=>f.a.nombre||'(sin nombre)').join(' · ')}.`);
-      if(fueraLic.length) parr.push(`<b>Con un ID que no figura en el ANEXO VI (${fueraLic.length}):</b> ${fueraLic.map(f=>`${f.a.nombre} → ${f.fueraLic.join(', ')}`).join(' · ')}.`);
+      if(sinId.length) parr.push(`Sin ID (${sinId.length}): ${sinId.map(f=>f.a.nombre||'(sin nombre)').join(' · ')}.`);
+      if(fueraLic.length) parr.push(`Con un ID que no figura en el ANEXO VI (${fueraLic.length}): ${fueraLic.map(f=>`${f.a.nombre} → ${f.fueraLic.join(', ')}`).join(' · ')}.`);
       m.secciones.push(texto('Plazas sin ID y IDs que no figuran en el ANEXO VI', parr));
     }
     if(o.sec.repetidas){
@@ -24665,11 +24732,14 @@ const ITEMIZADO_EPEC = [
           <div class="inf-texto">${(s.parrafos||[]).map(p=>`<p>${esc(p)}</p>`).join('')}</div></div>`;
       }
       const th = (s.cols||[]).map(c=>`<th class="${c.num?'num':''}"${c.w?` style="width:${c.w}"`:''}>${esc(c.t)}</th>`).join('');
-      const tb = (s.filas||[]).map(f=>`<tr>${f.map((v,i)=>{
+      // Una fila puede traer `_cls` (una propiedad del array) para pintarse distinta: las de
+      // «no contado en el itemizado» van en ámbar (2026-09-08).
+      const trCls = f => f && f._cls ? ` class="${esc(f._cls)}"` : '';
+      const tb = (s.filas||[]).map(f=>`<tr${trCls(f)}>${f.map((v,i)=>{
         const c = (s.cols||[])[i] || {};
         return `<td class="${c.num?'num':''}">${esc(celTxt(v))}</td>`;
       }).join('')}</tr>`).join('');
-      const tf = (s.pie||[]).map(f=>`<tr>${f.map((v,i)=>{
+      const tf = (s.pie||[]).map(f=>`<tr${trCls(f)}>${f.map((v,i)=>{
         const c = (s.cols||[])[i] || {};
         return `<td class="${c.num?'num':''}">${esc(celTxt(v))}</td>`;
       }).join('')}</tr>`).join('');
