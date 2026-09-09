@@ -2779,7 +2779,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-09 09:58 · ae673a</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-09 17:14 · 3c030c</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -9158,7 +9158,6 @@ function abrirHojaImpresion(titulo, contenidoHtml){
   <h1>${escHtml(titulo)}</h1>
   <div class="sub">Emitido el ${escHtml(hoy)}</div>
   ${contenidoHtml}
-  <div class="foot">Generado automáticamente desde la Calculadora de materiales de alumbrado público — EMA Servicios.</div>
   </body></html>`);
   w.document.close();
   w.focus();
@@ -12325,7 +12324,6 @@ function descargarInformeWord(){
   </div>
   <h1>Informe de Avance de Obra — Plazas</h1>
   ${cuerpoInformeHtml()}
-  <p style="margin-top:18pt; color:#5b7a70; font-size:9pt;">EMA Servicios — generado automáticamente desde la Calculadora de materiales de alumbrado público.</p>
   </body></html>`;
   descargarArchivo(html, `Informe_Avance_Plazas_${fecha}.doc`, 'application/msword');
 }
@@ -24902,7 +24900,6 @@ const ITEMIZADO_EPEC = [
     <div class="marca">EMA SERVICIOS · ALUMBRADO PÚBLICO</div>
     <h1>${esc(m.titulo)}</h1>
     ${cuerpoPapel(m)}
-    <p style="margin-top:16px; font-size:8.5pt; color:#5b7a70;">Generado desde la herramienta de EMA Servicios el ${esc(fCorta(m.fecha))}.</p>
     </body></html>`;
     bajar(html, nombreArchivo(m, 'doc'), 'application/msword');
   }
@@ -25062,6 +25059,24 @@ const ITEMIZADO_EPEC = [
     return hojas;
   }
 
+  // El logo de EMA arriba de cada hoja (2026-09-09). Pedido del usuario: *"cuando descargamos en
+  // Excel, ¿se puede agregar el logo?"*. Es la misma imagen del membrete impreso, en PNG, anclada
+  // a la celda A1 con un dibujo (xl/drawings). Las primeras cuatro filas quedan para él; el título
+  // arranca en la fila 5. Los números, los anchos y el panel congelado no cambian.
+  const LOGO_EMA_PNG_B64 = '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';
+  const LOGO_FILAS = 4;                         // filas reservadas arriba
+  const LOGO_PX = { ancho: 150, alto: 75 };     // tamaño en pantalla del logo
+  const b64aBytes = (b)=>{ const bin = atob(b); const out = new Uint8Array(bin.length); for(let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; };
+  const drawingXml = ()=> `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+<xdr:oneCellAnchor><xdr:from><xdr:col>0</xdr:col><xdr:colOff>38100</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>38100</xdr:rowOff></xdr:from>
+<xdr:ext cx="${LOGO_PX.ancho * 9525}" cy="${LOGO_PX.alto * 9525}"/>
+<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Logo EMA Servicios"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr>
+<xdr:blipFill><a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>
+<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${LOGO_PX.ancho * 9525}" cy="${LOGO_PX.alto * 9525}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic>
+<xdr:clientData/></xdr:oneCellAnchor>
+</xdr:wsDr>`;
+
   function hojaXml(titulo, subtitulo, secs, junta){
     const filas = [];
     let r = 0;
@@ -25072,6 +25087,8 @@ const ITEMIZADO_EPEC = [
       const xs = celdas.map((c,i)=>{ anchoDe(i, celTxt(c)); return celdaXml(colLetra(i) + r, c, estiloTexto, negrita); }).join('');
       filas.push(`<row r="${r}">${xs}</row>`);
     };
+    // Las filas del logo: vacías, de 15 pt cada una (4 × 20 px = 80 px, el logo mide 75).
+    for(let k = 0; k < LOGO_FILAS; k++){ r++; filas.push(`<row r="${r}" ht="15" customHeight="1"/>`); }
     pushSimple([titulo], EST.titulo);
     if(subtitulo) pushSimple([subtitulo], EST.sub);
     r++; filas.push(`<row r="${r}"/>`);
@@ -25108,6 +25125,7 @@ const ITEMIZADO_EPEC = [
 <sheetFormatPr defaultRowHeight="15"/>
 ${colsXml}
 <sheetData>${filas.join('')}</sheetData>
+<drawing xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="rId1"/>
 </worksheet>`;
   }
 
@@ -25142,8 +25160,10 @@ ${colsXml}
 <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
 <Default Extension="xml" ContentType="application/xml"/>
 <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Default Extension="png" ContentType="image/png"/>
 <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
 ${hojas.map((h,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}
+${hojas.map((h,i)=>`<Override PartName="/xl/drawings/drawing${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>`).join('')}
 </Types>`) },
       { nombre:'_rels/.rels', datos: utf8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
@@ -25158,7 +25178,18 @@ ${hojas.map((h,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentT
 ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
 </Relationships>`) },
       { nombre:'xl/styles.xml', datos: utf8(STYLES_XML) },
-    ].concat(hojas.map((h,i)=>({ nombre:`xl/worksheets/sheet${i+1}.xml`, datos: utf8(h.xml) })));
+      { nombre:'xl/media/image1.png', datos: b64aBytes(LOGO_EMA_PNG_B64) },
+    ].concat(hojas.map((h,i)=>({ nombre:`xl/worksheets/sheet${i+1}.xml`, datos: utf8(h.xml) })))
+     // Cada hoja tiene su dibujo (Excel quiere uno por hoja) y los dibujos comparten la imagen.
+     .concat(hojas.map((h,i)=>({ nombre:`xl/worksheets/_rels/sheet${i+1}.xml.rels`, datos: utf8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing${i+1}.xml"/>
+</Relationships>`) })))
+     .concat(hojas.map((h,i)=>({ nombre:`xl/drawings/drawing${i+1}.xml`, datos: utf8(drawingXml()) })))
+     .concat(hojas.map((h,i)=>({ nombre:`xl/drawings/_rels/drawing${i+1}.xml.rels`, datos: utf8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image1.png"/>
+</Relationships>`) })));
 
     const bytes = zip(arch);
     const blob = new Blob([bytes], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
