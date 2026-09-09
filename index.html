@@ -1543,6 +1543,12 @@
   .inf-secciones label{ display:flex; align-items:center; gap:7px; margin:0; font-size:13px; font-weight:500;
                         color:var(--text); cursor:pointer; }
   .inf-secciones input{ width:auto; margin:0; }
+  /* Qué plata mostrar en el informe de itemizado: contratado, certificado o los dos (2026-09-09). */
+  .inf-importes{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; margin:10px 0 4px; padding:10px 12px;
+                 border:1px solid var(--line); border-radius:10px; background:var(--panel-soft, #f7f8fa); }
+  .inf-importes .inf-imp-tit{ font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--text-soft); margin-right:4px; }
+  .inf-importes label{ display:flex; align-items:center; gap:6px; margin:0; font-size:13px; font-weight:500; color:var(--text); cursor:pointer; }
+  .inf-importes input{ width:auto; margin:0; }
   .inf-generar{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:16px; }
 
   /* ---- El informe generado ---- */
@@ -2779,7 +2785,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-09 17:14 · 3c030c</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-09 17:48 · 30c096</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -4437,6 +4443,7 @@
           </div>
         </div>
         <div class="inf-secciones" id="infSecciones"></div>
+        <div class="inf-importes" id="infImportes" style="display:none;"></div>
         <label>Comentarios para agregar al informe</label>
         <div class="hint" style="margin-top:2px;">Si lo dejás vacío, en el informe de avance se escribe solo (cuáles están frenadas, cuáles esperan definición, cuáles ya se prendieron).</div>
         <textarea id="informeObs" rows="3" placeholder="(Opcional)"></textarea>
@@ -23834,6 +23841,7 @@ const ITEMIZADO_EPEC = [
       secciones:[['resumen','Resumen por plaza',1],['cantidades','Cantidades de obra (columnas, luminarias, cables, hormigón…)',1],
                  ['detalle','Detalle ítem por ítem de cada plaza',1],['cantdet','Vínculos y cables, abiertos por tipo',0],
                  ['consolidado','Consolidado por ítem (todas juntas)',0]],
+      importes:true,
       construir: infItemizado },
     { id:'plazas-certif', tema:'plazas', txt:'Certificado municipal vs. Calculadora', sel:'plazas', fechas:false,
       hint:'Plaza por plaza y ítem por ítem: lo que se certificó en la planilla de la Municipalidad contra lo que tiene la Calculadora, la diferencia y el porqué de cada una. Es el informe para ver qué quedó sin cobrar.',
@@ -23881,7 +23889,11 @@ const ITEMIZADO_EPEC = [
   // ==========================================================================================
   // ESTADO DE LA PANTALLA
   // ==========================================================================================
-  const cfg = { tema:'plazas', tipo:'plazas-avance', sel:{}, filtro:'', busca:'', sec:{} };
+  // «importes»: qué plata lleva el informe de itemizado — 'ambos' (contratado y certificado),
+  // 'contratado' o 'certificado'. Pedido del usuario (2026-09-09): *"poneme una opción en informe:
+  // poner el certificado, o contratado, o ambos"*.
+  const cfg = { tema:'plazas', tipo:'plazas-avance', sel:{}, filtro:'', busca:'', sec:{}, importes:'ambos' };
+  const IMPORTES = [['ambos','Contratado y certificado (los dos)'],['contratado','Solo lo contratado'],['certificado','Solo lo certificado']];
   let modelo = null;
 
   function seccionesPorDefecto(t){
@@ -24001,9 +24013,19 @@ const ITEMIZADO_EPEC = [
   // ---- 2. Itemizado y certificación ----
   function infItemizado(o){
     const base = baseMod(), iva = conIva();
-    const m = { titulo:'Informe de itemizado y certificación',
+    // Qué plata lleva el informe (2026-09-09): 'ambos', 'contratado' o 'certificado'. Con «solo
+    // contratado» se sacan las columnas de lo hecho/certificado; con «solo certificado», las de lo
+    // contratado. Las cuentas son las mismas de siempre: solo cambia qué columnas se muestran.
+    const modo = (o.importes === 'contratado' || o.importes === 'certificado') ? o.importes : 'ambos';
+    const verC = modo !== 'certificado', verA = modo !== 'contratado';
+    const OMIT = {}; const q = arr => { const r = arr.filter(x => x !== OMIT); if(arr._cls) r._cls = arr._cls; return r; };
+    const siC = x => verC ? x : OMIT, siA = x => verA ? x : OMIT;
+    const modoTxt = modo === 'contratado' ? ' · solo lo contratado' : modo === 'certificado' ? ' · solo lo certificado' : '';
+    const m = { titulo: modo === 'contratado' ? 'Informe de itemizado — contratado'
+                      : modo === 'certificado' ? 'Informe de itemizado — certificado'
+                      : 'Informe de itemizado y certificación',
                 subtitulo:`${o.items.length} plaza(s) · ANEXO I — LPE 5589 · SIC 21760` +
-                          (base > 0 ? ` · módulo ${plata(base)} ${iva?'con IVA':'sin IVA'}` : ' · valor del módulo sin cargar'),
+                          (base > 0 ? ` · módulo ${plata(base)} ${iva?'con IVA':'sin IVA'}` : ' · valor del módulo sin cargar') + modoTxt,
                 tiles:[], avisos:[], secciones:[] };
     if(base <= 0) m.avisos.push('El <b>valor del módulo</b> no está cargado en el Itemizado 2026, así que el informe sale en <b>K (módulos)</b> y las columnas de plata van en cero. Cargalo en la pestaña Obras → Itemizado 2026 y volvé a generar.');
 
@@ -24023,30 +24045,35 @@ const ITEMIZADO_EPEC = [
       return { a, n:i+1, v, nIt, fuera, fueraPlata };
     });
     const hayFuera = fueraN > 0;
-    m.tiles = [
-      { n: N(kT,'k'), l:'Módulos (K) contratados', c:'' },
-      { n: N(kA,'k'), l:'Módulos certificados', c:'verde' },
-      { n: N(kT > 0 ? kA/kT : 0,'pct'), l:'Certificado', c:'azul' },
-      { n: base > 0 ? N(kT*base,'money') : '—', l:'Contratado' + (iva?' (c/IVA)':' (s/IVA)'), c:'' },
-    ];
+    m.tiles = q([
+      siC({ n: N(kT,'k'), l:'Módulos (K) contratados', c:'' }),
+      siA({ n: N(kA,'k'), l:'Módulos certificados', c:'verde' }),
+      modo === 'ambos' ? { n: N(kT > 0 ? kA/kT : 0,'pct'), l:'Certificado', c:'azul' } : OMIT,
+      siC({ n: base > 0 ? N(kT*base,'money') : '—', l:'Contratado' + (iva?' (c/IVA)':' (s/IVA)'), c:'' }),
+      // Con los dos juntos la plata certificada ya se ve en el resumen, así que los cuadros quedan
+      // como estaban; con «solo certificado» ese cuadro reemplaza al de lo contratado.
+      modo === 'certificado' ? { n: base > 0 ? N(kA*base,'money') : '—', l:'Certificado' + (iva?' (c/IVA)':' (s/IVA)'), c:'verde' } : OMIT,
+    ]);
     if(hayFuera) m.tiles.push({ n: N(fueraTot,'money'), l:'No contado en el itemizado (aparte)', c:'ambar' });
     if(sinItems) m.avisos.push(`<b>${sinItems}</b> de las plazas elegidas <b>no tienen ningún ítem cargado</b>: entran al informe en cero. Traeles las cantidades desde el Itemizado 2026.`);
     if(hayFuera) m.avisos.push(`Hay <b>${fueraN}</b> trabajo(s) que el pliego no contempla, por <b>${plata(fueraTot)}</b>, marcados <b>NO CONTADO EN EL ITEMIZADO</b>. Van con su propio importe y <b>no suman</b> al contratado ni al certificado: se reclaman aparte.`);
 
     if(o.sec.resumen){
-      const colsRes = [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},{t:'Ítems', num:true, w:'56px'},
-         {t:'K contratado', num:true},{t:'K certificado', num:true},
-         {t:'Contratado', num:true},{t:'Certificado', num:true},{t:'%', num:true, w:'52px'}];
+      const colsRes = q([{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},{t:'Ítems', num:true, w:'56px'},
+         siC({t:'K contratado', num:true}), siA({t:'K certificado', num:true}),
+         siC({t:'Contratado', num:true}), siA({t:'Certificado', num:true}), modo === 'ambos' ? {t:'%', num:true, w:'52px'} : OMIT]);
       if(hayFuera) colsRes.push({t:'No contado (aparte)', num:true});
-      m.secciones.push(tabla('Resumen por plaza', 'Una fila por plaza, con sus módulos y su plata.' + (hayFuera ? ' La última columna es lo que el pliego no contempla: va aparte y no está sumado en las otras.' : ''),
+      m.secciones.push(tabla('Resumen por plaza', 'Una fila por plaza, con sus módulos y su plata' +
+          (modo === 'contratado' ? ' contratada.' : modo === 'certificado' ? ' certificada.' : '.') +
+          (hayFuera ? ' La última columna es lo que el pliego no contempla: va aparte y no está sumado en las otras.' : ''),
         colsRes,
-        filas.map(f=>[N(f.n,'int'), f.a.nombre||'', String(f.a.obraId||'—'), N(f.nIt,'int'),
-                      N(f.v.kTotal,'k'), N(f.v.kAvanzado,'k'),
-                      base>0?N(f.v.presupuesto,'money'):'—', base>0?N(f.v.avanzado,'money'):'—',
-                      N(f.v.kTotal>0 ? f.v.kAvanzado/f.v.kTotal : 0,'pct')].concat(hayFuera ? [f.fueraPlata > 0 ? N(f.fueraPlata,'money') : '—'] : [])),
-        [['', 'TOTAL', '', N(filas.reduce((t,f)=>t+f.nIt,0),'int'), N(kT,'k'), N(kA,'k'),
-          base>0?N(kT*base,'money'):'—', base>0?N(kA*base,'money'):'—',
-          N(kT>0 ? kA/kT : 0,'pct')].concat(hayFuera ? [N(fueraTot,'money')] : [])]));
+        filas.map(f=>q([N(f.n,'int'), f.a.nombre||'', String(f.a.obraId||'—'), N(f.nIt,'int'),
+                      siC(N(f.v.kTotal,'k')), siA(N(f.v.kAvanzado,'k')),
+                      siC(base>0?N(f.v.presupuesto,'money'):'—'), siA(base>0?N(f.v.avanzado,'money'):'—'),
+                      modo === 'ambos' ? N(f.v.kTotal>0 ? f.v.kAvanzado/f.v.kTotal : 0,'pct') : OMIT]).concat(hayFuera ? [f.fueraPlata > 0 ? N(f.fueraPlata,'money') : '—'] : [])),
+        [q(['', 'TOTAL', '', N(filas.reduce((t,f)=>t+f.nIt,0),'int'), siC(N(kT,'k')), siA(N(kA,'k')),
+          siC(base>0?N(kT*base,'money'):'—'), siA(base>0?N(kA*base,'money'):'—'),
+          modo === 'ambos' ? N(kT>0 ? kA/kT : 0,'pct') : OMIT]).concat(hayFuera ? [N(fueraTot,'money')] : [])]));
     }
 
     // ---- Cantidades de obra (2026-09-07) ----
@@ -24106,39 +24133,61 @@ const ITEMIZADO_EPEC = [
     if(o.sec.detalle){
       filas.forEach(f=>{
         const its = itemsDe(f.a);
-        const sub = `ID ${f.a.obraId||'—'}${f.a.barrio?' · '+f.a.barrio:''} — ${nf(f.v.kTotal,2)} K contratados`;
+        const sub = `ID ${f.a.obraId||'—'}${f.a.barrio?' · '+f.a.barrio:''} — ` +
+                    (modo === 'certificado' ? `${nf(f.v.kAvanzado,2)} K certificados`
+                     : modo === 'contratado' ? `${nf(f.v.kTotal,2)} K contratados`
+                     : `${nf(f.v.kTotal,2)} K contratados · ${nf(f.v.kAvanzado,2)} K certificados`) +
+                    ' · Módulos = K × cantidad';
         if(!its.length && !f.fuera.length){
           m.secciones.push(texto(`${f.a.nombre||'(sin nombre)'}`, [sub, 'Esta plaza no tiene ítems cargados en el itemizado.']));
           return;
         }
         // Los trabajos fuera del itemizado van al final de la tabla, en ámbar, con su importe en
         // pesos y sin K; el «Total de la plaza» no los incluye y tienen su propia fila de pie.
+        // Con «solo certificado» el importe de lo no contado va en la columna de certificado
+        // (es la única de plata que queda); con «solo contratado», en la de subtotal.
+        // Módulos por ítem y su suma al pie de cada plaza (2026-09-09). Pedido del usuario: *"al
+        // final de cada plaza hay que sumar el valor de todos los módulos: todos los módulos que
+        // tenemos por ítem y la sumatoria total"*. Cada fila lleva K × cantidad (contratada y
+        // hecha) y el «Total de la plaza» suma esos módulos además de la plata.
         const filasFuera = f.fuera.map(t=>{
-          const r = ['—', 'NO CONTADO EN EL ITEMIZADO · ' + t.desc + (t.pedido ? ' (pidió: ' + t.pedido + ')' : ''), t.un || 'Un.', '—',
-                     N(n2(t.cant),'cant'), '—', N(t.sub,'money'), '—'];
+          const r = q(['—', 'NO CONTADO EN EL ITEMIZADO · ' + t.desc + (t.pedido ? ' (pidió: ' + t.pedido + ')' : ''), t.un || 'Un.', '—',
+                     siC(N(n2(t.cant),'cant')), siA(verC ? '—' : N(n2(t.cant),'cant')),
+                     siC('—'), siA('—'),
+                     siC(N(t.sub,'money')), siA(verC ? '—' : N(t.sub,'money'))]);
           r._cls = 'inf-fuera'; return r;
         });
-        const pie = [['', 'Total de la plaza' + (f.fuera.length ? ' (sin lo no contado)' : ''), '', '', '', '',
-            base>0?N(f.v.presupuesto,'money'):N(f.v.kTotal,'k'),
-            base>0?N(f.v.avanzado,'money'):N(f.v.kAvanzado,'k')]];
-        if(f.fuera.length){ const pf = ['', 'No contado en el itemizado — se reclama aparte', '', '', '', '', N(f.fueraPlata,'money'), '—']; pf._cls = 'inf-fuera'; pie.push(pf); }
+        const pie = [q(['', 'Total de la plaza' + (f.fuera.length ? ' (sin lo no contado)' : ''), '', '', siC(''), siA(''),
+            siC(N(f.v.kTotal,'k')), siA(N(f.v.kAvanzado,'k')),
+            siC(base>0?N(f.v.presupuesto,'money'):'—'),
+            siA(base>0?N(f.v.avanzado,'money'):'—')])];
+        if(f.fuera.length){ const pf = q(['', 'No contado en el itemizado — se reclama aparte', '', '', siC(''), siA(''), siC(''), siA(''), siC(N(f.fueraPlata,'money')), siA(verC ? '—' : N(f.fueraPlata,'money'))]); pf._cls = 'inf-fuera'; pie.push(pf); }
         m.secciones.push(tabla(f.a.nombre || '(sin nombre)', sub,
-          [{t:'Ítem', w:'56px'},{t:'Descripción'},{t:'Un.', w:'46px'},{t:'K', num:true, w:'56px'},
-           {t:'Contratada', num:true, w:'80px'},{t:'Hecha', num:true, w:'70px'},
-           {t:'Subtotal', num:true},{t:'Certificado', num:true}],
+          q([{t:'Ítem', w:'56px'},{t:'Descripción'},{t:'Un.', w:'46px'},{t:'K', num:true, w:'56px'},
+           siC({t:'Contratada', num:true, w:'80px'}), siA({t:'Hecha', num:true, w:'70px'}),
+           siC({t: modo === 'ambos' ? 'Módulos contr.' : 'Módulos', num:true, w:'84px'}), siA({t: modo === 'ambos' ? 'Módulos certif.' : 'Módulos', num:true, w:'84px'}),
+           siC({t:'Subtotal', num:true}), siA({t:'Certificado', num:true})]),
           its.map(it=>{
             const k = K(it.id), c = n2(it.v.cantidad), ca = Math.min(n2(it.v.cantidadAvanzada), c);
             // El id va limpio: la descripción de los 83.1–89 ya empieza con «Provisión de…», así
             // que marcarlos otra vez en la columna del número sería repetir lo mismo dos veces.
-            return [it.id, DESC(it.id), UN(it.id), N(k,'k'),
-                    N(c,'cant'), N(ca,'cant'),
-                    base>0?N(c*k*base,'money'):N(c*k,'k'), base>0?N(ca*k*base,'money'):N(ca*k,'k')];
+            return q([it.id, DESC(it.id), UN(it.id), N(k,'k'),
+                    siC(N(c,'cant')), siA(N(ca,'cant')),
+                    siC(N(c*k,'k')), siA(N(ca*k,'k')),
+                    siC(base>0?N(c*k*base,'money'):'—'), siA(base>0?N(ca*k*base,'money'):'—')]);
           }).concat(filasFuera),
           pie,
           // Las hojas de detalle son todas de la misma forma: en el Excel se juntan en UNA sola
           // hoja con una columna «Plaza» adelante, que es lo que sirve para tablas dinámicas.
           { grupo:'Detalle por plaza', etiqueta:f.a.nombre || '(sin nombre)', etiquetaCol:'Plaza' }));
       });
+      // La sumatoria total de módulos, después del detalle de todas las plazas.
+      if(filas.length > 1){
+        const lin = [];
+        if(verC) lin.push(`Módulos contratados: ${nf(kT,2)} K` + (base > 0 ? ` = ${plata(kT*base)}` : ''));
+        if(verA) lin.push(`Módulos certificados: ${nf(kA,2)} K` + (base > 0 ? ` = ${plata(kA*base)}` : ''));
+        m.secciones.push(texto(`Suma de módulos de las ${filas.length} plazas`, lin));
+      }
     }
 
     if(o.sec.consolidado){
@@ -24149,14 +24198,19 @@ const ITEMIZADO_EPEC = [
         g.plazas++; acum.set(it.id, g);
       }));
       const cons = [...acum.values()].sort((a,b)=> parseFloat(a.id) - parseFloat(b.id));
-      m.secciones.push(tabla('Consolidado por ítem', 'La cantidad de todas las plazas elegidas, sumada ítem por ítem.',
-        [{t:'Ítem', w:'56px'},{t:'Descripción'},{t:'Un.', w:'46px'},{t:'K', num:true, w:'56px'},
-         {t:'Plazas', num:true, w:'56px'},{t:'Cantidad', num:true},{t:'Hecha', num:true},
-         {t:'Módulos', num:true},{t:'Importe', num:true}],
+      // Con «solo certificado», los módulos y el importe del consolidado salen de lo HECHO (g.av),
+      // que es lo que se certifica; en los otros dos modos, de lo contratado, como siempre.
+      const cantCons = g => modo === 'certificado' ? g.av : g.cant;
+      const kCons = modo === 'certificado' ? kA : kT;
+      m.secciones.push(tabla('Consolidado por ítem', 'La cantidad de todas las plazas elegidas, sumada ítem por ítem.' +
+          (modo === 'certificado' ? ' Los módulos y el importe son los de lo hecho (certificado).' : ''),
+        q([{t:'Ítem', w:'56px'},{t:'Descripción'},{t:'Un.', w:'46px'},{t:'K', num:true, w:'56px'},
+         {t:'Plazas', num:true, w:'56px'},siC({t:'Cantidad', num:true}),siA({t:'Hecha', num:true}),
+         {t:'Módulos', num:true},{t:'Importe', num:true}]),
         cons.map(g=>{ const k = K(g.id);
-          return [g.id, DESC(g.id), UN(g.id), N(k,'k'), N(g.plazas,'int'), N(g.cant,'cant'), N(g.av,'cant'),
-                  N(g.cant*k,'k'), base>0?N(g.cant*k*base,'money'):'—']; }),
-        [['', 'TOTAL', '', '', N(o.items.length,'int'), '', '', N(kT,'k'), base>0?N(kT*base,'money'):'—']]));
+          return q([g.id, DESC(g.id), UN(g.id), N(k,'k'), N(g.plazas,'int'), siC(N(g.cant,'cant')), siA(N(g.av,'cant')),
+                  N(cantCons(g)*k,'k'), base>0?N(cantCons(g)*k*base,'money'):'—']); }),
+        [q(['', 'TOTAL', '', '', N(o.items.length,'int'), siC(''), siA(''), N(kCons,'k'), base>0?N(kCons*base,'money'):'—'])]));
     }
     // ---- Lo no contado, todo junto ----
     if(hayFuera && (o.sec.detalle || o.sec.consolidado || o.sec.resumen)){
@@ -24783,7 +24837,8 @@ const ITEMIZADO_EPEC = [
                 fecha: ($('informeFecha')||{}).value || hoyISO(),
                 periodo: ($('informePeriodo')||{}).value || 'A la fecha',
                 obs: (($('informeObs')||{}).value || '').trim(),
-                sec: { ...cfg.sec } };
+                sec: { ...cfg.sec },
+                importes: t.importes ? cfg.importes : 'ambos' };
     const m = t.construir(o);
     m.fecha = o.fecha;
     m.tipoTxt = t.txt;
@@ -25263,6 +25318,12 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     const sc = $('infSecciones');
     if(sc) sc.innerHTML = (t.secciones||[]).map(([k,txt])=>
       `<label><input type="checkbox" class="inf-sec-chk" data-sec="${k}" ${cfg.sec[k]?'checked':''}> ${esc(txt)}</label>`).join('');
+    const im = $('infImportes');
+    if(im){
+      im.style.display = t.importes ? '' : 'none';
+      im.innerHTML = t.importes ? '<span class="inf-imp-tit">Qué plata mostrar</span>' + IMPORTES.map(([k,txt])=>
+        `<label><input type="radio" name="infImportes" class="inf-imp-rad" value="${k}" ${cfg.importes===k?'checked':''}> ${esc(txt)}</label>`).join('') : '';
+    }
     const hint = $('infGenerarHint');
     const n = Object.keys(cfg.sel).filter(x=>cfg.sel[x]).length;
     if(hint) hint.textContent = n
@@ -25347,10 +25408,14 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       const c = e.target.closest('.inf-sec-chk'); if(!c) return;
       cfg.sec[c.dataset.sec] = c.checked;
     });
+    $('infImportes').addEventListener('change', e=>{
+      const r = e.target.closest('.inf-imp-rad'); if(!r) return;
+      cfg.importes = r.value;
+    });
     $('infGenerar').addEventListener('click', generar);
     $('infReset').addEventListener('click', ()=>{
       cfg.tema = 'plazas'; cfg.tipo = 'plazas-avance'; cfg.sel = {}; cfg.filtro = ''; cfg.busca = '';
-      cfg.sec = seccionesPorDefecto(tipoDe(cfg.tipo));
+      cfg.sec = seccionesPorDefecto(tipoDe(cfg.tipo)); cfg.importes = 'ambos';
       const q = $('infBuscar'); if(q) q.value = '';
       const s = $('infSalida'); if(s) s.innerHTML = '';
       pintarTodo();
