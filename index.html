@@ -2102,6 +2102,9 @@
   .it-tabla tfoot tr.ep-fila-fuera-pie th{ background:rgba(224,140,26,.14); color:#5c3d0b; font-weight:700; }
   .ep-fuera-nota{ font-weight:500; font-size:11px; color:var(--text-soft); }
   @media print{ .it-tabla tr.ep-fila-fuera td, .it-tabla tfoot tr.ep-fila-fuera-pie th{ background:#fff3e0 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } .ep-fuera-tag{ background:#e08c1a !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+  .it-cien{ margin:0 0 10px; padding:10px 12px; border-radius:10px; border:1px solid var(--border); border-left:4px solid var(--teal-dark); background:var(--panel); font-size:13px; }
+  .it-cien.it-cien-fin{ border-left-color:var(--amber); background:rgba(224,140,26,.08); }
+  .it-cien > b{ display:block; margin-bottom:4px; }
   .ep-repes{ border-left:4px solid var(--danger); }
   .ep-repes > b{ display:block; font-size:14px; color:var(--danger); }
   .ep-repe-grupo{ border:1px solid var(--border); border-radius:10px; padding:8px 10px; margin-top:8px; background:var(--panel); }
@@ -2776,7 +2779,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-08 14:48 · e803ae</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-09 09:58 · ae673a</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -19942,6 +19945,21 @@ const ITEMIZADO_EPEC = [
     return compartidos.concat(propios).sort((x,y)=> parseFloat(x.id) - parseFloat(y.id));
   }
 
+  // Qué renglones frenan el 100 % de una plaza (2026-09-09): los que tienen «Hecha» < «Contratada».
+  function diagnostico100(a){
+    const frenan = []; let total = 0, hecho = 0, sinContratada = 0;
+    itemsEpecDePlaza(a).forEach(f=>{
+      const it = itemEpec(f.id); if(!it) return;
+      const cant = n2(f.ref.cantidad), hecha = n2(f.ref.cantidadAvanzada);
+      if(cant <= 0){ if(hecha > 0) sinContratada++; return; }
+      total += cant * it.k; hecho += Math.min(hecha, cant) * it.k;
+      if(hecha + 0.0001 < cant) frenan.push({ id:f.id, cant, hecha, un:it.un, ref:f.ref });
+    });
+    return { frenan, total, hecho, sinContratada, pct: total > 0 ? Math.round(hecho / total * 100) : 0 };
+  }
+  const fmtCant = v => fmt(n2(v), Number.isInteger(n2(v)) ? 0 : 2);
+  window.epecDiagnostico100 = diagnostico100;
+
   function cuentasEpec(a){
     let contratado = 0, avanzado = 0;
     itemsEpecDePlaza(a).forEach(f=>{
@@ -20599,10 +20617,21 @@ const ITEMIZADO_EPEC = [
         <button type="button" class="btn-ghost ep-mini" id="epecNingunaMarcar">Ninguna</button>
       </div>
     </div>`;
+        // (2026-09-09) Aviso: plazas finalizadas cuyo avance del itemizado no llegó al 100 %.
+    {
+      const finSin100 = todas.filter(a=>{ if(estadoDe(a) !== 'finalizada') return false; const d = diagnostico100(a); return d.total > 0 && d.pct < 100; });
+      const viejo = document.getElementById('epecAviso100'); if(viejo) viejo.remove();
+      if(finSin100.length){
+        const div = document.createElement('div');
+        div.id = 'epecAviso100'; div.className = 'it-cien it-cien-fin no-print';
+        div.innerHTML = `<b>⚠ ${finSin100.length} plaza(s) finalizada(s) con el avance del itemizado por debajo del 100 %</b>
+          <div>${finSin100.slice(0, 12).map(a=>`<button type="button" class="btn-ghost ep-abrir-reg" data-plaza="${esc(a.id)}" style="padding:3px 10px; font-size:12px; margin:2px 4px 2px 0;">${esc(a.nombre||'(sin nombre)')} · ${diagnostico100(a).pct} %</button>`).join('')}${finSin100.length > 12 ? ` y ${finSin100.length - 12} más` : ''}</div>
+          <div class="hint" style="margin:6px 0 0;">En cada una, arriba de la tabla, dice qué renglones frenan el 100 y hay un botón para completar solo la columna «Hecha».</div>`;
+        barra.insertAdjacentElement('afterend', div);
+      }
+    }
     pintarPanelCertif(todas);
-  }
-
-  // ==========================================================================================
+  }// ==========================================================================================
   // QUÉ HOJAS DEL CERTIFICADO QUEDARON SIN PLAZA  (2026-09-07)
   // ==========================================================================================
   // Pedido del usuario: *"hay plazas que no me aparecen para sacar los datos de la Muni, ¿por qué?"*.
@@ -20946,6 +20975,30 @@ const ITEMIZADO_EPEC = [
     // Si la plaza tiene el mismo ítem en dos renglones, el itemizado los suma a los dos y la plaza
     // vale de más. Se avisa arriba de todo, con el detalle, y se unifica con un botón: no se toca
     // nada sin que el usuario lo pida.
+    // ---- ¿Por qué no está al 100 %? (2026-09-09) ----
+    // El usuario: *"llené el itemizado y hay plazas que llené todo e igual me dice que no está al
+    // 100 por ciento; tené cuidado con lo ya cargado"*. El % de la plaza es lo HECHO contra lo
+    // CONTRATADO, ítem por ítem, pesado por K. Si se cargó la columna «Contratada» y la de «Hecha»
+    // quedó en cero o más baja —que es lo que pasa al traer las cantidades de la Calculadora, que
+    // llegan como contratadas y en cero de avance—, la plaza no llega al 100 aunque «esté llena».
+    // Acá se dice exactamente qué renglones frenan el 100 y, si la plaza está terminada, un botón
+    // pone «Hecha» = «Contratada» SOLO en esos renglones: no toca cantidades, ni ítems, ni nada más.
+    {
+      const d = diagnostico100(a);
+      if(d.total > 0 && d.pct < 100 && d.frenan.length){
+        const fin = estadoDe(a) === 'finalizada';
+        const lista = d.frenan.slice(0, 8).map(f=>`<b>ítem ${esc(f.id)}</b> (${fmtCant(f.hecha)} de ${fmtCant(f.cant)} ${esc(f.un)})`).join(' · ') + (d.frenan.length > 8 ? ` · y ${d.frenan.length - 8} más` : '');
+        h += `<div class="it-cien no-print${fin ? ' it-cien-fin' : ''}">
+          <b>${fin ? '⚠ Está marcada Finalizada pero el avance del itemizado está al ' + d.pct + ' %' : 'ℹ El avance del itemizado está al ' + d.pct + ' %'}</b>
+          <div>El % sale de la columna <b>«Hecha»</b> contra la de <b>«Contratada»</b>. Hay <b>${d.frenan.length}</b> renglón(es) con «Hecha» menor que «Contratada»: ${lista}.${d.sinContratada ? ` Además ${d.sinContratada} renglón(es) tienen «Hecha» pero «Contratada» en cero: ésos no cuentan.` : ''}</div>
+          <div class="ep-cargar-todo" style="margin-top:8px;">
+            <button type="button" class="btn-auto ep-cien-btn" style="margin:0;" ${dis}>✔ Poner «Hecha» = «Contratada» en esos ${d.frenan.length} renglón(es)</button>
+            <span class="hint" style="margin:0;">Solo toca esos renglones y solo la columna «Hecha». <b>No cambia ninguna cantidad contratada ni agrega ni quita ítems.</b> Pide confirmación.</span>
+          </div>
+        </div>`;
+      }
+    }
+
     const rep = itemsRepetidos(a);
     const nRep = rep.items.length + rep.prov.length;
     if(nRep){
@@ -21503,6 +21556,24 @@ const ITEMIZADO_EPEC = [
             + (res.errores.length ? `\n\nNo se pudo con (${res.errores.length}): ${res.errores.join(', ')} — revisá la conexión y volvé a tocar el botón.` : '')
             + `\n\nEl tablero queda con ${total} plaza(s).`);
         })();
+        return;
+      }
+
+      // «Hecha» = «Contratada» en los renglones que frenan el 100 % (2026-09-09).
+      const cien = e.target.closest('.ep-cien-btn');
+      if(cien){
+        if(!puedeEditar()){ alert('Para cambiar cantidades hay que iniciar sesión.'); return; }
+        const card = cien.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        const d = diagnostico100(a);
+        if(!d.frenan.length) return;
+        const txt = `En «${a.nombre||''}» se va a poner «Hecha» igual a «Contratada» en ${d.frenan.length} renglón(es):\n\n`
+          + d.frenan.map(f=> `  • ítem ${f.id}: ${fmtCant(f.hecha)} → ${fmtCant(f.cant)} ${f.un}`).join('\n')
+          + `\n\nNo se cambia ninguna cantidad contratada, ni se agrega ni se quita ningún ítem. Los renglones que ya estaban completos no se tocan.\n\n¿Seguimos?`;
+        if(!confirm(txt)) return;
+        d.frenan.forEach(f=>{ f.ref.cantidadAvanzada = f.ref.cantidad; });
+        if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        renderEpec(); refrescarPantallasDeAvance();
         return;
       }
 
