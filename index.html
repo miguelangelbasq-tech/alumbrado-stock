@@ -732,6 +732,10 @@
   .etapa-item{display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--panel); font-size:13px; cursor:pointer;}
   .etapa-item input[type="checkbox"]{margin:0; width:16px; height:16px; flex:none;}
   .etapa-item.etapa-done{background:rgba(126,198,230,0.15); border-color:var(--teal);}
+  .etapa-itz{ font-size:10.5px; color:var(--text-soft); font-weight:600; }
+  .etapa-itz.lleno{ color:#1d4ed8; }
+  .av-itz{ font-size:11px; color:var(--text-soft); margin-top:2px; white-space:nowrap; }
+  .av-itz-btn{ background:rgba(37,99,235,.10); border:1px solid #93c5fd; color:#1d4ed8; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; cursor:pointer; width:auto; margin:0; min-height:0; }
   .etapa-label{flex:1;}
   .etapa-peso{margin-left:auto; font-weight:700; color:var(--teal-dark); font-size:11.5px; flex:none;}
   @media print{
@@ -820,6 +824,12 @@
   .ot-tarea .ot-pasos{ grid-column:1 / -1; display:none; font-size:12px; color:var(--text); background:#fff; border:1px solid var(--border); border-radius:8px; padding:8px 10px 8px 26px; margin:2px 0 0; }
   .ot-tarea .ot-pasos.ver{ display:block; }
   .ot-tarea .ot-pasos li{ margin-bottom:2px; }
+  .it-items{ display:inline; }
+  .it-items-btn{ background:none; border:0; padding:0; margin:0; width:auto; min-height:0; font:inherit; font-size:inherit; color:var(--teal-dark); font-weight:700; cursor:pointer; text-decoration:underline dotted; }
+  .it-items-lista{ display:none; margin:6px 0 2px; padding:8px 10px 8px 22px; background:#fff; border:1px solid var(--border); border-radius:8px; font-size:12px; color:var(--text); line-height:1.45; }
+  .it-items-lista li{ margin-bottom:3px; }
+  .it-items-lista li span{ color:var(--text-soft); }
+  .it-items.abierto .it-items-lista{ display:block; }
   .ot-otra-tarea{ margin-top:14px; border-top:1px dashed var(--border); padding-top:10px; }
   .ot-otra-tit{ font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:var(--text-soft); margin-bottom:6px; }
   .ot-otra-fila{ display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:center; margin-bottom:8px; }
@@ -1830,6 +1840,14 @@
   .per-legajo{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
   .per-legajo.falta, .per-valor.falta{ background:#fffbeb; border-color:#e8c96a; }
   .prod-legajo{ font-family:var(--mono); font-weight:700; color:var(--teal-dark); }
+  #tablaBaremo tr.bar-fase td{ background:var(--bg-soft); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:var(--text-soft); padding:8px 10px; }
+  .bar-sub{ font-size:11px; color:var(--text-soft); font-weight:500; margin-top:1px; }
+  .bar-sug{ background:rgba(37,99,235,.08); border:1px dashed #93c5fd; color:#1d4ed8; font-family:var(--mono); font-weight:700; font-size:13px; padding:4px 9px; border-radius:8px; cursor:pointer; width:auto; margin:0; min-height:0; }
+  .bar-sug:hover{ background:rgba(37,99,235,.16); }
+  .bar-dif{ font-size:10.5px; font-weight:700; margin-left:4px; }
+  .bar-dif.sube{ color:#047857; } .bar-dif.baja{ color:#b45309; } .bar-dif.ok{ color:var(--text-soft); }
+  .bar-plata{ font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .prod-premio{ font-size:11.5px; color:#047857; font-weight:700; }
   .prod-sinlegajo{ color:var(--amber); font-weight:700; }
 
   /* ---------- Cuadro para cerrar la orden ---------- */
@@ -2875,7 +2893,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-10 12:31 · 01be3e</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-10 14:10 · ead053</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3813,7 +3831,9 @@
 
   <div class="card" style="margin-top:18px;">
     <h2><span class="dot"></span>Tablero de avance — todas las plazas</h2>
-    <div class="hist-actions no-print" style="margin-top:0; margin-bottom:10px;">
+    <div class="hint" style="margin-top:0;">El <b>avance físico</b> son las etapas tildadas (a mano o desde el cierre de una orden de trabajo). Debajo va el <b>% del itemizado</b> (lo «hecho» de los ítems del pliego). Cuando el itemizado ya tiene al 100 % los ítems de una etapa y esa etapa no está tildada, aparece «✔ tildar» para ponerlas de acuerdo.</div>
+    <div class="hist-actions no-print" style="margin-top:8px; margin-bottom:10px; justify-content:flex-start;">
+      <button type="button" class="btn-ghost" onclick="sincronizarEtapasTodas()" title="Tilda, en todas las plazas, las etapas que el Itemizado 2026 ya da por hechas">⇄ Sincronizar etapas con el itemizado</button>
       <button type="button" class="btn-ghost" onclick="mostrarVista('informe')">📄 Ver informe de cómo está la obra</button>
     </div>
     <div style="overflow-x:auto;">
@@ -4438,17 +4458,34 @@
       <div class="card-header-row">
         <div>
           <h2 style="margin:0;"><span class="dot"></span>Cuánto vale cada tarea</h2>
-          <div class="hint" style="margin-top:3px;">Los puntos por unidad de cada tarea. Estos valores son un <b>punto de partida</b> — nadie sabe mejor que vos cuánto cuesta cada cosa en tu obra. Cambialos y se guardan para todo el equipo.</div>
+          <div class="hint" style="margin-top:3px;">Los puntos por unidad de cada tarea. La columna <b>sugerido</b> sale del pliego: <b>10 puntos = 1 K de mano de obra</b> (el K del ítem del Anexo I que paga esa tarea, descontando lo que es material o máquina). Tocá el número sugerido para copiarlo, o «Usar todos los sugeridos». Lo que manda es lo que guardás.</div>
         </div>
-        <button type="button" class="btn-primary no-print" style="width:auto; margin:0; padding:9px 16px; font-size:13px;" onclick="guardarBaremo()">Guardar</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="btn-ghost no-print" style="width:auto; margin:0; padding:9px 14px; font-size:13px;" onclick="usarSugeridosBaremo()" title="Copia los puntos sugeridos por el pliego en todas las tareas (después hay que Guardar)">⚖ Usar todos los sugeridos</button>
+          <button type="button" class="btn-primary no-print" style="width:auto; margin:0; padding:9px 16px; font-size:13px;" onclick="guardarBaremo()">Guardar</button>
+        </div>
       </div>
       <div style="overflow-x:auto;">
         <table id="tablaBaremo"><thead><tr>
-          <th style="width:44%">Tarea</th><th>Se mide en</th><th style="text-align:right;">Puntos por unidad</th><th class="no-print" style="width:52px;"></th>
+          <th style="width:36%">Tarea</th><th>Se mide en</th><th style="text-align:right;">Puntos por unidad</th>
+          <th style="text-align:right;" title="10 puntos = 1 K de mano de obra, según el ítem del pliego">Sugerido (pliego)</th><th style="text-align:right;">$ por unidad</th><th class="no-print" style="width:52px;"></th>
         </tr></thead><tbody id="baremoBody"></tbody></table>
       </div>
       <button type="button" class="btn-auto no-print" onclick="abrirEditorTarea(null)">+ Agregar una tarea propia</button>
       <div class="hint" id="baremoMsg" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;" id="cardValorPunto">
+      <h2><span class="dot"></span>Cuánto vale el punto</h2>
+      <div class="hint" style="margin-top:0;">El premio es un extra sobre el sueldo: <b>puntos × valor del punto</b>. Con la regla «10 puntos = 1 K de mano de obra», acá ves qué parte de lo que cobra la empresa por esa mano de obra se reparte a la cuadrilla.</div>
+      <div class="row2" style="align-items:end;">
+        <div>
+          <label for="baremoValorPunto">Valor del punto ($)</label>
+          <input type="number" id="baremoValorPunto" min="0" step="1" inputmode="decimal" placeholder="0">
+        </div>
+        <div class="hint" id="baremoValorPuntoHint" style="margin:0 0 8px;"></div>
+      </div>
+      <div id="baremoSimulacion"></div>
     </div>
 
     <div class="card" style="margin-top:16px;">
@@ -7773,6 +7810,50 @@ const ACTIVIDADES_CATALOGO = [
 `1) Verificar que el circuito esté desenergizado.
 2) Desconectar y bajar el artefacto con los medios adecuados.
 3) Acopiar las luminarias retiradas para su devolución o disposición según indique la inspección.` },
+
+  // ---- Tareas que el pliego paga aparte y no tenían renglón propio (2026-09-10) ----
+  // Ítems 41 a 44 (columnas existentes), 78/79 (empalmes), 80 y 81 (mediciones). Sin renglón, la
+  // cuadrilla las hacía dentro de otra tarea y no sumaban puntos.
+  { id:'restauracion_columna', label:'Restauración de columna metálica existente (ítem 41)', pasos:
+`1) Verificar que la columna esté desenergizada.
+2) Limpiar y lijar la columna completa, sacando óxido y pintura suelta.
+3) Aplicar antióxido y dos manos de esmalte según indique la inspección.
+4) Revisar la base y el capuchón; reponer lo que falte.` },
+
+  { id:'acometida_existente', label:'Acometida subterránea nueva en columna existente (ítem 42)', pasos:
+`1) Verificar el corte de energía del circuito.
+2) Colocar borneras BPN, seccionador portafusible para riel DIN y fusibles de 2/4 A.
+3) Tender el tramo de Sintenax 3×1,5 / 3×2,5 mm² hasta la luminaria y conexionar con terminales.
+4) Hacer la puesta a tierra completa de la columna y medirla.
+5) Colocar el acrílico de protección y cerrar la ventana de inspección.` },
+
+  { id:'aplomado_columna', label:'Aplomado de columna metálica fuera de plomo (ítem 43)', pasos:
+`1) Verificar que la columna esté desenergizada y señalizar el área.
+2) Descalzar la base lo necesario y llevar la columna a plomo con los medios adecuados.
+3) Recalzar y compactar; rehacer la torta de protección de la base.
+4) Verificar el plomo en dos direcciones antes de retirar el equipo.` },
+
+  { id:'luminaria_existente', label:'Luminaria LED sobre columna existente (ítem 44)', pasos:
+`1) Verificar que el circuito esté desenergizado.
+2) Montar el artefacto en el brazo existente y ajustar la fijación.
+3) Conexionar con terminales y verificar la polaridad y la puesta a tierra del artefacto.
+4) Energizar y probar el encendido.` },
+
+  { id:'empalme_subterraneo', label:'Empalme subterráneo con resina (ítems 78/79)', pasos:
+`1) Verificar el corte de energía y cortar el cable dejando puntas prolijas.
+2) Pelar, unir con manguitos a compresión y aislar cada conductor.
+3) Armar la caja del empalme y colar la resina según instrucciones del fabricante.
+4) Esperar el curado antes de tapar; señalizar la posición del empalme en el plano.` },
+
+  { id:'medicion_aislacion', label:'Medición de resistencia de aislación de cable subterráneo (ítem 80)', pasos:
+`1) Desconectar el tramo en ambos extremos y descargar el conductor.
+2) Medir con megóhmetro entre fases y entre cada fase y tierra (por cada 100 m).
+3) Anotar los valores en la planilla y compararlos con el mínimo exigido.` },
+
+  { id:'medicion_pat', label:'Medición de resistencia de puesta a tierra (ítem 81)', pasos:
+`1) Desconectar el conductor de PAT del electrodo a medir.
+2) Medir con telurímetro por el método de las tres picas.
+3) Anotar el valor en la planilla de la columna o del tablero; si supera lo exigido, avisar para agregar jabalina.` },
 ];
 
 // ---- Metadatos de cada tarea (2026-09-10): fase, unidad, etapa del tablero e ítems del pliego ----
@@ -7791,7 +7872,7 @@ const TAREA_META = {
   galpon_prep:        { fase:'Columnas y luminarias', etapas:[],           items:[] },
   montaje_prfv:       { fase:'Columnas y luminarias', etapas:['izaje'],    items:['5','6','7','8'] },
   montaje_metalica:   { fase:'Columnas y luminarias', etapas:['izaje'],    items:['1','2','3','4'] },
-  vinculo_luminaria:  { fase:'Columnas y luminarias', etapas:['vinculos'], items:['44'] },
+  vinculo_luminaria:  { fase:'Columnas y luminarias', etapas:['vinculos'], items:[] },
   bpn:                { fase:'Columnas y luminarias', etapas:['vinculos'], items:[] },
   sellado_base:       { fase:'Columnas y luminarias', etapas:['sellos'],   items:[] },
   base_tablero_nivel: { fase:'Tablero, acometida y puesta a tierra', etapas:[],                  items:[] },
@@ -7799,6 +7880,13 @@ const TAREA_META = {
   tablero:            { fase:'Tablero, acometida y puesta a tierra', etapas:['tableroConexion'], items:['9','10'] },
   acometida:          { fase:'Tablero, acometida y puesta a tierra', etapas:['tableroConexion'], items:[] },
   pat:                { fase:'Tablero, acometida y puesta a tierra', etapas:[],                  items:['75','77'] },
+  restauracion_columna:{ fase:'Columnas y luminarias', etapas:['limpiezaPintura'], items:['41'] },
+  acometida_existente:{ fase:'Columnas y luminarias', etapas:['vinculos'], items:['42'] },
+  aplomado_columna:   { fase:'Columnas y luminarias', etapas:['izaje'],    items:['43'] },
+  luminaria_existente:{ fase:'Columnas y luminarias', etapas:['vinculos'], items:['44'] },
+  empalme_subterraneo:{ fase:'Cableado',     etapas:['cableTapada'],       items:['78','79'] },
+  medicion_aislacion: { fase:'Pruebas y cierre', etapas:[],               items:['80'] },
+  medicion_pat:       { fase:'Pruebas y cierre', etapas:[],               items:['81'] },
   retiro_luminaria:   { fase:'Retiros y poda', etapas:['desmonte'], items:['45'] },
   retiro_columna:     { fase:'Retiros y poda', etapas:['desmonte'], items:['46','47','48'] },
   retiro_tablero:     { fase:'Retiros y poda', etapas:['desmonte'], items:['49'] },
@@ -7813,18 +7901,110 @@ function metaDeTarea(id){ return TAREA_META[id] || { fase:'Otras tareas', etapas
 const UN_TAREA_DEFECTO = { fundaciones:'base', zanjeo:'metro', cruce_calzada:'cruce', tendido_cable:'metro', galpon_prep:'columna',
   montaje_prfv:'columna', montaje_metalica:'columna', vinculo_luminaria:'artefacto', bpn:'columna', sellado_base:'columna',
   base_tablero_nivel:'base', poste_tablero:'apoyo', tablero:'tablero', acometida:'acometida', pat:'jabalina', retiro_luminaria:'artefacto',
-  retiro_columna:'columna', retiro_tablero:'tablero', poda:'árbol', limpieza_pintura:'columna', verificacion:'plaza', inspeccion_pruebas:'plaza', cierre_documentacion:'plaza' };
+  retiro_columna:'columna', retiro_tablero:'tablero', poda:'árbol', limpieza_pintura:'columna', verificacion:'plaza', inspeccion_pruebas:'plaza', cierre_documentacion:'plaza',
+  restauracion_columna:'columna', acometida_existente:'columna', aplomado_columna:'columna', luminaria_existente:'artefacto', empalme_subterraneo:'empalme', medicion_aislacion:'medición', medicion_pat:'medición' };
 function unidadDeTarea(id){
   const b = (typeof window.baremoActual === 'function') ? window.baremoActual() : null;
   if(b && b[id] && b[id].un) return b[id].un;
   return UN_TAREA_DEFECTO[id] || 'unidad';
 }
+// Los ítems del pliego de una tarea, con lo que significa cada uno (2026-09-10). El usuario:
+// *"me dice de los ítems pero no dice qué significa cada uno"*. Se muestra el número y, al tocar,
+// se despliega la lista con la descripción y el K de cada ítem.
+function itemsDeTareaHtml(ids){
+  ids = (ids||[]).map(String);
+  if(!ids.length) return '';
+  const desc = id => (typeof window.epecItemDesc === 'function') ? window.epecItemDesc(id) : '';
+  const un = id => (typeof window.epecItemUn === 'function') ? window.epecItemUn(id) : '';
+  const k = id => (typeof window.epecItemK === 'function') ? window.epecItemK(id) : 0;
+  const lista = ids.map(id=>`<li><b>Ítem ${escHtml(id)}</b> — ${escHtml(desc(id) || 'ítem del Anexo I')}${un(id)?` <span>(${escHtml(un(id))}${k(id)?`, ${fmt(k(id),2)} K`:''})</span>`:''}</li>`).join('');
+  const resumen = ids.length <= 4 ? ids.join(', ') : ids.slice(0,3).join(', ') + '… (' + ids.length + ')';
+  return `<span class="it-items"><button type="button" class="it-items-btn" title="Tocá para ver qué es cada ítem">ítems ${escHtml(resumen)} ▾</button><ul class="it-items-lista">${lista}</ul></span>`;
+}
+document.addEventListener('click', e=>{
+  const b = e.target.closest('.it-items-btn'); if(!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const w = b.closest('.it-items'); if(w) w.classList.toggle('abierto');
+  b.textContent = b.textContent.replace(/[▾▴]$/, w && w.classList.contains('abierto') ? '▴' : '▾');
+});
 // Las etapas del tablero de Avance que tocan las tareas elegidas, en el orden del tablero.
 function etapasDeTareas(ids){
   const set = new Set();
   (ids||[]).forEach(id=> metaDeTarea(id).etapas.forEach(k=> set.add(k)));
   return ETAPAS_OBRA.filter(e=> set.has(e.key));
 }
+
+// ---- Las etapas del tablero según el Itemizado 2026 (2026-09-10) ----
+// El usuario: *"en el itemizado está todo al 100 pero el avance ni se movió; tendrían que estar
+// conectadas esas áreas"*. Cada etapa se lee de los ítems del Anexo I que la pagan: si esos ítems
+// están al 100 % de «hecha», el itemizado da esa etapa por terminada. Los ítems 1 a 8 (columna
+// completa) cubren varias etapas de una: pozo, fundación, izaje, vínculos, sellos y limpieza.
+// «Inspección municipal» no tiene ítem: es un acta, se tilda a mano.
+const COL_ITEMS = ['1','2','3','4','5','6','7','8'];
+const ETAPA_ITEMS = {
+  pozo:            COL_ITEMS,
+  zanjeo:          ['15','16','17','18','19','20','21','22','23','24'],
+  cableTapada:     ['25','26','27','28','29','31','32','33','34','35','36','37','38','39','40','78','79'],
+  fundaciones:     COL_ITEMS,
+  izaje:           COL_ITEMS.concat(['43']),
+  vinculos:        COL_ITEMS.concat(['42','44']),
+  posteTablero:    ['13','14'],
+  tableroConexion: ['9','10','11','12'],
+  sellos:          COL_ITEMS,
+  limpiezaPintura: COL_ITEMS.concat(['41']),
+  inspeccion:      [],
+  desmonte:        ['45','46','47','48','49'],
+};
+function avanceItemizadoPorEtapa(a){
+  const K = id => (typeof window.epecItemK === 'function') ? (Number(window.epecItemK(id)) || 1) : 1;
+  const items = [];
+  (a.valorItems||[]).forEach(v=>{ if(v.itemPliego) items.push({ id:String(v.itemPliego), c:Number(v.cantidad)||0, ca:Math.min(Number(v.cantidadAvanzada)||0, Number(v.cantidad)||0) }); });
+  (a.valorItemsEpec||[]).forEach(v=>{ if(v.itemEpec) items.push({ id:String(v.itemEpec), c:Number(v.cantidad)||0, ca:Math.min(Number(v.cantidadAvanzada)||0, Number(v.cantidad)||0) }); });
+  const porEtapa = {};
+  let tot = 0, hecho = 0;
+  items.forEach(it=>{ tot += it.c * K(it.id); hecho += it.ca * K(it.id); });
+  ETAPAS_OBRA.forEach(e=>{
+    const ids = ETAPA_ITEMS[e.key] || [];
+    const mios = items.filter(it=> ids.includes(it.id) && it.c > 0);
+    const t = mios.reduce((x,it)=> x + it.c * K(it.id), 0), h = mios.reduce((x,it)=> x + it.ca * K(it.id), 0);
+    porEtapa[e.key] = { aplica: t > 0, pct: t > 0 ? h / t : 0, items: mios.map(it=>it.id), tildada: !!((a.etapas||{})[e.key]) };
+  });
+  const sugeridas = ETAPAS_OBRA.filter(e=> porEtapa[e.key].aplica && porEtapa[e.key].pct >= 0.999 && !porEtapa[e.key].tildada);
+  return { porEtapa, sugeridas, pctItemizado: tot > 0 ? hecho / tot : null, tieneItems: items.length > 0 };
+}
+// Tilda en la plaza las etapas que el itemizado ya da por hechas (con su línea de historial).
+// Devuelve cuántas tildó. No destilda nunca: lo que se marcó a mano queda.
+function sincronizarEtapasConItemizado(a, guardar){
+  const r = avanceItemizadoPorEtapa(a);
+  if(!r.sugeridas.length) return 0;
+  if(!a.etapas) a.etapas = {};
+  r.sugeridas.forEach(e=>{
+    const antes = calcularAvanceEtapasPct(a);
+    a.etapas[e.key] = true;
+    registrarHistorialEtapa(a, e.key, true, antes, calcularAvanceEtapasPct(a));
+  });
+  if(guardar !== false) guardarAvanceObras(a);
+  return r.sugeridas.length;
+}
+async function sincronizarEtapasTodas(){
+  if(!avanceGuardEdicion()) return;
+  const pend = avanceObras.map(a=>({ a, n: avanceItemizadoPorEtapa(a).sugeridas.length })).filter(x=> x.n > 0);
+  if(!pend.length){ alert('No hay nada para sincronizar: en todas las plazas, las etapas que el itemizado da por hechas ya están tildadas.'); return; }
+  const tot = pend.reduce((t,x)=> t + x.n, 0);
+  if(!confirm(`Se van a tildar ${tot} etapa(s) en ${pend.length} plaza(s), según lo que el Itemizado 2026 tiene al 100 % de «hecha»:\n\n${pend.slice(0,12).map(x=>'· ' + (x.a.nombre||'') + ': ' + x.n).join('\n')}${pend.length>12?'\n· …':''}\n\nNo se destilda nada. Cada etapa queda en el historial con tu usuario. ¿Seguimos?`)) return;
+  pend.forEach(x=> sincronizarEtapasConItemizado(x.a));
+  renderAvanceTablero(); renderAvanceDetalle();
+  if(typeof renderHistorialEtapasTabla === 'function') renderHistorialEtapasTabla();
+}
+window.sincronizarEtapasTodas = sincronizarEtapasTodas;
+window.sincronizarEtapasPlaza = function(id){
+  if(!avanceGuardEdicion()) return;
+  const a = avanceObras.find(x=>x.id===id); if(!a) return;
+  const n = sincronizarEtapasConItemizado(a);
+  renderAvanceTablero(); renderAvanceDetalle();
+  if(typeof renderHistorialEtapasTabla === 'function') renderHistorialEtapasTabla();
+  if(!n) alert('El itemizado de esta plaza no da por hecha ninguna etapa que no esté tildada.');
+};
 
 let personaIdSeq = 1;
 let personal = [
@@ -7976,7 +8156,7 @@ document.getElementById('addActividadBtn').addEventListener('click', ()=>{
   cont.addEventListener('click', e=>{
     const b = e.target.closest('.ot-pasos-btn');
     if(b){ e.preventDefault(); e.stopPropagation(); const p = b.closest('.ot-tarea').querySelector('.ot-pasos'); if(p) p.classList.toggle('ver'); b.textContent = p && p.classList.contains('ver') ? 'ocultar pasos' : 'ver pasos'; return; }
-    if(e.target.closest('input, label, .ot-tarea-prev')) return;
+    if(e.target.closest('input, label, .ot-tarea-prev, .it-items')) return;
     const fila = e.target.closest('.ot-tarea'); if(!fila) return;
     const c = fila.querySelector('.ot-act-check'); if(!c) return;
     c.checked = !c.checked; c.dispatchEvent(new Event('change', { bubbles:true }));
@@ -10634,6 +10814,8 @@ function renderAvanceTablero(){
       <td style="min-width:150px;">
         <div class="avance-bar"><div class="avance-bar-fill" style="width:${pct}%; background:${colorPorPctEtapas(pct)};"></div></div>
         <span style="font-size:11.5px; color:var(--text-soft);">${pct}%</span>
+        ${(()=>{ const r = avanceItemizadoPorEtapa(a); if(r.pctItemizado == null) return ''; const pi = Math.round(r.pctItemizado*100);
+          return `<div class="av-itz" title="Lo «hecho» de los ítems del Itemizado 2026, pesado por K">itemizado ${pi}%${r.sugeridas.length ? ` · <button type="button" class="av-itz-btn no-print" onclick="sincronizarEtapasPlaza('${a.id}')" title="${escHtml(r.sugeridas.map(e=>e.label).join(', '))}" ${dis}>✔ tildar ${r.sugeridas.length} etapa${r.sugeridas.length===1?'':'s'}</button>` : (Math.abs(pi - pct) > 0 ? '' : '')}</div>`; })()}
       </td>
       <td style="font-size:12px; white-space:nowrap;">${fechaHtml}</td>
       <td>
@@ -10898,12 +11080,21 @@ function renderAvanceDetalle(){
 
   html += `<div class="section-title" id="etapasSectionTitle" style="margin-top:18px;">✅ Etapas de obra (criterio EPEC) — ${pctEtapas}% completado</div>`;
   html += `<div class="hint no-print" style="margin-top:0;">Tildá cada etapa a medida que se va completando en la obra real — el % de avance físico de arriba (y el del tablero) se calcula solo, sumando el peso de cada etapa tildada. El detalle de materiales de más abajo queda aparte, para ver puntualmente qué se instaló y qué falta.</div>`;
+  const itz = avanceItemizadoPorEtapa(a);
+  if(itz.sugeridas.length){
+    html += `<div class="no-print" style="margin:6px 0 8px; background:rgba(37,99,235,.08); border:1px solid #93c5fd; border-radius:8px; padding:9px 12px; font-size:12.5px; color:#1e3a8a;">
+      ⇄ El <b>Itemizado 2026</b> ya tiene al 100 % los ítems de <b>${itz.sugeridas.length}</b> etapa(s) que acá no están tildadas: ${itz.sugeridas.map(e=>escHtml(e.label)).join(', ')}.
+      <button type="button" class="btn-ghost" style="margin-left:8px; padding:3px 10px; font-size:12px;" onclick="sincronizarEtapasPlaza('${a.id}')" ${dis}>✔ Tildarlas</button>
+    </div>`;
+  }
   html += `<div class="etapas-checklist">`;
   ETAPAS_OBRA.forEach(e=>{
     const checked = !!etapas[e.key];
+    const pe = itz.porEtapa[e.key];
+    const sub = pe && pe.aplica ? `<span class="etapa-itz${pe.pct >= 0.999 ? ' lleno' : ''}" title="Ítems ${escHtml(pe.items.join(', '))} del itemizado">itemizado ${Math.round(pe.pct*100)}%</span>` : (e.key === 'inspeccion' ? '<span class="etapa-itz">a mano</span>' : '');
     html += `<label class="etapa-item${checked?' etapa-done':''}">
       <input type="checkbox" data-action="toggle-etapa" data-etapa="${e.key}" ${checked?'checked':''} ${dis}>
-      <span class="etapa-label">${escHtml(e.label)}</span>
+      <span class="etapa-label">${escHtml(e.label)}${sub ? '<br>' + sub : ''}</span>
       <span class="etapa-peso">${e.peso}%</span>
     </label>`;
   });
@@ -11950,14 +12141,15 @@ function poblarOtActividades(){
     const filas = grupos.get(fase).map(act=>{
       const meta = metaDeTarea(act.id);
       const et = etapasDeTareas([act.id]).map(e=>e.label).join(' · ');
-      const items = (meta.items||[]).length ? `ítems ${meta.items.slice(0,4).join(', ')}${meta.items.length>4?'…':''}` : '';
-      const sub = [et ? 'etapa: ' + et : '', items].filter(Boolean).join(' · ');
+      const items = itemsDeTareaHtml(meta.items);
+      const sub = [et ? 'etapa: ' + escHtml(et) : '', items].filter(Boolean).join(' · ');
       const pasos = String(act.pasos||'').split('\n').map(p=>p.trim()).filter(Boolean)
         .map(p=>`<li>${escHtml(p.replace(/^\d+[a-z]?\)\s*/,''))}</li>`).join('');
-      return `<div class="ot-tarea" data-txt="${escHtml((act.label + ' ' + fase + ' ' + sub).toLowerCase())}">
+      const txtBusq = (act.label + ' ' + fase + ' ' + et + ' ' + (meta.items||[]).map(id=>'item ' + id + ' ' + ((typeof window.epecItemDesc === 'function') ? window.epecItemDesc(id) : '')).join(' ')).toLowerCase();
+      return `<div class="ot-tarea" data-txt="${escHtml(txtBusq)}">
         <input type="checkbox" class="ot-act-check" value="${escHtml(act.id)}" id="otAct_${escHtml(act.id)}">
         <div><label class="ot-tarea-lbl" for="otAct_${escHtml(act.id)}" style="margin:0; display:block; cursor:pointer;">${escHtml(act.label)}</label>
-          <div class="ot-tarea-sub">${escHtml(sub || 'sin etapa del tablero')}${pasos ? ' · <button type="button" class="ot-pasos-btn">ver pasos</button>' : ''}</div></div>
+          <div class="ot-tarea-sub">${sub || 'sin etapa del tablero'}${pasos ? ' · <button type="button" class="ot-pasos-btn">ver pasos</button>' : ''}</div></div>
         <div class="ot-tarea-prev"><span>previsto</span><input type="number" min="0" step="any" class="ot-act-prev" data-id="${escHtml(act.id)}" placeholder="—"><span>${escHtml(unidadDeTarea(act.id))}</span></div>
         ${pasos ? `<ol class="ot-pasos">${pasos}</ol>` : ''}
       </div>`;
@@ -16667,7 +16859,68 @@ function poblarParteObraDatalist(){
     poste_tablero:      { un:'apoyo',     pts:4    },
     limpieza_pintura:   { un:'columna',   pts:1    },
     retiro_luminaria:   { un:'artefacto', pts:1    },
+    restauracion_columna:{un:'columna',   pts:20   },
+    acometida_existente:{ un:'columna',   pts:10   },
+    aplomado_columna:   { un:'columna',   pts:6    },
+    luminaria_existente:{ un:'artefacto', pts:6.5  },
+    empalme_subterraneo:{ un:'empalme',   pts:20   },
+    medicion_aislacion: { un:'medición',  pts:9    },
+    medicion_pat:       { un:'medición',  pts:4.5  },
   };
+
+  // ==================================================================
+  // BAREMO DE REFERENCIA: LOS PUNTOS QUE SALEN DEL PLIEGO  (2026-09-10)
+  // ==================================================================
+  // Pedido del usuario: *"ya sabés qué tareas valen más y cuáles menos: armar un itemizado propio,
+  // muy lógico, con un precio justo por punto"*. La regla: **10 puntos = 1 K de mano de obra**.
+  // Para cada tarea se toma el K del Anexo I que la paga (`kRef`, por unidad de la tarea) y la parte
+  // de ese K que es trabajo de la cuadrilla y no material o máquina (`mo`). Las tareas que son un
+  // pedazo de la columna completa (ítems 1 a 8, K ≈ 4,00 la metálica de 7 m con 2 brazos) llevan la
+  // porción que les toca de ese K. Los puntos sugeridos son kRef × mo × 10. Son una PROPUESTA con
+  // la cuenta a la vista: el que manda es el baremo guardado, que el usuario ajusta a su obra.
+  const K_COLUMNA_REF = 4.00;   // ítem 2, metálica 7 m con 2 brazos: la columna «típica»
+  const BAREMO_REFERENCIA = {
+    fundaciones:        { kRef:K_COLUMNA_REF*0.22, mo:0.70, base:'22 % de la columna completa (ítems 1–8); el hormigón es material' },
+    zanjeo:             { kRef:0.40, mo:0.80, base:'promedio de los ítems 15 a 20 (0,29 a 0,60 K/m); arena, ladrillo y malla son material' },
+    cruce_calzada:      { kRef:15,   mo:0.40, base:'un cruce típico de 8 m a 1,8–2 K/m (ítems 21–22); la tunelera es máquina' },
+    tendido_cable:      { kRef:0.14, mo:0.35, base:'ítems 36 a 39 (0,12–0,19 K/m); el ítem incluye la provisión del cable' },
+    galpon_prep:        { kRef:K_COLUMNA_REF*0.05, mo:1.00, base:'5 % de la columna completa: armado en galpón' },
+    montaje_prfv:       { kRef:3.37*0.22, mo:0.85, base:'22 % de la columna PRFV (ítem 6, 3,37 K); la columna la provee EPEC' },
+    montaje_metalica:   { kRef:K_COLUMNA_REF*0.22, mo:0.85, base:'22 % de la columna metálica (ítem 2, 4,00 K); la hidráulica pesa poco' },
+    vinculo_luminaria:  { kRef:K_COLUMNA_REF*0.15/2, mo:0.90, base:'15 % de la columna, repartido en sus 2 artefactos' },
+    bpn:                { kRef:K_COLUMNA_REF*0.12, mo:0.75, base:'12 % de la columna; borneras y portafusibles son material' },
+    sellado_base:       { kRef:K_COLUMNA_REF*0.04, mo:0.80, base:'4 % de la columna: la torta o el sellado' },
+    base_tablero_nivel: { kRef:37.15*0.15, mo:0.60, base:'15 % del tablero a nivel (ítem 10, 37,15 K); ladrillo y cemento son material' },
+    poste_tablero:      { kRef:5.33, mo:0.35, base:'ítem 13 (5,33 K); el apoyo PRFV es la mayor parte del ítem' },
+    tablero:            { kRef:5.46, mo:0.50, base:'ítem 9, tablero aéreo (5,46 K); el gabinete armado es material' },
+    acometida:          { kRef:0.76*10, mo:0.40, base:'10 m de acometida subterránea (ítem 12, 0,76 K/m); pilar y cable son material' },
+    pat:                { kRef:K_COLUMNA_REF*0.10 + 0.52, mo:0.80, base:'10 % de la columna + la medición (ítem 81, 0,52 K); la jabalina la provee el ítem 88' },
+    retiro_luminaria:   { kRef:0.78, mo:0.90, base:'ítem 45 (0,78 K)' },
+    retiro_columna:     { kRef:1.00, mo:0.80, base:'ítems 46 a 48 (0,78 a 1,40 K)' },
+    retiro_tablero:     { kRef:1.76, mo:0.80, base:'ítem 49 (1,76 K)' },
+    poda:               { kRef:0.58, mo:0.90, base:'ítem 82 (0,58 K por árbol)' },
+    limpieza_pintura:   { kRef:K_COLUMNA_REF*0.07, mo:0.90, base:'7 % de la columna: reparación del terreno, limpieza y pintura' },
+    verificacion:       { kRef:0.30, mo:1.00, base:'sin ítem propio: media jornada de una persona' },
+    inspeccion_pruebas: { kRef:0.80, mo:1.00, base:'sin ítem propio: una jornada de dos personas con el inspector' },
+    cierre_documentacion:{kRef:0.50, mo:1.00, base:'sin ítem propio: planos conforme a obra y trámites' },
+    restauracion_columna:{kRef:2.57, mo:0.85, base:'ítem 41 (2,57 K); pintura y lija son poco material' },
+    acometida_existente:{ kRef:1.77, mo:0.60, base:'ítem 42 (1,77 K); borneras, seccionador y cable son material' },
+    aplomado_columna:   { kRef:0.67, mo:0.95, base:'ítem 43 (0,67 K)' },
+    luminaria_existente:{ kRef:0.73, mo:0.90, base:'ítem 44 (0,73 K); la luminaria la provee EPEC' },
+    empalme_subterraneo:{ kRef:4.13, mo:0.50, base:'ítems 78/79 (4,13–4,20 K); el kit de resina es material' },
+    medicion_aislacion: { kRef:1.04, mo:0.90, base:'ítem 80 (1,04 K por cada 100 m)' },
+    medicion_pat:       { kRef:0.52, mo:0.90, base:'ítem 81 (0,52 K)' },
+  };
+  const PTS_POR_K_MO = 10;   // 10 puntos = 1 K de mano de obra
+  function puntosSugeridos(id){
+    const r = BAREMO_REFERENCIA[id]; if(!r) return null;
+    const p = r.kRef * r.mo * PTS_POR_K_MO;
+    return Math.round(p * 2) / 2;   // al medio punto
+  }
+  // Valor del punto en pesos (extra sobre el sueldo). Se guarda con el baremo, para todo el equipo.
+  let valorPunto = 0;
+  window.valorPuntoActual = ()=> valorPunto;
+  const plataP = v => '$ ' + num(v).toLocaleString('es-AR', { minimumFractionDigits:0, maximumFractionDigits:0 });
   // Peso de cada rol al repartir. El capataz coordina y también trabaja; el sereno cuida, no produce.
   const PESOS_DEFECTO = { 'Oficial':1, 'Medio oficial':0.8, 'Ayudante':0.6, 'Capataz':1, 'Chofer':0.4, 'Sereno':0.2 };
   const PTS_TAREA_MANUAL = 2;   // una tarea escrita a mano, sin baremo, vale esto por unidad
@@ -16951,6 +17204,7 @@ function poblarParteObraDatalist(){
       Object.keys(b.baremo).forEach(k=>{ if(!baremo[k]) baremo[k] = b.baremo[k]; });
     }
     if(b.pesos && typeof b.pesos === 'object') pesos = { ...PESOS_DEFECTO, ...b.pesos };
+    if(b.valorPunto != null) valorPunto = num(b.valorPunto);
     if(Array.isArray(b.tareasPropias)){ tareasPropias = b.tareasPropias; sincronizarCatalogoTareas(); }
     // Nombres cambiados de las tareas del catálogo original.
     if(b.labels && typeof ACTIVIDADES_CATALOGO !== 'undefined'){
@@ -17490,7 +17744,7 @@ function poblarParteObraDatalist(){
     const tiles = document.getElementById('prodTiles');
     if(tiles) tiles.innerHTML = [
       { n: fmt(totalPts, Number.isInteger(totalPts)?0:1), l:'Puntos del equipo', c:'' },
-      { n: personas.length, l:'Personas con producción', c:'azul' },
+      valorPunto > 0 ? { n: plataP(totalPts * valorPunto), l:'Premio del período (puntos × $ ' + fmt(valorPunto,0) + ')', c:'verde' } : { n: personas.length, l:'Personas con producción', c:'azul' },
       { n: cerradas.length, l:'Órdenes cerradas', c:'verde' },
       { n: abiertas, l:'Sin cerrar (no cuentan)', c: abiertas>0 ? 'ambar' : '' },
     ].map(t=>`<div class="inf-tile"><div class="inf-num ${t.c}">${t.n}</div><div class="inf-lbl">${t.l}</div></div>`).join('');
@@ -17549,7 +17803,7 @@ function poblarParteObraDatalist(){
           <div class="prod-rol">${leg}${esc([...g.roles].join(' / ')||'—')} · ${dias} día${dias===1?'':'s'} · ${g.plazas.size} plaza${g.plazas.size===1?'':'s'}${g.aMano?' · <b>reparto a mano</b>':''}</div>
         </div>
         <div class="prod-bar-wrap"><span class="prod-bar" style="width:${ancho}%"></span></div>
-        <div class="prod-num"><b>${fmt(g.pts, Number.isInteger(g.pts)?0:1)}</b><span>pts · ${fmt(porDia,1)}/día</span></div>
+        <div class="prod-num"><b>${fmt(g.pts, Number.isInteger(g.pts)?0:1)}</b><span>pts · ${fmt(porDia,1)}/día</span>${valorPunto > 0 ? `<div class="prod-premio">${plataP(g.pts * valorPunto)}</div>` : ''}</div>
       </div>`;
 
     if(abierta){
@@ -17592,21 +17846,88 @@ function poblarParteObraDatalist(){
     const body = document.getElementById('baremoBody');
     if(!body) return;
     const cat = (typeof ACTIVIDADES_CATALOGO !== 'undefined') ? ACTIVIDADES_CATALOGO : [];
-    body.innerHTML = cat.map(c=>{
-      const d = baremo[c.id] || { un:'unidad', pts:PTS_TAREA_MANUAL };
-      const propia = esTareaPropia(c.id);
-      return `<tr>
-        <td><b>${esc(c.label)}</b>${propia?' <span class="bar-propia">propia</span>':''}</td>
-        <td><input type="text" class="bar-un" data-k="${esc(c.id)}" value="${esc(d.un)}" style="width:120px;"></td>
-        <td style="text-align:right;"><input type="number" min="0" step="any" class="bar-pts" data-k="${esc(c.id)}" value="${num(d.pts)}" style="width:92px; text-align:right;"></td>
-        <td class="no-print" style="text-align:center;"><button type="button" class="btn-ghost" style="padding:4px 9px; font-size:12px;" onclick="abrirEditorTarea('${esc(c.id)}')" title="Cambiar el nombre y los pasos que salen impresos">✎</button></td>
-      </tr>`;
-    }).join('');
+    const fases = (typeof FASES_TAREA !== 'undefined') ? FASES_TAREA : [];
+    const faseDe = id => (typeof metaDeTarea === 'function') ? (metaDeTarea(id).fase || 'Otras tareas') : 'Tareas';
+    const orden = fases.concat(['Otras tareas']);
+    const grupos = new Map();
+    cat.forEach(c=>{ const f = faseDe(c.id); if(!grupos.has(f)) grupos.set(f, []); grupos.get(f).push(c); });
+    let html = '';
+    orden.concat([...grupos.keys()].filter(f=>!orden.includes(f))).forEach(fase=>{
+      if(!grupos.has(fase)) return;
+      html += `<tr class="bar-fase"><td colspan="6">${esc(fase)}</td></tr>`;
+      grupos.get(fase).forEach(c=>{
+        const d = baremo[c.id] || { un:'unidad', pts:PTS_TAREA_MANUAL };
+        const propia = esTareaPropia(c.id);
+        const sug = puntosSugeridos(c.id);
+        const r = BAREMO_REFERENCIA[c.id];
+        const meta = (typeof metaDeTarea === 'function') ? metaDeTarea(c.id) : { items:[] };
+        const items = (typeof itemsDeTareaHtml === 'function') ? itemsDeTareaHtml(meta.items) : '';
+        const dif = (sug != null && num(d.pts) > 0) ? (sug - num(d.pts)) / num(d.pts) : null;
+        const difTxt = dif == null ? '' : (Math.abs(dif) < 0.15 ? '<span class="bar-dif ok">≈</span>' : (dif > 0 ? `<span class="bar-dif sube" title="El pliego la paga mejor de lo que valen los puntos de hoy">▲ ${Math.round(dif*100)}%</span>` : `<span class="bar-dif baja" title="Los puntos de hoy están por encima de lo que paga el pliego">▼ ${Math.round(-dif*100)}%</span>`));
+        html += `<tr data-k="${esc(c.id)}">
+          <td><b>${esc(c.label)}</b>${propia?' <span class="bar-propia">propia</span>':''}${items?`<div class="bar-sub">${items}</div>`:''}</td>
+          <td><input type="text" class="bar-un" data-k="${esc(c.id)}" value="${esc(d.un)}" style="width:110px;"></td>
+          <td style="text-align:right;"><input type="number" min="0" step="any" class="bar-pts" data-k="${esc(c.id)}" value="${num(d.pts)}" style="width:88px; text-align:right;"></td>
+          <td style="text-align:right; white-space:nowrap;">${sug != null ? `<button type="button" class="bar-sug" data-k="${esc(c.id)}" data-pts="${sug}" title="${esc(r.base)} · K de referencia ${fmt(r.kRef,2)} × ${Math.round(r.mo*100)} % de mano de obra × 10. Tocá para copiarlo.">${fmt(sug, Number.isInteger(sug)?0:1)}</button> ${difTxt}` : '<span class="hint" style="margin:0;">—</span>'}</td>
+          <td class="qty bar-plata" data-k="${esc(c.id)}">${valorPunto > 0 ? plataP(num(d.pts) * valorPunto) : '—'}</td>
+          <td class="no-print" style="text-align:center;"><button type="button" class="btn-ghost" style="padding:4px 9px; font-size:12px;" onclick="abrirEditorTarea('${esc(c.id)}')" title="Cambiar el nombre y los pasos que salen impresos">✎</button></td>
+        </tr>`;
+      });
+    });
+    body.innerHTML = html;
+    const vp = document.getElementById('baremoValorPunto');
+    if(vp && document.activeElement !== vp) vp.value = valorPunto > 0 ? valorPunto : '';
+    pintarValorPunto();
     const pb = document.getElementById('pesosBody');
     if(pb) pb.innerHTML = (typeof ROLES_CUADRILLA !== 'undefined' ? ROLES_CUADRILLA : []).map(r=>
       `<div class="prod-peso"><label style="margin:0;">${esc(r)}</label><input type="number" min="0" step="0.1" class="bar-peso" data-r="${esc(r)}" value="${num(pesos[r],0.6)}"></div>`
     ).join('');
   }
+
+  // Qué significa el valor del punto, en plata de la empresa: 10 pts = 1 K de mano de obra.
+  function pintarValorPunto(){
+    const hint = document.getElementById('baremoValorPuntoHint');
+    const sim = document.getElementById('baremoSimulacion');
+    const base = (typeof window.epecBaseEf === 'function') ? num(window.epecBaseEf()) : 0;   // $ por K (según IVA elegido)
+    document.querySelectorAll('.bar-plata').forEach(td=>{
+      const inp = document.querySelector(`.bar-pts[data-k="${CSS.escape(td.dataset.k)}"]`);
+      td.textContent = valorPunto > 0 && inp ? plataP(num(inp.value) * valorPunto) : '—';
+    });
+    if(!hint || !sim) return;
+    if(!(valorPunto > 0)){ hint.innerHTML = 'Sin valor cargado: la producción se ve en puntos, sin plata.'; sim.innerHTML = ''; return; }
+    const porK = valorPunto * PTS_POR_K_MO;                      // $ que recibe la cuadrilla por cada K de mano de obra
+    const pct = base > 0 ? porK / base : null;
+    hint.innerHTML = `10 puntos = 1 K de mano de obra = <b>${plataP(porK)}</b> para la cuadrilla` + (base > 0 ? ` · el módulo vale <b>${plataP(base)}</b>, así que el premio es el <b>${(pct*100).toLocaleString('es-AR',{maximumFractionDigits:1})} %</b> de lo que cobra la empresa por esa mano de obra.` : ' · cargá el valor del módulo en Obras → Itemizado 2026 para ver el porcentaje.');
+    const ej = [
+      { t:'Montar una columna metálica', k:'montaje_metalica', n:1 },
+      { t:'100 m de zanjeo', k:'zanjeo', n:100 },
+      { t:'Armar 10 tableritos BPN', k:'bpn', n:10 },
+      { t:'Un tablero completo', k:'tablero', n:1 },
+      { t:'Restaurar una columna existente', k:'restauracion_columna', n:1 },
+    ].map(e=>{ const d = baremo[e.k] || { pts:0 }; const pts = num(d.pts) * e.n; return `<tr><td>${esc(e.t)}</td><td class="qty">${fmt(pts, Number.isInteger(pts)?0:1)} pts</td><td class="qty"><b>${plataP(pts * valorPunto)}</b></td></tr>`; }).join('');
+    sim.innerHTML = `<div class="hint" style="margin:10px 0 4px;"><b>Ejemplos con los puntos de hoy</b> (para la cuadrilla entera; se reparte por el peso de cada rol):</div>
+      <table class="prod-ord-tabla" style="max-width:560px;"><tbody>${ej}</tbody></table>`;
+  }
+  window.usarSugeridosBaremo = function(){
+    document.querySelectorAll('.bar-sug').forEach(b=>{
+      const inp = document.querySelector(`.bar-pts[data-k="${CSS.escape(b.dataset.k)}"]`);
+      if(inp) inp.value = num(b.dataset.pts);
+    });
+    pintarValorPunto();
+    const msg = document.getElementById('baremoMsg');
+    if(msg){ msg.style.color = 'var(--amber)'; msg.textContent = 'Se copiaron los sugeridos. Revisalos y tocá «Guardar» para que valgan.'; }
+  };
+  (function(){
+    const t = document.getElementById('tablaBaremo');
+    if(t) t.addEventListener('click', e=>{
+      const b = e.target.closest('.bar-sug'); if(!b) return;
+      const inp = document.querySelector(`.bar-pts[data-k="${CSS.escape(b.dataset.k)}"]`);
+      if(inp){ inp.value = num(b.dataset.pts); inp.focus(); pintarValorPunto(); }
+    });
+    if(t) t.addEventListener('input', e=>{ if(e.target.closest('.bar-pts')) pintarValorPunto(); });
+    const vp = document.getElementById('baremoValorPunto');
+    if(vp) vp.addEventListener('input', ()=>{ valorPunto = Math.max(0, num(vp.value)); pintarValorPunto(); });
+  })();
 
   window.guardarBaremo = async function(){
     const msg = document.getElementById('baremoMsg');
@@ -17619,6 +17940,8 @@ function poblarParteObraDatalist(){
     const np = {};
     document.querySelectorAll('.bar-peso').forEach(inp=>{ np[inp.dataset.r] = num(inp.value, 0.6); });
     baremo = nuevo; pesos = np;
+    const vpEl = document.getElementById('baremoValorPunto');
+    if(vpEl) valorPunto = Math.max(0, num(vpEl.value));
     msg.style.color = 'var(--text-soft)'; msg.textContent = 'Guardando…';
     if(!window.__fbUser){
       msg.style.color = 'var(--amber)';
@@ -17628,7 +17951,7 @@ function poblarParteObraDatalist(){
     try{
       const labels = {};
       (typeof ACTIVIDADES_CATALOGO !== 'undefined' ? ACTIVIDADES_CATALOGO : []).forEach(c=>{ labels[c.id] = c.label; });
-      await window.fbBaremoGuardar({ baremo:nuevo, pesos:np, tareasPropias, labels,
+      await window.fbBaremoGuardar({ baremo:nuevo, pesos:np, tareasPropias, labels, valorPunto,
                                      ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
       msg.style.color = 'var(--teal-dark)';
       msg.textContent = '✔ Guardado. Ya lo ve todo el equipo, y los puntos de todas las órdenes se recalculan con estos valores.';
@@ -25405,12 +25728,15 @@ const ITEMIZADO_EPEC = [
     const personas = [...gente.values()].sort((a,b)=> b.pts - a.pts);
     const ptsSel = personas.reduce((t,g)=>t+g.pts, 0);
     const diasSel = new Set(); personas.forEach(g=> g.dias.forEach(d=>diasSel.add(d)));
+    // Premio en pesos (2026-09-10): puntos × valor del punto cargado en Equipo → Baremo.
+    const vPunto = (typeof window.valorPuntoActual === 'function') ? n2(window.valorPuntoActual()) : 0;
     m.tiles = [
       { n: N(ptsSel,'pts'), l:'Puntos de los elegidos', c:'' },
-      { n: personas.filter(g=>g.pts>0).length + '/' + personas.length, l:'Con producción', c:'azul' },
+      vPunto > 0 ? { n: N(ptsSel * vPunto,'money'), l:'Premio (puntos × ' + plata(vPunto) + ')', c:'verde' } : { n: personas.filter(g=>g.pts>0).length + '/' + personas.length, l:'Con producción', c:'azul' },
       { n: N(diasSel.size,'int'), l:'Días con trabajo cargado', c:'' },
       { n: N(cerradas.length,'int'), l:'Órdenes cerradas del período', c:'verde' },
     ];
+    if(vPunto > 0) m.subtitulo += ` · valor del punto ${plata(vPunto)}`;
     m.avisos.push('⚖ <b>Cómo leer estos números.</b> Miden lo que produjo la <b>cuadrilla</b>, repartido según el peso de cada rol. Cuando tres personas arman nueve tableritos juntas, nadie puede decir cuál hizo cuál: el reparto es una convención, no una medición. Sirve para ver el ritmo del equipo y comparar períodos. <b>No alcanza, solo, para decidir un sueldo o una sanción.</b>');
     if(abiertas) m.avisos.push(`Hay <b>${abiertas}</b> orden(es) de este período <b>sin cerrar</b>: su trabajo todavía no le suma a nadie.`);
     const enCero = personas.filter(g=>g.pts <= 0);
@@ -25420,11 +25746,11 @@ const ITEMIZADO_EPEC = [
       m.secciones.push(tabla('Resumen por persona', 'Ordenado por puntos.',
         [{t:'Persona'},{t:'Rol'},{t:'Puntos', num:true},{t:'Días', num:true, w:'60px'},
          {t:'Plazas', num:true, w:'62px'},{t:'Órdenes', num:true, w:'70px'},
-         {t:'Puntos/día', num:true, w:'82px'},{t:'% del grupo', num:true, w:'80px'}],
+         {t:'Puntos/día', num:true, w:'82px'},{t:'% del grupo', num:true, w:'80px'}].concat(vPunto > 0 ? [{t:'Premio $', num:true}] : []),
         personas.map(g=>[g.nombre, g.rol||'—', N(g.pts,'pts'), N(g.dias.size,'int'), N(g.plazas.size,'int'),
                          N(g.ordenes.length,'int'), g.dias.size ? N(g.pts/g.dias.size,'pts') : '—',
-                         N(ptsSel>0 ? g.pts/ptsSel : 0,'pct')]),
-        [['TOTAL', '', N(ptsSel,'pts'), N(diasSel.size,'int'), '', N(personas.reduce((t,g)=>t+g.ordenes.length,0),'int'), '', N(1,'pct')]]));
+                         N(ptsSel>0 ? g.pts/ptsSel : 0,'pct')].concat(vPunto > 0 ? [N(g.pts * vPunto,'money')] : [])),
+        [['TOTAL', '', N(ptsSel,'pts'), N(diasSel.size,'int'), '', N(personas.reduce((t,g)=>t+g.ordenes.length,0),'int'), '', N(1,'pct')].concat(vPunto > 0 ? [N(ptsSel * vPunto,'money')] : [])]));
     }
     if(o.sec.plazas){
       const filas = [];
