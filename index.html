@@ -2871,7 +2871,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-10 10:12 · b0b160</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-10 12:04 · 4996b5</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -24046,7 +24046,7 @@ const ITEMIZADO_EPEC = [
     let m3 = 0;
     const mirar = (secs)=> (secs||[]).forEach(s=> (s.items||[]).forEach(it=>{
       const d = String(it.desc||'').replace(/<[^>]*>/g,'').trim();
-      if(/^Fundaci[oó]n de hormig[oó]n/i.test(d)) m3 += n2(it.cant != null ? it.cant : it.cantNecesaria);
+      if(/^Fundaci[oó]n de hormig[oó]n/i.test(d)){ const v = it.cant != null ? it.cant : it.cantNecesaria; m3 += n2(typeof v === 'string' ? v.replace(',', '.') : v); }
     }));
     mirar(a.secciones);
     if(m3 > 0) return m3;
@@ -24364,8 +24364,13 @@ const ITEMIZADO_EPEC = [
       construir: infAvance },
     { id:'plazas-itemizado', tema:'plazas', txt:'Itemizado y certificación', sel:'plazas', fechas:false,
       hint:'Lo que se cobra: módulos (K), plata contratada y certificada de cada plaza, y el total. Es el informe de las 36 plazas que pediste.',
-      secciones:[['resumen','Resumen por plaza',1],['cantidades','Cantidades de obra (columnas, luminarias, cables, hormigón…)',1],
-                 ['detalle','Detalle ítem por ítem de cada plaza',1],['cantdet','Vínculos y cables, abiertos por tipo',0],
+      // Cantidades de obra separadas por rubro (2026-09-10): el usuario quiere poder pedir «solo las
+      // luminarias», «solo el cable», «solo el hormigón» de cada plaza, sin la tabla grande.
+      secciones:[['resumen','Resumen por plaza',1],['cantidades','Cantidades de obra — todo junto en una tabla',1],
+                 ['cantColumnas','Solo columnas',0],['cantLuminarias','Solo luminarias',0],['cantVinculos','Solo vínculos (por tipo)',0],
+                 ['cantCables','Solo cables (metros, por sección)',0],['cantZanjeo','Solo zanjeo y cruces de calle',0],
+                 ['cantHormigon','Solo hormigón de fundaciones',0],['cantTableros','Solo tableros y acometida',0],['cantPat','Solo puesta a tierra (jabalinas)',0],
+                 ['detalle','Detalle ítem por ítem de cada plaza',1],
                  ['consolidado','Consolidado por ítem (todas juntas)',0]],
       importes:true,
       construir: infItemizado },
@@ -24612,11 +24617,55 @@ const ITEMIZADO_EPEC = [
     // ---- Cantidades de obra (2026-09-07) ----
     // Cuánto hay de cada cosa en cada plaza y en total. Es la pregunta que se hace cuando lo que
     // importa no es la plata sino la obra: cuántas columnas van, cuántos artefactos, cuánto cable.
-    if(o.sec.cantidades || o.sec.cantdet){
+    const SEC_CANT = ['cantidades','cantColumnas','cantLuminarias','cantVinculos','cantCables','cantZanjeo','cantHormigon','cantTableros','cantPat','cantdet'];
+    if(SEC_CANT.some(k=> o.sec[k])){
       const cants = o.items.map((a,i)=>({ a, n:i+1, c: cantidadesDe(a) }));
       const sum = campo => cants.reduce((t,x)=> t + n2(x.c[campo]), 0);
       const hayHormigon = sum('hormigon') > 0;
       const sinHormigon = cants.filter(x=> x.c.hormigon <= 0 && (x.c.colMet + x.c.colPrfv) > 0).length;
+      // Una tabla chica por rubro: N°, plaza, ID y las columnas de ese rubro, con su TOTAL.
+      const cab = [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'}];
+      const filaBase = x => [N(x.n,'int'), x.a.nombre||'', String(x.a.obraId||'—')];
+      const pieBase = ['', 'TOTAL', ''];
+      const rubro = (tit, hint, cols, celdas, tot) => m.secciones.push(tabla(tit, hint, cab.concat(cols), cants.map(x=> filaBase(x).concat(celdas(x))), [pieBase.concat(tot())]));
+      const I = v => N(v,'int'), C = v => N(v,'cant');
+      if(o.sec.cantColumnas) rubro('Columnas', 'Columnas nuevas del itemizado (ítems 1 a 8) y existentes reacondicionadas (ítem 41).',
+        [{t:'Metálicas', num:true},{t:'PRFV', num:true},{t:'Nuevas (total)', num:true},{t:'Existentes (ítem 41)', num:true}],
+        x=>[I(x.c.colMet), I(x.c.colPrfv), I(x.c.colMet + x.c.colPrfv), I(x.c.colExist)],
+        ()=>[I(sum('colMet')), I(sum('colPrfv')), I(sum('colMet')+sum('colPrfv')), I(sum('colExist'))]);
+      if(o.sec.cantLuminarias) rubro('Luminarias', 'Un artefacto por brazo: 1 por columna simple, 2 por doble, 3 por triple, 4 por cuádruple (ítems 1 a 8), más las montadas sobre columna existente (ítem 44).',
+        [{t:'En columna nueva', num:true},{t:'Sobre existente (ítem 44)', num:true},{t:'Luminarias (total)', num:true}],
+        x=>[I(x.c.lum - n2(itemsDe(x.a).filter(f=>f.id==='44').reduce((t,f)=>t+n2(f.v.cantidad),0))), I(itemsDe(x.a).filter(f=>f.id==='44').reduce((t,f)=>t+n2(f.v.cantidad),0)), I(x.c.lum)],
+        ()=>{ const ex = cants.reduce((t,x)=> t + itemsDe(x.a).filter(f=>f.id==='44').reduce((u,f)=>u+n2(f.v.cantidad),0), 0); return [I(sum('lum')-ex), I(ex), I(sum('lum'))]; });
+      if(o.sec.cantVinculos) rubro('Vínculos por tipo', 'Un vínculo por columna nueva. El tipo lo dice el ítem con el que se certifica.',
+        [{t:'Simple (1 brazo)', num:true},{t:'Doble (2)', num:true},{t:'Triple (3)', num:true},{t:'Cuádruple (4, 10 m)', num:true},{t:'Total', num:true}],
+        x=>[I(x.c.vinc.simple), I(x.c.vinc.doble), I(x.c.vinc.triple), I(x.c.vinc.cuad), I(x.c.vincTotal)],
+        ()=>[I(cants.reduce((t,x)=>t+x.c.vinc.simple,0)), I(cants.reduce((t,x)=>t+x.c.vinc.doble,0)), I(cants.reduce((t,x)=>t+x.c.vinc.triple,0)), I(cants.reduce((t,x)=>t+x.c.vinc.cuad,0)), I(sum('vincTotal'))]);
+      if(o.sec.cantZanjeo) rubro('Zanjeo y cruces de calle', 'En metros. Zanjeo: ítems 15 a 20. Cruces: ítems 21 a 24.',
+        [{t:'Zanjeo (m)', num:true},{t:'Cruces de calle (m)', num:true},{t:'Total abierto (m)', num:true}],
+        x=>[C(x.c.zanjeo), C(x.c.cruce), C(x.c.zanjeo + x.c.cruce)],
+        ()=>[C(sum('zanjeo')), C(sum('cruce')), C(sum('zanjeo')+sum('cruce'))]);
+      if(o.sec.cantHormigon){
+        rubro('Hormigón de fundaciones', 'En m³. No tiene ítem propio en el Anexo I (está adentro de los ítems 1 a 8), así que se lee del cómputo de la Calculadora de cada plaza.',
+          [{t:'Columnas nuevas', num:true},{t:'Hormigón (m³)', num:true},{t:'m³ por columna', num:true}],
+          x=>[I(x.c.colMet + x.c.colPrfv), x.c.hormigon > 0 ? C(x.c.hormigon) : '—', (x.c.hormigon > 0 && (x.c.colMet + x.c.colPrfv) > 0) ? C(x.c.hormigon / (x.c.colMet + x.c.colPrfv)) : '—'],
+          ()=>[I(sum('colMet')+sum('colPrfv')), hayHormigon ? C(sum('hormigon')) : '—', (hayHormigon && (sum('colMet')+sum('colPrfv')) > 0) ? C(sum('hormigon')/(sum('colMet')+sum('colPrfv'))) : '—']);
+        if(sinHormigon) m.avisos.push(`El <b>hormigón</b> de <b>${sinHormigon}</b> plaza(s) sale en cero porque no tienen cargado el listado de materiales del cómputo. Calculalas en la Calculadora y volvé a generar el informe.`);
+      }
+      if(o.sec.cantTableros) rubro('Tableros y acometida', 'Tableros: aéreo (ítem 9) y a nivel (ítem 10). Acometida EPEC ↔ tablero en metros (ítems 11 y 12).',
+        [{t:'Tablero aéreo', num:true},{t:'Tablero a nivel', num:true},{t:'Tableros (total)', num:true},{t:'Acometida (m)', num:true}],
+        x=>[I(x.c.tabAereo), I(x.c.tabNivel), I(x.c.tabTotal), C(x.c.acometida)],
+        ()=>[I(sum('tabAereo')), I(sum('tabNivel')), I(sum('tabTotal')), C(sum('acometida'))]);
+      if(o.sec.cantPat) rubro('Puesta a tierra', 'Jabalinas: ítem 88 (provisión) o, si no está, ítem 75 (dispersor). Medición de PAT: ítem 81.',
+        [{t:'Jabalinas', num:true},{t:'Mediciones de PAT (ítem 81)', num:true}],
+        x=>[I(x.c.jabalinas), I(itemsDe(x.a).filter(f=>f.id==='81').reduce((t,f)=>t+n2(f.v.cantidad),0))],
+        ()=>[I(sum('jabalinas')), I(cants.reduce((t,x)=> t + itemsDe(x.a).filter(f=>f.id==='81').reduce((u,f)=>u+n2(f.v.cantidad),0), 0))]);
+      if(o.sec.cantCables){
+        rubro('Cables — metros por plaza', 'Total de cable de los ítems 25 a 40 (tendido en zanja y en columna).',
+          [{t:'Cable (m)', num:true},{t:'Secciones distintas', num:true}],
+          x=>[C(x.c.cableM), I(Object.keys(x.c.cablePorSec).length)],
+          ()=>[C(sum('cableM')), '']);
+      }
 
       if(o.sec.cantidades){
         m.secciones.push(tabla('Cantidades de obra',
@@ -24634,7 +24683,7 @@ const ITEMIZADO_EPEC = [
         if(sinHormigon) m.avisos.push(`El <b>hormigón</b> de <b>${sinHormigon}</b> plaza(s) sale en cero porque no tienen cargado el listado de materiales del cómputo. Calculalas en la Calculadora y volvé a generar el informe — el resto de las cantidades no depende de eso.`);
       }
 
-      if(o.sec.cantdet){
+      if(o.sec.cantdet && !o.sec.cantVinculos){
         m.secciones.push(tabla('Vínculos por tipo',
           'Un vínculo por columna nueva. El tipo lo dice el ítem con el que se certifica.',
           [{t:'Plaza / obra'},{t:'Simple (1 brazo)', num:true},{t:'Doble (2)', num:true},
@@ -24644,7 +24693,8 @@ const ITEMIZADO_EPEC = [
           [['TOTAL', N(cants.reduce((t,x)=>t+x.c.vinc.simple,0),'int'), N(cants.reduce((t,x)=>t+x.c.vinc.doble,0),'int'),
             N(cants.reduce((t,x)=>t+x.c.vinc.triple,0),'int'), N(cants.reduce((t,x)=>t+x.c.vinc.cuad,0),'int'),
             N(sum('vincTotal'),'int')]]));
-
+      }
+      if(o.sec.cantdet || o.sec.cantCables){
         // Los cables sumados en un solo número no sirven para comprar: 300 m de 4×2,5 y 300 m de
         // 4×16 no son la misma plata ni el mismo rollo. Acá van abiertos por sección.
         const secs = new Set();
