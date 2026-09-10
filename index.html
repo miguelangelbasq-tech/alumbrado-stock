@@ -2871,7 +2871,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-10 12:04 · 4996b5</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-10 12:16 · 41b90e</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -24067,7 +24067,11 @@ const ITEMIZADO_EPEC = [
     return {
       colMet: g('1')+g('2')+g('3')+g('4'),
       colPrfv: g('5')+g('6')+g('7')+g('8'),
-      colExist: g('41'),
+      // Por altura (2026-09-10): 7 m = ítems 1-3 y 5-7; 10 m = ítems 4 y 8.
+      colMet7: g('1')+g('2')+g('3'), colMet10: g('4'),
+      colPrfv7: g('5')+g('6')+g('7'), colPrfv10: g('8'),
+      // Existentes: restauradas (ítem 41), con acometida nueva (42), aplomadas (43), con luminaria nueva (44).
+      colExist: g('41'), colAcomExist: g('42'), colAplom: g('43'), colLumExist: g('44'),
       lum: g('1')+2*g('2')+3*g('3')+4*g('4') + g('5')+2*g('6')+3*g('7')+4*g('8') + g('44'),
       vinc, vincTotal: vinc.simple + vinc.doble + vinc.triple + vinc.cuad,
       tabAereo: g('9'), tabNivel: g('10'), tabTotal: g('9') + g('10'),
@@ -24629,10 +24633,21 @@ const ITEMIZADO_EPEC = [
       const pieBase = ['', 'TOTAL', ''];
       const rubro = (tit, hint, cols, celdas, tot) => m.secciones.push(tabla(tit, hint, cab.concat(cols), cants.map(x=> filaBase(x).concat(celdas(x))), [pieBase.concat(tot())]));
       const I = v => N(v,'int'), C = v => N(v,'cant');
-      if(o.sec.cantColumnas) rubro('Columnas', 'Columnas nuevas del itemizado (ítems 1 a 8) y existentes reacondicionadas (ítem 41).',
-        [{t:'Metálicas', num:true},{t:'PRFV', num:true},{t:'Nuevas (total)', num:true},{t:'Existentes (ítem 41)', num:true}],
-        x=>[I(x.c.colMet), I(x.c.colPrfv), I(x.c.colMet + x.c.colPrfv), I(x.c.colExist)],
-        ()=>[I(sum('colMet')), I(sum('colPrfv')), I(sum('colMet')+sum('colPrfv')), I(sum('colExist'))]);
+      if(o.sec.cantColumnas){
+        rubro('Columnas nuevas — por tipo y altura', 'Ítems 1 a 8 del Anexo I. Metálicas 7 m: ítems 1, 2 y 3 (1, 2 y 3 brazos) · metálica 10 m: ítem 4 · PRFV 7 m: ítems 5, 6 y 7 · PRFV 10 m: ítem 8.',
+          [{t:'Metálica 7 m', num:true},{t:'Metálica 10 m', num:true},{t:'Metálicas', num:true},{t:'PRFV 7 m', num:true},{t:'PRFV 10 m', num:true},{t:'PRFV', num:true},{t:'Nuevas (total)', num:true}],
+          x=>[I(x.c.colMet7), I(x.c.colMet10), I(x.c.colMet), I(x.c.colPrfv7), I(x.c.colPrfv10), I(x.c.colPrfv), I(x.c.colMet + x.c.colPrfv)],
+          ()=>[I(sum('colMet7')), I(sum('colMet10')), I(sum('colMet')), I(sum('colPrfv7')), I(sum('colPrfv10')), I(sum('colPrfv')), I(sum('colMet')+sum('colPrfv'))]);
+        rubro('Columnas existentes — restauradas', 'Lo que se hace sobre columnas que ya estaban: restauración (ítem 41), acometida subterránea nueva con BPN y portafusible (ítem 42), aplomado (ítem 43) y luminaria LED montada sobre la columna existente (ítem 44).',
+          [{t:'Restauradas (41)', num:true},{t:'Acometida nueva (42)', num:true},{t:'Aplomadas (43)', num:true},{t:'Con luminaria nueva (44)', num:true}],
+          x=>[I(x.c.colExist), I(x.c.colAcomExist), I(x.c.colAplom), I(x.c.colLumExist)],
+          ()=>[I(sum('colExist')), I(sum('colAcomExist')), I(sum('colAplom')), I(sum('colLumExist'))]);
+        // Brazos por columna (1, 2, 3 o 4): es la misma cuenta que los vínculos, vista desde la columna.
+        rubro('Columnas nuevas — por cantidad de brazos', 'Cuántas columnas van con 1, 2, 3 o 4 brazos, metálicas y PRFV juntas.',
+          [{t:'1 brazo', num:true},{t:'2 brazos', num:true},{t:'3 brazos', num:true},{t:'4 brazos (10 m)', num:true}],
+          x=>[I(x.c.vinc.simple), I(x.c.vinc.doble), I(x.c.vinc.triple), I(x.c.vinc.cuad)],
+          ()=>[I(cants.reduce((t,x)=>t+x.c.vinc.simple,0)), I(cants.reduce((t,x)=>t+x.c.vinc.doble,0)), I(cants.reduce((t,x)=>t+x.c.vinc.triple,0)), I(cants.reduce((t,x)=>t+x.c.vinc.cuad,0))]);
+      }
       if(o.sec.cantLuminarias) rubro('Luminarias', 'Un artefacto por brazo: 1 por columna simple, 2 por doble, 3 por triple, 4 por cuádruple (ítems 1 a 8), más las montadas sobre columna existente (ítem 44).',
         [{t:'En columna nueva', num:true},{t:'Sobre existente (ítem 44)', num:true},{t:'Luminarias (total)', num:true}],
         x=>[I(x.c.lum - n2(itemsDe(x.a).filter(f=>f.id==='44').reduce((t,f)=>t+n2(f.v.cantidad),0))), I(itemsDe(x.a).filter(f=>f.id==='44').reduce((t,f)=>t+n2(f.v.cantidad),0)), I(x.c.lum)],
@@ -24670,14 +24685,14 @@ const ITEMIZADO_EPEC = [
       if(o.sec.cantidades){
         m.secciones.push(tabla('Cantidades de obra',
           'Sale del itemizado de cada plaza, que es lo que se certifica. El hormigón es la excepción: no tiene ítem propio en el Anexo I (está adentro de los ítems 1 a 8), así que se lee del cómputo de la Calculadora.',
-          [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'Col. metálicas', num:true},{t:'Col. PRFV', num:true},
+          [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'Col. metálicas', num:true},{t:'Col. PRFV', num:true},{t:'Col. restauradas', num:true},
            {t:'Luminarias', num:true},{t:'Vínculos', num:true},{t:'Tableros', num:true},
            {t:'Cable (m)', num:true},{t:'Zanjeo (m)', num:true},{t:'Hormigón (m³)', num:true},{t:'Jabalinas', num:true}],
-          cants.map(x=>[N(x.n,'int'), x.a.nombre||'', N(x.c.colMet,'int'), N(x.c.colPrfv,'int'),
+          cants.map(x=>[N(x.n,'int'), x.a.nombre||'', N(x.c.colMet,'int'), N(x.c.colPrfv,'int'), N(x.c.colExist,'int'),
                         N(x.c.lum,'int'), N(x.c.vincTotal,'int'), N(x.c.tabTotal,'int'),
                         N(x.c.cableM,'cant'), N(x.c.zanjeo,'cant'),
                         x.c.hormigon > 0 ? N(x.c.hormigon,'cant') : '—', N(x.c.jabalinas,'int')]),
-          [['', 'TOTAL', N(sum('colMet'),'int'), N(sum('colPrfv'),'int'), N(sum('lum'),'int'),
+          [['', 'TOTAL', N(sum('colMet'),'int'), N(sum('colPrfv'),'int'), N(sum('colExist'),'int'), N(sum('lum'),'int'),
             N(sum('vincTotal'),'int'), N(sum('tabTotal'),'int'), N(sum('cableM'),'cant'),
             N(sum('zanjeo'),'cant'), hayHormigon ? N(sum('hormigon'),'cant') : '—', N(sum('jabalinas'),'int')]]));
         if(sinHormigon) m.avisos.push(`El <b>hormigón</b> de <b>${sinHormigon}</b> plaza(s) sale en cero porque no tienen cargado el listado de materiales del cómputo. Calculalas en la Calculadora y volvé a generar el informe — el resto de las cantidades no depende de eso.`);
