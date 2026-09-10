@@ -2586,6 +2586,10 @@
               border-radius:0 8px 8px 0; padding:11px 15px; font-size:12.5px; line-height:1.6;
               color:var(--navy); }
   .it-tabla input.ep-cant{ width:84px; text-align:right; }
+  .ep-alt{ display:flex; align-items:center; gap:8px 12px; flex-wrap:wrap; margin-top:6px; font-size:11.5px; color:var(--text-soft); }
+  .ep-alt label{ display:flex; align-items:center; gap:5px; margin:0; font-size:11.5px; font-weight:600; color:var(--text); }
+  .ep-alt input{ width:58px; margin:0; padding:4px 6px; font-size:12px; text-align:right; }
+  .ep-alt-aviso{ color:#8a5a0c; font-weight:700; }
   /* ---- El total del itemizado, arriba de la lista (2026-09-07) ---- */
   .ep-tot{ border:1px solid var(--teal-dark); border-radius:14px; background:rgba(126,198,230,.09);
            padding:14px 16px; margin-bottom:14px; }
@@ -2871,7 +2875,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-10 12:16 · 41b90e</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-10 12:31 · 01be3e</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -21487,6 +21491,19 @@ const ITEMIZADO_EPEC = [
     return h;
   }
 
+  // Restauradas por altura (2026-09-10). El Anexo I tiene un solo ítem (41) para reacondicionar
+  // columnas existentes, sin distinguir 7 de 10 m; el usuario quiere verlo igual en el informe de
+  // columnas. Es un dato de control propio (`a.restauradasAltura = {m7, m10}`), no cambia el cobro.
+  function epAlturasHtml(a, cant, dis){
+    const r = a.restauradasAltura || {};
+    const m7 = n2(r.m7), m10 = n2(r.m10), suma = m7 + m10;
+    const aviso = (suma > 0 && cant > 0 && Math.abs(suma - cant) > 0.001) ? `<span class="ep-alt-aviso">⚠ suman ${fmt(suma,0)}, la cantidad es ${fmt(cant,0)}</span>` : (cant > 0 && suma === 0 ? `<span class="ep-alt-aviso">sin altura cargada</span>` : '');
+    return `<div class="ep-alt" title="Solo para el informe de columnas: cuántas de las restauradas son de 7 m y cuántas de 10 m. El pliego las cobra igual.">
+      <span>Por altura:</span>
+      <label><input type="number" min="0" step="1" class="ep-alt-inp" data-alt="m7" value="${m7||''}" placeholder="0" ${dis}> de 7 m</label>
+      <label><input type="number" min="0" step="1" class="ep-alt-inp" data-alt="m10" value="${m10||''}" placeholder="0" ${dis}> de 10 m</label>
+      ${aviso}</div>`;
+  }
   function detallePlazaEpec(a){
     const filas = itemsEpecDePlaza(a);
     const edit = puedeEditar();
@@ -21578,6 +21595,7 @@ const ITEMIZADO_EPEC = [
             <button type="button" class="it-tit-btn" data-ver="${esc(it.id)}" title="Tocá para ver todo lo que incluye este ítem"><b>Ítem ${esc(it.id)} — ${esc(it.desc)}</b> <span class="it-tit-i">ⓘ</span></button>
             <div class="it-cat">${esc(it.cat)}</div>
             ${notaItemHtml(it.id, it)}
+            ${String(it.id) === '41' ? epAlturasHtml(a, cant, dis) : ''}
           </td>
           <td class="qty"><b>${fmt(it.k,2)}</b><div class="it-un">/ ${esc(it.un)}</div></td>
           ${coFijado ? CO.columnasTd(a, f.ref) : ''}
@@ -22256,8 +22274,19 @@ const ITEMIZADO_EPEC = [
       siTimer = setTimeout(()=>{ if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a); }, 600);
       return true;
     }
+    let altTimer = null;
     panelEp.addEventListener('input', (e)=>{
       if(siEditar(e)) return;
+      const alt = e.target.closest('.ep-alt-inp');
+      if(alt){
+        const tr = alt.closest('tr');
+        const a = obras().find(x=>String(x.id)===tr.dataset.plaza); if(!a) return;
+        if(!a.restauradasAltura) a.restauradasAltura = { m7:0, m10:0 };
+        a.restauradasAltura[alt.dataset.alt] = Math.max(0, Math.round(n2(alt.value)));
+        clearTimeout(altTimer);
+        altTimer = setTimeout(()=>{ if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a); renderEpec(); }, 700);
+        return;
+      }
       const cant = e.target.closest('.ep-cant');
       if(cant){
         const tr = cant.closest('tr');
@@ -24072,6 +24101,8 @@ const ITEMIZADO_EPEC = [
       colPrfv7: g('5')+g('6')+g('7'), colPrfv10: g('8'),
       // Existentes: restauradas (ítem 41), con acometida nueva (42), aplomadas (43), con luminaria nueva (44).
       colExist: g('41'), colAcomExist: g('42'), colAplom: g('43'), colLumExist: g('44'),
+      // Altura de las restauradas: dato propio cargado en el Itemizado 2026 (fila del ítem 41).
+      colExist7: n2((a.restauradasAltura||{}).m7), colExist10: n2((a.restauradasAltura||{}).m10),
       lum: g('1')+2*g('2')+3*g('3')+4*g('4') + g('5')+2*g('6')+3*g('7')+4*g('8') + g('44'),
       vinc, vincTotal: vinc.simple + vinc.doble + vinc.triple + vinc.cuad,
       tabAereo: g('9'), tabNivel: g('10'), tabTotal: g('9') + g('10'),
@@ -24634,19 +24665,23 @@ const ITEMIZADO_EPEC = [
       const rubro = (tit, hint, cols, celdas, tot) => m.secciones.push(tabla(tit, hint, cab.concat(cols), cants.map(x=> filaBase(x).concat(celdas(x))), [pieBase.concat(tot())]));
       const I = v => N(v,'int'), C = v => N(v,'cant');
       if(o.sec.cantColumnas){
-        rubro('Columnas nuevas — por tipo y altura', 'Ítems 1 a 8 del Anexo I. Metálicas 7 m: ítems 1, 2 y 3 (1, 2 y 3 brazos) · metálica 10 m: ítem 4 · PRFV 7 m: ítems 5, 6 y 7 · PRFV 10 m: ítem 8.',
-          [{t:'Metálica 7 m', num:true},{t:'Metálica 10 m', num:true},{t:'Metálicas', num:true},{t:'PRFV 7 m', num:true},{t:'PRFV 10 m', num:true},{t:'PRFV', num:true},{t:'Nuevas (total)', num:true}],
-          x=>[I(x.c.colMet7), I(x.c.colMet10), I(x.c.colMet), I(x.c.colPrfv7), I(x.c.colPrfv10), I(x.c.colPrfv), I(x.c.colMet + x.c.colPrfv)],
-          ()=>[I(sum('colMet7')), I(sum('colMet10')), I(sum('colMet')), I(sum('colPrfv7')), I(sum('colPrfv10')), I(sum('colPrfv')), I(sum('colMet')+sum('colPrfv'))]);
-        rubro('Columnas existentes — restauradas', 'Lo que se hace sobre columnas que ya estaban: restauración (ítem 41), acometida subterránea nueva con BPN y portafusible (ítem 42), aplomado (ítem 43) y luminaria LED montada sobre la columna existente (ítem 44).',
-          [{t:'Restauradas (41)', num:true},{t:'Acometida nueva (42)', num:true},{t:'Aplomadas (43)', num:true},{t:'Con luminaria nueva (44)', num:true}],
-          x=>[I(x.c.colExist), I(x.c.colAcomExist), I(x.c.colAplom), I(x.c.colLumExist)],
-          ()=>[I(sum('colExist')), I(sum('colAcomExist')), I(sum('colAplom')), I(sum('colLumExist'))]);
-        // Brazos por columna (1, 2, 3 o 4): es la misma cuenta que los vínculos, vista desde la columna.
-        rubro('Columnas nuevas — por cantidad de brazos', 'Cuántas columnas van con 1, 2, 3 o 4 brazos, metálicas y PRFV juntas.',
-          [{t:'1 brazo', num:true},{t:'2 brazos', num:true},{t:'3 brazos', num:true},{t:'4 brazos (10 m)', num:true}],
-          x=>[I(x.c.vinc.simple), I(x.c.vinc.doble), I(x.c.vinc.triple), I(x.c.vinc.cuad)],
-          ()=>[I(cants.reduce((t,x)=>t+x.c.vinc.simple,0)), I(cants.reduce((t,x)=>t+x.c.vinc.doble,0)), I(cants.reduce((t,x)=>t+x.c.vinc.triple,0)), I(cants.reduce((t,x)=>t+x.c.vinc.cuad,0))]);
+        // Una sola tabla (pedido 2026-09-10): nuevas y restauradas, con sus alturas, cantidad por plaza.
+        // Las restauradas son un solo ítem del pliego (41, sin altura): su 7 m / 10 m sale de lo que
+        // se cargó en la fila del ítem 41 del Itemizado 2026; si no está cargado, va «—» y se avisa.
+        const altOk = x => x.c.colExist <= 0 || (x.c.colExist7 + x.c.colExist10) > 0;
+        const sinAlt = cants.filter(x=> !altOk(x)).length;
+        const desc7 = x => altOk(x) ? I(x.c.colExist7) : '—', desc10 = x => altOk(x) ? I(x.c.colExist10) : '—';
+        rubro('Columnas — nuevas y restauradas, por altura',
+          'Nuevas: ítems 1 a 8 (metálica 7 m = ítems 1, 2 y 3 · metálica 10 m = ítem 4 · PRFV 7 m = ítems 5, 6 y 7 · PRFV 10 m = ítem 8). Restauradas: ítem 41 (el pliego no distingue altura; el 7 m / 10 m es el dato cargado en la fila del ítem 41 del Itemizado 2026).',
+          [{t:'Metálica 7 m', num:true},{t:'Metálica 10 m', num:true},{t:'PRFV 7 m', num:true},{t:'PRFV 10 m', num:true},{t:'Nuevas', num:true},
+           {t:'Restaurada 7 m', num:true},{t:'Restaurada 10 m', num:true},{t:'Restauradas', num:true},{t:'Total columnas', num:true}],
+          x=>[I(x.c.colMet7), I(x.c.colMet10), I(x.c.colPrfv7), I(x.c.colPrfv10), I(x.c.colMet + x.c.colPrfv),
+              desc7(x), desc10(x), I(x.c.colExist), I(x.c.colMet + x.c.colPrfv + x.c.colExist)],
+          ()=>[I(sum('colMet7')), I(sum('colMet10')), I(sum('colPrfv7')), I(sum('colPrfv10')), I(sum('colMet')+sum('colPrfv')),
+               I(sum('colExist7')), I(sum('colExist10')), I(sum('colExist')), I(sum('colMet')+sum('colPrfv')+sum('colExist'))]);
+        if(sinAlt) m.avisos.push(`<b>${sinAlt}</b> plaza(s) tienen columnas restauradas <b>sin la altura cargada</b>: en el Itemizado 2026, en la fila del ítem 41, completá cuántas son de 7 m y cuántas de 10 m.`);
+        const mal = cants.filter(x=> x.c.colExist > 0 && (x.c.colExist7 + x.c.colExist10) > 0 && Math.abs(x.c.colExist7 + x.c.colExist10 - x.c.colExist) > 0.001).map(x=>x.a.nombre);
+        if(mal.length) m.avisos.push(`En ${mal.map(esc).join(', ')} las restauradas por altura <b>no suman</b> lo del ítem 41: revisá la fila del ítem 41.`);
       }
       if(o.sec.cantLuminarias) rubro('Luminarias', 'Un artefacto por brazo: 1 por columna simple, 2 por doble, 3 por triple, 4 por cuádruple (ítems 1 a 8), más las montadas sobre columna existente (ítem 44).',
         [{t:'En columna nueva', num:true},{t:'Sobre existente (ítem 44)', num:true},{t:'Luminarias (total)', num:true}],
