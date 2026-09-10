@@ -802,6 +802,29 @@
   }
   .act-item-head select{margin:0; flex:1;}
   .act-item textarea{min-height:90px; font-size:13px;}
+  /* ---- La lista única de tareas de la orden (2026-09-10) ---- */
+  .ot-tareas-filtro{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:10px; }
+  .ot-tareas-filtro input{ flex:1; min-width:180px; margin:0; }
+  .ot-fase{ margin-top:12px; }
+  .ot-fase-tit{ font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:var(--text-soft); margin:0 0 6px; display:flex; align-items:center; gap:8px; }
+  .ot-fase-tit .n{ font-weight:700; color:var(--teal-dark); }
+  .ot-tarea{ display:grid; grid-template-columns:auto 1fr; align-items:center; gap:4px 10px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--panel); margin-bottom:6px; cursor:pointer; }
+  .ot-tarea input[type="checkbox"]{ margin:0; width:17px; height:17px; flex:none; cursor:pointer; }
+  .ot-tarea.on{ background:rgba(126,198,230,.14); border-color:var(--teal); }
+  .ot-tarea .ot-tarea-lbl{ font-size:13px; font-weight:600; color:var(--text); }
+  .ot-tarea .ot-tarea-sub{ font-size:11px; color:var(--text-soft); font-weight:500; margin-top:1px; }
+  .ot-tarea .ot-tarea-prev{ display:none; grid-column:2; align-items:center; gap:6px; font-size:11.5px; color:var(--text-soft); margin-top:2px; }
+  .ot-tarea.on .ot-tarea-prev{ display:flex; }
+  .ot-tarea .ot-tarea-prev input{ width:72px; margin:0; padding:5px 7px; font-size:12.5px; text-align:right; }
+  .ot-tarea .ot-pasos-btn{ background:none; border:0; color:var(--teal-dark); font-size:11.5px; font-weight:700; cursor:pointer; padding:0; margin:0; width:auto; min-height:0; text-decoration:underline; }
+  .ot-tarea .ot-pasos{ grid-column:1 / -1; display:none; font-size:12px; color:var(--text); background:#fff; border:1px solid var(--border); border-radius:8px; padding:8px 10px 8px 26px; margin:2px 0 0; }
+  .ot-tarea .ot-pasos.ver{ display:block; }
+  .ot-tarea .ot-pasos li{ margin-bottom:2px; }
+  .ot-otra-tarea{ margin-top:14px; border-top:1px dashed var(--border); padding-top:10px; }
+  .ot-otra-tit{ font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:var(--text-soft); margin-bottom:6px; }
+  .ot-otra-fila{ display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:center; margin-bottom:8px; }
+  .ot-otra-fila input{ margin:0; }
+  @media (max-width:640px){ .ot-otra-fila{ grid-template-columns:1fr auto; } .ot-otra-fila input[data-field="detalle"]{ grid-column:1 / -1; } }
   textarea{
     width:100%;
     padding:9px 10px;
@@ -1581,6 +1604,59 @@
               padding:10px 14px; font-size:12.5px; line-height:1.55; margin-bottom:10px; }
   .inf-nada{ text-align:center; padding:26px; border:1px dashed var(--line); border-radius:12px; color:var(--text-soft); }
 
+  /* ---------- Gastos de obra (2026-09-10) ---------- */
+  .ga-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .ga-buscar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:12px 0 4px; }
+  .ga-buscar input{ flex:1; min-width:200px; margin:0; }
+  .ga-tabla-wrap{ overflow-x:auto; margin-top:10px; }
+  .ga-tabla{ width:100%; border-collapse:collapse; font-size:13px; }
+  .ga-tabla th, .ga-tabla td{ border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; vertical-align:middle; white-space:nowrap; }
+  .ga-tabla th{ background:var(--bg-soft); font-weight:700; color:var(--navy); font-size:11.5px; text-transform:uppercase; letter-spacing:.3px; position:sticky; top:0; }
+  .ga-tabla td.num, .ga-tabla th.num{ text-align:right; font-variant-numeric:tabular-nums; }
+  .ga-tabla td.nombre{ white-space:normal; min-width:180px; font-weight:700; color:var(--navy); }
+  .ga-tabla tr.ga-fila{ cursor:pointer; }
+  .ga-tabla tr.ga-fila:hover td{ background:rgba(56,189,248,.08); }
+  .ga-tabla tfoot td{ font-weight:800; background:rgba(126,198,230,.14); color:var(--navy); }
+  .ga-tabla td.desc{ white-space:normal; min-width:200px; }
+  .ga-pend{ display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; background:rgba(224,140,26,.16); color:#8a5a0c; }
+  .ga-ok{ display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; background:rgba(5,150,105,.12); color:#047857; }
+  .ga-margen-pos{ color:#047857; font-weight:700; }
+  .ga-margen-neg{ color:var(--danger); font-weight:700; }
+  .ga-cats{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin:12px 0 6px; }
+  .ga-cat{ background:var(--bg-soft); border:1px solid var(--line); border-radius:12px; padding:10px 12px; }
+  .ga-cat .ga-cat-n{ font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:17px; font-weight:700; color:var(--navy); }
+  .ga-cat .ga-cat-l{ font-size:11px; color:var(--text-soft); font-weight:600; margin-top:3px; }
+  .ga-cat.auto{ border-style:dashed; }
+  .ga-sec{ margin-top:18px; }
+  .ga-sec-tit{ font-size:14px; font-weight:800; color:var(--navy); margin:0 0 2px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ga-sec-tit .auto-tag{ font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:20px; background:rgba(37,99,235,.10); color:#1d4ed8; text-transform:uppercase; letter-spacing:.3px; }
+  .ga-form{ display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px 14px; margin-top:10px; }
+  .ga-form label{ margin:0 0 4px; font-size:12px; }
+  .ga-form input, .ga-form select{ margin:0; }
+  .ga-form .ancho{ grid-column:1 / -1; }
+  .ga-total-form{ font-family:var(--mono); font-variant-numeric:tabular-nums; font-weight:700; color:var(--navy); font-size:15px; align-self:end; padding:9px 0; }
+  .ga-volver{ margin:0 0 10px; }
+  .ga-aviso{ border-left:4px solid var(--amber); background:rgba(240,183,74,.10); border-radius:0 8px 8px 0; padding:10px 14px; font-size:12.5px; line-height:1.55; margin:10px 0; }
+  .ga-aviso.rojo{ border-left-color:var(--danger); background:rgba(220,38,38,.07); }
+  .ga-aviso a, #viewGastos button.link{ color:var(--teal-dark); font-weight:700; background:none; border:0; padding:0; margin:0; width:auto; box-shadow:none; cursor:pointer; font:inherit; font-size:12.5px; text-decoration:underline; min-height:0; }
+  .ga-borrar{ background:none; border:0; color:var(--danger); cursor:pointer; font-size:15px; padding:2px 6px; }
+  .ga-vacio{ text-align:center; padding:22px; border:1px dashed var(--line); border-radius:12px; color:var(--text-soft); font-size:13px; }
+  #viewGastos .inf-tile{ min-width:0; overflow:hidden; }
+  #viewGastos .inf-num{ overflow-wrap:anywhere; }
+  @media (max-width:760px){
+    .ga-tabla{ font-size:12px; }
+    .ga-tabla th, .ga-tabla td{ padding:7px 8px; }
+    #viewGastos .inf-num{ font-size:18px; letter-spacing:-.5px; }
+    .ga-cat .ga-cat-n{ font-size:15px; }
+  }
+  @media (max-width:480px){
+    /* En el celular los importes grandes no entran de a dos por fila: un cuadro por fila. */
+    #viewGastos .inf-tiles{ grid-template-columns:1fr; gap:10px; }
+    #viewGastos .inf-tile{ padding:12px 14px; }
+    #viewGastos .inf-num{ font-size:20px; }
+    .ga-cats{ grid-template-columns:1fr 1fr; }
+  }
+
   @media (max-width:900px){
     .inf-tiles{ grid-template-columns:repeat(2, 1fr); }
   }
@@ -1749,9 +1825,10 @@
   .per-aviso{ border-radius:10px; padding:9px 12px; font-size:12.5px; line-height:1.5; margin-bottom:10px; }
   .per-aviso.ambar{ background:#fffbeb; border:1px solid #f0d090; color:#7a5a12; }
   .per-aviso.rojo { background:#fef2f2; border:1px solid #f3b4b4; color:#9b1c1c; }
-  #tablaPersonal input[type="text"], #tablaPersonal select{ padding:7px 9px; font-size:13px; }
+  #tablaPersonal input[type="text"], #tablaPersonal input[type="number"], #tablaPersonal select{ padding:7px 9px; font-size:13px; }
+  .per-valor{ font-variant-numeric:tabular-nums; text-align:right; }
   .per-legajo{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
-  .per-legajo.falta{ background:#fffbeb; border-color:#e8c96a; }
+  .per-legajo.falta, .per-valor.falta{ background:#fffbeb; border-color:#e8c96a; }
   .prod-legajo{ font-family:var(--mono); font-weight:700; color:var(--teal-dark); }
   .prod-sinlegajo{ color:var(--amber); font-weight:700; }
 
@@ -1780,6 +1857,15 @@
   .cierre-cant{ display:flex; align-items:center; gap:6px; }
   .cierre-cant input{ width:82px; text-align:right; }
   .cierre-cant span{ font-size:11.5px; color:var(--text-soft); }
+  .cierre-horas{ display:flex; align-items:center; gap:4px; }
+  .cierre-horas input{ width:78px; margin:0; padding:5px 6px; font-size:12.5px; }
+  .cierre-horas span{ color:var(--text-soft); font-size:12px; }
+  .cierre-persona-campos{ display:flex; gap:10px; align-items:center; }
+  .cierre-persona-campos label{ display:flex; align-items:center; gap:5px; margin:0; font-size:11.5px; color:var(--text-soft); font-weight:600; }
+  .cierre-persona-campos input{ width:76px; margin:0; text-align:right; }
+  .cierre-etapas{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-bottom:6px; }
+  .cierre-chk.ya{ opacity:.65; }
+  @media (max-width:640px){ .cierre-horas{ flex-wrap:wrap; } .cierre-persona{ flex-direction:column; align-items:flex-start; } }
   .cierre-pts{ font-family:var(--mono); font-weight:700; color:var(--teal-dark); }
   .cierre-total{ text-align:right; font-size:14px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
   .cierre-total b{ color:var(--navy); font-family:var(--mono); }
@@ -2785,7 +2871,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-09 17:48 · 30c096</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-10 10:12 · b0b160</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -2799,6 +2885,7 @@
   <button type="button" class="tab-btn" id="tabBtnMapa" onclick="mostrarVista('mapa')">🗺 Mapa</button>
   <button type="button" class="tab-btn" id="tabBtnStock" onclick="mostrarVista('stock')">📦 Stock</button>
   <button type="button" class="tab-btn" id="tabBtnInforme" onclick="mostrarVista('informe')">📄 Informe</button>
+  <button type="button" class="tab-btn" id="tabBtnGastos" onclick="mostrarVista('gastos')">💰 Gastos de obra</button>
 </nav>
 
 <!-- ============ INICIO (2026-08-31) ============
@@ -3504,8 +3591,9 @@
         </div>
         <div class="hint" style="margin-top:0;">La hora real de terminación va en blanco en la hoja impresa, para que la complete la cuadrilla.</div>
 
-        <label for="otEtapa">Etapa de obra</label>
-        <select id="otEtapa"></select>
+        <!-- La etapa ya no se elige a mano: se deduce de las tareas tildadas (2026-09-10). El select
+             queda oculto para que las órdenes viejas se puedan seguir editando sin romper nada. -->
+        <div style="display:none;"><label for="otEtapa">Etapa de obra</label><select id="otEtapa"></select></div>
       </div>
 
       <div class="card">
@@ -3515,18 +3603,23 @@
         <div class="hint" id="personalSummary" style="margin-top:10px;"></div>
       </div>
 
-      <div class="card">
-        <h2><span class="dot"></span>Tareas del catálogo</h2>
-        <div class="hint" style="margin-top:0;">Marcá las que correspondan — los pasos técnicos de cada una salen impresos en la orden, para que la cuadrilla los tenga a mano.</div>
-        <div id="otActividades" class="etapas-checklist" style="margin-top:6px;"></div>
-      </div>
-
-      <div class="card">
-        <h2><span class="dot"></span>Tareas escritas a mano</h2>
-        <div class="hint" style="margin-top:0;">Para lo que no está en el catálogo. Se suman a las tildadas arriba.</div>
-        <div id="actividadesContainer"></div>
-        <button type="button" id="addActividadBtn" class="btn-auto">+ Agregar tarea</button>
-        <div class="hint" id="actividadesSummary" style="margin-top:10px;"></div>
+      <div class="card" id="cardTareasOt">
+        <div class="card-header-row">
+          <h2 style="margin:0;"><span class="dot"></span>¿Qué tareas van a hacer?</h2>
+          <span class="hint" id="otTareasResumen" style="margin:0;"></span>
+        </div>
+        <div class="hint" style="margin-top:4px;">Una sola lista, por etapa de la obra. Tildá la tarea y, si querés, anotá <b>cuánto</b> se prevé (metros, columnas…): sale impreso al lado del casillero que la cuadrilla completa a la vuelta. Los pasos técnicos de cada tarea van en la hoja. De acá salen solos la etapa de la plaza, los puntos de cada persona, el avance del itemizado y las horas de Gastos de obra.</div>
+        <div class="ot-tareas-filtro no-print">
+          <input type="search" id="otTareasBuscar" placeholder="Buscar tarea… (zanjeo, tablero, poda)" autocomplete="off">
+          <button type="button" class="btn-ghost" id="otTareasSoloMarcadas" style="padding:6px 10px; font-size:12px;">Ver solo las tildadas</button>
+        </div>
+        <div id="otActividades" style="margin-top:6px;"></div>
+        <div class="ot-otra-tarea">
+          <div class="ot-otra-tit">Otra tarea que no está en la lista</div>
+          <div id="actividadesContainer"></div>
+          <button type="button" id="addActividadBtn" class="btn-auto">+ Agregar otra tarea</button>
+          <div class="hint" id="actividadesSummary" style="margin-top:6px;"></div>
+        </div>
       </div>
 
       <div class="card">
@@ -4327,6 +4420,7 @@
       <div style="overflow-x:auto;">
         <table id="tablaPersonal"><thead><tr>
           <th style="width:110px;">Legajo</th><th>Nombre y apellido</th><th style="width:160px;">Rol habitual</th>
+          <th style="width:120px;" title="Costo de una hora de esta persona para la empresa. Con esto se calcula sola la mano de obra en Gastos de obra.">Valor hora ($)</th>
           <th style="width:80px; text-align:center;">Activo</th><th class="no-print" style="width:40px;"></th>
         </tr></thead><tbody id="personalBody"></tbody></table>
       </div>
@@ -4458,6 +4552,13 @@
 
   <!-- El informe generado. Se dibuja entero desde el modelo; en papel sale solo esta parte. -->
   <div id="infSalida"></div>
+</div>
+
+<!-- ================= GASTOS DE OBRA (2026-09-10) ================= -->
+<!-- Lo que se gastó de verdad en cada plaza, separado del itemizado del pliego (que es lo que se
+     cobra). Materiales y mano de obra se valorizan solos; el resto se carga a mano. -->
+<div class="wrap" id="viewGastos" style="display:none">
+  <div id="gastosCont"></div>
 </div>
 
 <footer id="mainFooter" class="no-print">
@@ -7641,7 +7742,85 @@ const ACTIVIDADES_CATALOGO = [
 5) Entregar los tableros con su medidor de energía instalado.
 6) Retirar del lugar los materiales excedentes y cualquier equipamiento ajeno al alumbrado público.
 7) Presentar toda la documentación a Inspección (plazo habitual: 48 hs hábiles).` },
+
+  // ---- Tareas agregadas el 2026-09-10 para que la lista cubra todas las etapas de la obra ----
+  // Antes había etapas del tablero de Avance (sellos, limpieza y pintura, poste del tablero,
+  // desmonte de luminarias) que ninguna tarea de la orden nombraba: la cuadrilla las hacía y nadie
+  // podía marcarlas desde la orden.
+  { id:'sellado_base', label:'Sellado de base / contrabase (torta) de columnas', pasos:
+`1) Verificar que la columna esté aplomada y la fundación fraguada.
+2) Metálicas y hormigón: hacer la contrabase o torta de mortero cementicio alrededor de la base, protegiendo el bloquete de puesta a tierra.
+3) PRFV: sellar la base (sin torta) para que no entre agua a la fundación.
+4) Dejar la superficie prolija, con pendiente hacia afuera, y limpiar los restos de mortero.` },
+
+  { id:'poste_tablero', label:'Colocación de apoyo PRFV para el tablero', pasos:
+`1) Replantear la posición del apoyo según el proyecto (cerca del pilar de EPEC, fuera del paso peatonal).
+2) Excavar y hormigonar la fundación del apoyo según plano tipo.
+3) Izar y aplomar el apoyo PRFV; dejar fraguar antes de cargarlo.
+4) Colocar las abrazaderas de fijación del gabinete.` },
+
+  { id:'limpieza_pintura', label:'Limpieza final de obra y pintura de columnas', pasos:
+`1) Retirar del predio escombros, restos de cable, embalajes y material sobrante.
+2) Reponer el terreno o el solado donde se abrió zanja o pozo.
+3) Columnas metálicas: repasar la pintura donde quedó dañada por el montaje; pintar la base si corresponde.
+4) Dejar la plaza en condiciones de recepción por la inspección.` },
+
+  { id:'retiro_luminaria', label:'Retiro de luminaria existente', pasos:
+`1) Verificar que el circuito esté desenergizado.
+2) Desconectar y bajar el artefacto con los medios adecuados.
+3) Acopiar las luminarias retiradas para su devolución o disposición según indique la inspección.` },
 ];
+
+// ---- Metadatos de cada tarea (2026-09-10): fase, unidad, etapa del tablero e ítems del pliego ----
+// Una sola lista de tareas alimenta todo lo demás: la orden impresa, los puntos del baremo, las
+// etapas del Avance de obra, el avance del Itemizado 2026 y las horas de Gastos de obra. Acá está
+// el pegamento: qué etapa termina cada tarea y qué ítems del Anexo I avanza cuando se hace.
+// `items` solo lleva ítems cuya unidad coincide con la de la tarea (metro→metro, columna→Un.), así
+// la cantidad hecha se puede proponer directo como avance del ítem; el resto queda en manos del
+// itemizado (p. ej. el vínculo y la luminaria ya están adentro de los ítems 1 a 8 de la columna).
+const FASES_TAREA = ['Obra civil', 'Cableado', 'Columnas y luminarias', 'Tablero, acometida y puesta a tierra', 'Retiros y poda', 'Pruebas y cierre'];
+const TAREA_META = {
+  fundaciones:        { fase:'Obra civil',   etapas:['pozo','fundaciones'], items:[] },
+  zanjeo:             { fase:'Obra civil',   etapas:['zanjeo'],            items:['15','16','17','18','19','20'] },
+  cruce_calzada:      { fase:'Obra civil',   etapas:['zanjeo'],            items:['21','22','23','24'] },
+  tendido_cable:      { fase:'Cableado',     etapas:['cableTapada'],       items:['25','26','27','28','29','31','32','33','34','35','36','37','38','39','40'] },
+  galpon_prep:        { fase:'Columnas y luminarias', etapas:[],           items:[] },
+  montaje_prfv:       { fase:'Columnas y luminarias', etapas:['izaje'],    items:['5','6','7','8'] },
+  montaje_metalica:   { fase:'Columnas y luminarias', etapas:['izaje'],    items:['1','2','3','4'] },
+  vinculo_luminaria:  { fase:'Columnas y luminarias', etapas:['vinculos'], items:['44'] },
+  bpn:                { fase:'Columnas y luminarias', etapas:['vinculos'], items:[] },
+  sellado_base:       { fase:'Columnas y luminarias', etapas:['sellos'],   items:[] },
+  base_tablero_nivel: { fase:'Tablero, acometida y puesta a tierra', etapas:[],                  items:[] },
+  poste_tablero:      { fase:'Tablero, acometida y puesta a tierra', etapas:['posteTablero'],    items:['13','14'] },
+  tablero:            { fase:'Tablero, acometida y puesta a tierra', etapas:['tableroConexion'], items:['9','10'] },
+  acometida:          { fase:'Tablero, acometida y puesta a tierra', etapas:['tableroConexion'], items:[] },
+  pat:                { fase:'Tablero, acometida y puesta a tierra', etapas:[],                  items:['75','77'] },
+  retiro_luminaria:   { fase:'Retiros y poda', etapas:['desmonte'], items:['45'] },
+  retiro_columna:     { fase:'Retiros y poda', etapas:['desmonte'], items:['46','47','48'] },
+  retiro_tablero:     { fase:'Retiros y poda', etapas:['desmonte'], items:['49'] },
+  poda:               { fase:'Retiros y poda', etapas:[],           items:['82'] },
+  limpieza_pintura:   { fase:'Pruebas y cierre', etapas:['limpiezaPintura'], items:[] },
+  verificacion:       { fase:'Pruebas y cierre', etapas:[],               items:[] },
+  inspeccion_pruebas: { fase:'Pruebas y cierre', etapas:['inspeccion'],   items:[] },
+  cierre_documentacion:{ fase:'Pruebas y cierre', etapas:['inspeccion'],  items:[] },
+};
+function metaDeTarea(id){ return TAREA_META[id] || { fase:'Otras tareas', etapas:[], items:[] }; }
+// Unidad de la tarea: la del baremo si está cargado (bloque Producción), si no una razonable.
+const UN_TAREA_DEFECTO = { fundaciones:'base', zanjeo:'metro', cruce_calzada:'cruce', tendido_cable:'metro', galpon_prep:'columna',
+  montaje_prfv:'columna', montaje_metalica:'columna', vinculo_luminaria:'artefacto', bpn:'columna', sellado_base:'columna',
+  base_tablero_nivel:'base', poste_tablero:'apoyo', tablero:'tablero', acometida:'acometida', pat:'jabalina', retiro_luminaria:'artefacto',
+  retiro_columna:'columna', retiro_tablero:'tablero', poda:'árbol', limpieza_pintura:'columna', verificacion:'plaza', inspeccion_pruebas:'plaza', cierre_documentacion:'plaza' };
+function unidadDeTarea(id){
+  const b = (typeof window.baremoActual === 'function') ? window.baremoActual() : null;
+  if(b && b[id] && b[id].un) return b[id].un;
+  return UN_TAREA_DEFECTO[id] || 'unidad';
+}
+// Las etapas del tablero de Avance que tocan las tareas elegidas, en el orden del tablero.
+function etapasDeTareas(ids){
+  const set = new Set();
+  (ids||[]).forEach(id=> metaDeTarea(id).etapas.forEach(k=> set.add(k)));
+  return ETAPAS_OBRA.filter(e=> set.has(e.key));
+}
 
 let personaIdSeq = 1;
 let personal = [
@@ -7717,39 +7896,32 @@ document.getElementById('addPersonaBtn').addEventListener('click', ()=>{
 });
 
 // ---- Actividades ----
+// Las «otras tareas» (2026-09-10): antes cada fila traía OTRA VEZ el catálogo entero en un select,
+// y elegir ahí una tarea del catálogo la guardaba como texto suelto —perdía el id y en el cierre
+// valía 2 puntos genéricos en vez de su baremo—. Ahora es solo para lo que de verdad no está en la
+// lista: nombre + detalle, y los pasos opcionales.
 function renderActividades(){
   const cont = document.getElementById('actividadesContainer');
-  let html = '';
-  actividades.forEach((a, idx)=>{
-    html += `<div class="act-item" data-act="${a.id}">
-      <div class="act-item-head">
-        <span class="tramo-num">${idx+1}</span>
-        <select data-field="catalogoId">
-          <option value="">— Actividad personalizada (escribir a mano) —</option>
-          ${ACTIVIDADES_CATALOGO.map(c=>`<option value="${c.id}" ${c.id===a.catalogoId?'selected':''}>${c.label}</option>`).join('')}
-        </select>
-        <button type="button" class="tramo-remove" data-action="remove" ${actividades.length<=1?'disabled':''} title="Quitar actividad">×</button>
-      </div>
-      <div class="row2" style="margin-top:8px;">
-        <div>
-          <label style="margin-top:0;">Actividad</label>
-          <input type="text" data-field="actividad" value="${escHtml(a.actividad)}" placeholder="Ej: Zanjeo troncal">
-        </div>
-        <div>
-          <label style="margin-top:0;">Ubicación / detalle</label>
-          <input type="text" data-field="detalle" value="${escHtml(a.detalle)}" placeholder="Ej: Sector norte, 40 ml">
-        </div>
-      </div>
-      <label>Descripción técnica / pasos a seguir</label>
-      <textarea data-field="pasos" placeholder="Se completa solo al elegir una actividad del listado de arriba, o cargá los pasos a mano.">${escHtml(a.pasos)}</textarea>
-    </div>`;
-  });
-  cont.innerHTML = html;
+  cont.innerHTML = actividades.map((a, idx)=>`<div class="ot-otra-fila act-item" data-act="${a.id}" style="background:none; border:0; padding:0; margin-bottom:8px;">
+      <input type="text" data-field="actividad" value="${escHtml(a.actividad)}" placeholder="Tarea (ej.: reparar cerco perimetral)">
+      <input type="text" data-field="detalle" value="${escHtml(a.detalle)}" placeholder="Detalle / dónde (opcional)">
+      <button type="button" class="tramo-remove" data-action="remove" title="Quitar">×</button>
+    </div>`).join('');
   actualizarActividadesSummary();
 }
 function actualizarActividadesSummary(){
   const cargadas = actividades.filter(a=>a.actividad.trim()).length;
-  document.getElementById('actividadesSummary').innerHTML = `<b>${cargadas}</b> de ${actividades.length} actividad(es) con descripción cargada.`;
+  const el = document.getElementById('actividadesSummary');
+  if(el) el.innerHTML = cargadas ? `<b>${cargadas}</b> tarea(s) fuera de la lista. En el cierre valen el puntaje genérico de tarea manual.` : '';
+  actualizarResumenTareasOt();
+}
+// Resumen arriba de la lista: cuántas tildadas, qué etapas tocan.
+function actualizarResumenTareasOt(){
+  const el = document.getElementById('otTareasResumen'); if(!el) return;
+  const ids = [...document.querySelectorAll('.ot-act-check:checked')].map(c=>c.value);
+  const otras = actividades.filter(a=>a.actividad.trim()).length;
+  const et = etapasDeTareas(ids).map(e=>e.label);
+  el.innerHTML = (ids.length + otras) ? `<b>${ids.length + otras}</b> tarea(s)${et.length ? ' · etapa: ' + et.map(escHtml).join(' · ') : ''}` : 'Ninguna tildada todavía';
 }
 document.getElementById('actividadesContainer').addEventListener('input', (e)=>{
   const row = e.target.closest('.act-item');
@@ -7786,7 +7958,42 @@ document.getElementById('actividadesContainer').addEventListener('click', (e)=>{
 document.getElementById('addActividadBtn').addEventListener('click', ()=>{
   actividades.push({ id: actividadIdSeq++, catalogoId:'', actividad:'', detalle:'', pasos:'' });
   renderActividades();
+  const ult = document.querySelector('#actividadesContainer .act-item:last-child input[data-field="actividad"]');
+  if(ult) ult.focus();
 });
+// La lista única: tildar, cantidad prevista, ver pasos, buscar y filtrar (2026-09-10).
+(function(){
+  const cont = document.getElementById('otActividades'); if(!cont) return;
+  cont.addEventListener('change', e=>{
+    const c = e.target.closest('.ot-act-check'); if(!c) return;
+    const fila = c.closest('.ot-tarea'); if(fila) fila.classList.toggle('on', c.checked);
+    actualizarResumenTareasOt();
+  });
+  cont.addEventListener('click', e=>{
+    const b = e.target.closest('.ot-pasos-btn');
+    if(b){ e.preventDefault(); e.stopPropagation(); const p = b.closest('.ot-tarea').querySelector('.ot-pasos'); if(p) p.classList.toggle('ver'); b.textContent = p && p.classList.contains('ver') ? 'ocultar pasos' : 'ver pasos'; return; }
+    if(e.target.closest('input, label, .ot-tarea-prev')) return;
+    const fila = e.target.closest('.ot-tarea'); if(!fila) return;
+    const c = fila.querySelector('.ot-act-check'); if(!c) return;
+    c.checked = !c.checked; c.dispatchEvent(new Event('change', { bubbles:true }));
+  });
+  const q = document.getElementById('otTareasBuscar');
+  const solo = document.getElementById('otTareasSoloMarcadas');
+  let soloMarcadas = false;
+  function filtrar(){
+    const t = String((q && q.value) || '').trim().toLowerCase();
+    cont.querySelectorAll('.ot-tarea').forEach(f=>{
+      const on = f.querySelector('.ot-act-check').checked;
+      const txt = (f.dataset.txt || '');
+      const ok = (!t || txt.includes(t)) && (!soloMarcadas || on);
+      f.style.display = ok ? '' : 'none';
+    });
+    cont.querySelectorAll('.ot-fase').forEach(g=>{ g.style.display = [...g.querySelectorAll('.ot-tarea')].some(f=>f.style.display !== 'none') ? '' : 'none'; });
+  }
+  if(q) q.addEventListener('input', filtrar);
+  if(solo) solo.addEventListener('click', ()=>{ soloMarcadas = !soloMarcadas; solo.textContent = soloMarcadas ? 'Ver todas' : 'Ver solo las tildadas'; solo.classList.toggle('btn-primary', soloMarcadas); filtrar(); });
+  window.__otFiltrarTareas = filtrar;
+})();
 
 // ---- Generar parte diario ----
 
@@ -8140,10 +8347,11 @@ function promoverAParteDiario(entry){
 
   // Tarea: si es del catálogo se tilda; si está escrita a mano va a «Tareas escritas a mano».
   poblarOtActividades();
-  document.querySelectorAll('.ot-act-check').forEach(c=>{ c.checked = false; });
+  document.querySelectorAll('.ot-act-check').forEach(c=>{ c.checked = false; const f = c.closest('.ot-tarea'); if(f) f.classList.remove('on'); });
   if(entry.catalogoId){
     const chk = document.querySelector(`.ot-act-check[value="${entry.catalogoId}"]`);
-    if(chk) chk.checked = true;
+    if(chk){ chk.checked = true; const f = chk.closest('.ot-tarea'); if(f) f.classList.add('on'); }
+    actualizarResumenTareasOt();
   } else if(entry.tarea){
     let destino = actividades.find(a => !a.actividad.trim());
     if(!destino){
@@ -9402,6 +9610,7 @@ const RESPALDO_COLECCIONES = [
   { clave:'catalogoProductos', titulo:'Cambios del catálogo',      lista:()=>window.catalogoCambios||[] },
   { clave:'avanceObras',       titulo:'Plazas (avance e itemizado)', lista:()=>avanceObras||[] },
   { clave:'ordenesTrabajo',    titulo:'Órdenes de trabajo',        lista:()=>ordenesTrabajo||[] },
+  { clave:'gastosObra',        titulo:'Gastos de obra',            lista:()=>window.gastosObra||[] },
   { clave:'historialEtapas',   titulo:'Historial de etapas',       lista:()=>historialEtapas||[] },
   { clave:'historialCalculos', titulo:'Cómputos de la calculadora', lista:()=>historial||[] },
 ];
@@ -11724,10 +11933,35 @@ function historialEtapasDePlaza(a){
 function poblarOtActividades(){
   const cont = document.getElementById('otActividades');
   if(!cont || cont.children.length) return;
-  cont.innerHTML = ACTIVIDADES_CATALOGO.map(act=>`<label class="etapa-item">
-    <input type="checkbox" class="ot-act-check" value="${escHtml(act.id)}">
-    <span class="etapa-label">${escHtml(act.label)}</span>
-  </label>`).join('');
+  // Una fila por tarea, agrupadas por fase de la obra. Los ids y la clase .ot-act-check son los de
+  // siempre: la planificación semanal, «Traer de la calculadora» y las tareas propias los usan.
+  const grupos = new Map();
+  ACTIVIDADES_CATALOGO.forEach(act=>{
+    const fase = metaDeTarea(act.id).fase || 'Otras tareas';
+    if(!grupos.has(fase)) grupos.set(fase, []);
+    grupos.get(fase).push(act);
+  });
+  const orden = FASES_TAREA.concat([...grupos.keys()].filter(f=>!FASES_TAREA.includes(f)));
+  cont.innerHTML = orden.filter(f=>grupos.has(f)).map(fase=>{
+    const filas = grupos.get(fase).map(act=>{
+      const meta = metaDeTarea(act.id);
+      const et = etapasDeTareas([act.id]).map(e=>e.label).join(' · ');
+      const items = (meta.items||[]).length ? `ítems ${meta.items.slice(0,4).join(', ')}${meta.items.length>4?'…':''}` : '';
+      const sub = [et ? 'etapa: ' + et : '', items].filter(Boolean).join(' · ');
+      const pasos = String(act.pasos||'').split('\n').map(p=>p.trim()).filter(Boolean)
+        .map(p=>`<li>${escHtml(p.replace(/^\d+[a-z]?\)\s*/,''))}</li>`).join('');
+      return `<div class="ot-tarea" data-txt="${escHtml((act.label + ' ' + fase + ' ' + sub).toLowerCase())}">
+        <input type="checkbox" class="ot-act-check" value="${escHtml(act.id)}" id="otAct_${escHtml(act.id)}">
+        <div><label class="ot-tarea-lbl" for="otAct_${escHtml(act.id)}" style="margin:0; display:block; cursor:pointer;">${escHtml(act.label)}</label>
+          <div class="ot-tarea-sub">${escHtml(sub || 'sin etapa del tablero')}${pasos ? ' · <button type="button" class="ot-pasos-btn">ver pasos</button>' : ''}</div></div>
+        <div class="ot-tarea-prev"><span>previsto</span><input type="number" min="0" step="any" class="ot-act-prev" data-id="${escHtml(act.id)}" placeholder="—"><span>${escHtml(unidadDeTarea(act.id))}</span></div>
+        ${pasos ? `<ol class="ot-pasos">${pasos}</ol>` : ''}
+      </div>`;
+    }).join('');
+    return `<div class="ot-fase"><div class="ot-fase-tit">${escHtml(fase)} <span class="n">${grupos.get(fase).length}</span></div>${filas}</div>`;
+  }).join('');
+  if(typeof window.__otFiltrarTareas === 'function') window.__otFiltrarTareas();
+  actualizarResumenTareasOt();
 }
 
 // El número de OT es correlativo por AÑO (OT-2026-001, OT-2026-002...). Se calcula mirando las
@@ -11782,8 +12016,19 @@ function datosOtDesdeFormulario(){
     return null;
   }
 
-  const etapaKey = document.getElementById('otEtapa').value;
+  // Cantidad prevista por tarea (opcional): sale impresa al lado del casillero de «hecho».
+  const previsto = {};
+  document.querySelectorAll('.ot-act-prev').forEach(inp=>{
+    const v = parseFloat(inp.value);
+    if(actividadesCatalogo.includes(inp.dataset.id) && isFinite(v) && v > 0) previsto[inp.dataset.id] = v;
+  });
+  // La etapa se deduce de las tareas (2026-09-10). Si la orden vieja tenía una elegida a mano y
+  // las tareas no marcan ninguna, se conserva la de antes.
+  const etapasOt = etapasDeTareas(actividadesCatalogo);
+  const etapaVieja = document.getElementById('otEtapa').value;
+  const etapaKey = etapasOt.length ? etapasOt[0].key : etapaVieja;
   const etapa = ETAPAS_OBRA.find(e=>e.key===etapaKey);
+  const etapaLabel = etapasOt.length ? etapasOt.map(e=>e.label).join(' · ') : (etapa ? etapa.label : '');
   return {
     plazaId: sinPlaza ? '' : a.id,
     plazaNombre: sinPlaza ? (lugarLibre || 'Trabajo general (sin plaza)') : (a.nombre||''),
@@ -11798,9 +12043,11 @@ function datosOtDesdeFormulario(){
     horaFin: document.getElementById('otHoraFin').value,
     cuadrilla,
     responsable: document.getElementById('otResponsable').value.trim(),
-    etapaKey: etapaKey||'', etapaLabel: etapa ? etapa.label : '',
+    etapaKey: etapaKey||'', etapaLabel,
+    etapasKeys: etapasOt.map(e=>e.key),
     personal: personalCargado,
     actividades: actividadesCatalogo,
+    previsto,
     actividadesManuales,
     materiales: document.getElementById('otMateriales').value.trim(),
     notas: document.getElementById('otNotas').value.trim()
@@ -11832,7 +12079,10 @@ async function emitirOrdenTrabajo(){
       msg.style.color = 'var(--teal-dark)';
       msg.innerHTML = `✓ ${escHtml(ot.numero)} emitida para ${escHtml(ot.plazaNombre)}. Está en el registro de abajo y ya aparece en la <b>Planificación semanal</b> del ${escHtml(formatFechaCorta(ot.fecha)||ot.fecha)}.`
         + ` <button type="button" class="btn-ghost" style="margin-left:6px; padding:3px 10px; font-size:12px;" onclick="irAPlanDeFecha('${ot.fecha}')">Ver en la semana →</button>`;
-      document.querySelectorAll('.ot-act-check:checked').forEach(c=>{ c.checked = false; });
+      document.querySelectorAll('.ot-act-check:checked').forEach(c=>{ c.checked = false; c.closest('.ot-tarea') && c.closest('.ot-tarea').classList.remove('on'); });
+      document.querySelectorAll('.ot-act-prev').forEach(i=>{ i.value = ''; });
+      actividades = [{ id: actividadIdSeq++, catalogoId:'', actividad:'', detalle:'', pasos:'' }];
+      renderActividades();
       document.getElementById('otMateriales').value = '';
       document.getElementById('otNotas').value = '';
     }
@@ -11876,7 +12126,9 @@ function editarOrdenTrabajo(id){
   renderActividades();
 
   poblarOtActividades();
-  document.querySelectorAll('.ot-act-check').forEach(c=>{ c.checked = (o.actividades||[]).includes(c.value); });
+  document.querySelectorAll('.ot-act-check').forEach(c=>{ c.checked = (o.actividades||[]).includes(c.value); const f = c.closest('.ot-tarea'); if(f) f.classList.toggle('on', c.checked); });
+  document.querySelectorAll('.ot-act-prev').forEach(i=>{ const v = (o.previsto||{})[i.dataset.id]; i.value = v > 0 ? v : ''; });
+  actualizarResumenTareasOt();
 
   document.getElementById('otEmitirBtn').textContent = `Guardar cambios en ${o.numero||'la orden'}`;
   document.getElementById('otCancelarEdicionBtn').style.display = '';
@@ -11944,29 +12196,47 @@ function cuerpoOrdenTrabajoHtml(o, opts){
     <tr><th>Horario previsto</th><td>${escHtml(o.horaInicio||'—')} a ${escHtml(o.horaFin||'—')}</td><th>Hora real de terminación</th><td style="min-width:120px;">&nbsp;</td></tr>
   </table>`;
 
+  // Personal: con casilleros de entrada, salida y firma para que cada uno anote su horario real
+  // (2026-09-10). A la vuelta, esas horas se cargan en el cierre y van a Gastos de obra.
+  const cie = o.cierre || {};
+  const hp = cie.horasPersona || {};
   if((o.personal||[]).length){
     html += `<h2 style="font-size:14px; margin:18px 0 0;">Personal de la cuadrilla</h2>`;
-    html += `<table><thead><tr><th>Nombre y apellido</th><th>Rol</th><th style="width:22%;">Firma</th></tr></thead><tbody>`;
-    o.personal.forEach(p=>{ html += `<tr><td>${escHtml(p.nombre)}</td><td>${escHtml(p.rol)}</td><td>&nbsp;</td></tr>`; });
+    html += `<table><thead><tr><th>Nombre y apellido</th><th>Rol</th><th style="width:13%;">Entrada</th><th style="width:13%;">Salida</th><th style="width:11%;">Horas</th><th style="width:20%;">Firma</th></tr></thead><tbody>`;
+    o.personal.forEach(p=>{
+      const h = hp[String(p.nombre||'').trim()];
+      html += `<tr><td>${escHtml(p.nombre)}</td><td>${escHtml(p.rol)}</td><td>&nbsp;</td><td>&nbsp;</td><td>${h > 0 ? escHtml(fmt(h, Number.isInteger(h)?0:1)) : '&nbsp;'}</td><td>&nbsp;</td></tr>`;
+    });
     html += `</tbody></table>`;
   }
 
+  // Tareas: una sola lista. Cada tarea lleva sus pasos y, debajo, el renglón que la cuadrilla
+  // completa en obra: cantidad hecha (con la unidad y lo previsto), hora de inicio y de fin.
+  const cant = cie.cantidades || {};
+  const ht = cie.horasTarea || {};
+  const renglon = (k, un, prev)=>{
+    const c = cant[k], t = ht[k] || {};
+    const cel = v => v ? `<b>${escHtml(String(v))}</b>` : '________';
+    return `<div style="margin-top:6px; padding:5px 8px; border:1px dashed #9fb3ab; border-radius:6px; font-size:11.5px; color:#2b3f38; display:flex; gap:18px; flex-wrap:wrap;">
+      <span>Cantidad hecha: ${c > 0 ? `<b>${escHtml(fmt(c, Number.isInteger(c)?0:2))}</b>` : '________'} ${escHtml(un||'')}${prev > 0 ? ` <span style="color:#5b7a70;">(previsto ${escHtml(fmt(prev, Number.isInteger(prev)?0:2))})</span>` : ''}</span>
+      <span>Hora inicio: ${cel(t.ini)}</span><span>Hora fin: ${cel(t.fin)}</span></div>`;
+  };
   const bloquesTarea = [];
   (o.actividades||[]).forEach(idAct=>{
     const act = ACTIVIDADES_CATALOGO.find(x=>x.id===idAct);
     if(!act) return;
     const pasos = String(act.pasos||'').split('\n').map(p=>p.trim()).filter(Boolean)
-      .map(p=>`<li style="margin-bottom:2px;">${escHtml(p.replace(/^\d+\)\s*/,''))}</li>`).join('');
-    bloquesTarea.push(`<div style="margin-top:10px;"><b>${escHtml(act.label)}</b><ol style="margin:4px 0 0 18px; padding:0;">${pasos}</ol></div>`);
+      .map(p=>`<li style="margin-bottom:2px;">${escHtml(p.replace(/^\d+[a-z]?\)\s*/,''))}</li>`).join('');
+    const et = etapasDeTareas([idAct]).map(e=>e.label).join(' · ');
+    bloquesTarea.push(`<div style="margin-top:10px; break-inside:avoid;"><b>${bloquesTarea.length+1}. ${escHtml(act.label)}</b>${et ? ` <span style="font-size:11px; color:#5b7a70;">· etapa: ${escHtml(et)}</span>` : ''}<ol style="margin:4px 0 0 18px; padding:0;">${pasos}</ol>${renglon(idAct, unidadDeTarea(idAct), (o.previsto||{})[idAct])}</div>`);
   });
   (o.actividadesManuales||[]).forEach(a=>{
     const pasos = String(a.pasos||'').split('\n').map(p=>p.trim()).filter(Boolean)
-      .map(p=>`<li style="margin-bottom:2px;">${escHtml(p.replace(/^\d+\)\s*/,''))}</li>`).join('');
-    bloquesTarea.push(`<div style="margin-top:10px;"><b>${escHtml(a.actividad)}</b>${a.detalle?` — ${escHtml(a.detalle)}`:''}${pasos?`<ol style="margin:4px 0 0 18px; padding:0;">${pasos}</ol>`:''}
-      <div style="margin-top:6px; font-size:11.5px; color:#5b7a70;">Hora inicio: ______   Hora fin: ______</div></div>`);
+      .map(p=>`<li style="margin-bottom:2px;">${escHtml(p.replace(/^\d+[a-z]?\)\s*/,''))}</li>`).join('');
+    bloquesTarea.push(`<div style="margin-top:10px; break-inside:avoid;"><b>${bloquesTarea.length+1}. ${escHtml(a.actividad)}</b>${a.detalle?` — ${escHtml(a.detalle)}`:''}${pasos?`<ol style="margin:4px 0 0 18px; padding:0;">${pasos}</ol>`:''}${renglon('m:'+String(a.actividad||'').trim(), 'unidad', 0)}</div>`);
   });
   if(bloquesTarea.length){
-    html += `<h2 style="font-size:14px; margin:18px 0 0;">Tareas a realizar</h2>` + bloquesTarea.join('');
+    html += `<h2 style="font-size:14px; margin:18px 0 0;">Tareas a realizar</h2><div style="font-size:11px; color:#5b7a70; margin-top:2px;">Al terminar cada tarea, anotar en el renglón punteado cuánto se hizo y de qué hora a qué hora.</div>` + bloquesTarea.join('');
   }
 
   if(o.materiales){
@@ -11977,9 +12247,10 @@ function cuerpoOrdenTrabajoHtml(o, opts){
   }
 
   // Espacio en blanco para que la cuadrilla complete a mano al terminar la jornada.
-  html += `<h2 style="font-size:14px; margin:18px 0 4px;">Reporte de la cuadrilla (completar en obra)</h2>
-    <div style="border:1px solid #cddbd6; padding:10px; min-height:80px;">
-      ${'<div style="border-bottom:1px solid #b9c9c3; height:20px; margin-bottom:6px;"></div>'.repeat(4)}
+  html += `<h2 style="font-size:14px; margin:18px 0 4px;">Novedades de la cuadrilla (completar en obra)</h2>
+    <div style="font-size:11px; color:#5b7a70; margin-bottom:4px;">Qué quedó sin hacer y por qué, materiales que faltaron, imprevistos, algo que se agregó o se sacó del proyecto.</div>
+    <div style="border:1px solid #cddbd6; padding:10px; min-height:70px;">
+      ${cie.obs ? `<div style="white-space:pre-wrap;">${escHtml(cie.obs)}</div>` : '<div style="border-bottom:1px solid #b9c9c3; height:20px; margin-bottom:6px;"></div>'.repeat(3)}
     </div>`;
   html += `<div style="margin-top:28px; display:flex; gap:40px;">
     <div style="flex:1; border-top:1px solid #183028; padding-top:4px;">Firma responsable</div>
@@ -15310,6 +15581,7 @@ function poblarParteObraDatalist(){
     // llega un producto nuevo desde otra computadora (2026-08-27).
     if(typeof window.poblarStockDatalist === 'function') window.poblarStockDatalist();
     if(typeof window.actualizarStockMovBadge === 'function') window.actualizarStockMovBadge();
+    if(typeof window.renderGastos === 'function') window.renderGastos();   // los costos del catálogo valorizan los gastos (2026-09-10)
   }
 
   function actualizarStockAuthUI(user){
@@ -15455,6 +15727,13 @@ function poblarParteObraDatalist(){
     // archivo — este bloque ya no es un <script type="module"> aislado (se migró a SDK "compat"
     // el 15/08), así que comparte el scope léxico de los <script> clásicos de la página y puede
     // reasignarla directo, sin pasar por `window.*`.
+    // Gastos de obra (2026-09-10): lo que se gastó de verdad en cada plaza, aparte del itemizado
+    // del pliego. Cada documento es un gasto suelto con `plazaId` (id del documento de avanceObras).
+    fbDb.collection('gastosObra').onSnapshot(snapshot => {
+      window.gastosObra = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      if(typeof window.renderGastos === 'function') window.renderGastos();
+    }, err => console.error('Error escuchando gastos de obra:', err));
+
     fbDb.collection('avanceObras').onSnapshot(snapshot => {
       avanceObras = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       window.__stockConnOk = true;
@@ -15635,6 +15914,21 @@ function poblarParteObraDatalist(){
   window.fbAvanceEliminar = async function(id){
     if(!fbAvailable) throw new Error('Firebase no disponible');
     await fbDb.collection('avanceObras').doc(id).delete();
+  };
+
+  // ---- Gastos de obra (2026-09-10) ----
+  window.fbGastoAdd = async function(g){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    const ref = await fbDb.collection('gastosObra').add(g);
+    return ref.id;
+  };
+  window.fbGastoUpdate = async function(id, patch){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    await fbDb.collection('gastosObra').doc(id).update(patch);
+  };
+  window.fbGastoEliminar = async function(id){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    await fbDb.collection('gastosObra').doc(id).delete();
   };
 })();
 </script>
@@ -16364,6 +16658,11 @@ function poblarParteObraDatalist(){
     verificacion:       { un:'plaza',     pts:3    },
     inspeccion_pruebas: { un:'plaza',     pts:8    },
     cierre_documentacion:{un:'plaza',     pts:5    },
+    // Tareas agregadas el 2026-09-10 (ver ACTIVIDADES_CATALOGO).
+    sellado_base:       { un:'columna',   pts:1    },
+    poste_tablero:      { un:'apoyo',     pts:4    },
+    limpieza_pintura:   { un:'columna',   pts:1    },
+    retiro_luminaria:   { un:'artefacto', pts:1    },
   };
   // Peso de cada rol al repartir. El capataz coordina y también trabaja; el sereno cuida, no produce.
   const PESOS_DEFECTO = { 'Oficial':1, 'Medio oficial':0.8, 'Ayudante':0.6, 'Capataz':1, 'Chofer':0.4, 'Sereno':0.2 };
@@ -16444,6 +16743,7 @@ function poblarParteObraDatalist(){
       <td><input type="text" class="per-legajo${p.legajo?'':' falta'}" value="${esc(p.legajo||'')}" placeholder="sin legajo"></td>
       <td><input type="text" class="per-nombre" value="${esc(p.nombre||'')}"></td>
       <td><select class="per-rol">${roles.map(r=>`<option value="${esc(r)}" ${r===p.rol?'selected':''}>${esc(r)}</option>`).join('')}</select></td>
+      <td><input type="number" class="per-valor${Number(p.valorHora)>0?'':' falta'}" min="0" step="0.01" inputmode="decimal" value="${Number(p.valorHora)>0?Number(p.valorHora):''}" placeholder="sin cargar" title="Costo por hora para la empresa (para Gastos de obra)"></td>
       <td style="text-align:center;"><input type="checkbox" class="per-activo" ${p.activo!==false?'checked':''}></td>
       <td class="no-print"><button type="button" class="tramo-remove" onclick="quitarFilaPersonal(${i})" title="Quitar de la nómina">×</button></td>
     </tr>`).join('');
@@ -16463,6 +16763,8 @@ function poblarParteObraDatalist(){
       if(sin.length) html += `<div class="per-aviso ambar">⚠ <b>Sin legajo:</b> ${sin.map(p=>esc(p.nombre)).join(', ')}. Completalo — el legajo es lo que distingue a dos personas con el mismo apellido.</div>`;
       if(legRep.length) html += `<div class="per-aviso rojo">⚠ <b>Legajo repetido:</b> ${legRep.join(', ')}. Dos personas no pueden tener el mismo.</div>`;
       if(nomRep.length) html += `<div class="per-aviso rojo">⚠ <b>Nombre repetido:</b> ${nomRep.join(', ')}. Como en la orden de trabajo se escribe el nombre, dos iguales suman en el mismo montón.</div>`;
+      const sinValor = nomina.filter(p=>p.activo!==false && String(p.nombre||'').trim() && !(Number(p.valorHora)>0));
+      if(sinValor.length) html += `<div class="per-aviso ambar">💰 <b>Sin valor hora:</b> ${sinValor.map(p=>esc(p.nombre)).join(', ')}. Hasta que lo cargues, sus horas salen como <b>pendientes</b> en Gastos de obra (no como cero).</div>`;
       av.innerHTML = html;
     }
   }
@@ -16474,9 +16776,12 @@ function poblarParteObraDatalist(){
       legajo: (tr.querySelector('.per-legajo').value||'').trim(),
       nombre: (tr.querySelector('.per-nombre').value||'').trim(),
       rol:    tr.querySelector('.per-rol').value,
+      valorHora: (()=>{ const el = tr.querySelector('.per-valor'); const v = el ? Number(el.value) : 0; return isFinite(v) && v > 0 ? v : 0; })(),
       activo: tr.querySelector('.per-activo').checked
     })).filter(p=>p.nombre);
   }
+  // La nómina, para que Gastos de obra pueda valorizar las horas (2026-09-10).
+  window.nominaEquipo = ()=> nomina;
   window.agregarFilaPersonal = function(){
     nomina = leerTablaPersonal();
     nomina.push({ legajo:'', nombre:'', rol:'Ayudante', activo:true });
@@ -16556,7 +16861,7 @@ function poblarParteObraDatalist(){
     if(enPantalla === esperado) return;            // no cambió nada: no se toca
     cont.innerHTML = '';
     if(typeof poblarOtActividades === 'function') poblarOtActividades();
-    cont.querySelectorAll('.ot-act-check').forEach(c=>{ c.checked = marcadas.includes(c.value); });
+    cont.querySelectorAll('.ot-act-check').forEach(c=>{ c.checked = marcadas.includes(c.value); const f = c.closest('.ot-tarea'); if(f) f.classList.toggle('on', c.checked); });
   }
 
   // ---- El cuadro de alta / edición ----
@@ -16656,6 +16961,98 @@ function poblarParteObraDatalist(){
     const c = (typeof ACTIVIDADES_CATALOGO !== 'undefined') ? ACTIVIDADES_CATALOGO.find(x=>x.id===id) : null;
     return c ? c.label : id;
   }
+  window.baremoActual = ()=> baremo;
+
+  // ==================================================================
+  // LO QUE UN CIERRE DE ORDEN ACTUALIZA EN LA PLAZA  (2026-09-10)
+  // ==================================================================
+  // El usuario: *"agregar las cosas que faltarían para que se llenen las otras hojas
+  // automáticamente"*. Con las cantidades hechas de cada tarea se calcula:
+  //  · qué ETAPAS del tablero de Avance toca esta orden (para tildarlas si quedaron terminadas);
+  //  · qué ÍTEMS del Itemizado 2026 avanza, cuánto (la cantidad hecha, repartida entre los ítems de
+  //    esa familia que la plaza tiene cargados, sin pasarse de lo contratado).
+  // Son PROPUESTAS: se muestran en el cierre, el usuario las revisa y recién ahí se aplican.
+  function plazaDeOrden(o){
+    const lista = (typeof avanceObras !== 'undefined' && avanceObras) || [];
+    return lista.find(a=> String(a.id) === String(o.plazaId||'')) || null;
+  }
+  function itemsDePlaza(a){
+    const out = [];
+    (a.valorItems||[]).forEach(v=>{ if(v.itemPliego) out.push({ id:String(v.itemPliego), v }); });
+    (a.valorItemsEpec||[]).forEach(v=>{ if(v.itemEpec) out.push({ id:String(v.itemEpec), v }); });
+    return out;
+  }
+  function efectosDelCierre(o, cantidades){
+    const a = plazaDeOrden(o);
+    const res = { plaza:a, etapas:[], propuestas:[], sinItem:[] };
+    if(!a) return res;
+    const hechas = (o.actividades||[]).filter(id=> num(cantidades[id]) > 0);
+    // Etapas
+    const et = (typeof etapasDeTareas === 'function') ? etapasDeTareas(hechas) : [];
+    res.etapas = et.map(e=>({ key:e.key, label:e.label, peso:e.peso, ya: !!((a.etapas||{})[e.key]) }));
+    // Ítems: la cantidad hecha se reparte entre los ítems candidatos que la plaza tiene, llenando
+    // primero el que más falta. Lo ya aplicado por ESTE mismo cierre se descuenta para no sumar dos veces.
+    const items = itemsDePlaza(a);
+    const yaAplicado = {};
+    (((o.cierre||{}).avanceItems)||[]).forEach(x=>{ yaAplicado[String(x.id)] = (yaAplicado[String(x.id)]||0) + num(x.delta); });
+    const K = id => (typeof window.epecItemK === 'function') ? window.epecItemK(id) : 0;
+    const DESC = id => (typeof window.epecItemDesc === 'function') ? window.epecItemDesc(id) : ('Ítem ' + id);
+    const UN = id => (typeof window.epecItemUn === 'function') ? window.epecItemUn(id) : '';
+    hechas.forEach(id=>{
+      const meta = (typeof metaDeTarea === 'function') ? metaDeTarea(id) : { items:[] };
+      if(!(meta.items||[]).length) return;
+      const cand = items.filter(it=> meta.items.includes(it.id));
+      if(!cand.length){ res.sinItem.push({ tarea:tareaLabel(id), items:meta.items }); return; }
+      let pendiente = num(cantidades[id]);
+      // Orden: primero los que tienen más por avanzar (contando lo que este cierre ya había puesto).
+      cand.sort((x,y)=> (num(y.v.cantidad) - (num(y.v.cantidadAvanzada) - (yaAplicado[y.id]||0))) - (num(x.v.cantidad) - (num(x.v.cantidadAvanzada) - (yaAplicado[x.id]||0))));
+      cand.forEach(it=>{
+        if(pendiente <= 0) return;
+        const avanzadoSinEste = num(it.v.cantidadAvanzada) - (yaAplicado[it.id]||0);
+        const falta = Math.max(0, num(it.v.cantidad) - avanzadoSinEste);
+        const delta = Math.min(falta, pendiente);
+        if(delta > 0){
+          res.propuestas.push({ id:it.id, desc:DESC(it.id), un:UN(it.id), k:K(it.id), delta:Math.round(delta*100)/100, max:falta, tarea:tareaLabel(id), avanzado:avanzadoSinEste, contratado:num(it.v.cantidad) });
+          pendiente -= delta;
+        }
+      });
+      if(pendiente > 0.001) res.sinItem.push({ tarea:tareaLabel(id), sobra:pendiente, items:meta.items, lleno:true });
+    });
+    return res;
+  }
+  // Aplica en la plaza lo que se confirmó en el cierre. Devuelve lo que hay que guardar en la orden.
+  function aplicarEfectos(o, conf){
+    const a = plazaDeOrden(o);
+    if(!a) return { etapas:[], avanceItems:[] };
+    // 1) Revertir lo que este mismo cierre había aplicado antes (si se vuelve a guardar).
+    const prev = ((o.cierre||{}).avanceItems)||[];
+    const items = itemsDePlaza(a);
+    prev.forEach(x=>{ const it = items.find(i=> i.id === String(x.id)); if(it) it.v.cantidadAvanzada = Math.max(0, num(it.v.cantidadAvanzada) - num(x.delta)); });
+    // 2) Avance del itemizado
+    const aplicados = [];
+    (conf.avanceItems||[]).forEach(x=>{
+      const it = items.find(i=> i.id === String(x.id)); if(!it || !(num(x.delta) > 0)) return;
+      const nuevo = Math.min(num(it.v.cantidad), num(it.v.cantidadAvanzada) + num(x.delta));
+      const real = nuevo - num(it.v.cantidadAvanzada);
+      if(real > 0){ it.v.cantidadAvanzada = Math.round(nuevo*100)/100; aplicados.push({ id:it.id, delta:Math.round(real*100)/100 }); }
+    });
+    // 3) Etapas: solo se tildan (nunca se destildan desde acá), con su línea de historial.
+    const etapasHechas = [];
+    (conf.etapas||[]).forEach(key=>{
+      if(!a.etapas) a.etapas = {};
+      if(a.etapas[key]) return;
+      const antes = (typeof calcularAvanceEtapasPct === 'function') ? calcularAvanceEtapasPct(a) : 0;
+      a.etapas[key] = true;
+      const despues = (typeof calcularAvanceEtapasPct === 'function') ? calcularAvanceEtapasPct(a) : 0;
+      if(typeof registrarHistorialEtapa === 'function') registrarHistorialEtapa(a, key, true, antes, despues);
+      etapasHechas.push(key);
+    });
+    if(prev.length || aplicados.length || etapasHechas.length){
+      if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+    }
+    return { etapas:etapasHechas, avanceItems:aplicados };
+  }
+  window.efectosDelCierre = efectosDelCierre;
 
   // ==================================================================
   // PUNTOS DE UNA ORDEN CERRADA
@@ -16727,12 +17124,16 @@ function poblarParteObraDatalist(){
     if(!tareas.length){
       html += `<div class="hint" style="color:var(--amber);">Esta orden no tiene ninguna tarea tildada, así que no hay nada que contar. Editala y marcá qué se hizo.</div>`;
     } else {
-      html += `<div class="hint" style="margin-top:0;">Cargá <b>cuánto se hizo de verdad</b> de cada tarea. Lo que quede en cero no suma puntos — sirve para dejar asentado que esa tarea no se llegó a hacer.</div>`;
-      html += `<table class="cierre-tabla"><thead><tr><th>Tarea</th><th style="width:130px;">Cantidad</th><th style="width:74px; text-align:right;">Puntos</th></tr></thead><tbody>`;
+      const ht = c.horasTarea || {};
+      const prev = o.previsto || {};
+      html += `<div class="hint" style="margin-top:0;">Pasá lo que la cuadrilla anotó en la hoja: <b>cuánto se hizo</b> de cada tarea y <b>de qué hora a qué hora</b>. Lo que quede en cero no suma puntos y deja asentado que no se llegó a hacer.</div>`;
+      html += `<table class="cierre-tabla"><thead><tr><th>Tarea</th><th style="width:130px;">Cantidad hecha</th><th style="width:170px;">Hora inicio → fin</th><th style="width:64px; text-align:right;">Puntos</th></tr></thead><tbody>`;
       tareas.forEach(t=>{
+        const h = ht[t.k] || {};
         html += `<tr>
-          <td><b>${esc(t.label)}</b><div class="cierre-un">${num(t.def.pts)} punto(s) por ${esc(t.def.un)}${t.enBaremo?'':' · <b>sin baremo</b>, se le da el valor genérico'}</div></td>
+          <td><b>${esc(t.label)}</b><div class="cierre-un">${num(t.def.pts)} punto(s) por ${esc(t.def.un)}${t.enBaremo?'':' · <b>sin baremo</b>, valor genérico'}${prev[t.k] > 0 ? ' · previsto ' + fmt(prev[t.k], Number.isInteger(prev[t.k])?0:2) + ' ' + esc(t.def.un) : ''}</div></td>
           <td><div class="cierre-cant"><input type="number" min="0" step="any" class="cierre-qty" data-k="${esc(t.k)}" value="${cant[t.k]!=null?cant[t.k]:''}" placeholder="0"><span>${esc(t.def.un)}</span></div></td>
+          <td><div class="cierre-horas"><input type="time" class="cierre-hini" data-k="${esc(t.k)}" value="${esc(h.ini||'')}"><span>→</span><input type="time" class="cierre-hfin" data-k="${esc(t.k)}" value="${esc(h.fin||'')}"></div></td>
           <td class="qty cierre-pts" data-k="${esc(t.k)}">0</td>
         </tr>`;
       });
@@ -16743,14 +17144,21 @@ function poblarParteObraDatalist(){
     const gente = (o.personal||[]).filter(p=>String(p.nombre||'').trim());
     if(gente.length){
       const manual = c.reparto && Object.keys(c.reparto).length;
-      html += `<div class="cierre-sub-titulo">Cómo se reparte entre los ${gente.length} que fueron</div>`;
-      html += `<label class="cierre-chk"><input type="checkbox" id="cierreManual" ${manual?'checked':''}> Repartir a mano (si no, se reparte por el peso de cada rol)</label>`;
+      const hp = c.horasPersona || {};
+      const jornada = horasJornadaDe(o);
+      html += `<div class="cierre-sub-titulo">Los ${gente.length} que fueron: horas trabajadas y puntos</div>`;
+      html += `<div class="hint" style="margin:0 0 6px;">Las horas salen de la hoja (entrada y salida de cada uno). Por defecto, la jornada de la orden: <b>${fmt(jornada, Number.isInteger(jornada)?0:1)} h</b>. Van a Gastos de obra por el valor hora de cada persona.</div>`;
+      html += `<label class="cierre-chk"><input type="checkbox" id="cierreManual" ${manual?'checked':''}> Repartir los puntos a mano (si no, se reparten por el peso de cada rol)</label>`;
       html += `<div id="cierreReparto" class="cierre-reparto">`;
       gente.forEach(p=>{
         const n = String(p.nombre).trim();
+        const h = hp[n] != null ? num(hp[n]) : jornada;
         html += `<div class="cierre-persona">
           <div><b>${esc(n)}</b><div class="cierre-un">${esc(p.rol||'—')} · peso ${num(pesos[p.rol],0.6)}</div></div>
-          <input type="number" min="0" step="any" class="cierre-pers" data-n="${esc(n)}" value="${manual? num((c.reparto||{})[n]) : ''}">
+          <div class="cierre-persona-campos">
+            <label>horas <input type="number" min="0" max="24" step="0.5" class="cierre-horas-p" data-n="${esc(n)}" value="${h}"></label>
+            <label>puntos <input type="number" min="0" step="any" class="cierre-pers" data-n="${esc(n)}" value="${manual? num((c.reparto||{})[n]) : ''}"></label>
+          </div>
         </div>`;
       });
       html += `</div>`;
@@ -16758,17 +17166,83 @@ function poblarParteObraDatalist(){
       html += `<div class="hint" style="color:var(--amber);">Esta orden no tiene personal cargado, así que los puntos no se le pueden asignar a nadie. Editala y agregá quién fue.</div>`;
     }
 
-    html += `<label style="margin-top:14px;">Observaciones de la jornada</label>
-      <textarea id="cierreObs" rows="2" placeholder="Ej: se paró a las 11 por lluvia; falta el cruce de calle">${esc(c.obs||'')}</textarea>`;
+    html += `<label style="margin-top:14px;">Novedades de la jornada</label>
+      <textarea id="cierreObs" rows="2" placeholder="Ej: se paró a las 11 por lluvia; falta el cruce de calle; faltó cable 4×4">${esc(c.obs||'')}</textarea>`;
+    // Lo que esta orden actualiza en la plaza (2026-09-10): etapas y avance del itemizado.
+    html += `<div id="cierreEfectos"></div>`;
     // Conforme a obra (2026-09-06): la pregunta obligatoria «¿esta orden cambió algo del itemizado?».
     if(window.CO) html += window.CO.cierreOtHtml(o);
+    const terminada = o.estado === 'Terminada' || (!o.cierre && o.estado !== 'En curso');
+    html += `<label class="cierre-chk" style="margin-top:14px;"><input type="checkbox" id="cierreTerminada" ${terminada?'checked':''}> La orden quedó <b>terminada</b> (si se sigue mañana, destildá: queda «En curso»)</label>`;
 
     cont.innerHTML = html;
     const caja = document.getElementById('cierreOt');
     caja.style.display = '';
     requestAnimationFrame(()=>caja.classList.add('abierto'));
+    cierreFirmaEfectos = '';
     recalcularCierre();
   };
+  let cierreFirmaEfectos = '';
+
+  // Horas de la jornada de la orden (hora de entrada → salida prevista; si no hay, 8).
+  function horasJornadaDe(o){
+    const p = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(t||'').trim()); return m ? Number(m[1]) + Number(m[2])/60 : null; };
+    const i = p(o.horaInicio), f = p(o.horaFin);
+    return (i != null && f != null && f > i) ? Math.round((f - i) * 10) / 10 : 8;
+  }
+  function horasEntre(ini, fin){
+    const p = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(t||'').trim()); return m ? Number(m[1]) + Number(m[2])/60 : null; };
+    const i = p(ini), f = p(fin);
+    return (i != null && f != null && f > i) ? Math.round((f - i) * 100) / 100 : 0;
+  }
+  function cantidadesDelModal(){
+    const cantidades = {};
+    document.querySelectorAll('#cierreCuerpo .cierre-qty').forEach(inp=>{ const v = num(inp.value); if(v > 0) cantidades[inp.dataset.k] = v; });
+    return cantidades;
+  }
+  // Dibuja (o redibuja, si cambiaron las cantidades) las etapas e ítems que la orden propone actualizar.
+  function pintarEfectos(o){
+    const caja = document.getElementById('cierreEfectos'); if(!caja) return;
+    const cantidades = cantidadesDelModal();
+    const firma = JSON.stringify(cantidades);
+    if(firma === cierreFirmaEfectos) return;
+    cierreFirmaEfectos = firma;
+    const ef = efectosDelCierre(o, cantidades);
+    if(!ef.plaza){ caja.innerHTML = ''; return; }
+    const prevEt = ((o.cierre||{}).etapas)||[];
+    let html = `<div class="cierre-sub-titulo" style="margin-top:16px;">Lo que esta orden actualiza en <b>${esc(ef.plaza.nombre||'la plaza')}</b></div>`;
+    if(!ef.etapas.length && !ef.propuestas.length && !ef.sinItem.length){
+      html += `<div class="hint" style="margin:0;">Con las cantidades cargadas no hay etapas ni ítems del itemizado para actualizar. Poné cuánto se hizo de cada tarea y aparecen acá.</div>`;
+      caja.innerHTML = html; return;
+    }
+    if(ef.etapas.length){
+      html += `<div class="hint" style="margin:0 0 4px;"><b>Etapas del tablero de Avance</b> — tildá las que quedaron <u>terminadas</u> con esta orden (si falta parte, dejalas sin tildar):</div><div class="cierre-etapas">`;
+      ef.etapas.forEach(e=>{
+        html += `<label class="cierre-chk${e.ya?' ya':''}"><input type="checkbox" class="cierre-etapa" data-key="${esc(e.key)}" ${e.ya ? 'checked disabled' : (prevEt.includes(e.key) ? 'checked' : '')}> ${esc(e.label)}${e.ya ? ' <span class="cierre-un">(ya estaba tildada)</span>' : ''}</label>`;
+      });
+      html += `</div>`;
+    }
+    if(ef.propuestas.length){
+      html += `<div class="hint" style="margin:8px 0 4px;"><b>Avance del Itemizado 2026</b> — con lo hecho, se propone sumar a «Hecha» de estos ítems (revisá y corregí la cantidad si hace falta):</div>`;
+      html += `<table class="cierre-tabla"><thead><tr><th style="width:30px;"></th><th>Ítem</th><th style="width:110px;">Sumar</th><th style="width:110px; text-align:right;">Queda</th></tr></thead><tbody>`;
+      ef.propuestas.forEach((pr,i)=>{
+        html += `<tr>
+          <td><input type="checkbox" class="cierre-av-on" data-i="${i}" checked></td>
+          <td><b>Ítem ${esc(pr.id)}</b> · ${esc(pr.desc)}<div class="cierre-un">por «${esc(pr.tarea)}» · contratado ${fmt(pr.contratado, Number.isInteger(pr.contratado)?0:2)} ${esc(pr.un)} · hecho hasta ahora ${fmt(pr.avanzado, Number.isInteger(pr.avanzado)?0:2)}</div></td>
+          <td><div class="cierre-cant"><input type="number" min="0" max="${pr.max}" step="any" class="cierre-av-delta" data-i="${i}" data-id="${esc(pr.id)}" value="${pr.delta}"><span>${esc(pr.un)}</span></div></td>
+          <td class="qty cierre-av-queda" data-i="${i}">${fmt(pr.avanzado + pr.delta, 2)} / ${fmt(pr.contratado, 2)}</td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+    }
+    if(ef.sinItem.length){
+      html += `<div class="hint" style="margin:6px 0 0; color:var(--amber);">${ef.sinItem.map(x=> x.lleno
+        ? `«${esc(x.tarea)}»: sobran ${fmt(x.sobra, 2)} que no entran en los ítems cargados de la plaza (ya están completos). Si la plaza tiene más de lo contratado, va como ajuste en el paso del itemizado de abajo.`
+        : `«${esc(x.tarea)}»: la plaza no tiene cargado ninguno de los ítems ${x.items.join(', ')} en el Itemizado 2026, así que no se puede avanzar solo.`).join('<br>')}</div>`;
+    }
+    caja.innerHTML = html;
+    caja.__propuestas = ef.propuestas;
+  }
 
   function recalcularCierre(){
     let total = 0;
@@ -16787,6 +17261,16 @@ function poblarParteObraDatalist(){
     const manual = (document.getElementById('cierreManual')||{}).checked;
     const cajas = [...document.querySelectorAll('.cierre-pers')];
     const o = ordenes().find(x=>x.id===cierreOtId);
+    if(o){
+      pintarEfectos(o);
+      // «Queda» de cada propuesta de avance, en vivo.
+      const props = (document.getElementById('cierreEfectos')||{}).__propuestas || [];
+      document.querySelectorAll('.cierre-av-delta').forEach(inp=>{
+        const pr = props[Number(inp.dataset.i)]; if(!pr) return;
+        const q = document.querySelector(`.cierre-av-queda[data-i="${inp.dataset.i}"]`);
+        if(q) q.textContent = fmt(pr.avanzado + Math.min(num(inp.value), pr.max), 2) + ' / ' + fmt(pr.contratado, 2);
+      });
+    }
     const gente = o ? (o.personal||[]).filter(p=>String(p.nombre||'').trim()) : [];
     const suma = gente.reduce((t,p)=> t + num(pesos[p.rol],0.6), 0) || 1;
     cajas.forEach((inp,i)=>{
@@ -16821,29 +17305,54 @@ function poblarParteObraDatalist(){
     const manual = (document.getElementById('cierreManual')||{}).checked;
     const reparto = {};
     if(manual) document.querySelectorAll('.cierre-pers').forEach(inp=>{ reparto[inp.dataset.n] = num(inp.value); });
+    // Horas por tarea y por persona (2026-09-10)
+    const horasTarea = {};
+    document.querySelectorAll('#cierreCuerpo .cierre-hini').forEach(inp=>{
+      const k = inp.dataset.k; const fin = document.querySelector(`#cierreCuerpo .cierre-hfin[data-k="${CSS.escape(k)}"]`);
+      const ini = inp.value || '', f = fin ? (fin.value || '') : '';
+      if(ini || f) horasTarea[k] = { ini, fin:f, horas: horasEntre(ini, f) };
+    });
+    const horasPersona = {};
+    document.querySelectorAll('#cierreCuerpo .cierre-horas-p').forEach(inp=>{ horasPersona[inp.dataset.n] = Math.max(0, num(inp.value)); });
+    // Etapas y avance del itemizado confirmados
+    const etapasConf = [...document.querySelectorAll('#cierreCuerpo .cierre-etapa:checked:not(:disabled)')].map(c=>c.dataset.key);
+    const props = (document.getElementById('cierreEfectos')||{}).__propuestas || [];
+    const avanceConf = [];
+    document.querySelectorAll('#cierreCuerpo .cierre-av-on:checked').forEach(c=>{
+      const pr = props[Number(c.dataset.i)]; const d = document.querySelector(`#cierreCuerpo .cierre-av-delta[data-i="${c.dataset.i}"]`);
+      if(pr && d && num(d.value) > 0) avanceConf.push({ id:pr.id, delta:Math.min(num(d.value), pr.max) });
+    });
+    const terminada = !!((document.getElementById('cierreTerminada')||{}).checked);
 
     // Conforme a obra: no se puede cerrar sin contestar si cambió algo del itemizado.
     const coVal = window.CO ? window.CO.cierreOtValidar() : { ok:true, datos:null };
     if(!coVal.ok){ msg.style.color = 'var(--danger)'; msg.textContent = 'Falta el paso del itemizado (abajo de todo).'; return; }
     const cierre = {
       cantidades, reparto: manual ? reparto : {},
+      horasTarea, horasPersona,
       obs: (document.getElementById('cierreObs')||{}).value || '',
       fecha: o.fecha || '',
       cerradoPor: (window.__fbUser && window.__fbUser.email) || '',
       cerradoTs: Date.now()
     };
     if(o.cierre && o.cierre.itemizado) cierre.itemizado = o.cierre.itemizado;
+    if(o.cierre && o.cierre.etapas) cierre.etapas = o.cierre.etapas.slice();
     msg.style.color = 'var(--text-soft)';
     msg.textContent = 'Guardando…';
     try{
-      // Primero los ajustes en la plaza (quedan atados a esta orden), después la orden.
+      // Primero la plaza (etapas, avance del itemizado y ajustes quedan atados a esta orden), después la orden.
+      const ap = aplicarEfectos(o, { etapas: etapasConf, avanceItems: avanceConf });
+      cierre.avanceItems = ap.avanceItems;
+      cierre.etapas = Array.from(new Set((cierre.etapas||[]).concat(ap.etapas)));
       if(window.CO && coVal.datos){ const it = window.CO.cierreOtAplicar({ ...o, cierre }, coVal.datos); if(it) cierre.itemizado = it; }
-      await window.fbOtUpdate(o.id, { cierre });
-      o.cierre = cierre;                      // que se vea al instante, sin esperar a la nube
+      const estado = terminada ? 'Terminada' : (o.estado === 'Anulada' ? 'Anulada' : 'En curso');
+      await window.fbOtUpdate(o.id, { cierre, estado });
+      o.cierre = cierre; o.estado = estado;   // que se vea al instante, sin esperar a la nube
       msg.style.color = 'var(--teal-dark)';
-      msg.textContent = '✔ Guardado.';
+      msg.textContent = '✔ Guardado.' + (ap.avanceItems.length ? ` Itemizado: ${ap.avanceItems.length} ítem(s) avanzados.` : '') + (ap.etapas.length ? ` Etapas tildadas: ${ap.etapas.length}.` : '');
       if(typeof renderOt === 'function') renderOt();
-      setTimeout(()=>{ cerrarCuadroCierre(); renderProduccion(); }, 500);
+      if(typeof window.renderGastos === 'function') window.renderGastos();
+      setTimeout(()=>{ cerrarCuadroCierre(); renderProduccion(); }, 700);
     }catch(e){
       msg.style.color = 'var(--danger)';
       msg.textContent = 'No se pudo guardar (revisá la conexión a internet).';
@@ -17174,6 +17683,7 @@ function poblarParteObraDatalist(){
         obs: c.obs || '',
         manual: !!(c.reparto && Object.keys(c.reparto).length),
         reparto: { ...(c.reparto||{}) },
+        horas: { ...(c.horasPersona||{}) },      // horas trabajadas por persona (2026-09-10)
         sucio: false
       };
     }
@@ -17260,16 +17770,22 @@ function poblarParteObraDatalist(){
           const rep = b.manual
             ? gente.map(p=>({nombre:String(p.nombre).trim(), rol:p.rol||'—', pts:num(b.reparto[String(p.nombre).trim()])}))
             : repartoAutomatico(o, total);
-          html += `<label class="dia-chk"><input type="checkbox" class="dia-manual" data-ot="${esc(o.id)}" ${b.manual?'checked':''}> Repartir a mano</label>`;
+          const jornada = horasJornadaDe(o);
+          html += `<label class="dia-chk"><input type="checkbox" class="dia-manual" data-ot="${esc(o.id)}" ${b.manual?'checked':''}> Repartir los puntos a mano</label>`;
+          html += `<div class="hint" style="margin:0 0 4px;">Horas trabajadas de cada uno (de la hoja); por defecto la jornada de la orden, ${fmt(jornada, Number.isInteger(jornada)?0:1)} h.</div>`;
           html += `<div class="dia-reparto">` + rep.map(r=>`
             <div class="dia-persona">
               <div><b>${esc(r.nombre)}</b><div class="dia-rol2">${esc(r.rol)} · peso ${num(pesos[r.rol], 0.6)}</div></div>
-              <input type="number" min="0" step="any" class="dia-pers${b.manual?'':' auto'}" data-ot="${esc(o.id)}" data-n="${esc(r.nombre)}" value="${r.pts}" ${b.manual?'':'readonly'}>
+              <div class="cierre-persona-campos">
+                <label>horas <input type="number" min="0" max="24" step="0.5" class="dia-horas" data-ot="${esc(o.id)}" data-n="${esc(r.nombre)}" value="${b.horas[r.nombre] != null ? num(b.horas[r.nombre]) : jornada}"></label>
+                <label>puntos <input type="number" min="0" step="any" class="dia-pers${b.manual?'':' auto'}" data-ot="${esc(o.id)}" data-n="${esc(r.nombre)}" value="${r.pts}" ${b.manual?'':'readonly'}></label>
+              </div>
             </div>`).join('') + `</div>`;
         }
         html += `<textarea class="dia-obs" data-ot="${esc(o.id)}" rows="2" placeholder="Observaciones del día: se paró por lluvia, faltó material…">${esc(b.obs)}</textarea>`;
         html += `<div class="dia-pie">
           <span class="hint dia-msg" data-ot="${esc(o.id)}">${b.sucio?'Hay cambios sin guardar.':''}</span>
+          ${o.plazaId ? `<button type="button" class="btn-ghost" onclick="abrirCierreOt('${esc(o.id)}')" title="Horas por tarea, etapas de la plaza, avance del itemizado y cambios del proyecto" style="padding:8px 12px; font-size:12px;">Cierre completo (etapas e itemizado) →</button>` : ''}
           <button type="button" class="btn-primary dia-guardar" data-ot="${esc(o.id)}" style="width:auto; margin:0; padding:9px 18px;">Guardar el parte</button>
         </div>`;
       }
@@ -17294,18 +17810,26 @@ function poblarParteObraDatalist(){
     }
     const cantidades = {};
     Object.keys(b.cantidades).forEach(k=>{ if(num(b.cantidades[k]) > 0) cantidades[k] = num(b.cantidades[k]); });
+    const horasPersona = {};
+    (o.personal||[]).filter(p=>String(p.nombre||'').trim()).forEach(p=>{ const n = String(p.nombre).trim(); horasPersona[n] = b.horas[n] != null ? num(b.horas[n]) : horasJornadaDe(o); });
     const cierre = {
       cantidades,
       reparto: b.manual ? { ...b.reparto } : {},
+      horasPersona,
       obs: b.obs || '',
       fecha: o.fecha || diaFecha,
       cerradoPor: (window.__fbUser && window.__fbUser.email) || '',
       cerradoTs: Date.now()
     };
+    // Lo que se cargó desde el cierre completo (horas por tarea, etapas, avance del itemizado,
+    // ajustes del proyecto) se conserva: este atajo no lo pisa (antes lo borraba, 2026-09-10).
+    const prev = o.cierre || {};
+    ['horasTarea','itemizado','etapas','avanceItems'].forEach(k=>{ if(prev[k] != null) cierre[k] = prev[k]; });
     if(msg && !silencioso){ msg.style.color='var(--text-soft)'; msg.textContent='Guardando…'; }
     try{
-      await window.fbOtUpdate(o.id, { cierre });
-      o.cierre = cierre;
+      const estado = (o.estado === 'Emitida') ? 'Terminada' : o.estado;   // un parte cargado = la orden se hizo
+      await window.fbOtUpdate(o.id, { cierre, estado });
+      o.cierre = cierre; o.estado = estado;
       b.sucio = false;
       if(msg){ msg.style.color='var(--teal-dark)'; msg.textContent='✔ Guardado.'; }
       return true;
@@ -17397,6 +17921,8 @@ function poblarParteObraDatalist(){
       if(ob){ const o = ordenes().find(x=>x.id===ob.dataset.ot); if(o){ borradorDe(o).obs = ob.value; borradorDe(o).sucio = true; } return; }
       const pe = e.target.closest('.dia-pers');
       if(pe && !pe.readOnly){ const o = ordenes().find(x=>x.id===pe.dataset.ot); if(o){ borradorDe(o).reparto[pe.dataset.n] = num(pe.value); borradorDe(o).sucio = true; } return; }
+      const hh = e.target.closest('.dia-horas');
+      if(hh){ const o = ordenes().find(x=>x.id===hh.dataset.ot); if(o){ borradorDe(o).horas[hh.dataset.n] = Math.max(0, num(hh.value)); borradorDe(o).sucio = true; } return; }
     });
 
     panel.addEventListener('change', (e)=>{
@@ -23843,6 +24369,13 @@ const ITEMIZADO_EPEC = [
                  ['consolidado','Consolidado por ítem (todas juntas)',0]],
       importes:true,
       construir: infItemizado },
+    { id:'plazas-gastos', tema:'plazas', txt:'Gastos vs. certificado (margen)', sel:'plazas', fechas:false,
+      hint:'Plaza por plaza: lo que se certifica por el pliego según el itemizado contra lo que realmente se gastó (pañol, mano de obra y lo cargado en Gastos de obra), con el margen en pesos y en porcentaje, ítem por ítem y total.',
+      secciones:[['resumen','Resumen por plaza',1],['categorias','Gastos por categoría de cada plaza',1],
+                 ['items','Margen ítem por ítem de cada plaza',1],['detalle','Detalle de los gastos de cada plaza',0],
+                 ['consolidado','Consolidado (todas juntas)',1]],
+      importes:true,
+      construir: infGastos },
     { id:'plazas-certif', tema:'plazas', txt:'Certificado municipal vs. Calculadora', sel:'plazas', fechas:false,
       hint:'Plaza por plaza y ítem por ítem: lo que se certificó en la planilla de la Municipalidad contra lo que tiene la Calculadora, la diferencia y el porqué de cada una. Es el informe para ver qué quedó sin cobrar.',
       secciones:[['resumen','Resumen por plaza',1],['detalle','Detalle ítem por ítem de cada plaza',1],
@@ -24221,6 +24754,124 @@ const ITEMIZADO_EPEC = [
         [{t:'Plaza'},{t:'Trabajo'},{t:'Cantidad', num:true, w:'80px'},{t:'Un.', w:'46px'},{t:'$ unitario', num:true},{t:'Importe', num:true},{t:'Quién lo pidió'},{t:'Fecha', w:'86px'},{t:'Ítem propuesto', w:'90px'}],
         todos.map(({f,t})=>{ const r = [f.a.nombre||'', t.desc, N(n2(t.cant),'cant'), t.un||'Un.', N(n2(t.pu),'money'), N(t.sub,'money'), t.pedido||'—', t.fecha ? fCorta(t.fecha) : '—', t.item ? 'Ítem ' + t.item : '—']; r._cls = 'inf-fuera'; return r; }),
         [(()=>{ const pf = ['TOTAL NO CONTADO', '', '', '', '', N(fueraTot,'money'), '', '', '']; pf._cls = 'inf-fuera'; return pf; })()]));
+    }
+    return m;
+  }
+
+  // ==========================================================================================
+  // GASTOS vs. CERTIFICADO — MARGEN  (2026-09-10)
+  // ==========================================================================================
+  // Pedido del usuario: *"en Informes, un comparativo automático por plaza entre lo que certifico
+  // por pliego según el itemizado y lo que realmente gasté, con el margen en pesos y en
+  // porcentaje, ítem por ítem y total"*. Las cuentas de gasto son las de la pestaña Gastos de obra
+  // (`window.GASTOS.costeoDe`); las de lo certificado, las mismas del Itemizado 2026.
+  // «Qué plata mostrar»: con «solo contratado» el margen se compara contra lo contratado (margen
+  // proyectado); con «solo certificado» o «ambos», contra lo certificado (margen real a hoy).
+  function infGastos(o){
+    const G = window.GASTOS;
+    const base = baseMod(), iva = conIva();
+    const modo = (o.importes === 'contratado' || o.importes === 'certificado') ? o.importes : 'ambos';
+    const contra = modo === 'contratado' ? 'contratado' : 'certificado';
+    const contraTxt = contra === 'contratado' ? 'contratado' : 'certificado';
+    const m = { titulo:'Gastos de obra contra lo ' + contraTxt + ' — margen',
+                subtitulo:`${o.items.length} plaza(s) · gastos reales vs. ANEXO I — LPE 5589` +
+                          (base > 0 ? ` · módulo ${plata(base)} ${iva?'con IVA':'sin IVA'}` : ' · valor del módulo sin cargar') +
+                          (modo === 'contratado' ? ' · margen contra lo contratado' : ' · margen contra lo certificado'),
+                tiles:[], avisos:[], secciones:[] };
+    if(!G || typeof G.costeoDe !== 'function'){ m.avisos.push('La pestaña Gastos de obra no está cargada: no se pueden calcular los gastos.'); return m; }
+    if(base <= 0) m.avisos.push('El <b>valor del módulo</b> no está cargado en el Itemizado 2026: lo certificado sale en cero y el margen no se puede calcular. Cargalo y volvé a generar.');
+
+    const CATS = G.CATS;
+    const filas = o.items.map((a,i)=>{ const c = G.costeoDe(a); const ref = c.cert[contra]; return { a, n:i+1, c, ref, margen: ref - c.total, pct: ref > 0 ? (ref - c.total) / ref : null }; });
+    const T = campo => filas.reduce((t,f)=> t + n2(campo(f)), 0);
+    const totGasto = T(f=>f.c.total), totRef = T(f=>f.ref), totCert = T(f=>f.c.cert.certificado), totContr = T(f=>f.c.cert.contratado);
+    const nPend = T(f=>f.c.nPend);
+    const margenTot = totRef - totGasto;
+    const M = v => ({ ...N(v,'money'), txt: (v < 0 ? '−' : '') + plata(Math.abs(v)) });
+    const P = p => p == null ? '—' : ({ ...N(p,'pct'), txt: (Math.round(p*1000)/10).toLocaleString('es-AR',{maximumFractionDigits:1}) + '%' });
+
+    m.tiles = [
+      { n: N(totGasto,'money'), l:'Gastado' + (nPend ? ' (falta valorizar ' + nPend + ')' : ''), c:'' },
+      { n: N(totRef,'money'), l:(contra === 'contratado' ? 'Contratado' : 'Certificado') + ' por pliego', c:'azul' },
+      { n: M(margenTot), l:'Margen en pesos', c: margenTot >= 0 ? 'verde' : 'ambar' },
+      { n: totRef > 0 ? P(margenTot/totRef) : '—', l:'Margen en %', c: margenTot >= 0 ? 'verde' : 'ambar' },
+    ];
+    if(nPend) m.avisos.push(`Hay <b>${nPend}</b> renglón(es) que todavía <b>no se pueden valorizar</b> (materiales sin costo en el catálogo de Stock o personas sin valor hora en la nómina). El gasto real es <b>mayor</b> al que se muestra y el margen, menor. Cargá esos costos y volvé a generar.`);
+    const sinCert = filas.filter(f=> f.ref <= 0 && f.c.total > 0).length;
+    if(sinCert) m.avisos.push(`<b>${sinCert}</b> plaza(s) tienen gastos pero nada ${contraTxt} en el itemizado: salen con margen negativo igual al gasto.`);
+
+    if(o.sec.resumen){
+      const cols = [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'}];
+      if(modo === 'ambos') cols.push({t:'Contratado', num:true}, {t:'Certificado', num:true});
+      else cols.push({t: contra === 'contratado' ? 'Contratado' : 'Certificado', num:true});
+      cols.push({t:'Gastado', num:true},{t:'Pendientes', num:true, w:'70px'},{t:'Margen $', num:true},{t:'Margen %', num:true, w:'70px'});
+      const fila = f => {
+        const r = [N(f.n,'int'), f.a.nombre||'', String(f.a.obraId||'—')];
+        if(modo === 'ambos') r.push(N(f.c.cert.contratado,'money'), N(f.c.cert.certificado,'money'));
+        else r.push(N(f.ref,'money'));
+        r.push(N(f.c.total,'money'), f.c.nPend ? N(f.c.nPend,'int') : '—', M(f.margen), P(f.pct));
+        if(f.margen < 0) r._cls = 'inf-fuera';
+        return r;
+      };
+      const pie = ['', 'TOTAL', ''];
+      if(modo === 'ambos') pie.push(N(totContr,'money'), N(totCert,'money')); else pie.push(N(totRef,'money'));
+      pie.push(N(totGasto,'money'), nPend ? N(nPend,'int') : '—', M(margenTot), totRef > 0 ? P(margenTot/totRef) : '—');
+      m.secciones.push(tabla('Resumen por plaza', `Margen = lo ${contraTxt} por el pliego − lo gastado. Las filas en ámbar tienen margen negativo (se gastó más de lo que se cobra).`,
+        cols, filas.map(fila), [pie]));
+    }
+
+    if(o.sec.categorias){
+      const cols = [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'}].concat(CATS.map(k=>({t:k.txt, num:true}))).concat([{t:'Total gastado', num:true}]);
+      m.secciones.push(tabla('Gastos por categoría', 'Materiales = salidas del pañol × costo del catálogo (más lo cargado a mano). Mano de obra = horas de las órdenes de trabajo × valor hora de cada persona (más lo cargado a mano). El resto es lo cargado en Gastos de obra.',
+        cols,
+        filas.map(f=> [N(f.n,'int'), f.a.nombre||''].concat(CATS.map(k=> f.c.porCat[k.id] > 0 ? N(f.c.porCat[k.id],'money') : '—')).concat([N(f.c.total,'money')])),
+        [['', 'TOTAL'].concat(CATS.map(k=>{ const v = T(f=>f.c.porCat[k.id]); return v > 0 ? N(v,'money') : '—'; })).concat([N(totGasto,'money')])]));
+    }
+
+    if(o.sec.items){
+      filas.forEach(f=>{
+        const gi = G.gastoPorItem(f.a, f.c, contra);
+        const sub = `ID ${f.a.obraId||'—'} — ${contraTxt} ${plata(f.ref)} · gastado ${plata(f.c.total)} · margen ${(f.margen<0?'−':'')}${plata(Math.abs(f.margen))}${f.pct==null?'':' ('+P(f.pct).txt+')'}`;
+        if(!gi.items.length){
+          m.secciones.push(texto(`${f.a.nombre||'(sin nombre)'} — ítem por ítem`, [sub, 'Esta plaza no tiene ítems cargados en el itemizado: no hay contra qué comparar ítem por ítem.']));
+          return;
+        }
+        m.secciones.push(tabla(`${f.a.nombre||'(sin nombre)'} — ítem por ítem`, sub + '. «Directo» es lo cargado en Gastos de obra imputado a ese ítem; «prorrateado» reparte el resto del gasto según el peso de cada ítem en lo ' + contraTxt + '.',
+          [{t:'Ítem', w:'56px'},{t:'Descripción'},{t:'Un.', w:'46px'},{t:'Cant.', num:true, w:'64px'},
+           {t: contra === 'contratado' ? 'Contratado' : 'Certificado', num:true},{t:'Directo', num:true},{t:'Prorrateado', num:true},{t:'Gasto', num:true},{t:'Margen $', num:true},{t:'Margen %', num:true, w:'70px'}],
+          gi.items.map(it=>{
+            const r = [it.id, DESC(it.id), UN(it.id), N(contra === 'contratado' ? it.cant : it.hecha,'cant'),
+                       N(it[contra],'money'), it.directo > 0 ? N(it.directo,'money') : '—', N(it.prorrateo,'money'), N(it.gasto,'money'), M(it.margen), P(it.margenPct)];
+            if(it.margen < 0) r._cls = 'inf-fuera';
+            return r;
+          }),
+          [['', 'TOTAL DE LA PLAZA', '', '', N(f.ref,'money'), N(gi.sumaDirecto - gi.sinItem,'money'), N(gi.resto,'money'), N(f.c.total,'money'), M(f.margen), P(f.pct)]],
+          { grupo:'Ítem por ítem', etiqueta:f.a.nombre || '(sin nombre)', etiquetaCol:'Plaza' }));
+      });
+    }
+
+    if(o.sec.detalle){
+      filas.forEach(f=>{
+        const c = f.c; const r = [];
+        c.mat.lineas.forEach(l=>{ const x = ['Materiales', (l.codigo!=null?l.codigo+' · ':'') + l.desc, l.ultimo ? fCorta(l.ultimo) : '—', N(l.cant,'cant'), l.un||'', l.pendiente ? '—' : N(l.costo,'money'), l.pendiente ? 'PENDIENTE — sin costo en el catálogo' : N(l.importe,'money')]; if(l.pendiente) x._cls = 'inf-fuera'; r.push(x); });
+        c.mo.ots.forEach(ot=>{ const x = ['Mano de obra', `OT ${ot.numero||'—'} · ${ot.personas} persona(s) × ${nf(ot.horas,1)} h${ot.estimadas?' (estim.)':''}${ot.cerrada?'':' · sin cierre'}`, fCorta(ot.fecha), N(ot.horasTotales,'cant'), 'h-h', '—', ot.pendientes.length ? (ot.importe > 0 ? N(ot.importe,'money').txt + ' + ' : '') + ot.pendientes.length + ' sin valor hora' : N(ot.importe,'money')]; if(ot.pendientes.length) x._cls = 'inf-fuera'; r.push(x); });
+        c.man.lineas.forEach(g=>{ const k = CATS.find(x=>x.id===g.cat) || CATS[CATS.length-1]; r.push([k.txt, g.desc + (g.proveedor?' · '+g.proveedor:'') + (g.item?' · ítem '+g.item:''), fCorta(g.fecha), g.cant!=null&&g.cant!=='' ? N(g.cant,'cant') : '—', g.un||'', n2(g.pu)>0 ? N(g.pu,'money') : '—', N(g.importe,'money')]); });
+        if(!r.length){ m.secciones.push(texto(`${f.a.nombre||'(sin nombre)'} — gastos`, ['Sin gastos registrados.'])); return; }
+        m.secciones.push(tabla(`${f.a.nombre||'(sin nombre)'} — gastos`, `ID ${f.a.obraId||'—'} · ${r.length} renglón(es) · total ${plata(c.total)}${c.nPend?' + '+c.nPend+' pendiente(s)':''}`,
+          [{t:'Categoría', w:'110px'},{t:'Detalle'},{t:'Fecha', w:'80px'},{t:'Cant.', num:true, w:'70px'},{t:'Un.', w:'46px'},{t:'$ unit.', num:true},{t:'Importe', num:true}],
+          r, [['', 'TOTAL GASTADO', '', '', '', '', N(c.total,'money')]],
+          { grupo:'Detalle de gastos', etiqueta:f.a.nombre || '(sin nombre)', etiquetaCol:'Plaza' }));
+      });
+    }
+
+    if(o.sec.consolidado){
+      const lin = CATS.map(k=>{ const v = T(f=>f.c.porCat[k.id]); return [k.txt, N(v,'money'), totGasto > 0 ? P(v/totGasto) : '—']; });
+      m.secciones.push(tabla('Consolidado — en qué se fue la plata', `Las ${o.items.length} plaza(s) juntas, por categoría, y el margen total contra lo ${contraTxt}.`,
+        [{t:'Concepto'},{t:'Importe', num:true},{t:'% del gasto', num:true, w:'90px'}],
+        lin,
+        [['TOTAL GASTADO', N(totGasto,'money'), totGasto > 0 ? P(1) : '—'],
+         [(contra === 'contratado' ? 'CONTRATADO' : 'CERTIFICADO') + ' POR PLIEGO', N(totRef,'money'), ''],
+         ['MARGEN', M(margenTot), totRef > 0 ? P(margenTot/totRef) : '—']]));
     }
     return m;
   }
@@ -25562,6 +26213,489 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   window.SESION = { pintar, entrar, salir };
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', marcarBoton);
   else marcarBoton();
+})();
+</script>
+
+<script>
+// ==========================================================================================
+// GASTOS DE OBRA  (2026-09-10)
+// ==========================================================================================
+// Pedido del usuario, textual: *"Quiero una pestaña nueva de Gastos de obra, separada del
+// itemizado de pliego. La vista principal es un listado de plazas con el total gastado en cada
+// una, y al tocar una plaza se abre su detalle. […] Los materiales consumidos por plaza se
+// valorizan solos con el costo unitario del catálogo de Stock. Si un material todavía no tiene
+// costo cargado, que salga marcado como pendiente y no como cero, para que el total no mienta.
+// La mano de obra también se calcula sola: las horas salen de las órdenes de trabajo y de la
+// actividad diaria de cuadrilla por plaza, multiplicadas por el valor hora que cargo en la ficha
+// de cada persona."*
+//
+// Qué es cada cosa:
+//  · MATERIALES  → salidas del pañol a la plaza (movimientos con `plazaId`), menos las devoluciones,
+//                  por el `costo` del producto en el catálogo de Stock. Costo en cero = PENDIENTE.
+//  · MANO DE OBRA → cada orden de trabajo de la plaza (no anulada, con fecha hasta hoy): horas de
+//                  la jornada (horaInicio→horaFin; si falta, 8 h) × cada persona de la cuadrilla ×
+//                  su `valorHora` de la nómina (Equipo → Personal). Sin valor hora = PENDIENTE.
+//                  La actividad diaria (el cierre del día) es el mismo documento de la OT: si está
+//                  cerrada se toma la fecha del cierre y se marca «cerrada»; si no, «sin cierre».
+//  · LO DEMÁS     → se carga a mano acá (combustible, alquileres, fletes, herramientas, varios), y
+//                  también se pueden cargar materiales o mano de obra que no pasaron por el pañol
+//                  ni por una OT (un subcontratista, una compra directa).
+// Todo queda en la colección `gastosObra` con `plazaId` = id del documento de avanceObras, que es
+// la misma clave que usan el pañol y las órdenes.
+(function(){
+  const $ = id => document.getElementById(id);
+  const esc = s => (typeof escHtml === 'function') ? escHtml(s) : String(s==null?'':s);
+  const escA = s => esc(s).replace(/"/g, '&quot;');
+  const leer = (f, def) => { try{ const v=f(); return v==null?def:v; }catch(e){ return def; } };
+  const obras = ()=> leer(()=> avanceObras, []) || [];
+  const ots   = ()=> leer(()=> ordenesTrabajo, []) || [];
+  const movs  = ()=> (leer(()=> window.stockMovimientos, []) || []).filter(m=> m && !m.anulado);
+  const gastos= ()=> leer(()=> window.gastosObra, []) || [];
+  const nomina= ()=> leer(()=> (typeof window.nominaEquipo === 'function') ? window.nominaEquipo() : [], []) || [];
+  const catalogoTodo = ()=> leer(()=> (typeof window.catalogoCompleto === 'function') ? window.catalogoCompleto() : (typeof window.catalogo === 'function' ? window.catalogo() : []), []) || [];
+  const n2 = v => { const x = Number(v); return isFinite(x) ? x : 0; };
+  const nf = (v, d=2)=> (typeof fmt === 'function') ? fmt(v, d) : String(v);
+  const nEnt = v => nf(v, Number.isInteger(n2(v)) ? 0 : 2);
+  const fCorta = f => (typeof formatFechaCorta === 'function' && f) ? formatFechaCorta(f) : (f || '—');
+  const hoyISO = ()=> (typeof fechaAISO === 'function') ? fechaAISO(new Date()) : new Date().toISOString().slice(0,10);
+  const plata = v => '$ ' + n2(v).toLocaleString('es-AR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const pct = v => (isFinite(v) ? Math.round(v * 1000) / 10 : 0).toLocaleString('es-AR', { maximumFractionDigits:1 }) + '%';
+  const claveNombre = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase().replace(/\s+/g,' ');
+
+  const CATS = [
+    { id:'materiales',   txt:'Materiales',                       ico:'📦', auto:true  },
+    { id:'mano_obra',    txt:'Mano de obra',                     ico:'👷', auto:true  },
+    { id:'combustible',  txt:'Combustible',                      ico:'⛽', auto:false },
+    { id:'alquiler',     txt:'Alquiler de equipos y máquinas',   ico:'🚜', auto:false },
+    { id:'fletes',       txt:'Fletes',                           ico:'🚚', auto:false },
+    { id:'herramientas', txt:'Herramientas y consumibles',       ico:'🔧', auto:false },
+    { id:'varios',       txt:'Gastos varios',                    ico:'🧾', auto:false },
+  ];
+  const catDe = id => CATS.find(c=>c.id===id) || CATS[CATS.length-1];
+  const HORAS_JORNADA = 8;   // cuando la OT no tiene hora de inicio y fin válidas
+
+  // ---------- Cuentas ----------
+  function horasDeOt(o){
+    const p = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(t||'').trim()); return m ? Number(m[1]) + Number(m[2])/60 : null; };
+    const i = p(o.horaInicio), f = p(o.horaFin);
+    if(i != null && f != null && f > i) return { horas: f - i, estimadas:false };
+    return { horas: HORAS_JORNADA, estimadas:true };
+  }
+  function valorHoraDe(nombre){
+    const k = claveNombre(nombre);
+    if(!k) return 0;
+    const p = nomina().find(x=> claveNombre(x.nombre) === k);
+    return p ? n2(p.valorHora) : 0;
+  }
+  function certificadoDe(a){
+    // Lo que se cobra por el pliego: mismas cuentas que el Itemizado 2026 y que los informes.
+    const v = leer(()=> calcularValorPlaza(a), null);
+    if(v) return { contratado: n2(v.presupuesto), certificado: n2(v.avanzado), kTotal: n2(v.kTotal), kAvanzado: n2(v.kAvanzado) };
+    return { contratado:0, certificado:0, kTotal:0, kAvanzado:0 };
+  }
+
+  function costeoDe(a){
+    const id = String(a.id);
+    const hoy = hoyISO();
+    // --- Materiales: salidas del pañol a esta plaza, valorizadas con el costo del catálogo ---
+    const porProd = new Map();
+    movs().filter(m=> String(m.plazaId||'') === id).forEach(m=>{
+      const key = (m.codigo != null && m.codigo !== '') ? 'c' + m.codigo : 'd' + claveNombre(m.desc);
+      const g = porProd.get(key) || { codigo: m.codigo, desc: m.desc || '', un: m.un || '', cant: 0, ultimo: '' };
+      g.cant += (m.tipo === 'entrada' ? -1 : 1) * n2(m.cantidad);
+      if(!g.desc && m.desc) g.desc = m.desc;
+      if((m.fecha||'') > g.ultimo) g.ultimo = m.fecha || '';
+      porProd.set(key, g);
+    });
+    const cat = catalogoTodo();
+    const mat = { lineas:[], total:0, pendientes:[] };
+    [...porProd.values()].filter(g=> g.cant > 0).forEach(g=>{
+      const prod = (g.codigo != null) ? cat.find(p=> String(p.codigo) === String(g.codigo)) : null;
+      const costo = prod ? n2(prod.costo) : 0;
+      const desc = (prod && prod.desc) || g.desc || ('Producto ' + g.codigo);
+      const un = (prod && prod.un) || g.un || '';
+      const linea = { codigo: g.codigo, desc, un, cant: g.cant, costo, importe: costo > 0 ? g.cant * costo : 0, pendiente: !(costo > 0), ultimo: g.ultimo };
+      mat.lineas.push(linea);
+      if(linea.pendiente) mat.pendientes.push(linea); else mat.total += linea.importe;
+    });
+    mat.lineas.sort((x,y)=> (y.importe - x.importe) || String(x.desc).localeCompare(String(y.desc)));
+
+    // --- Mano de obra: horas de las OT de la plaza × valor hora de cada persona ---
+    const mo = { ots:[], personas:[], total:0, horas:0, pendientes:[] };
+    const porPersona = new Map();
+    ots().filter(o=> String(o.plazaId||'') === id && o.estado !== 'Anulada').forEach(o=>{
+      const fecha = (o.cierre && o.cierre.fecha) || o.fecha || '';
+      if(fecha && fecha > hoy) return;          // todavía no pasó: no es un gasto
+      const h = horasDeOt(o);
+      const gente = (o.personal||[]).filter(p=> p && String(p.nombre||'').trim());
+      const fila = { id:o.id, numero:o.numero||'', fecha, horas:h.horas, estimadas:h.estimadas, personas:gente.length, horasTotales:h.horas*gente.length,
+                     importe:0, pendientes:[], cerrada: !!(o.cierre && o.cierre.cerradoTs), estado:o.estado||'Emitida', etapa:o.etapaLabel||'' };
+      // Si el cierre trae las horas reales de cada persona (de la hoja), mandan esas (2026-09-10).
+      const hp = (o.cierre && o.cierre.horasPersona) || null;
+      let hTot = 0;
+      gente.forEach(p=>{
+        const vh = valorHoraDe(p.nombre);
+        const k = claveNombre(p.nombre);
+        const n = String(p.nombre||'').trim();
+        const horasP = (hp && hp[n] != null) ? n2(hp[n]) : h.horas;
+        hTot += horasP;
+        const acc = porPersona.get(k) || { nombre:p.nombre, rol:p.rol||'', horas:0, importe:0, valorHora:vh, ots:0, pendiente:!(vh>0) };
+        acc.horas += horasP; acc.ots++;
+        if(vh > 0){ const imp = horasP * vh; fila.importe += imp; acc.importe += imp; }
+        else { fila.pendientes.push(p.nombre); acc.pendiente = true; }
+        porPersona.set(k, acc);
+      });
+      fila.horasTotales = hTot;
+      if(hp) fila.estimadas = false;
+      mo.ots.push(fila);
+      mo.total += fila.importe; mo.horas += fila.horasTotales;
+    });
+    mo.ots.sort((x,y)=> String(y.fecha).localeCompare(String(x.fecha)));
+    mo.personas = [...porPersona.values()].sort((x,y)=> y.horas - x.horas);
+    mo.pendientes = mo.personas.filter(p=> p.pendiente);
+
+    // --- Lo cargado a mano ---
+    const man = { lineas: gastos().filter(g=> String(g.plazaId||'') === id).map(g=> ({ ...g, importe: n2(g.importe) })), porCat:{}, total:0 };
+    man.lineas.sort((x,y)=> String(y.fecha||'').localeCompare(String(x.fecha||'')) || (n2(y.ts) - n2(x.ts)));
+    CATS.forEach(c=>{ man.porCat[c.id] = { lineas:[], total:0 }; });
+    man.lineas.forEach(g=>{ const c = man.porCat[g.cat] ? g.cat : 'varios'; man.porCat[c].lineas.push(g); man.porCat[c].total += g.importe; man.total += g.importe; });
+
+    // --- Totales por categoría y total ---
+    const porCat = {};
+    CATS.forEach(c=>{ porCat[c.id] = man.porCat[c.id].total; });
+    porCat.materiales += mat.total;
+    porCat.mano_obra  += mo.total;
+    const total = Object.values(porCat).reduce((t,x)=> t + x, 0);
+    const nPend = mat.pendientes.length + mo.pendientes.length;
+    const cert = certificadoDe(a);
+    return { a, mat, mo, man, porCat, total, nPend, cert,
+             margen: cert.certificado - total, margenPct: cert.certificado > 0 ? (cert.certificado - total) / cert.certificado : null,
+             margenContratado: cert.contratado - total, margenContratadoPct: cert.contratado > 0 ? (cert.contratado - total) / cert.contratado : null,
+             tieneAlgo: total > 0 || nPend > 0 || mat.lineas.length > 0 || mo.ots.length > 0 || man.lineas.length > 0 };
+  }
+
+  // Gasto por ítem del pliego (para el informe comparativo): lo cargado a mano con «ítem» va
+  // directo a ese ítem; el resto se prorratea según el peso de cada ítem en lo certificado (o en lo
+  // contratado si todavía no hay nada certificado), que es la única llave común que hay.
+  function gastoPorItem(a, c, baseModo){
+    const K = id => leer(()=> window.epecItemK(id), 0);
+    const base = leer(()=> window.epecBaseEf(), 0);
+    const items = [];
+    const push = (id, v) => { if(!id) return; const c0 = n2(v.cantidad), ca = Math.min(n2(v.cantidadAvanzada), c0); items.push({ id:String(id), k:K(id), cant:c0, hecha:ca, contratado:c0*K(id)*base, certificado:ca*K(id)*base }); };
+    (a.valorItems||[]).forEach(v=> push(v.itemPliego, v));
+    (a.valorItemsEpec||[]).forEach(v=> push(v.itemEpec, v));
+    items.sort((x,y)=> parseFloat(x.id) - parseFloat(y.id));
+    const directo = {};
+    c.man.lineas.forEach(g=>{ if(g.item) directo[String(g.item)] = (directo[String(g.item)]||0) + g.importe; });
+    let sumaDirecto = 0; items.forEach(it=>{ it.directo = directo[it.id] || 0; sumaDirecto += it.directo; });
+    const sinItem = Object.keys(directo).filter(k=> !items.some(it=> it.id === k)).reduce((t,k)=> t + directo[k], 0);
+    const resto = Math.max(0, c.total - sumaDirecto + sinItem);   // lo no imputado (incluye lo imputado a ítems que la plaza no tiene)
+    const campo = baseModo === 'contratado' ? 'contratado' : 'certificado';
+    let pesoTotal = items.reduce((t,it)=> t + it[campo], 0);
+    let usa = campo;
+    if(pesoTotal <= 0){ usa = 'contratado'; pesoTotal = items.reduce((t,it)=> t + it.contratado, 0); }
+    items.forEach(it=>{
+      it.prorrateo = pesoTotal > 0 ? resto * it[usa] / pesoTotal : (items.length ? resto / items.length : 0);
+      it.gasto = it.directo + it.prorrateo;
+      it.margen = it[campo] - it.gasto;
+      it.margenPct = it[campo] > 0 ? it.margen / it[campo] : null;
+    });
+    return { items, resto, sumaDirecto, sinItem, base };
+  }
+
+  // ---------- Pantalla ----------
+  let plazaAbierta = null;     // id de avanceObras
+  let busca = '';
+  let filtro = 'con';          // 'con' = solo plazas con algo gastado · 'todas'
+  let formCat = 'combustible';
+
+  function render(){
+    const cont = $('gastosCont'); if(!cont) return;
+    const v = $('viewGastos'); if(!v || v.style.display === 'none') return;
+    if(plazaAbierta){
+      const a = obras().find(x=> String(x.id) === String(plazaAbierta));
+      if(a){ cont.innerHTML = htmlDetalle(a); return; }
+      plazaAbierta = null;
+    }
+    cont.innerHTML = htmlListado();
+  }
+  window.renderGastos = render;
+
+  function tile(n, l, c){ return `<div class="inf-tile"><div class="inf-num ${c||''}">${n}</div><div class="inf-lbl">${l}</div></div>`; }
+  function margenHtml(m, p){
+    if(p == null) return `<span class="hint">sin certificado</span>`;
+    const cls = m >= 0 ? 'ga-margen-pos' : 'ga-margen-neg';
+    return `<span class="${cls}">${m >= 0 ? '' : '−'}${plata(Math.abs(m))} · ${pct(p)}</span>`;
+  }
+
+  function htmlListado(){
+    const todas = obras().map(a=> costeoDe(a));
+    const conAlgo = todas.filter(c=> c.tieneAlgo);
+    const lista = (filtro === 'todas' ? todas : conAlgo)
+      .filter(c=> !busca || claveNombre(c.a.nombre + ' ' + (c.a.obraId||'') + ' ' + (c.a.barrio||'')).includes(claveNombre(busca)))
+      .sort((x,y)=> (y.total - x.total) || String(x.a.nombre||'').localeCompare(String(y.a.nombre||'')));
+    const totGasto = conAlgo.reduce((t,c)=> t + c.total, 0);
+    const totCert  = todas.reduce((t,c)=> t + c.cert.certificado, 0);
+    const totPend  = conAlgo.reduce((t,c)=> t + c.nPend, 0);
+    const sinValor = nomina().filter(p=> p.activo !== false && String(p.nombre||'').trim() && !(n2(p.valorHora) > 0)).length;
+    const margen = totCert - totGasto;
+    const filas = lista.map(c=>`<tr class="ga-fila" data-abrir="${escA(c.a.id)}">
+        <td class="nombre">${esc(c.a.nombre||'(sin nombre)')}<div class="hint" style="margin:0; font-weight:500;">${esc(c.a.barrio||'')}</div></td>
+        <td>${esc(String(c.a.obraId||'—'))}</td>
+        <td class="num">${c.porCat.materiales > 0 ? plata(c.porCat.materiales) : '—'}</td>
+        <td class="num">${c.porCat.mano_obra > 0 ? plata(c.porCat.mano_obra) : '—'}</td>
+        <td class="num">${(c.total - c.porCat.materiales - c.porCat.mano_obra) > 0 ? plata(c.total - c.porCat.materiales - c.porCat.mano_obra) : '—'}</td>
+        <td class="num"><b>${plata(c.total)}</b></td>
+        <td>${c.nPend ? `<span class="ga-pend" title="Materiales sin costo o personas sin valor hora: el total real es mayor">${c.nPend} pendiente${c.nPend===1?'':'s'}</span>` : '<span class="ga-ok">completo</span>'}</td>
+        <td class="num">${c.cert.certificado > 0 ? plata(c.cert.certificado) : '—'}</td>
+        <td class="num">${margenHtml(c.margen, c.margenPct)}</td>
+      </tr>`).join('');
+    return `
+    <div class="card">
+      <div class="ga-top">
+        <div>
+          <h2 style="margin:0;"><span class="dot"></span>Gastos de obra</h2>
+          <div class="hint" style="margin-top:3px;">Lo que se <b>gastó de verdad</b> en cada plaza, aparte del itemizado del pliego (que es lo que se cobra). Materiales y mano de obra se calculan solos; el resto se carga a mano dentro de cada plaza.</div>
+        </div>
+        <button type="button" class="btn-ghost no-print" onclick="mostrarVista('informe')" title="Informes → Plazas → Gastos vs. certificado">📄 Informe de margen</button>
+      </div>
+      <div class="inf-tiles" style="margin-top:14px;">
+        ${tile(plata(totGasto), 'Gastado en total' + (totPend ? ' (falta valorizar ' + totPend + ')' : ''), '')}
+        ${tile(plata(totCert), 'Certificado por pliego', 'azul')}
+        ${tile((margen < 0 ? '−' : '') + plata(Math.abs(margen)), 'Margen (certificado − gastado)', margen >= 0 ? 'verde' : 'ambar')}
+        ${tile(String(conAlgo.length), 'Plazas con gastos', '')}
+      </div>
+      ${sinValor ? `<div class="ga-aviso">👷 Hay <b>${sinValor}</b> persona(s) activa(s) <b>sin valor hora</b> en la nómina: sus horas salen como <b>pendientes</b>, no como cero. <button type="button" class="link" data-ir="personal">Cargar el valor hora en Equipo → Personal</button>.</div>` : ''}
+      <div class="ga-buscar no-print">
+        <input type="search" id="gaBuscar" placeholder="Buscar plaza por nombre, ID o barrio…" value="${escA(busca)}" autocomplete="off">
+        <div class="inf-chips-filtro" style="margin:0;">
+          <button type="button" class="inf-chip${filtro==='con'?' on':''}" data-filtro="con">Con gastos (${conAlgo.length})</button>
+          <button type="button" class="inf-chip${filtro==='todas'?' on':''}" data-filtro="todas">Todas (${todas.length})</button>
+        </div>
+      </div>
+      ${lista.length ? `<div class="ga-tabla-wrap"><table class="ga-tabla"><thead><tr>
+          <th>Plaza</th><th>ID</th><th class="num">Materiales</th><th class="num">Mano de obra</th><th class="num">Otros gastos</th>
+          <th class="num">Total gastado</th><th>Valorizado</th><th class="num">Certificado</th><th class="num">Margen</th></tr></thead>
+        <tbody>${filas}</tbody>
+        <tfoot><tr><td colspan="2">TOTAL (${lista.length} plaza${lista.length===1?'':'s'})</td>
+          <td class="num">${plata(lista.reduce((t,c)=>t+c.porCat.materiales,0))}</td>
+          <td class="num">${plata(lista.reduce((t,c)=>t+c.porCat.mano_obra,0))}</td>
+          <td class="num">${plata(lista.reduce((t,c)=>t+c.total-c.porCat.materiales-c.porCat.mano_obra,0))}</td>
+          <td class="num">${plata(lista.reduce((t,c)=>t+c.total,0))}</td><td></td>
+          <td class="num">${plata(lista.reduce((t,c)=>t+c.cert.certificado,0))}</td>
+          <td class="num">${margenHtml(lista.reduce((t,c)=>t+c.cert.certificado-c.total,0), lista.reduce((t,c)=>t+c.cert.certificado,0) > 0 ? lista.reduce((t,c)=>t+c.cert.certificado-c.total,0)/lista.reduce((t,c)=>t+c.cert.certificado,0) : null)}</td></tr></tfoot>
+        </table></div>
+        <div class="hint" style="margin-top:8px;">Tocá una plaza para ver el detalle y cargarle gastos. «Otros gastos» junta combustible, alquileres, fletes, herramientas y varios.</div>`
+      : `<div class="ga-vacio" style="margin-top:12px;">${filtro === 'con' && !busca ? 'Todavía no hay gastos en ninguna plaza. Los materiales aparecen solos cuando el pañol registra una salida a la plaza; la mano de obra, cuando hay órdenes de trabajo. Para cargar otro gasto, pasá a «Todas» y abrí la plaza.' : 'No hay plazas que coincidan.'}</div>`}
+    </div>`;
+  }
+
+  function htmlDetalle(a){
+    const c = costeoDe(a);
+    const cats = CATS.map(k=>`<div class="ga-cat${k.auto?' auto':''}"><div class="ga-cat-n">${c.porCat[k.id] > 0 ? plata(c.porCat[k.id]) : '—'}</div><div class="ga-cat-l">${k.ico} ${esc(k.txt)}</div></div>`).join('');
+    const pend = [];
+    if(c.mat.pendientes.length) pend.push(`<b>${c.mat.pendientes.length}</b> material(es) sin costo en el catálogo (${c.mat.pendientes.slice(0,4).map(l=>esc(l.desc)).join(', ')}${c.mat.pendientes.length>4?'…':''}) — <button type="button" class="link" data-ir="stock">cargarlo en Stock → Catálogo</button>`);
+    if(c.mo.pendientes.length) pend.push(`<b>${c.mo.pendientes.length}</b> persona(s) sin valor hora (${c.mo.pendientes.map(p=>esc(p.nombre)).join(', ')}) — <button type="button" class="link" data-ir="personal">cargarlo en Equipo → Personal</button>`);
+
+    // Materiales
+    const matFilas = c.mat.lineas.map(l=>`<tr>
+        <td>${l.codigo != null ? esc(String(l.codigo)) : '—'}</td><td class="desc">${esc(l.desc)}</td><td class="num">${nEnt(l.cant)}</td><td>${esc(l.un)}</td>
+        <td class="num">${l.pendiente ? `<button type="button" class="link ga-costo" data-codigo="${escA(l.codigo==null?'':l.codigo)}" title="Cargar el costo unitario en el catálogo de Stock">cargar costo</button>` : plata(l.costo)}</td>
+        <td class="num">${l.pendiente ? '<span class="ga-pend">pendiente</span>' : plata(l.importe)}</td></tr>`).join('');
+    const matMan = c.man.porCat.materiales.lineas;
+    // Mano de obra
+    const moFilas = c.mo.ots.map(o=>`<tr>
+        <td>${fCorta(o.fecha)}</td><td>${esc(o.numero||'—')}${o.etapa?`<div class="hint" style="margin:0;">${esc(o.etapa)}</div>`:''}</td>
+        <td class="num">${o.personas}</td><td class="num">${nf(o.horas,1)}${o.estimadas?' <span class="hint" title="La OT no tiene hora de inicio y fin válidas: se toma la jornada de 8 h">(estim.)</span>':''}</td>
+        <td class="num">${nf(o.horasTotales,1)}</td>
+        <td class="num">${o.importe > 0 ? plata(o.importe) : '—'}${o.pendientes.length ? ` <span class="ga-pend" title="${escA(o.pendientes.join(', '))}">${o.pendientes.length} sin valor</span>` : ''}</td>
+        <td>${o.cerrada ? '<span class="ga-ok">cerrada</span>' : '<span class="hint">sin cierre</span>'}</td></tr>`).join('');
+    const perFilas = c.mo.personas.map(p=>`<tr><td class="desc">${esc(p.nombre)}</td><td>${esc(p.rol||'—')}</td><td class="num">${p.ots}</td><td class="num">${nf(p.horas,1)}</td>
+        <td class="num">${p.valorHora > 0 ? plata(p.valorHora) : '<span class="ga-pend">sin valor hora</span>'}</td><td class="num">${p.valorHora > 0 ? plata(p.importe) : '—'}</td></tr>`).join('');
+    const moMan = c.man.porCat.mano_obra.lineas;
+
+    const filaManual = g => `<tr>
+        <td>${fCorta(g.fecha)}</td><td class="desc">${esc(g.desc||'')}${g.proveedor?`<div class="hint" style="margin:0;">${esc(g.proveedor)}${g.comprobante?' · '+esc(g.comprobante):''}</div>`:''}${g.obs?`<div class="hint" style="margin:0;">${esc(g.obs)}</div>`:''}</td>
+        <td class="num">${g.cant != null && g.cant !== '' ? nEnt(g.cant) : '—'}</td><td>${esc(g.un||'')}</td><td class="num">${n2(g.pu) > 0 ? plata(g.pu) : '—'}</td>
+        <td class="num"><b>${plata(g.importe)}</b></td><td>${g.item ? 'Ítem ' + esc(String(g.item)) : '—'}</td>
+        <td class="no-print"><button type="button" class="ga-borrar" data-borrar="${escA(g.id)}" title="Borrar este gasto">🗑</button></td></tr>`;
+    const tablaManual = (lineas, tit) => lineas.length ? `<div class="ga-tabla-wrap"><table class="ga-tabla"><thead><tr><th>Fecha</th><th>Detalle</th><th class="num">Cant.</th><th>Un.</th><th class="num">$ unit.</th><th class="num">Importe</th><th>Ítem</th><th class="no-print"></th></tr></thead>
+        <tbody>${lineas.map(filaManual).join('')}</tbody>
+        <tfoot><tr><td colspan="5">${tit||'Total'}</td><td class="num">${plata(lineas.reduce((t,g)=>t+g.importe,0))}</td><td></td><td class="no-print"></td></tr></tfoot></table></div>` : '';
+
+    const secManual = CATS.filter(k=>!k.auto).map(k=>{
+      const l = c.man.porCat[k.id].lineas;
+      return `<div class="ga-sec"><div class="ga-sec-tit">${k.ico} ${esc(k.txt)} <span class="hint" style="margin:0; font-weight:600;">${l.length ? plata(c.man.porCat[k.id].total) : 'sin gastos cargados'}</span></div>${tablaManual(l)}</div>`;
+    }).join('');
+
+    const itemsOpc = leer(()=> window.epecOpcionesItems(''), '') || '';
+    return `
+    <div class="card">
+      <button type="button" class="btn-ghost ga-volver no-print" data-volver="1">‹ Volver al listado</button>
+      <div class="ga-top">
+        <div>
+          <h2 style="margin:0;"><span class="dot"></span>${esc(a.nombre||'(sin nombre)')}</h2>
+          <div class="hint" style="margin-top:3px;">ID ${esc(String(a.obraId||'—'))}${a.barrio?' · '+esc(a.barrio):''}${a.estado?' · '+esc(a.estado):''} · gastos de obra</div>
+        </div>
+        <button type="button" class="btn-ghost no-print" onclick="mostrarVista('avance'); if(typeof verAvanceDetalle==='function') verAvanceDetalle('${escA(a.id)}');">📊 Ver la plaza en Obras</button>
+      </div>
+      <div class="inf-tiles" style="margin-top:14px;">
+        ${tile(plata(c.total), 'Gastado' + (c.nPend ? ' (falta valorizar ' + c.nPend + ')' : ''), '')}
+        ${tile(c.cert.certificado > 0 ? plata(c.cert.certificado) : '—', 'Certificado por pliego' + (c.cert.contratado > 0 ? ' · contratado ' + plata(c.cert.contratado) : ''), 'azul')}
+        ${tile(c.margenPct == null ? '—' : (c.margen < 0 ? '−' : '') + plata(Math.abs(c.margen)), 'Margen en pesos', c.margen >= 0 ? 'verde' : 'ambar')}
+        ${tile(c.margenPct == null ? '—' : pct(c.margenPct), 'Margen sobre lo certificado', c.margen >= 0 ? 'verde' : 'ambar')}
+      </div>
+      ${pend.length ? `<div class="ga-aviso">⚠ El total <b>no incluye</b> lo que todavía no se puede valorizar: ${pend.join('. ')}.</div>` : ''}
+      <div class="ga-cats">${cats}</div>
+      <div class="hint">Las categorías con borde punteado se calculan solas (pañol y órdenes de trabajo); igual se les puede sumar algo a mano abajo.</div>
+
+      <div class="ga-sec">
+        <div class="ga-sec-tit">📦 Materiales <span class="auto-tag">automático</span> <span class="hint" style="margin:0; font-weight:600;">${c.mat.lineas.length ? plata(c.mat.total) + (c.mat.pendientes.length ? ' + ' + c.mat.pendientes.length + ' pendiente(s)' : '') : ''}</span></div>
+        <div class="hint" style="margin:0 0 6px;">Salidas del pañol a esta plaza (menos devoluciones) × costo unitario del catálogo de Stock.</div>
+        ${c.mat.lineas.length ? `<div class="ga-tabla-wrap"><table class="ga-tabla"><thead><tr><th>Cód.</th><th>Producto</th><th class="num">Cant.</th><th>Un.</th><th class="num">Costo unit.</th><th class="num">Importe</th></tr></thead>
+          <tbody>${matFilas}</tbody><tfoot><tr><td colspan="5">Total materiales del pañol${c.mat.pendientes.length ? ' (sin los pendientes)' : ''}</td><td class="num">${plata(c.mat.total)}</td></tr></tfoot></table></div>`
+          : `<div class="ga-vacio">El pañol no registró salidas a esta plaza todavía.</div>`}
+        ${matMan.length ? `<div class="hint" style="margin:10px 0 4px;"><b>Materiales cargados a mano</b> (compras directas, sin pasar por el pañol):</div>${tablaManual(matMan, 'Total materiales a mano')}` : ''}
+      </div>
+
+      <div class="ga-sec">
+        <div class="ga-sec-tit">👷 Mano de obra <span class="auto-tag">automático</span> <span class="hint" style="margin:0; font-weight:600;">${c.mo.ots.length ? plata(c.mo.total) + ' · ' + nf(c.mo.horas,1) + ' h-hombre' : ''}</span></div>
+        <div class="hint" style="margin:0 0 6px;">Cada orden de trabajo de la plaza: horas de la jornada × cada persona de la cuadrilla × su valor hora (Equipo → Personal). Las OT con fecha futura no cuentan.</div>
+        ${c.mo.ots.length ? `<div class="ga-tabla-wrap"><table class="ga-tabla"><thead><tr><th>Fecha</th><th>Orden</th><th class="num">Personas</th><th class="num">Horas</th><th class="num">H-hombre</th><th class="num">Importe</th><th>Cierre</th></tr></thead>
+          <tbody>${moFilas}</tbody><tfoot><tr><td colspan="4">Total mano de obra (${c.mo.ots.length} OT)</td><td class="num">${nf(c.mo.horas,1)}</td><td class="num">${plata(c.mo.total)}</td><td></td></tr></tfoot></table></div>
+          <div class="hint" style="margin:10px 0 4px;"><b>Por persona</b>:</div>
+          <div class="ga-tabla-wrap"><table class="ga-tabla"><thead><tr><th>Persona</th><th>Rol</th><th class="num">OT</th><th class="num">Horas</th><th class="num">Valor hora</th><th class="num">Importe</th></tr></thead><tbody>${perFilas}</tbody></table></div>`
+          : `<div class="ga-vacio">No hay órdenes de trabajo de esta plaza con fecha hasta hoy.</div>`}
+        ${moMan.length ? `<div class="hint" style="margin:10px 0 4px;"><b>Mano de obra cargada a mano</b> (subcontratos, jornales sueltos):</div>${tablaManual(moMan, 'Total mano de obra a mano')}` : ''}
+      </div>
+
+      ${secManual}
+
+      <div class="ga-sec no-print">
+        <div class="ga-sec-tit">➕ Cargar un gasto</div>
+        <div class="hint" style="margin:0;">Queda guardado para todo el equipo. El importe se calcula con cantidad × precio unitario, o lo escribís directo.</div>
+        <div class="ga-form">
+          <div><label for="gaCat">Categoría</label><select id="gaCat">${CATS.map(k=>`<option value="${k.id}"${k.id===formCat?' selected':''}>${k.ico} ${esc(k.txt)}</option>`).join('')}</select></div>
+          <div><label for="gaFecha">Fecha</label><input type="date" id="gaFecha" value="${hoyISO()}"></div>
+          <div class="ancho"><label for="gaDesc">Detalle</label><input type="text" id="gaDesc" placeholder="Ej.: 40 litros de gasoil para la camioneta · alquiler de retro 1 día · flete de columnas"></div>
+          <div><label for="gaCant">Cantidad</label><input type="number" id="gaCant" min="0" step="0.01" inputmode="decimal" placeholder="1"></div>
+          <div><label for="gaUn">Unidad</label><input type="text" id="gaUn" placeholder="l, h, día, viaje, un." list="gaUnLista"><datalist id="gaUnLista"><option value="l"><option value="h"><option value="día"><option value="viaje"><option value="un."><option value="m"><option value="kg"><option value="jornal"></datalist></div>
+          <div><label for="gaPu">Precio unitario ($)</label><input type="number" id="gaPu" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div>
+          <div><label for="gaImporte">Importe ($)</label><input type="number" id="gaImporte" min="0" step="0.01" inputmode="decimal" placeholder="se calcula solo"></div>
+          <div><label for="gaProveedor">Proveedor</label><input type="text" id="gaProveedor" placeholder="(opcional)"></div>
+          <div><label for="gaComprobante">Comprobante</label><input type="text" id="gaComprobante" placeholder="N° de factura / ticket (opcional)"></div>
+          ${itemsOpc ? `<div class="ancho"><label for="gaItem">Ítem del pliego al que se imputa (opcional)</label><select id="gaItem">${itemsOpc.replace('— Elegí el ítem que querés agregar —', '— Sin imputar a un ítem (se prorratea en el informe) —')}</select></div>` : ''}
+          <div class="ancho"><label for="gaObs">Observaciones</label><input type="text" id="gaObs" placeholder="(opcional)"></div>
+        </div>
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:12px;">
+          <button type="button" class="btn-primary" id="gaGuardar" style="width:auto; margin:0; padding:10px 22px;">💾 Guardar gasto</button>
+          <span class="hint" id="gaMsg" style="margin:0;"></span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ---------- Toques ----------
+  function irA(destino){
+    if(destino === 'stock'){ mostrarVista('stock'); const c = $('cardStockCatalogo'); if(c) c.scrollIntoView({ behavior:'smooth', block:'start' }); return; }
+    if(destino === 'personal'){ mostrarVista('produccion'); const b = [...document.querySelectorAll('#subtabsProd .subtab')].find(x=> x.dataset.sub === 'personal'); if(b) b.click(); return; }
+  }
+  function leerForm(){
+    const cant = $('gaCant').value === '' ? null : n2($('gaCant').value);
+    const pu = n2($('gaPu').value);
+    let importe = n2($('gaImporte').value);
+    if(!(importe > 0) && cant != null && pu > 0) importe = cant * pu;
+    return { cat: $('gaCat').value, fecha: $('gaFecha').value || hoyISO(), desc: ($('gaDesc').value||'').trim(), cant, un: ($('gaUn').value||'').trim(), pu,
+             importe, proveedor: ($('gaProveedor').value||'').trim(), comprobante: ($('gaComprobante').value||'').trim(),
+             item: $('gaItem') ? ($('gaItem').value||'') : '', obs: ($('gaObs').value||'').trim() };
+  }
+  async function guardar(){
+    const a = obras().find(x=> String(x.id) === String(plazaAbierta)); if(!a) return;
+    const msg = $('gaMsg'); const f = leerForm();
+    const aviso = (t, color)=>{ if(msg){ msg.style.color = color || 'var(--text-soft)'; msg.textContent = t; } };
+    if(!f.desc) return aviso('Escribí el detalle del gasto.', 'var(--amber)');
+    if(!(f.importe > 0)) return aviso('Falta el importe (o cantidad × precio unitario).', 'var(--amber)');
+    if(!window.__fbUser) return aviso('Para guardar hay que iniciar sesión (el candado de arriba a la derecha, o Stock → Acceso).', 'var(--amber)');
+    if(typeof window.fbGastoAdd !== 'function') return aviso('La base compartida no está disponible en este momento.', 'var(--danger)');
+    aviso('Guardando…');
+    try{
+      await window.fbGastoAdd({ ...f, plazaId: String(a.id), plazaNombre: a.nombre || '', obraId: String(a.obraId || ''),
+                                usuario: (window.__fbUser && window.__fbUser.email) || '', ts: Date.now() });
+      formCat = f.cat;
+      aviso('Guardado ✔');
+      // El listener redibuja; si tarda, limpiamos el formulario igual.
+      ['gaDesc','gaCant','gaUn','gaPu','gaImporte','gaProveedor','gaComprobante','gaObs'].forEach(id=>{ const e=$(id); if(e) e.value=''; });
+      if($('gaItem')) $('gaItem').value = '';
+    }catch(e){ console.error(e); aviso('No se pudo guardar: ' + (e.message||e), 'var(--danger)'); }
+  }
+  async function borrar(id){
+    const g = gastos().find(x=> String(x.id) === String(id)); if(!g) return;
+    if(!window.__fbUser){ alert('Para borrar hay que iniciar sesión.'); return; }
+    if(!confirm(`¿Borrar este gasto?\n\n${g.desc || ''} — ${plata(g.importe)}\n\nSe borra para todo el equipo.`)) return;
+    try{ await window.fbGastoEliminar(String(id)); }catch(e){ console.error(e); alert('No se pudo borrar: ' + (e.message||e)); }
+  }
+  function toques(){
+    const cont = $('gastosCont'); if(!cont) return;
+    cont.addEventListener('click', e=>{
+      const fila = e.target.closest('[data-abrir]');
+      if(fila){ plazaAbierta = fila.dataset.abrir; render(); window.scrollTo({ top:0, behavior:'auto' }); return; }
+      if(e.target.closest('[data-volver]')){ plazaAbierta = null; render(); return; }
+      const ch = e.target.closest('[data-filtro]'); if(ch){ filtro = ch.dataset.filtro; render(); return; }
+      const ir = e.target.closest('[data-ir]'); if(ir){ irA(ir.dataset.ir); return; }
+      const costo = e.target.closest('.ga-costo');
+      if(costo){ mostrarVista('stock'); if(costo.dataset.codigo && typeof catEditarProducto === 'function') catEditarProducto(Number(costo.dataset.codigo)); return; }
+      const b = e.target.closest('[data-borrar]'); if(b){ borrar(b.dataset.borrar); return; }
+      if(e.target.closest('#gaGuardar')){ guardar(); return; }
+    });
+    cont.addEventListener('input', e=>{
+      if(e.target.id === 'gaBuscar'){ busca = e.target.value || ''; render(); const q = $('gaBuscar'); if(q){ q.focus(); q.setSelectionRange(q.value.length, q.value.length); } return; }
+      if(e.target.id === 'gaCant' || e.target.id === 'gaPu'){
+        const cant = n2($('gaCant').value), pu = n2($('gaPu').value);
+        if(cant > 0 && pu > 0){ $('gaImporte').value = Math.round(cant * pu * 100) / 100; }
+      }
+    });
+  }
+
+  // ---------- Navegación ----------
+  const previa = window.mostrarVista;
+  window.mostrarVista = function(v){
+    const vista = $('viewGastos');
+    const tab = $('tabBtnGastos');
+    if(v === 'gastos'){
+      document.querySelectorAll('.wrap[id^="view"]').forEach(el=>{ if(el.id !== 'viewGastos') el.style.display = 'none'; });
+      const f = $('mainFooter'); if(f) f.style.display = 'none';
+      document.querySelectorAll('.tab-btn').forEach(b=> b.classList.remove('active'));
+      if(tab) tab.classList.add('active');
+      document.querySelectorAll('#navAbajo .nav-item, #menuLista .menu-item').forEach(b=> b.classList.toggle('activo', b.dataset.vista === 'gastos'));
+      if(vista) vista.style.display = '';
+      document.body.dataset.vista = 'gastos';
+      render();
+      window.scrollTo({ top:0, behavior:'auto' });
+      return;
+    }
+    if(vista) vista.style.display = 'none';
+    if(tab) tab.classList.remove('active');
+    return previa.apply(this, arguments);
+  };
+
+  // Entrada en el menú lateral («Más»), después de Informes. El menú se rearma en cada apertura,
+  // así que se observa la lista, igual que hace Producción.
+  const menuLista = $('menuLista');
+  if(menuLista){
+    const obs = new MutationObserver(()=>{
+      if($('menuGastos')) return;
+      const ref = menuLista.querySelector('.menu-item[data-vista="informe"]');
+      if(!ref) return;
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'menu-item'; b.id = 'menuGastos'; b.dataset.vista = 'gastos';
+      b.innerHTML = '<span class="menu-ico">💰</span>Gastos de obra';
+      ref.insertAdjacentElement('afterend', b);
+    });
+    obs.observe(menuLista, { childList:true });
+  }
+
+  toques();
+  window.GASTOS = { costeoDe, gastoPorItem, certificadoDe, CATS, render, abrir: id => { plazaAbierta = id; mostrarVista('gastos'); } };
 })();
 </script>
 
