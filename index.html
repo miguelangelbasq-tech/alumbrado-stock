@@ -2893,7 +2893,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-10 14:10 · ead053</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-10 22:03 · 5560db</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3719,7 +3719,10 @@
   <div class="card" style="margin-top:18px;">
     <div class="card-header-row no-print">
       <h2><span class="dot"></span>Planificación de la semana</h2>
-      <button type="button" class="btn-ghost" onclick="imprimir()">🖨 Imprimir planificación</button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button type="button" class="btn-ghost" onclick="imprimirPlanificacion('informe','semana')" title="Una fila por plaza: tarea principal, ID, días, órdenes y horas de trabajo de la semana">🖨 Para informe</button>
+        <button type="button" class="btn-ghost" onclick="imprimirPlanificacion('detallado','semana')" title="Día por día: cada orden con su cuadrilla, todas las tareas, cantidades y horas">🖨 Detallado</button>
+      </div>
     </div>
     <div class="plan-week-title" id="planWeekTitlePrint">Semana del ...</div>
     <div class="no-print" id="avisoPlanLocal" style="margin:0 0 10px; display:none;"></div>
@@ -3737,7 +3740,10 @@
     <div class="card no-print">
       <div class="card-header-row">
         <h2 style="margin:0;"><span class="dot"></span>El mes completo</h2>
-        <button type="button" class="btn-ghost" onclick="imprimir()">🖨 Imprimir el mes</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="btn-ghost" onclick="imprimirPlanificacion('informe','mes')" title="Una fila por plaza: tarea principal, ID, días, órdenes y horas de trabajo del mes">🖨 Para informe</button>
+          <button type="button" class="btn-ghost" onclick="imprimirPlanificacion('detallado','mes')" title="Día por día: cada orden con su cuadrilla, todas las tareas, cantidades y horas">🖨 Detallado</button>
+        </div>
       </div>
       <div class="mes-nav">
         <button type="button" class="btn-ghost mes-flecha" id="mesPrev" title="Mes anterior">◀</button>
@@ -8305,6 +8311,119 @@ window.subirPlanLocal = subirPlanLocal;
 // órdenes que ya existen en la fecha de cada día. Si la orden se edita o se borra, la semana queda
 // al día sola, y como `ordenesTrabajo` vive en la base compartida, la semana se ve igual en todas
 // las computadoras (las tareas escritas a mano siguen siendo de cada navegador).
+// ==================================================================
+// IMPRIMIR LA PLANIFICACIÓN: «para informe» o «detallado»  (2026-09-10)
+// ==================================================================
+// Pedido del usuario: *"cuando imprimo necesito que se imprima de dos formas: para informe —la
+// tarea principal, plaza, ID, la semana o el mes, horas de trabajo— y detallado, súper detallado,
+// las tareas y todo"*. Las dos salen de las órdenes de trabajo del período (y de lo planificado a
+// mano que todavía no tiene orden). Las horas son las del cierre si está cargado; si no, la
+// jornada de la orden (entrada → salida) por cada persona.
+function horasDeOrdenPlan(o){
+  const p = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(t||'').trim()); return m ? Number(m[1]) + Number(m[2])/60 : null; };
+  const gente = (o.personal||[]).filter(x=> x && String(x.nombre||'').trim());
+  const hp = o.cierre && o.cierre.horasPersona;
+  if(hp && Object.keys(hp).length){
+    let t = 0; gente.forEach(x=>{ const n = String(x.nombre).trim(); t += (hp[n] != null) ? (Number(hp[n]) || 0) : 0; });
+    return { horas: Math.round(t*10)/10, reales:true, personas:gente.length };
+  }
+  const i = p(o.horaInicio), f = p(o.horaFin);
+  const jornada = (i != null && f != null && f > i) ? (f - i) : 8;
+  return { horas: Math.round(jornada * gente.length * 10) / 10, reales:false, personas:gente.length };
+}
+function tareasDeOrdenPlan(o){
+  const cat = (o.actividades||[]).map(id=>{ const a = ACTIVIDADES_CATALOGO.find(x=>x.id===id); return { k:id, label: a ? a.label : id, un: (typeof unidadDeTarea === 'function') ? unidadDeTarea(id) : 'unidad' }; });
+  const man = (o.actividadesManuales||[]).filter(a=>String(a.actividad||'').trim()).map(a=>({ k:'m:'+String(a.actividad).trim(), label:String(a.actividad).trim() + (a.detalle ? ' — ' + a.detalle : ''), un:'unidad' }));
+  return cat.concat(man);
+}
+function imprimirPlanificacion(modo, rango){
+  let desde, hasta, titulo;
+  if(rango === 'mes'){
+    const ancla = (typeof window.mesAnclaActual === 'function') ? window.mesAnclaActual() : fechaAISO(new Date());
+    const [a, m] = ancla.split('-').map(Number);
+    const primero = new Date(a, m-1, 1, 12), ultimo = new Date(a, m, 0, 12);
+    desde = fechaAISO(primero); hasta = fechaAISO(ultimo);
+    const nm = primero.toLocaleDateString('es-AR', { month:'long', year:'numeric' });
+    titulo = 'Mes de ' + nm;
+  } else {
+    desde = planWeekStart; hasta = sumarDias(planWeekStart, 6);
+    titulo = `Semana del ${formatFechaCorta(desde)} al ${formatFechaCorta(hasta)}`;
+  }
+  let ots = []; try{ ots = (ordenesTrabajo||[]).filter(o=> o.estado !== 'Anulada' && (o.fecha||'') >= desde && (o.fecha||'') <= hasta); }catch(e){}
+  ots.sort((x,y)=> String(x.fecha).localeCompare(String(y.fecha)) || String(x.numero||'').localeCompare(String(y.numero||''), 'es', {numeric:true}));
+  const plan = planEntries.filter(e=> e.fecha >= desde && e.fecha <= hasta).sort((x,y)=> String(x.fecha).localeCompare(String(y.fecha)));
+  const h1 = v => fmt(v, Number.isInteger(v) ? 0 : 1);
+  const H = s => escHtml(s == null ? '' : String(s));
+  let html = '';
+  if(!ots.length && !plan.length){
+    html = `<p>No hay órdenes de trabajo ni tareas planificadas en este período.</p>`;
+    abrirHojaImpresion(`Planificación — ${titulo}`, html); return;
+  }
+  if(modo === 'informe'){
+    // Una fila por plaza: tarea principal, días, órdenes, personas y horas.
+    const porPlaza = new Map();
+    ots.forEach(o=>{
+      const key = String(o.plazaId || ('n:' + (o.plazaNombre||'')));
+      const g = porPlaza.get(key) || { nombre:o.plazaNombre||'(sin plaza)', id:o.obraId||'', dias:new Set(), ots:0, horas:0, personas:0, tareas:new Map(), reales:true };
+      const hh = horasDeOrdenPlan(o);
+      g.dias.add(o.fecha); g.ots++; g.horas += hh.horas; g.personas = Math.max(g.personas, hh.personas); if(!hh.reales) g.reales = false;
+      tareasDeOrdenPlan(o).forEach(t=> g.tareas.set(t.label, (g.tareas.get(t.label)||0) + 1));
+      porPlaza.set(key, g);
+    });
+    const filas = [...porPlaza.values()].sort((x,y)=> y.horas - x.horas);
+    const principal = g => { const arr = [...g.tareas.entries()].sort((a,b)=> b[1]-a[1]); return arr.length ? arr[0][0] + (arr.length > 1 ? ` <span style="color:#5b7a70;">(+${arr.length-1} más)</span>` : '') : '—'; };
+    const totH = filas.reduce((t,g)=> t + g.horas, 0), totOt = filas.reduce((t,g)=> t + g.ots, 0);
+    const diasTot = new Set(); ots.forEach(o=> diasTot.add(o.fecha));
+    html += `<div class="sub">${H(titulo)} · ${filas.length} plaza(s) · ${totOt} orden(es) · ${diasTot.size} día(s) con trabajo · <b>${h1(totH)} horas-hombre</b></div>`;
+    html += `<table><thead><tr><th>Plaza / obra</th><th style="width:70px;">ID</th><th>Tarea principal</th><th style="width:60px; text-align:right;">Días</th><th style="width:70px; text-align:right;">Órdenes</th><th style="width:70px; text-align:right;">Personas</th><th style="width:90px; text-align:right;">Horas de trabajo</th></tr></thead><tbody>`;
+    filas.forEach(g=>{
+      html += `<tr><td><b>${H(g.nombre)}</b></td><td>${H(g.id||'—')}</td><td>${principal(g)}</td><td style="text-align:right;">${g.dias.size}</td><td style="text-align:right;">${g.ots}</td><td style="text-align:right;">${g.personas}</td><td style="text-align:right;"><b>${h1(g.horas)}</b>${g.reales?'':' <span style="color:#5b7a70;">*</span>'}</td></tr>`;
+    });
+    html += `<tr><td colspan="3"><b>TOTAL</b></td><td style="text-align:right;"><b>${diasTot.size}</b></td><td style="text-align:right;"><b>${totOt}</b></td><td></td><td style="text-align:right;"><b>${h1(totH)}</b></td></tr></tbody></table>`;
+    if(filas.some(g=>!g.reales)) html += `<div class="sub" style="margin-top:6px;">* horas previstas (jornada de la orden × personas): la orden todavía no tiene el cierre con las horas reales.</div>`;
+    if(plan.length){
+      html += `<h2 style="font-size:14px; margin:16px 0 0;">Planificado a mano, todavía sin orden de trabajo</h2>`;
+      html += `<table><thead><tr><th style="width:90px;">Fecha</th><th>Plaza / obra</th><th>Cuadrilla</th><th>Tarea</th></tr></thead><tbody>`;
+      plan.forEach(e=>{ const c = ACTIVIDADES_CATALOGO.find(x=>x.id===e.catalogoId); html += `<tr><td>${H(formatFechaCorta(e.fecha))}</td><td>${H(e.obra||'—')}</td><td>${H(e.cuadrilla||'—')}</td><td>${H(c ? c.label : (e.tarea||'—'))}</td></tr>`; });
+      html += `</tbody></table>`;
+    }
+  } else {
+    // Detallado: día por día, cada orden con su gente, todas las tareas, cantidades y horas.
+    const dias = []; for(let f = desde; f <= hasta; f = sumarDias(f, 1)) dias.push(f);
+    const totH = ots.reduce((t,o)=> t + horasDeOrdenPlan(o).horas, 0);
+    html += `<div class="sub">${H(titulo)} · ${ots.length} orden(es) · <b>${h1(totH)} horas-hombre</b></div>`;
+    dias.forEach(f=>{
+      const del = ots.filter(o=> o.fecha === f), pl = plan.filter(e=> e.fecha === f);
+      if(!del.length && !pl.length) return;
+      html += `<h2 style="font-size:14px; margin:16px 0 4px; border-bottom:1px solid #cddbd6; padding-bottom:3px;">${H(diaSemanaDeFecha(f))} ${H(formatFechaCorta(f))}</h2>`;
+      del.forEach(o=>{
+        const hh = horasDeOrdenPlan(o); const c = o.cierre || {}; const cant = c.cantidades || {}; const ht = c.horasTarea || {}; const hp = c.horasPersona || {};
+        const gente = (o.personal||[]).filter(x=> x && String(x.nombre||'').trim());
+        html += `<div style="margin:8px 0 10px; break-inside:avoid;">
+          <div><b>${H(o.numero||'OT')}</b> — <b>${H(o.plazaNombre||'(sin plaza)')}</b>${o.obraId?` · ID ${H(o.obraId)}`:''}${o.barrio?` · ${H(o.barrio)}`:''} · ${H(o.cuadrilla||'—')}${o.responsable?` · resp. ${H(o.responsable)}`:''} · ${H(o.horaInicio||'—')}–${H(o.horaFin||'—')} · <span style="color:#5b7a70;">${H(o.estado||'Emitida')}${c.cerradoTs ? ' · cierre cargado' : ' · sin cierre'}</span></div>
+          <table style="margin-top:4px;"><thead><tr><th>Tarea</th><th style="width:110px; text-align:right;">Previsto</th><th style="width:110px; text-align:right;">Hecho</th><th style="width:130px;">Hora inicio → fin</th></tr></thead><tbody>`;
+        tareasDeOrdenPlan(o).forEach(t=>{
+          const pv = (o.previsto||{})[t.k], hc = cant[t.k], hr = ht[t.k] || {};
+          html += `<tr><td>${H(t.label)}</td><td style="text-align:right;">${pv > 0 ? h1(pv) + ' ' + H(t.un) : '—'}</td><td style="text-align:right;">${hc > 0 ? '<b>' + h1(hc) + ' ' + H(t.un) + '</b>' : (c.cerradoTs ? '0' : '—')}</td><td>${hr.ini || hr.fin ? H(hr.ini||'—') + ' → ' + H(hr.fin||'—') + (hr.horas ? ' (' + h1(hr.horas) + ' h)' : '') : '—'}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+        if(gente.length){
+          html += `<table style="margin-top:4px;"><thead><tr><th>Persona</th><th style="width:140px;">Rol</th><th style="width:110px; text-align:right;">Horas</th></tr></thead><tbody>`;
+          gente.forEach(x=>{ const n = String(x.nombre).trim(); const h = hp[n] != null ? Number(hp[n]) : null; html += `<tr><td>${H(n)}</td><td>${H(x.rol||'—')}</td><td style="text-align:right;">${h != null ? h1(h) : '<span style="color:#5b7a70;">prev. ' + h1(hh.personas ? hh.horas / hh.personas : 0) + '</span>'}</td></tr>`; });
+          html += `<tr><td colspan="2"><b>Total de la orden</b></td><td style="text-align:right;"><b>${h1(hh.horas)} h</b>${hh.reales?'':' (prev.)'}</td></tr></tbody></table>`;
+        }
+        if(o.materiales) html += `<div style="margin-top:4px;"><b>Materiales:</b> ${H(o.materiales).replace(/\n/g,' · ')}</div>`;
+        if(o.notas) html += `<div style="margin-top:2px;"><b>Observaciones:</b> ${H(o.notas)}</div>`;
+        if(c.obs) html += `<div style="margin-top:2px;"><b>Novedades del cierre:</b> ${H(c.obs)}</div>`;
+        html += `</div>`;
+      });
+      pl.forEach(e=>{ const cc = ACTIVIDADES_CATALOGO.find(x=>x.id===e.catalogoId); html += `<div style="margin:4px 0; color:#5b7a70;">Planificado (sin orden): <b>${H(e.obra||'—')}</b> · ${H(e.cuadrilla||'—')} · ${H(cc ? cc.label : (e.tarea||'—'))}</div>`; });
+    });
+  }
+  abrirHojaImpresion(`Planificación ${modo === 'informe' ? 'para informe' : 'detallada'} — ${titulo}`, html);
+}
+window.imprimirPlanificacion = imprimirPlanificacion;
+
 function ordenesTrabajoDelDia(fecha){
   // OJO: `ordenesTrabajo` se declara con `let` MÁS ABAJO en el archivo, y la grilla semanal se
   // dibuja una vez durante la carga inicial — antes de esa línea. En esa ventana la variable está
@@ -22874,6 +22993,7 @@ const ITEMIZADO_EPEC = [
 
   let mesAncla = (typeof fechaAISO === 'function') ? fechaAISO(new Date()) : '2026-01-01';
   let subPlan = 'semana';
+  window.mesAnclaActual = ()=> mesAncla;
 
   const aDate = (iso)=>{ const [a,m,d] = String(iso).split('-').map(Number); return new Date(a, m-1, d, 12); };
   const aIso  = (dt)=> (typeof fechaAISO === 'function') ? fechaAISO(dt)
