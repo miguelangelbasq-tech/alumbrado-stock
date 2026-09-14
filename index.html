@@ -2171,11 +2171,19 @@
   .ctr-pct-caja input{ width:84px; text-align:right; }
   .ctr-pct-caja span{ font-weight:700; color:var(--navy); }
   .ctr-acc{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:10px; }
-  .ctr-cel{ display:flex; align-items:center; justify-content:flex-end; gap:6px; }
-  .ctr-cel input.ctr-precio{ width:120px; text-align:right; }
-  .ctr-txt{ font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--navy); font-weight:700; }
-  .ctr-cel.cerrado input.ctr-precio{ display:none; }
-  .ctr-cel:not(.cerrado) .ctr-txt{ display:none; }
+  .ctr-cel{ display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+  .ctr-cel input.ctr-precio{ width:134px; text-align:right; }
+  .ctr-efectivo{ font-size:11.5px; color:var(--text-soft); white-space:nowrap; }
+  .ctr-txt{ font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--navy); font-weight:700; font-size:13px; }
+  .ctr-banda{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px;
+              border-radius:12px; padding:10px 14px; font-size:13px; line-height:1.5; }
+  .ctr-banda-txt{ flex:1 1 320px; min-width:0; }
+  .ctr-banda-acc{ display:flex; gap:8px; flex-wrap:wrap; }
+  .ctr-banda-acc button{ margin:0; width:auto; padding:8px 15px; font-size:13px; }
+  .ctr-banda.abierto{ background:rgba(126,198,230,.12); border:1px solid var(--teal-dark); color:var(--navy); }
+  .ctr-banda.fijado{ background:rgba(16,122,88,.10); border:1px solid var(--teal-dark); color:var(--navy); }
+  .ctr-banda.fijado .ctr-banda-txt{ color:var(--teal-dark); }
+  #cardContratista.fijada .ctr-cfg{ opacity:.55; }
   .ctr-tag{ background:rgba(245,158,11,.16); color:#8a5a08; border-radius:999px;
             padding:1px 8px; font-size:10.5px; font-weight:800; white-space:nowrap; }
   #ctrTabla tr.ctr-manual{ background:rgba(245,158,11,.07); }
@@ -2931,7 +2939,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-14 10:48 · 3c189f</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-14 15:35 · 248d33</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -4086,43 +4094,6 @@
       <div id="cobResultado"></div>
     </div>
 
-    <!-- ============================================================
-         ITEMIZADO DE CONTRATISTA (2026-09-14)
-         El mismo Anexo I, pero con lo que se le paga al contratista: por defecto el 25 % del valor
-         de pliego SIN IVA, y cada precio se puede corregir a mano.
-         ============================================================ -->
-    <div class="card plegable" id="cardContratista" data-pleg="epecContratista">
-      <div class="card-header-row">
-        <h2 style="margin:0;"><span class="dot"></span>Itemizado de contratista</h2>
-        <button type="button" class="btn-ghost no-print" id="ctrImprimir">🖨 Imprimir la lista de precios</button>
-      </div>
-      <div class="hint" style="margin-top:8px;">Es <b>el mismo itemizado</b> —los mismos ítems, las mismas unidades— pero con <b>lo que le pagamos al contratista</b>
-        por cada unidad que hace. Arranca en el <b>25 % del valor del pliego sin IVA</b>, y cualquier precio se puede escribir a mano.
-        <b>No toca el itemizado de EPEC</b>: lo que se le cobra a EPEC sigue siendo el 100 %. La diferencia es el margen de EMA.</div>
-      <div class="ctr-cfg no-print">
-        <label for="ctrPct">Porcentaje del valor de pliego</label>
-        <div class="ctr-pct-caja">
-          <input type="number" min="0" max="100" step="any" id="ctrPct" value="25"> <span>%</span>
-          <button type="button" class="btn-auto" id="ctrPctBtn" style="margin:0;">Aplicar</button>
-        </div>
-        <span class="hint" style="margin:0;">Se usa para <b>todos los ítems que no tengan un precio escrito a mano</b>. Los que sí lo tengan no se tocan.</span>
-      </div>
-      <div class="ctr-acc no-print">
-        <button type="button" class="btn-ghost" id="ctrResetTodo">↺ Volver todos al porcentaje</button>
-        <span class="hint" id="ctrMsg" style="margin:0;"></span>
-      </div>
-      <div class="summary-tiles" id="ctrTiles"></div>
-      <div class="it-buscador no-print"><input type="text" id="ctrBuscar" placeholder="Buscar un ítem por número o descripción…"></div>
-      <div class="tabla-scroll" style="margin-top:12px;"><table class="it-tabla" id="ctrTabla"><thead><tr>
-        <th style="width:66px;">Ítem</th><th>Descripción</th><th style="width:70px;">Unidad</th>
-        <th style="width:78px; text-align:right;">K</th>
-        <th style="width:120px; text-align:right;">Pliego (s/IVA)</th>
-        <th style="width:150px; text-align:right;">Contratista (s/IVA)</th>
-        <th style="width:66px; text-align:right;">%</th>
-        <th class="no-print" style="width:44px;"></th>
-      </tr></thead><tbody id="ctrTablaBody"></tbody></table></div>
-    </div>
-
     <div class="card no-print plegable" data-pleg="epecTablaK" data-pleg-def="cerrado">
       <h2><span class="dot"></span>La tabla de coeficientes completa</h2>
       <div class="hint" style="margin-top:0;">Los 92 ítems con su K, tal como figuran en el ANEXO I, y al lado lo que sale cada uno con el módulo cargado arriba. Es de consulta: no se edita.</div>
@@ -4131,6 +4102,46 @@
         <th style="width:70px;">Ítem</th><th>Descripción</th><th style="width:70px;">Unidad</th><th style="width:90px; text-align:right;">K</th>
       </tr></thead><tbody id="epecTablaKBody"></tbody></table></div>
     </div>
+  </div>
+
+  <!-- ============================================================
+       ITEMIZADO DE CONTRATISTA  (2026-09-14)
+       Pestaña propia, al lado de «Itemizado 2026», a pedido del usuario: *"en obras, al lado de
+       itemizado poné la pestaña"*. Es el mismo Anexo I pero con lo que se le paga al contratista.
+       ============================================================ -->
+  <div id="avPanelContratista" style="display:none;">
+    <div class="card" id="cardContratista">
+    <div class="card-header-row">
+      <h2 style="margin:0;"><span class="dot"></span>Itemizado de contratista</h2>
+      <button type="button" class="btn-ghost no-print" id="ctrImprimir">🖨 Imprimir la lista de precios</button>
+    </div>
+    <div class="hint" style="margin-top:8px;">Es <b>el mismo itemizado</b> —los mismos ítems, las mismas unidades— pero con <b>lo que le pagamos al contratista</b>
+      por cada unidad que hace. Arranca en el <b>25 % del valor del pliego sin IVA</b>, y cualquier precio se puede escribir a mano.
+      <b>No toca el itemizado de EPEC</b>: lo que se le cobra a EPEC sigue siendo el 100 %. La diferencia es el margen de EMA.</div>
+    <div class="ctr-banda" id="ctrBanda"></div>
+    <div class="ctr-cfg no-print">
+      <label for="ctrPct">Porcentaje del valor de pliego</label>
+      <div class="ctr-pct-caja">
+        <input type="number" min="0" max="100" step="any" id="ctrPct" value="25"> <span>%</span>
+        <button type="button" class="btn-auto" id="ctrPctBtn" style="margin:0;">Aplicar</button>
+      </div>
+      <span class="hint" style="margin:0;">Se usa para <b>todos los ítems que no tengan un precio escrito a mano</b>. Los que sí lo tengan no se tocan.</span>
+    </div>
+    <div class="ctr-acc no-print">
+      <button type="button" class="btn-ghost" id="ctrResetTodo">↺ Volver todos al porcentaje</button>
+      <span class="hint" id="ctrMsg" style="margin:0;"></span>
+    </div>
+    <div class="summary-tiles" id="ctrTiles"></div>
+    <div class="it-buscador no-print"><input type="text" id="ctrBuscar" placeholder="Buscar un ítem por número o descripción…"></div>
+    <div class="tabla-scroll" style="margin-top:12px;"><table class="it-tabla" id="ctrTabla"><thead><tr>
+      <th style="width:66px;">Ítem</th><th>Descripción</th><th style="width:70px;">Unidad</th>
+      <th style="width:78px; text-align:right;">K</th>
+      <th style="width:130px; text-align:right;" title="Lo que paga el pliego por UNA unidad de este ítem, sin IVA">Pliego · $ por unidad (s/IVA)</th>
+      <th style="width:168px; text-align:right;" title="Lo que le pagás al contratista por UNA unidad de este ítem, sin IVA. Escribilo para acordar otro precio.">Contratista · $ por unidad (s/IVA)</th>
+      <th style="width:66px; text-align:right;">%</th>
+      <th class="no-print" style="width:44px;"></th>
+    </tr></thead><tbody id="ctrTablaBody"></tbody></table></div>
+  </div>
   </div>
 
   <!-- ============================================================
@@ -18839,6 +18850,10 @@ function poblarParteObraDatalist(){
   const CONTRATISTA_PCT_DEF = 25;
   let contratistaPct = CONTRATISTA_PCT_DEF;   // % del valor de pliego sin IVA
   let contratistaPrecios = {};                // { idDeItem: $ por unidad, NETO } — lo escrito a mano
+  // Lista FIJADA (2026-09-14). Cuando se cierra un precio con un contratista, se congela: se copian
+  // los 92 precios de hoy a `contratistaPrecios` y queda anotado con qué módulo y qué porcentaje se
+  // sacaron. Desde ahí, cambiar el módulo o el porcentaje NO los mueve — es el precio acordado.
+  let contratistaFijado = null;               // { fecha, ts, usuario, pct, modulo } o null
 
   // $ por unidad que le corresponde al contratista por un ítem, sin IVA. `epecBase` ya es el neto.
   function contratistaAuto(id){
@@ -18854,13 +18869,15 @@ function poblarParteObraDatalist(){
   window.epecContratistaPU      = (id)=> contratistaPU(id);
   window.epecContratistaAuto    = (id)=> contratistaAuto(id);
   window.epecContratistaEditado = (id)=> contratistaEditado(id);
-  window.epecContratistaCfg     = ()=> ({ contratistaPct: n2(contratistaPct), contratistaPrecios: { ...contratistaPrecios } });
+  window.epecContratistaFijado  = ()=> contratistaFijado ? { ...contratistaFijado } : null;
+  window.epecContratistaCfg     = ()=> ({ contratistaPct: n2(contratistaPct), contratistaPrecios: { ...contratistaPrecios }, contratistaFijado });
   // Lo que llega de la nube. Si el documento todavía no tiene estos campos (equipos que vienen de
   // antes del 14/09/2026), queda el 25 % de fábrica y ningún precio a mano: nada se pierde.
   function aplicarContratistaDeLaNube(d){
     if(!d) return;
     if(d.contratistaPct != null && n2(d.contratistaPct) > 0) contratistaPct = n2(d.contratistaPct);
     if(d.contratistaPrecios && typeof d.contratistaPrecios === 'object') contratistaPrecios = { ...d.contratistaPrecios };
+    if(d.contratistaFijado !== undefined) contratistaFijado = d.contratistaFijado || null;
     try{ renderContratista(); }catch(e){}
   }
 
@@ -18924,7 +18941,7 @@ function poblarParteObraDatalist(){
     }
     try{
       await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol,
-                                      contratistaPct, contratistaPrecios,
+                                      contratistaPct, contratistaPrecios, contratistaFijado,
                                       ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
       if(msgEl){ msgEl.style.color='var(--teal-dark)'; msgEl.textContent='✔ Guardado para todo el equipo.'; }
       return true;
@@ -22405,7 +22422,7 @@ const ITEMIZADO_EPEC = [
         <input type="checkbox" class="ep-ctr-chk" ${marcada?'checked':''} ${dis}> La hace un contratista
       </label>
       <input type="text" class="ep-ctr-nom" placeholder="Nombre del contratista" value="${esc(nom)}" ${marcada?'':'style="display:none;"'} ${dis}>
-      ${marcada ? (nom ? `<span class="ep-ctr-badge">${fmt(contratistaPct, contratistaPct%1?1:0)} % del pliego</span>`
+      ${marcada ? (nom ? `<span class="ep-ctr-badge">${contratistaFijado ? '📌 precios fijados' : fmt(contratistaPct, contratistaPct%1?1:0) + ' % del pliego'}</span>`
                         : `<span class="ep-ctr-badge">falta el nombre</span>`) : ''}
       ${marcada && epecBase > 0 ? `<div class="ep-ctr-tot">
         <b>${plata(p.importe)}</b> a pagar <small>(s/IVA, por lo hecho)</small>
@@ -22664,12 +22681,16 @@ const ITEMIZADO_EPEC = [
   // Los mismos 92 ítems, con lo que le pagamos al contratista por unidad. El número de fábrica es
   // el % sobre el valor de pliego SIN IVA; el que se escribe a mano queda marcado y el % se vuelve
   // a calcular al revés, para que se vea a cuánto quedó ese renglón.
+  const fechaCortaCtr = (f)=> (typeof formatFechaCorta === 'function') ? formatFechaCorta(f) : String(f||'');
+
   function renderContratista(){
     const body = document.getElementById('ctrTablaBody');
     if(!body) return;
+    const fijado = !!contratistaFijado;
     const inpPct = document.getElementById('ctrPct');
-    if(inpPct && document.activeElement !== inpPct) inpPct.value = contratistaPct;
-    const edit = puedeEditar();
+    if(inpPct && document.activeElement !== inpPct){ inpPct.value = contratistaPct; inpPct.disabled = fijado; }
+    // Con la lista fijada no se edita nada: ése es el sentido de fijarla. Primero se reabre.
+    const edit = puedeEditar() && !fijado;
     const dis = edit ? '' : 'disabled';
     const q = ((document.getElementById('ctrBuscar')||{}).value||'').toLowerCase().trim();
     const filas = ITEMIZADO_EPEC.filter(it=> !q || (it.id+' '+it.desc+' '+it.cat).toLowerCase().includes(q));
@@ -22678,37 +22699,63 @@ const ITEMIZADO_EPEC = [
       const pu = contratistaPU(it.id);
       const manual = contratistaEditado(it.id);
       const pct = pliego > 0 ? (pu / pliego * 100) : 0;
-      return `<tr class="${manual?'ctr-manual':''}" data-ctr="${esc(it.id)}">
+      return `<tr class="${manual && !fijado ? 'ctr-manual' : ''}" data-ctr="${esc(it.id)}">
         <td><button type="button" class="it-ref" data-ver="${esc(it.id)}" title="Ver todo lo que incluye este ítem">${esc(it.id)}</button></td>
-        <td><b>${esc(it.desc)}</b><div class="it-cat">${esc(it.cat)}${manual?' · <span class="ctr-tag">precio a mano</span>':''}</div></td>
+        <td><b>${esc(it.desc)}</b><div class="it-cat">${esc(it.cat)}${manual && !fijado ?' · <span class="ctr-tag">precio a mano</span>':''}</div></td>
         <td>${esc(it.un)}</td>
         <td class="qty">${fmt(it.k,2)}</td>
-        <td class="qty"><span class="ctr-pliego">${epecBase>0?plata(pliego):'—'}</span></td>
+        <td class="qty"><span class="ctr-pliego">${epecBase>0?plata(pliego):'—'}</span>${epecBase>0?`<div class="it-un">por ${esc(it.un)}</div>`:''}</td>
         <td class="qty">
-          <div class="ctr-cel${epecBase>0?' cerrado':''}">
-            <span class="ctr-txt">${epecBase>0?plata(pu):'—'}</span>
-            <input type="number" min="0" step="any" class="ctr-precio" data-item="${esc(it.id)}" value="${manual?n2(contratistaPrecios[String(it.id)]):''}" placeholder="${epecBase>0?fmt(contratistaAuto(it.id),2):'auto'}" ${dis}>
-            ${epecBase>0 && edit ? '<button type="button" class="it-lapiz ctr-lapiz" title="Escribir el precio de este ítem a mano">✎</button>' : ''}
+          <div class="ctr-cel">
+            ${edit && epecBase>0
+              ? `<input type="number" min="0" step="any" class="ctr-precio" data-item="${esc(it.id)}" value="${manual?n2(contratistaPrecios[String(it.id)]):''}" placeholder="${fmt(contratistaAuto(it.id),2)}" title="Escribí acá el precio acordado para este ítem. Si lo dejás vacío, vale el ${fmt(contratistaPct,0)} % del pliego.">`
+              : ''}
+            <div class="ctr-efectivo"><b class="ctr-txt">${epecBase>0?plata(pu):'—'}</b>${epecBase>0?` <span class="it-un">por ${esc(it.un)}</span>`:''}</div>
           </div>
         </td>
         <td class="qty">${epecBase>0?fmt(pct,1)+' %':'—'}</td>
         <td class="no-print">${manual && edit ? `<button type="button" class="it-lapiz ctr-reset" data-item="${esc(it.id)}" title="Volver este ítem al ${fmt(contratistaPct,0)} %">↺</button>` : ''}</td>
       </tr>`;
     }).join('');
+
+    // ---- La banda de estado: fijada o abierta ----
+    const banda = document.getElementById('ctrBanda');
+    if(banda){
+      const puede = puedeEditar() ? '' : 'disabled';
+      if(fijado){
+        const f = contratistaFijado;
+        banda.className = 'ctr-banda fijado';
+        banda.innerHTML = `<div class="ctr-banda-txt">📌 <b>Precios FIJADOS</b> el ${esc(fechaCortaCtr(f.fecha))}${f.usuario?` por ${esc(f.usuario)}`:''} — se sacaron con el módulo <b>${plata(n2(f.modulo))} sin IVA</b> al <b>${fmt(n2(f.pct), n2(f.pct)%1?1:0)} %</b>.
+            <b>No se mueven</b> aunque cambie el módulo o el porcentaje: es el precio acordado. Para cambiar algo, reabrí la lista.</div>
+          <div class="ctr-banda-acc"><button type="button" class="btn-ghost" id="ctrReabrir" ${puede}>Reabrir la lista</button></div>`;
+      } else {
+        const nMan = Object.keys(contratistaPrecios).length;
+        banda.className = 'ctr-banda abierto';
+        banda.innerHTML = `<div class="ctr-banda-txt">✎ <b>Lista abierta.</b> Los precios se recalculan solos: son el <b>${fmt(contratistaPct, contratistaPct%1?1:0)} %</b> del pliego${nMan?`, salvo los <b>${nMan}</b> que escribiste a mano`:''}. Si cambiás el módulo o el porcentaje, se mueven.
+            Cuando cierres el precio con el contratista, <b>fijalos</b>: quedan clavados con fecha.</div>
+          <div class="ctr-banda-acc"><button type="button" class="btn-primary" id="ctrFijar" ${epecBase>0?puede:'disabled'}>📌 Fijar precios</button></div>`;
+      }
+    }
+    const reset = document.getElementById('ctrResetTodo');
+    if(reset) reset.disabled = fijado || !puedeEditar();
+    const btnPct = document.getElementById('ctrPctBtn');
+    if(btnPct) btnPct.disabled = fijado || !puedeEditar();
     // Los cuadros de arriba: cuánto vale el Anexo I entero para EPEC y cuánto para el contratista.
     const tiles = document.getElementById('ctrTiles');
     if(tiles){
       if(epecBase <= 0){
         tiles.innerHTML = `<div class="hint" style="margin:0;">Cargá el <b>valor del módulo</b> arriba, en «Itemizado 2026», y acá aparecen los precios.</div>`;
       } else {
-        const nMan = Object.keys(contratistaPrecios).length;
+        const nMan = contratistaFijado ? 0 : Object.keys(contratistaPrecios).length;
         const tot = ITEMIZADO_EPEC.reduce((t,it)=> t + n2(it.k) * n2(epecBase), 0);
         const totC = ITEMIZADO_EPEC.reduce((t,it)=> t + contratistaPU(it.id), 0);
         const tile = (n,l,sub)=>`<div class="tile"><div class="num" style="font-size:18px;">${n}</div>${sub?`<div class="ep-pesos">${sub}</div>`:''}<div class="lbl">${l}</div></div>`;
         tiles.innerHTML = tile(fmt(contratistaPct, contratistaPct % 1 ? 1 : 0) + ' %', 'Del valor de pliego (sin IVA)', '')
           + tile(plata(totC), 'Los 92 ítems, a precio de contratista', '')
           + tile(plata(tot - totC), 'Margen sobre los 92 ítems', plata(tot) + ' de pliego')
-          + tile(String(nMan), 'Ítems con precio escrito a mano', nMan ? 'los demás van al ' + fmt(contratistaPct,0) + ' %' : 'todos al ' + fmt(contratistaPct,0) + ' %');
+          + (contratistaFijado
+              ? tile('📌 Fijada', 'Estado de la lista', 'desde el ' + fechaCortaCtr(contratistaFijado.fecha))
+              : tile(String(nMan), 'Ítems con precio escrito a mano', nMan ? 'los demás van al ' + fmt(contratistaPct,0) + ' %' : 'todos al ' + fmt(contratistaPct,0) + ' %'));
       }
     }
   }
@@ -22726,7 +22773,7 @@ const ITEMIZADO_EPEC = [
     if(msgEl){ msgEl.style.color='var(--text-soft)'; msgEl.textContent='Guardando…'; }
     try{
       await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase,
-                                      contratistaPct, contratistaPrecios,
+                                      contratistaPct, contratistaPrecios, contratistaFijado,
                                       ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
       if(msgEl){ msgEl.style.color='var(--teal-dark)'; msgEl.textContent = txtOk || '✔ Guardado para todo el equipo.'; }
       clearTimeout(ctrMsgTimer);
@@ -22747,12 +22794,14 @@ const ITEMIZADO_EPEC = [
         <td class="q">${fmt(it.k,2)}</td><td class="q">${epecBase>0?plata(pliego):'—'}</td>
         <td class="q"><b>${epecBase>0?plata(pu):'—'}</b>${contratistaEditado(it.id)?' *':''}</td></tr>`;
     }).join('');
-    const hay = Object.keys(contratistaPrecios).length;
+    const hay = contratistaFijado ? 0 : Object.keys(contratistaPrecios).length;
     const cuerpo = `
-      <div class="sub">Lo que se le paga al contratista por cada unidad que hace. Precios <b>SIN IVA</b>.
-        Base: <b>${fmt(contratistaPct, contratistaPct%1?1:0)} %</b> del valor del Anexo I${epecBase>0?` · módulo ${plata(epecBase)} sin IVA`:' · falta cargar el valor del módulo'}.</div>
+      <div class="sub">Lo que se le paga al contratista <b>por cada unidad</b> que hace. Precios <b>SIN IVA</b>.
+        ${contratistaFijado
+          ? `<b>Precios FIJADOS</b> el ${esc(fechaCortaCtr(contratistaFijado.fecha))}${contratistaFijado.usuario?` por ${esc(contratistaFijado.usuario)}`:''} — sacados con el módulo ${plata(n2(contratistaFijado.modulo))} sin IVA al ${fmt(n2(contratistaFijado.pct), n2(contratistaFijado.pct)%1?1:0)} %. No se mueven.`
+          : `Base: <b>${fmt(contratistaPct, contratistaPct%1?1:0)} %</b> del valor del Anexo I${epecBase>0?` · módulo ${plata(epecBase)} sin IVA`:' · falta cargar el valor del módulo'}. <b>Lista todavía sin fijar</b>: estos precios se mueven si cambia el módulo o el porcentaje.`}</div>
       <table><thead><tr><th>Ítem</th><th>Descripción</th><th>Un.</th><th class="q">K</th>
-        <th class="q">Pliego (s/IVA)</th><th class="q">Contratista (s/IVA)</th></tr></thead><tbody>${filas}</tbody></table>
+        <th class="q">Pliego $/unidad (s/IVA)</th><th class="q">Contratista $/unidad (s/IVA)</th></tr></thead><tbody>${filas}</tbody></table>
       ${hay ? `<div class="sub" style="margin-top:10px;">(*) ${hay} ítem(s) con el precio acordado a mano, fuera del ${fmt(contratistaPct,0)} %.</div>` : ''}
       <div class="firma"><div>EMA Servicios</div><div>Contratista</div></div>`;
     if(typeof abrirHojaImpresion === 'function'){ abrirHojaImpresion('Itemizado de contratista', cuerpo); return; }
@@ -22783,8 +22832,13 @@ const ITEMIZADO_EPEC = [
 
   // ---- Toques ----
   const panelEp = document.getElementById('avPanelEpec');
-  if(panelEp){
-    panelEp.addEventListener('click', async (e)=>{
+  // El itemizado de contratista pasó a ser su propia pestaña (2026-09-14), así que vive en otro
+  // panel. Los mismos manejadores se enganchan a los dos: las ramas que hablan de plazas no
+  // encuentran nada adentro del panel de contratista y no hacen nada, y al revés igual.
+  const panelCtr = document.getElementById('avPanelContratista');
+  const onEp = (ev, fn)=>{ if(panelEp) panelEp.addEventListener(ev, fn); if(panelCtr) panelCtr.addEventListener(ev, fn); };
+  if(panelEp || panelCtr){
+    onEp('click', async (e)=>{
       const impr = e.target.closest('.it-imprimir-ep');
       if(impr){
         const id = impr.dataset.plaza;
@@ -23268,17 +23322,35 @@ const ITEMIZADO_EPEC = [
       }
 
       // ---- Itemizado de contratista (2026-09-14) ----
-      const ctrLapiz = e.target.closest('.ctr-lapiz');
-      if(ctrLapiz){
-        const cel = ctrLapiz.closest('.ctr-cel');
-        cel.classList.remove('cerrado');
-        const inp = cel.querySelector('.ctr-precio');
-        if(inp){ inp.focus(); inp.select(); }
+      // Fijar la lista: se congelan los 92 precios de hoy (2026-09-14). Desde ahí, cambiar el
+      // módulo o el porcentaje no los mueve. Se guarda con qué módulo y qué % se sacaron.
+      if(e.target.id === 'ctrFijar'){
+        if(!puedeEditar()){ alert('Para fijar los precios hay que iniciar sesión.'); return; }
+        if(!(epecBase > 0)){ alert('Primero cargá el valor del módulo en «Itemizado 2026».'); return; }
+        const totC = ITEMIZADO_EPEC.reduce((t,it)=> t + contratistaPU(it.id), 0);
+        if(!confirm(`¿Fijar los precios del contratista como están hoy?\n\nSe clavan los 92 ítems (${plata(totC)} en total, sin IVA), sacados con el módulo ${plata(epecBase)} al ${fmt(contratistaPct, contratistaPct%1?1:0)} %.\n\nDesde ahí NO se mueven aunque cambie el módulo o el porcentaje, y no se pueden editar hasta que reabras la lista.\n\nEsto no toca el itemizado de EPEC ni ninguna plaza cargada.`)) return;
+        const congelado = {};
+        ITEMIZADO_EPEC.forEach(it=>{ congelado[String(it.id)] = Math.round(contratistaPU(it.id) * 100) / 100; });
+        contratistaPrecios = congelado;
+        contratistaFijado = { fecha: (typeof fechaAISO === 'function') ? fechaAISO(new Date()) : '',
+                              ts: Date.now(), usuario: (window.__fbUser||{}).email || '',
+                              pct: n2(contratistaPct), modulo: n2(epecBase) };
+        renderContratista(); renderEpec();
+        guardarContratista(document.getElementById('ctrMsg'), '📌 Precios fijados para todo el equipo.');
+        return;
+      }
+      if(e.target.id === 'ctrReabrir'){
+        if(!puedeEditar()){ alert('Para reabrir la lista hay que iniciar sesión.'); return; }
+        if(!confirm('¿Reabrir la lista de precios del contratista?\n\nLos precios NO cambian: quedan los mismos, pero vuelven a poder editarse y a moverse si cambiás el módulo o el porcentaje.\n\nPara volver a calcularlos con el porcentaje, después tocá «↺ Volver todos al porcentaje».')) return;
+        contratistaFijado = null;
+        renderContratista(); renderEpec();
+        guardarContratista(document.getElementById('ctrMsg'), '✔ Lista reabierta. Los precios quedaron como estaban.');
         return;
       }
       const ctrReset = e.target.closest('.ctr-reset');
       if(ctrReset){
         if(!puedeEditar()){ alert('Para cambiar precios hay que iniciar sesión.'); return; }
+        if(contratistaFijado){ alert('La lista está fijada: primero reabrila.'); return; }
         delete contratistaPrecios[String(ctrReset.dataset.item)];
         renderContratista();
         guardarContratista(document.getElementById('ctrMsg'));
@@ -23286,6 +23358,7 @@ const ITEMIZADO_EPEC = [
       }
       if(e.target.id === 'ctrResetTodo'){
         if(!puedeEditar()){ alert('Para cambiar precios hay que iniciar sesión.'); return; }
+        if(contratistaFijado){ alert('La lista está fijada: primero reabrila.'); return; }
         const n = Object.keys(contratistaPrecios).length;
         if(!n){ const m = document.getElementById('ctrMsg'); if(m){ m.style.color='var(--text-soft)'; m.textContent='No hay ningún precio escrito a mano: ya están todos al ' + fmt(contratistaPct,0) + ' %.'; } return; }
         if(!confirm(`¿Borrar los ${n} precio(s) escritos a mano y dejar TODOS los ítems al ${fmt(contratistaPct,0)} % del pliego?\n\nEsto no toca el itemizado de EPEC ni ninguna plaza cargada.`)) return;
@@ -23296,6 +23369,7 @@ const ITEMIZADO_EPEC = [
       }
       if(e.target.id === 'ctrPctBtn'){
         if(!puedeEditar()){ alert('Para cambiar el porcentaje hay que iniciar sesión.'); return; }
+        if(contratistaFijado){ alert('La lista está fijada: el porcentaje no la mueve. Reabrila si querés recalcular.'); return; }
         const v = n2((document.getElementById('ctrPct')||{}).value);
         if(!(v > 0) || v > 100){ const m = document.getElementById('ctrMsg'); if(m){ m.style.color='var(--danger)'; m.textContent='El porcentaje tiene que ser un número entre 0 y 100.'; } return; }
         contratistaPct = v;
@@ -23313,7 +23387,7 @@ const ITEMIZADO_EPEC = [
         let enLaNube = true;
         try{
           if(!puedeEditar()) throw new Error('sin sesión');
-          await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase, contratistaPct, contratistaPrecios,
+          await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase, contratistaPct, contratistaPrecios, contratistaFijado,
                                           ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
         }catch(err){ enLaNube = false; }
         // El aviso del número va SIEMPRE, haya sesión o no (2026-09-07): antes vivía adentro del
@@ -23369,7 +23443,7 @@ const ITEMIZADO_EPEC = [
     // Al salir del casillero de un precio de contratista se redibuja la tabla: mientras se escribe
     // NO se redibuja (se perdería el cursor), así que el botón ↺ para volver ese ítem al porcentaje
     // recién puede aparecer acá (2026-09-14).
-    panelEp.addEventListener('focusout', (e)=>{
+    onEp('focusout', (e)=>{
       if(!e.target.closest || !e.target.closest('.ctr-precio')) return;
       setTimeout(()=>{
         const a = document.activeElement;
@@ -23377,7 +23451,7 @@ const ITEMIZADO_EPEC = [
         try{ renderContratista(); }catch(err){}
       }, 0);
     });
-    panelEp.addEventListener('input', (e)=>{
+    onEp('input', (e)=>{
       if(siEditar(e)) return;
       // El nombre del contratista de la plaza (2026-09-14). No se redibuja mientras se escribe.
       const ctrNom = e.target.closest('.ep-ctr-nom');
@@ -23400,6 +23474,7 @@ const ITEMIZADO_EPEC = [
       if(e.target.id === 'ctrBuscar'){ renderContratista(); return; }
       const ctrP = e.target.closest('.ctr-precio');
       if(ctrP){
+        if(contratistaFijado) return;   // con la lista fijada no se edita: primero se reabre
         const id = String(ctrP.dataset.item);
         const v = n2(ctrP.value);
         if(String(ctrP.value).trim() === '' || !(v > 0)) delete contratistaPrecios[id];
@@ -23456,7 +23531,7 @@ const ITEMIZADO_EPEC = [
       if(e.target.id === 'epecLicBuscar') pintarPlazasLicitacion();
       if(e.target.id === 'hechasBuscar') renderHechas();
     });
-    panelEp.addEventListener('change', (e)=>{
+    onEp('change', (e)=>{
       // Al elegir un ítem para asignarle a un trabajo hay que redibujar, para que aparezca el aviso.
       const siSel = e.target.closest('.si-item');
       if(siSel){
@@ -23475,12 +23550,12 @@ const ITEMIZADO_EPEC = [
         if(sel.value) mapeoCol[k] = sel.value; else delete mapeoCol[k];
         renderHechas();
         if(!puedeEditar()) return;
-        window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase, contratistaPct, contratistaPrecios,
+        window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase, contratistaPct, contratistaPrecios, contratistaFijado,
                                   ts:Date.now(), por:(window.__fbUser&&window.__fbUser.email)||'' })
           .catch(()=>{ alert('No se pudo guardar la elección (revisá la conexión). En esta pantalla se ve, pero no le llegó al resto del equipo.'); });
       }
     });
-    panelEp.addEventListener('change', (e)=>{
+    onEp('change', (e)=>{
       if(e.target.id === 'epecSoloConItems') renderEpec();
       // Cambiar el estado de la obra desde el itemizado (2026-09-07).
       const selEst = e.target.closest('.ep-estado-sel');
@@ -23554,9 +23629,9 @@ const ITEMIZADO_EPEC = [
       }
     });
     // Mientras se escribe, la equivalencia se actualiza sola: los dos números siempre a la vista.
-    panelEp.addEventListener('input', (e)=>{ if(e.target.id === 'epecBase') pintarBaseEq(); });
+    onEp('input', (e)=>{ if(e.target.id === 'epecBase') pintarBaseEq(); });
     // Elegir el renglón recorta la lista de plazas de la licitación.
-    panelEp.addEventListener('click', async (e)=>{
+    onEp('click', async (e)=>{
       // El atajo del control de cobertura: carga el renglón como ítem propio, con nombre y unidad ya
       // puestos, y lo deja listo para ponerle el precio en la tabla de ítems propios.
       const add = e.target.closest('.cob-add');
@@ -23572,7 +23647,7 @@ const ITEMIZADO_EPEC = [
         itemsPropios.push({ id, cat:'Tareas cargadas por el equipo (fuera del itemizado)', desc, un, precio:0 });
         add.disabled = true; add.textContent = 'Guardando…';
         try{
-          await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase, contratistaPct, contratistaPrecios,
+          await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase, contratistaPct, contratistaPrecios, contratistaFijado,
                                           ts:Date.now(), por:(window.__fbUser&&window.__fbUser.email)||'' });
         }catch(err){
           itemsPropios = itemsPropios.filter(p=>p.id!==id);
@@ -23637,15 +23712,19 @@ const ITEMIZADO_EPEC = [
     barra.innerHTML = [
       { id:'obra', label:'Avance de obra' },
       { id:'epec', label:'Itemizado 2026' },
+      { id:'contratista', label:'Itemizado de contratista' },
     ].map(g=>`<button type="button" class="subtab${subAv===g.id?' activo':''}" data-sub="${g.id}">${g.label}</button>`).join('');
     const po = document.getElementById('avPanelObra');
     const pi = document.getElementById('avPanelItemizado');
     const pe = document.getElementById('avPanelEpec');
+    const pc = document.getElementById('avPanelContratista');
     if(subAv === 'itemizado') subAv = 'epec';   // por si quedó apuntando a la pestaña que se sacó
     if(po) po.style.display = subAv==='obra' ? '' : 'none';
     if(pi) pi.style.display = 'none';               // el itemizado de la Municipalidad ya no se muestra
     if(pe) pe.style.display = subAv==='epec' ? '' : 'none';
+    if(pc) pc.style.display = subAv==='contratista' ? '' : 'none';
     if(subAv === 'epec') renderEpec();
+    if(subAv === 'contratista'){ try{ renderContratista(); }catch(e){} }
   }
   const barraAv = document.getElementById('subtabsAvance');
   if(barraAv){
@@ -23667,6 +23746,7 @@ const ITEMIZADO_EPEC = [
   // Los atajos que antes llevaban al itemizado de la Municipalidad ahora llevan al 2026, que es el
   // único que queda. Se conserva el nombre de la función para no tocar a quienes la llaman.
   window.irAlItemizado = function(){ subAv = 'epec'; mostrarVista('avance'); };
+  window.irAlContratista = function(){ subAv = 'contratista'; mostrarVista('avance'); };
   window.renderItemizado = renderItemizado;
 
   pintarSubtabsAvance();
@@ -26162,6 +26242,7 @@ const ITEMIZADO_EPEC = [
     const PU  = id => (typeof window.epecContratistaPU === 'function') ? n2(window.epecContratistaPU(id)) : 0;
     const MAN = id => (typeof window.epecContratistaEditado === 'function') ? !!window.epecContratistaEditado(id) : false;
     const PCT = (typeof window.epecContratistaPct === 'function') ? n2(window.epecContratistaPct()) : 25;
+    const FIJ = (typeof window.epecContratistaFijado === 'function') ? window.epecContratistaFijado() : null;
     const esCtr  = a => (typeof window.epecEsDeContratista === 'function') ? window.epecEsDeContratista(a) : false;
     const nomCtr = a => (typeof window.epecNombreContratista === 'function') ? (window.epecNombreContratista(a) || '(sin nombre)') : '(sin nombre)';
     // El módulo NETO: el itemizado de contratista se calcula siempre sin IVA, esté como esté el
@@ -26171,9 +26252,13 @@ const ITEMIZADO_EPEC = [
 
     const m = { titulo:'Pago a contratista',
                 subtitulo:`${o.items.length} plaza(s) · ANEXO I — LPE 5589 · SIC 21760 · precios SIN IVA` +
+                          (FIJ ? ` · precios FIJADOS el ${fCorta(FIJ.fecha)}` : '') +
                           (neto > 0 ? ` · módulo ${plata(neto)} sin IVA · ${nf(PCT, PCT % 1 ? 1 : 0)} % del pliego` : ' · falta el valor del módulo'),
                 tiles:[], avisos:[], secciones:[] };
     if(neto <= 0) m.avisos.push('El <b>valor del módulo</b> no está cargado en el Itemizado 2026, así que todos los precios de contratista salen en cero. Cargalo en Obras → Itemizado 2026 y volvé a generar.');
+    m.avisos.push(FIJ
+      ? `Los precios de contratista están <b>FIJADOS</b> desde el <b>${fCorta(FIJ.fecha)}</b>${FIJ.usuario?` (${esc(FIJ.usuario)})`:''}: se sacaron con el módulo ${plata(n2(FIJ.modulo))} sin IVA al ${nf(n2(FIJ.pct), n2(FIJ.pct)%1?1:0)} % y <b>no se mueven</b>. Es el precio acordado.`
+      : `Los precios de contratista <b>todavía no están fijados</b>: hoy son el <b>${nf(PCT, PCT % 1 ? 1 : 0)} %</b> del pliego y <b>se recalculan solos</b> si cambia el módulo o el porcentaje. Si ya cerraste el precio, fijalos en <b>Obras → Itemizado de contratista</b> para que este informe no cambie mañana.`);
 
     const conCtr = o.items.filter(esCtr);
     const sinCtr = o.items.filter(a=> !esCtr(a));
