@@ -2171,6 +2171,8 @@
   .ctr-pct-caja input{ width:84px; text-align:right; }
   .ctr-pct-caja span{ font-weight:700; color:var(--navy); }
   .ctr-acc{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:10px; }
+  .ctr-imprimir{ display:flex; gap:6px; flex-wrap:wrap; }
+  .ctr-imprimir button{ margin:0; width:auto; }
   .ctr-cel{ display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
   .ctr-cel input.ctr-precio{ width:134px; text-align:right; }
   .ctr-efectivo{ font-size:11.5px; color:var(--text-soft); white-space:nowrap; }
@@ -2184,6 +2186,28 @@
   .ctr-banda.fijado{ background:rgba(16,122,88,.10); border:1px solid var(--teal-dark); color:var(--navy); }
   .ctr-banda.fijado .ctr-banda-txt{ color:var(--teal-dark); }
   #cardContratista.fijada .ctr-cfg{ opacity:.55; }
+  /* Reparto civil / eléctrico (2026-09-15) */
+  #ctrTabla input.ctr-civil{ width:62px; text-align:right; }
+  #ctrTabla input.ctr-civil.tocado{ border-color:var(--teal-dark); font-weight:700; }
+  .ctr-civil-cel{ color:#8a5a08; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .ctr-elec-cel{ color:var(--teal-dark); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .ctr-prov{ color:var(--text-soft); font-size:11.5px; text-align:center !important; font-style:italic; }
+  /* Ítems propios del contratista */
+  .cp-fila{ display:grid; grid-template-columns:minmax(0,1fr) 92px 130px 150px 40px; gap:8px;
+            align-items:center; padding:8px 0; border-bottom:1px solid var(--line); }
+  .cp-labels{ display:grid; grid-template-columns:minmax(0,1fr) 92px 130px 150px 40px; gap:8px;
+              font-size:11px; font-weight:800; color:var(--text-soft); text-transform:uppercase;
+              letter-spacing:.04em; padding-bottom:4px; }
+  .cp-fila input, .cp-fila select{ margin:0; }
+  .cp-vacio{ color:var(--text-soft); font-size:13px; padding:10px 0; }
+  .cp-total{ margin-top:10px; font-size:13px; color:var(--navy); }
+  @media (max-width:700px){
+    .cp-labels{ display:none; }
+    .cp-fila{ grid-template-columns:1fr 40px; grid-auto-rows:min-content; gap:6px;
+              padding:10px; border:1px solid var(--line); border-radius:10px; margin-bottom:8px; }
+    .cp-fila > *:nth-child(1){ grid-column:1 / -1; }
+    .cp-fila > *:nth-child(5){ grid-column:2; grid-row:1; }
+  }
   .ctr-tag{ background:rgba(245,158,11,.16); color:#8a5a08; border-radius:999px;
             padding:1px 8px; font-size:10.5px; font-weight:800; white-space:nowrap; }
   #ctrTabla tr.ctr-manual{ background:rgba(245,158,11,.07); }
@@ -2199,6 +2223,39 @@
   .ep-ctr .ep-ctr-tot div{ font-size:11.5px; color:var(--text-soft); }
   .ep-ctr-badge{ background:rgba(245,158,11,.16); color:#8a5a08; border-radius:999px;
                  padding:1px 9px; font-size:11px; font-weight:800; white-space:nowrap; }
+  /* Varios contratistas por plaza y sus ítems propios (2026-09-15) */
+  .ep-ctr-lista{ border:1px solid var(--line); border-top:none; border-radius:0 0 12px 12px;
+                 padding:10px 13px 13px; background:var(--bg-soft); margin-bottom:4px; }
+  .ep-ctr-fila{ display:grid; grid-template-columns:minmax(0,1fr) 190px 140px 34px; gap:8px;
+                align-items:center; padding:6px 0; }
+  .ep-ctr-fila input, .ep-ctr-fila select{ margin:0; }
+  .ep-ctr-monto{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .ep-ctr-monto b{ color:var(--navy); }
+  .ep-ctr-monto div{ font-size:11px; color:var(--text-soft); }
+  .ep-ctr-aviso{ margin-top:8px; font-size:12.5px; color:#8a5a08;
+                 background:rgba(245,158,11,.10); border-radius:8px; padding:7px 11px; }
+  .ep-cx{ margin-top:14px; border-top:1px dashed var(--line); padding-top:10px; }
+  .ep-cx-tit{ font-weight:800; color:var(--navy); font-size:13px; }
+  .ep-cx-labels, .ep-cx-fila{ display:grid; grid-template-columns:minmax(0,1fr) 92px 130px 120px 34px;
+                              gap:8px; align-items:center; }
+  .ep-cx-labels{ font-size:10.5px; font-weight:800; color:var(--text-soft); text-transform:uppercase;
+                 letter-spacing:.04em; margin-top:8px; }
+  .ep-cx-fila{ padding:5px 0; }
+  .ep-cx-fila input, .ep-cx-fila select{ margin:0; }
+  .ep-cx-pu, .ep-cx-sub{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; font-size:12.5px; }
+  .ep-cx-sub b{ color:var(--navy); }
+  @media (max-width:700px){
+    .ep-ctr-fila{ grid-template-columns:1fr 34px; }
+    .ep-ctr-fila > *:nth-child(1), .ep-ctr-fila > *:nth-child(2), .ep-ctr-fila > *:nth-child(3){ grid-column:1; }
+    .ep-ctr-fila > *:nth-child(4){ grid-column:2; grid-row:1; }
+    .ep-ctr-monto{ text-align:left; }
+    .ep-cx-labels{ display:none; }
+    .ep-cx-fila{ grid-template-columns:1fr 34px; border:1px solid var(--line); border-radius:10px;
+                 padding:9px; margin-top:8px; }
+    .ep-cx-fila > *:nth-child(1), .ep-cx-fila > *:nth-child(2), .ep-cx-fila > *:nth-child(3), .ep-cx-fila > *:nth-child(4){ grid-column:1; }
+    .ep-cx-fila > *:nth-child(5){ grid-column:2; grid-row:1; }
+    .ep-cx-pu, .ep-cx-sub{ text-align:left; }
+  }
   @media (max-width:560px){
     .ep-ctr .ep-ctr-tot{ margin-left:0; text-align:left; width:100%; }
     .ctr-cfg{ align-items:flex-start; flex-direction:column; }
@@ -2939,7 +2996,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-14 15:35 · 248d33</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-15 11:36 · f2a303</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3620,11 +3677,20 @@
             <input type="date" id="otFecha">
           </div>
           <div>
-            <label>Plaza / obra</label>
+            <label for="otPlazaBuscar">Plaza / obra</label>
+            <!-- Buscar escribiendo (2026-09-15). Pedido del usuario: *"aparte de la lista
+                 deslizable que me dé la opción de escribir, así busco más rápido, igual que la
+                 parte de personal de cuadrilla"*. El desplegable se queda —es el que manda y el
+                 que ya usa todo el resto del código—; arriba va un casillero que filtra la lista
+                 mientras se escribe, por nombre, por ID o por barrio. Los dos quedan sincronizados. -->
             <div style="display:flex; gap:6px; align-items:center;">
-              <select id="otPlaza" style="flex:1;"></select>
+              <input type="text" id="otPlazaBuscar" list="otPlazasLista" autocomplete="off" style="flex:1;"
+                     placeholder="Escribí el nombre, el ID o el barrio…">
               <button type="button" class="btn-ghost" style="flex:none; padding:8px 12px;" onclick="altaPlazaDesdeOt()" title="Registrar una plaza nueva sin salir de esta pantalla">➕</button>
             </div>
+            <datalist id="otPlazasLista"></datalist>
+            <select id="otPlaza" style="width:100%; margin-top:6px;"></select>
+            <div class="hint" id="otPlazaMsg" style="margin-top:4px;"></div>
             <!-- Lugar libre, solo para las órdenes sin plaza (2026-09-03) -->
             <div id="otLugarBox" style="display:none; margin-top:10px;">
               <label style="margin-top:0;" for="otLugar">¿Dónde se hace?</label>
@@ -4113,7 +4179,11 @@
     <div class="card" id="cardContratista">
     <div class="card-header-row">
       <h2 style="margin:0;"><span class="dot"></span>Itemizado de contratista</h2>
-      <button type="button" class="btn-ghost no-print" id="ctrImprimir">🖨 Imprimir la lista de precios</button>
+      <div class="ctr-imprimir no-print">
+        <button type="button" class="btn-ghost" id="ctrImprimir">🖨 Lista completa</button>
+        <button type="button" class="btn-ghost" id="ctrImprimirCivil">🖨 Solo civil</button>
+        <button type="button" class="btn-ghost" id="ctrImprimirElec">🖨 Solo eléctrico</button>
+      </div>
     </div>
     <div class="hint" style="margin-top:8px;">Es <b>el mismo itemizado</b> —los mismos ítems, las mismas unidades— pero con <b>lo que le pagamos al contratista</b>
       por cada unidad que hace. Arranca en el <b>25 % del valor del pliego sin IVA</b>, y cualquier precio se puede escribir a mano.
@@ -4136,12 +4206,31 @@
     <div class="tabla-scroll" style="margin-top:12px;"><table class="it-tabla" id="ctrTabla"><thead><tr>
       <th style="width:66px;">Ítem</th><th>Descripción</th><th style="width:70px;">Unidad</th>
       <th style="width:78px; text-align:right;">K</th>
-      <th style="width:130px; text-align:right;" title="Lo que paga el pliego por UNA unidad de este ítem, sin IVA">Pliego · $ por unidad (s/IVA)</th>
-      <th style="width:168px; text-align:right;" title="Lo que le pagás al contratista por UNA unidad de este ítem, sin IVA. Escribilo para acordar otro precio.">Contratista · $ por unidad (s/IVA)</th>
-      <th style="width:66px; text-align:right;">%</th>
+      <th style="width:120px; text-align:right;" title="Lo que paga el pliego por UNA unidad de este ítem, sin IVA">Pliego · $ por unidad (s/IVA)</th>
+      <th style="width:158px; text-align:right;" title="Lo que le pagás al contratista por UNA unidad de este ítem, sin IVA. Escribilo para acordar otro precio.">Contratista · $ por unidad (s/IVA)</th>
+      <th style="width:60px; text-align:right;">%</th>
+      <th style="width:78px; text-align:right;" title="Qué parte de este ítem es obra civil. Lo que sobra es eléctrico y montaje. Es un aproximado: corregilo.">% civil</th>
+      <th style="width:120px; text-align:right;">Civil · $ por unidad</th>
+      <th style="width:120px; text-align:right;">Eléctrico · $ por unidad</th>
       <th class="no-print" style="width:44px;"></th>
     </tr></thead><tbody id="ctrTablaBody"></tbody></table></div>
-  </div>
+    </div>
+
+    <!-- ============================================================
+         ÍTEMS PROPIOS DEL CONTRATISTA (2026-09-15)
+         Trabajos que el pliego no itemiza por separado y que igual hay que pagarle.
+         ============================================================ -->
+    <div class="card" id="cardCtrPropios">
+      <h2><span class="dot"></span>Ítems propios — lo que el pliego no itemiza</h2>
+      <div class="hint" style="margin-top:8px;">Para lo que le pagás al contratista y <b>no tiene un ítem en el Anexo I</b>: «base excavada a mano»,
+        «viaje de camión», «recalce de columna». Ponés la descripción, la unidad, el precio por unidad y de qué rubro es.
+        Después se los cargás a la plaza que corresponda, con su cantidad, abajo del itemizado de esa plaza.
+        <b>No tocan lo que se le cobra a EPEC</b>: son plata de EMA, igual que el resto de esta pestaña.</div>
+      <div class="cp-labels no-print"><div>Descripción del trabajo</div><div>Unidad</div><div>$ por unidad (s/IVA)</div><div>Rubro</div><div></div></div>
+      <div id="cpLista"></div>
+      <button type="button" class="btn-auto no-print" id="cpAgregar" style="margin-top:12px;">＋ Agregar un ítem propio</button>
+      <div class="cp-total" id="cpTotal"></div>
+    </div>
   </div>
 
   <!-- ============================================================
@@ -11946,6 +12035,64 @@ const OT_ESTADOS = ['Emitida','En curso','Terminada','Anulada'];
 //   · Balance de material → dentro de cada plaza, en «Avance de obra», con la opción de decidir qué
 //     hacer con lo que sobró (devolverlo al pañol o pasarlo a otra plaza)
 //   · Entradas y salidas  → siguen en «Stock», que es donde ya estaban
+// ---- Buscar la plaza escribiendo, al lado del desplegable (2026-09-15) ----
+// El <select> sigue siendo el que manda: todo el resto del código lee y escribe `otPlaza.value`,
+// y no se le tocó una línea. Acá arriba hay un casillero de texto con la MISMA lista adentro de un
+// <datalist>, igual que el nombre del personal de cuadrilla. Se escribe, la lista se achica sola, y
+// al elegir (o al salir del casillero) se resuelve a qué plaza es y se le pone el valor al select.
+const OT_SIN_PLAZA_TXT = '— Sin plaza · trabajo general (galpón, traslados, barrio) —';
+function otPlazaEtiqueta(a){
+  return `${a.nombre || '(sin nombre)'}${a.obraId ? ` · ID ${a.obraId}` : ''}${a.barrio ? ` · ${a.barrio}` : ''}`;
+}
+// Texto escrito → id de plaza. Devuelve el id, '__sin__', o null si no se pudo resolver.
+// Se busca en este orden: la etiqueta entera, «sin plaza», el ID de obra, y por último el nombre
+// (empieza con, o contiene) — pero solo si hay UNA sola candidata: con dos, no se adivina.
+function otPlazaIdDeTexto(txt){
+  const t = String(txt || '').trim();
+  if(!t) return null;
+  const lista = (typeof avanceObras !== 'undefined' ? avanceObras : []) || [];
+  const norm = v => String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/\s+/g,' ').trim();
+  const k = norm(t);
+  if(k === norm(OT_SIN_PLAZA_TXT) || /^(SIN PLAZA|GENERAL|TRABAJO GENERAL)$/.test(k)) return '__sin__';
+  // 1) la etiqueta tal cual salió de la lista
+  const exacta = lista.find(a=> norm(otPlazaEtiqueta(a)) === k);
+  if(exacta) return exacta.id;
+  // 2) por ID de obra
+  if(typeof idsDePlaza === 'function'){
+    const pedidos = idsDePlaza(t.replace(/^.*?\bID\b\s*/i, ''));
+    const porId = lista.filter(a=>{
+      const mios = idsDePlaza(a.obraId);
+      return mios.length && pedidos.some(x=> mios.includes(x));
+    });
+    if(porId.length === 1) return porId[0].id;
+  }
+  // 3) por nombre
+  const kn = (typeof claveNombrePlaza === 'function') ? claveNombrePlaza(t) : k;
+  const exactoNom = lista.filter(a=> (typeof claveNombrePlaza === 'function' ? claveNombrePlaza(a.nombre) : norm(a.nombre)) === kn);
+  if(exactoNom.length === 1) return exactoNom[0].id;
+  const empieza = lista.filter(a=> norm(otPlazaEtiqueta(a)).startsWith(k));
+  if(empieza.length === 1) return empieza[0].id;
+  const contiene = lista.filter(a=> norm(otPlazaEtiqueta(a)).includes(k));
+  if(contiene.length === 1) return contiene[0].id;
+  return null;
+}
+// Deja el casillero de texto mostrando lo que tiene elegido el desplegable.
+// Se pone en `true` solo mientras el propio casillero está resolviendo lo que se tipea: ahí NO hay
+// que pisarle el texto al usuario en medio de la palabra. Cualquier otro cambio de plaza (el
+// desplegable, editar una orden, el atajo del itemizado) sí actualiza el casillero, tenga el foco
+// donde tenga.
+let otPlazaEscribiendo = false;
+function sincronizarOtPlazaBuscar(){
+  const sel = document.getElementById('otPlaza');
+  const inp = document.getElementById('otPlazaBuscar');
+  if(!sel || !inp) return;
+  if(otPlazaEscribiendo && document.activeElement === inp) return;
+  if(sel.value === '__sin__'){ inp.value = OT_SIN_PLAZA_TXT; return; }
+  const a = (typeof avanceObras !== 'undefined' ? avanceObras : []).find(x=> String(x.id) === String(sel.value));
+  inp.value = a ? otPlazaEtiqueta(a) : '';
+}
+window.sincronizarOtPlazaBuscar = sincronizarOtPlazaBuscar;
+
 function poblarOtPlazas(){
   const sel = document.getElementById('otPlaza');
   if(!sel) return;
@@ -11963,6 +12110,59 @@ function poblarOtPlazas(){
   if(!sel.dataset.dirEnganchada){
     sel.addEventListener('change', mostrarDireccionOt);
     sel.dataset.dirEnganchada = '1';
+  }
+  // La MISMA lista, adentro del <datalist> del casillero de búsqueda.
+  const dl = document.getElementById('otPlazasLista');
+  if(dl){
+    const vistos = new Set();
+    dl.innerHTML = `<option value="${escHtml(OT_SIN_PLAZA_TXT)}"></option>`
+      + ordenadas.map(a=>{
+          let et = otPlazaEtiqueta(a);
+          // dos plazas con el mismo nombre y sin ID no pueden compartir la misma opción
+          if(vistos.has(et)) et += ` · ${a.id}`;
+          vistos.add(et);
+          return `<option value="${escHtml(et)}"></option>`;
+        }).join('');
+  }
+  const inp = document.getElementById('otPlazaBuscar');
+  if(inp && !inp.dataset.enganchado){
+    inp.dataset.enganchado = '1';
+    const resolver = (avisar)=>{
+      const msg = document.getElementById('otPlazaMsg');
+      const txt = inp.value.trim();
+      if(!txt){ if(msg) msg.innerHTML = ''; return; }
+      const id = otPlazaIdDeTexto(txt);
+      if(id && [...sel.options].some(o=>o.value === String(id))){
+        if(sel.value !== String(id)){
+          sel.value = String(id);
+          otPlazaEscribiendo = !avisar;   // al tipear no se pisa el texto; al confirmar, sí
+          try{ sel.dispatchEvent(new Event('change', { bubbles:true })); }
+          finally{ otPlazaEscribiendo = false; }
+        }
+        if(msg) msg.innerHTML = '';
+        // El texto se acomoda a la etiqueta completa SOLO cuando el usuario terminó (eligió de la
+        // lista, apretó Enter o salió del casillero). Mientras tipea no se le toca: si no, escribir
+        // «san» le dejaba «PLAZA SANTA ANA · ID 4045 · Villa Cabrera» y el cursor al final, que es
+        // justo lo que hacía perder tiempo.
+        if(avisar) sincronizarOtPlazaBuscar();
+      } else if(avisar && msg){
+        // Decir cuál de las dos cosas pasó: que no hay ninguna, o que hay varias. Con «varias» se
+        // deja la que estaba puesta a propósito: adivinar la plaza de una orden sale caro.
+        const norm = v => String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/\s+/g,' ').trim();
+        const k = norm(txt);
+        const cand = (typeof avanceObras !== 'undefined' ? avanceObras : []).filter(a=> norm(otPlazaEtiqueta(a)).includes(k));
+        msg.style.color = 'var(--amber)';
+        msg.innerHTML = cand.length > 1
+          ? `Hay <b>${cand.length}</b> plazas que coinciden con «${escHtml(txt)}»: ${cand.slice(0,4).map(a=>`<b>${escHtml(a.nombre||'')}</b>`).join(', ')}${cand.length>4?' y más':''}. Escribí un poco más, o elegila del desplegable de abajo.`
+          : `No encontré <b>«${escHtml(txt)}»</b> entre las plazas cargadas. Elegila del desplegable de abajo, o tocá <b>➕</b> para darla de alta.`;
+      }
+    };
+    // Al elegir de la lista salta `change`; mientras se escribe se prueba igual, porque elegir una
+    // sugerencia del <datalist> dispara `input` y no siempre `change`.
+    inp.addEventListener('input', ()=> resolver(false));
+    inp.addEventListener('change', ()=> resolver(true));
+    inp.addEventListener('blur', ()=>{ resolver(true); setTimeout(sincronizarOtPlazaBuscar, 0); });
+    inp.addEventListener('focus', ()=>{ inp.select(); });
   }
   mostrarDireccionOt();
   // Etapas de la OT: la lista es fija (las 12 etapas EPEC), se puebla una sola vez.
@@ -12001,6 +12201,11 @@ function poblarHistPlazas(){
 // es el momento en que hace falta (2026-08-27, a pedido del usuario).
 function mostrarDireccionOt(){
   const el = document.getElementById('otDireccionHint');
+  // El casillero de búsqueda sigue siempre a lo que tenga elegido el desplegable (2026-09-15).
+  // Se hace acá porque `mostrarDireccionOt()` la llaman TODOS los caminos que cambian la plaza:
+  // poblar la lista, editar una orden, traerla de la semana, dar de alta una plaza, el atajo del
+  // itemizado. Así ninguno de ellos tuvo que tocarse.
+  try{ sincronizarOtPlazaBuscar(); }catch(e){}
   if(!el) return;
   // Orden sin plaza: se muestra el casillero del lugar y se explica qué significa.
   const selP = document.getElementById('otPlaza');
@@ -18855,6 +19060,95 @@ function poblarParteObraDatalist(){
   // sacaron. Desde ahí, cambiar el módulo o el porcentaje NO los mueve — es el precio acordado.
   let contratistaFijado = null;               // { fecha, ts, usuario, pct, modulo } o null
 
+  // ==================================================================
+  // REPARTO CIVIL / ELÉCTRICO  (2026-09-15)
+  // ==================================================================
+  // Pedido del usuario: *"si yo quiero contratar un equipo civil y otro eléctrico no se puede,
+  // porque está todo junto: los ítems de columna con fundación, cavado de base, etc. Estaría bueno
+  // tener un aproximado de todos los ítems de civil, para cuando quiera contratar solo civil y
+  // poder pagarlo."*
+  //
+  // El Anexo I paga la columna ENTERA en un solo ítem. El ítem 1, textual, incluye «excavación,
+  // fundación de hormigón; torta» (civil) y también «puesta a tierra y su medición; acometida
+  // subterránea; el montaje, conexionado y energización de luminaria» (eléctrico). Acá se le pone a
+  // cada ítem qué PARTE es civil; lo que sobra es eléctrico y montaje.
+  //
+  // Los números de abajo son un ARRANQUE razonable sacado de lo que dice cada ítem en el Anexo I,
+  // no una verdad del pliego: el pliego no reparte nada. Están para corregirlos.
+  //
+  // Los ítems de PROVISIÓN (83.1 a 89) quedan afuera del reparto: son materiales, no mano de obra.
+  // No se le paga a un equipo civil por «proveer una columna».
+  const CIVIL_DEF = {
+    // Columnas: excavación + fundación + torta + reparación del terreno contra izaje + PAT +
+    // acometida + luminaria. Las de 10 m llevan una fundación bastante más grande.
+    '1':45, '2':45, '3':45, '4':50, '5':45, '6':45, '7':45, '8':50,
+    '9':0,          // tablero aéreo: no lleva base
+    '10':15,        // tablero a nivel: «Incluye: base de mampostería»
+    '11':0,         // acometida aérea
+    '12':50,        // acometida subterránea: zanja + «Incluye: reposición de vereda»
+    '13':40, '14':40,   // apoyos PRFV: «Incluye base / suelo-cemento»
+    '15':100, '16':100, '17':100, '18':100, '19':100, '20':100,   // zanjeo
+    '21':100, '22':100, '23':100, '24':100,                        // cruces de calle
+    // Cables y tendido (25 a 40): la zanja se paga aparte, acá es tendido y conexión.
+    '41':100,       // reacondicionar columna: limpieza, lijado y pintado
+    '42':0,         // acometida nueva en columna existente (BPN, portafusible, PAT)
+    '43':80,        // aplomado: hay que recalzar la base
+    '44':0,         // montaje y energización de luminaria
+    '45':0,         // retiro de luminaria
+    '46':60,        // retiro de columna: «desconexión, retiro de conductores, tapado» y traslado
+    '47':70,        // retiro de poste de hormigón
+    '48':60,        // retiro de poste de madera
+    '49':30,        // retiro de tablero: «en caso de ser a nivel, la demolición de la base»
+    '82':100,       // poda: no es eléctrico; va con la cuadrilla de terreno
+  };
+  const RUBROS_CTR = [
+    { id:'civil',     txt:'Civil',                 corto:'Civil' },
+    { id:'electrico', txt:'Eléctrico y montaje',   corto:'Eléctrico' },
+  ];
+  let contratistaCivil = {};                  // { idDeItem: 0..100 } — lo corregido a mano
+
+  // ---- Ítems propios del contratista (2026-09-15) ----
+  // Trabajos que el pliego NO itemiza por separado y que igual hay que pagarle: «base excavada a
+  // mano», «viaje de camión», «recalce». Viven acá, con su unidad, su precio y su rubro, y se le
+  // cargan a la plaza que corresponda con su cantidad. NO tocan el itemizado de EPEC: son plata
+  // que sale del bolsillo de EMA, igual que el resto de esta pestaña.
+  let contratistaPropios = [];                // [{ id, desc, un, precio, rubro }]
+  const propioDe = (id)=> contratistaPropios.find(p=> String(p.id) === String(id)) || null;
+  function nuevoIdPropio(){
+    let n = 0;
+    contratistaPropios.forEach(p=>{ const k = parseInt(String(p.id).replace(/\D/g,''),10); if(isFinite(k) && k > n) n = k; });
+    return 'P' + (n + 1);
+  }
+  window.epecCtrPropios = ()=> contratistaPropios.map(p=>({ ...p }));
+  window.epecCtrPropioDe = (id)=> { const p = propioDe(id); return p ? { ...p } : null; };
+  // % civil de un ítem: lo corregido a mano, si no el de arranque, si no 0.
+  function pctCivilDe(id){
+    const k = String(id);
+    if(contratistaCivil[k] != null && isFinite(n2(contratistaCivil[k]))) return Math.max(0, Math.min(100, n2(contratistaCivil[k])));
+    return CIVIL_DEF[k] != null ? CIVIL_DEF[k] : 0;
+  }
+  const pctCivilEditado = (id)=> contratistaCivil[String(id)] != null;
+  // Lo que le toca a cada rubro del precio de contratista de UNA unidad de ese ítem.
+  function contratistaPorRubro(id){
+    const pu = contratistaPU(id);
+    const esProv = (typeof esEventualidad === 'function') ? esEventualidad(id) : false;
+    if(esProv) return { civil:0, electrico:0, material:pu, pu, esProv:true, pct:null };
+    const pct = pctCivilDe(id);
+    const civil = pu * pct / 100;
+    return { civil, electrico: pu - civil, material:0, pu, esProv:false, pct };
+  }
+  // Cuánto de este precio le corresponde a un contratista según lo que hace.
+  function parteDelRubro(id, rubro){
+    const r = contratistaPorRubro(id);
+    if(rubro === 'civil') return r.civil;
+    if(rubro === 'electrico') return r.electrico;
+    return r.pu;                      // 'todo' — también se lleva la provisión
+  }
+  window.epecPctCivil        = (id)=> pctCivilDe(id);
+  window.epecCtrPorRubro     = (id)=> contratistaPorRubro(id);
+  window.epecCtrParteRubro   = (id, rubro)=> parteDelRubro(id, rubro);
+  window.epecRubrosCtr       = ()=> RUBROS_CTR.map(r=>({ ...r }));
+
   // $ por unidad que le corresponde al contratista por un ítem, sin IVA. `epecBase` ya es el neto.
   function contratistaAuto(id){
     const k = (typeof window.epecItemK === 'function') ? n2(window.epecItemK(id)) : 0;
@@ -18870,7 +19164,7 @@ function poblarParteObraDatalist(){
   window.epecContratistaAuto    = (id)=> contratistaAuto(id);
   window.epecContratistaEditado = (id)=> contratistaEditado(id);
   window.epecContratistaFijado  = ()=> contratistaFijado ? { ...contratistaFijado } : null;
-  window.epecContratistaCfg     = ()=> ({ contratistaPct: n2(contratistaPct), contratistaPrecios: { ...contratistaPrecios }, contratistaFijado });
+  window.epecContratistaCfg     = ()=> ({ contratistaPct: n2(contratistaPct), contratistaPrecios: { ...contratistaPrecios }, contratistaFijado, contratistaCivil: { ...contratistaCivil } });
   // Lo que llega de la nube. Si el documento todavía no tiene estos campos (equipos que vienen de
   // antes del 14/09/2026), queda el 25 % de fábrica y ningún precio a mano: nada se pierde.
   function aplicarContratistaDeLaNube(d){
@@ -18878,6 +19172,8 @@ function poblarParteObraDatalist(){
     if(d.contratistaPct != null && n2(d.contratistaPct) > 0) contratistaPct = n2(d.contratistaPct);
     if(d.contratistaPrecios && typeof d.contratistaPrecios === 'object') contratistaPrecios = { ...d.contratistaPrecios };
     if(d.contratistaFijado !== undefined) contratistaFijado = d.contratistaFijado || null;
+    if(d.contratistaCivil && typeof d.contratistaCivil === 'object') contratistaCivil = { ...d.contratistaCivil };
+    if(Array.isArray(d.contratistaPropios)) contratistaPropios = d.contratistaPropios.slice();
     try{ renderContratista(); }catch(e){}
   }
 
@@ -18941,7 +19237,7 @@ function poblarParteObraDatalist(){
     }
     try{
       await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol,
-                                      contratistaPct, contratistaPrecios, contratistaFijado,
+                                      contratistaPct, contratistaPrecios, contratistaFijado, contratistaCivil, contratistaPropios,
                                       ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
       if(msgEl){ msgEl.style.color='var(--teal-dark)'; msgEl.textContent='✔ Guardado para todo el equipo.'; }
       return true;
@@ -22380,55 +22676,151 @@ const ITEMIZADO_EPEC = [
   // `a.contratista` = nombre del contratista. Vacío o ausente = la hace EMA con gente propia.
   // Es lo único que se guarda en la plaza: el precio de cada ítem sale del itemizado de contratista,
   // que es uno solo para todo el equipo.
-  // Marcada = el campo existe y no está vacío (puede tener solo un espacio: marcada pero sin
-  // nombre todavía). El nombre para mostrar va siempre recortado.
-  const esDeContratista = a => a != null && a.contratista != null && String(a.contratista) !== '';
-  const nombreContratista = a => String((a && a.contratista) || '').trim();
+  // ---- Los contratistas de una plaza (2026-09-15) ----
+  // Antes era un solo nombre en `a.contratista`. Ahora es una LISTA, porque el usuario puede
+  // contratar un equipo civil y otro eléctrico para la misma plaza:
+  //   a.contratistas = [{ id, nombre, rubro }]   rubro: 'civil' | 'electrico' | 'todo'
+  // Las plazas cargadas antes de hoy traen `a.contratista` y se leen igual, como un solo
+  // contratista que hace TODO. No se convierte nada en la nube hasta que se toque la plaza.
+  function contratistasDe(a){
+    if(!a) return [];
+    if(Array.isArray(a.contratistas)) return a.contratistas;
+    if(a.contratista != null && String(a.contratista) !== '')
+      return [{ id:'c1', nombre:String(a.contratista).trim(), rubro:'todo' }];
+    return [];
+  }
+  // Deja la lista escrita en la plaza (y limpia el campo viejo, que ya no manda).
+  function ponerContratistas(a, lista){
+    a.contratistas = lista;
+    a.contratista = lista.length ? (lista.map(c=>c.nombre).filter(Boolean).join(' / ') || ' ') : '';
+  }
+  const esDeContratista = a => contratistasDe(a).length > 0;
+  const nombreContratista = a => contratistasDe(a).map(c=>String(c.nombre||'').trim()).filter(Boolean).join(' / ');
+  const rubroTxt = (r)=> r === 'civil' ? 'Civil' : (r === 'electrico' ? 'Eléctrico y montaje' : 'Todo el ítem');
   window.epecEsDeContratista = esDeContratista;
   window.epecNombreContratista = nombreContratista;
-  // Lo que se le paga por esta plaza: la cantidad HECHA de cada ítem × su precio de contratista.
-  // Se usa la hecha (no la contratada) porque al contratista se le paga lo que efectivamente hizo,
-  // igual que como EPEC nos certifica a nosotros.
-  function pagoContratista(a){
+  window.epecContratistasDe = (a)=> contratistasDe(a).map(c=>({ ...c }));
+
+  // Los ítems propios cargados en esta plaza: [{ id, propioId, cant }]
+  const extrasDe = a => (a && Array.isArray(a.contratistaExtras)) ? a.contratistaExtras : [];
+  window.epecCtrExtrasDe = (a)=> extrasDe(a).map(x=>({ ...x }));
+
+  // Lo que se le paga por esta plaza a UN contratista, según el rubro que hace.
+  // Se usa la cantidad HECHA (no la contratada) porque al contratista se le paga lo que
+  // efectivamente hizo, igual que como EPEC nos certifica a nosotros.
+  // `rubro` null = todo junto (el total de la plaza, sin repartir).
+  function pagoContratista(a, rubro){
     let importe = 0, items = 0;
     const renglones = [];
     itemsEpecDePlaza(a).forEach(f=>{
       const it = itemEpec(f.id); if(!it) return;
       const cant = n2(f.ref.cantidad);
       const hecha = Math.min(n2(f.ref.cantidadAvanzada), cant);
-      const pu = contratistaPU(f.id);
+      const r = contratistaPorRubro(f.id);
+      const pu = rubro ? parteDelRubro(f.id, rubro) : r.pu;
       const sub = hecha * pu;
-      if(hecha > 0){ importe += sub; items++; }
+      if(hecha > 0 && pu > 0){ importe += sub; items++; }
       renglones.push({ id:f.id, desc:it.desc, un:it.un, k:n2(it.k), cant, hecha, pu, sub,
-                       manual: contratistaEditado(f.id) });
+                       manual: contratistaEditado(f.id), pctCivil:r.pct, esProv:r.esProv,
+                       civil:r.civil, electrico:r.electrico });
     });
-    return { importe, items, renglones };
+    // Los ítems propios cargados en la plaza, los del rubro que le toca.
+    const extras = [];
+    extrasDe(a).forEach(x=>{
+      const p = propioDe(x.propioId);
+      const cantX = n2(x.cant);
+      if(!p){ extras.push({ id:x.id, propioId:x.propioId, desc:'(ítem propio borrado de la lista)', un:'', precio:0, cant:cantX, sub:0, huerfano:true }); return; }
+      if(rubro && rubro !== 'todo' && p.rubro !== rubro) return;
+      const sub = cantX * n2(p.precio);
+      extras.push({ id:x.id, propioId:p.id, desc:p.desc, un:p.un, precio:n2(p.precio), rubro:p.rubro, cant:cantX, sub });
+      if(sub > 0){ importe += sub; items++; }
+    });
+    return { importe, items, renglones, extras };
   }
-  window.epecPagoContratista = pagoContratista;
+  window.epecPagoContratista = (a, rubro)=> pagoContratista(a, rubro);
 
-  // La fila para marcar la plaza como hecha por contratista y ponerle el nombre.
+  // La caja de contratistas de la plaza: uno o varios, cada uno con su rubro, y abajo los ítems
+  // propios que se le cargan a esta plaza con su cantidad (2026-09-15).
   function epContratistaHtml(a, dis){
-    const nom = nombreContratista(a);
-    const marcada = esDeContratista(a);
-    const p = marcada ? pagoContratista(a) : null;
+    const lista = contratistasDe(a);
+    const marcada = lista.length > 0;
     const c = cuentasEpec(a);
-    const cert = c.avanzado * epecBase;              // lo certificado, NETO
-    const margen = p ? cert - p.importe : 0;
-    // `no-print`: la hoja del itemizado se imprime para EPEC y para la Inspección. Lo que le
-    // pagamos al contratista es cuenta interna de EMA y no tiene por qué salir ahí. Para el
-    // contratista está el informe «Pago a contratista», que es una hoja aparte (2026-09-14).
-    return `<div class="ep-ctr no-print">
-      <label title="Marcala si esta plaza la hace un contratista. El precio sale del «Itemizado de contratista», acá abajo en esta misma pestaña.">
-        <input type="checkbox" class="ep-ctr-chk" ${marcada?'checked':''} ${dis}> La hace un contratista
+    const cert = c.avanzado * epecBase;              // lo certificado a EPEC, NETO
+    if(!marcada){
+      return `<div class="ep-ctr no-print">
+        <label title="Marcala si esta plaza la hace un contratista. Los precios salen del «Itemizado de contratista», la pestaña de al lado.">
+          <input type="checkbox" class="ep-ctr-chk" ${dis}> La hace un contratista
+        </label>
+        <span class="hint" style="margin:0;">Podés poner <b>más de uno</b>: por ejemplo uno para la parte civil y otro para la eléctrica.</span>
+      </div>`;
+    }
+    const pagos = lista.map(x=> ({ c:x, p: pagoContratista(a, x.rubro) }));
+    const total = pagos.reduce((t,x)=> t + x.p.importe, 0);
+    const margen = cert - total;
+    // Dos contratistas con rubros que se pisan cobrarían dos veces lo mismo: hay que decirlo.
+    const solapan = (()=>{
+      const cuenta = { civil:0, electrico:0, todo:0 };
+      lista.forEach(x=> cuenta[x.rubro === 'civil' ? 'civil' : (x.rubro === 'electrico' ? 'electrico' : 'todo')]++);
+      if(cuenta.todo > 1) return true;
+      if(cuenta.todo && (cuenta.civil || cuenta.electrico)) return true;
+      return cuenta.civil > 1 || cuenta.electrico > 1;
+    })();
+    const extras = extrasDe(a);
+    const opcionesPropios = contratistaPropios.filter(p=>String(p.desc||'').trim());
+
+    let h = `<div class="ep-ctr no-print">
+      <label title="Destildala para sacarle todos los contratistas a esta plaza.">
+        <input type="checkbox" class="ep-ctr-chk" checked ${dis}> La hace un contratista
       </label>
-      <input type="text" class="ep-ctr-nom" placeholder="Nombre del contratista" value="${esc(nom)}" ${marcada?'':'style="display:none;"'} ${dis}>
-      ${marcada ? (nom ? `<span class="ep-ctr-badge">${contratistaFijado ? '📌 precios fijados' : fmt(contratistaPct, contratistaPct%1?1:0) + ' % del pliego'}</span>`
-                        : `<span class="ep-ctr-badge">falta el nombre</span>`) : ''}
-      ${marcada && epecBase > 0 ? `<div class="ep-ctr-tot">
-        <b>${plata(p.importe)}</b> a pagar <small>(s/IVA, por lo hecho)</small>
+      ${epecBase > 0 ? `<div class="ep-ctr-tot">
+        <b>${plata(total)}</b> a pagar en total <small>(s/IVA, por lo hecho)</small>
         <div>certificado ${plata(cert)} · margen ${margen < 0 ? '−' : ''}${plata(Math.abs(margen))}${cert > 0 ? ` (${fmt(margen/cert*100,1)} %)` : ''}</div>
       </div>` : ''}
-    </div>`;
+    </div>
+    <div class="ep-ctr-lista no-print">`;
+    lista.forEach((x, i)=>{
+      const p = pagos[i].p;
+      h += `<div class="ep-ctr-fila" data-ctrid="${esc(x.id)}">
+        <input type="text" class="ep-ctr-nom" placeholder="Nombre del contratista" value="${esc(x.nombre||'')}" ${dis}>
+        <select class="ep-ctr-rubro" title="Qué parte de cada ítem le pagás a éste" ${dis}>
+          <option value="todo"${x.rubro==='todo'?' selected':''}>Todo el ítem</option>
+          ${RUBROS_CTR.map(r=>`<option value="${r.id}"${x.rubro===r.id?' selected':''}>Solo ${esc(r.txt.toLowerCase())}</option>`).join('')}
+        </select>
+        <div class="ep-ctr-monto">${epecBase>0?`<b>${plata(p.importe)}</b><div>${p.items} renglón(es)</div>`:'—'}</div>
+        <button type="button" class="tramo-remove ep-ctr-quitar" title="Sacar este contratista de la plaza" ${dis}>×</button>
+      </div>`;
+    });
+    h += `<button type="button" class="btn-auto ep-ctr-mas" style="margin:8px 0 0;" ${dis}>＋ Otro contratista para esta plaza</button>`;
+    if(solapan) h += `<div class="ep-ctr-aviso">⚠ Hay contratistas con <b>rubros que se pisan</b> (por ejemplo dos «todo el ítem», o uno «todo» y otro «solo civil»). Así, el mismo trabajo se está pagando dos veces. Dejale a cada uno el rubro que de verdad hace.</div>`;
+    if(!lista.every(x=>String(x.nombre||'').trim())) h += `<div class="ep-ctr-aviso">Falta el <b>nombre</b> de algún contratista. Sin nombre, en el informe salen agrupados como «(sin nombre)».</div>`;
+
+    // ---- Ítems propios cargados en esta plaza ----
+    h += `<div class="ep-cx">
+      <div class="ep-cx-tit">Ítems propios de esta plaza <span class="hint" style="margin:0; font-weight:500;">— lo que el pliego no itemiza. La lista se arma en la pestaña «Itemizado de contratista».</span></div>`;
+    if(!opcionesPropios.length){
+      h += `<div class="hint" style="margin:6px 0 0;">Todavía no hay ítems propios cargados en la lista. Agregalos en <b>Obras → Itemizado de contratista</b>, abajo de todo.</div>`;
+    } else {
+      if(extras.length){
+        h += `<div class="ep-cx-labels"><div>Trabajo</div><div>Cantidad</div><div>$ por unidad</div><div>Importe</div><div></div></div>`;
+        extras.forEach(x=>{
+          const pr = propioDe(x.propioId);
+          const sub = pr ? n2(x.cant) * n2(pr.precio) : 0;
+          h += `<div class="ep-cx-fila" data-cx="${esc(x.id)}">
+            <select class="ep-cx-item" ${dis}>
+              ${pr ? '' : `<option value="">— el ítem se borró de la lista —</option>`}
+              ${opcionesPropios.map(o=>`<option value="${esc(o.id)}"${String(o.id)===String(x.propioId)?' selected':''}>${esc(o.desc)} · ${esc(rubroTxt(o.rubro))}</option>`).join('')}
+            </select>
+            <input type="number" min="0" step="any" class="ep-cx-cant" value="${n2(x.cant)||''}" placeholder="0" ${dis}>
+            <div class="ep-cx-pu">${pr ? plata(n2(pr.precio)) + ' / ' + esc(pr.un||'Un.') : '—'}</div>
+            <div class="ep-cx-sub"><b>${plata(sub)}</b></div>
+            <button type="button" class="tramo-remove ep-cx-quitar" title="Quitar este ítem de la plaza" ${dis}>×</button>
+          </div>`;
+        });
+      }
+      h += `<button type="button" class="btn-auto ep-cx-mas" style="margin:8px 0 0;" ${dis}>＋ Agregar un ítem propio a esta plaza</button>`;
+    }
+    h += `</div></div>`;
+    return h;
   }
 
   function detallePlazaEpec(a){
@@ -22535,7 +22927,13 @@ const ITEMIZADO_EPEC = [
           <td><input type="number" min="0" step="any" class="ep-cant" data-f="cantidadAvanzada" value="${n2(f.ref.cantidadAvanzada)||''}" placeholder="0" ${dis}></td>
           <td class="qty">${fmtK(cant*it.k)}${epecBase>0?`<div class="ep-pesos">${plata(cant*it.k*baseEf())}</div>`:''}</td>
           <td class="qty">${fmtK(cav*it.k)}${epecBase>0?`<div class="ep-pesos">${plata(cav*it.k*baseEf())}</div>`:''}</td>
-          ${conCtr ? `<td class="qty no-print">${epecBase>0?`<b>${plata(cav*contratistaPU(it.id))}</b><div class="ep-pesos">${plata(contratistaPU(it.id))} / ${esc(it.un)}${contratistaEditado(it.id)?' · a mano':''}</div>`:'—'}</td>` : ''}
+          ${conCtr ? (()=>{ const r = contratistaPorRubro(it.id);
+              if(!(epecBase > 0)) return '<td class="qty no-print">—</td>';
+              const detalle = r.esProv
+                ? `${plata(r.pu)} / ${esc(it.un)} · material`
+                : `civil ${plata(cav*r.civil)} · eléctrico ${plata(cav*r.electrico)}`;
+              return `<td class="qty no-print"><b>${plata(cav*r.pu)}</b><div class="ep-pesos">${detalle}</div></td>`;
+            })() : ''}
           <td class="qty" style="color:${colorPct(pct)}"><b>${pct}%</b></td>
           <td class="no-print"><button type="button" class="tramo-remove ep-quitar" title="Quitar este ítem de esta plaza" ${dis}>×</button></td>
         </tr>`;
@@ -22568,7 +22966,12 @@ const ITEMIZADO_EPEC = [
         <th colspan="${nCols}" style="text-align:right;">Total de la plaza${fuera.length ? ' <span class="ep-fuera-nota">(sin lo no contado)</span>' : ''}</th>
         <th class="qty">${fmtK(c.contratado)}${epecBase>0?`<div class="ep-pesos">${plata(c.contratado*baseEf())}</div>`:''}</th>
         <th class="qty">${fmtK(c.avanzado)}${epecBase>0?`<div class="ep-pesos">${plata(c.avanzado*baseEf())}</div>`:''}</th>
-        ${conCtr ? `<th class="qty no-print">${epecBase>0?`<b>${plata(pagoContratista(a).importe)}</b><div class="ep-pesos">${nombreContratista(a) ? 'a ' + esc(nombreContratista(a)) : 'contratista sin nombre'}</div>`:'—'}</th>` : ''}
+        ${conCtr ? (()=>{ if(!(epecBase > 0)) return '<th class="qty no-print">—</th>';
+            const pagos = contratistasDe(a).map(x=> ({ x, p: pagoContratista(a, x.rubro) }));
+            const tot = pagos.reduce((t,y)=> t + y.p.importe, 0);
+            const det = pagos.map(y=> `${esc(String(y.x.nombre||'').trim() || '(sin nombre)')}: ${plata(y.p.importe)}`).join(' · ');
+            return `<th class="qty no-print"><b>${plata(tot)}</b><div class="ep-pesos">${det}</div></th>`;
+          })() : ''}
         <th class="qty" style="color:${colorPct(c.pct)}">${c.pct}%</th>
         <th class="no-print"></th>
       </tr>${fuera.length ? `<tr class="ep-fila-fuera-pie">
@@ -22714,6 +23117,15 @@ const ITEMIZADO_EPEC = [
           </div>
         </td>
         <td class="qty">${epecBase>0?fmt(pct,1)+' %':'—'}</td>
+        ${(()=>{ const r = contratistaPorRubro(it.id);
+          if(r.esProv) return `<td class="qty ctr-prov" colspan="3">No se reparte: es <b>material</b>, no mano de obra</td>`;
+          const editado = pctCivilEditado(it.id);
+          return `<td class="qty">${edit
+              ? `<input type="number" min="0" max="100" step="any" class="ctr-civil${editado?' tocado':''}" data-item="${esc(it.id)}" value="${editado?n2(contratistaCivil[String(it.id)]):''}" placeholder="${fmt(pctCivilDe(it.id),0)}" title="Qué parte de este ítem es obra civil. Vacío = el aproximado de arranque (${fmt(pctCivilDe(it.id),0)} %).">`
+              : `<b>${fmt(pctCivilDe(it.id),0)} %</b>`}</td>
+            <td class="qty ctr-civil-cel">${epecBase>0?plata(r.civil):'—'}</td>
+            <td class="qty ctr-elec-cel">${epecBase>0?plata(r.electrico):'—'}</td>`;
+        })()}
         <td class="no-print">${manual && edit ? `<button type="button" class="it-lapiz ctr-reset" data-item="${esc(it.id)}" title="Volver este ítem al ${fmt(contratistaPct,0)} %">↺</button>` : ''}</td>
       </tr>`;
     }).join('');
@@ -22736,6 +23148,7 @@ const ITEMIZADO_EPEC = [
           <div class="ctr-banda-acc"><button type="button" class="btn-primary" id="ctrFijar" ${epecBase>0?puede:'disabled'}>📌 Fijar precios</button></div>`;
       }
     }
+    try{ renderCtrPropios(); }catch(e){}
     const reset = document.getElementById('ctrResetTodo');
     if(reset) reset.disabled = fijado || !puedeEditar();
     const btnPct = document.getElementById('ctrPctBtn');
@@ -22750,8 +23163,14 @@ const ITEMIZADO_EPEC = [
         const tot = ITEMIZADO_EPEC.reduce((t,it)=> t + n2(it.k) * n2(epecBase), 0);
         const totC = ITEMIZADO_EPEC.reduce((t,it)=> t + contratistaPU(it.id), 0);
         const tile = (n,l,sub)=>`<div class="tile"><div class="num" style="font-size:18px;">${n}</div>${sub?`<div class="ep-pesos">${sub}</div>`:''}<div class="lbl">${l}</div></div>`;
+        // Cuánto de los 92 ítems es civil y cuánto eléctrico, con el reparto de hoy.
+        let sCivil = 0, sElec = 0, sMat = 0;
+        ITEMIZADO_EPEC.forEach(it=>{ const r = contratistaPorRubro(it.id); sCivil += r.civil; sElec += r.electrico; sMat += r.material; });
         tiles.innerHTML = tile(fmt(contratistaPct, contratistaPct % 1 ? 1 : 0) + ' %', 'Del valor de pliego (sin IVA)', '')
           + tile(plata(totC), 'Los 92 ítems, a precio de contratista', '')
+          + tile(plata(sCivil), 'De eso, obra CIVIL', totC > 0 ? fmt(sCivil/totC*100,0) + ' % del total' : '')
+          + tile(plata(sElec), 'De eso, ELÉCTRICO y montaje', totC > 0 ? fmt(sElec/totC*100,0) + ' % del total' : '')
+          + (sMat > 0 ? tile(plata(sMat), 'Provisión de materiales', 'no se reparte por rubro') : '')
           + tile(plata(tot - totC), 'Margen sobre los 92 ítems', plata(tot) + ' de pliego')
           + (contratistaFijado
               ? tile('📌 Fijada', 'Estado de la lista', 'desde el ' + fechaCortaCtr(contratistaFijado.fecha))
@@ -22759,6 +23178,32 @@ const ITEMIZADO_EPEC = [
       }
     }
   }
+  // ---- Los ítems propios del contratista (2026-09-15) ----
+  function renderCtrPropios(){
+    const cont = document.getElementById('cpLista');
+    if(!cont) return;
+    const edit = puedeEditar();
+    const dis = edit ? '' : 'disabled';
+    cont.innerHTML = contratistaPropios.length
+      ? contratistaPropios.map(p=>`<div class="cp-fila" data-cp="${esc(p.id)}">
+          <input type="text" class="cp-campo" data-f="desc" value="${esc(p.desc||'')}" placeholder="Qué trabajo es" ${dis}>
+          <input type="text" class="cp-campo" data-f="un" value="${esc(p.un||'')}" placeholder="Un." ${dis}>
+          <input type="number" min="0" step="any" class="cp-campo" data-f="precio" value="${n2(p.precio)||''}" placeholder="0" ${dis}>
+          <select class="cp-campo" data-f="rubro" ${dis}>${RUBROS_CTR.map(r=>`<option value="${r.id}"${p.rubro===r.id?' selected':''}>${esc(r.txt)}</option>`).join('')}</select>
+          <button type="button" class="tramo-remove cp-quitar" title="Quitar este ítem propio" ${dis}>×</button>
+        </div>`).join('')
+      : `<div class="cp-vacio">Todavía no cargaste ningún ítem propio. Con el botón de abajo agregás el primero.</div>`;
+    const tot = document.getElementById('cpTotal');
+    if(tot){
+      const conPrecio = contratistaPropios.filter(p=> String(p.desc||'').trim() && n2(p.precio) > 0);
+      const sinPrecio = contratistaPropios.filter(p=> String(p.desc||'').trim() && !(n2(p.precio) > 0)).length;
+      tot.innerHTML = contratistaPropios.length
+        ? `<b>${conPrecio.length}</b> ítem(s) propio(s) con precio cargado${sinPrecio?` · <span style="color:var(--amber)"><b>${sinPrecio}</b> sin precio: no se van a poder pagar</span>`:''}.`
+        : '';
+    }
+  }
+  window.renderCtrPropios = renderCtrPropios;
+
   window.renderContratista = renderContratista;
 
   // Guarda el itemizado de contratista para todo el equipo. Va por el MISMO documento de precios
@@ -22773,7 +23218,7 @@ const ITEMIZADO_EPEC = [
     if(msgEl){ msgEl.style.color='var(--text-soft)'; msgEl.textContent='Guardando…'; }
     try{
       await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase,
-                                      contratistaPct, contratistaPrecios, contratistaFijado,
+                                      contratistaPct, contratistaPrecios, contratistaFijado, contratistaCivil, contratistaPropios,
                                       ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
       if(msgEl){ msgEl.style.color='var(--teal-dark)'; msgEl.textContent = txtOk || '✔ Guardado para todo el equipo.'; }
       clearTimeout(ctrMsgTimer);
@@ -22786,25 +23231,42 @@ const ITEMIZADO_EPEC = [
   }
 
   // La lista de precios de contratista, en una hoja para imprimir o mandar por WhatsApp.
+  let imprimirContratistaRubro = 'todo';
   function imprimirContratista(){
+    // La hoja se imprime para UN rubro (o para todo). Así se le entrega al equipo civil solo lo
+    // que le toca a él, con su precio, sin los renglones eléctricos (2026-09-15).
+    const rubro = imprimirContratistaRubro || 'todo';
     const filas = ITEMIZADO_EPEC.map(it=>{
+      const r = contratistaPorRubro(it.id);
+      const parte = parteDelRubro(it.id, rubro);
+      if(rubro !== 'todo' && !(parte > 0)) return '';    // no le toca nada de este ítem
       const pliego = n2(it.k) * n2(epecBase);
-      const pu = contratistaPU(it.id);
       return `<tr><td>${esc(it.id)}</td><td>${esc(it.desc)}</td><td>${esc(it.un)}</td>
         <td class="q">${fmt(it.k,2)}</td><td class="q">${epecBase>0?plata(pliego):'—'}</td>
-        <td class="q"><b>${epecBase>0?plata(pu):'—'}</b>${contratistaEditado(it.id)?' *':''}</td></tr>`;
+        ${rubro !== 'todo' ? `<td class="q">${r.esProv?'—':fmt(rubro==='civil'?r.pct:100-r.pct,0)+' %'}</td>` : ''}
+        <td class="q"><b>${epecBase>0?plata(parte):'—'}</b>${contratistaEditado(it.id)?' *':''}</td></tr>`;
     }).join('');
+    const propios = contratistaPropios.filter(pp=> String(pp.desc||'').trim() && (rubro === 'todo' || pp.rubro === rubro));
+    const filasPropios = propios.map(pp=>`<tr><td>—</td><td>${esc(pp.desc)}</td><td>${esc(pp.un||'')}</td>
+        <td class="q">—</td><td class="q">—</td>${rubro !== 'todo' ? '<td class="q">—</td>' : ''}
+        <td class="q"><b>${plata(n2(pp.precio))}</b></td></tr>`).join('');
     const hay = contratistaFijado ? 0 : Object.keys(contratistaPrecios).length;
     const cuerpo = `
       <div class="sub">Lo que se le paga al contratista <b>por cada unidad</b> que hace. Precios <b>SIN IVA</b>.
+        ${rubro === 'civil' ? '<b>Solo la parte de OBRA CIVIL</b> de cada ítem (excavación, fundación, zanjeo, cruces, reposición). '
+         : rubro === 'electrico' ? '<b>Solo la parte ELÉCTRICA y de montaje</b> de cada ítem (izaje, PAT, acometida, cableado, luminaria, tablero). ' : ''}
         ${contratistaFijado
           ? `<b>Precios FIJADOS</b> el ${esc(fechaCortaCtr(contratistaFijado.fecha))}${contratistaFijado.usuario?` por ${esc(contratistaFijado.usuario)}`:''} — sacados con el módulo ${plata(n2(contratistaFijado.modulo))} sin IVA al ${fmt(n2(contratistaFijado.pct), n2(contratistaFijado.pct)%1?1:0)} %. No se mueven.`
           : `Base: <b>${fmt(contratistaPct, contratistaPct%1?1:0)} %</b> del valor del Anexo I${epecBase>0?` · módulo ${plata(epecBase)} sin IVA`:' · falta cargar el valor del módulo'}. <b>Lista todavía sin fijar</b>: estos precios se mueven si cambia el módulo o el porcentaje.`}</div>
       <table><thead><tr><th>Ítem</th><th>Descripción</th><th>Un.</th><th class="q">K</th>
-        <th class="q">Pliego $/unidad (s/IVA)</th><th class="q">Contratista $/unidad (s/IVA)</th></tr></thead><tbody>${filas}</tbody></table>
+        <th class="q">Pliego $/unidad (s/IVA)</th>${rubro !== 'todo' ? '<th class="q">% del ítem</th>' : ''}<th class="q">${rubro === 'civil' ? 'Civil' : (rubro === 'electrico' ? 'Eléctrico' : 'Contratista')} $/unidad (s/IVA)</th></tr></thead><tbody>${filas}</tbody></table>
+      ${filasPropios ? `<h2 style="font-size:13px; margin:16px 0 6px;">Ítems propios — lo que el pliego no itemiza</h2>
+        <table><thead><tr><th>Ítem</th><th>Descripción</th><th>Un.</th><th class="q">K</th>
+        <th class="q">Pliego $/unidad (s/IVA)</th>${rubro !== 'todo' ? '<th class="q">% del ítem</th>' : ''}<th class="q">$/unidad (s/IVA)</th></tr></thead><tbody>${filasPropios}</tbody></table>` : ''}
       ${hay ? `<div class="sub" style="margin-top:10px;">(*) ${hay} ítem(s) con el precio acordado a mano, fuera del ${fmt(contratistaPct,0)} %.</div>` : ''}
       <div class="firma"><div>EMA Servicios</div><div>Contratista</div></div>`;
-    if(typeof abrirHojaImpresion === 'function'){ abrirHojaImpresion('Itemizado de contratista', cuerpo); return; }
+    const tit = 'Itemizado de contratista' + (rubro === 'civil' ? ' — obra CIVIL' : (rubro === 'electrico' ? ' — ELÉCTRICO y montaje' : ''));
+    if(typeof abrirHojaImpresion === 'function'){ abrirHojaImpresion(tit, cuerpo); return; }
     const w = window.open('', '_blank');
     if(!w){ alert('El navegador bloqueó la ventana de impresión. Permití las ventanas emergentes para este sitio.'); return; }
     w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Itemizado de contratista</title>
@@ -23309,16 +23771,70 @@ const ITEMIZADO_EPEC = [
         const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
         if(!puedeEditar()){ ctrChk.checked = !ctrChk.checked; alert('Para marcar la plaza hay que iniciar sesión.'); return; }
         if(ctrChk.checked){
-          if(!nombreContratista(a)) a.contratista = ' ';   // marcada, falta el nombre
+          if(!contratistasDe(a).length) ponerContratistas(a, [{ id:'c'+Date.now(), nombre:'', rubro:'todo' }]);
         } else {
-          if(nombreContratista(a) && !confirm(`¿Sacarle el contratista «${nombreContratista(a)}» a «${a.nombre||''}»?\n\nSe borra solo el nombre: no se toca ninguna cantidad ni ningún precio.`)){ ctrChk.checked = true; return; }
-          a.contratista = '';
+          const nom = nombreContratista(a);
+          if(contratistasDe(a).length && !confirm(`¿Sacarle ${contratistasDe(a).length > 1 ? 'los contratistas' : 'el contratista'}${nom?` «${nom}»`:''} a «${a.nombre||''}»?\n\nSe borran solo los nombres: no se toca ninguna cantidad ni ningún precio. Los ítems propios cargados en la plaza quedan.`)){ ctrChk.checked = true; return; }
+          ponerContratistas(a, []);
         }
         if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
         renderEpec();
         // el foco va al casillero del nombre, que es lo que falta llenar
         setTimeout(()=>{ const i = document.querySelector(`.it-plaza[data-epec="${CSS.escape(String(a.id))}"] .ep-ctr-nom`); if(i && ctrChk.checked) i.focus(); }, 60);
         return;
+      }
+      // Otro contratista para la misma plaza (2026-09-15)
+      const ctrMas = e.target.closest('.ep-ctr-mas');
+      if(ctrMas){
+        if(!puedeEditar()){ alert('Para agregar un contratista hay que iniciar sesión.'); return; }
+        const card = ctrMas.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        const lista = contratistasDe(a).slice();
+        // El segundo arranca con el rubro que le falta al primero, que es lo más probable.
+        const usados = new Set(lista.map(x=>x.rubro));
+        const rubro = !usados.has('civil') ? 'civil' : (!usados.has('electrico') ? 'electrico' : 'todo');
+        lista.push({ id:'c'+Date.now(), nombre:'', rubro });
+        ponerContratistas(a, lista);
+        if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        renderEpec();
+        setTimeout(()=>{ const f = document.querySelectorAll(`.it-plaza[data-epec="${CSS.escape(String(a.id))}"] .ep-ctr-nom`); if(f.length) f[f.length-1].focus(); }, 60);
+        return;
+      }
+      const ctrQuitar = e.target.closest('.ep-ctr-quitar');
+      if(ctrQuitar){
+        if(!puedeEditar()){ alert('Para sacar un contratista hay que iniciar sesión.'); return; }
+        const card = ctrQuitar.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        const cid = ctrQuitar.closest('.ep-ctr-fila').dataset.ctrid;
+        const q = contratistasDe(a).find(x=>String(x.id)===String(cid));
+        if(q && String(q.nombre||'').trim() && !confirm(`¿Sacar a «${q.nombre}» de «${a.nombre||''}»?`)) return;
+        ponerContratistas(a, contratistasDe(a).filter(x=>String(x.id)!==String(cid)));
+        if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        renderEpec(); return;
+      }
+      // Ítems propios cargados en la plaza (2026-09-15)
+      const cxMas = e.target.closest('.ep-cx-mas');
+      if(cxMas){
+        if(!puedeEditar()){ alert('Para cargar un ítem propio hay que iniciar sesión.'); return; }
+        const card = cxMas.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        const primero = contratistaPropios.find(p=>String(p.desc||'').trim());
+        if(!primero){ alert('Primero cargá algún ítem propio en la pestaña «Itemizado de contratista», abajo de todo.'); return; }
+        a.contratistaExtras = extrasDe(a).concat([{ id:'x'+Date.now(), propioId:primero.id, cant:0 }]);
+        if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        renderEpec();
+        setTimeout(()=>{ const f = document.querySelectorAll(`.it-plaza[data-epec="${CSS.escape(String(a.id))}"] .ep-cx-cant`); if(f.length) f[f.length-1].focus(); }, 60);
+        return;
+      }
+      const cxQuitar = e.target.closest('.ep-cx-quitar');
+      if(cxQuitar){
+        if(!puedeEditar()){ alert('Para quitar un ítem propio hay que iniciar sesión.'); return; }
+        const card = cxQuitar.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        const xid = cxQuitar.closest('.ep-cx-fila').dataset.cx;
+        a.contratistaExtras = extrasDe(a).filter(x=>String(x.id)!==String(xid));
+        if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+        renderEpec(); return;
       }
 
       // ---- Itemizado de contratista (2026-09-14) ----
@@ -23377,7 +23893,34 @@ const ITEMIZADO_EPEC = [
         guardarContratista(document.getElementById('ctrMsg'), `✔ Guardado: los ítems sin precio a mano quedan al ${fmt(v, v%1?1:0)} % del pliego.`);
         return;
       }
-      if(e.target.id === 'ctrImprimir'){ imprimirContratista(); return; }
+      if(e.target.id === 'ctrImprimir'){ imprimirContratistaRubro = 'todo'; imprimirContratista(); return; }
+      if(e.target.id === 'ctrImprimirCivil'){ imprimirContratistaRubro = 'civil'; imprimirContratista(); return; }
+      if(e.target.id === 'ctrImprimirElec'){ imprimirContratistaRubro = 'electrico'; imprimirContratista(); return; }
+
+      // ---- Ítems propios del contratista (2026-09-15) ----
+      if(e.target.id === 'cpAgregar'){
+        if(!puedeEditar()){ alert('Para agregar ítems propios hay que iniciar sesión.'); return; }
+        contratistaPropios.push({ id: nuevoIdPropio(), desc:'', un:'Un.', precio:0, rubro:'civil' });
+        renderCtrPropios();
+        const f = document.querySelector('#cpLista .cp-fila:last-child .cp-campo');
+        if(f) f.focus();
+        return;
+      }
+      const cpQuitar = e.target.closest('.cp-quitar');
+      if(cpQuitar){
+        if(!puedeEditar()){ alert('Para quitar ítems propios hay que iniciar sesión.'); return; }
+        const fila = cpQuitar.closest('.cp-fila');
+        const p = propioDe(fila.dataset.cp); if(!p) return;
+        // Si ya está cargado en alguna plaza, se avisa con nombre y apellido antes de borrarlo.
+        const usan = (typeof obras === 'function' ? obras() : []).filter(a=> (a.contratistaExtras||[]).some(x=> String(x.propioId) === String(p.id)));
+        const txt = `¿Quitar el ítem propio «${p.desc || '(sin descripción)'}» de la lista?`
+          + (usan.length ? `\n\nOJO: está cargado en ${usan.length} plaza(s): ${usan.slice(0,5).map(a=>a.nombre||'').join(', ')}${usan.length>5?' y más':''}. Ahí va a quedar como «ítem borrado» y deja de sumar al pago.` : '');
+        if(!confirm(txt)) return;
+        contratistaPropios = contratistaPropios.filter(x=> String(x.id) !== String(p.id));
+        renderCtrPropios(); renderEpec();
+        guardarContratista(document.getElementById('ctrMsg'));
+        return;
+      }
 
       if(e.target.id === 'epecBaseBtn'){
         // Lo que se escribe puede venir con IVA o sin IVA; adentro se guarda SIEMPRE el neto.
@@ -23387,7 +23930,7 @@ const ITEMIZADO_EPEC = [
         let enLaNube = true;
         try{
           if(!puedeEditar()) throw new Error('sin sesión');
-          await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase, contratistaPct, contratistaPrecios, contratistaFijado,
+          await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase, contratistaPct, contratistaPrecios, contratistaFijado, contratistaCivil, contratistaPropios,
                                           ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
         }catch(err){ enLaNube = false; }
         // El aviso del número va SIEMPRE, haya sesión o no (2026-09-07): antes vivía adentro del
@@ -23458,14 +24001,59 @@ const ITEMIZADO_EPEC = [
       if(ctrNom){
         const card = ctrNom.closest('.it-plaza');
         const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
-        a.contratista = ctrNom.value;
-        // El cartelito de al lado cambia en el momento, sin redibujar (redibujar perdería el foco).
-        const badge = ctrNom.parentElement && ctrNom.parentElement.querySelector('.ep-ctr-badge');
-        if(badge) badge.textContent = String(ctrNom.value).trim()
-          ? fmt(contratistaPct, contratistaPct % 1 ? 1 : 0) + ' % del pliego'
-          : 'falta el nombre';
+        const cid = ctrNom.closest('.ep-ctr-fila').dataset.ctrid;
+        const lista = contratistasDe(a).map(x=> String(x.id) === String(cid) ? { ...x, nombre: ctrNom.value } : x);
+        ponerContratistas(a, lista);
         clearTimeout(ctrNomTimer);
         ctrNomTimer = setTimeout(()=>{ if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a); }, 700);
+        return;
+      }
+      // La cantidad de un ítem propio cargado en la plaza (2026-09-15)
+      const cxCant = e.target.closest('.ep-cx-cant');
+      if(cxCant){
+        const card = cxCant.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec); if(!a) return;
+        const fila = cxCant.closest('.ep-cx-fila');
+        const x = extrasDe(a).find(y=>String(y.id)===String(fila.dataset.cx)); if(!x) return;
+        x.cant = Math.max(0, n2(cxCant.value));
+        // El importe del renglón se actualiza en el momento, sin redibujar.
+        const pr = propioDe(x.propioId);
+        const sub = fila.querySelector('.ep-cx-sub');
+        if(sub) sub.innerHTML = `<b>${plata(pr ? n2(x.cant) * n2(pr.precio) : 0)}</b>`;
+        clearTimeout(ctrNomTimer);
+        ctrNomTimer = setTimeout(()=>{ if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a); }, 700);
+        return;
+      }
+      // ---- El % civil de un ítem (2026-09-15) ----
+      const ctrCiv = e.target.closest('.ctr-civil');
+      if(ctrCiv){
+        if(contratistaFijado) return;
+        const id = String(ctrCiv.dataset.item);
+        const v = n2(ctrCiv.value);
+        if(String(ctrCiv.value).trim() === '') delete contratistaCivil[id];
+        else contratistaCivil[id] = Math.max(0, Math.min(100, v));
+        // Las dos celdas de plata del renglón se actualizan en el momento, sin redibujar.
+        const tr = ctrCiv.closest('tr');
+        if(tr){
+          const r = contratistaPorRubro(id);
+          const c1 = tr.querySelector('.ctr-civil-cel'), c2 = tr.querySelector('.ctr-elec-cel');
+          if(c1) c1.textContent = epecBase > 0 ? plata(r.civil) : '—';
+          if(c2) c2.textContent = epecBase > 0 ? plata(r.electrico) : '—';
+          ctrCiv.classList.toggle('tocado', pctCivilEditado(id));
+        }
+        clearTimeout(ctrTimer);
+        ctrTimer = setTimeout(()=> guardarContratista(document.getElementById('ctrMsg')), 700);
+        return;
+      }
+      // ---- Los campos de un ítem propio (2026-09-15) ----
+      const cpCampo = e.target.closest('.cp-campo');
+      if(cpCampo){
+        const fila = cpCampo.closest('.cp-fila');
+        const p = propioDe(fila.dataset.cp); if(!p) return;
+        const f = cpCampo.dataset.f;
+        p[f] = (f === 'precio') ? Math.max(0, n2(cpCampo.value)) : cpCampo.value;
+        clearTimeout(ctrTimer);
+        ctrTimer = setTimeout(()=>{ guardarContratista(document.getElementById('ctrMsg')); try{ renderEpec(); }catch(e2){} }, 700);
         return;
       }
       // ---- Itemizado de contratista (2026-09-14) ----
@@ -23541,6 +24129,38 @@ const ITEMIZADO_EPEC = [
         renderEpec(); return;
       }
       if(siEditar(e)) return;
+      // El <select> de rubro de un ítem propio y el de rubro de un contratista de plaza: algunos
+      // navegadores no disparan `input` en un <select>, así que se atienden también acá (2026-09-15).
+      const cpSel = e.target.closest('.cp-campo');
+      if(cpSel && cpSel.tagName === 'SELECT'){
+        const fila = cpSel.closest('.cp-fila');
+        const pp = propioDe(fila.dataset.cp);
+        if(pp){ pp.rubro = cpSel.value; guardarContratista(document.getElementById('ctrMsg')); try{ renderEpec(); }catch(e2){} }
+        return;
+      }
+      const ctrRub = e.target.closest('.ep-ctr-rubro');
+      if(ctrRub){
+        const card = ctrRub.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec);
+        if(a){
+          const cid = ctrRub.closest('.ep-ctr-fila').dataset.ctrid;
+          ponerContratistas(a, contratistasDe(a).map(x=> String(x.id) === String(cid) ? { ...x, rubro: ctrRub.value } : x));
+          if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a);
+          renderEpec();
+        }
+        return;
+      }
+      const cxItem = e.target.closest('.ep-cx-item');
+      if(cxItem){
+        const card = cxItem.closest('.it-plaza');
+        const a = obras().find(x=>String(x.id)===card.dataset.epec);
+        if(a){
+          const fila = cxItem.closest('.ep-cx-fila');
+          const x = extrasDe(a).find(y=>String(y.id)===String(fila.dataset.cx));
+          if(x){ x.propioId = cxItem.value; if(typeof guardarAvanceObras === 'function') guardarAvanceObras(a); renderEpec(); }
+        }
+        return;
+      }
       if(e.target.id === 'cobPlaza'){ cobPlazaId = e.target.value; renderCobertura(); }
       // Cambiar el ítem del Anexo I que se va a usar para un renglón viejo sin equivalencia exacta.
       const sel = e.target.closest('.hech-sel');
@@ -23550,7 +24170,7 @@ const ITEMIZADO_EPEC = [
         if(sel.value) mapeoCol[k] = sel.value; else delete mapeoCol[k];
         renderHechas();
         if(!puedeEditar()) return;
-        window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase, contratistaPct, contratistaPrecios, contratistaFijado,
+        window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase, contratistaPct, contratistaPrecios, contratistaFijado, contratistaCivil, contratistaPropios,
                                   ts:Date.now(), por:(window.__fbUser&&window.__fbUser.email)||'' })
           .catch(()=>{ alert('No se pudo guardar la elección (revisá la conexión). En esta pantalla se ve, pero no le llegó al resto del equipo.'); });
       }
@@ -23647,7 +24267,7 @@ const ITEMIZADO_EPEC = [
         itemsPropios.push({ id, cat:'Tareas cargadas por el equipo (fuera del itemizado)', desc, un, precio:0 });
         add.disabled = true; add.textContent = 'Guardando…';
         try{
-          await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase, contratistaPct, contratistaPrecios, contratistaFijado,
+          await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase, contratistaPct, contratistaPrecios, contratistaFijado, contratistaCivil, contratistaPropios,
                                           ts:Date.now(), por:(window.__fbUser&&window.__fbUser.email)||'' });
         }catch(err){
           itemsPropios = itemsPropios.filter(p=>p.id!==id);
@@ -26245,6 +26865,10 @@ const ITEMIZADO_EPEC = [
     const FIJ = (typeof window.epecContratistaFijado === 'function') ? window.epecContratistaFijado() : null;
     const esCtr  = a => (typeof window.epecEsDeContratista === 'function') ? window.epecEsDeContratista(a) : false;
     const nomCtr = a => (typeof window.epecNombreContratista === 'function') ? (window.epecNombreContratista(a) || '(sin nombre)') : '(sin nombre)';
+    // Los contratistas de la plaza, cada uno con su rubro (2026-09-15).
+    const ctrsDe = a => (typeof window.epecContratistasDe === 'function') ? window.epecContratistasDe(a) : [];
+    const PAGO   = (a, rubro)=> (typeof window.epecPagoContratista === 'function') ? window.epecPagoContratista(a, rubro) : { importe:0, items:0, renglones:[], extras:[] };
+    const RUBTXT = r => r === 'civil' ? 'Civil' : (r === 'electrico' ? 'Eléctrico y montaje' : 'Todo el ítem');
     // El módulo NETO: el itemizado de contratista se calcula siempre sin IVA, esté como esté el
     // interruptor de la pantalla. Así el informe dice lo mismo un lunes que un martes.
     const t = (typeof window.epecTotales === 'function') ? window.epecTotales() : null;
@@ -26266,114 +26890,194 @@ const ITEMIZADO_EPEC = [
       m.avisos.push('Ninguna de las plazas elegidas está marcada como <b>hecha por contratista</b>. Marcalas en <b>Obras → Itemizado 2026</b>, adentro de cada plaza, arriba de la tabla de ítems.');
     }
 
-    // Una fila por plaza: lo que se le paga, lo que se certifica y el margen.
+    // Una fila por plaza: lo que se le paga a cada contratista, lo que se certifica y el margen.
     const filas = conCtr.map((a,i)=>{
-      const renglones = itemsDe(a).map(f=>{
-        const cant = n2(f.v.cantidad);
-        const hecha = Math.min(n2(f.v.cantidadAvanzada), cant);
-        const pu = PU(f.id);
-        return { id:f.id, desc:DESC(f.id), un:UN(f.id), k:K(f.id), cant, hecha, pu, sub:hecha*pu, manual:MAN(f.id) };
+      const ctrs = ctrsDe(a);
+      // Un bloque por contratista, con SOLO la parte del rubro que hace.
+      const porCtr = ctrs.map(c=>{
+        const p = PAGO(a, c.rubro);
+        return { c, rubro:c.rubro, nombre:String(c.nombre||'').trim() || '(sin nombre)',
+                 importe:p.importe,
+                 renglones: p.renglones.filter(r=> r.hecha > 0 && r.pu > 0),
+                 extras: (p.extras||[]).filter(x=> x.cant > 0) };
       });
-      const conHecho = renglones.filter(r=> r.hecha > 0);
-      const pago = conHecho.reduce((t2,r)=> t2 + r.sub, 0);
-      const kA = renglones.reduce((t2,r)=> t2 + r.hecha * r.k, 0);
+      const pago = porCtr.reduce((t2,x)=> t2 + x.importe, 0);
+      const todo = PAGO(a, null);   // la plaza entera, sin repartir, para el detalle por rubro
+      const kA = todo.renglones.reduce((t2,r)=> t2 + r.hecha * r.k, 0);
       const cert = kA * neto;                       // lo certificado a EPEC, también NETO
-      return { a, n:i+1, ctr:nomCtr(a), renglones, conHecho, pago, kA, cert,
+      const civil = todo.renglones.reduce((t2,r)=> t2 + r.hecha * r.civil, 0);
+      const elec  = todo.renglones.reduce((t2,r)=> t2 + r.hecha * r.electrico, 0);
+      const mat   = todo.renglones.filter(r=>r.esProv).reduce((t2,r)=> t2 + r.hecha * r.pu, 0);
+      const conHecho = todo.renglones.filter(r=> r.hecha > 0);
+      return { a, n:i+1, ctr:nomCtr(a), porCtr, conHecho, extrasTodo:(todo.extras||[]).filter(x=>x.cant>0),
+               pago, kA, cert, civil, elec, mat,
                margen: cert - pago, pct: cert > 0 ? (cert - pago) / cert : null };
     });
     const totPago = filas.reduce((t2,f)=> t2 + f.pago, 0);
     const totCert = filas.reduce((t2,f)=> t2 + f.cert, 0);
     const totMargen = totCert - totPago;
 
+    const totCivil = filas.reduce((t2,f)=> t2 + f.civil, 0);
+    const totElec  = filas.reduce((t2,f)=> t2 + f.elec, 0);
     m.tiles = [
       { n: N(totPago,'money'), l:'A pagar a contratistas (s/IVA)', c:'' },
+      { n: N(totCivil,'money'), l:'De eso, obra CIVIL', c:'' },
+      { n: N(totElec,'money'), l:'De eso, ELÉCTRICO y montaje', c:'' },
       { n: N(totCert,'money'), l:'Se certifica por esas plazas (s/IVA)', c:'azul' },
       { n: N(totMargen,'money'), l:'Margen', c: totMargen >= 0 ? 'verde' : 'ambar' },
       { n: String(conCtr.length), l:'Plazas con contratista', c:'' },
     ];
-    const sinNombre = filas.filter(f=> f.ctr === '(sin nombre)').length;
+    m.avisos.push('El reparto <b>civil / eléctrico</b> es un <b>aproximado</b>: el pliego paga la columna entera en un solo ítem y no dice qué parte es cada cosa. El porcentaje de cada ítem se carga en <b>Obras → Itemizado de contratista</b> y se puede corregir renglón por renglón. Los ítems de <b>provisión</b> (83.1 a 89) no se reparten: son materiales, no mano de obra.');
+    const sinNombre = filas.filter(f=> !f.ctr || f.ctr === '(sin nombre)').length;
     if(sinNombre) m.avisos.push(`<b>${sinNombre}</b> plaza(s) están marcadas como de contratista pero <b>no tienen el nombre cargado</b>. Escribilo en el itemizado, al lado del tilde.`);
     const sinHecho = filas.filter(f=> !f.conHecho.length).length;
     if(sinHecho) m.avisos.push(`<b>${sinHecho}</b> plaza(s) con contratista <b>todavía no tienen nada hecho</b> en la columna «Hecha» del itemizado: salen en cero. El pago se calcula sobre lo hecho, no sobre lo contratado.`);
 
     if(o.sec.resumen && filas.length){
       m.secciones.push(tabla('Resumen por plaza',
-        'Se paga por la cantidad <b>hecha</b> de cada ítem, igual que como nos certifica EPEC a nosotros. Todos los importes van sin IVA. Las filas en ámbar tienen margen negativo (se le paga más de lo que se cobra).',
-        [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},{t:'Contratista'},
+        'Se paga por la cantidad <b>hecha</b> de cada ítem, igual que como nos certifica EPEC a nosotros. Todos los importes van sin IVA. «Civil» y «Eléctrico» son el reparto aproximado de TODA la plaza; «A pagar» es lo que suman los contratistas que realmente tiene cargados. Las filas en ámbar tienen margen negativo.',
+        [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'ID', w:'70px'},{t:'Contratista(s)'},
          {t:'Ítems con algo hecho', num:true, w:'70px'},{t:'K hecho', num:true},
+         {t:'Civil', num:true},{t:'Eléctrico', num:true},
          {t:'Se certifica', num:true},{t:'A pagar', num:true},{t:'Margen $', num:true},{t:'Margen %', num:true, w:'70px'}],
         filas.map(f=>{
-          const r = [N(f.n,'int'), f.a.nombre||'', String(f.a.obraId||'—'), f.ctr, N(f.conHecho.length,'int'),
-                     N(f.kA,'k'), N(f.cert,'money'), N(f.pago,'money'), N(f.margen,'money'),
+          const quien = f.porCtr.length
+            ? f.porCtr.map(x=> `${x.nombre} (${RUBTXT(x.rubro).toLowerCase()})`).join(' · ')
+            : f.ctr;
+          const r = [N(f.n,'int'), f.a.nombre||'', String(f.a.obraId||'—'), quien, N(f.conHecho.length,'int'),
+                     N(f.kA,'k'), N(f.civil,'money'), N(f.elec,'money'),
+                     N(f.cert,'money'), N(f.pago,'money'), N(f.margen,'money'),
                      f.pct == null ? '—' : N(f.pct,'pct')];
           if(f.margen < 0) r._cls = 'inf-fuera';
           return r;
         }),
         [['', 'TOTAL', '', '', N(filas.reduce((t2,f)=>t2+f.conHecho.length,0),'int'),
-          N(filas.reduce((t2,f)=>t2+f.kA,0),'k'), N(totCert,'money'), N(totPago,'money'), N(totMargen,'money'),
+          N(filas.reduce((t2,f)=>t2+f.kA,0),'k'), N(totCivil,'money'), N(totElec,'money'),
+          N(totCert,'money'), N(totPago,'money'), N(totMargen,'money'),
           totCert > 0 ? N(totMargen/totCert,'pct') : '—']]));
     }
 
     // ---- La hoja que se le entrega al contratista, una por plaza ----
     if(o.sec.items){
       filas.forEach(f=>{
-        const sub = `ID ${f.a.obraId||'—'} — contratista ${f.ctr} · a pagar ${plata(f.pago)} sin IVA`;
-        if(!f.conHecho.length){
-          m.secciones.push(texto(`${f.a.nombre||'(sin nombre)'} — ítems a pagar`,
-            [sub, 'Esta plaza todavía no tiene ninguna cantidad cargada en la columna «Hecha» del itemizado, así que no hay nada para pagar. Cargá lo que se hizo y volvé a generar el informe.']));
+        const nom = f.a.nombre || '(sin nombre)';
+        if(!f.conHecho.length && !f.extrasTodo.length){
+          m.secciones.push(texto(`${nom} — ítems a pagar`,
+            [`ID ${f.a.obraId||'—'} — ${f.ctr}`,
+             'Esta plaza todavía no tiene ninguna cantidad cargada en la columna «Hecha» del itemizado, así que no hay nada para pagar. Cargá lo que se hizo y volvé a generar el informe.']));
           return;
         }
-        m.secciones.push(tabla(`${f.a.nombre||'(sin nombre)'} — ítems a pagar`,
-          sub + '. «Hecha» es la cantidad que el contratista ejecutó y se le reconoce; el precio unitario sale del itemizado de contratista' +
-          (neto > 0 ? ` (${nf(PCT, PCT % 1 ? 1 : 0)} % del valor de pliego sin IVA, salvo los marcados «a mano»).` : '.'),
-          [{t:'Ítem', w:'56px'},{t:'Descripción'},{t:'Un.', w:'46px'},{t:'Contratada', num:true, w:'70px'},
-           {t:'Hecha', num:true, w:'70px'},{t:'P. unitario', num:true},{t:'Importe', num:true}],
-          f.conHecho.map(r=> [r.id, r.desc + (r.manual ? ' · precio a mano' : ''), r.un,
-                              N(r.cant,'cant'), N(r.hecha,'cant'), N(r.pu,'money'), N(r.sub,'money')]),
-          [['', 'TOTAL A PAGAR', '', '', '', '', N(f.pago,'money')]],
-          { grupo:'Ítems a pagar', etiqueta:f.a.nombre || '(sin nombre)', etiquetaCol:'Plaza' }));
+        if(!f.porCtr.length){
+          m.secciones.push(texto(`${nom} — ítems a pagar`,
+            [`ID ${f.a.obraId||'—'}`, 'Esta plaza está marcada como de contratista pero no tiene ninguno cargado. Agregalo en el itemizado de la plaza.']));
+          return;
+        }
+        // Una hoja POR CONTRATISTA: es la que se le entrega a cada uno con su pago.
+        f.porCtr.forEach(x=>{
+          const tit = f.porCtr.length > 1 ? `${nom} — a pagar a ${x.nombre}` : `${nom} — ítems a pagar`;
+          const sub = `ID ${f.a.obraId||'—'} — ${x.nombre} · <b>${RUBTXT(x.rubro)}</b> · a pagar ${plata(x.importe)} sin IVA`;
+          if(!x.renglones.length && !x.extras.length){
+            m.secciones.push(texto(tit, [sub.replace(/<\/?b>/g,''),
+              x.rubro === 'civil' ? 'De lo que está hecho en esta plaza, no hay nada de obra civil para pagarle.'
+                                  : (x.rubro === 'electrico' ? 'De lo que está hecho en esta plaza, no hay nada de la parte eléctrica para pagarle.'
+                                                             : 'Todavía no hay nada hecho para pagarle.')]));
+            return;
+          }
+          const cols = [{t:'Ítem', w:'56px'},{t:'Descripción'},{t:'Un.', w:'46px'},{t:'Contratada', num:true, w:'70px'},
+                        {t:'Hecha', num:true, w:'70px'}];
+          if(x.rubro !== 'todo') cols.push({t:'% del ítem', num:true, w:'70px'});
+          cols.push({t:'P. unitario', num:true},{t:'Importe', num:true});
+          const filasIt = x.renglones.map(r=>{
+            const fila = [r.id, r.desc + (r.manual ? ' · precio a mano' : ''), r.un,
+                          N(r.cant,'cant'), N(r.hecha,'cant')];
+            if(x.rubro !== 'todo') fila.push(r.esProv ? '—' : N((x.rubro === 'civil' ? r.pctCivil : 100 - r.pctCivil) / 100, 'pct'));
+            fila.push(N(r.pu,'money'), N(r.sub,'money'));
+            return fila;
+          });
+          // Los ítems propios van en la misma tabla, marcados: es lo que el pliego no itemiza.
+          x.extras.forEach(ex=>{
+            const fila = ['—', (ex.huerfano ? '⚠ ' : '') + ex.desc + ' · fuera del pliego', ex.un||'',
+                          '—', N(ex.cant,'cant')];
+            if(x.rubro !== 'todo') fila.push('—');
+            fila.push(N(ex.precio,'money'), N(ex.sub,'money'));
+            fila._cls = 'inf-fuera';
+            filasIt.push(fila);
+          });
+          const pie = ['', 'TOTAL A PAGAR', '', '', ''];
+          if(x.rubro !== 'todo') pie.push('');
+          pie.push('', N(x.importe,'money'));
+          m.secciones.push(tabla(tit,
+            sub + '. «Hecha» es la cantidad ejecutada que se le reconoce; el precio unitario sale del itemizado de contratista' +
+            (neto > 0 ? ` (${nf(PCT, PCT % 1 ? 1 : 0)} % del valor de pliego sin IVA, salvo los marcados «a mano»)` : '') +
+            (x.rubro !== 'todo' ? `. La columna «% del ítem» es la parte de ${x.rubro === 'civil' ? 'obra civil' : 'trabajo eléctrico y montaje'} que se le reconoce de cada renglón — un aproximado, editable ítem por ítem.` : '.') +
+            (x.extras.length ? ' Las filas en ámbar son ítems propios: trabajos que el pliego no itemiza.' : ''),
+            cols, filasIt, [pie],
+            { grupo:'Ítems a pagar', etiqueta:`${nom}${f.porCtr.length > 1 ? ' · ' + x.nombre : ''}`, etiquetaCol:'Plaza' }));
+        });
       });
     }
 
     // ---- Cuánto le toca a cada contratista, juntando sus plazas ----
     if(o.sec.porContratista && filas.length){
+      // Se agrupa por contratista Y por rubro: el mismo nombre puede hacer la civil de una plaza y
+      // todo el ítem en otra, y no es lo mismo a la hora de pagarle.
       const porC = new Map();
-      filas.forEach(f=>{
-        const g = porC.get(f.ctr) || { ctr:f.ctr, plazas:0, pago:0, cert:0 };
-        g.plazas++; g.pago += f.pago; g.cert += f.cert;
-        porC.set(f.ctr, g);
-      });
+      filas.forEach(f=> f.porCtr.forEach(x=>{
+        const clave = x.nombre + '||' + x.rubro;
+        const g = porC.get(clave) || { nombre:x.nombre, rubro:x.rubro, plazas:0, pago:0 };
+        g.plazas++; g.pago += x.importe;
+        porC.set(clave, g);
+      }));
       const lista = [...porC.values()].sort((x,y)=> y.pago - x.pago);
+      const totLista = lista.reduce((t2,g)=> t2 + g.pago, 0);
       m.secciones.push(tabla('Total por contratista',
-        'Juntando todas las plazas de cada uno. Es lo que hay que pagarle en total, sin IVA.',
-        [{t:'Contratista'},{t:'Plazas', num:true, w:'60px'},{t:'Se certifica', num:true},
-         {t:'A pagar', num:true},{t:'Margen $', num:true},{t:'Margen %', num:true, w:'70px'}],
-        lista.map(g=>{
-          const mg = g.cert - g.pago;
-          const r = [g.ctr, N(g.plazas,'int'), N(g.cert,'money'), N(g.pago,'money'), N(mg,'money'),
-                     g.cert > 0 ? N(mg/g.cert,'pct') : '—'];
-          if(mg < 0) r._cls = 'inf-fuera';
-          return r;
-        }),
-        [['TOTAL', N(filas.length,'int'), N(totCert,'money'), N(totPago,'money'), N(totMargen,'money'),
-          totCert > 0 ? N(totMargen/totCert,'pct') : '—']]));
+        'Juntando todas las plazas de cada uno. Si el mismo contratista hace la parte civil en una plaza y todo el ítem en otra, salen en dos renglones: no es lo mismo a la hora de pagarle. Sin IVA.',
+        [{t:'Contratista'},{t:'Qué hace'},{t:'Plazas', num:true, w:'60px'},{t:'A pagar', num:true},{t:'% del total', num:true, w:'80px'}],
+        lista.map(g=> [g.nombre, RUBTXT(g.rubro), N(g.plazas,'int'), N(g.pago,'money'),
+                       totLista > 0 ? N(g.pago/totLista,'pct') : '—']),
+        [['TOTAL', '', N(filas.length,'int'), N(totLista,'money'), totLista > 0 ? N(1,'pct') : '—']]));
     }
 
     // ---- Todas las plazas juntas, ítem por ítem ----
     if(o.sec.consolidado && filas.length){
       const porItem = new Map();
       filas.forEach(f=> f.conHecho.forEach(r=>{
-        const g = porItem.get(r.id) || { id:r.id, desc:r.desc, un:r.un, pu:r.pu, hecha:0, sub:0, plazas:0 };
-        g.hecha += r.hecha; g.sub += r.sub; g.plazas++;
+        const g = porItem.get(r.id) || { id:r.id, desc:r.desc, un:r.un, pu:r.pu, pct:r.pctCivil, esProv:r.esProv,
+                                         hecha:0, sub:0, civil:0, elec:0, plazas:0 };
+        g.hecha += r.hecha; g.sub += r.hecha * r.pu;
+        g.civil += r.hecha * r.civil; g.elec += r.hecha * r.electrico;
+        g.plazas++;
         porItem.set(r.id, g);
       }));
       const lista = [...porItem.values()].sort((x,y)=> parseFloat(x.id) - parseFloat(y.id));
+      const tSub = lista.reduce((t2,g)=> t2 + g.sub, 0);
+      const tCiv = lista.reduce((t2,g)=> t2 + g.civil, 0);
+      const tEle = lista.reduce((t2,g)=> t2 + g.elec, 0);
       m.secciones.push(tabla('Consolidado por ítem — todas las plazas juntas',
-        'Cuánto se hizo de cada ítem entre todas las plazas con contratista, y cuánto suma eso a pagar.',
+        'Cuánto se hizo de cada ítem entre todas las plazas con contratista, cuánto suma eso a pagar y cómo se reparte entre obra civil y trabajo eléctrico. <b>Ésta es la tabla para saber cuánto vale contratar solo la parte civil.</b>',
         [{t:'Ítem', w:'56px'},{t:'Descripción'},{t:'Un.', w:'46px'},{t:'Plazas', num:true, w:'60px'},
-         {t:'Hecha', num:true},{t:'P. unitario', num:true},{t:'Importe', num:true}],
-        lista.map(g=> [g.id, g.desc, g.un, N(g.plazas,'int'), N(g.hecha,'cant'), N(g.pu,'money'), N(g.sub,'money')]),
-        [['', 'TOTAL', '', '', '', '', N(totPago,'money')]]));
+         {t:'Hecha', num:true},{t:'P. unitario', num:true},{t:'Importe', num:true},
+         {t:'% civil', num:true, w:'64px'},{t:'Civil', num:true},{t:'Eléctrico', num:true}],
+        lista.map(g=> [g.id, g.desc, g.un, N(g.plazas,'int'), N(g.hecha,'cant'), N(g.pu,'money'), N(g.sub,'money'),
+                       g.esProv ? '—' : N(n2(g.pct)/100,'pct'),
+                       g.esProv ? '—' : N(g.civil,'money'), g.esProv ? '—' : N(g.elec,'money')]),
+        [['', 'TOTAL', '', '', '', '', N(tSub,'money'), '', N(tCiv,'money'), N(tEle,'money')]]));
+      // Y los ítems propios, aparte: no son del pliego.
+      const px = new Map();
+      filas.forEach(f=> f.extrasTodo.forEach(ex=>{
+        const g = px.get(ex.propioId) || { desc:ex.desc, un:ex.un, precio:ex.precio, rubro:ex.rubro, cant:0, sub:0, plazas:0 };
+        g.cant += ex.cant; g.sub += ex.sub; g.plazas++;
+        px.set(ex.propioId, g);
+      }));
+      if(px.size){
+        const lp = [...px.values()].sort((x,y)=> y.sub - x.sub);
+        m.secciones.push(tabla('Ítems propios — lo que el pliego no itemiza',
+          'Trabajos que se le pagan al contratista y no tienen ítem en el Anexo I. No se cobran a EPEC: salen del bolsillo de EMA.',
+          [{t:'Trabajo'},{t:'Rubro', w:'120px'},{t:'Un.', w:'46px'},{t:'Plazas', num:true, w:'60px'},
+           {t:'Cantidad', num:true},{t:'P. unitario', num:true},{t:'Importe', num:true}],
+          lp.map(g=> [g.desc, RUBTXT(g.rubro), g.un||'', N(g.plazas,'int'), N(g.cant,'cant'), N(g.precio,'money'), N(g.sub,'money')]),
+          [['TOTAL', '', '', '', '', '', N(lp.reduce((t2,g)=>t2+g.sub,0),'money')]]));
+      }
     }
 
     // ---- Las que se eligieron pero no son de contratista ----
