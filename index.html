@@ -802,14 +802,29 @@
   .mapa-ref{background:rgba(255,255,255,0.95); border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:12px; line-height:1.7; box-shadow:0 1px 5px rgba(0,0,0,0.22);}
   .mapa-ref b{display:block; margin-bottom:3px; font-size:10.5px; letter-spacing:0.5px; color:var(--text-soft); text-transform:uppercase;}
   /* Plazas del pliego en el mapa (2026-09-16) */
-  .mapa-pin-lic{ width:14px; height:14px; border:2.5px solid #7a8699; background:#fff;
-                 transform:rotate(45deg); border-radius:3px; box-shadow:0 1px 4px rgba(0,0,0,.25); }
+  /* La caja transparente es el blanco del toque; el rombo es solo el dibujo. */
+  .mapa-lic-toque{ width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+                   cursor:pointer; border-radius:50%; }
+  .mapa-lic-toque:hover{ background:rgba(21,42,83,.10); }
+  .mapa-lic-toque:hover .mapa-pin-lic{ transform:rotate(45deg) scale(1.25); }
+  .mapa-pin-lic{ width:15px; height:15px; border:3px solid #7a8699; background:#fff;
+                 transform:rotate(45deg); border-radius:3px;
+                 box-shadow:0 1px 4px rgba(0,0,0,.3), 0 0 0 2px rgba(255,255,255,.85);
+                 transition:transform .12s ease; }
   .mapa-lic-barra{ display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin:0 0 6px;
                    font-size:12px; color:var(--text-soft); font-weight:700; }
   .mapa-lic-btn{ border:1px solid var(--line); background:#fff; border-radius:999px;
                  padding:3px 11px; font-size:12px; cursor:pointer; color:var(--text-soft); font-weight:600; }
   .mapa-lic-btn:hover{ border-color:var(--teal-dark); color:var(--teal-dark); }
   .mapa-lic-btn.on{ background:var(--navy); border-color:var(--navy); color:#fff; }
+  .mapa-ref-sub{ font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em;
+                 color:var(--text-soft); margin:7px 0 3px; }
+  .mapa-ref-sub span{ font-weight:600; text-transform:none; letter-spacing:0; }
+  .mapa-ref-rombo{ width:10px; height:10px; border:2.5px solid #7a8699; background:#fff;
+                   transform:rotate(45deg); border-radius:2px; flex:none; }
+  .mapa-ref-nota{ font-size:10.5px; color:var(--text-soft); margin-top:5px; max-width:180px; line-height:1.35; }
+  .leaflet-tooltip.mapa-etiqueta-lic{ background:rgba(255,255,255,.88); font-weight:600; font-size:10.5px;
+                                      padding:0 5px; color:#4a5468; border-style:dashed; }
   .mapa-ref-fila{display:flex; align-items:center; gap:7px;}
   .mapa-ref-dot{width:12px; height:12px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px rgba(0,0,0,0.18); flex:none;}
   .mapa-num{display:inline-flex; align-items:center; justify-content:center; width:21px; height:21px; border-radius:50%; color:#fff; font-size:11px; font-weight:700; flex:none; border:1px solid rgba(0,0,0,0.08);}
@@ -3066,7 +3081,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-16 09:49 · c840f0</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-16 11:19 · 4e597e</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -16139,15 +16154,19 @@ function mapaLicElegir(v){
 window.mapaLicElegir = mapaLicElegir;
 // Las del pliego que corresponde mostrar: las del renglón elegido que todavía NO están cargadas.
 function plazasLicitacionParaMapa(){
-  if(mapaVerLicitacion === 'no') return { lista:[], yaCargadas:0 };
-  const todas = (window.PLAZAS_LICITACION || []).filter(x=> mapaVerLicitacion === 'todas' || x[5] === mapaVerLicitacion);
+  if(mapaVerLicitacion === 'no') return { lista:[], yaCargadas:0, filtradas:0 };
+  let todas = (window.PLAZAS_LICITACION || []).filter(x=> mapaVerLicitacion === 'todas' || x[5] === mapaVerLicitacion);
+  // El buscador de arriba también achica los rombos: si escribís «rivera», quedan solo ésas.
+  const q = ((document.getElementById('mapaBuscar')||{}).value||'').trim().toLowerCase();
+  const antesDeBuscar = todas.length;
+  if(q) todas = todas.filter(x=> `${x[1]} ${x[2]}`.toLowerCase().includes(q));
   const ids = new Set();
   (avanceObras||[]).forEach(a=>{
     (typeof idsDePlaza === 'function' ? idsDePlaza(a.obraId) : [String(a.obraId||'')]).forEach(i=>{ if(i) ids.add(i); });
   });
   const estaCargada = x=> (typeof idsDePlaza === 'function' ? idsDePlaza(x[1]) : [String(x[1])]).some(i=> ids.has(i));
   const lista = todas.filter(x=> !estaCargada(x) && Number(x[3]) && Number(x[4]));
-  return { lista, yaCargadas: todas.length - lista.length };
+  return { lista, yaCargadas: todas.length - lista.length, filtradas: q ? antesDeBuscar - todas.length : 0 };
 }
 // Registrar una plaza del pliego en el tablero, con su ubicación ya puesta. Cero carga a mano.
 window.registrarPlazaDelPliego = async function(id){
@@ -16190,6 +16209,27 @@ let mapaModoAlta = false;           // "+ Nueva plaza acá": el próximo clic en
 let mapaVerNombres = true;          // etiquetas con el nombre sobre cada pin
 let mapaMarcadores = {};            // id de plaza -> marcador, para poder ir a un pin desde la lista
 let mapaRefControl = null;          // recuadro de referencia de colores
+
+// La referencia del mapa se redibuja sola (2026-09-16): el usuario prendió las plazas del pliego y
+// *"no me aparecen las referencias, no sé qué plaza es ni nada"* — los rombos no estaban explicados
+// en ningún lado. Ahora, cuando están prendidas, la referencia suma su renglón con su color.
+function pintarReferenciaMapa(){
+  const d = document.getElementById('mapaRefCaja');
+  if(!d) return;
+  let h = '<b>Referencia</b>'
+    + '<div class="mapa-ref-sub">Obras del tablero</div>'
+    + MAPA_REFERENCIAS.map(r=>
+        `<div class="mapa-ref-fila"><span class="mapa-ref-dot" style="background:${r.color};"></span>${r.txt}</div>`).join('')
+    + `<div class="mapa-ref-fila"><span class="mapa-ref-dot" style="background:#c7cedd;"></span>Sin ubicar todavía</div>`;
+  if(typeof mapaVerLicitacion !== 'undefined' && mapaVerLicitacion !== 'no'){
+    const zonas = mapaVerLicitacion === 'todas' ? ['A','B','C'] : [mapaVerLicitacion];
+    h += '<div class="mapa-ref-sub">Plazas del pliego <span>(todavía sin cargar)</span></div>'
+      + zonas.map(k=>{ const z = MAPA_LIC_ZONA[k];
+          return `<div class="mapa-ref-fila"><span class="mapa-ref-rombo" style="border-color:${z.color};"></span>${z.txt}</div>`; }).join('')
+      + '<div class="mapa-ref-nota">Tocá un rombo para ver cuál es y registrarla.</div>';
+  }
+  d.innerHTML = h;
+}
 
 const MAPA_REFERENCIAS = [
   { color:'var(--danger)',    txt:'Recién arrancada (menos del 30%)' },
@@ -16266,13 +16306,16 @@ function initMapaObras(){
     mapaRefControl = L.control({ position:'bottomright' });
     mapaRefControl.onAdd = function(){
       const d = L.DomUtil.create('div', 'mapa-ref');
-      d.innerHTML = '<b>Referencia</b>' + MAPA_REFERENCIAS.map(r=>
-        `<div class="mapa-ref-fila"><span class="mapa-ref-dot" style="background:${r.color};"></span>${r.txt}</div>`).join('');
+      d.id = 'mapaRefCaja';
       L.DomEvent.disableClickPropagation(d);   // que tocar la referencia no coloque un pin
       return d;
     };
     mapaRefControl.addTo(mapaLeaflet);
+    pintarReferenciaMapa();
     mapaLeaflet.on('click', onClickMapaObras);
+    // Los nombres de las plazas del pliego aparecen recién de cerca: con las 244 a la vez, a
+    // nivel ciudad las etiquetas se taparían unas a otras (2026-09-16).
+    mapaLeaflet.on('zoomend', ()=>{ try{ renderMapaObras(); }catch(e){} });
     setTimeout(()=>mapaLeaflet.invalidateSize(), 60);
   }catch(e){
     mostrarErrorConexionMapa();
@@ -16501,14 +16544,26 @@ function renderMapaObras(){
   if(mapaLicLayer){
     mapaLicLayer.clearLayers();
     const lic = plazasLicitacionParaMapa();
+    // De lejos se ven los rombos pelados; de cerca (zoom 14+) cada uno muestra su barrio y su ID.
+    // Con las 244 prendidas a nivel ciudad, las etiquetas se taparían entre sí.
+    const zoomAhora = (typeof mapaLeaflet.getZoom === 'function') ? mapaLeaflet.getZoom() : 12;
+    const verNombresLic = mapaVerNombres && zoomAhora >= 13;
     lic.lista.forEach(x=>{
       const z = MAPA_LIC_ZONA[x[5]] || { txt:x[5], color:'#7a8699', corto:x[5] };
+      // El rombo se dibuja chico, pero la zona que se puede TOCAR es de 34×34 px y transparente
+      // (2026-09-16). El usuario: *"es muy difícil apretar ese botón"* — con 16 px había que
+      // acertarle justo, sobre todo en el celular. El dibujo queda igual; lo que crece es el blanco
+      // alrededor, que es lo que recibe el toque.
       const icono = L.divIcon({
         className: '',
-        html: `<div class="mapa-pin-lic" style="border-color:${z.color}; color:${z.color};" title="${escHtml(x[2])} · ID ${escHtml(String(x[1]))}"></div>`,
-        iconSize: [16,16], iconAnchor: [8,8], popupAnchor: [0,-8], tooltipAnchor: [0,2]
+        html: `<div class="mapa-lic-toque"><div class="mapa-pin-lic" style="border-color:${z.color};"></div></div>`,
+        iconSize: [34,34], iconAnchor: [17,17], popupAnchor: [0,-11], tooltipAnchor: [0,10]
       });
-      const m = L.marker([Number(x[3]), Number(x[4])], { icon: icono, title: `${x[2]} · ID ${x[1]}` });
+      const m = L.marker([Number(x[3]), Number(x[4])], { icon: icono, title: `${x[2]} · ID ${x[1]} — ${z.txt}` });
+      if(verNombresLic){
+        m.bindTooltip(`${escHtml(String(x[2]||''))} <b>${escHtml(String(x[1]))}</b>`,
+          { permanent:true, direction:'bottom', className:'mapa-etiqueta mapa-etiqueta-lic', offset:[0,5] });
+      }
       m.bindPopup(`<div style="min-width:190px; font-size:13px;">
         <b>N° ${x[0]} — ID ${escHtml(String(x[1]))}</b><br>
         ${escHtml(String(x[2]||''))}<br>
@@ -16523,11 +16578,15 @@ function renderMapaObras(){
       m.addTo(mapaLicLayer);
     });
     document.querySelectorAll('.mapa-lic-btn').forEach(b=> b.classList.toggle('on', b.dataset.lic === mapaVerLicitacion));
+    try{ pintarReferenciaMapa(); }catch(e){}
     const cl = document.getElementById('mapaLicCont');
     if(cl){
       cl.innerHTML = mapaVerLicitacion === 'no'
         ? '<span style="color:var(--text-soft);">Las 244 plazas del pliego están apagadas. Prendelas con los botones de arriba: ya vienen con su ubicación, no hay que marcar nada a mano.</span>'
-        : `◇ <b>${lic.lista.length}</b> plaza(s) del pliego en el mapa${lic.yaCargadas?` · <b>${lic.yaCargadas}</b> ya está(n) en el tablero y se muestran con su pin de obra`:''}. Tocá un rombo para registrarla con su ubicación ya puesta.`;
+        : `◇ <b>${lic.lista.length}</b> plaza(s) del pliego en el mapa${lic.yaCargadas?` · <b>${lic.yaCargadas}</b> ya está(n) en el tablero, con su pin de obra`:''}${lic.filtradas?` · ${lic.filtradas} escondida(s) por la búsqueda`:''}.`
+          + (verNombresLic
+              ? ' Cada rombo dice su barrio y su ID. <b>Tocalo</b> para verlo entero y registrarla.'
+              : ' <b>Acercate</b> para ver el nombre de cada una, o <b>tocá un rombo</b> para saber cuál es y registrarla.');
     }
   }
 }
