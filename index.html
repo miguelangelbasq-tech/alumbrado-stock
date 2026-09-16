@@ -3093,7 +3093,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-16 14:49 · 4d6406</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-16 15:47 · 3d2db6</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -19707,7 +19707,11 @@ function poblarParteObraDatalist(){
     if(d.contratistaListas && typeof d.contratistaListas === 'object'){
       ['completo','civil','electrico'].forEach(k=>{
         const L = d.contratistaListas[k];
-        if(L && typeof L === 'object') contratistaListas[k] = { sembrada:!!L.sembrada, fijado:L.fijado||null, items:Array.isArray(L.items)?L.items.slice():[] };
+        // OJO con `semillaV` (2026-09-16): si no se copia, la lista vuelve de la nube como si nunca
+        // se hubiera sembrado con esta versión, se resiembra, se guarda, vuelve de la nube otra vez
+        // sin la marca… y queda dando vueltas en «Se agregaron los ítems nuevos / guardando…».
+        if(L && typeof L === 'object') contratistaListas[k] = { sembrada:!!L.sembrada, fijado:L.fijado||null,
+          semillaV: n2(L.semillaV) || 0, items:Array.isArray(L.items)?L.items.slice():[] };
       });
     }
     try{ renderContratista(); }catch(e){}
@@ -23730,6 +23734,8 @@ const ITEMIZADO_EPEC = [
   }
   // ---- La lista de un rubro (2026-09-15) ----
   let ctrVista = 'completo';
+  // Qué arregló solo la herramienta en esta sesión, por lista. Ver renderListaRubro().
+  const arreglosHechos = {};
   const rubroNombre = k => (k === 'civil' ? 'Civil'
                           : (k === 'electrico' ? 'Eléctrico y montaje'
                           : 'Completo · civil + eléctrico'));
@@ -23742,13 +23748,25 @@ const ITEMIZADO_EPEC = [
     // La primera vez se arma sola. Y si la semilla cambió (porque se agregaron ítems nuevos a la
     // lista de arranque), se rehace una vez — conservando los precios que el usuario haya escrito.
     // Una lista FIJADA no se toca: ésa es un acuerdo cerrado.
-    if(!L.sembrada || (!L.fijado && (L.semillaV||0) < SEMILLA_V)){
-      const rehizo = L.sembrada;
+    //
+    // CADA ARREGLO AUTOMÁTICO SE HACE UNA SOLA VEZ POR LISTA Y POR SESIÓN (2026-09-16). Se dibuja
+    // muchísimas veces —cada vez que llega algo de la nube, cada vez que se toca un precio—, así
+    // que un arreglo que no quede pegado dejaba la pantalla dando vueltas en «Se agregaron los
+    // ítems nuevos… guardando…». Con esta marca, si el arreglo no llega a guardarse, no se
+    // reintenta solo: se vuelve a intentar la próxima vez que se abra la herramienta.
+    if(!arreglosHechos[k]) arreglosHechos[k] = {};
+    const yaSe = arreglosHechos[k];
+    if(!L.sembrada){
       sembrarLista(k);
-      if(rehizo) setTimeout(()=>{ try{ guardarContratista(document.getElementById('clMsg'), '✔ Se agregaron los ítems nuevos de esta lista.'); }catch(e){} }, 0);
-    } else if(!L.fijado && limpiarProvisionDeLista(k)){
+    } else if(!L.fijado && (L.semillaV||0) < SEMILLA_V && !yaSe.semilla){
+      yaSe.semilla = true;
+      sembrarLista(k);
+      setTimeout(()=>{ try{ guardarContratista(document.getElementById('clMsg'), '✔ Se agregaron los ítems nuevos de esta lista.'); }catch(e){} }, 0);
+    } else if(!L.fijado && !yaSe.provision){
       // Una lista armada antes del 16/09/2026 puede tener provisión adentro: se saca sola.
-      setTimeout(()=>{ try{ guardarContratista(document.getElementById('clMsg'), '✔ Se sacaron los ítems de provisión: los materiales los pone EMA.'); }catch(e){} }, 0);
+      yaSe.provision = true;
+      if(limpiarProvisionDeLista(k))
+        setTimeout(()=>{ try{ guardarContratista(document.getElementById('clMsg'), '✔ Se sacaron los ítems de provisión: los materiales los pone EMA.'); }catch(e){} }, 0);
     }
     const fijado = !!L.fijado;
     const edit = puedeEditar() && !fijado;
