@@ -746,7 +746,11 @@
   /* ---- Mapa de obras (2026-08-20) — pestaña nueva, mapa tipo "My Maps" con OpenStreetMap/Leaflet ---- */
   .mapa-layout{display:grid; grid-template-columns:305px 1fr; gap:16px; align-items:start;}
   @media (max-width:820px){ .mapa-layout{grid-template-columns:1fr;} }
-  .mapa-lista{max-height:432px; overflow-y:auto; border:1px solid var(--border); border-radius:10px;}
+  /* El mapa crece con la pantalla (2026-09-16). El usuario: *"en la computadora el mapa se ve
+     chico, ¿lo podemos agrandar un poco más?"*. Antes eran 560 px fijos, así que en un monitor
+     grande sobraba pantalla vacía abajo. Ahora ocupa lo que haya, con un piso (para que en una
+     notebook chica no quede una ranura) y un techo (para que no se vaya de largo). */
+  .mapa-lista{max-height:clamp(432px, calc(100vh - 400px), 760px); overflow-y:auto; border:1px solid var(--border); border-radius:10px;}
   .mapa-lista-item{display:flex; align-items:center; gap:8px; padding:9px 10px; border-bottom:1px solid var(--border); cursor:pointer; font-size:13px;}
   .mapa-lista-item:last-child{border-bottom:none;}
   .mapa-lista-item:hover{background:var(--panel);}
@@ -754,7 +758,34 @@
   .mapa-lista-nombre{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .mapa-pin-dot{width:10px; height:10px; border-radius:50%; flex:none; background:#c7cedd;}
   .mapa-pin-dot.mapa-pin-ok{background:var(--teal-dark);}
-  #mapaObras{height:560px; border-radius:10px; border:1px solid var(--border); background:var(--panel);}
+  #mapaObras{height:clamp(560px, calc(100vh - 270px), 900px); border-radius:10px; border:1px solid var(--border); background:var(--panel);}
+
+  /* ---- Mapa a pantalla completa (2026-09-16) ---- */
+  .card.mapa-full{ position:fixed; inset:0; z-index:9500; margin:0; border-radius:0;
+                   padding:12px 16px 14px; box-shadow:none; overflow:hidden;
+                   display:flex; flex-direction:column; background:var(--card); }
+  .card.mapa-full > h2, .card.mapa-full > .hint{ display:none; }
+  .card.mapa-full .mapa-full-cab{ display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+                                  margin-bottom:10px; flex:none; }
+  .mapa-full-cab{ display:none; }
+  .card.mapa-full .mapa-layout{ flex:1 1 auto; min-height:0; align-items:stretch; }
+  .card.mapa-full .mapa-layout > div:first-child{ min-height:0; overflow-y:auto; padding-right:4px; }
+  .card.mapa-full .mapa-lista{ max-height:none; }
+  .card.mapa-full #mapaObras{ height:100%; min-height:0; }
+  body.mapa-full-on{ overflow:hidden; }
+  .mapa-full-salir{ border:1px solid var(--line); background:#fff; border-radius:999px;
+                    padding:5px 14px; font-size:13px; font-weight:700; cursor:pointer; color:var(--navy); }
+  .mapa-full-salir:hover{ border-color:var(--teal-dark); color:var(--teal-dark); }
+  @media (max-width:820px){
+    #mapaObras{ height:clamp(380px, calc(100vh - 330px), 700px); }
+    /* A pantalla completa en el celular manda el MAPA: la lista se achica a un cuarto de pantalla
+       y el mapa se queda con el resto. Si no, entre la búsqueda, los botones y la lista, el mapa
+       terminaba MÁS CHICO que en la pantalla normal (2026-09-16). */
+    .card.mapa-full .mapa-layout{ grid-template-rows:auto 1fr; gap:8px; }
+    .card.mapa-full .mapa-layout > div:first-child{ max-height:26vh; }
+    .card.mapa-full .mapa-lista{ max-height:14vh; }
+    .card.mapa-full #mapaObras{ height:100%; min-height:66vh; }
+  }
   /* Cuadro de alta de plaza (2026-08-27) — una sola alta, alcanzable desde Calculadora, Mapa y OT */
   .alta-fondo{position:fixed; inset:0; background:rgba(10,15,30,0.55); z-index:9000; display:flex; align-items:flex-start; justify-content:center; padding:24px 14px; overflow-y:auto;}
   .alta-caja{background:var(--card); border-radius:var(--radius); box-shadow:0 12px 40px rgba(0,0,0,0.3); width:100%; max-width:480px; padding:20px 22px; margin-top:5vh;}
@@ -770,6 +801,15 @@
   .leaflet-tooltip.mapa-etiqueta::before{display:none;}
   .mapa-ref{background:rgba(255,255,255,0.95); border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:12px; line-height:1.7; box-shadow:0 1px 5px rgba(0,0,0,0.22);}
   .mapa-ref b{display:block; margin-bottom:3px; font-size:10.5px; letter-spacing:0.5px; color:var(--text-soft); text-transform:uppercase;}
+  /* Plazas del pliego en el mapa (2026-09-16) */
+  .mapa-pin-lic{ width:14px; height:14px; border:2.5px solid #7a8699; background:#fff;
+                 transform:rotate(45deg); border-radius:3px; box-shadow:0 1px 4px rgba(0,0,0,.25); }
+  .mapa-lic-barra{ display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin:0 0 6px;
+                   font-size:12px; color:var(--text-soft); font-weight:700; }
+  .mapa-lic-btn{ border:1px solid var(--line); background:#fff; border-radius:999px;
+                 padding:3px 11px; font-size:12px; cursor:pointer; color:var(--text-soft); font-weight:600; }
+  .mapa-lic-btn:hover{ border-color:var(--teal-dark); color:var(--teal-dark); }
+  .mapa-lic-btn.on{ background:var(--navy); border-color:var(--navy); color:#fff; }
   .mapa-ref-fila{display:flex; align-items:center; gap:7px;}
   .mapa-ref-dot{width:12px; height:12px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px rgba(0,0,0,0.18); flex:none;}
   .mapa-num{display:inline-flex; align-items:center; justify-content:center; width:21px; height:21px; border-radius:50%; color:#fff; font-size:11px; font-weight:700; flex:none; border:1px solid rgba(0,0,0,0.08);}
@@ -2926,10 +2966,20 @@
     <div style="font-size:17px; font-weight:800; color:#16233f;">Alumbrado Público</div>
     <div style="font-size:12.5px; color:#8b93a1; margin-top:2px; letter-spacing:.4px;">EMA SERVICIOS</div>
     <div style="font-size:13.5px; color:#16233f; margin-top:18px;">Poné la clave de entrada para continuar</div>
-    <input type="password" id="portadaClave" inputmode="numeric" autocomplete="off" enterkeyhint="go" aria-label="Clave de entrada"
-           style="width:100%; margin-top:10px; padding:12px 14px; font-size:17px; text-align:center; letter-spacing:3px; border:1px solid #e4e8f0; border-radius:10px; background:#f3f5f9; color:#16233f; box-sizing:border-box;">
-    <button type="button" id="portadaBtn"
-            style="width:100%; margin-top:12px; padding:12px; font-size:15px; font-weight:700; color:#fff; background:#4fa8cc; border:none; border-radius:10px; cursor:pointer;">Entrar</button>
+    <!-- La clave va adentro de su propio <form> (2026-09-16). El usuario: *"apenas entro al inicio
+         para buscar una obra me sale mi correo en el buscador"*. Era el navegador: veía un campo
+         `password` suelto, no encontraba ningún casillero de usuario cerca, y le metía el correo
+         guardado al PRIMER casillero de texto de la página — que es el buscador del Inicio.
+         Con el <form> propio, la búsqueda del gestor de contraseñas termina acá adentro y no llega
+         al buscador. `autocomplete="one-time-code"` termina de decirle que esto es un código de
+         entrada y no un usuario y contraseña que haya que recordar. -->
+    <form id="portadaForm" autocomplete="off" onsubmit="return false;" style="margin:0;">
+      <input type="password" id="portadaClave" inputmode="numeric" autocomplete="one-time-code" enterkeyhint="go" aria-label="Clave de entrada"
+             name="clave-de-entrada" data-lpignore="true" data-1p-ignore data-form-type="other"
+             style="width:100%; margin-top:10px; padding:12px 14px; font-size:17px; text-align:center; letter-spacing:3px; border:1px solid #e4e8f0; border-radius:10px; background:#f3f5f9; color:#16233f; box-sizing:border-box;">
+      <button type="button" id="portadaBtn"
+              style="width:100%; margin-top:12px; padding:12px; font-size:15px; font-weight:700; color:#fff; background:#4fa8cc; border:none; border-radius:10px; cursor:pointer;">Entrar</button>
+    </form>
     <div id="portadaMsg" style="font-size:12.5px; color:#c0392b; margin-top:10px; min-height:17px;"></div>
     <label style="display:flex; align-items:center; justify-content:center; gap:6px; margin-top:6px; font-size:12px; color:#8b93a1; cursor:pointer;">
       <input type="checkbox" id="portadaRecordar" checked style="width:auto; margin:0;"> No volver a pedirla en este dispositivo
@@ -3016,7 +3066,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-15 13:11 · dc1dc7</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-16 09:49 · c840f0</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3040,7 +3090,8 @@
 <div class="wrap" id="viewInicio" style="display:none;">
   <div class="inicio-buscador no-print">
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
-    <input type="text" id="inicioBuscar" placeholder="Buscar por plaza, barrio o expediente..." aria-label="Buscar plaza" autocomplete="off" enterkeyhint="search">
+    <input type="search" id="inicioBuscar" name="buscar-plaza" placeholder="Buscar por plaza, barrio o expediente..." aria-label="Buscar plaza"
+           autocomplete="off" enterkeyhint="search" data-lpignore="true" data-1p-ignore data-form-type="other">
   </div>
 
   <div class="inicio-accesos no-print" id="inicioAccesos"></div>
@@ -3076,7 +3127,7 @@
              se sepa, para después editar y guardar. -->
         <label for="plazaBuscar">Buscá la plaza y se llena sola</label>
         <div class="pb-wrap">
-          <input type="text" id="plazaBuscar" autocomplete="off" placeholder="Escribí 2 letras del nombre, del barrio o el ID — ej: «mai», «renaci», «7081»">
+          <input type="text" id="plazaBuscar" autocomplete="off" placeholder="Escribí 2 letras del nombre, del barrio o el ID — ej: «mai», «renaci», «7081»" data-lpignore="true" data-1p-ignore data-form-type="other">
           <div class="pb-lista" id="plazaBuscarLista" style="display:none;"></div>
         </div>
         <div class="hint" id="plazaBuscarMsg" style="margin-top:6px;">Están las <b>244 plazas de la licitación</b>, las <b>36 que ya hicieron</b> y las que tengas cargadas en el tablero. Al elegir una se completan nombre, ID, barrio y zona, y si hay datos de esa plaza se precargan columnas, vínculos y zanjeo para que los corrijas contra el plano.</div>
@@ -3705,7 +3756,7 @@
                  mientras se escribe, por nombre, por ID o por barrio. Los dos quedan sincronizados. -->
             <div style="display:flex; gap:6px; align-items:center;">
               <input type="text" id="otPlazaBuscar" list="otPlazasLista" autocomplete="off" style="flex:1;"
-                     placeholder="Escribí el nombre, el ID o el barrio…">
+                     placeholder="Escribí el nombre, el ID o el barrio…" data-lpignore="true" data-1p-ignore data-form-type="other">
               <button type="button" class="btn-ghost" style="flex:none; padding:8px 12px;" onclick="altaPlazaDesdeOt()" title="Registrar una plaza nueva sin salir de esta pantalla">➕</button>
             </div>
             <datalist id="otPlazasLista"></datalist>
@@ -3764,7 +3815,7 @@
         </div>
         <div class="hint" style="margin-top:4px;">Una sola lista, por etapa de la obra. Tildá la tarea y, si querés, anotá <b>cuánto</b> se prevé (metros, columnas…): sale impreso al lado del casillero que la cuadrilla completa a la vuelta. Los pasos técnicos de cada tarea van en la hoja. De acá salen solos la etapa de la plaza, los puntos de cada persona, el avance del itemizado y las horas de Gastos de obra.</div>
         <div class="ot-tareas-filtro no-print">
-          <input type="search" id="otTareasBuscar" placeholder="Buscar tarea… (zanjeo, tablero, poda)" autocomplete="off">
+          <input type="search" id="otTareasBuscar" placeholder="Buscar tarea… (zanjeo, tablero, poda)" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
           <button type="button" class="btn-ghost" id="otTareasSoloMarcadas" style="padding:6px 10px; font-size:12px;">Ver solo las tildadas</button>
         </div>
         <div id="otActividades" style="margin-top:6px;"></div>
@@ -3943,17 +3994,21 @@
     <h2><span class="dot"></span>Acceso para editar Avance de obra</h2>
     <div id="avanceAuthLoggedOut">
       <div class="hint" style="margin-top:0;">Cualquiera puede VER el tablero de avance, sin iniciar sesión — se sincroniza en vivo entre todas las compus, igual que Stock. Para cargar avance, marcar ítems, valorización o eliminar una plaza hace falta iniciar sesión con la clave del equipo (la misma de Stock).</div>
+      <!-- El par usuario+contraseña va adentro de un <form> propio (2026-09-16): así el gestor de
+           contraseñas sabe exactamente dónde poner el correo y no lo mete en un buscador. -->
+      <form onsubmit="return false;" style="margin:0;">
       <div class="row2">
         <div>
           <label for="avanceAuthEmail">Usuario (mail)</label>
-          <input type="email" id="avanceAuthEmail" placeholder="mail del equipo" autocomplete="username">
+          <input type="email" id="avanceAuthEmail" name="email" placeholder="mail del equipo" autocomplete="username">
         </div>
         <div>
           <label for="avanceAuthPass">Contraseña</label>
-          <input type="password" id="avanceAuthPass" placeholder="contraseña" autocomplete="current-password">
+          <input type="password" id="avanceAuthPass" name="password" placeholder="contraseña" autocomplete="current-password">
         </div>
       </div>
-      <button type="button" class="btn-primary" id="avanceAuthBtn" style="margin-top:10px;">Iniciar sesión</button>
+      <button type="submit" class="btn-primary" id="avanceAuthBtn" style="margin-top:10px;">Iniciar sesión</button>
+      </form>
       <div class="hint" id="avanceAuthMsg"></div>
     </div>
     <div id="avanceAuthLoggedIn" style="display:none;">
@@ -4116,7 +4171,7 @@
       <div class="hint" id="epecBaseMsg" style="margin-top:8px;"></div>
       <div class="summary-tiles" id="epecTiles"></div>
       <div class="it-buscador no-print">
-        <input type="text" id="epecBuscar" placeholder="Buscar una plaza por nombre, ID o barrio…">
+        <input type="text" id="epecBuscar" placeholder="Buscar una plaza por nombre, ID o barrio…" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
         <label class="it-chk"><input type="checkbox" id="epecSoloConItems"> Ocultar las plazas sin ítems cargados</label>
       </div>
       <div class="nota-epec">
@@ -4142,7 +4197,7 @@
       <div class="hint" style="margin-top:0;">Es el <b>ANEXO VI</b> del pliego, tal cual: número de orden, ID de plaza, barrio, renglón y coordenadas.
         Es el <b>catálogo de la licitación</b>, no las obras cargadas — una plaza de acá recién existe como obra cuando se le calcula el cómputo
         y se la registra en el tablero de avance. Las que ya están cargadas salen marcadas en verde, cruzadas por el <b>ID de plaza</b>.</div>
-      <div class="it-buscador"><input type="text" id="epecLicBuscar" placeholder="Buscar por ID de plaza o barrio…"></div>
+      <div class="it-buscador"><input type="text" id="epecLicBuscar" placeholder="Buscar por ID de plaza o barrio…" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other"></div>
       <div class="hint" id="epecLicCab" style="margin-top:10px;"></div>
       <div id="epecLicLista"></div>
     </div>
@@ -4161,7 +4216,7 @@
         <button type="button" class="btn-auto" id="hechasRegBtn" style="margin:0;">＋ Registrar en el tablero las que falten</button>
         <span class="hint" id="hechasRegMsg" style="margin:0;"></span>
       </div>
-      <div class="it-buscador no-print"><input type="text" id="hechasBuscar" placeholder="Buscar por nombre, ID o barrio…"></div>
+      <div class="it-buscador no-print"><input type="text" id="hechasBuscar" placeholder="Buscar por nombre, ID o barrio…" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other"></div>
       <div id="hechasLista"></div>
     </div>
 
@@ -4183,7 +4238,7 @@
     <div class="card no-print plegable" data-pleg="epecTablaK" data-pleg-def="cerrado">
       <h2><span class="dot"></span>La tabla de coeficientes completa</h2>
       <div class="hint" style="margin-top:0;">Los 92 ítems con su K, tal como figuran en el ANEXO I, y al lado lo que sale cada uno con el módulo cargado arriba. Es de consulta: no se edita.</div>
-      <div class="it-buscador"><input type="text" id="epecBuscarItem" placeholder="Buscar un ítem por número o descripción…"></div>
+      <div class="it-buscador"><input type="text" id="epecBuscarItem" placeholder="Buscar un ítem por número o descripción…" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other"></div>
       <div class="tabla-scroll" style="margin-top:12px;"><table class="it-tabla" id="epecTablaK"><thead><tr>
         <th style="width:70px;">Ítem</th><th>Descripción</th><th style="width:70px;">Unidad</th><th style="width:90px; text-align:right;">K</th>
       </tr></thead><tbody id="epecTablaKBody"></tbody></table></div>
@@ -4229,7 +4284,7 @@
       <span class="hint" id="ctrMsg" style="margin:0;"></span>
     </div>
     <div class="summary-tiles" id="ctrTiles"></div>
-    <div class="it-buscador no-print"><input type="text" id="ctrBuscar" placeholder="Buscar un ítem por número o descripción…"></div>
+    <div class="it-buscador no-print"><input type="text" id="ctrBuscar" placeholder="Buscar un ítem por número o descripción…" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other"></div>
     <div class="tabla-scroll" style="margin-top:12px;"><table class="it-tabla" id="ctrTabla"><thead><tr>
       <th style="width:66px;">Ítem</th><th>Descripción</th><th style="width:70px;">Unidad</th>
       <th style="width:78px; text-align:right;">K</th>
@@ -4310,7 +4365,7 @@
       </div>
       <div class="summary-tiles" id="itzTiles"></div>
       <div class="it-buscador no-print">
-        <input type="text" id="itzBuscar" placeholder="Buscar una plaza por nombre, ID o barrio…">
+        <input type="text" id="itzBuscar" placeholder="Buscar una plaza por nombre, ID o barrio…" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
         <label class="it-chk"><input type="checkbox" id="itzSoloConItems"> Ocultar las plazas sin ítems cargados</label>
       </div>
       <div class="hint" id="itzAviso" style="margin-top:10px;"></div>
@@ -4365,16 +4420,24 @@
 </div>
 
 <div class="wrap" id="viewMapa" style="display:none">
-  <div class="card no-print">
+  <div class="card no-print" id="mapaCard">
+    <!-- Solo se ve a pantalla completa: el título largo y la ayuda se esconden para dejarle
+         todo el alto al mapa (2026-09-16). -->
+    <div class="mapa-full-cab">
+      <b style="color:var(--navy);">Mapa de obras</b>
+      <span class="hint" style="margin:0;">Tocá <b>Esc</b> o el botón para volver.</span>
+      <button type="button" class="mapa-full-salir" style="margin-left:auto;" onclick="mapaPantallaCompleta(false)">✕ Salir de pantalla completa</button>
+    </div>
     <h2><span class="dot"></span>Mapa de obras — todas las plazas de Córdoba</h2>
     <div class="hint" style="margin-top:0;">Elegí una plaza de la lista y después tocá el punto exacto en el mapa para ubicarla — queda guardado para todo el equipo. Cada pin lleva el <b>número</b> que tiene la plaza en la lista de acá al lado y, arriba, su <b>nombre</b> (se puede apagar con «Ver nombres»). El <b>color</b> indica el avance — la referencia está abajo a la derecha del mapa. Tocá un pin para ver el detalle.</div>
     <div id="mapaConnBanner" style="display:none; color:var(--danger); background:rgba(255,107,107,0.15); border:1px solid var(--danger); border-radius:8px; padding:10px 12px; margin:12px 0; font-size:13px; line-height:1.5;">⚠ No se pudo cargar el mapa (Leaflet/OpenStreetMap) — revisá la conexión a internet de este dispositivo y volvé a esta pestaña.</div>
     <div class="mapa-layout" id="mapaLayout">
       <div>
         <div class="hint" style="margin-top:0; margin-bottom:6px;">📍 Plaza elegida para ubicar: <b id="mapaSeleccionLabel">ninguna — elegí una de la lista</b></div>
-        <input type="text" id="mapaBuscar" placeholder="Buscar plaza por nombre, barrio o ID..." oninput="renderMapaObras()" style="margin-bottom:6px;">
+        <input type="text" id="mapaBuscar" placeholder="Buscar plaza por nombre, barrio o ID..." oninput="renderMapaObras()" style="margin-bottom:6px;" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
         <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px; flex-wrap:wrap;">
           <button type="button" class="btn-ghost" style="padding:4px 10px; font-size:12px;" onclick="mapaVerTodas()" title="Ajustar el zoom para que entren todas las plazas ubicadas">🔍 Ver todas</button>
+          <button type="button" class="btn-ghost" id="mapaFullBtn" style="padding:4px 10px; font-size:12px;" onclick="mapaPantallaCompleta()" title="Agrandar el mapa a toda la pantalla (Esc para volver)">⛶ Pantalla completa</button>
           <button type="button" class="btn-ghost" id="mapaAltaBtn" style="padding:4px 10px; font-size:12px;" onclick="mapaModoAltaToggle()" title="Registrar una plaza nueva tocando su punto en el mapa">➕ Nueva plaza acá</button>
           <label style="display:flex; align-items:center; gap:5px; font-size:12.5px; margin:0; cursor:pointer;">
             <input type="checkbox" id="mapaVerNombresChk" checked style="width:auto; margin:0;" onchange="toggleMapaVerNombres(this.checked)">
@@ -4382,6 +4445,16 @@
           </label>
         </div>
         <div class="hint" id="mapaContador" style="margin:0 0 6px;"></div>
+        <!-- Las 244 del pliego, con las coordenadas del ANEXO VI (2026-09-16) -->
+        <div class="mapa-lic-barra">
+          <span>Plazas del pliego:</span>
+          <button type="button" class="mapa-lic-btn" data-lic="no" onclick="mapaLicElegir('no')">Ninguna</button>
+          <button type="button" class="mapa-lic-btn" data-lic="todas" onclick="mapaLicElegir('todas')">Las 244</button>
+          <button type="button" class="mapa-lic-btn" data-lic="A" onclick="mapaLicElegir('A')">Este</button>
+          <button type="button" class="mapa-lic-btn" data-lic="B" onclick="mapaLicElegir('B')">Centro</button>
+          <button type="button" class="mapa-lic-btn" data-lic="C" onclick="mapaLicElegir('C')">Oeste</button>
+        </div>
+        <div class="hint" id="mapaLicCont" style="margin:0 0 8px;"></div>
         <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-soft); font-weight:600; margin-bottom:8px; cursor:pointer;">
           <input type="checkbox" id="mapaOcultarFinalizadasChk" style="width:auto; margin:0;" onchange="toggleMapaOcultarFinalizadas(this.checked)">
           Ocultar plazas finalizadas
@@ -4406,17 +4479,19 @@
         <div id="stockConnBanner" style="display:none; color:var(--danger); background:rgba(255,107,107,0.15); border:1px solid var(--danger); border-radius:8px; padding:10px 12px; margin-bottom:12px; font-size:13px; line-height:1.5;"></div>
         <div id="stockAuthLoggedOut">
           <div class="hint" style="margin-top:0;">Cualquiera puede VER el stock, sin iniciar sesión. Para registrar, eliminar, importar o reiniciar movimientos hace falta iniciar sesión con la clave del equipo.</div>
+          <form onsubmit="return false;" style="margin:0;">
           <div class="row2">
             <div>
               <label for="stockAuthEmail">Usuario (mail)</label>
-              <input type="email" id="stockAuthEmail" placeholder="mail del equipo" autocomplete="username">
+              <input type="email" id="stockAuthEmail" name="email" placeholder="mail del equipo" autocomplete="username">
             </div>
             <div>
               <label for="stockAuthPass">Contraseña</label>
-              <input type="password" id="stockAuthPass" placeholder="contraseña" autocomplete="current-password">
+              <input type="password" id="stockAuthPass" name="password" placeholder="contraseña" autocomplete="current-password">
             </div>
           </div>
-          <button type="button" class="btn-primary" id="stockAuthBtn" style="margin-top:10px;">Iniciar sesión</button>
+          <button type="submit" class="btn-primary" id="stockAuthBtn" style="margin-top:10px;">Iniciar sesión</button>
+          </form>
           <div class="hint" id="stockAuthMsg"></div>
         </div>
         <div id="stockAuthLoggedIn" style="display:none;">
@@ -4502,7 +4577,7 @@
         <div class="row2">
           <div>
             <label for="stockMovBuscar">Buscar (producto, destino, quién)</label>
-            <input type="text" id="stockMovBuscar" placeholder="Ej: cable, Hípica, Juan...">
+            <input type="text" id="stockMovBuscar" placeholder="Ej: cable, Hípica, Juan..." autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
           </div>
           <div>
             <label for="stockMovFiltroPlaza">Filtrar por plaza</label>
@@ -4544,7 +4619,7 @@
         <div class="summary-tiles" id="stockResumenTiles"></div>
 
         <label style="margin-top:14px;" for="stockBuscar">Buscar (código o descripción)</label>
-        <input type="text" id="stockBuscar" placeholder="Ej: cable, BPN, terminal...">
+        <input type="text" id="stockBuscar" placeholder="Ej: cable, BPN, terminal..." autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
         <div class="checkbox-line" style="margin-top:8px;">
           <input type="checkbox" id="stockSoloFaltantes">
           <label style="margin:0;" for="stockSoloFaltantes">Mostrar solo faltantes / poca cantidad (≤3)</label>
@@ -4600,7 +4675,7 @@
         <div class="hint" id="catMsg" style="margin-top:8px;"></div>
 
         <label style="margin-top:16px;" for="catBuscar">Buscar en el catálogo</label>
-        <input type="text" id="catBuscar" placeholder="Ej: prensacable, morseto...">
+        <input type="text" id="catBuscar" placeholder="Ej: prensacable, morseto..." autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
         <div class="checkbox-line" style="margin-top:8px;">
           <input type="checkbox" id="catVerBajas">
           <label style="margin:0;" for="catVerBajas">Mostrar también los dados de baja</label>
@@ -4788,7 +4863,7 @@
       <div class="inf-paso-cuerpo">
         <div class="inf-paso-tit" id="infSelTit">¿Sobre cuáles?</div>
         <div class="inf-sel-barra">
-          <input type="text" id="infBuscar" placeholder="Buscar…" style="margin:0;">
+          <input type="text" id="infBuscar" placeholder="Buscar…" style="margin:0;" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
           <button type="button" class="btn-ghost inf-mini" id="infTodas">Marcar todas</button>
           <button type="button" class="btn-ghost inf-mini" id="infNinguna">Ninguna</button>
         </div>
@@ -16007,6 +16082,100 @@ function exportarCSV(){
 let mapaLeaflet = null;
 let mapaMarkersLayer = null;
 let mapaSeleccionId = null;
+
+// ---- Las 244 plazas del pliego, directo en el mapa (2026-09-16) ----
+// El usuario: *"del pliego tenés plazas de zona oeste, ¿podemos ponerlas directo en el mapa, ya que
+// tienen la latitud y longitud?"*. Sí: el ANEXO VI trae las coordenadas de las 244 —las 54 del
+// Oeste incluidas— así que no hay que ubicar nada a mano. Se dibujan en su propia capa, con otra
+// forma y otro color, para que no se confundan con las obras cargadas en el tablero:
+//   · pin redondo con número y color de avance = obra del tablero (lo de siempre);
+//   · rombo chico hueco = plaza del pliego todavía no cargada.
+// Las que YA están en el tablero no se dibujan dos veces: manda el pin de la obra real.
+let mapaVerLicitacion = 'no';        // 'no' | 'todas' | 'A' | 'B' | 'C'
+let mapaLicLayer = null;
+const MAPA_LIC_ZONA = { A:{ txt:'Renglón 1 · Zona A (Este)',   corto:'Este',   color:'#2f6fb5' },
+                        B:{ txt:'Renglón 2 · Zona B (Centro)', corto:'Centro', color:'#7a4fb5' },
+                        C:{ txt:'Renglón 3 · Zona C (Oeste)',  corto:'Oeste',  color:'#c2701a' } };
+const MAPA_LIC_LS = 'emaMapaLicitacion';
+try{ const g = localStorage.getItem(MAPA_LIC_LS); if(g) mapaVerLicitacion = g; }catch(e){}
+// ---- Mapa a pantalla completa (2026-09-16) ----
+// El usuario: *"en la computadora el mapa se ve chico, ¿lo podemos agrandar un poco más, o poner un
+// botón para mapa pantalla completa?"*. Las dos cosas: el mapa normal ahora crece con la pantalla, y
+// este botón lo lleva a ocupar todo. Se intenta además la pantalla completa DE VERDAD del navegador
+// (la que esconde las pestañas); si el navegador la rechaza —pasa en algunos iPhone—, igual queda el
+// mapa ocupando toda la ventana, que es lo que se quería.
+let mapaEstaFull = false;
+function mapaPantallaCompleta(v){
+  const card = document.getElementById('mapaCard');
+  if(!card) return;
+  mapaEstaFull = (v === undefined) ? !mapaEstaFull : !!v;
+  card.classList.toggle('mapa-full', mapaEstaFull);
+  document.body.classList.toggle('mapa-full-on', mapaEstaFull);
+  const btn = document.getElementById('mapaFullBtn');
+  if(btn) btn.innerHTML = mapaEstaFull ? '✕ Salir de pantalla completa' : '⛶ Pantalla completa';
+  try{
+    if(mapaEstaFull){
+      if(card.requestFullscreen) card.requestFullscreen().catch(()=>{});
+    } else if(document.fullscreenElement && document.exitFullscreen){
+      document.exitFullscreen().catch(()=>{});
+    }
+  }catch(e){}
+  // Leaflet necesita que le avisen que cambió de tamaño, si no queda la mitad del mapa en gris.
+  [60, 260, 520].forEach(ms=> setTimeout(()=>{ try{ if(mapaLeaflet) mapaLeaflet.invalidateSize(); }catch(e){} }, ms));
+}
+window.mapaPantallaCompleta = mapaPantallaCompleta;
+// Esc vuelve atrás, y si el usuario sale de la pantalla completa del navegador por su cuenta
+// (con F11 o con la X del navegador), la pantalla se acomoda sola.
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && mapaEstaFull) mapaPantallaCompleta(false); });
+document.addEventListener('fullscreenchange', ()=>{
+  if(!document.fullscreenElement && mapaEstaFull) mapaPantallaCompleta(false);
+});
+
+function mapaLicElegir(v){
+  mapaVerLicitacion = v;
+  try{ localStorage.setItem(MAPA_LIC_LS, v); }catch(e){}
+  renderMapaObras();
+}
+window.mapaLicElegir = mapaLicElegir;
+// Las del pliego que corresponde mostrar: las del renglón elegido que todavía NO están cargadas.
+function plazasLicitacionParaMapa(){
+  if(mapaVerLicitacion === 'no') return { lista:[], yaCargadas:0 };
+  const todas = (window.PLAZAS_LICITACION || []).filter(x=> mapaVerLicitacion === 'todas' || x[5] === mapaVerLicitacion);
+  const ids = new Set();
+  (avanceObras||[]).forEach(a=>{
+    (typeof idsDePlaza === 'function' ? idsDePlaza(a.obraId) : [String(a.obraId||'')]).forEach(i=>{ if(i) ids.add(i); });
+  });
+  const estaCargada = x=> (typeof idsDePlaza === 'function' ? idsDePlaza(x[1]) : [String(x[1])]).some(i=> ids.has(i));
+  const lista = todas.filter(x=> !estaCargada(x) && Number(x[3]) && Number(x[4]));
+  return { lista, yaCargadas: todas.length - lista.length };
+}
+// Registrar una plaza del pliego en el tablero, con su ubicación ya puesta. Cero carga a mano.
+window.registrarPlazaDelPliego = async function(id){
+  const x = (window.PLAZAS_LICITACION || []).find(y=> String(y[1]) === String(id));
+  if(!x){ alert('No encontré esa plaza en el listado del pliego.'); return; }
+  if(typeof avanceGuardEdicion === 'function' && !avanceGuardEdicion()) return;
+  const zona = MAPA_LIC_ZONA[x[5]] || { txt:x[5] };
+  const nombre = `Plaza ${x[2]} (ID ${x[1]})`;
+  if(!confirm(`¿Registrar esta plaza en el tablero de avance?\n\n${nombre}\nBarrio: ${x[2]}\n${zona.txt}\n\nQueda ubicada en el mapa con las coordenadas del pliego (${x[3]}, ${x[4]}) — no hay que marcarla a mano.\nEl nombre lo podés corregir después desde el detalle de la plaza.`)) return;
+  const nuevo = { nombre, obraId:String(x[1]), barrio:String(x[2]||''), direccion:'',
+                  creado:(typeof fechaAISO === 'function') ? fechaAISO(new Date()) : '', estado:'Pendiente',
+                  secciones:[{ titulo:'OTROS ÍTEMS (agregados a mano)', items:[], extra:true }],
+                  valorItems:[], valorItemsEpec:[], grupos:[], etapas:{},
+                  fechaEncendido:'', listaParaEncender:false, lat:Number(x[3]), lng:Number(x[4]) };
+  try{
+    const nuevoId = await window.fbAvanceCrear(nuevo);
+    if(!avanceObras.some(a=>a.id===nuevoId)) avanceObras.push({ ...nuevo, id:nuevoId });
+    if(typeof renderAvanceTablero === 'function') renderAvanceTablero();
+    if(typeof poblarOtPlazas === 'function') poblarOtPlazas();
+    if(typeof poblarParteObraDatalist === 'function') poblarParteObraDatalist();
+    if(typeof poblarHistPlazas === 'function') poblarHistPlazas();
+    if(typeof poblarStockFiltroPlazas === 'function') poblarStockFiltroPlazas();
+    if(typeof renderEpec === 'function') try{ renderEpec(); }catch(e){}
+    renderMapaObras();
+  }catch(e){
+    alert('No se pudo registrar la plaza (revisá tu conexión a internet). No se guardó nada.');
+  }
+};
 // El usuario pidió "algo que limpie el listado de nombres una vez terminada" — filtro de solo
 // pantalla (no se guarda en Firestore ni se sincroniza entre dispositivos, como avanceActivoId):
 // oculta de la lista Y de los pines del mapa las plazas ya "Finalizada" por etapas, sin borrar ni
@@ -16091,6 +16260,8 @@ function initMapaObras(){
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(mapaLeaflet);
     mapaMarkersLayer = L.layerGroup().addTo(mapaLeaflet);
+    // Capa aparte para las plazas del pliego: se prende y se apaga sin tocar los pines de las obras.
+    mapaLicLayer = L.layerGroup().addTo(mapaLeaflet);
     // Referencia de colores fija en el mapa: sin esto, el color del pin no dice nada por sí solo.
     mapaRefControl = L.control({ position:'bottomright' });
     mapaRefControl.onAdd = function(){
@@ -16325,6 +16496,40 @@ function renderMapaObras(){
     marker.addTo(mapaMarkersLayer);
     mapaMarcadores[a.id] = marker;
   });
+
+  // ---- Las plazas del pliego (2026-09-16) ----
+  if(mapaLicLayer){
+    mapaLicLayer.clearLayers();
+    const lic = plazasLicitacionParaMapa();
+    lic.lista.forEach(x=>{
+      const z = MAPA_LIC_ZONA[x[5]] || { txt:x[5], color:'#7a8699', corto:x[5] };
+      const icono = L.divIcon({
+        className: '',
+        html: `<div class="mapa-pin-lic" style="border-color:${z.color}; color:${z.color};" title="${escHtml(x[2])} · ID ${escHtml(String(x[1]))}"></div>`,
+        iconSize: [16,16], iconAnchor: [8,8], popupAnchor: [0,-8], tooltipAnchor: [0,2]
+      });
+      const m = L.marker([Number(x[3]), Number(x[4])], { icon: icono, title: `${x[2]} · ID ${x[1]}` });
+      m.bindPopup(`<div style="min-width:190px; font-size:13px;">
+        <b>N° ${x[0]} — ID ${escHtml(String(x[1]))}</b><br>
+        ${escHtml(String(x[2]||''))}<br>
+        <span style="color:${z.color}; font-weight:700;">${escHtml(z.txt)}</span><br>
+        <span style="color:var(--text-soft); font-family:ui-monospace,monospace; font-size:11px;">${x[3]}, ${x[4]}</span>
+        <div style="margin-top:6px; color:var(--text-soft); font-size:12px;">Está en el pliego (ANEXO VI) pero <b>todavía no se cargó</b> en el tablero de avance.</div>
+        <div style="margin-top:6px; display:flex; gap:5px; flex-wrap:wrap;">
+          <button type="button" class="mapa-popup-btn" style="margin:0;" onclick="registrarPlazaDelPliego('${escHtml(String(x[1]))}')" ${window.__fbUser?'':'disabled title="Iniciá sesión para registrarla"'}>＋ Registrar en el tablero</button>
+          <button type="button" class="mapa-popup-btn" style="margin:0; background:var(--teal-dark);" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${x[3]},${x[4]}','_blank')">🧭 Cómo llegar</button>
+        </div>
+      </div>`);
+      m.addTo(mapaLicLayer);
+    });
+    document.querySelectorAll('.mapa-lic-btn').forEach(b=> b.classList.toggle('on', b.dataset.lic === mapaVerLicitacion));
+    const cl = document.getElementById('mapaLicCont');
+    if(cl){
+      cl.innerHTML = mapaVerLicitacion === 'no'
+        ? '<span style="color:var(--text-soft);">Las 244 plazas del pliego están apagadas. Prendelas con los botones de arriba: ya vienen con su ubicación, no hay que marcar nada a mano.</span>'
+        : `◇ <b>${lic.lista.length}</b> plaza(s) del pliego en el mapa${lic.yaCargadas?` · <b>${lic.yaCargadas}</b> ya está(n) en el tablero y se muestran con su pin de obra`:''}. Tocá un rombo para registrarla con su ubicación ya puesta.`;
+    }
+  }
 }
 
 // Autocompletar de nombres de plaza en «Actividad diaria de cuadrilla» — sigue siendo texto libre
@@ -25861,7 +26066,7 @@ const ITEMIZADO_EPEC = [
     <h2 style="margin-top:0;"><span class="dot"></span>Normas y planos — la biblioteca de la obra</h2>
     <div class="hint" style="margin-top:0;">Todo lo que la calculadora cita: los <b>planos tipo</b> de la Dirección de Alumbrado, las <b>normas</b> IRAM / IEC / AEA que piden el pliego y las planillas de datos garantizados, un <b>glosario</b> para el que entra nuevo, y los <b>criterios</b> con que se resuelven las contradicciones. Escribí lo que buscás: «zanja», «jabalina», «TT», «prensacable», «AP-T-008»…</div>
     <div class="nr-cab">
-      <div class="nr-buscar"><span class="nr-lupa">⌕</span><input type="search" id="nrBuscar" placeholder="Buscar un plano, una norma, una palabra…" autocomplete="off"></div>
+      <div class="nr-buscar"><span class="nr-lupa">⌕</span><input type="search" id="nrBuscar" placeholder="Buscar un plano, una norma, una palabra…" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other"></div>
       <button type="button" class="btn-ghost" onclick="imprimir()" title="Imprime lo que se está viendo">🖨 Imprimir</button>
     </div>
     <div class="nr-chips" id="nrChips"></div>
@@ -28736,9 +28941,11 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     c.innerHTML = `<div class="ses-caja">
       <div class="ses-tit"><span class="ses-pto"></span>Sin sesión iniciada</div>
       <div class="ses-hint">Podés <b>mirar todo</b> igual. Para <b>cargar o cambiar</b> datos —cómputos, itemizado, órdenes, pañol— hay que iniciar sesión con la clave del equipo.</div>
-      <input type="email" id="sesMail" placeholder="Correo" autocomplete="username" inputmode="email">
-      <input type="password" id="sesPass" placeholder="Contraseña" autocomplete="current-password">
-      <button type="button" class="btn-primary" id="sesEntrar">Iniciar sesión</button>
+      <form class="ses-form" onsubmit="return false;" style="margin:0; display:contents;">
+        <input type="email" id="sesMail" name="email" placeholder="Correo" autocomplete="username" inputmode="email">
+        <input type="password" id="sesPass" name="password" placeholder="Contraseña" autocomplete="current-password">
+        <button type="submit" class="btn-primary" id="sesEntrar">Iniciar sesión</button>
+      </form>
       <div class="ses-msg" id="sesMsg"></div>
     </div>`;
     $('sesEntrar').addEventListener('click', entrar);
@@ -29072,7 +29279,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       </div>
       ${sinValor ? `<div class="ga-aviso">👷 Hay <b>${sinValor}</b> persona(s) activa(s) <b>sin valor hora</b> en la nómina: sus horas salen como <b>pendientes</b>, no como cero. <button type="button" class="link" data-ir="personal">Cargar el valor hora en Equipo → Personal</button>.</div>` : ''}
       <div class="ga-buscar no-print">
-        <input type="search" id="gaBuscar" placeholder="Buscar plaza por nombre, ID o barrio…" value="${escA(busca)}" autocomplete="off">
+        <input type="search" id="gaBuscar" placeholder="Buscar plaza por nombre, ID o barrio…" value="${escA(busca)}" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
         <div class="inf-chips-filtro" style="margin:0;">
           <button type="button" class="inf-chip${filtro==='con'?' on':''}" data-filtro="con">Con gastos (${conAlgo.length})</button>
           <button type="button" class="inf-chip${filtro==='todas'?' on':''}" data-filtro="todas">Todas (${todas.length})</button>
@@ -29301,6 +29508,30 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 
   toques();
   window.GASTOS = { costeoDe, gastoPorItem, certificadoDe, CATS, render, abrir: id => { plazaAbierta = id; mostrarVista('gastos'); } };
+})();
+</script>
+
+<script>
+// ============================================================
+// SALIR DE LA PANTALLA COMPLETA DEL MAPA AL CAMBIAR DE PESTAÑA (2026-09-16)
+// ============================================================
+// Va último de todo a propósito. `mostrarVista` la envuelven varios bloques (Avance, Gastos…),
+// cada uno guardando la anterior; el guard puesto adentro de la función original no llegaba a
+// correr. Envolviéndola acá, después de todos, éste es el primero en enterarse de cualquier
+// cambio de pantalla. Sin esto, el mapa a pantalla completa tapaba la pestaña nueva.
+(function(){
+  const anterior = window.mostrarVista;
+  if(typeof anterior !== 'function') return;
+  window.mostrarVista = function(v){
+    if(v !== 'mapa'){
+      try{
+        const c = document.getElementById('mapaCard');
+        if(c && c.classList.contains('mapa-full') && typeof window.mapaPantallaCompleta === 'function')
+          window.mapaPantallaCompleta(false);
+      }catch(e){}
+    }
+    return anterior.apply(this, arguments);
+  };
 })();
 </script>
 
