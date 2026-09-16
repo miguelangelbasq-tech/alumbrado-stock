@@ -1886,11 +1886,26 @@
 
   .bar-propia{ background:rgba(56,189,248,.14); color:var(--teal-dark); border-radius:999px;
     padding:1px 8px; font-size:10px; font-weight:700; margin-left:6px; vertical-align:middle; }
+  /* Tarea sacada de un ítem del Anexo I (2026-09-16) */
+  .bar-delitem{ background:rgba(16,185,129,.15); color:#0f6b52; border-radius:999px;
+    padding:1px 8px; font-size:10px; font-weight:700; margin-left:6px; vertical-align:middle; white-space:nowrap; }
+  .bar-acc{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .bar-acc button{ width:auto; }
+  .ti-cuenta{ background:var(--bg-soft); border:1px solid var(--line); border-radius:10px;
+    padding:10px 12px; margin-top:12px; font-size:12.5px; color:var(--text-soft); line-height:1.6; }
+  .ti-cuenta b{ color:var(--navy); }
+  .ti-sel{ max-height:none; }
   #tareaEdit{ position:fixed; inset:0; z-index:1001; }
   #tareaEdit .menu-fondo{ position:absolute; inset:0; background:rgba(11,23,39,.5); opacity:0; transition:opacity .18s; }
   #tareaEdit.abierto .menu-fondo{ opacity:1; }
   #tareaEdit .cierre-panel{ opacity:0; }
   #tareaEdit.abierto .cierre-panel{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  /* El mismo cuadro, para la tarea sacada del itemizado (2026-09-16) */
+  #tareaItem{ position:fixed; inset:0; z-index:1001; }
+  #tareaItem .menu-fondo{ position:absolute; inset:0; background:rgba(11,23,39,.5); opacity:0; transition:opacity .18s; }
+  #tareaItem.abierto .menu-fondo{ opacity:1; }
+  #tareaItem .cierre-panel{ opacity:0; }
+  #tareaItem.abierto .cierre-panel{ opacity:1; transform:translate(-50%,-50%) scale(1); }
 
   /* Nómina del personal (2026-08-31) */
   .per-aviso{ border-radius:10px; padding:9px 12px; font-size:12.5px; line-height:1.5; margin-bottom:10px; }
@@ -3093,7 +3108,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-16 15:47 · 3d2db6</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-16 16:50 · f16e02</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -4846,7 +4861,13 @@
           <th style="text-align:right;" title="10 puntos = 1 K de mano de obra, según el ítem del pliego">Sugerido (pliego)</th><th style="text-align:right;">$ por unidad</th><th class="no-print" style="width:52px;"></th>
         </tr></thead><tbody id="baremoBody"></tbody></table>
       </div>
-      <button type="button" class="btn-auto no-print" onclick="abrirEditorTarea(null)">+ Agregar una tarea propia</button>
+      <div class="bar-acc no-print">
+        <button type="button" class="btn-auto" style="margin:0;" onclick="abrirEditorTarea(null)">+ Agregar una tarea propia</button>
+        <button type="button" class="btn-ghost" style="margin:0;" onclick="abrirTareaDelItemizado()" title="Tomar un ítem del Anexo I y convertirlo en una tarea de la cuadrilla, con sus puntos">+ Agregar una tarea del itemizado</button>
+      </div>
+      <div class="hint" style="margin-top:8px;">La <b>tarea propia</b> es un trabajo que vos inventás y le ponés el nombre y los puntos.
+        La <b>tarea del itemizado</b> sale de un ítem del Anexo I: ya viene con su nombre, su unidad y <b>los puntos calculados desde el K de ese ítem</b> — y desde ahí se los cambiás como quieras.
+        Las dos aparecen después en las órdenes de trabajo, igual que el resto.</div>
       <div class="hint" id="baremoMsg" style="margin-top:10px;"></div>
     </div>
 
@@ -17154,6 +17175,57 @@ function poblarParteObraDatalist(){
   </div>
 </div>
 
+<!-- ============================================================
+     UNA TAREA SACADA DEL ITEMIZADO (2026-09-16)
+     Pedido: *"en cuánto vale cada tarea de personal estaría bueno tener la opción de poner tareas
+     del itemizado igual; o sea, poder agregar propias y del itemizado, y ponerle yo los puntos"*.
+     Se elige un ítem del Anexo I y sale una tarea de la cuadrilla con su nombre, su unidad y los
+     puntos calculados desde el K de ese ítem — que después el usuario cambia a mano.
+     ============================================================ -->
+<div id="tareaItem" class="no-print" style="display:none;">
+  <div class="menu-fondo" onclick="cerrarTareaDelItemizado()"></div>
+  <div class="cierre-panel">
+    <div class="cierre-head">
+      <div>
+        <div class="cierre-titulo">Una tarea del itemizado</div>
+        <div class="cierre-sub">Se toma un ítem del Anexo I y se convierte en tarea de la cuadrilla</div>
+      </div>
+      <button type="button" class="menu-cerrar" onclick="cerrarTareaDelItemizado()" aria-label="Cerrar">×</button>
+    </div>
+    <div class="cierre-cuerpo">
+      <label for="tiBuscar">Buscar el ítem</label>
+      <input type="text" id="tiBuscar" placeholder="Por número o por descripción — ej: «zanjeo», «30», «tablero»" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
+      <label for="tiItem" style="margin-top:12px;">Ítem del Anexo I</label>
+      <select id="tiItem" class="ti-sel"></select>
+      <label for="tiNombre" style="margin-top:12px;">Nombre de la tarea</label>
+      <div class="hint" style="margin-top:0;">Viene el del ítem. Cambialo por el nombre con el que la cuadrilla la conoce.</div>
+      <input type="text" id="tiNombre" placeholder="Cómo se llama esta tarea en la obra">
+      <div class="row2" style="margin-top:12px;">
+        <div>
+          <label for="tiUn">Se mide en</label>
+          <input type="text" id="tiUn" placeholder="columna, metro, plaza…">
+        </div>
+        <div>
+          <label for="tiMo" title="Qué parte del ítem es trabajo de la cuadrilla y no material ni máquina">% de mano de obra</label>
+          <input type="number" id="tiMo" min="0" max="100" step="any" value="60">
+        </div>
+      </div>
+      <div class="ti-cuenta" id="tiCuenta"></div>
+      <label for="tiPts" style="margin-top:12px;">Puntos por unidad</label>
+      <div class="hint" style="margin-top:0;">Viene calculado, pero <b>manda lo que escribas acá</b>.</div>
+      <input type="number" id="tiPts" min="0" step="any" placeholder="0">
+      <label style="margin-top:14px;">Pasos para la cuadrilla (opcional)</label>
+      <div class="hint" style="margin-top:0;">Uno por renglón. Salen impresos en la orden de trabajo.</div>
+      <textarea id="tiPasos" rows="5" placeholder="1) Primer paso&#10;2) Segundo paso"></textarea>
+      <div class="hint" id="tiAviso" style="margin-top:10px;"></div>
+    </div>
+    <div class="cierre-pie">
+      <button type="button" class="btn-ghost" onclick="cerrarTareaDelItemizado()">Cancelar</button>
+      <button type="button" class="btn-primary" style="width:auto; margin:0; padding:10px 18px;" onclick="guardarTareaDelItemizado()">Agregar la tarea</button>
+    </div>
+  </div>
+</div>
+
 <div id="menuLateral" class="no-print" style="display:none;">
   <div class="menu-fondo" onclick="cerrarMenuLateral()"></div>
   <aside class="menu-panel">
@@ -17861,8 +17933,23 @@ function poblarParteObraDatalist(){
     medicion_pat:       { kRef:0.52, mo:0.90, base:'ítem 81 (0,52 K)' },
   };
   const PTS_POR_K_MO = 10;   // 10 puntos = 1 K de mano de obra
+  // De dónde sale el sugerido de una tarea: del baremo de referencia, o —si la tarea se armó desde
+  // un ítem del Anexo I— del K de ese mismo ítem, con la misma regla (2026-09-16).
+  function refSugerido(id){
+    const r = BAREMO_REFERENCIA[id];
+    if(r) return { kRef:r.kRef, mo:r.mo, base:r.base };
+    const t = (typeof tareasPropias !== 'undefined') ? tareasPropias.find(x=> x.id === id) : null;
+    if(t && t.item){
+      const k = (typeof window.epecItemK === 'function') ? num(window.epecItemK(t.item)) : 0;
+      if(k > 0){
+        const mo = num(t.mo, 60) / 100;
+        return { kRef:k, mo, base:'ítem ' + t.item + ' del Anexo I (' + fmt(k,2) + ' K)' };
+      }
+    }
+    return null;
+  }
   function puntosSugeridos(id){
-    const r = BAREMO_REFERENCIA[id]; if(!r) return null;
+    const r = refSugerido(id); if(!r) return null;
     const p = r.kRef * r.mo * PTS_POR_K_MO;
     return Math.round(p * 2) / 2;   // al medio punto
   }
@@ -18042,8 +18129,10 @@ function poblarParteObraDatalist(){
     if(typeof ACTIVIDADES_CATALOGO === 'undefined') return;
     // Sacar del catálogo las propias que ya no están, y agregar/actualizar las que sí.
     for(let i = ACTIVIDADES_CATALOGO.length - 1; i >= 0; i--){
-      if(esTareaPropia(ACTIVIDADES_CATALOGO[i].id) && !tareasPropias.some(t=>t.id===ACTIVIDADES_CATALOGO[i].id)){
+      const idv = ACTIVIDADES_CATALOGO[i].id;
+      if(esTareaPropia(idv) && !tareasPropias.some(t=>t.id===idv)){
         ACTIVIDADES_CATALOGO.splice(i,1);
+        if(typeof TAREA_META !== 'undefined') delete TAREA_META[idv];   // la que salió de un ítem, también
       }
     }
     tareasPropias.forEach(t=>{
@@ -18051,6 +18140,11 @@ function poblarParteObraDatalist(){
       if(ya){ ya.label = t.label; ya.pasos = t.pasos||''; }
       else   ACTIVIDADES_CATALOGO.push({ id:t.id, label:t.label, pasos:t.pasos||'' });
       baremo[t.id] = { un: t.un||'unidad', pts: num(t.pts, PTS_TAREA_MANUAL) };
+      // La que salió de un ítem del Anexo I queda atada a ese ítem: así el renglón del baremo
+      // muestra de dónde viene, y la tarea se agrupa aparte en vez de caer en «Otras» (2026-09-16).
+      if(t.item && typeof TAREA_META !== 'undefined'){
+        TAREA_META[t.id] = { fase:'Tareas del itemizado (Anexo I)', etapas:[], items:[String(t.item)] };
+      }
     });
     refrescarTildesDeLaOrden();
   }
@@ -18132,6 +18226,120 @@ function poblarParteObraDatalist(){
     if(msg){ msg.style.color='var(--amber)';
       msg.textContent='Cambio aplicado acá. Tocá «Guardar» para que lo vea todo el equipo.'; }
   };
+
+  // ==================================================================
+  // UNA TAREA SACADA DEL ITEMIZADO  (2026-09-16)
+  // ==================================================================
+  // El usuario: *"en cuánto vale cada tarea de personal estaría bueno tener la opción de poner
+  // tareas del itemizado igual; o sea, poder agregar propias y del itemizado, y ponerle yo los
+  // puntos"*. Se elige un ítem del Anexo I y sale una tarea de la cuadrilla, con la misma regla de
+  // siempre —10 puntos = 1 K de mano de obra— aplicada al K de ESE ítem, por el % de mano de obra
+  // que ponga el usuario. Los puntos vienen calculados y se pueden pisar a mano: manda lo escrito.
+  //
+  // La tarea se guarda en `tareasPropias`, como cualquier otra, con dos datos más: `item` (de qué
+  // ítem salió) y `mo` (el % de mano de obra). Así el baremo puede volver a sugerir los puntos si
+  // cambia el módulo, y el renglón muestra de dónde viene.
+  const esTareaDeItem = (id)=> String(id||'').startsWith('propia_it_');
+  const tareaPropiaDe = (id)=> tareasPropias.find(t=> t.id === id) || null;
+  const MO_DEFECTO_ITEM = 60;   // % de mano de obra de arranque, editable en el cuadro
+
+  function itemsParaTarea(){
+    const lista = (typeof window.epecItemizado === 'function') ? window.epecItemizado() : [];
+    return lista.filter(it=> !(typeof window.epecEsEventualidad === 'function' && window.epecEsEventualidad(it.id)));
+  }
+  function puntosDesdeItem(itemId, moPct){
+    const k = (typeof window.epecItemK === 'function') ? num(window.epecItemK(itemId)) : 0;
+    if(!(k > 0)) return null;
+    const p = k * (num(moPct, MO_DEFECTO_ITEM) / 100) * PTS_POR_K_MO;
+    return Math.round(p * 2) / 2;       // al medio punto, igual que el resto del baremo
+  }
+  function pintarCuentaTareaItem(){
+    const sel = document.getElementById('tiItem'); if(!sel) return;
+    const id = sel.value;
+    const k = (typeof window.epecItemK === 'function') ? num(window.epecItemK(id)) : 0;
+    const un = (typeof window.epecItemUn === 'function') ? (window.epecItemUn(id)||'') : '';
+    const mo = num((document.getElementById('tiMo')||{}).value, MO_DEFECTO_ITEM);
+    const pts = puntosDesdeItem(id, mo);
+    const caja = document.getElementById('tiCuenta');
+    if(caja){
+      caja.innerHTML = !id ? 'Elegí un ítem de la lista.'
+        : `El ítem <b>${esc(id)}</b> vale <b>${fmt(k,2)} K</b> por ${esc(un||'unidad')}.
+           Si <b>${fmt(mo,0)} %</b> de eso es trabajo de la cuadrilla, con la regla de siempre —<b>10 puntos = 1 K de mano de obra</b>—
+           quedan <b>${pts == null ? '—' : fmt(pts, Number.isInteger(pts)?0:1)} puntos</b> por ${esc(un||'unidad')}.`;
+    }
+    const inpP = document.getElementById('tiPts');
+    if(inpP && !inpP.dataset.tocado) inpP.value = pts == null ? '' : pts;
+  }
+  function llenarSelectorItems(){
+    const sel = document.getElementById('tiItem'); if(!sel) return;
+    const q = ((document.getElementById('tiBuscar')||{}).value||'').toLowerCase().trim();
+    const elegido = sel.value;
+    const todos = itemsParaTarea();
+    const filas = todos.filter(it=> !q || (it.id + ' ' + it.desc + ' ' + (it.cat||'')).toLowerCase().includes(q));
+    sel.innerHTML = filas.length
+      ? filas.map(it=>`<option value="${esc(it.id)}">${esc(it.id)} · ${esc(it.desc)} (${esc(it.un)}, ${fmt(num(it.k),2)} K)</option>`).join('')
+      : `<option value="">— ningún ítem con «${esc(q)}» —</option>`;
+    if(filas.some(it=> String(it.id) === String(elegido))) sel.value = elegido;
+    ponerNombreDelItem();
+  }
+  function ponerNombreDelItem(){
+    const sel = document.getElementById('tiItem'); if(!sel) return;
+    const it = itemsParaTarea().find(x=> String(x.id) === String(sel.value));
+    const nom = document.getElementById('tiNombre'), un = document.getElementById('tiUn');
+    if(nom && !nom.dataset.tocado) nom.value = it ? it.desc : '';
+    if(un  && !un.dataset.tocado)  un.value  = it ? (it.un || 'unidad') : '';
+    pintarCuentaTareaItem();
+  }
+  window.abrirTareaDelItemizado = function(){
+    const caja = document.getElementById('tareaItem'); if(!caja) return;
+    ['tiNombre','tiUn','tiPts'].forEach(id=>{ const e = document.getElementById(id); if(e) delete e.dataset.tocado; });
+    const bus = document.getElementById('tiBuscar'); if(bus) bus.value = '';
+    const mo = document.getElementById('tiMo'); if(mo) mo.value = MO_DEFECTO_ITEM;
+    const av = document.getElementById('tiAviso'); if(av){ av.textContent = ''; av.style.color = ''; }
+    const pa = document.getElementById('tiPasos'); if(pa) pa.value = '';
+    llenarSelectorItems();
+    caja.style.display = '';
+    requestAnimationFrame(()=> caja.classList.add('abierto'));
+    setTimeout(()=>{ const b = document.getElementById('tiBuscar'); if(b) b.focus(); }, 200);
+  };
+  window.cerrarTareaDelItemizado = function(){
+    const c = document.getElementById('tareaItem'); if(!c) return;
+    c.classList.remove('abierto');
+    setTimeout(()=>{ c.style.display = 'none'; }, 180);
+  };
+  window.guardarTareaDelItemizado = function(){
+    const av = document.getElementById('tiAviso');
+    const itemId = (document.getElementById('tiItem')||{}).value || '';
+    const nombre = ((document.getElementById('tiNombre')||{}).value || '').trim();
+    const un     = ((document.getElementById('tiUn')||{}).value || '').trim() || 'unidad';
+    const mo     = Math.max(0, Math.min(100, num((document.getElementById('tiMo')||{}).value, MO_DEFECTO_ITEM)));
+    const pts    = num((document.getElementById('tiPts')||{}).value, 0);
+    const pasos  = ((document.getElementById('tiPasos')||{}).value || '').trim();
+    const decir = (t)=>{ if(av){ av.style.color = 'var(--danger)'; av.textContent = t; } };
+    if(!itemId){ decir('Elegí el ítem del Anexo I.'); return; }
+    if(!nombre){ decir('Poné el nombre de la tarea.'); return; }
+    const id = 'propia_it_' + String(itemId).replace(/[^0-9a-zA-Z]/g,'_');
+    if(tareasPropias.some(t=> t.id === id)){
+      decir('Ese ítem ya tiene su tarea en el baremo. Editala desde la tabla con el lápiz.'); return;
+    }
+    tareasPropias.push({ id, label:nombre, un, pts, pasos, item:String(itemId), mo });
+    sincronizarCatalogoTareas();
+    renderBaremo();
+    cerrarTareaDelItemizado();
+    const msg = document.getElementById('baremoMsg');
+    if(msg){ msg.style.color = 'var(--amber)';
+      msg.textContent = `Se agregó «${nombre}» desde el ítem ${itemId}. Tocá «Guardar» para que lo vea todo el equipo.`; }
+  };
+  // Los tres campos del cuadro: mientras no se toquen, se rellenan solos con lo del ítem.
+  document.addEventListener('input', (e)=>{
+    if(!e.target.closest || !e.target.closest('#tareaItem')) return;
+    if(e.target.id === 'tiBuscar'){ llenarSelectorItems(); return; }
+    if(e.target.id === 'tiMo'){ pintarCuentaTareaItem(); return; }
+    if(['tiNombre','tiUn','tiPts'].includes(e.target.id)) e.target.dataset.tocado = '1';
+  });
+  document.addEventListener('change', (e)=>{
+    if(e.target && e.target.id === 'tiItem') ponerNombreDelItem();
+  });
 
   window.borrarTareaPropia = function(){
     if(!tareaEditandoId || !esTareaPropia(tareaEditandoId)) return;
@@ -18820,13 +19028,16 @@ function poblarParteObraDatalist(){
         const d = baremo[c.id] || { un:'unidad', pts:PTS_TAREA_MANUAL };
         const propia = esTareaPropia(c.id);
         const sug = puntosSugeridos(c.id);
-        const r = BAREMO_REFERENCIA[c.id];
+        const r = refSugerido(c.id);
+        const tp = esTareaDeItem(c.id) ? tareaPropiaDe(c.id) : null;
         const meta = (typeof metaDeTarea === 'function') ? metaDeTarea(c.id) : { items:[] };
         const items = (typeof itemsDeTareaHtml === 'function') ? itemsDeTareaHtml(meta.items) : '';
         const dif = (sug != null && num(d.pts) > 0) ? (sug - num(d.pts)) / num(d.pts) : null;
         const difTxt = dif == null ? '' : (Math.abs(dif) < 0.15 ? '<span class="bar-dif ok">≈</span>' : (dif > 0 ? `<span class="bar-dif sube" title="El pliego la paga mejor de lo que valen los puntos de hoy">▲ ${Math.round(dif*100)}%</span>` : `<span class="bar-dif baja" title="Los puntos de hoy están por encima de lo que paga el pliego">▼ ${Math.round(-dif*100)}%</span>`));
         html += `<tr data-k="${esc(c.id)}">
-          <td><b>${esc(c.label)}</b>${propia?' <span class="bar-propia">propia</span>':''}${items?`<div class="bar-sub">${items}</div>`:''}</td>
+          <td><b>${esc(c.label)}</b>${tp
+              ? ` <span class="bar-delitem" title="Esta tarea se armó desde el ítem ${esc(tp.item)} del Anexo I, tomando el ${fmt(num(tp.mo,60),0)} % de su K como mano de obra">del ítem ${esc(tp.item)}</span>`
+              : (propia ? ' <span class="bar-propia">propia</span>' : '')}${items?`<div class="bar-sub">${items}</div>`:''}</td>
           <td><input type="text" class="bar-un" data-k="${esc(c.id)}" value="${esc(d.un)}" style="width:110px;"></td>
           <td style="text-align:right;"><input type="number" min="0" step="any" class="bar-pts" data-k="${esc(c.id)}" value="${num(d.pts)}" style="width:88px; text-align:right;"></td>
           <td style="text-align:right; white-space:nowrap;">${sug != null ? `<button type="button" class="bar-sug" data-k="${esc(c.id)}" data-pts="${sug}" title="${esc(r.base)} · K de referencia ${fmt(r.kRef,2)} × ${Math.round(r.mo*100)} % de mano de obra × 10. Tocá para copiarlo.">${fmt(sug, Number.isInteger(sug)?0:1)}</button> ${difTxt}` : '<span class="hint" style="margin:0;">—</span>'}</td>
@@ -21972,6 +22183,9 @@ const ITEMIZADO_EPEC = [
   window.epecItemK   = (id)=>{ const it = itemEpec(id); return it ? n2(it.k) : 0; };
   window.epecItemDesc= (id)=>{ const it = itemEpec(id); return it ? it.desc : ''; };
   window.epecItemUn  = (id)=>{ const it = itemEpec(id); return it ? it.un : ''; };
+  // La lista entera del Anexo I, para armar una tarea del baremo desde un ítem (2026-09-16).
+  window.epecItemizado = ()=> ITEMIZADO_EPEC.map(it=>({ ...it }));
+  window.epecEsEventualidad = (id)=> esEventualidad(id);
   window.epecBaseEf  = ()=> baseEf();                 // $ por módulo, ya con IVA si está encendido
   window.epecConIva  = ()=> ivaEncendido();
   window.epecTotales = ()=> ({ modulos: MODULOS_TOTALES, presupuesto: PRESUPUESTO_OFICIAL,
