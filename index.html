@@ -2246,6 +2246,13 @@
   .cl-tag{ background:rgba(245,158,11,.16); color:#8a5a08; border-radius:999px;
            padding:1px 8px; font-size:10.5px; font-weight:800; white-space:nowrap; }
   .cl-auto{ font-size:11px; color:var(--text-soft); }
+  .ctr-hoja-cfg{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:12px;
+                 border:1px dashed var(--line); border-radius:12px; padding:10px 14px; background:var(--bg-soft); }
+  .ctr-hoja-cfg > label{ font-weight:700; color:var(--navy); font-size:13px; }
+  .ctr-hoja-cfg input[type="text"]{ width:min(280px, 60vw); margin:0; }
+  .ctr-hoja-chk{ display:flex; align-items:center; gap:6px; margin:0; font-size:12.5px;
+                 color:var(--text-soft); font-weight:600; cursor:pointer; }
+  .ctr-hoja-chk input{ width:auto; margin:0; }
   .ctr-imprimir{ display:flex; gap:6px; flex-wrap:wrap; }
   .ctr-imprimir button{ margin:0; width:auto; }
   .ctr-cel{ display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
@@ -3081,7 +3088,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-16 11:19 · 4e597e</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-16 12:45 · 6becf2</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -4274,6 +4281,14 @@
         <button type="button" class="btn-ghost" id="ctrImprimirCivil">🖨 Solo civil</button>
         <button type="button" class="btn-ghost" id="ctrImprimirElec">🖨 Solo eléctrico</button>
       </div>
+    </div>
+    <!-- Para quién sale la hoja. Es lo único que se agrega: la hoja impresa NO lleva el K, ni el
+         valor del pliego, ni el porcentaje — eso es cuenta interna (2026-09-16). -->
+    <div class="ctr-hoja-cfg no-print">
+      <label for="ctrPara" style="margin:0;">La hoja se le entrega a</label>
+      <input type="text" id="ctrPara" placeholder="Nombre del contratista (opcional)" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
+      <label class="ctr-hoja-chk"><input type="checkbox" id="ctrEnBlanco"> Dejar columnas en blanco para completar cantidad e importe</label>
+      <span class="hint" style="margin:0; flex-basis:100%;">La hoja impresa lleva <b>solo el trabajo, la unidad y el precio por unidad</b>. No sale el coeficiente K, ni lo que paga el pliego, ni el porcentaje.</span>
     </div>
     <div class="hint" style="margin-top:8px;">Es <b>el mismo itemizado</b> —los mismos ítems, las mismas unidades— pero con <b>lo que le pagamos al contratista</b>
       por cada unidad que hace. Arranca en el <b>25 % del valor del pliego sin IVA</b>, y cualquier precio se puede escribir a mano.
@@ -23741,71 +23756,94 @@ const ITEMIZADO_EPEC = [
     }
   }
 
-  // La lista de precios de contratista, en una hoja para imprimir o mandar por WhatsApp.
+  // ==================================================================
+  // LA HOJA QUE SE LE ENTREGA AL CONTRATISTA  (2026-09-16)
+  // ==================================================================
+  // Pedido del usuario: *"necesito que me imprima el itemizado completo que se le va a mostrar al
+  // contratista, o sea con los ítems y el precio que haya puesto yo —ya sea el ítem completo, el de
+  // electricista o el de civil—. No quiero que diga el 25 % al imprimir ni nada de eso."*
+  //
+  // Antes esta hoja salía con el coeficiente K, el valor que paga el PLIEGO, el «% del ítem» y una
+  // nota que decía «el 25 % del valor del Anexo I». Todo eso es cuenta interna de EMA: puesto en
+  // una hoja que se le entrega al contratista, le estaba mostrando el margen. Ahora la hoja tiene
+  // solo lo que a él le importa: qué trabajo, en qué unidad se mide y cuánto se le paga por unidad.
   let imprimirContratistaRubro = 'todo';
+  let imprimirContratistaPara = '';       // a quién se le entrega (opcional)
+  function leerCfgHojaContratista(){
+    imprimirContratistaPara = ((document.getElementById('ctrPara')||{}).value || '').trim();
+    imprimirContratistaEnBlanco = !!((document.getElementById('ctrEnBlanco')||{}).checked);
+  }
+  let imprimirContratistaEnBlanco = false; // columnas vacías para completar cantidad e importe
   function imprimirContratista(){
-    // La hoja se imprime para UN rubro (o para todo). Así se le entrega al equipo civil solo lo
-    // que le toca a él, con su precio, sin los renglones eléctricos (2026-09-15).
     const rubro = imprimirContratistaRubro || 'todo';
-    // Si es la lista de un rubro, se imprime EXACTAMENTE lo que el usuario armó en esa lista, en
-    // ese orden. Si nunca la armó, se cae al reparto por porcentaje (2026-09-15).
+    // Si la lista de ese rubro está armada, se imprime EXACTAMENTE lo que el usuario armó, en el
+    // orden del itemizado. Si nunca la armó, se cae al reparto por porcentaje.
     const L = esRubroLista(rubro) ? listaDe(rubro) : null;
     const usaLista = !!(L && L.sembrada);
-    let filas = '', filasPropios = '';
+    const enBlanco = !!imprimirContratistaEnBlanco;
+    const colsExtra = enBlanco ? '<th class="q" style="width:70px;">Cantidad</th><th class="q" style="width:110px;">Importe</th>' : '';
+    const celdasExtra = enBlanco ? '<td class="v"></td><td class="v"></td>' : '';
+
+    // Un solo armado de renglones, para los dos casos: { n (nº de ítem o —), desc, un, pu }
+    let renglones = [];
     if(usaLista){
-      const orden = itemsOrdenados(rubro);
-      filas = orden.map(x=>{
-        if(esRefPropia(x.ref)) return '';
-        const it = itemEpec(x.ref); if(!it) return '';
+      itemsOrdenados(rubro).forEach(x=>{
         const pu = precioDeLista(rubro, x.ref);
-        const r = contratistaPorRubro(it.id);
-        return `<tr><td>${esc(it.id)}</td><td>${esc(it.desc)}</td><td>${esc(it.un)}</td>
-          <td class="q">${fmt(it.k,2)}</td><td class="q">${epecBase>0?plata(n2(it.k)*n2(epecBase)):'—'}</td>
-          <td class="q">${r.esProv?'—':fmt(rubro==='civil'?r.pct:100-r.pct,0)+' %'}</td>
-          <td class="q"><b>${epecBase>0?plata(pu):'—'}</b></td></tr>`;
-      }).join('');
-      filasPropios = orden.map(x=>{
-        if(!esRefPropia(x.ref)) return '';
-        const pp = propioDe(x.ref); if(!pp) return '';
-        return `<tr><td>—</td><td>${esc(pp.desc)}</td><td>${esc(pp.un||'')}</td>
-          <td class="q">—</td><td class="q">—</td><td class="q">—</td>
-          <td class="q"><b>${plata(precioDeLista(rubro, x.ref))}</b></td></tr>`;
-      }).join('');
+        if(esRefPropia(x.ref)){
+          const pp = propioDe(x.ref); if(!pp || !String(pp.desc||'').trim()) return;
+          renglones.push({ n:'—', desc:pp.desc, un:pp.un||'', pu });
+        } else {
+          const it = itemEpec(x.ref); if(!it) return;
+          renglones.push({ n:it.id, desc:it.desc, un:it.un, pu });
+        }
+      });
     } else {
-      filas = ITEMIZADO_EPEC.map(it=>{
-        const r = contratistaPorRubro(it.id);
+      ITEMIZADO_EPEC.forEach(it=>{
         const parte = parteDelRubro(it.id, rubro);
-        if(rubro !== 'todo' && !(parte > 0)) return '';    // no le toca nada de este ítem
-        const pliego = n2(it.k) * n2(epecBase);
-        return `<tr><td>${esc(it.id)}</td><td>${esc(it.desc)}</td><td>${esc(it.un)}</td>
-          <td class="q">${fmt(it.k,2)}</td><td class="q">${epecBase>0?plata(pliego):'—'}</td>
-          ${rubro !== 'todo' ? `<td class="q">${r.esProv?'—':fmt(rubro==='civil'?r.pct:100-r.pct,0)+' %'}</td>` : ''}
-          <td class="q"><b>${epecBase>0?plata(parte):'—'}</b>${contratistaEditado(it.id)?' *':''}</td></tr>`;
-      }).join('');
-      const propios = contratistaPropios.filter(pp=> String(pp.desc||'').trim() && (rubro === 'todo' || pp.rubro === rubro));
-      filasPropios = propios.map(pp=>`<tr><td>—</td><td>${esc(pp.desc)}</td><td>${esc(pp.un||'')}</td>
-          <td class="q">—</td><td class="q">—</td>${rubro !== 'todo' ? '<td class="q">—</td>' : ''}
-          <td class="q"><b>${plata(n2(pp.precio))}</b></td></tr>`).join('');
+        if(rubro !== 'todo' && !(parte > 0)) return;    // de este ítem no le toca nada
+        renglones.push({ n:it.id, desc:it.desc, un:it.un, pu:parte });
+      });
+      contratistaPropios.filter(pp=> String(pp.desc||'').trim() && (rubro === 'todo' || pp.rubro === rubro))
+        .forEach(pp=> renglones.push({ n:'—', desc:pp.desc, un:pp.un||'', pu:n2(pp.precio) }));
     }
-    const hay = contratistaFijado ? 0 : Object.keys(contratistaPrecios).length;
+    const sinPrecio = renglones.filter(r=> !(r.pu > 0)).length;
+    const filas = renglones.map(r=>`<tr><td class="c">${esc(String(r.n))}</td><td>${esc(r.desc)}</td>
+        <td class="c">${esc(r.un)}</td><td class="q"><b>${r.pu > 0 ? plata(r.pu) : '—'}</b></td>${celdasExtra}</tr>`).join('');
+
+    const quien = String(imprimirContratistaPara||'').trim();
+    const rubroTit = rubro === 'civil' ? 'Obra civil' : (rubro === 'electrico' ? 'Instalación eléctrica y montaje' : 'Trabajos completos');
+    // La hoja compartida (`abrirHojaImpresion`) trae el membrete y una tabla básica; el resto de
+    // los estilos de ESTA hoja van acá adentro, para no tocar las demás.
     const cuerpo = `
-      <div class="sub">Lo que se le paga al contratista <b>por cada unidad</b> que hace. Precios <b>SIN IVA</b>.
-        ${rubro === 'civil' ? '<b>Solo la parte de OBRA CIVIL</b>. '
-         : rubro === 'electrico' ? '<b>Solo la parte ELÉCTRICA y de montaje</b>. ' : ''}
-        ${usaLista ? (L.fijado
-            ? `<b>Lista FIJADA</b> el ${esc(fechaCortaCtr(L.fijado.fecha))}${L.fijado.usuario?` por ${esc(L.fijado.usuario)}`:''}: estos precios no se mueven. `
-            : '<b>Lista todavía sin fijar</b>: estos precios se pueden mover. ') : ''}
-        ${contratistaFijado
-          ? `<b>Precios FIJADOS</b> el ${esc(fechaCortaCtr(contratistaFijado.fecha))}${contratistaFijado.usuario?` por ${esc(contratistaFijado.usuario)}`:''} — sacados con el módulo ${plata(n2(contratistaFijado.modulo))} sin IVA al ${fmt(n2(contratistaFijado.pct), n2(contratistaFijado.pct)%1?1:0)} %. No se mueven.`
-          : `Base: <b>${fmt(contratistaPct, contratistaPct%1?1:0)} %</b> del valor del Anexo I${epecBase>0?` · módulo ${plata(epecBase)} sin IVA`:' · falta cargar el valor del módulo'}. <b>Lista todavía sin fijar</b>: estos precios se mueven si cambia el módulo o el porcentaje.`}</div>
-      <table><thead><tr><th>Ítem</th><th>Descripción</th><th>Un.</th><th class="q">K</th>
-        <th class="q">Pliego $/unidad (s/IVA)</th>${rubro !== 'todo' ? '<th class="q">% del ítem</th>' : ''}<th class="q">${rubro === 'civil' ? 'Civil' : (rubro === 'electrico' ? 'Eléctrico' : 'Contratista')} $/unidad (s/IVA)</th></tr></thead><tbody>${filas}</tbody></table>
-      ${filasPropios ? `<h2 style="font-size:13px; margin:16px 0 6px;">Ítems propios — lo que el pliego no itemiza</h2>
-        <table><thead><tr><th>Ítem</th><th>Descripción</th><th>Un.</th><th class="q">K</th>
-        <th class="q">Pliego $/unidad (s/IVA)</th>${rubro !== 'todo' ? '<th class="q">% del ítem</th>' : ''}<th class="q">$/unidad (s/IVA)</th></tr></thead><tbody>${filasPropios}</tbody></table>` : ''}
-      ${hay ? `<div class="sub" style="margin-top:10px;">(*) ${hay} ítem(s) con el precio acordado a mano, fuera del ${fmt(contratistaPct,0)} %.</div>` : ''}
-      <div class="firma"><div>EMA Servicios</div><div>Contratista</div></div>`;
-    const tit = 'Itemizado de contratista' + (rubro === 'civil' ? ' — obra CIVIL' : (rubro === 'electrico' ? ' — ELÉCTRICO y montaje' : ''));
+      <style>
+        td.q, th.q{ text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+        td.c, th.c{ text-align:center; }
+        td.v{ height:22px; background:#fff; }
+        .ctr-hoja-cab{ display:flex; gap:22px; flex-wrap:wrap; font-size:12px; margin-bottom:10px;
+                       border:1px solid #cddbd6; border-radius:6px; padding:8px 12px; background:#fafcfb; }
+        .ctr-hoja-cab .linea{ display:inline-block; width:180px; border-bottom:1px solid #90a29b; }
+        .firma{ margin-top:46px; display:flex; justify-content:space-between; }
+        .firma div{ width:40%; border-top:1px solid #183028; padding-top:5px; text-align:center;
+                    color:#5b7a70; font-size:11px; }
+        tfoot th{ background:#eef5f2; }
+        @media print{ .ctr-hoja-cab{ background:#fff; } }
+      </style>
+      <div class="ctr-hoja-cab">
+        <div><b>Para:</b> ${quien ? esc(quien) : '<span class="linea"></span>'}</div>
+        <div><b>Trabajos:</b> ${esc(rubroTit)}</div>
+        <div><b>Fecha:</b> ${esc(typeof formatFechaCorta === 'function' ? formatFechaCorta(fechaAISO(new Date())) : '')}</div>
+      </div>
+      <div class="sub">Precios acordados <b>por unidad</b> de trabajo terminado. Los importes son <b>sin IVA</b>.
+        Se abona por la cantidad efectivamente ejecutada y aprobada de cada ítem.</div>
+      <table><thead><tr><th style="width:52px;">Ítem</th><th>Descripción del trabajo</th>
+        <th style="width:60px;">Unidad</th><th class="q" style="width:130px;">Precio por unidad</th>${colsExtra}</tr></thead>
+        <tbody>${filas || '<tr><td colspan="4" style="text-align:center; padding:14px;">La lista está vacía.</td></tr>'}</tbody>
+        ${enBlanco ? '<tfoot><tr><th colspan="' + (4 + 1) + '" style="text-align:right;">TOTAL</th><th class="v"></th></tr></tfoot>' : ''}
+      </table>
+      ${sinPrecio ? `<div class="sub" style="margin-top:8px;">Hay ${sinPrecio} ítem(s) sin precio acordado todavía.</div>` : ''}
+      <div class="sub" style="margin-top:12px;">Total de ítems: <b>${renglones.length}</b>.</div>
+      <div class="firma"><div>EMA Servicios</div><div>${quien ? esc(quien) : 'Contratista'}</div></div>`;
+    const tit = 'Itemizado de contratista' + (rubro === 'civil' ? ' — Obra civil' : (rubro === 'electrico' ? ' — Instalación eléctrica y montaje' : ''));
     if(typeof abrirHojaImpresion === 'function'){ abrirHojaImpresion(tit, cuerpo); return; }
     const w = window.open('', '_blank');
     if(!w){ alert('El navegador bloqueó la ventana de impresión. Permití las ventanas emergentes para este sitio.'); return; }
@@ -24488,7 +24526,7 @@ const ITEMIZADO_EPEC = [
         renderListaRubro(); guardarContratista(document.getElementById('clMsg'));
         return;
       }
-      if(e.target.id === 'clImprimir'){ imprimirContratistaRubro = ctrVista; imprimirContratista(); return; }
+      if(e.target.id === 'clImprimir'){ imprimirContratistaRubro = ctrVista; leerCfgHojaContratista(); imprimirContratista(); return; }
       if(e.target.id === 'clFijar'){
         if(!puedeEditar()){ alert('Para fijar la lista hay que iniciar sesión.'); return; }
         const L = listaDe(ctrVista); if(!L) return;
@@ -24513,9 +24551,12 @@ const ITEMIZADO_EPEC = [
         return;
       }
 
-      if(e.target.id === 'ctrImprimir'){ imprimirContratistaRubro = 'todo'; imprimirContratista(); return; }
-      if(e.target.id === 'ctrImprimirCivil'){ imprimirContratistaRubro = 'civil'; imprimirContratista(); return; }
-      if(e.target.id === 'ctrImprimirElec'){ imprimirContratistaRubro = 'electrico'; imprimirContratista(); return; }
+      if(e.target.id === 'ctrImprimir' || e.target.id === 'ctrImprimirCivil' || e.target.id === 'ctrImprimirElec'){
+        imprimirContratistaRubro = e.target.id === 'ctrImprimirCivil' ? 'civil'
+                                 : (e.target.id === 'ctrImprimirElec' ? 'electrico' : 'todo');
+        leerCfgHojaContratista();
+        imprimirContratista(); return;
+      }
 
       // ---- Ítems propios del contratista (2026-09-15) ----
       if(e.target.id === 'cpAgregar'){
