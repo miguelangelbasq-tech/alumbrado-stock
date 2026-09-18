@@ -3108,7 +3108,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-16 16:50 · f16e02</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-17 15:05 · bc99bc</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -14427,6 +14427,13 @@ function calcular(){
     itemsEx.push({...T, desc:'Reacondicionamiento de columna metálica existente — <b>limpieza, lijado y pintado</b> s/ AP-TC-023, 1 por columna', cant:colExist, un:'Un.', ref:'Ítem 41'});
     itemsEx.push({...T, desc:'Nueva acometida subterránea en columna existente — BPN, portafusible p/ riel DIN, fusibles 2/4 A, terminales, tramo 3×1,5, acrílico y <b>PAT completa con medición</b>; es el ítem que paga la caja y la ferretería de arriba', cant:colExist, un:'Un.', ref:'Ítem 42'});
     if(lumEx > 0) itemsEx.push({...T, desc:`Montaje, conexionado y energización de luminaria LED sobre columna existente — ${lumExOrigen}`, cant:lumEx, un:'Un.', ref:'Ítem 44'});
+    else {
+      // Sin luminarias cargadas ni vínculo para estimarlas: se avisa en el propio cómputo, porque
+      // si esto queda en cero el itemizado no trae el 44 y el informe cuenta las luminarias de
+      // menos (2026-09-17).
+      itemsEx.push({desc:'⚠ <b>Luminarias sobre columna existente: 0.</b> No cargaste cuántas van (casillero «Luminarias que van sobre esas existentes») y no hay vínculo para estimarlas. Si estas columnas llevan luminaria nueva, cargalas: es el <b>ítem 44</b>, una unidad por artefacto, y sin eso el itemizado y el informe de luminarias las cuentan de menos.', cant:'—', un:'—', ref:'Ítem 44'});
+      alertas.push(`<b>Columnas existentes sin luminaria:</b> tenés <b>${colExist}</b> existente(s) y <b>0</b> luminarias sobre ellas. Si llevan artefacto nuevo, cargá cuántas en «Luminarias que van sobre esas existentes» (ítem 44); si no, el itemizado y el informe las cuentan de menos.`);
+    }
     if(colExistAplomar > 0) itemsEx.push({...T, desc:'Aplomado / reubicación de columna existente fuera de plomo — las reubicadas llevan <b>fundación nueva</b>: cargala en Obra civil', cant:colExistAplomar, un:'Un.', ref:'Ítem 43 · 10.9 del cómputo oficial'});
     itemsEx.push({desc:'ℹ Las columnas existentes se cuentan <b>también en Vínculos</b> (brazos, luminarias, BPN, fusibles) y en <b>Puesta a tierra</b> (una jabalina por columna, ya sumadas ahí). <b>No</b> se cuentan en las alturas de Columnas (no se compran) ni en las fundaciones de Obra civil, salvo las reubicadas.', cant:'—', un:'—', ref:'Criterio de la herramienta'});
     itemsEx.push({desc:'ℹ Caso testigo — <b>Alberto Pío ID 3191</b>: 1 columna nueva + 8 existentes. Su cómputo oficial dio 14.1 = <b>8</b> cajas externas, 14.2 = <b>1</b> tablerito, pintura 3.3 = 8 y 3.5 = 1, torta 12.5 = <b>9</b>, aplomado 10.9 = <b>3</b>, 9 acoples triples y 27 luminarias.', cant:'—', un:'—', ref:'Proyecto ejecutivo ID 3191'});
@@ -20084,6 +20091,21 @@ function poblarParteObraDatalist(){
       const gruposVinc = on('toggleVinculos')
         ? (f.vinculoGrupos||[]).filter(g=>n2(g.columnas) > 0).map(g=>({ brazos:brazosDe(g.tipo), columnas:n2(g.columnas) }))
         : [];
+      // Las columnas EXISTENTES también están contadas en Vínculos (la Calculadora lo pide así),
+      // pero sus brazos NO son ítems 1 a 8: se descuentan antes de repartir, empezando por el
+      // grupo más numeroso — el mismo criterio que la vía del listado (2026-09-17). Antes esta vía
+      // los repartía todos entre las nuevas y cargaba columnas nuevas de más.
+      const exCols = (tipo === 'Metálica') ? numC('colExistentes') : 0;
+      if(exCols > 0 && gruposVinc.length){
+        let aDescontar = exCols;
+        gruposVinc.sort((a,b)=> b.columnas - a.columnas).forEach(g=>{
+          if(aDescontar <= 0) return;
+          const usa = Math.min(g.columnas, aDescontar);
+          g.columnas -= usa; aDescontar -= usa;
+        });
+        for(let i = gruposVinc.length - 1; i >= 0; i--) if(gruposVinc[i].columnas <= 0) gruposVinc.splice(i, 1);
+        dudas.push(`${exCols} de los vínculos van sobre <b>columnas existentes</b>: sus brazos <b>no tienen ítem propio</b> en el Anexo I (esas columnas se cobran por 41, 42 y 44), así que se descontaron de los ítems de columna nueva. Si el reparto entre triples y dobles no es ese, corregilo a mano.`);
+      }
 
       const de10 = gruposCol.filter(g=>n2(g.altura) === 10).reduce((t,g)=>t+n2(g.columnas), 0);
       const de7  = gruposCol.filter(g=>n2(g.altura) === 7 ).reduce((t,g)=>t+n2(g.columnas), 0);
@@ -20122,6 +20144,32 @@ function poblarParteObraDatalist(){
         });
         if(de7 > 0 && asignadas7 !== de7)
           dudas.push(`La calculadora tiene ${de7} columna(s) de 7 m pero ${asignadas7} con vínculo asignado. Revisá el reparto de brazos.`);
+      }
+    }
+
+    // ---------- Columnas metálicas EXISTENTES que se reutilizan (2026-09-17) ----------
+    // Hasta hoy esta vía —la de respaldo, cuando el cómputo no tiene listado— NO miraba las
+    // existentes: no traía el 41, el 42, el 43 ni el 44, y encima repartía TODOS los vínculos entre
+    // las columnas nuevas. Se lee igual que el listado: la caja y el reacondicionamiento (42 y 41)
+    // por columna, el aplomado (43) por las marcadas, y la luminaria (44) por las cargadas o, si
+    // quedó en cero, estimada por el vínculo de la plaza, como hace la Calculadora.
+    if(on('toggleColumnas') && String(C.colTipo||'') === 'Metálica'){
+      const ex = numC('colExistentes');
+      if(ex > 0){
+        push(41, ex, `${ex} columna(s) existente(s) a reacondicionar`);
+        push(42, ex, `${ex} acometida(s) nueva(s) en columna existente (incluye la caja externa 14.1)`);
+        const apl = Math.min(numC('colExistAplomar'), ex);
+        if(apl > 0) push(43, apl, `${apl} columna(s) existente(s) a aplomar`);
+        let lumEx = numC('colExistLum');
+        let origen = 'cargadas en la Calculadora';
+        if(!lumEx && on('toggleVinculos')){
+          const vinc = leer(()=> VINCULOS) || [];
+          const grupos = (f.vinculoGrupos||[]).filter(g=> n2(g.columnas) > 0);
+          const cols = grupos.reduce((t,g)=> t + n2(g.columnas), 0);
+          const lums = grupos.reduce((t,g)=>{ const v = vinc.find(x=> x.id === g.tipo); return t + n2(g.columnas) * (v ? n2(v.lum) : 0); }, 0);
+          if(cols > 0){ lumEx = Math.round(lums / cols * ex); origen = `estimadas: ${fmt(lums/cols,2)} luminarias por columna según Vínculos × ${ex} existentes`; }
+        }
+        if(lumEx > 0) push(44, lumEx, `${lumEx} luminaria(s) sobre columna existente (${origen})`);
       }
     }
 
@@ -20227,6 +20275,7 @@ function poblarParteObraDatalist(){
       agregarProvision(push, dudas, c, provisionDe(h, null));
       dudas.push('Este itemizado salió de la foto del formulario, no del listado de materiales: las <b>jabalinas (88)</b> y, si las puso EMA, las luminarias (85) y los cables (86, 87) hay que cargarlos a mano. Si volvés a calcular la plaza, salen solos.');
     }
+    avisarExistentesSin44(out, dudas);
     return { filas:out, dudas };
   }
 
@@ -20506,7 +20555,21 @@ function poblarParteObraDatalist(){
 
     // ---- PROVISIÓN de materiales, ítems 83.1 a 89 (2026-09-06) ----
     agregarProvision(push, dudas, { tipo, de7, de10, ...ctx }, prov);
+    // ---- Columnas existentes SIN luminaria (2026-09-17) ----
+    // El 41 paga limpieza, lijado y pintado; el 42, la acometida. La luminaria sobre una columna
+    // que ya estaba la paga SOLO el 44. Si el cómputo trae el 41 y no el 44, las luminarias de esas
+    // columnas no van a existir en el itemizado ni en el informe, y el usuario ya se comió una:
+    // *"no me están contando todas… no sé si no me está tomando las columnas restauradas"*.
+    avisarExistentesSin44(out, dudas);
     return { filas:out, dudas, origen: deDonde };
+  }
+  function avisarExistentesSin44(out, dudas){
+    const cant = it => (out.find(x=> String(x.item) === String(it)) || {}).cantidad || 0;
+    const ex = Math.max(cant(41), cant(42)), lum = cant(44);
+    if(ex > 0 && lum <= 0)
+      dudas.push(`<b>⚠ ${ex} columna(s) existente(s) (ítem ${cant(41) > 0 ? '41' : '42'}) y NINGUNA luminaria sobre columna existente (ítem 44).</b> El 41 paga limpieza, lijado y pintado, no el artefacto: si esas columnas llevan luminaria nueva, agregá el <b>ítem 44</b> abajo con el selector — <b>una unidad por artefacto</b> (una columna de tres brazos son 3). Si no, el informe de luminarias las va a contar de menos.`);
+    else if(cant(41) > 0 && lum < cant(41))
+      dudas.push(`<b>⚠ ${cant(41)} columna(s) restaurada(s) (ítem 41) y solo ${lum} luminaria(s) sobre existente (ítem 44).</b> Suele ser al menos una por columna: revisá si falta cargar alguna.`);
   }
 
   // Los ítems de PROVISIÓN (83.1 a 89). Los ítems 1–9 pagan el trabajo pero «no incluyen la provisión»
@@ -22185,6 +22248,8 @@ const ITEMIZADO_EPEC = [
   window.epecItemUn  = (id)=>{ const it = itemEpec(id); return it ? it.un : ''; };
   // La lista entera del Anexo I, para armar una tarea del baremo desde un ítem (2026-09-16).
   window.epecItemizado = ()=> ITEMIZADO_EPEC.map(it=>({ ...it }));
+  // Para las pruebas: qué traería «Traer las cantidades de la Calculadora» para una plaza (2026-09-17).
+  window.epecPreviaDe = (a)=>{ armarPrevia(a); const r = previa[a.id]; return r ? JSON.parse(JSON.stringify(r)) : null; };
   window.epecEsEventualidad = (id)=> esEventualidad(id);
   window.epecBaseEf  = ()=> baseEf();                 // $ por módulo, ya con IVA si está encendido
   window.epecConIva  = ()=> ivaEncendido();
@@ -27055,9 +27120,23 @@ const ITEMIZADO_EPEC = [
     return m3;
   }
   function cantidadesDe(a){
-    const q = {};
-    itemsDe(a).forEach(f=>{ q[f.id] = n2(q[f.id]) + n2(f.v.cantidad); });
-    const g = id => n2(q[id]);
+    const q = {}, qh = {};
+    itemsDe(a).forEach(f=>{
+      const c = n2(f.v.cantidad);
+      q[f.id]  = n2(q[f.id]) + c;
+      // Lo HECHO (certificado): la cantidad avanzada, nunca más que la contratada — el mismo tope
+      // que usa el Itemizado 2026 para la plata (2026-09-17).
+      qh[f.id] = n2(qh[f.id]) + Math.min(n2(f.v.cantidadAvanzada), c);
+    });
+    const g = id => n2(q[id]), gh = id => n2(qh[id]);
+    // Luminarias, desarmadas para que se pueda ver de dónde sale cada una (2026-09-17). El usuario:
+    // *"no me están contando todas… no sé si no me está tomando las columnas restauradas"*.
+    //   · en columna NUEVA: un artefacto por brazo de los ítems 1 a 8
+    //   · sobre columna EXISTENTE: ítem 44, que es el ÚNICO ítem del Anexo I que paga una luminaria
+    //     en una columna que ya estaba. El 41 (reacondicionamiento) paga limpieza, lijado y pintado;
+    //     el 42, la acometida; el 43, el aplomado: NINGUNO de los tres trae luminaria. Si una plaza
+    //     tiene el 41 cargado y no el 44, sus luminarias no existen para el pliego ni para acá.
+    const lumNuevaDe = f => f('1')+2*f('2')+3*f('3')+4*f('4') + f('5')+2*f('6')+3*f('7')+4*f('8');
     const vinc = { simple:g('1')+g('5'), doble:g('2')+g('6'), triple:g('3')+g('7'), cuad:g('4')+g('8') };
     const cablePorSec = {};
     let cableM = 0;
@@ -27072,7 +27151,10 @@ const ITEMIZADO_EPEC = [
       colExist: g('41'), colAcomExist: g('42'), colAplom: g('43'), colLumExist: g('44'),
       // Altura de las restauradas: dato propio cargado en el Itemizado 2026 (fila del ítem 41).
       colExist7: n2((a.restauradasAltura||{}).m7), colExist10: n2((a.restauradasAltura||{}).m10),
-      lum: g('1')+2*g('2')+3*g('3')+4*g('4') + g('5')+2*g('6')+3*g('7')+4*g('8') + g('44'),
+      lum: lumNuevaDe(g) + g('44'),
+      lumNueva: lumNuevaDe(g), lumExist: g('44'), lumRetiro: g('45'),
+      lumHecha: lumNuevaDe(gh) + gh('44'), lumNuevaHecha: lumNuevaDe(gh), lumExistHecha: gh('44'),
+      colExistHecha: gh('41'),
       vinc, vincTotal: vinc.simple + vinc.doble + vinc.triple + vinc.cuad,
       tabAereo: g('9'), tabNivel: g('10'), tabTotal: g('9') + g('10'),
       cableM, cablePorSec,
@@ -27631,6 +27713,15 @@ const ITEMIZADO_EPEC = [
     if(SEC_CANT.some(k=> o.sec[k])){
       const cants = o.items.map((a,i)=>({ a, n:i+1, c: cantidadesDe(a) }));
       const sum = campo => cants.reduce((t,x)=> t + n2(x.c[campo]), 0);
+      // Los cuadros de arriba: cuántas plazas, columnas y luminarias hay en lo elegido (2026-09-17).
+      // Es la pregunta «¿cuántas plazas tengo y cuántas luminarias?» contestada en la primera línea.
+      m.tiles.push({ n: N(cants.length,'int'), l:'Plazas en el informe', c:'' });
+      m.tiles.push({ n: N(sum('colMet') + sum('colPrfv'),'int'), l:'Columnas nuevas', c:'' });
+      if(sum('colExist') > 0) m.tiles.push({ n: N(sum('colExist'),'int'), l:'Columnas restauradas (ítem 41)', c:'' });
+      // Los cuadros respetan el modo del informe: con «solo certificado» va lo hecho; con «solo
+      // contratado», lo contratado; con los dos, los dos.
+      if(verC) m.tiles.push({ n: N(sum('lum'),'int'), l:`Luminarias contratadas (${N(sum('lumNueva'),'int').txt} en col. nueva + ${N(sum('lumExist'),'int').txt} sobre existente)`, c:'azul' });
+      if(verA) m.tiles.push({ n: N(sum('lumHecha'),'int'), l:'Luminarias hechas (cargadas como hecho)', c:'verde' });
       const hayHormigon = sum('hormigon') > 0;
       const sinHormigon = cants.filter(x=> x.c.hormigon <= 0 && (x.c.colMet + x.c.colPrfv) > 0).length;
       // Una tabla chica por rubro: N°, plaza, ID y las columnas de ese rubro, con su TOTAL.
@@ -27658,10 +27749,53 @@ const ITEMIZADO_EPEC = [
         const mal = cants.filter(x=> x.c.colExist > 0 && (x.c.colExist7 + x.c.colExist10) > 0 && Math.abs(x.c.colExist7 + x.c.colExist10 - x.c.colExist) > 0.001).map(x=>x.a.nombre);
         if(mal.length) m.avisos.push(`En ${mal.map(esc).join(', ')} las restauradas por altura <b>no suman</b> lo del ítem 41: revisá la fila del ítem 41.`);
       }
-      if(o.sec.cantLuminarias) rubro('Luminarias', 'Un artefacto por brazo: 1 por columna simple, 2 por doble, 3 por triple, 4 por cuádruple (ítems 1 a 8), más las montadas sobre columna existente (ítem 44).',
-        [{t:'En columna nueva', num:true},{t:'Sobre existente (ítem 44)', num:true},{t:'Luminarias (total)', num:true}],
-        x=>[I(x.c.lum - n2(itemsDe(x.a).filter(f=>f.id==='44').reduce((t,f)=>t+n2(f.v.cantidad),0))), I(itemsDe(x.a).filter(f=>f.id==='44').reduce((t,f)=>t+n2(f.v.cantidad),0)), I(x.c.lum)],
-        ()=>{ const ex = cants.reduce((t,x)=> t + itemsDe(x.a).filter(f=>f.id==='44').reduce((u,f)=>u+n2(f.v.cantidad),0), 0); return [I(sum('lum')-ex), I(ex), I(sum('lum'))]; });
+      // ---- Luminarias, con la cuenta a la vista (2026-09-17) ----
+      // El usuario: *"cuántas luminarias… no me están contando todas, necesito saber cuántas
+      // luminarias me dio la Muni y no sé si no me está tomando las columnas restauradas"*.
+      // La tabla desarma el número: cuántas van en columna nueva (un artefacto por brazo, ítems
+      // 1 a 8), cuántas sobre columna existente (ítem 44), cuántas columnas restauradas hay (41)
+      // y cuántas se retiraron (45). Y una columna «Revisar» que dice, plaza por plaza, por qué
+      // el número puede estar corto:
+      //   · restauradas (41) o con acometida nueva (42) SIN el ítem 44 → esas columnas no tienen
+      //     luminaria cargada. El 41 paga limpieza, lijado y pintado; la luminaria la paga SOLO
+      //     el 44. Es el caso típico de «me faltan luminarias».
+      //   · menos luminarias (44) que columnas restauradas (41) → alguna quedó sin artefacto.
+      //   · lo que certificó la Municipalidad, si la plaza cruza con la planilla, cuando no coincide.
+      //   · plazas sin ítems cargados.
+      if(o.sec.cantLuminarias){
+        const revisarDe = x=>{
+          const c = x.c, av = [];
+          if(!itemsDe(x.a).length){ av.push('sin ítems cargados: entra en cero'); return av; }
+          const exSinLum = Math.max(c.colExist, c.colAcomExist);
+          if(exSinLum > 0 && c.lumExist <= 0) av.push(`${I(exSinLum).txt} columna(s) existente(s) (ítem ${c.colExist > 0 ? '41' : '42'}) SIN luminaria: falta cargar el ítem 44`);
+          else if(c.colExist > 0 && c.lumExist < c.colExist) av.push(`${I(c.colExist).txt} restaurada(s) y solo ${I(c.lumExist).txt} luminaria(s) sobre existente (ítem 44): alguna quedó sin artefacto`);
+          if(c.lumRetiro > 0 && c.lumExist <= 0 && exSinLum <= 0) av.push(`se retiraron ${I(c.lumRetiro).txt} luminaria(s) (ítem 45) y no hay ninguna sobre columna existente: si alguna columna se reutilizó, faltan el 41 y el 44`);
+          const h = certifDe(x.a);
+          if(h){
+            const gc = it => n2(h.it[it]);
+            const certNueva = gc('1')+2*gc('2')+3*gc('3')+4*gc('4')+gc('5')+2*gc('6')+3*gc('7')+4*gc('8');
+            const certEx = gc('44'), certTot = certNueva + certEx;
+            if(Math.abs(certTot - c.lum) > 0.001) av.push(`la Municipalidad certificó ${I(certTot).txt} (${I(certNueva).txt} en columna nueva + ${I(certEx).txt} sobre existente); acá hay ${I(c.lum).txt}`);
+          }
+          return av;
+        };
+        const revis = cants.map(x=>({ x, av: revisarDe(x) }));
+        m.secciones.push(tabla('Luminarias — de dónde sale cada una',
+          'Un artefacto por brazo en columna nueva: 1 por simple, 2 por doble, 3 por triple, 4 por cuádruple (ítems 1 a 8). Sobre columna existente, el ítem 44 — es el ÚNICO ítem del Anexo I que paga una luminaria en una columna que ya estaba: el 41 (reacondicionamiento) paga limpieza, lijado y pintado, no el artefacto. «Hechas» es lo cargado como hecho en el Itemizado 2026. Las luminarias las provee EPEC/Municipalidad: el total contratado es lo que hay que recibir; el hecho, lo ya montado.',
+          cab.concat([{t:'Col. nuevas', num:true},{t:'Lum. en col. nueva', num:true},{t:'Col. restauradas (41)', num:true},{t:'Lum. sobre existente (44)', num:true},
+                      {t:'Luminarias contratadas', num:true},{t:'Luminarias hechas', num:true},{t:'Retiradas (45)', num:true},{t:'Revisar'}]),
+          revis.map(({x, av})=>{ const r = filaBase(x).concat([I(x.c.colMet + x.c.colPrfv), I(x.c.lumNueva), I(x.c.colExist), I(x.c.lumExist),
+                      I(x.c.lum), I(x.c.lumHecha), I(x.c.lumRetiro), av.length ? '⚠ ' + av.join(' · ') : '✓']);
+                      if(av.length) r._cls = 'inf-fuera'; return r; }),
+          [pieBase.concat([I(sum('colMet')+sum('colPrfv')), I(sum('lumNueva')), I(sum('colExist')), I(sum('lumExist')),
+                           I(sum('lum')), I(sum('lumHecha')), I(sum('lumRetiro')), ''])]));
+        const conAviso = revis.filter(r=> r.av.length);
+        const sinLum44 = revis.filter(r=> r.av.some(t=> /SIN luminaria|sin artefacto/.test(t)));
+        if(sinLum44.length) m.avisos.push(`<b>Luminarias:</b> en <b>${sinLum44.length}</b> plaza(s) hay columnas existentes (ítem 41 o 42) <b>sin su luminaria cargada</b> (ítem 44): ${sinLum44.map(r=> esc(r.x.a.nombre||'')).join(', ')}. El ítem 41 paga <b>limpieza, lijado y pintado</b>, no el artefacto; la luminaria sobre columna existente la paga <b>solo el 44</b>. Cargá el 44 en esas plazas (una unidad por artefacto: una columna restaurada de tres brazos son <b>3</b>) y el total se corrige solo.`);
+        const cert = revis.filter(r=> r.av.some(t=> /Municipalidad certificó/.test(t)));
+        if(cert.length) m.avisos.push(`<b>Luminarias:</b> en <b>${cert.length}</b> plaza(s) el total no coincide con lo que <b>certificó la Municipalidad</b>: ${cert.map(r=> esc(r.x.a.nombre||'')).join(', ')}. Mirá la columna «Revisar» de la tabla, o el informe «Certificado municipal vs. Calculadora».`);
+        if(!conAviso.length && cants.length) m.avisos.push(`<b>Luminarias:</b> las ${I(sum('lum')).txt} salen de ${I(sum('lumNueva')).txt} en columna nueva (ítems 1 a 8) + ${I(sum('lumExist')).txt} sobre columna existente (ítem 44). Ninguna plaza tiene columnas restauradas sin su ítem 44, y todas las que cruzan con el certificado de la Municipalidad coinciden.`);
+      }
       if(o.sec.cantVinculos) rubro('Vínculos por tipo', 'Un vínculo por columna nueva. El tipo lo dice el ítem con el que se certifica.',
         [{t:'Simple (1 brazo)', num:true},{t:'Doble (2)', num:true},{t:'Triple (3)', num:true},{t:'Cuádruple (4, 10 m)', num:true},{t:'Total', num:true}],
         x=>[I(x.c.vinc.simple), I(x.c.vinc.doble), I(x.c.vinc.triple), I(x.c.vinc.cuad), I(x.c.vincTotal)],
@@ -27696,15 +27830,18 @@ const ITEMIZADO_EPEC = [
         m.secciones.push(tabla('Cantidades de obra',
           'Sale del itemizado de cada plaza, que es lo que se certifica. El hormigón es la excepción: no tiene ítem propio en el Anexo I (está adentro de los ítems 1 a 8), así que se lee del cómputo de la Calculadora.',
           [{t:'N°', num:true, w:'40px'},{t:'Plaza / obra'},{t:'Col. metálicas', num:true},{t:'Col. PRFV', num:true},{t:'Col. restauradas', num:true},
-           {t:'Luminarias', num:true},{t:'Vínculos', num:true},{t:'Tableros', num:true},
+           {t:'Luminarias', num:true},{t:'de ellas, sobre existente (44)', num:true},{t:'Lum. hechas', num:true},{t:'Vínculos', num:true},{t:'Tableros', num:true},
            {t:'Cable (m)', num:true},{t:'Zanjeo (m)', num:true},{t:'Hormigón (m³)', num:true},{t:'Jabalinas', num:true}],
           cants.map(x=>[N(x.n,'int'), x.a.nombre||'', N(x.c.colMet,'int'), N(x.c.colPrfv,'int'), N(x.c.colExist,'int'),
-                        N(x.c.lum,'int'), N(x.c.vincTotal,'int'), N(x.c.tabTotal,'int'),
+                        N(x.c.lum,'int'), N(x.c.lumExist,'int'), N(x.c.lumHecha,'int'), N(x.c.vincTotal,'int'), N(x.c.tabTotal,'int'),
                         N(x.c.cableM,'cant'), N(x.c.zanjeo,'cant'),
                         x.c.hormigon > 0 ? N(x.c.hormigon,'cant') : '—', N(x.c.jabalinas,'int')]),
-          [['', 'TOTAL', N(sum('colMet'),'int'), N(sum('colPrfv'),'int'), N(sum('colExist'),'int'), N(sum('lum'),'int'),
+          [['', 'TOTAL', N(sum('colMet'),'int'), N(sum('colPrfv'),'int'), N(sum('colExist'),'int'), N(sum('lum'),'int'), N(sum('lumExist'),'int'), N(sum('lumHecha'),'int'),
             N(sum('vincTotal'),'int'), N(sum('tabTotal'),'int'), N(sum('cableM'),'cant'),
             N(sum('zanjeo'),'cant'), hayHormigon ? N(sum('hormigon'),'cant') : '—', N(sum('jabalinas'),'int')]]));
+        // El mismo control de las luminarias, también acá: columnas existentes sin el ítem 44.
+        const sinLum44b = cants.filter(x=> Math.max(x.c.colExist, x.c.colAcomExist) > 0 && x.c.lumExist <= 0);
+        if(sinLum44b.length && !o.sec.cantLuminarias) m.avisos.push(`<b>Luminarias:</b> en <b>${sinLum44b.length}</b> plaza(s) hay columnas existentes (ítem 41 o 42) <b>sin su luminaria cargada</b> (ítem 44): ${sinLum44b.map(x=> esc(x.a.nombre||'')).join(', ')}. El 41 paga limpieza, lijado y pintado, no el artefacto: cargá el ítem 44 (una unidad por luminaria) y el total se corrige solo. Tildá «Solo luminarias» para ver la cuenta plaza por plaza.`);
         if(sinHormigon) m.avisos.push(`El <b>hormigón</b> de <b>${sinHormigon}</b> plaza(s) sale en cero porque no tienen cargado el listado de materiales del cómputo. Calculalas en la Calculadora y volvé a generar el informe — el resto de las cantidades no depende de eso.`);
       }
 
