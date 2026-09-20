@@ -2328,6 +2328,22 @@
   .chq-lista li b{ color:inherit; }
   .chq-ok{ margin-top:12px; padding:12px 14px; border-radius:10px; background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.35); color:var(--teal-dark); font-size:13.5px; }
   .it-plaza.chq-resaltada{ outline:3px solid #f0b429; outline-offset:2px; transition:outline .3s; }
+  /* Borrar varias plazas (2026-09-20) */
+  .bv-acc{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  .bv-acc button{ width:auto; padding:7px 12px; font-size:12.5px; }
+  .bv-lista{ margin-top:10px; max-height:360px; overflow:auto; border:1px solid var(--line); border-radius:10px; }
+  .bv-fila{ display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--line); font-size:13px; cursor:pointer; }
+  .bv-fila:last-child{ border-bottom:0; }
+  .bv-fila:hover{ background:var(--bg-soft); }
+  .bv-fila input{ width:auto; margin:0; }
+  .bv-fila b{ color:var(--navy); }
+  .bv-fila .bv-meta{ color:var(--text-soft); font-size:12px; margin-left:auto; text-align:right; white-space:nowrap; }
+  .bv-fila.tildada{ background:rgba(199,74,74,.06); }
+  .bv-vacio{ padding:14px; color:var(--text-soft); font-size:13px; text-align:center; }
+  .bv-pie{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:12px; }
+  .bv-pie .hint{ flex:1; min-width:200px; }
+  .bv-borrar{ background:var(--danger) !important; border-color:var(--danger) !important; }
+  .bv-borrar:disabled{ opacity:.45; }
   .chq-sec-tit{ margin:16px 0 4px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--text-soft); }
   .ctr-tag{ background:rgba(245,158,11,.16); color:#8a5a08; border-radius:999px;
             padding:1px 8px; font-size:10.5px; font-weight:800; white-space:nowrap; }
@@ -3127,7 +3143,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-18 19:26 · a0ee10</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-20 23:46 · 4931f8</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -4263,6 +4279,31 @@
         ítems en <b>cero</b>, plazas <b>sin ítems</b>, plazas <b>repetidas</b>, lo que <b>no coincide con el certificado de la Municipalidad</b> y la <b>provisión</b> que no cierra.
         <b>No toca nada</b>: solo mira y te dice.</div>
       <div id="epChequeoOut"></div>
+    </div>
+
+    <!-- ============================================================
+         BORRAR VARIAS PLAZAS (2026-09-20)
+         Pedido: *"necesito cargar todas las plazas de nuevo mediante la Calculadora"* → *"sí, poné
+         para borrar varias"*. Tildás las que van, una sola confirmación fuerte (hay que escribir
+         BORRAR), y se eliminan de a una con el mismo camino que el botón de cada tarjeta. Va
+         plegada y cerrada, porque es destructivo y no es de todos los días.
+         ============================================================ -->
+    <div class="card no-print plegable" id="cardEpBorrarVarias" data-pleg="epBorrarVarias" data-pleg-def="cerrado">
+      <h2><span class="dot"></span>Borrar varias plazas</h2>
+      <div class="hint" style="margin-top:8px;">Para cuando hay que <b>volver a cargar de cero</b>: tildás las plazas que van, y se eliminan todas juntas con una sola confirmación.
+        Se borra <b>para todo el equipo</b> y <b>no se puede deshacer</b>: se va la plaza entera (ítems, avance, etapas, observaciones).
+        <b>El cómputo de la Calculadora no se toca</b>: queda en el historial para volver a registrarla.</div>
+      <div class="bv-acc no-print">
+        <input type="text" id="bvBuscar" placeholder="Filtrar por nombre, ID o barrio…" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other" style="flex:1; min-width:200px; margin:0;">
+        <button type="button" class="btn-ghost" id="bvTodas" style="margin:0;">Tildar las que se ven</button>
+        <button type="button" class="btn-ghost" id="bvNinguna" style="margin:0;">Destildar todas</button>
+      </div>
+      <div id="bvLista" class="bv-lista"></div>
+      <div class="bv-pie">
+        <div class="hint" id="bvResumen" style="margin:0;"></div>
+        <button type="button" class="btn-primary bv-borrar" id="bvBorrar" style="width:auto; margin:0; padding:9px 16px; font-size:13px;" disabled>🗑 Borrar las tildadas</button>
+      </div>
+      <div class="hint" id="bvMsg" style="margin-top:8px;"></div>
     </div>
 
     <!-- Qué hojas del certificado de la Municipalidad quedaron sin plaza, y qué plazas quedaron sin
@@ -23503,10 +23544,77 @@ const ITEMIZADO_EPEC = [
   window.chequearItemizado = renderChequeo;
   window.epecChequearPlaza = (a)=> chequearPlaza(a);
 
+  // ==================================================================
+  // BORRAR VARIAS PLAZAS  (2026-09-20)
+  // ==================================================================
+  // Las tildadas se guardan por id mientras se filtra y se redibuja. El borrado es el mismo que el
+  // del botón de cada tarjeta (fbAvanceEliminar + sacar del array local), de a una y con avance.
+  const bvSeleccion = new Set();
+  let bvBorrando = false;
+  function renderBorrarVarias(){
+    const lista = document.getElementById('bvLista'); if(!lista) return;
+    const todas = obras().slice().sort((x,y)=> String(x.nombre||'').localeCompare(String(y.nombre||''),'es'));
+    // sacar de la selección las que ya no existen
+    [...bvSeleccion].forEach(id=>{ if(!todas.some(a=> String(a.id) === id)) bvSeleccion.delete(id); });
+    const q = ((document.getElementById('bvBuscar')||{}).value||'').toLowerCase().trim();
+    const visibles = todas.filter(a=> !q || [a.nombre, a.obraId, a.barrio].map(x=> String(x||'').toLowerCase()).some(t=> t.includes(q)));
+    const edit = puedeEditar();
+    lista.innerHTML = visibles.length ? visibles.map(a=>{
+      const nIt = (a.valorItems||[]).length + (a.valorItemsEpec||[]).length;
+      const on = bvSeleccion.has(String(a.id));
+      return `<label class="bv-fila${on?' tildada':''}"><input type="checkbox" class="bv-chk" data-plaza="${esc(a.id)}"${on?' checked':''}${edit?'':' disabled'}>
+        <span><b>${esc(a.nombre||'(sin nombre)')}</b>${a.obraId ? ` <span style="color:var(--text-soft); font-family:var(--mono); font-size:12px;">ID ${esc(a.obraId)}</span>` : ''}</span>
+        <span class="bv-meta">${esc(a.estado||'')}${nIt ? ` · ${nIt} ítem(s)` : ' · sin ítems'}</span></label>`;
+    }).join('') : `<div class="bv-vacio">${todas.length ? 'Ninguna plaza coincide con el filtro.' : 'No hay plazas en el tablero.'}</div>`;
+    const n = bvSeleccion.size;
+    const res = document.getElementById('bvResumen');
+    if(res) res.innerHTML = !edit ? 'Para borrar plazas hay que iniciar sesión.'
+      : (n ? `<b>${n}</b> plaza(s) tildada(s) de ${todas.length}.` : `Tildá las plazas que querés borrar. Hay ${todas.length} en el tablero.`);
+    const btn = document.getElementById('bvBorrar');
+    if(btn){ btn.disabled = !edit || !n || bvBorrando; btn.textContent = n ? `🗑 Borrar las ${n} tildadas` : '🗑 Borrar las tildadas'; }
+  }
+  async function borrarVariasPlazas(){
+    if(bvBorrando) return;
+    if(!puedeEditar()){ alert('Para borrar plazas hay que iniciar sesión.'); return; }
+    const elegidas = obras().filter(a=> bvSeleccion.has(String(a.id)));
+    if(!elegidas.length) return;
+    const msg = document.getElementById('bvMsg');
+    const nIt = elegidas.reduce((t,a)=> t + (a.valorItems||[]).length + (a.valorItemsEpec||[]).length, 0);
+    const nombres = elegidas.map(a=> `• ${a.nombre||'(sin nombre)'}${a.obraId ? ` (ID ${a.obraId})` : ''}`);
+    const lista = nombres.length <= 12 ? nombres.join('\n') : nombres.slice(0,12).join('\n') + `\n… y ${nombres.length - 12} más`;
+    if(!confirm(`¿Seguro que querés eliminar estas ${elegidas.length} plaza(s)?\n\n${lista}\n\nSe pierde TODO lo cargado en ellas: ${nIt} ítem(s) del itemizado, el avance, las etapas y las observaciones.\nSe borra para TODO EL EQUIPO y NO SE PUEDE DESHACER.\n\nLos cómputos de la Calculadora NO se tocan.`)) return;
+    const palabra = prompt(`Última confirmación: para eliminar ${elegidas.length} plaza(s) definitivamente, escribí BORRAR (en mayúsculas):`);
+    if(String(palabra||'').trim() !== 'BORRAR'){ if(msg){ msg.style.color='var(--text-soft)'; msg.textContent='No se borró nada.'; } return; }
+    if(typeof window.fbAvanceEliminar !== 'function'){ alert('No hay conexión con la base compartida.'); return; }
+    bvBorrando = true; renderBorrarVarias();
+    let hechas = 0, fallo = null;
+    for(const a of elegidas){
+      if(msg){ msg.style.color='var(--text-soft)'; msg.textContent = `Borrando… ${hechas + 1} de ${elegidas.length}: ${a.nombre||''}`; }
+      try{
+        await window.fbAvanceEliminar(a.id);
+        const i = avanceObras.indexOf(a); if(i >= 0) avanceObras.splice(i, 1);   // el listener de Firestore lo confirma después
+        delete previa[a.id]; bvSeleccion.delete(String(a.id)); hechas++;
+      }catch(e){ fallo = a; break; }
+    }
+    bvBorrando = false;
+    renderEpec(); refrescarPantallasDeAvance();
+    try{ if(typeof renderAvanceTablero === 'function') renderAvanceTablero(); }catch(e2){}
+    try{ if(typeof renderAvanceDetalle === 'function') renderAvanceDetalle(); }catch(e2){}
+    try{ if(typeof renderMapaObras === 'function') renderMapaObras(); }catch(e2){}
+    try{ if(typeof poblarOtPlazas === 'function') poblarOtPlazas(); }catch(e2){}
+    const m2 = document.getElementById('bvMsg');
+    if(m2){
+      if(fallo){ m2.style.color='var(--danger)'; m2.textContent = `Se borraron ${hechas} de ${elegidas.length} y falló en «${fallo.nombre||''}» (revisá la conexión). Las que faltan siguen tildadas: volvé a tocar el botón.`; }
+      else { m2.style.color='var(--teal-dark)'; m2.textContent = `✔ Se eliminaron ${hechas} plaza(s). Los cómputos siguen en la Calculadora para volver a registrarlas.`; }
+    }
+  }
+  window.borrarVariasPlazas = borrarVariasPlazas;
+
   function renderEpec(){
     const cont = document.getElementById('epecLista');
     if(!cont) return;
     try{ pintarRenglones(); pintarPlazasLicitacion(); renderHechas(); renderCobertura(); }catch(e){}
+    try{ renderBorrarVarias(); }catch(e){}
     // Que el casillero muestre el módulo con el que se está calculando, sin pisar lo que
     // alguien esté tipeando en ese momento. Se escribe según cómo esté el selector con/sin IVA.
     espejarTildeIva();
@@ -24509,6 +24617,12 @@ const ITEMIZADO_EPEC = [
   if(panelEp || panelCtr){
     onEp('click', async (e)=>{
       if(e.target.id === 'epChequear'){ renderChequeo(); return; }
+      if(e.target.id === 'bvBorrar'){ borrarVariasPlazas(); return; }
+      if(e.target.id === 'bvTodas'){
+        document.querySelectorAll('#bvLista .bv-chk').forEach(c=> bvSeleccion.add(String(c.dataset.plaza)));
+        renderBorrarVarias(); return;
+      }
+      if(e.target.id === 'bvNinguna'){ bvSeleccion.clear(); renderBorrarVarias(); return; }
       const abrirChq = e.target.closest('.chq-abrir');
       if(abrirChq){
         const id = abrirChq.dataset.plaza;
@@ -25297,6 +25411,7 @@ const ITEMIZADO_EPEC = [
       }, 0);
     });
     onEp('input', (e)=>{
+      if(e.target.id === 'bvBuscar'){ renderBorrarVarias(); return; }
       if(siEditar(e)) return;
       // El nombre del contratista de la plaza (2026-09-14). No se redibuja mientras se escribe.
       const ctrNom = e.target.closest('.ep-ctr-nom');
@@ -25457,6 +25572,9 @@ const ITEMIZADO_EPEC = [
       if(e.target.id === 'hechasBuscar') renderHechas();
     });
     onEp('change', (e)=>{
+      // Tildes de «Borrar varias plazas» (2026-09-20)
+      const bvChk = e.target.closest('.bv-chk');
+      if(bvChk){ if(bvChk.checked) bvSeleccion.add(String(bvChk.dataset.plaza)); else bvSeleccion.delete(String(bvChk.dataset.plaza)); renderBorrarVarias(); return; }
       // Al elegir un ítem para asignarle a un trabajo hay que redibujar, para que aparezca el aviso.
       const siSel = e.target.closest('.si-item');
       if(siSel){
