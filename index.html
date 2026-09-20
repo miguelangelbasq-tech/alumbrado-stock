@@ -2310,6 +2310,25 @@
     .cp-fila > *:nth-child(5){ grid-column:2; grid-row:1; }
     .cp-fila .cp-det{ grid-column:1 / -1; }
   }
+  /* Chequeo del itemizado (2026-09-18) */
+  .chq-tiles{ display:flex; gap:10px; flex-wrap:wrap; margin:12px 0; }
+  .chq-tile{ flex:1 1 140px; border:1px solid var(--line); border-radius:12px; padding:10px 12px; background:var(--bg-soft); }
+  .chq-tile b{ display:block; font-size:22px; font-family:var(--mono); color:var(--navy); }
+  .chq-tile span{ font-size:11.5px; color:var(--text-soft); text-transform:uppercase; letter-spacing:.04em; font-weight:700; }
+  .chq-tile.rojo b{ color:var(--danger); } .chq-tile.ambar b{ color:#b7791f; } .chq-tile.verde b{ color:var(--teal-dark); }
+  .chq-plaza{ border:1px solid var(--line); border-left:4px solid var(--line); border-radius:10px; padding:10px 12px; margin-top:8px; }
+  .chq-plaza.rojo{ border-left-color:var(--danger); background:rgba(199,74,74,.04); }
+  .chq-plaza.ambar{ border-left-color:#f0b429; background:rgba(245,158,11,.05); }
+  .chq-plaza-cab{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .chq-plaza-cab b{ font-size:14px; color:var(--navy); }
+  .chq-plaza-cab .chq-id{ font-family:var(--mono); font-size:12px; color:var(--text-soft); }
+  .chq-plaza-cab .chq-abrir{ margin-left:auto; width:auto; padding:5px 12px; font-size:12px; }
+  .chq-lista{ margin:6px 0 0; padding-left:18px; font-size:13px; line-height:1.55; }
+  .chq-lista li.rojo{ color:var(--danger); } .chq-lista li.ambar{ color:#8a5a08; } .chq-lista li.info{ color:var(--text-soft); }
+  .chq-lista li b{ color:inherit; }
+  .chq-ok{ margin-top:12px; padding:12px 14px; border-radius:10px; background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.35); color:var(--teal-dark); font-size:13.5px; }
+  .it-plaza.chq-resaltada{ outline:3px solid #f0b429; outline-offset:2px; transition:outline .3s; }
+  .chq-sec-tit{ margin:16px 0 4px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--text-soft); }
   .ctr-tag{ background:rgba(245,158,11,.16); color:#8a5a08; border-radius:999px;
             padding:1px 8px; font-size:10.5px; font-weight:800; white-space:nowrap; }
   #ctrTabla tr.ctr-manual{ background:rgba(245,158,11,.07); }
@@ -3108,7 +3127,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-17 15:05 · bc99bc</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-18 19:26 · a0ee10</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -4225,6 +4244,26 @@
     <!-- El total, siempre a la vista (2026-09-07). Va FUERA de la tarjeta plegable de arriba a
          propósito: adentro desaparecía apenas se cerraba esa tarjeta. -->
     <div id="epecTotalizador"></div>
+
+    <!-- ============================================================
+         CHEQUEO DEL ITEMIZADO (2026-09-18)
+         Pedido: *"voy a tener que llenar todo a mano; ¿qué me recomendás hacer con todo lo que ya
+         existe para que no se confunda la app o no haya errores?"*. Un botón que revisa TODAS las
+         plazas y lista, con nombre y enlace, lo que puede estar mal: ítems repetidos, hecha mayor
+         que contratada, columnas existentes sin luminaria (41 sin 44), ítems en cero, plazas sin
+         ítems, plazas repetidas, lo que no coincide con la Muni y la provisión sospechosa. Solo LEE.
+         ============================================================ -->
+    <div class="card no-print" id="cardEpChequeo">
+      <div class="card-header-row">
+        <h2 style="margin:0;"><span class="dot"></span>Chequeo del itemizado — antes de certificar</h2>
+        <button type="button" class="btn-primary" id="epChequear" style="width:auto; margin:0; padding:9px 16px; font-size:13px;">🔎 Chequear todas las plazas</button>
+      </div>
+      <div class="hint" style="margin-top:8px;">Revisa <b>todas</b> las plazas del tablero y te lista, con nombre y botón para abrirla, lo que conviene mirar antes de certificar:
+        ítems <b>repetidos</b> (la plaza vale el doble), cantidad <b>hecha mayor que la contratada</b> (la diferencia no se cobra), columnas existentes <b>sin su luminaria</b> (41 sin 44),
+        ítems en <b>cero</b>, plazas <b>sin ítems</b>, plazas <b>repetidas</b>, lo que <b>no coincide con el certificado de la Municipalidad</b> y la <b>provisión</b> que no cierra.
+        <b>No toca nada</b>: solo mira y te dice.</div>
+      <div id="epChequeoOut"></div>
+    </div>
 
     <!-- Qué hojas del certificado de la Municipalidad quedaron sin plaza, y qué plazas quedaron sin
          hoja. Es la respuesta a *"hay plazas que no me aparecen para sacar los datos de la Muni,
@@ -23349,6 +23388,121 @@ const ITEMIZADO_EPEC = [
     cont.innerHTML = h;
   }
 
+  // ==================================================================
+  // CHEQUEO DEL ITEMIZADO DE TODAS LAS PLAZAS  (2026-09-18)
+  // ==================================================================
+  // Solo lee. Devuelve, por plaza, una lista de hallazgos con su gravedad:
+  //   rojo  → la plaza cobra mal (ítems repetidos, hecha > contratada, renglón sin ítem válido)
+  //   ambar → hay que mirar (41 sin 44, ítems en cero, sin ítems, no coincide con la Muni, provisión rara)
+  //   info  → dato para tener en cuenta (proyecto fijado, sin cruce con la Muni)
+  function chequearPlaza(a){
+    const h = [];
+    const rojo = t => h.push({ g:'rojo', t }), ambar = t => h.push({ g:'ambar', t }), info = t => h.push({ g:'info', t });
+    const vi = (a.valorItems||[]), ve = (a.valorItemsEpec||[]);
+    const nn = v => fmt(n2(v), Number.isInteger(n2(v)) ? 0 : 2);
+
+    // 1) renglones sin ítem válido
+    const sinItem = vi.filter(v=> v.itemPliego == null || v.itemPliego === '' || !itemEpec(String(v.itemPliego)))
+                .concat(ve.filter(v=> !itemEpec(String(v.itemEpec))));
+    if(sinItem.length) rojo(`<b>${sinItem.length}</b> renglón(es) sin un ítem válido del Anexo I (${sinItem.map(v=> v.itemPliego == null || v.itemPliego === '' ? 'vacío' : ('«' + esc(String(v.itemPliego != null ? v.itemPliego : v.itemEpec)) + '»')).slice(0,4).join(', ')}): no valen nada y confunden. Sacalos o elegiles el ítem.`);
+
+    // 2) ítems repetidos
+    const cuenta = {};
+    vi.forEach(v=>{ if(v.itemPliego != null && v.itemPliego !== ''){ const k = String(v.itemPliego); cuenta[k] = (cuenta[k]||0) + 1; } });
+    ve.forEach(v=>{ const k = String(v.itemEpec); cuenta[k] = (cuenta[k]||0) + 1; });
+    const repes = Object.keys(cuenta).filter(k=> cuenta[k] > 1).sort((x,y)=> parseFloat(x) - parseFloat(y));
+    if(repes.length) rojo(`Ítem(s) <b>repetido(s)</b>: ${repes.map(k=> `<b>${esc(k)}</b> (${cuenta[k]} veces)`).join(', ')}. Se suman entre sí: la plaza vale de más. Dejá un solo renglón por ítem.`);
+
+    // 3) hecha > contratada
+    const todos = vi.map(v=>({ id:String(v.itemPliego), v })).concat(ve.map(v=>({ id:String(v.itemEpec), v })));
+    const mayor = todos.filter(x=> n2(x.v.cantidadAvanzada) > n2(x.v.cantidad) + 0.0001);
+    if(mayor.length) rojo(`En <b>${mayor.length}</b> ítem(s) la cantidad <b>hecha es mayor que la contratada</b> (${mayor.slice(0,4).map(x=> `${esc(x.id)}: ${nn(x.v.cantidadAvanzada)} hechas / ${nn(x.v.cantidad)} contratadas`).join(' · ')}${mayor.length > 4 ? '…' : ''}). La diferencia <b>no se cobra</b>: subí la contratada (con su motivo si el proyecto está fijado).`);
+
+    // 4) cantidades
+    const q = {}; todos.forEach(x=>{ q[x.id] = n2(q[x.id]) + n2(x.v.cantidad); });
+    const g = id => n2(q[id]);
+    const conAlgo = todos.filter(x=> n2(x.v.cantidad) > 0);
+    if(!todos.length) ambar(`<b>Sin ítems cargados.</b> Entra en cero en todos los informes.`);
+    else if(!conAlgo.length) ambar(`Tiene ${todos.length} renglón(es) pero <b>todos en cero</b>: vale cero.`);
+    else {
+      const ceros = todos.filter(x=> !(n2(x.v.cantidad) > 0) && !(n2(x.v.cantidadAvanzada) > 0));
+      if(ceros.length) ambar(`<b>${ceros.length}</b> ítem(s) en <b>cero</b> (${ceros.slice(0,6).map(x=> esc(x.id)).join(', ')}${ceros.length > 6 ? '…' : ''}): si no van, sacalos; si van, ponéles la cantidad.`);
+    }
+
+    // 5) columnas existentes sin luminaria (41 / 42 sin 44)
+    const ex = Math.max(g('41'), g('42'));
+    if(ex > 0 && g('44') <= 0) ambar(`<b>${nn(ex)}</b> columna(s) existente(s) (ítem ${g('41') > 0 ? '41' : '42'}) <b>sin luminaria</b>: falta el <b>ítem 44</b> (una unidad por artefacto). El 41 paga limpieza, lijado y pintado, no la luminaria.`);
+    else if(g('41') > 0 && g('44') < g('41')) ambar(`${nn(g('41'))} restaurada(s) (41) y solo ${nn(g('44'))} luminaria(s) sobre existente (44): suele ser al menos una por columna.`);
+    if(g('45') > 0 && g('44') <= 0 && ex <= 0 && (g('46') + g('47') + g('48')) < g('45')) info(`Se retiraron ${nn(g('45'))} luminaria(s) (45) y solo ${nn(g('46')+g('47')+g('48'))} columna(s)/poste(s) (46–48): si alguna columna quedó y se reutilizó, faltan el 41 y el 44.`);
+
+    // 6) provisión que no cierra
+    const lum85 = g('85.1') + g('85.2');
+    if(lum85 > 0) ambar(`Provisión de <b>luminarias</b> (85.1/85.2) = ${nn(lum85)}: en esta obra las luminarias <b>las provee EPEC</b>. Cobrarlas solo si de verdad las puso EMA.`);
+    const colNuevas = g('1')+g('2')+g('3')+g('4')+g('5')+g('6')+g('7')+g('8');
+    const prov83 = g('83.1')+g('83.2')+g('84.1')+g('84.2');
+    if(prov83 > colNuevas + 0.0001) ambar(`Provisión de columnas (83/84) = ${nn(prov83)} pero hay ${nn(colNuevas)} columna(s) nueva(s) (ítems 1 a 8): se está cobrando más provisión que columnas.`);
+    if(g('89') > g('9') + 0.0001) ambar(`Provisión de tablero aéreo (89) = ${nn(g('89'))} y tableros aéreos (9) = ${nn(g('9'))}.`);
+
+    // 7) contra el certificado de la Municipalidad
+    const hoja = (typeof window.certifDePlaza === 'function') ? window.certifDePlaza(a) : null;
+    if(hoja && conAlgo.length){
+      const dif = [];
+      const ids = new Set(Object.keys(hoja.it).concat(Object.keys(q)));
+      ids.forEach(id=>{
+        if(esEventualidad(id)) return;                      // el certificado es anterior al 83–89
+        const c = n2(hoja.it[id]), m = g(id);
+        if(Math.abs(c - m) > 0.001) dif.push({ id, c, m });
+      });
+      dif.sort((x,y)=> parseFloat(x.id) - parseFloat(y.id));
+      if(dif.length) ambar(`<b>${dif.length}</b> ítem(s) distintos de lo que <b>certificó la Municipalidad</b> (hoja «${esc(hoja.n)}»): ${dif.slice(0,5).map(d=> `${esc(d.id)}: Muni ${nn(d.c)} / acá ${nn(d.m)}`).join(' · ')}${dif.length > 5 ? '…' : ''}. El detalle está en el informe «Certificado municipal vs. Calculadora».`);
+      else info(`Coincide ítem por ítem con lo que certificó la Municipalidad (hoja «${esc(hoja.n)}»).`);
+    } else if(!hoja && a.yaEjecutada) info(`Es una de las 36 ya ejecutadas pero <b>no cruza</b> con ninguna hoja del certificado de la Municipalidad: asignale la hoja desde «Traer lo certificado».`);
+
+    // 8) estado del proyecto
+    if(window.CO && window.CO.estado(a).fijado) info(`Proyecto <b>fijado</b>${window.CO.estado(a).cerrado ? ' y cerrado' : ''}: los cambios entran como ajustes con motivo.`);
+    return h;
+  }
+
+  function renderChequeo(){
+    const out = document.getElementById('epChequeoOut'); if(!out) return;
+    const todas = obras().slice().sort((x,y)=> String(x.nombre||'').localeCompare(String(y.nombre||''),'es'));
+    if(!todas.length){ out.innerHTML = `<div class="hint" style="margin-top:10px;">No hay plazas en el tablero.</div>`; return; }
+    const res = todas.map(a=>{ const h = chequearPlaza(a); const g = h.some(x=>x.g==='rojo') ? 'rojo' : (h.some(x=>x.g==='ambar') ? 'ambar' : 'ok'); return { a, h, g }; });
+    const rojas = res.filter(r=> r.g === 'rojo'), ambar = res.filter(r=> r.g === 'ambar'), ok = res.filter(r=> r.g === 'ok');
+    const repes = (typeof plazasRepetidas === 'function') ? plazasRepetidas(todas) : [];
+    let html = `<div class="chq-tiles">
+      <div class="chq-tile"><b>${todas.length}</b><span>plazas revisadas</span></div>
+      <div class="chq-tile rojo"><b>${rojas.length}</b><span>cobran mal</span></div>
+      <div class="chq-tile ambar"><b>${ambar.length}</b><span>para mirar</span></div>
+      <div class="chq-tile verde"><b>${ok.length}</b><span>sin nada que revisar</span></div>
+      <div class="chq-tile ${repes.length ? 'rojo' : 'verde'}"><b>${repes.length}</b><span>grupo(s) de plazas repetidas</span></div>
+    </div>`;
+    if(repes.length){
+      html += `<div class="chq-sec-tit">Plazas que parecen repetidas — cuentan doble en todo</div>`;
+      repes.forEach(gr=>{
+        html += `<div class="chq-plaza rojo"><div class="chq-plaza-cab"><b>${gr.plazas.map(a=> esc(a.nombre||'(sin nombre)')).join(' ↔ ')}</b>
+          <span class="chq-id">${gr.plazas.map(a=> 'ID ' + esc(a.obraId||'—')).join(' · ')}</span></div>
+          <ul class="chq-lista"><li class="rojo">Comparten ${esc(gr.motivos.join(' y '))}. Unificalas desde el aviso de arriba de la lista (o desde el informe «IDs de plazas»).</li></ul></div>`;
+      });
+    }
+    const pintar = (lista, tit)=>{
+      if(!lista.length) return;
+      html += `<div class="chq-sec-tit">${tit}</div>`;
+      lista.forEach(r=>{
+        html += `<div class="chq-plaza ${r.g}"><div class="chq-plaza-cab"><b>${esc(r.a.nombre||'(sin nombre)')}</b><span class="chq-id">ID ${esc(r.a.obraId||'—')}${r.a.estado ? ' · ' + esc(r.a.estado) : ''}</span>
+          <button type="button" class="btn-ghost chq-abrir" data-plaza="${esc(r.a.id)}">Abrir la plaza ↓</button></div>
+          <ul class="chq-lista">${r.h.map(x=> `<li class="${x.g}">${x.t}</li>`).join('')}</ul></div>`;
+      });
+    };
+    pintar(rojas, 'Cobran mal — arreglar antes de certificar');
+    pintar(ambar, 'Para mirar');
+    if(!rojas.length && !ambar.length && !repes.length) html += `<div class="chq-ok">✔ ${todas.length === 1 ? 'La plaza está limpia' : `Las ${todas.length} plazas están limpias`}: sin ítems repetidos, sin hecha mayor que contratada, sin columnas existentes sin luminaria, sin ítems en cero y sin plazas repetidas.</div>`;
+    if(ok.length && (rojas.length || ambar.length)) html += `<div class="hint" style="margin-top:12px;">Las otras <b>${ok.length}</b> plaza(s) no tienen nada que revisar${ok.some(r=> r.h.length) ? ' (solo datos informativos)' : ''}.</div>`;
+    out.innerHTML = html;
+  }
+  window.chequearItemizado = renderChequeo;
+  window.epecChequearPlaza = (a)=> chequearPlaza(a);
+
   function renderEpec(){
     const cont = document.getElementById('epecLista');
     if(!cont) return;
@@ -24354,6 +24508,18 @@ const ITEMIZADO_EPEC = [
   const onEp = (ev, fn)=>{ if(panelEp) panelEp.addEventListener(ev, fn); if(panelCtr) panelCtr.addEventListener(ev, fn); };
   if(panelEp || panelCtr){
     onEp('click', async (e)=>{
+      if(e.target.id === 'epChequear'){ renderChequeo(); return; }
+      const abrirChq = e.target.closest('.chq-abrir');
+      if(abrirChq){
+        const id = abrirChq.dataset.plaza;
+        epecAbiertas[id] = true;
+        const bus = document.getElementById('epecBuscar'); if(bus && bus.value){ bus.value = ''; }
+        const solo = document.getElementById('epecSoloConItems'); if(solo && solo.checked) solo.checked = false;
+        renderEpec();
+        const card = document.querySelector(`.it-plaza[data-epec="${CSS.escape(String(id))}"]`);
+        if(card){ card.scrollIntoView({ behavior:'smooth', block:'start' }); card.classList.add('chq-resaltada'); setTimeout(()=> card.classList.remove('chq-resaltada'), 2500); }
+        return;
+      }
       const impr = e.target.closest('.it-imprimir-ep');
       if(impr){
         const id = impr.dataset.plaza;
