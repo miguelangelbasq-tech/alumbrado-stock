@@ -3162,7 +3162,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 12:32 · 1b0ea6</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 13:23 · b78052</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -11004,6 +11004,23 @@ function construirGruposAvance(h, secciones){
 // Las tres escriben exactamente el mismo documento.
 let altaPlazaPendiente = null;   // { lat, lng, secciones, grupos, alCrear }
 
+// Por qué falló una escritura en la base, dicho en criollo y con el detalle técnico al lado. Antes
+// todo se tapaba con «revisá tu conexión a internet», y cuando la causa era otra (un dato que la
+// base no acepta, un permiso) no había forma de saberlo (2026-09-21).
+function porQueFallo(e){
+  const msg = String((e && (e.message || e.code)) || e || '');
+  const code = String((e && e.code) || '');
+  let causa;
+  if(/permission-denied|insufficient permissions/i.test(msg + code)) causa = 'La base <b>rechazó la escritura por permisos</b>: cerrá sesión y volvé a entrar (pestaña Stock → «Acceso para editar»).';
+  else if(/unauthenticated/i.test(msg + code)) causa = 'No hay sesión iniciada: entrá por la pestaña Stock → «Acceso para editar».';
+  else if(/Unsupported field value|invalid data|nested arrays|invalid document/i.test(msg)) causa = 'Hay un <b>dato que la base no acepta</b> en lo que se quiso guardar — avisale a quien mantiene la herramienta y pasale el detalle de abajo.';
+  else if(/unavailable|network|offline|Failed to fetch|deadline|timeout/i.test(msg + code)) causa = 'Parece un problema de <b>conexión a internet</b>: revisala y probá de nuevo.';
+  else if(/Firebase no disponible/i.test(msg)) causa = 'La conexión con la base no llegó a cargar: recargá la página con internet.';
+  else causa = 'Revisá la conexión a internet y que tengas la sesión iniciada.';
+  return causa + (msg ? ` <span style="opacity:.8; font-size:11.5px;">Detalle técnico: ${escHtml(msg.slice(0, 220))}</span>` : '');
+}
+window.porQueFallo = porQueFallo;
+
 function abrirAltaPlaza(opts){
   opts = opts || {};
   if(!avanceGuardEdicion()) return;
@@ -11069,7 +11086,7 @@ async function altaPlazaConfirmar(){
     nuevoId = await window.fbAvanceCrear(nuevo);
   }catch(e){
     btn.disabled = false;
-    altaMensaje('⚠ No se pudo registrar la plaza (revisá tu conexión a internet). No se guardó nada.', true);
+    altaMensaje('⚠ No se pudo registrar la plaza. No se guardó nada. ' + porQueFallo(e), true);
     return;
   }
   btn.disabled = false;
@@ -11172,8 +11189,10 @@ function seccionesDesdeComputo(h){
       // producto —no por parecido de texto— y saltea las líneas que son TAREA (zanjeo, mediciones),
       // que no salen del pañol. Sin estos dos campos el balance volvía al cruce por nombre y el
       // «material completo» de la plaza no cerraba nunca.
-      .map(it => ({ id: avanceItemIdSeq++, desc: it.desc, cantNecesaria: it.cant, un: it.un, ref: it.ref,
-                    cod: it.cod, tarea: it.tarea === true, cantInstalada: 0 }))
+      .map(it => ({ id: avanceItemIdSeq++, desc: it.desc, cantNecesaria: it.cant, un: it.un || '', ref: it.ref || '',
+                    // `cod` solo si el renglón es un producto: las tareas no lo tienen, y un
+                    // `cod: undefined` hace que Firestore rechace la plaza entera (2026-09-21).
+                    ...(it.cod != null ? { cod: it.cod } : {}), tarea: it.tarea === true, cantInstalada: 0 }))
   })).filter(sec => sec.items.length);
 }
 
@@ -11233,8 +11252,10 @@ async function crearAvanceDesdeHistorial(idx){
       // producto —no por parecido de texto— y saltea las líneas que son TAREA (zanjeo, mediciones),
       // que no salen del pañol. Sin estos dos campos el balance volvía al cruce por nombre y el
       // «material completo» de la plaza no cerraba nunca.
-      .map(it => ({ id: avanceItemIdSeq++, desc: it.desc, cantNecesaria: it.cant, un: it.un, ref: it.ref,
-                    cod: it.cod, tarea: it.tarea === true, cantInstalada: 0 }))
+      .map(it => ({ id: avanceItemIdSeq++, desc: it.desc, cantNecesaria: it.cant, un: it.un || '', ref: it.ref || '',
+                    // `cod` solo si el renglón es un producto: las tareas no lo tienen, y un
+                    // `cod: undefined` hace que Firestore rechace la plaza entera (2026-09-21).
+                    ...(it.cod != null ? { cod: it.cod } : {}), tarea: it.tarea === true, cantInstalada: 0 }))
   })).filter(sec => sec.items.length);
   const grupos = construirGruposAvance(h, secciones);
   secciones.push({ titulo:'OTROS ÍTEMS (agregados a mano)', items:[], extra:true });
@@ -11246,7 +11267,7 @@ async function crearAvanceDesdeHistorial(idx){
   try{
     nuevoId = await window.fbAvanceCrear(nuevo);
   }catch(e){
-    alert('No se pudo agregar la plaza al tablero (revisá tu conexión a internet). No se guardó nada.');
+    alert('No se pudo agregar la plaza al tablero. No se guardó nada.\n' + porQueFallo(e).replace(/<[^>]*>/g,''));
     return;
   }
   // Empuje optimista al array local: el listener de Firestore (onSnapshot) va a traer lo mismo en
@@ -11338,7 +11359,7 @@ async function crearAvancePlazaConocida(n){
   try{
     nuevoId = await window.fbAvanceCrear(nuevo);
   }catch(e){
-    alert('No se pudo agregar la plaza al tablero (revisá tu conexión a internet). No se guardó nada.');
+    alert('No se pudo agregar la plaza al tablero. No se guardó nada.\n' + porQueFallo(e).replace(/<[^>]*>/g,''));
     return;
   }
   avanceActivoId = nuevoId;
@@ -16451,7 +16472,7 @@ window.registrarPlazaDelPliego = async function(id){
     if(typeof renderEpec === 'function') try{ renderEpec(); }catch(e){}
     renderMapaObras();
   }catch(e){
-    alert('No se pudo registrar la plaza (revisá tu conexión a internet). No se guardó nada.');
+    alert('No se pudo registrar la plaza. No se guardó nada.\n' + porQueFallo(e).replace(/<[^>]*>/g,''));
   }
 };
 // El usuario pidió "algo que limpie el listado de nombres una vez terminada" — filtro de solo
@@ -16922,6 +16943,12 @@ function poblarParteObraDatalist(){
   try{
     firebase.initializeApp(firebaseConfig);
     fbDb = firebase.firestore();
+    // Firestore RECHAZA cualquier campo con valor `undefined` («Unsupported field value: undefined»)
+    // y la escritura entera falla. Un renglón de TAREA del cómputo (zanjeo, medición, pintura) no
+    // tiene código de producto, y al registrar la plaza viajaba como `cod: undefined`: el alta desde
+    // la Calculadora fallaba con un cartel que decía «revisá tu conexión a internet» (2026-09-21).
+    // Con esto, los `undefined` se saltean como si el campo no estuviera.
+    try{ fbDb.settings({ ignoreUndefinedProperties: true }); }catch(e){ console.warn('Firestore settings:', e); }
     fbAuth = firebase.auth();
     fbAvailable = true;
   }catch(e){
