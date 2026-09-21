@@ -3162,7 +3162,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 13:23 · b78052</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 14:08 · 04fcab</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3453,9 +3453,9 @@
         <div class="hint" id="tramosSummary" style="margin-top:10px;"></div>
         </div>
 
-        <label style="margin-top:14px;" for="cableGanancia">Ganancia por subida <span style="font-weight:400; color:var(--text-soft);">— opcional, normalmente se deja vacío</span></label>
-        <input type="number" id="cableGanancia" min="0" step="0.5" placeholder="(por defecto, la altura libre de la columna)">
-        <div class="hint" style="margin-top:2px;"><b>Dejalo vacío.</b> Vos cargás solo los tramos (largo y calibre) y la ganancia sale sola: la calculadora sabe, por el orden de los puntos, que en una columna intermedia suben <b>2 cables</b> (entra y sale) y en la última del circuito sube <b>1</b>, y usa la <b>altura de cada columna</b> para los metros de cada subida.<br>Solo se completa en dos casos: poner un número para forzar los mismos metros en todas las subidas, o poner <b>0</b> si en los largos ya cargaste la ganancia incluida.</div>
+        <label style="margin-top:14px;" for="cableGanancia">Ganancia por subida, en metros <span style="font-weight:400; color:var(--text-soft);">— ponés tu número, o lo dejás vacío y usa la altura de la columna</span></label>
+        <input type="number" id="cableGanancia" min="0" step="0.5" placeholder="ej. 7 · vacío = altura libre de la columna">
+        <div class="hint" style="margin-top:2px;"><b>Manda lo que escribas acá.</b> Es lo que sube <b>un cable</b> por <b>una columna</b>; la calculadora ya sabe, por el orden de los puntos, que en una columna intermedia suben <b>2 cables</b> (el que llega y el que sigue) y en la última del circuito <b>1</b>. Ej.: con <b>7</b>, una intermedia suma 14 m y la última 7 m. Vacío = la <b>altura libre de cada columna</b>. <b>0</b> = no sumar nada (ya cargaste los largos con la ganancia adentro). El total se ve abajo apenas lo escribís y se suma solo a los metros de cada calibre.</div>
         <div class="hint" id="gananciaSummary" style="margin-top:6px;"></div>
       </div>
 
@@ -3581,7 +3581,20 @@
         </div>
 
         <div id="tableroAereoCampos">
-          <label>Diámetro del poste donde se monta el tablero <span style="font-weight:400; color:var(--text-soft);">— en mm</span></label>
+          <!-- Sobre qué se monta el tablero aéreo (2026-09-21). El usuario: *"si ponés tablero con poste
+               de PRFV o en poste de hormigón existente no está diferenciando eso la Calculadora, porque
+               ahí te cambia: si es con hormigón te cuenta el PVC doble aislación, la hebilla y el fleje;
+               si es PRFV no"*. Verificado contra el pliego (9.02 → AP-T-007/019 en apoyo PRFV; 9.03 →
+               «los caños galvanizados de acometidas de tablero… a pagar por ítem 8.02 ó 8.03, todo de
+               acuerdo a planos AP-T-011 y AP-T-012») y contra el cómputo oficial de Eleodoro Fierro
+               (ID 2063: apoyo PRFV nuevo + 14 m aéreos, y NO trae 8.02 ni 15.74/15.75). -->
+          <label for="tableroApoyo">Sobre qué se monta el tablero aéreo</label>
+          <select id="tableroApoyo">
+            <option value="prfv_nuevo">Apoyo de PRFV NUEVO, h.l. 8 m / Ro 1050 (AP-T-018, alimentado s/AP-T-019) — ítem 13</option>
+            <option value="hormigon_existente">Poste de H°A° EXISTENTE de EPEC (s/AP-T-011/012) — bajada por caño doble aislación</option>
+          </select>
+          <div class="hint" style="margin-top:2px;"><b>Cambia el cómputo y el itemizado.</b> En <b>apoyo PRFV nuevo</b> se computa el poste (ítem 13), la espuma y el babero del orificio (AP-T-019 nota 2), y la derivación entra directo al tablero: <b>sin caño de bajada, sin fleje ni hebillas</b> (así viene el cómputo oficial de Eleodoro Fierro). En <b>poste de H°A° existente</b> no hay apoyo que cobrar, y la acometida baja por <b>caño de doble aislación Ø2" sujetado con fleje y hebillas</b> (pliego 8.02 → ítems <b>76</b>, <b>71</b> y <b>72</b>).</div>
+          <label style="margin-top:10px;">Diámetro del poste donde se monta el tablero <span style="font-weight:400; color:var(--text-soft);">— en mm</span></label>
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
             <input type="number" id="posteDiamMm" min="40" max="600" step="1" placeholder="ej. 180" style="width:130px;">
             <span style="font-weight:700;">mm</span>
@@ -6828,8 +6841,12 @@ function actualizarGananciaSummary(){
   }
   const total = Object.values(window.__gananciaExactaPorCalibre || {}).reduce((a,b)=>a+b, 0);
   const ultimos = (circuitos||[]).filter(c=>c.puntos.some(p=>p.calibre && p.esColumna)).length;
+  const gFija = (input !== '') ? parseFloat(input) : null;
+  const conQue = gFija != null
+    ? `a <b>${fmt(gFija,1)} m por subida</b> (el número que pusiste: ${subidas} × ${fmt(gFija,1)})`
+    : 'con la <b>altura de cada columna</b> por subida (campo vacío)';
   el.innerHTML = `<b>${subidas} subidas</b> en ${cols} columnas de ${ultimos} circuito${ultimos>1?'s':''} `
-    + `(${cols - ultimos} intermedia${cols-ultimos===1?'':'s'} con 2 cables + ${ultimos} última${ultimos===1?'':'s'} con 1) `
+    + `(${cols - ultimos} intermedia${cols-ultimos===1?'':'s'} con 2 cables + ${ultimos} última${ultimos===1?'':'s'} con 1), ${conQue} `
     + `= <b>${fmt(total,0)} m</b> para subir y bajar el cable por las columnas. <b>Ya están sumados</b> en los metros de cada calibre — no se piden aparte.`;
 }
 
@@ -6986,10 +7003,16 @@ document.getElementById('tramosContainer').addEventListener('click', (e)=>{
     renderTramos();
   }
 });
-['cableGanancia','circuitos'].forEach(id=>{
-  const el = document.getElementById(id);
-  if(el) el.addEventListener('input', actualizarGananciaSummary);
-});
+// El número que se escribe en «Ganancia por subida» tiene que verse al instante (2026-09-21). Antes
+// el resumen de abajo leía la ganancia derivada ANTES de tipear —mostraba el número anterior— y
+// parecía que el campo no tomaba lo que uno ponía. El cómputo sí lo tomaba; lo que fallaba era la
+// vista. Ahora se vuelve a derivar por circuitos en cada tecla, igual que cuando se toca un punto.
+(function(){
+  const g = document.getElementById('cableGanancia');
+  if(g) g.addEventListener('input', ()=>{ try{ actualizarResumenCircuitos(); }catch(e){} actualizarGananciaSummary(); });
+  const c = document.getElementById('circuitos');
+  if(c) c.addEventListener('input', actualizarGananciaSummary);
+})();
 document.getElementById('addTramoBtn').addEventListener('click', ()=>{
   const cantColTotal = parseInt(document.getElementById('colCantidad').value) || 0;
   const sumaColumnas = tramos.reduce((a,t)=>a+(t.columnas||0),0);
@@ -13990,6 +14013,11 @@ function restaurarFormulario(snap){
     // Cómputo nuevo: el retiro que trae es el que vale; que la precarga «una por columna» no lo pise.
     const rt = document.getElementById('colExistRetiroLum'); if(rt) rt.dataset.tocado = '1';
   }
+  // Una foto de antes del 21/09/2026 no tiene «Sobre qué se monta el tablero aéreo»: siempre era
+  // apoyo PRFV nuevo. Se pone así para no arrastrar lo que hubiera quedado de la obra anterior.
+  if(!Object.prototype.hasOwnProperty.call(snap.campos, 'tableroApoyo')){
+    const ap = document.getElementById('tableroApoyo'); if(ap) ap.value = 'prfv_nuevo';
+  }
   ['toggleColumnas','toggleVinculos','toggleCableado','toggleCivil','toggleTablero','toggleCruce','toggleRetiros','toggleExistentes','toggleTabElem','toggleEmpalmes']
     .forEach(id=>{ const el = document.getElementById(id); if(el) el.dispatchEvent(new Event('change', {bubbles:true})); });
   return true;
@@ -15090,6 +15118,11 @@ function calcular(){
     // alcance del otro — que es justo el error que apareció al probarlo.
     const dPoste = diamPosteMm();
     const itemsTablero = [];
+    // Sobre qué se monta el tablero aéreo (2026-09-21): apoyo PRFV nuevo (AP-T-018/019) o poste de
+    // H°A° existente de EPEC (AP-T-011/012). Decide el poste, la espuma y el babero, y la bajada.
+    const tableroApoyo = (tableroTipoVal === 'aereo_prfv')
+      ? String((document.getElementById('tableroApoyo')||{value:'prfv_nuevo'}).value || 'prfv_nuevo') : null;
+    const posteNuevoPrfv = tableroTipoVal === 'aereo_prfv' && tableroApoyo !== 'hormigon_existente';
     if(tableroTipoVal === 'aereo_prfv'){
       itemsTablero.push({...M(3058,'aéreo, armado según proyecto ejecutivo / unifilar (se compra ensamblado)'), cant:1, un:'Un.', ref:'AP-T-007/008'});
       // ---- El tablero NO es el mismo en TT que en TN-S (verificado 06/09/2026) ----
@@ -15104,11 +15137,15 @@ function calcular(){
           itemsTablero.push({desc:'⚠ <b>Tablero para esquema TN-S — pedirlo así (plano AP-T-008 3/3).</b> Se diferencia del de TT en tres cosas: <b>NO lleva diferencial general</b> en los circuitos de AP; las salidas son <b>1×6 mm² con termomagnéticos UNIPOLARES</b>; y lleva un <b>borne de neutro</b> después del termomagnético general, <b>unido eléctricamente a la barra de PAT</b> («unión neutro – masas eléctricas»), que se puede desvincular a voluntad para medir.', cant:'—', un:'—', ref:'AP-T-008 (3/3)'});
         }
       }
-      itemsTablero.push({...M(6015,'altura total 9,5 m, empotramiento ≈1,5 m'), cant:1, un:'Un.', ref:'AP-T-018'});
+      if(posteNuevoPrfv){
+      itemsTablero.push({...M(6015,'altura total 9,5 m, empotramiento ≈1,5 m'), cant:1, un:'Un.', ref:'AP-T-018 · ítem 13'});
       // Reglas de emplazamiento del plano AP-T-019 (junio 2026), cargadas del original 2026-09-05.
       // No son materiales pero se rechazan en obra si no se cumplen, así que van en el papel.
       itemsTablero.push({desc:'ℹ <b>Reglas de emplazamiento del tablero aéreo (notas del AP-T-019):</b> el <b>tiro flojo no debe superar los 10 m</b> · el <b>poste de PRFV va a 2,50 m de la línea de cordón</b> · el <b>gabinete se orienta con la puerta hacia el espacio verde</b> · el rack se orienta de modo que la derivación al tablero quede lo más perpendicular posible al tendido de preensamblado · los elementos internos y su conexión salen del AP-T-007 (TT) o del AP-T-008 (TN-S), según el esquema de tierra del proyecto · la sujeción del tablero al apoyo sigue el AP-T-012 (dos juegos de abrazaderas).', cant:'—', un:'—', ref:'AP-T-019'});
       itemsTablero.push({desc:'ℹ <b>Ingreso de los cables al poste (nota 2 del AP-T-019):</b> los conductores de salida entran al apoyo de PRFV por un agujero practicado en el poste, con las dimensiones mínimas necesarias. Ese orificio <b>se sella con espuma de poliuretano</b> y se le agrega <b>protección mecánica exterior sobre el tramo de cable expuesto: babero de zinguería o equivalente en PVC apto para UV</b>. El cable de salida es Cu XLPE + vaina PVC IRAM 2178-1 apto para exposición y radiación UV.', cant:'—', un:'—', ref:'AP-T-019 nota 2'});
+      } else {
+        itemsTablero.push({desc:'ℹ <b>Tablero sobre poste de H°A° EXISTENTE de EPEC</b> (s/AP-T-011/012): <b>no se computa apoyo</b> (el ítem 13 es solo para el apoyo de PRFV nuevo) ni espuma ni babero (eso es del orificio del poste de PRFV). La acometida <b>baja por fuera del poste, en caño de doble aislación Ø2" sujetado con fleje y hebillas</b> — están más abajo, en la acometida aérea (pliego 8.02 → ítems 76, 71 y 72). Si la Inspección pide juego completo de abrazaderas galvanizadas por vandalismo (8.02), agregalo a mano.', cant:'—', un:'—', ref:'Pliego 9.03 · AP-T-011/012'});
+      }
       // ---- Abrazaderas del tablero, ahora CON MEDIDA (2026-09-04) ----
       // Salían sin ninguna medida, así que había que acordarse de memoria cuál pedir. La medida de
       // una abrazadera es su diámetro interior en mm y se elige por el diámetro del poste en el
@@ -15126,12 +15163,12 @@ function calcular(){
       itemsTablero.push({desc:'Base del tablero a nivel s/AP-TC-007 — el desglose completo de materiales sale en la sección Obra civil', cant:'—', un:'—', ref:'AP-TC-007'});
     }
     itemsTablero.push({...M(3012,'con su base de montaje'), cant:1, un:'Un.', ref:'Ítem 15.01 · IRAM AADL J20-24/25'});
-    itemsTablero.push({...M(8010,'sellado del orificio de ingreso de los conductores al apoyo de PRFV'), cant:1, un:'Un.', ref:'AP-T-019 nota 2 · AP-T-015'});
+    if(posteNuevoPrfv) itemsTablero.push({...M(8010,'sellado del orificio de ingreso de los conductores al apoyo de PRFV'), cant:1, un:'Un.', ref:'AP-T-019 nota 2 · AP-T-015'});
     // Nota 2 del plano AP-T-019: el orificio "deberá sellarse con espuma de poliuretano y
     // complementarse con una protección mecánica exterior que recubra el tramo de cable expuesto,
     // mediante babero de zinguería o protección equivalente en PVC apto para UV". Este material no
     // estaba en ningún lado del cómputo: se compraba de memoria o directamente no se ponía.
-    if(tableroTipoVal === 'aereo_prfv'){
+    if(posteNuevoPrfv){
       // Qué es el babero, dicho en el propio cómputo (2026-09-04, lo preguntó el usuario): es la
       // chapa doblada —o el perfil de PVC apto UV— que se pone TAPANDO el tramo de cable que queda a
       // la vista sobre el poste, desde donde sale del caño hasta donde entra al tablero. Cumple dos
@@ -15228,7 +15265,19 @@ function calcular(){
       // CONDUCTOR en el punto de derivación (no uno por punta de retención), y el modelo lo define
       // la SECCIÓN de la bajada — el 1995/3 (PKD-16) ni siquiera admite derivaciones de 16 mm².
       itemsTablero.push(...lineasMorseteria(cableAcom, 'la acometida al tablero'));
-      itemsTablero.push({...M(5004,'protección del conductor en el apoyo'), cant:1, un:'Un.', ref:'Ítem 8.02 / ítem 76'});
+      // ---- Caño de bajada, fleje y hebillas: NO en apoyo PRFV nuevo (2026-09-21) ----
+      // En el apoyo de PRFV (AP-T-019) la derivación entra directo al tablero y el pliego 8.02
+      // no aparece en el cómputo oficial (Eleodoro Fierro ID 2063: 6.4 + 7.15 + 15.73, sin 8.02 ni
+      // 15.74/15.75). El caño con sus flejes va cuando el tablero está sobre un poste de H°A°
+      // existente (pliego 9.03 → AP-T-011/012) o es a nivel con alimentación aérea (9.01 → AP-T-013).
+      const conCanoBajada = !posteNuevoPrfv;
+      if(conCanoBajada){
+        itemsTablero.push({...M(5004, tableroTipoVal === 'nivel_prfv'
+            ? 'bajada de la acometida por el poste de EPEC hasta el suelo, hacia el tablero a nivel (s/AP-T-013)'
+            : 'bajada de la acometida por fuera del poste de H°A° hasta el tablero (s/AP-T-011/012)'), cant:1, un:'Un.', ref:'Ítem 8.02 / ítem 76'});
+      } else {
+        itemsTablero.push({desc:'ℹ <b>Sin caño de bajada, fleje ni hebillas:</b> en apoyo de PRFV nuevo la derivación va del rack al tablero por el mismo poste y el pliego no computa el 8.02 (así viene el cómputo oficial de Eleodoro Fierro ID 2063). Si el tablero fuera sobre un poste de H°A° existente, elegilo arriba en «Sobre qué se monta el tablero aéreo» y salen los tres.', cant:'—', un:'—', ref:'AP-T-019 · pliego 8.02 / 9.03'});
+      }
       // ---- Capuchones R15: uno por conductor y por punta (corregido 2026-09-04) ----
       // Salían 2 fijos, que era «uno por punta de retención» — y está mal, porque el preensamblado no
       // es un cable, son conductores separados y cada uno lleva el suyo. El usuario lo marcó así:
@@ -15239,19 +15288,22 @@ function calcular(){
       const condAcom = (cableAcom && Array.isArray(cableAcom.ojales))
         ? cableAcom.ojales.reduce((n,o)=>n+(o.cant||0), 0) : 0;
       const capuchonesR15 = (condAcom || 1) * puntasAereas;
+      const dondeCapuchon = conCanoBajada ? 'entrada al caño de bajada' : 'puntas de los conductores de la derivación';
       itemsTablero.push({...M(4031, condAcom
-          ? `entrada al caño de bajada · <b>uno por conductor y por punta</b>: ${condAcom} conductores del ${cableAcom.label.replace(/\s*\(.*$/,'')} × ${puntasAereas} puntas`
-          : 'entrada al caño de bajada'),
+          ? `${dondeCapuchon} · <b>uno por conductor y por punta</b>: ${condAcom} conductores del ${cableAcom.label.replace(/\s*\(.*$/,'')} × ${puntasAereas} puntas`
+          : dondeCapuchon),
         cant:capuchonesR15, un:'Un.', ref:'Criterio de campo'});
-      itemsTablero.push({...M(4024,'sujeción del caño de bajada'), cant:3, un:'m', ref:'Ítem 15.74 / ítem 71'});
-      itemsTablero.push({...M(4025,'una por vuelta de fleje'), cant:3, un:'Un.', ref:'Ítem 15.75 / ítem 72'});
+      if(conCanoBajada){
+        itemsTablero.push({...M(4024,'sujeción del caño de bajada'), cant:3, un:'m', ref:'Ítem 15.74 / ítem 71'});
+        itemsTablero.push({...M(4025,'una por vuelta de fleje'), cant:3, un:'Un.', ref:'Ítem 15.75 / ítem 72'});
+      }
     } else {
       itemsTablero.push({...M(5005,'entubado de la acometida subterránea'), cant:acometidaMl, un:'m', ref:'Ítem 8.01'});
       itemsTablero.push({...T, desc:'Reposición de vereda sobre el recorrido de la acometida (dentro de las 48 hs)', cant:acometidaMl, un:'m', ref:'Ítem 12 ITEMIZADO'});
     }
     itemsTablero.push({...M(4012), cant:1, un:'Un.', ref:'Ítem 73 / 15.73 · AP-T-019 ref. 11'});
     // Condiciones de montaje que fija el plano AP-T-019 y que no son material pero se olvidan en obra.
-    if(tableroTipoVal === 'aereo_prfv'){
+    if(posteNuevoPrfv){
       itemsTablero.push({desc:`— Montaje s/AP-T-019: poste de PRFV a ${fmt(POSTE_PRFV_DIST_CORDON_M,1)} m de la línea de cordón · puerta del gabinete orientada al espacio verde · tiro flojo máx. ${TIRO_FLOJO_MAX_M} m · rack orientado lo más perpendicular posible al preensamblado · interior del tablero s/AP-T-007 (TT o TN-C) o AP-T-008 (TN-S)`, cant:'—', un:'—', ref:'AP-T-019 notas 3-8'});
     }
     secciones.push({titulo:'TABLERO Y ACOMETIDA', items:itemsTablero, estimado:true});
@@ -20473,8 +20525,12 @@ function poblarParteObraDatalist(){
       const tt = String(C.tableroTipo || '');
       if(tt === 'aereo_prfv'){
         push(9, 1, 'Tablero aéreo de medición, protección y comando');
-        push(13, 1, 'Apoyo PRFV que sostiene el tablero');
-        dudas.push('El apoyo del tablero se cargó con el ítem 13 (PRFV h=8 m Ro1050), que es el que el itemizado usa para sostener el tablero. La calculadora nombra un apoyo de 9,5 m — verificá cuál corresponde en esta plaza.');
+        // El apoyo (ítem 13) solo si es PRFV nuevo; sobre poste de H°A° existente no hay apoyo que
+        // cobrar (2026-09-21). Las fotos anteriores no tienen el campo: siempre eran PRFV nuevo.
+        if(String(C.tableroApoyo || 'prfv_nuevo') !== 'hormigon_existente') push(13, 1, 'Apoyo PRFV h=8 m Ro1050 (AP-T-018) que sostiene el tablero');
+        else dudas.push('El tablero aéreo va <b>sobre un poste de H°A° existente</b>: no se cargó el ítem 13 (apoyo PRFV). El caño de bajada (76), el fleje (71) y las hebillas (72) no están en la foto del formulario: cargalos a mano, o volvé a calcular la plaza para que salgan del listado.');
+        if(String(C.acometidaTipo || '') === 'aerea' && String(C.tableroApoyo || 'prfv_nuevo') !== 'hormigon_existente')
+          dudas.push('Apoyo de PRFV nuevo con acometida aérea: <b>no van</b> el caño de bajada (76), el fleje (71) ni las hebillas (72) — la derivación entra directo al tablero (cómputo oficial de Eleodoro Fierro ID 2063).');
       } else if(tt === 'nivel_prfv'){
         push(10, 1, 'Tablero a nivel, sobre base de mampostería');
       }
@@ -20579,6 +20635,7 @@ function poblarParteObraDatalist(){
     const vincPorBrazos = {};    // 1..4 -> n
     let tipoCol = null;
     let colExistentes = 0;       // columnas metálicas existentes reutilizadas (sección nueva del 06/09/2026)
+    let tabAereoSinApoyo = 0;    // tableros aéreos que no trajeron su apoyo PRFV (van sobre poste existente)
     let exCaja = 0, ex41 = 0;    // cómo se contaron: por la caja externa (cómputos viejos) o por el 41
     let ex45 = 0;                // luminarias viejas retiradas de las que se reacondicionan (2026-09-21)
     // Para los ítems de PROVISIÓN 83.1–89 (2026-09-06): qué material hay en el cómputo.
@@ -20679,9 +20736,17 @@ function poblarParteObraDatalist(){
           else {
             push(9, cant || 1, 'Tablero aéreo de medición, protección y comando');
             ctx.tableroAereo += (cant || 1);
-            push(13, cant || 1, 'Apoyo PRFV que sostiene el tablero');
-            dudas.push('El apoyo del tablero se cargó con el ítem 13 (PRFV h=8 m Ro1050), que es el que el itemizado usa para sostener el tablero. La calculadora nombra un apoyo de 9,5 m — verificá cuál corresponde en esta plaza.');
+            tabAereoSinApoyo += (cant || 1);   // el 13 se decide por el renglón del apoyo (abajo)
           }
+          return;
+        }
+        // ---- El apoyo de PRFV nuevo (ítem 13) tiene renglón propio (2026-09-21) ----
+        // Antes el 13 se cargaba junto con el tablero aéreo. Ahora el tablero puede ir sobre un
+        // poste de H°A° existente de EPEC, que no tiene apoyo que cobrar: el 13 sale SOLO si el
+        // cómputo trae el poste de PRFV (AP-T-018).
+        if(/^(Poste|Apoyo)\b.*PRFV/i.test(d) && /AP-T-018|hl\s*=\s*8|Ro\s*1050|9,5\s*m/i.test(d)){
+          push(13, cant || 1, 'Apoyo PRFV h=8 m Ro1050 (AP-T-018) que sostiene el tablero');
+          tabAereoSinApoyo -= (cant || 1);
           return;
         }
         // ---- Cruce de calle: solo el renglón de encabezado de esa sección ----
@@ -20828,6 +20893,8 @@ function poblarParteObraDatalist(){
       if(q75 > 0) dudas.push(`Columnas <b>metálicas</b>: se descontaron <b>${q75}</b> jabalina(s), tomacable(s) y medición(es) de los ítems 75, 74 y 81 porque la PAT <b>ya está adentro</b>${colMetNuevas ? ` de los ítems 1 a 4 (${colMetNuevas} columna(s) nueva(s))` : ''}${colMetNuevas && con42 ? ' y' : ''}${con42 ? ` del ítem 42 (${con42} existente(s) con acometida nueva)` : ''}: «instalación completa de puesta a tierra y su medición». ${out.find(x=>x.item===75) ? 'Lo que quedó en 75/74/81 es la PAT del tablero.' : ''} La <b>provisión</b> de todas las jabalinas (ítem 88) sí se cobra: esos ítems la excluyen.`);
     }
 
+    if(tabAereoSinApoyo > 0)
+      dudas.push(`El tablero aéreo va <b>sobre un poste existente</b> (el cómputo no trae apoyo de PRFV nuevo), así que <b>no se cargó el ítem 13</b>. La bajada de la acometida sale por 76 / 71 / 72 si el cómputo trae el caño, el fleje y las hebillas. Si en esta plaza el apoyo de PRFV es nuevo, elegilo en la Calculadora («Sobre qué se monta el tablero aéreo») y volvé a calcular, o agregá el 13 a mano.`);
     // ---- PROVISIÓN de materiales, ítems 83.1 a 89 (2026-09-06) ----
     agregarProvision(push, dudas, { tipo, de7, de10, ...ctx }, prov);
     // ---- Columnas existentes SIN luminaria (2026-09-17) ----
@@ -21029,9 +21096,12 @@ function poblarParteObraDatalist(){
       + g(44)                    * L(0.425, 7,  'Metálica');   // luminarias sobre columna existente
     agregar(30, m315 - g(30), `${nn(Math.round(m315*100)/100)} m de cable 3×1,5 subiendo a los artefactos. El cable lo da EPEC, pero la INSTALACIÓN en columna es el ítem 30 y la hizo EMA. Sale de la fórmula (altura − caja) + brazo + 0,60, verificada contra seis cómputos oficiales.`, 'falta');
     agregar(64, tabAereo - g(64), `Un fotocontrol por cada uno de los ${nn(tabAereo)} tablero(s) aéreo(s) del certificado. No está certificado en esta plaza.`, 'falta');
-    agregar(76, tabAereo - g(76), `Un caño de bajada Ø2" por cada tablero aéreo (${nn(tabAereo)}).`, 'falta');
-    agregar(71, tabAereo - g(71), `Un largo de fleje inoxidable de 3 m por cada tablero aéreo (${nn(tabAereo)}), para sujetar el caño de bajada.`, 'falta');
-    agregar(72, tabAereo * 3 - g(72), `Tres hebillas inoxidables por tablero aéreo (${nn(tabAereo)} × 3), una por vuelta de fleje.`, 'falta');
+    // Caño de bajada, fleje y hebillas: solo para los tableros aéreos SIN apoyo de PRFV nuevo (los que
+    // van sobre poste existente). Con apoyo PRFV (ítem 13) la derivación entra directo (2026-09-21).
+    const tabSobrePoste = Math.max(0, tabAereo - g(13));
+    agregar(76, tabSobrePoste - g(76), `Un caño de bajada Ø2" por cada tablero aéreo sobre poste existente (${nn(tabSobrePoste)}: ${nn(tabAereo)} aéreos menos ${nn(g(13))} con apoyo PRFV nuevo, donde no va).`, 'falta');
+    agregar(71, tabSobrePoste - g(71), `Un largo de fleje inoxidable de 3 m por cada tablero aéreo sobre poste existente (${nn(tabSobrePoste)}), para sujetar el caño de bajada.`, 'falta');
+    agregar(72, tabSobrePoste * 3 - g(72), `Tres hebillas inoxidables por tablero aéreo sobre poste existente (${nn(tabSobrePoste)} × 3), una por vuelta de fleje.`, 'falta');
     agregar(74, g(75) - g(74), `Un tomacable por cada una de las ${nn(g(75))} jabalina(s) que el certificado cobró por el ítem 75. Las de columna metálica no van: su PAT está adentro del ítem 1-4.`, 'falta');
 
     // Ordenado por GRUPO y, adentro de cada uno, por número de ítem. Si se ordenara todo junto por
@@ -21759,8 +21829,10 @@ function poblarParteObraDatalist(){
         if(/^Fundaci[oó]n de hormig[oó]n/i.test(d)) { hayCivil = true; return; }
         if(/^Tablero de medici[oó]n/i.test(d)){
           campos.tableroTipo = /a nivel/i.test(d) ? 'nivel_prfv' : 'aereo_prfv';
+          if(campos.tableroTipo === 'aereo_prfv' && !campos.tableroApoyo) campos.tableroApoyo = 'hormigon_existente';   // hasta que aparezca el poste PRFV
           hayTablero = true; return;
         }
+        if(/^(Poste|Apoyo)\b.*PRFV/i.test(d) && /AP-T-018|hl\s*=\s*8|Ro\s*1050|9,5\s*m/i.test(d)){ campos.tableroApoyo = 'prfv_nuevo'; hayTablero = true; return; }
         // La acometida al tablero: el preensamblado de aluminio de la AÉREA no empieza con «Cable Cu»
         // y antes no se reconstruía (2026-09-21).
         if(/^(Cable|Acometida)\b/i.test(d) && /acometida\s+(a[eé]rea|subterr[aá]nea)\s+EPEC/i.test(d)){
@@ -21824,7 +21896,7 @@ function poblarParteObraDatalist(){
     if(ex.cant > 0) cargado.push(`Columnas existentes: ${ex.cant} a reacondicionar, ${ex.lum} luminaria(s) nueva(s), ${ex.ret} vieja(s) a retirar, ${Math.min(ex.apl, ex.cant)} a aplomar, ${ex.acom > 0 ? 'con' : 'sin'} acometida nueva`);
     if(hayCivil)   cargado.push(`Obra civil: ${campos.civilZanjaMl||0} m de zanja de ${(campos.civilZanjaProf||'0.6').replace('.',',')} m` +
                                 (campos.civilZanjaTerreno ? ` en ${campos.civilZanjaTerreno === 'natural' ? 'terreno natural' : (campos.civilZanjaTerreno==='baldosa'?'vereda de baldosas':'piso de hormigón')}` : ''));
-    if(hayTablero) cargado.push(`Tablero ${campos.tableroTipo === 'nivel_prfv' ? 'a nivel' : 'aéreo'}` +
+    if(hayTablero) cargado.push(`Tablero ${campos.tableroTipo === 'nivel_prfv' ? 'a nivel' : (campos.tableroApoyo === 'hormigon_existente' ? 'aéreo sobre poste de H°A° existente' : 'aéreo sobre apoyo PRFV nuevo')}` +
                                 (campos.acometidaMl ? ` · acometida ${campos.acometidaTipo === 'subterranea' ? 'subterránea' : 'aérea'} de ${campos.acometidaMl} m` : ''));
     if(hayCruce)   cargado.push(`Cruce de calle: ${campos.cruceMl||0} m (${campos.cruceTipo})`);
     if(hayRetiros) cargado.push(`Retiros y poda: ${campos.retiroCol||0} columna(s), ${campos.retiroTab||0} tablero(s), ${campos.podaCant||0} árbol(es)`);
@@ -26387,7 +26459,8 @@ const ITEMIZADO_EPEC = [
         }
         if(/^Fundaci[oó]n de hormig[oó]n/i.test(d)){ r.fundacionM3 += c; return; }
         if(/^Dispersor \(jabalina\)/i.test(d)){ r.jabalinas += c; return; }
-        if(/^Tablero de medici[oó]n/i.test(d)){ r.tablero = /a[eé]reo/i.test(d) ? 'Aéreo sobre poste PRFV' : 'A nivel sobre base'; return; }
+        if(/^Tablero de medici[oó]n/i.test(d)){ if(!r.tablero || !/apoyo PRFV/.test(r.tablero)) r.tablero = /a[eé]reo/i.test(d) ? 'Aéreo sobre poste existente' : 'A nivel sobre base'; return; }
+        if(/^(Poste|Apoyo)\b.*PRFV/i.test(d) && /AP-T-018|Ro\s*1050|9,5\s*m/i.test(d)){ r.tablero = 'Aéreo sobre apoyo PRFV nuevo'; return; }
         if(/^Portafusible/i.test(d)){ r.portafusibles += c; return; }
         if(/^Bornera BPN/i.test(d)){ r.bpn += c; return; }
       });
