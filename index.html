@@ -3162,7 +3162,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 15:34 · fbd5ee</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 16:15 · e5d5de</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3432,6 +3432,13 @@
           <button type="button" id="bpnMetResetBtn" class="btn-auto">↺ Volver al automático</button>
           <div class="hint" style="margin-top:10px;"><b>El fusible no se carga acá: sale solo.</b> En metálica va <b>1 portafusible por artefacto</b> y cada uno lleva su fusible de <b>2 A</b> — los mismos 2 A por artefacto que en PRFV, pero sin repartir. En esquema <b>TT</b> hay además una base para el neutro, y <b>ésa va sin fusible</b>.</div>
         </div>
+        <!-- Cajas de columna NUEVA en el itemizado (2026-09-21). El usuario: *"¿no deberíamos contarlos?
+             la 42 es para columnas existentes, hablo de las nuevas"*. Los ítems 1 a 8 dicen «acometida
+             subterránea» sin nombrar las BPN ni el portafusible; el 42 usa las mismas palabras y SÍ las
+             nombra. La lectura de la herramienta es que van adentro de 1–8, pero es discutible: por eso
+             hay un interruptor, apagado por defecto, para certificarlas aparte si la Inspección lo acepta. -->
+        <label class="ex-chk" style="margin-top:14px;"><input type="checkbox" id="cajaCertificarAparte"> <span><b>Certificar las cajas de las columnas NUEVAS aparte</b>, por los ítems <b>62/63</b> (BPN), <b>69</b> (portafusible tabaquera) y <b>68</b> (fusible) — solo si la Inspección lo acepta</span></label>
+        <div class="hint" style="margin-top:2px;">Apagado, el itemizado toma las BPN, los portafusibles y los fusibles de la caja de columna nueva como parte de los ítems 1 a 8 («acometida subterránea», como el 42 lo llama para las existentes) y no los carga. Prendido, «Traer las cantidades» carga BPN 4 mm² → 62, BPN 6 mm² → 63, tabaqueras → 69 y fusibles → 68, <b>solo por las columnas nuevas</b> (las existentes ya lo tienen adentro del 42). Dejalo asentado por escrito con la Inspección antes de certificar.</div>
       </div>
 
       <div class="card" id="cardCableado">
@@ -3771,6 +3778,11 @@
           <input type="number" id="tabFusNH" min="0" value="0">
           <label for="tabToma">Tomacorriente 2×10 A tipo Mignon <span class="ret-it">ítem 70 · 0,18 K</span></label>
           <input type="number" id="tabToma" min="0" value="0">
+          <label for="tabPortaTab">Portafusible tabaquera con fusible 1 / 6 / 10 A <span class="ret-it">ítem 69 · 0,21 K</span></label>
+          <input type="number" id="tabPortaTab" min="0" value="0">
+          <label for="tabFusCer">Fusible cerámico 2 A – 10 A <span class="ret-it">ítem 68 · 0,11 K</span></label>
+          <input type="number" id="tabFusCer" min="0" value="0">
+          <div class="hint" style="margin-top:2px;">Los ítems <b>68 y 69</b> son los del <b>tablero general</b> (comando, fotocontrol, circuito auxiliar). Los portafusibles y fusibles de la <b>caja de cada columna</b> no van acá: quedan adentro de los ítems 1 a 8 y del 42 (ver la nota de abajo). Si la Inspección aceptara certificarlos aparte, cargá acá la cantidad: 2 tabaqueras por columna.</div>
         </div>
         <div class="hint" style="margin-top:12px;">El <b>fotocontrol (ítem 64)</b> no está en esta lista <b>a propósito</b>: lo emite la sección «Tablero y acometida» y el itemizado ya lo carga desde ahí. Si estuviera también acá, se cobraría dos veces.</div>
         <div class="hint" style="margin-top:6px;">Las <b>borneras BPN de esta tarjeta son las del tablero general</b>. Las de la <b>caja de cada columna</b> no se cargan acá: en el Anexo I quedan adentro del ítem de la columna (1 a 8) o del ítem 42 — ver el «Control de cobertura».</div>
@@ -14632,6 +14644,23 @@ function calcular(){
                                    : {desc:`Puntera terminal TIF doble ${gaugeLabel} — columnas de paso`}), cant, un:'Un.', ref:'Criterio de campo'});
       });
     secciones.push({titulo:'LUMINARIAS', items:itemsLuminarias});
+    // ---- Cajas de columna NUEVA certificadas aparte (2026-09-21) ----
+    // Si el usuario prendió el interruptor, se suman las BPN, tabaqueras y fusibles de arriba y se
+    // deja un renglón que «Traer las cantidades» sabe leer (62/63/68/69), SOLO por la parte de
+    // columnas nuevas: las existentes ya lo tienen adentro del 42.
+    {
+      const aparte = !!(document.getElementById('cajaCertificarAparte')||{}).checked;
+      const sum = cods => itemsLum.reduce((t,i)=> t + (cods.includes(i.cod) && typeof i.cant === 'number' ? i.cant : 0), 0);
+      const totCols = vincCant || 0, nuevas = Math.max(0, totCols - colExist);
+      const frac = totCols > 0 ? nuevas / totCols : 0;
+      const q = x => Math.round(x * frac);
+      const c62 = q(sum([2007])), c63 = q(sum([2008, 2009, 2010])), c69 = q(sum([3053])), c68 = q(sum([3014, 3016, 3017, 3073]));
+      if(aparte && nuevas > 0){
+        itemsLum.push({desc:`Cajas de columna nueva certificadas aparte: 62 × ${c62} · 63 × ${c63} · 68 × ${c68} · 69 × ${c69} — BPN 4 mm² (62), BPN 6 mm² (63), fusibles (68) y portafusibles tabaquera (69) de las <b>${nuevas}</b> columna(s) nueva(s)${colExist ? ` (las ${colExist} existentes van adentro del 42 y no se cuentan acá)` : ''}. <b>Criterio acordado con la Inspección</b> — si no está por escrito, apagá el interruptor en Vínculos.`, cant:'—', un:'—', ref:'Ítems 62/63/68/69 · cajas de columna nueva'});
+      } else {
+        itemsLum.push({desc:'ℹ <b>En el itemizado, la caja de la columna nueva va adentro de los ítems 1 a 8</b> («acometida subterránea», las mismas palabras con que el 42 nombra BPN + portafusible + fusibles en la existente). Por eso «Traer las cantidades» no carga 62/63/68/69 por estas cajas. Si la Inspección acepta certificarlas aparte, prendé «Certificar las cajas de las columnas NUEVAS aparte» en Vínculos y salen solas.', cant:'—', un:'—', ref:'Anexo I · ítems 1–8 / 42'});
+      }
+    }
     secciones.push({titulo:`TABLERO DE COLUMNA (${vincTipo})`, items:itemsLum, estimado:true});
 
     tiles.push({num:totalLuminarias, lbl:`Luminarias LED${potenciaLumTxt?' '+fmt(potenciaLumW,0)+' W':''}`});
@@ -15645,6 +15674,8 @@ function calcular(){
     { id:'tabBaseNH',      item:66, desc:'Base portafusible NH 20–125 A / 500 V' },
     { id:'tabFusNH',       item:67, desc:'Fusible NH 20 A – 100 A' },
     { id:'tabToma',        item:70, desc:'Tomacorriente 2×10 A tipo Mignon' },
+    { id:'tabPortaTab',    item:69, desc:'Portafusible tabaquera del tablero con fusible 1 / 6 / 10 A — del tablero general (no el de la caja de columna)' },
+    { id:'tabFusCer',      item:68, desc:'Fusible cerámico del tablero 2 A – 10 A — del tablero general (no el de la caja de columna)' },
   ];
   if(tabElemOn){
     const itemsTabElem = [];
@@ -20482,6 +20513,8 @@ function poblarParteObraDatalist(){
       }
     }
 
+    if(on('cajaCertificarAparte'))
+      dudas.push('En Vínculos marcaste <b>certificar las cajas de columna nueva aparte</b> (62/63/68/69), pero esta vía —la foto del formulario— no tiene las cantidades de BPN, tabaqueras y fusibles. Volvé a calcular la plaza para que salgan del listado, o cargalas a mano.');
     // ---------- Zanjeo ----------
     if(on('toggleCivil')){
       const ml = numC('civilZanjaMl');
@@ -20566,7 +20599,7 @@ function poblarParteObraDatalist(){
       [['tabTermoTetraH',50],['tabTermoTetraM',51],['tabTermoTriH',52],['tabTermoTriM',53],
        ['tabTermoBiH',54],['tabTermoBiM',55],['tabTermoUniH',56],['tabTermoUniM',57],
        ['tabDifBi',58],['tabDifTetra',59],['tabContH',60],['tabContM',61],
-       ['tabBpn4',62],['tabBpn10',63],['tabReloj',65],['tabBaseNH',66],['tabFusNH',67],['tabToma',70]]
+       ['tabBpn4',62],['tabBpn10',63],['tabReloj',65],['tabBaseNH',66],['tabFusNH',67],['tabToma',70],['tabPortaTab',69],['tabFusCer',68]]
         .forEach(([id, item])=>{
           const n = numC(id);
           if(n > 0) push(item, n, `${fmt(n,0)} × ${(typeof window.epecItemDesc === 'function' ? window.epecItemDesc(String(item)) : '') || ('ítem ' + item)}`);
@@ -20673,6 +20706,19 @@ function poblarParteObraDatalist(){
           return;
         }
 
+        // ---- Cajas de columna NUEVA certificadas aparte (2026-09-21) ----
+        {
+          const mc = d.match(/^Cajas de columna nueva certificadas aparte:\s*62\s*×\s*(\d+)\s*·\s*63\s*×\s*(\d+)\s*·\s*68\s*×\s*(\d+)\s*·\s*69\s*×\s*(\d+)/i);
+          if(mc){
+            const c62 = parseInt(mc[1],10), c63 = parseInt(mc[2],10), c68 = parseInt(mc[3],10), c69 = parseInt(mc[4],10);
+            if(c62 > 0) push(62, c62, `${c62} bornera(s) BPN 4 mm² de las cajas de columna nueva (certificadas aparte por acuerdo con la Inspección)`);
+            if(c63 > 0) push(63, c63, `${c63} bornera(s) BPN 6 mm² de las cajas de columna nueva (certificadas aparte por acuerdo con la Inspección)`);
+            if(c68 > 0) push(68, c68, `${c68} fusible(s) de las cajas de columna nueva (certificados aparte por acuerdo con la Inspección)`);
+            if(c69 > 0) push(69, c69, `${c69} portafusible(s) tabaquera de las cajas de columna nueva (certificados aparte por acuerdo con la Inspección)`);
+            dudas.push(`<b>Cajas de columna nueva certificadas aparte</b> (62 × ${c62} · 63 × ${c63} · 68 × ${c68} · 69 × ${c69}): así lo marcaste en Vínculos. La lectura del Anexo I es que van adentro de 1–8; si la Inspección no lo aceptó por escrito, destildá estos renglones.`);
+            return;
+          }
+        }
         // ---- Columnas ----
         let m = d.match(/^Columna\s+(PRFV|met[aá]lica)\s+recta,?\s+([\d.,]+)\s*m/i);
         if(m){
@@ -23087,6 +23133,12 @@ const ITEMIZADO_EPEC = [
       porque:'Ítem 62: bornera BPN (para RSTN+T) de 4 mm² – 2,5 mm². En el Anexo I está bajo «ELEMENTOS DE TABLERO», así que se cobra por las del <b>tablero general</b>.' },
     { re:/^Bornera BPN del tablero\s+(6|10)/i, tipo:'item', item:63,
       porque:'Ítem 63: bornera BPN (para RSTN+T) de 10 mm² – 6 mm². En el Anexo I está bajo «ELEMENTOS DE TABLERO», así que se cobra por las del <b>tablero general</b>.' },
+    { re:/^Cajas de columna nueva certificadas aparte/i, tipo:'item', item:'62/63/68/69',
+      porque:'Interruptor de Vínculos: las BPN, tabaqueras y fusibles de las cajas de columna nueva se certifican aparte, por acuerdo con la Inspección.' },
+    { re:/^Portafusible tabaquera del tablero/i, tipo:'item', item:69,
+      porque:'Ítem 69: portafusible tabaquera con fusible 1 / 6 / 10 A. Cargado en «Tablero — elementos interiores»: es del tablero general.' },
+    { re:/^Fusible cer[aá]mico del tablero/i, tipo:'item', item:68,
+      porque:'Ítem 68: fusible cerámico 2 A – 10 A. Cargado en «Tablero — elementos interiores»: es del tablero general.' },
     { re:/^Portafusible tabaquera/i, tipo:'dentro', item:'1-8 / 42',
       porque:'⚠️ <b>Verificar siempre antes de certificar.</b> El portafusible de la caja de columna queda adentro del ítem de la columna: el <b>ítem 42</b> dice textual «Incluye borneras aisladas tipo BPN, <b>seccionador portafusible para riel din</b>, fusibles cerámicos 2/4 amper», y los ítems 1 a 8 pagan la columna con su cableado interno y conexionado completo. El <b>ítem 69</b> se reserva para el tablero. Si la Inspección acepta certificarlo aparte, cargalo a mano.' },
     { re:/^(Fusible cil[ií]ndrico|FUSIBLE CILINDRICO|Fusible cer[aá]mico|FUSIBLE CERAMICO)/i, tipo:'dentro', item:'1-8 / 42',
