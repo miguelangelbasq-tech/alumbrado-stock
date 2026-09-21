@@ -3162,7 +3162,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 16:15 · e5d5de</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 18:34 · 0d52f1</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3461,8 +3461,8 @@
         </div>
 
         <label style="margin-top:14px;" for="cableGanancia">Ganancia por subida, en metros <span style="font-weight:400; color:var(--text-soft);">— ponés tu número, o lo dejás vacío y usa la altura de la columna</span></label>
-        <input type="number" id="cableGanancia" min="0" step="0.5" placeholder="ej. 7 · vacío = altura libre de la columna">
-        <div class="hint" style="margin-top:2px;"><b>Manda lo que escribas acá.</b> Es lo que sube <b>un cable</b> por <b>una columna</b>; la calculadora ya sabe, por el orden de los puntos, que en una columna intermedia suben <b>2 cables</b> (el que llega y el que sigue) y en la última del circuito <b>1</b>. Ej.: con <b>7</b>, una intermedia suma 14 m y la última 7 m. Vacío = la <b>altura libre de cada columna</b>. <b>0</b> = no sumar nada (ya cargaste los largos con la ganancia adentro). El total se ve abajo apenas lo escribís y se suma solo a los metros de cada calibre.</div>
+        <input type="number" id="cableGanancia" min="0" step="0.5" placeholder="vacío = PRFV: altura libre de la columna · metálica: 5 m">
+        <div class="hint" style="margin-top:2px;"><b>Manda lo que escribas acá.</b> Es lo que sube <b>un cable</b> por <b>una columna</b>; la calculadora ya sabe, por el orden de los puntos, que en una columna intermedia suben <b>2 cables</b> (el que llega y el que sigue) y en la última del circuito <b>1</b>. Ej.: con <b>7</b>, una intermedia suma 14 m y la última 7 m. Vacío = <b>PRFV: la altura libre de cada columna</b> (7 o 10) · <b>metálica: 5 m</b> (el cable entra por la base y llega a la caja a 2,50 m). <b>0</b> = no sumar nada (ya cargaste los largos con la ganancia adentro). El total se ve abajo apenas lo escribís y se suma solo a los metros de cada calibre.</div>
         <div class="hint" id="gananciaSummary" style="margin-top:6px;"></div>
       </div>
 
@@ -6620,6 +6620,16 @@ function renderCircuitos(){
 // ---- Derivación: de los circuitos a los tramos por calibre ----
 // Esto es el corazón del cambio. Recorre cada circuito desde el tablero y va acumulando, por
 // calibre: metros de zanja, metros de ganancia por subida y cantidad de columnas alimentadas.
+// Ganancia por subida cuando el campo está vacío (2026-09-21). El usuario: *"básicamente para PRFV 7
+// y metálica 5"*. En PRFV el troncal sube hasta la caja a 3,50 m y la bornera está arriba: se toma la
+// altura libre de la columna (7 o 10). En METÁLICA la caja está a 2,50 m y el cable entra por la
+// base: 2,50 m + el tramo enterrado y la curva ≈ 5 m, sea la columna de 7 o de 10 m.
+const GANANCIA_METALICA_M = 5;
+function gananciaPorDefecto(alturaCol, tipoCol){
+  const t = tipoCol != null ? tipoCol : ((document.getElementById('colTipo')||{}).value || 'PRFV');
+  return t === 'Metálica' ? GANANCIA_METALICA_M : (alturaCol || 7);
+}
+window.gananciaPorDefecto = gananciaPorDefecto;
 function derivarTramosDeCircuitos(){
   const gInput = (document.getElementById('cableGanancia')||{}).value;
   const gananciaApagada = gInput !== '' && (parseFloat(gInput) || 0) === 0;
@@ -6636,7 +6646,7 @@ function derivarTramosDeCircuitos(){
       if(!p.esColumna) return;                 // punto de paso: no cuelga columna, no hay subida
       a.columnas += 1;
       if(gananciaApagada) return;              // el usuario ya cargó los metros con ganancia incluida
-      const h = gFija != null ? gFija : (p.altura != null ? p.altura : (c.altura || 7));
+      const h = gFija != null ? gFija : gananciaPorDefecto(p.altura != null ? p.altura : (c.altura || 7));
       a.ganancia += h;                         // sube el cable que LLEGA a esta columna
       const sig = pts[i+1];
       if(sig && sig.calibre) tocar(sig.calibre).ganancia += h;   // y el que SALE hacia la próxima
@@ -6696,7 +6706,7 @@ function desgloseSubidasHtml(){
     let totalC = 0;
     const filas = pts.map((p,i)=>{
       if(!p.esColumna) return `<tr><td>${escHtml(nombrePunto(c,i))}</td><td colspan="2" style="color:var(--text-soft);">solo pasa el cable, no hay columna</td><td>—</td></tr>`;
-      const h = gFija != null ? gFija : (p.altura != null ? p.altura : (c.altura || 7));
+      const h = gFija != null ? gFija : gananciaPorDefecto(p.altura != null ? p.altura : (c.altura || 7));
       const sig = pts[i+1];
       const sube = `sube ${escHtml(etiquetaCalibre(p.calibre))} <b>${fmt(h,1)} m</b>`;
       const baja = (sig && sig.calibre)
@@ -6857,7 +6867,9 @@ function actualizarGananciaSummary(){
   const gFija = (input !== '') ? parseFloat(input) : null;
   const conQue = gFija != null
     ? `a <b>${fmt(gFija,1)} m por subida</b> (el número que pusiste: ${subidas} × ${fmt(gFija,1)})`
-    : 'con la <b>altura de cada columna</b> por subida (campo vacío)';
+    : (((document.getElementById('colTipo')||{}).value || '') === 'Metálica'
+        ? `a <b>${fmt(GANANCIA_METALICA_M,1)} m por subida</b> (campo vacío, columna metálica: hasta la caja a 2,50 m + el tramo enterrado)`
+        : 'con la <b>altura de cada columna</b> por subida (campo vacío, PRFV)');
   el.innerHTML = `<b>${subidas} subidas</b> en ${cols} columnas de ${ultimos} circuito${ultimos>1?'s':''} `
     + `(${cols - ultimos} intermedia${cols-ultimos===1?'':'s'} con 2 cables + ${ultimos} última${ultimos===1?'':'s'} con 1), ${conQue} `
     + `= <b>${fmt(total,0)} m</b> para subir y bajar el cable por las columnas. <b>Ya están sumados</b> en los metros de cada calibre — no se piden aparte.`;
@@ -7342,6 +7354,7 @@ document.getElementById('cruceTipo').addEventListener('change', poblarCruce);
 document.getElementById('cruceMl').addEventListener('input', actualizarCruceResumen);
 
 colTipoEl.addEventListener('change', actualizarVinculoGruposSummary);
+colTipoEl.addEventListener('change', ()=>{ try{ actualizarResumenCircuitos(); }catch(e){} try{ actualizarGananciaSummary(); }catch(e){} });   // la ganancia por defecto depende del tipo (2026-09-21)
 colTipoEl.addEventListener('change', poblarAlturas);
 
 // ---- Los tres selectores de tipo de columna, vigilados (2026-09-06) ----
@@ -14752,7 +14765,7 @@ function calcular(){
     } else {
       const circuitosCable = parseInt(document.getElementById('circuitos').value) || 1;
       const gananciaInput = document.getElementById('cableGanancia').value;
-      const mPorSubida = gananciaInput === '' ? (altura != null ? altura : 7) : (parseFloat(gananciaInput) || 0);
+      const mPorSubida = gananciaInput === '' ? gananciaPorDefecto(altura != null ? altura : 7, tipoCol) : (parseFloat(gananciaInput) || 0);
       const gananciaTotal = Math.max(0, 2*colsTotalTramos - circuitosCable) * mPorSubida;
       gananciaPorTramo = colsTotalTramos > 0
         ? distribuirProporcional(gananciaTotal, colsPorTramo)
@@ -14796,7 +14809,7 @@ function calcular(){
               ? ` · <b>estos ${fmt(ml+g,0)} m ya contemplan ${fmt(g,0)} m para la subida y bajada del cable en las columnas</b>`
                 + (subidasTotalesCircuitos ? ` (la plaza tiene ${subidasTotalesCircuitos} subidas y bajadas)` : '')
                 + ` — ${fmt(ml,0)} m de zanja + ${fmt(g,0)} m por las columnas. No hay que sumarle nada más`
-              : '');
+              : ` — ${fmt(ml,0)} m de zanja, sin ganancia (la cargaste en 0 o no hay columnas en los circuitos)`);
       return {
         ...(cod ? M(cod, detalle) : {desc:`Cable Cu XLPE/PVC ${label} — ${detalle}`}),
         cant: ml + g, un:'m', ref:'IRAM 2178-1 / IEC 60502-1'
@@ -20537,25 +20550,36 @@ function poblarParteObraDatalist(){
 
     // ---------- Cables ----------
     // La fuente de verdad es «Cableado por circuitos»: cada punto trae su largo y su calibre. Se
-    // suman los LARGOS DE ZANJA por calibre — la ganancia (lo que sube por la columna) no va acá,
-    // porque el ítem del pliego es «provisión y tendido EN ZANJA». Si el cómputo es viejo y no tiene
-    // circuitos, se cae a los tramos derivados que la calculadora guardaba igual.
+    // suman los largos de zanja MÁS la ganancia (lo que sube y baja por cada columna) por calibre,
+    // como computa la Municipalidad (ver el comentario en itemizadoDesdeSecciones). Si el cómputo
+    // es viejo y no tiene circuitos, se cae a los tramos derivados que la calculadora guardaba igual.
     if(on('toggleCableado')){
-      const porCalibre = {};
+      // (2026-09-21) Zanja + ganancia por calibre, con la misma regla que derivarTramosDeCircuitos:
+      // en cada columna sube el cable que llega y baja el que sigue, con la altura de esa columna
+      // (o el número fijo de «Ganancia por subida», o nada si está en 0).
+      const porCalibre = {}, ganPorCalibre = {};
       let hayCircuitos = false;
+      const gInput = String(C.cableGanancia == null ? '' : C.cableGanancia);
+      const gApagada = gInput !== '' && (parseFloat(gInput) || 0) === 0;
+      const gFija = (gInput !== '' && !gApagada) ? parseFloat(gInput) : null;
       (f.circuitos||[]).forEach(c=>{
-        (c.puntos||[]).forEach(p=>{
-          if(!p.calibre) return;
+        const pts = (c.puntos||[]).filter(p=> p.calibre);
+        pts.forEach((p, i)=>{
           hayCircuitos = true;
           porCalibre[p.calibre] = (porCalibre[p.calibre]||0) + n2(p.largo);
+          if(!p.esColumna || gApagada) return;
+          const h = gFija != null ? gFija : gananciaPorDefecto(p.altura != null ? n2(p.altura) : (n2(c.altura) || 7), String(C.colTipo || 'PRFV'));
+          ganPorCalibre[p.calibre] = (ganPorCalibre[p.calibre]||0) + h;
+          const sig = pts[i+1];
+          if(sig && sig.calibre) ganPorCalibre[sig.calibre] = (ganPorCalibre[sig.calibre]||0) + h;
         });
       });
       if(!hayCircuitos) (f.tramos||[]).forEach(t=>{ if(t.calibre) porCalibre[t.calibre] = (porCalibre[t.calibre]||0) + n2(t.ml); });
       Object.keys(porCalibre).forEach(cal=>{
-        const ml = porCalibre[cal];
+        const zanja = porCalibre[cal], gan = ganPorCalibre[cal] || 0, ml = zanja + gan;
         const it = CABLE_A_ITEM[cal];
         const nombre = String(cal).replace('x','×');
-        if(it) push(it, ml, `${fmt(ml,2)} m de cable ${nombre} mm²${hayCircuitos?' (largo de zanja de los circuitos, sin la ganancia de subida)':''}`);
+        if(it) push(it, ml, `${fmt(ml,2)} m de cable ${nombre} mm²${hayCircuitos ? `: ${fmt(zanja,2)} m de zanja + ${fmt(gan,2)} m de subida y bajada por las columnas` : ' (tramos del cómputo viejo, sin ganancia)'}`);
         else if(ml > 0) dudas.push(`No hay ítem del itemizado para el cable ${nombre} mm² (${fmt(ml,2)} m). Cargalo a mano.`);
       });
     }
@@ -20742,16 +20766,24 @@ function poblarParteObraDatalist(){
           else push(11, cant, `${fmt(cant,2)} m de acometida aérea EPEC ↔ tablero`);
           return;
         }
-        // ---- Cable troncal: los METROS DE ZANJA salen escritos en el propio renglón ----
+        // ---- Cable troncal: el renglón dice «N m de zanja» y su cantidad es el TOTAL ----
+        // (2026-09-21) Antes se cargaban SOLO los metros de zanja, con el argumento de que el ítem dice
+        // «tendido EN ZANJA». El usuario: *"cuando calculo los vanos el cable no me está tirando las
+        // ganancias, me tira lo mismo que el zanjeo"*. Y tiene razón contra los cómputos oficiales: en
+        // Eleodoro Fierro la Muni computa 7.1 = 136 m de cable contra 6.2 = 93 m de zanja; en el
+        // certificado, Jerusalén 268 m de cable / 198 de zanja, Parque Latino 270 / 187, Roberto Viola
+        // 110 / 63. El cable que sube por la columna se provee y se tiende igual: va en el ítem.
         m = d.match(/^Cable Cu\s+(\d+)\s*[x×]\s*([\d.,]+)\s*mm/i);
         if(m){
           const clave = `${m[1]}x${String(m[2]).replace(',','.')}`;
           const zan = d.match(/([\d.,]+)\s*m de zanja/i);
           if(zan){
-            const ml = numAR(zan[1]);
+            const zanja = numAR(zan[1]);
+            const total = cant > 0 ? cant : zanja;
+            const gan = Math.max(0, total - zanja);
             const it2 = CABLE_A_ITEM[clave];
-            if(it2) push(it2, ml, `${fmt(ml,2)} m de cable ${clave.replace('x','×')} mm² en zanja (la ganancia de subida no cuenta acá)`);
-            else if(ml > 0) dudas.push(`No hay ítem del itemizado para el cable ${clave.replace('x','×')} mm² (${fmt(ml,2)} m de zanja). Cargalo a mano.`);
+            if(it2) push(it2, total, `${fmt(total,2)} m de cable ${clave.replace('x','×')} mm²: ${fmt(zanja,2)} m de zanja + ${fmt(gan,2)} m de subida y bajada por las columnas (como computa la Municipalidad: el cable que sube también se provee y se tiende)`);
+            else if(total > 0) dudas.push(`No hay ítem del itemizado para el cable ${clave.replace('x','×')} mm² (${fmt(total,2)} m). Cargalo a mano.`);
             return;
           }
           // Acometida EPEC ↔ tablero: es el conductor, no el caño ni la vereda
