@@ -266,7 +266,7 @@
   }
   .vinc-row{
     display:grid;
-    grid-template-columns:34px 2fr 1fr 26px;
+    grid-template-columns:34px 2fr 1fr 1.2fr 26px;
     gap:8px;
     align-items:center;
     margin-bottom:8px;
@@ -274,7 +274,7 @@
   .vinc-row select, .vinc-row input{margin:0;}
   .vinc-labels{
     display:grid;
-    grid-template-columns:34px 2fr 1fr 26px;
+    grid-template-columns:34px 2fr 1fr 1.2fr 26px;
     gap:8px;
     font-size:11px; color:var(--text-soft); font-weight:600;
     margin-bottom:6px;
@@ -1133,7 +1133,7 @@
      que ya se le había hecho a la carga de circuitos. */
   .grid > *{ min-width:0; }
   .tramo-row, .tramo-labels{ grid-template-columns:32px minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) 24px; }
-  .vinc-row, .vinc-labels{ grid-template-columns:32px minmax(0,2fr) minmax(0,1fr) 24px; }
+  .vinc-row, .vinc-labels{ grid-template-columns:32px minmax(0,2fr) minmax(0,1fr) minmax(0,1.2fr) 24px; }
   .tramo-row select, .tramo-row input, .vinc-row select, .vinc-row input{ min-width:0; }
   .row2 > *{ min-width:0; }
   .card, .card *{ max-width:100%; }
@@ -3162,7 +3162,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 18:34 · 0d52f1</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 19:11 · 201633</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3302,7 +3302,7 @@
         <div class="hint" style="margin-top:0;">Las columnas <b>metálicas que ya están en la plaza y se quedan</b>. <b>No se compran</b> —por eso no van en «Columnas»— pero llevan lo suyo, y en el itemizado
           son otros ítems: <b>41</b> reacondicionamiento (limpieza, lijado y pintado, AP-TC-023), <b>42</b> acometida nueva con caja externa (AP-PL-002/003) y PAT completa, <b>43</b> aplomado, <b>44</b> luminaria LED sobre columna existente y <b>45</b> retiro de la luminaria vieja.
           Sirve para una plaza <b>toda</b> de existentes (Eleodoro Fierro: 0 nuevas + 4 existentes) o mezclada con nuevas metálicas o PRFV (Alberto Pío: 1 nueva + 8 existentes).<br>
-          <b>Ojo:</b> en «Vínculos de columnas» contalas <b>también</b> — ahí van sus brazos, luminarias, BPN y fusibles — así que ese total tiene que ser <b>nuevas + existentes</b>.</div>
+          <b>Ojo:</b> en «Vínculos de columnas» contalas <b>también</b> — ahí van sus brazos, luminarias, BPN y fusibles — así que ese total tiene que ser <b>nuevas + existentes</b>. Y en cada grupo de vínculo <b>marcá «Sobre columna: Existente»</b> para los que van sobre estas columnas: así el itemizado sabe exactamente qué vínculos NO van por los ítems 1 a 8 y cuántas luminarias van por el 44, sin adivinar.</div>
         <div class="row2" style="margin-top:10px;">
           <div>
             <label for="colExistentes">Columnas existentes que se reacondicionan</label>
@@ -7069,7 +7069,10 @@ let vinculoGrupos = [
 
 function renderVinculoGrupos(){
   const cont = document.getElementById('vinculoGruposContainer');
-  let html = `<div class="vinc-labels"><div></div><div>Tipo de vínculo</div><div>Columnas</div><div></div></div>`;
+  // Cada grupo dice sobre qué columna va (2026-09-21): NUEVA o EXISTENTE (reacondicionada). El
+  // usuario: *"¿cómo diferencio los vínculos dobles o simples de las reacondicionadas con las
+  // nuevas?"*. Antes el itemizado adivinaba descontando las existentes del grupo más numeroso.
+  let html = `<div class="vinc-labels"><div></div><div>Tipo de vínculo</div><div>Columnas</div><div>Sobre columna</div><div></div></div>`;
   vinculoGrupos.forEach((g, idx)=>{
     html += `<div class="vinc-row" data-vinc="${g.id}">
       <div class="tramo-num">G${idx+1}</div>
@@ -7077,6 +7080,10 @@ function renderVinculoGrupos(){
         ${VINCULOS.map(v=>`<option value="${v.id}" ${v.id===g.tipo?'selected':''}>${v.label}</option>`).join('')}
       </select>
       <input type="number" min="0" data-field="columnas" value="${g.columnas}">
+      <select data-field="sobre" title="¿Estos vínculos van sobre columnas nuevas o sobre existentes que se reacondicionan? Cambia el itemizado: nueva = ítems 1 a 8 · existente = 41/42 + 44">
+        <option value="nueva" ${g.sobre !== 'existente' ? 'selected' : ''}>Nueva (ítems 1–8)</option>
+        <option value="existente" ${g.sobre === 'existente' ? 'selected' : ''}>Existente (41/42 + 44)</option>
+      </select>
       <button type="button" class="tramo-remove" data-action="remove" ${vinculoGrupos.length<=1?'disabled':''} title="Quitar grupo">×</button>
     </div>`;
   });
@@ -7109,7 +7116,7 @@ function actualizarVinculoGruposSummary(){
     else       totalBpnTierra += g.columnas * bpnVerdePorColumnaMet(v.lum);
     if(esPRFV) fusiblesDeColumna(v.lum, cfgCol.pf).forEach(a=>{ fusAmp[a] = (fusAmp[a]||0) + g.columnas; });
     else       totalPFMet += g.columnas * bpnPfPorColumnaMet(v.lum);
-    detalle.push(`${g.columnas}× ${v.label.split('—')[0].trim()}`);
+    detalle.push(`${g.columnas}× ${v.label.split('—')[0].trim()}${g.sobre === 'existente' ? ' <i>(sobre existente)</i>' : ''}`);
   });
   try{ renderBpnMetPanel(); }catch(e){}
   // La tercera verde de los finales de circuito se suma una sola vez para toda la plaza.
@@ -7141,8 +7148,10 @@ document.getElementById('vinculoGruposContainer').addEventListener('input', (e)=
   if(!g) return;
   const field = e.target.dataset.field;
   if(field === 'tipo') g.tipo = e.target.value;
+  else if(field === 'sobre') g.sobre = e.target.value === 'existente' ? 'existente' : 'nueva';
   else g[field] = parseFloat(e.target.value) || 0;
   actualizarVinculoGruposSummary();
+  try{ pintarResumenExistentes(); }catch(e2){}
 });
 document.getElementById('vinculoGruposContainer').addEventListener('click', (e)=>{
   if(e.target.dataset.action === 'remove'){
@@ -14281,7 +14290,8 @@ function calcular(){
       // combinaciones sin ítem de pliego propio (varios artefactos con brazo largo) no tienen
       // producto de catálogo: salen con el nombre descriptivo y sin código, marcadas como tales.
       const codVin = COD_VINCULO[v.id];
-      const detalleVin = `s/plano ${v.plano}${sinItem ? ' · sin ítem de pliego propio, confirmar con la Inspección' : ''}`;
+      const sobreEx = g.sobre === 'existente';
+      const detalleVin = `s/plano ${v.plano}${sinItem ? ' · sin ítem de pliego propio, confirmar con la Inspección' : ''}${sobreEx ? ' · <b>sobre columna existente</b> (reacondicionada: va por 41/42 + 44, no por los ítems 1 a 8)' : ''}`;
       // El plano tipo va SIEMPRE, tenga o no código de pañol (2026-09-06). Antes, los vínculos con
       // código —los de brazo 400, que son los más usados— salían solo con el nombre del producto y
       // sin citar su plano, mientras que todos los demás renglones del cómputo sí lo citan. Se veía
@@ -14686,14 +14696,31 @@ function calcular(){
   // del proyecto ejecutivo de Alberto Pío ID 3191 (1 nueva + 8 existentes), que es el caso testigo.
   // Lo que NO se computa acá porque ya lo hacen otras secciones cuando se cuentan ahí: los brazos,
   // luminarias, BPN y fusibles (Vínculos) y la jabalina (Puesta a tierra suma las existentes).
+  // Grupos de vínculo marcados «sobre columna existente» (2026-09-21): de ahí salen las luminarias
+  // del 44 sin adivinar, y se controla que sumen las existentes cargadas.
+  const gruposVincEx = (vincOn ? gruposVinculoActivos : []).filter(g=> g.sobre === 'existente');
+  const colsVincEx = gruposVincEx.reduce((t,g)=> t + (g.columnas||0), 0);
+  const lumVincEx = gruposVincEx.reduce((t,g)=>{ const v = VINCULOS.find(x=>x.id===g.tipo); return t + (g.columnas||0) * (v ? v.lum : 0); }, 0);
+  if(colsVincEx > 0 && colExist <= 0){
+    alertas.push(`<b>Vínculos marcados «sobre columna existente» sin columnas existentes:</b> hay ${colsVincEx} columna(s) en grupos marcados como existentes, pero la sección «Columnas existentes — reacondicionamiento» está apagada o en 0. Prendela y cargá cuántas son, o volvé esos grupos a «Nueva».`);
+  }
   if(colExist > 0){
     const itemsEx = [];
     let lumEx = colExistLum;
     let lumExOrigen = 'cargadas a mano';
-    if(!lumEx && vincOn && vincCant > 0){
+    if(colsVincEx > 0){
+      if(colsVincEx !== colExist){
+        alertas.push(`<b>Las existentes no cierran con los vínculos:</b> en «Columnas existentes» cargaste <b>${colExist}</b>, pero los grupos de Vínculos marcados «sobre columna existente» suman <b>${colsVincEx}</b>. Corregí uno de los dos: el itemizado carga el 41/42 por ${colExist} y el 44 por los vínculos marcados.`);
+      }
+      if(colExistLum > 0 && colExistLum !== lumVincEx){
+        alertas.push(`<b>Luminarias sobre existentes:</b> cargaste <b>${colExistLum}</b> a mano, pero los vínculos marcados «sobre columna existente» dan <b>${lumVincEx}</b>. Manda lo de los vínculos; si no es así, corregí el grupo.`);
+      }
+      lumEx = lumVincEx;
+      lumExOrigen = `según los ${colsVincEx} vínculo(s) marcados «sobre columna existente» en Vínculos (${gruposVincEx.map(g=>{ const v = VINCULOS.find(x=>x.id===g.tipo); return `${g.columnas}× ${v ? v.label.split('—')[0].trim() : g.tipo}`; }).join(' + ')})`;
+    } else if(!lumEx && vincOn && vincCant > 0){
       const porCol = totalLuminarias / vincCant;
       lumEx = Math.round(porCol * colExist);
-      lumExOrigen = `estimadas: ${fmt(porCol,2)} luminarias por columna según Vínculos × ${colExist} existentes — si no es así, cargalas en «Columnas existentes»`;
+      lumExOrigen = `estimadas: ${fmt(porCol,2)} luminarias por columna según Vínculos × ${colExist} existentes — mejor marcá en Vínculos qué grupos van «sobre columna existente» y sale exacto`;
     }
     // La caja externa y su ferretería, la banderita, el bloquete y la torta van SOLO con acometida
     // nueva (ítem 42), que es lo que las paga. Si la acometida se conserva, no se computan (2026-09-21).
@@ -14720,7 +14747,7 @@ function calcular(){
       alertas.push(`<b>Columnas existentes sin luminaria:</b> tenés <b>${colExist}</b> existente(s) y <b>0</b> luminarias sobre ellas. Si llevan artefacto nuevo, cargá cuántas en «Luminarias nuevas que van sobre ellas» (ítem 44); si no, el itemizado y el informe las cuentan de menos.`);
     }
     if(colExistAplomar > 0) itemsEx.push({...T, desc:'Aplomado / reubicación de columna existente fuera de plomo — las reubicadas llevan <b>fundación nueva</b>: cargala en Obra civil', cant:colExistAplomar, un:'Un.', ref:'Ítem 43 · 10.9 del cómputo oficial'});
-    itemsEx.push({desc:`ℹ <b>Resumen del reacondicionamiento para el itemizado:</b> ítem 41 × ${colExist} · ítem 42 × ${colExistAcom} · ítem 43 × ${colExistAplomar} · ítem 44 × ${lumEx} · ítem 45 × ${colExistRetiroLum}. Estas columnas se cuentan <b>también en Vínculos</b> (brazos, luminarias, BPN, fusibles)${colExistAcom ? ' y en <b>Puesta a tierra</b> (una jabalina por columna, ya sumadas ahí)' : ''}. <b>No</b> se cuentan en las alturas de Columnas (no se compran) ni en las fundaciones de Obra civil, salvo las reubicadas.`, cant:'—', un:'—', ref:'Criterio de la herramienta'});
+    itemsEx.push({desc:`ℹ <b>Resumen del reacondicionamiento para el itemizado:</b> ítem 41 × ${colExist} · ítem 42 × ${colExistAcom} · ítem 43 × ${colExistAplomar} · ítem 44 × ${lumEx} · ítem 45 × ${colExistRetiroLum}. Estas columnas se cuentan <b>también en Vínculos</b> (brazos, luminarias, BPN, fusibles)${colsVincEx > 0 ? `, donde <b>${colsVincEx}</b> están marcadas «sobre columna existente» — así el itemizado sabe cuáles vínculos NO van por los ítems 1 a 8` : ' — <b>marcá ahí qué grupos van «sobre columna existente»</b>, si no el itemizado tiene que adivinar cuáles descontar de los ítems 1 a 8'}${colExistAcom ? ' y en <b>Puesta a tierra</b> (una jabalina por columna, ya sumadas ahí)' : ''}. <b>No</b> se cuentan en las alturas de Columnas (no se compran) ni en las fundaciones de Obra civil, salvo las reubicadas.`, cant:'—', un:'—', ref:'Criterio de la herramienta'});
     itemsEx.push({desc:'ℹ Caso testigo — <b>Alberto Pío ID 3191</b>: 1 columna nueva + 8 existentes. Su cómputo oficial dio 14.1 = <b>8</b> cajas externas, 14.2 = <b>1</b> tablerito, pintura 3.3 = 8 y 3.5 = 1, torta 12.5 = <b>9</b>, aplomado 10.9 = <b>3</b>, 9 acoples triples y 27 luminarias.', cant:'—', un:'—', ref:'Proyecto ejecutivo ID 3191'});
     secciones.push({titulo:'COLUMNAS EXISTENTES (se reutilizan)', items:itemsEx});
     tiles.push({num:colExist, lbl:'Columnas existentes reutilizadas'});
@@ -20432,14 +20459,17 @@ function poblarParteObraDatalist(){
       const gruposCol = (f.columnaGrupos||[]).filter(g=>n2(g.columnas) > 0);
       const vinc = leer(()=> VINCULOS) || [];
       const brazosDe = (t)=>{ const v = vinc.find(x=>x.id===t); return v ? v.lum : null; };
-      const gruposVinc = on('toggleVinculos')
-        ? (f.vinculoGrupos||[]).filter(g=>n2(g.columnas) > 0).map(g=>({ brazos:brazosDe(g.tipo), columnas:n2(g.columnas) }))
-        : [];
+      // Los grupos marcados «sobre columna existente» (2026-09-21) no son ítems 1–8: se apartan.
+      const gruposVincTodos = on('toggleVinculos') ? (f.vinculoGrupos||[]).filter(g=>n2(g.columnas) > 0) : [];
+      const marcadosEx = gruposVincTodos.filter(g=> g.sobre === 'existente').reduce((t,g)=> t + n2(g.columnas), 0);
+      const gruposVinc = gruposVincTodos.filter(g=> g.sobre !== 'existente').map(g=>({ brazos:brazosDe(g.tipo), columnas:n2(g.columnas) }));
+      if(marcadosEx > 0) dudas.push(`${marcadosEx} vínculo(s) están marcados <b>«sobre columna existente»</b> en la Calculadora: no van por los ítems 1 a 8.`);
       // Las columnas EXISTENTES también están contadas en Vínculos (la Calculadora lo pide así),
       // pero sus brazos NO son ítems 1 a 8: se descuentan antes de repartir, empezando por el
       // grupo más numeroso — el mismo criterio que la vía del listado (2026-09-17). Antes esta vía
       // los repartía todos entre las nuevas y cargaba columnas nuevas de más.
-      const exCols = existentesDeLaFoto(C).cant;
+      const exCols = Math.max(0, existentesDeLaFoto(C).cant - marcadosEx);
+      vincDescontados = marcadosEx;
       if(exCols > 0 && gruposVinc.length){
         let aDescontar = exCols;
         gruposVinc.sort((a,b)=> b.columnas - a.columnas).forEach(g=>{
@@ -20448,8 +20478,9 @@ function poblarParteObraDatalist(){
           g.columnas -= usa; aDescontar -= usa;
         });
         for(let i = gruposVinc.length - 1; i >= 0; i--) if(gruposVinc[i].columnas <= 0) gruposVinc.splice(i, 1);
-        vincDescontados = exCols - aDescontar;
-        if(vincDescontados > 0) dudas.push(`${vincDescontados} de los vínculos van sobre <b>columnas existentes</b>: sus brazos <b>no tienen ítem propio</b> en el Anexo I (esas columnas se cobran por 41, 42 y 44), así que se descontaron de los ítems de columna nueva. Si el reparto entre triples y dobles no es ese, corregilo a mano.`);
+        const adivinados = exCols - aDescontar;
+        vincDescontados += adivinados;
+        if(adivinados > 0) dudas.push(`${adivinados} de los vínculos van sobre <b>columnas existentes</b> pero no están marcados: se descontaron del grupo más numeroso (esas columnas se cobran por 41, 42 y 44). Si el reparto no es ese, corregilo a mano o marcá los grupos en Vínculos.`);
       }
 
       const de10 = gruposCol.filter(g=>n2(g.altura) === 10).reduce((t,g)=>t+n2(g.columnas), 0);
@@ -20512,11 +20543,15 @@ function poblarParteObraDatalist(){
         if(E.retiro > 0) push(45, E.retiro, `${E.retiro} luminaria(s) vieja(s) retirada(s) de las columnas que se reacondicionan`);
         let lumEx = E.lum;
         let origen = 'cargadas en la Calculadora';
-        if(!lumEx && on('toggleVinculos')){
-          const vinc = leer(()=> VINCULOS) || [];
+        const vincAll = leer(()=> VINCULOS) || [];
+        const marcados = on('toggleVinculos') ? (f.vinculoGrupos||[]).filter(g=> n2(g.columnas) > 0 && g.sobre === 'existente') : [];
+        if(marcados.length){
+          lumEx = marcados.reduce((t,g)=>{ const v = vincAll.find(x=> x.id === g.tipo); return t + n2(g.columnas) * (v ? n2(v.lum) : 0); }, 0);
+          origen = 'según los vínculos marcados «sobre columna existente»';
+        } else if(!lumEx && on('toggleVinculos')){
           const grupos = (f.vinculoGrupos||[]).filter(g=> n2(g.columnas) > 0);
           const cols = grupos.reduce((t,g)=> t + n2(g.columnas), 0);
-          const lums = grupos.reduce((t,g)=>{ const v = vinc.find(x=> x.id === g.tipo); return t + n2(g.columnas) * (v ? n2(v.lum) : 0); }, 0);
+          const lums = grupos.reduce((t,g)=>{ const v = vincAll.find(x=> x.id === g.tipo); return t + n2(g.columnas) * (v ? n2(v.lum) : 0); }, 0);
           if(cols > 0){ lumEx = Math.round(lums / cols * ex); origen = `estimadas: ${fmt(lums/cols,2)} luminarias por columna según Vínculos × ${ex} existentes`; }
         }
         if(lumEx > 0) push(44, lumEx, `${lumEx} luminaria(s) sobre columna existente (${origen})`);
@@ -20701,6 +20736,7 @@ function poblarParteObraDatalist(){
     const vincPorBrazos = {};    // 1..4 -> n
     let tipoCol = null;
     let colExistentes = 0;       // columnas metálicas existentes reutilizadas (sección nueva del 06/09/2026)
+    let vincExistMarcados = 0;   // vínculos que el cómputo ya dice «sobre columna existente» (2026-09-21)
     let tabAereoSinApoyo = 0;    // tableros aéreos que no trajeron su apoyo PRFV (van sobre poste existente)
     let exCaja = 0, ex41 = 0;    // cómo se contaron: por la caja externa (cómputos viejos) o por el 41
     let ex45 = 0;                // luminarias viejas retiradas de las que se reacondicionan (2026-09-21)
@@ -20752,9 +20788,14 @@ function poblarParteObraDatalist(){
           return;
         }
         // ---- Vínculos (cuántos brazos/artefactos por columna) ----
+        // Los marcados «sobre columna existente» (2026-09-21) NO son ítems 1–8: se apartan.
         if(/^V[ií]nculo/i.test(d) || /^Capuch[oó]n/i.test(d)){
           const b = d.match(/(\d+)\s*artefactos?/i);
-          if(b){ const nb = parseInt(b[1],10); vincPorBrazos[nb] = (vincPorBrazos[nb]||0) + cant; }
+          if(b){
+            const nb = parseInt(b[1],10);
+            if(/sobre columna existente/i.test(d)) vincExistMarcados += cant;
+            else vincPorBrazos[nb] = (vincPorBrazos[nb]||0) + cant;
+          }
           return;
         }
         // ---- Acometida EPEC ↔ tablero: aérea (11) o subterránea (12) (2026-09-21) ----
@@ -20914,17 +20955,22 @@ function poblarParteObraDatalist(){
     // esas columnas de los vínculos antes de repartir, empezando por el grupo más numeroso, y se
     // avisa. Ej. Alberto Pío: 9 triples − 8 existentes = 1 → ítem 3 = 1, no 9.
     let vincDescontados = 0;
-    if(colExistentes > 0){
-      let aDescontar = colExistentes;
+    // Los vínculos ya marcados «sobre columna existente» no entraron en vincPorBrazos: solo hay que
+    // adivinar (descontar del grupo más numeroso) por las existentes que NO tengan su grupo marcado
+    // — cómputos anteriores al 21/09/2026, o plazas donde no se marcó.
+    if(vincExistMarcados > 0) dudas.push(`${vincExistMarcados} vínculo(s) están marcados <b>«sobre columna existente»</b> en el cómputo: no van por los ítems 1 a 8 (esas columnas se cobran por 41/42 y sus luminarias por el 44).`);
+    if(colExistentes - vincExistMarcados > 0){
+      let aDescontar = colExistentes - vincExistMarcados;
       Object.keys(vincPorBrazos).sort((a,b)=>vincPorBrazos[b]-vincPorBrazos[a]).forEach(k=>{
         if(aDescontar <= 0) return;
         const usa = Math.min(vincPorBrazos[k], aDescontar);
         vincPorBrazos[k] -= usa; aDescontar -= usa;
         if(vincPorBrazos[k] <= 0) delete vincPorBrazos[k];
       });
-      vincDescontados = colExistentes - aDescontar;
-      if(vincDescontados > 0) dudas.push(`${vincDescontados} de los vínculos van sobre <b>columnas existentes</b>: sus brazos <b>no tienen ítem propio</b> en el Anexo I (esas columnas se cobran por 41, 42 y 44), así que se descontaron de los ítems de columna nueva. Si el reparto entre triples y dobles no es ese, corregilo a mano.`);
+      vincDescontados = (colExistentes - vincExistMarcados) - aDescontar;
+      if(vincDescontados > 0) dudas.push(`${vincDescontados} de los vínculos van sobre <b>columnas existentes</b> pero el cómputo no dice cuáles: se descontaron del grupo más numeroso (sus brazos <b>no tienen ítem propio</b>; esas columnas se cobran por 41, 42 y 44). <b>Si el reparto entre triples, dobles y simples no es ese, corregilo a mano</b> — o marcá en Vínculos qué grupos van «sobre columna existente» y volvé a calcular.`);
     }
+    vincDescontados += vincExistMarcados;
     const brazos = Object.keys(vincPorBrazos).map(k=>({ brazos:parseInt(k,10), columnas:vincPorBrazos[k] }))
                      .sort((a,b)=>b.brazos - a.brazos);
     if(!brazos.length){
@@ -21896,7 +21942,7 @@ function poblarParteObraDatalist(){
           if(b){
             const r = vinculoParaDesc(d, parseInt(b[1],10));
             if(r.v){
-              vinculoGrupos.push({ id:idSeq++, tipo:r.v.id, columnas:Math.round(cant) });
+              vinculoGrupos.push({ id:idSeq++, tipo:r.v.id, columnas:Math.round(cant), sobre: /sobre columna existente/i.test(d) ? 'existente' : 'nueva' });
               hayVinc = true;
               if(!r.seguro) dudoso.push(`El vínculo «${d.slice(0,60)}…» se cargó como «${r.v.label}». Verificalo antes de calcular.`);
             } else {
