@@ -3143,7 +3143,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-20 23:46 · 4931f8</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 11:20 · 4434f6</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -4276,7 +4276,7 @@
       </div>
       <div class="hint" style="margin-top:8px;">Revisa <b>todas</b> las plazas del tablero y te lista, con nombre y botón para abrirla, lo que conviene mirar antes de certificar:
         ítems <b>repetidos</b> (la plaza vale el doble), cantidad <b>hecha mayor que la contratada</b> (la diferencia no se cobra), columnas existentes <b>sin su luminaria</b> (41 sin 44),
-        ítems en <b>cero</b>, plazas <b>sin ítems</b>, plazas <b>repetidas</b>, lo que <b>no coincide con el certificado de la Municipalidad</b> y la <b>provisión</b> que no cierra.
+        ítems en <b>cero</b>, plazas <b>sin ítems</b>, plazas <b>repetidas</b> y la <b>provisión</b> que no cierra.
         <b>No toca nada</b>: solo mira y te dice.</div>
       <div id="epChequeoOut"></div>
     </div>
@@ -23319,13 +23319,37 @@ const ITEMIZADO_EPEC = [
   }
   window.planUnificarGrupo = planUnificarGrupo;
 
+  // El aviso de plazas repetidas, compartido por el panel con y sin certificado (2026-09-21).
+  function avisoRepesHtml(todas){
+    const repes = plazasRepetidas(todas);
+    const conCert = !!window.CERTIF_MUNI_ACTIVO;
+    return repes.length ? `<div class="card no-print ep-repes">
+      <b>⚠ ${repes.length} plaza(s) parecen estar cargadas dos veces</b>
+      <div class="hint" style="margin:4px 0 8px;">Tienen el <b>mismo ID de obra</b>${conCert ? ', el <b>mismo nombre</b> o cruzan con la <b>misma hoja del certificado</b>' : ' o el <b>mismo nombre</b>'}. Una plaza repetida <b>suma dos veces</b> en el total, en el Mapa, en las órdenes y en el balance. En cada grupo, la primera es la que más cargado tiene.</div>
+      <div class="ep-cargar-todo" style="margin-bottom:8px;">
+        <button type="button" class="btn-primary ep-repes-unificar" style="width:auto; margin:0; padding:10px 16px;">🧹 Dejar una sola de cada una</button>
+        <span class="hint">De cada grupo se queda <b>la que más ítems tiene</b> (la que se llenó con la Calculadora), le pasa lo que a la otra le sobra —el segundo ID, el estado, ${conCert ? 'la hoja del certificado, ' : ''}el barrio— y <b>borra las demás</b>. Pide confirmación y muestra qué queda y qué se borra antes de tocar nada.</span>
+      </div>
+
+      ${repes.map(g=>{ const ord = g.plazas.slice().sort((x,y)=> cuentasEpec(y).items - cuentasEpec(x).items); return `<div class="ep-repe-grupo">
+        <div class="ep-repe-tit">${esc(ord[0].nombre || '(sin nombre)')} <span style="font-weight:500; text-transform:none; letter-spacing:0;">— comparten ${esc(g.motivos.join(' y '))}</span></div>
+        ${ord.map((a,i)=>{ const c = cuentasEpec(a); const pes = enPesos(c.contratado); return `<div class="ep-repe-fila">
+          <div style="flex:1 1 200px;"><b>${esc(a.nombre||'(sin nombre)')}</b>${a.obraId?` · ID ${esc(a.obraId)}`:' · <i>sin ID</i>'}${i === 0 && c.items ? ' <span class="ep-repe-buena">la más completa</span>' : ''}
+            <div class="it-cat">${c.items ? `${c.items} ítem(s) · ${fmtK(c.contratado)}${pes ? ' · ' + pes : ''}` : '<b style="color:var(--amber)">sin ítems</b>'}${a.estado?` · ${esc(a.estado)}`:''}</div></div>
+          <button type="button" class="btn-ghost ep-abrir-reg" data-plaza="${esc(a.id)}" style="padding:6px 12px; font-size:12.5px;">Abrirla →</button>
+          <button type="button" class="btn-ghost ep-borrar-plaza" data-plaza="${esc(a.id)}" style="padding:6px 12px; font-size:12.5px; color:var(--danger);">🗑 Borrar ésta</button>
+        </div>`; }).join('')}
+      </div>`; }).join('')}
+    </div>` : '';
+  }
+
   function pintarPanelCertif(todas){
     const cont = document.getElementById('epecCertifPanel');
     if(!cont) return;
     if(typeof window.certifHojas !== 'function' || typeof window.certifDePlaza !== 'function'){ cont.innerHTML = ''; return; }
     const hojas = window.certifHojas();
-    // Con CERO plazas registradas el panel igual va: es justamente cuando más sirve «cargar las 36».
-    if(!hojas.length){ cont.innerHTML = ''; return; }
+    // Con el certificado apagado (2026-09-21) no hay hojas: queda solo el aviso de plazas repetidas.
+    if(!hojas.length){ cont.innerHTML = avisoRepesHtml(todas); return; }
 
     const dueños = new Map();      // nombre de hoja -> plazas que la tienen
     const sinHoja = [];
@@ -23339,24 +23363,7 @@ const ITEMIZADO_EPEC = [
     const asignadas = hojas.length - libres.length;
 
     // ---- Aviso de plazas repetidas, arriba de todo ----
-    const repes = plazasRepetidas(todas);
-    const avisoRepes = repes.length ? `<div class="card no-print ep-repes">
-      <b>⚠ ${repes.length} plaza(s) parecen estar cargadas dos veces</b>
-      <div class="hint" style="margin:4px 0 8px;">Tienen el <b>mismo ID de obra</b>, el <b>mismo nombre</b> o cruzan con la <b>misma hoja del certificado</b>. Una plaza repetida <b>suma dos veces</b> en el total, en el Mapa, en las órdenes y en el balance. En cada grupo, la primera es la que más cargado tiene.</div>
-      <div class="ep-cargar-todo" style="margin-bottom:8px;">
-        <button type="button" class="btn-primary ep-repes-unificar" style="width:auto; margin:0; padding:10px 16px;">🧹 Dejar una sola de cada una</button>
-        <span class="hint">De cada grupo se queda <b>la que más ítems tiene</b> (la que se llenó con la Calculadora), le pasa lo que a la otra le sobra —el segundo ID, el estado, la hoja del certificado, el barrio— y <b>borra las demás</b>. Pide confirmación y muestra qué queda y qué se borra antes de tocar nada.</span>
-      </div>
-      ${repes.map(g=>{ const ord = g.plazas.slice().sort((x,y)=> cuentasEpec(y).items - cuentasEpec(x).items); return `<div class="ep-repe-grupo">
-        <div class="ep-repe-tit">${esc(ord[0].nombre || '(sin nombre)')} <span style="font-weight:500; text-transform:none; letter-spacing:0;">— comparten ${esc(g.motivos.join(' y '))}</span></div>
-        ${ord.map((a,i)=>{ const c = cuentasEpec(a); const pes = enPesos(c.contratado); return `<div class="ep-repe-fila">
-          <div style="flex:1 1 200px;"><b>${esc(a.nombre||'(sin nombre)')}</b>${a.obraId?` · ID ${esc(a.obraId)}`:' · <i>sin ID</i>'}${i === 0 && c.items ? ' <span class="ep-repe-buena">la más completa</span>' : ''}
-            <div class="it-cat">${c.items ? `${c.items} ítem(s) · ${fmtK(c.contratado)}${pes ? ' · ' + pes : ''}` : '<b style="color:var(--amber)">sin ítems</b>'}${a.estado?` · ${esc(a.estado)}`:''}</div></div>
-          <button type="button" class="btn-ghost ep-abrir-reg" data-plaza="${esc(a.id)}" style="padding:6px 12px; font-size:12.5px;">Abrirla →</button>
-          <button type="button" class="btn-ghost ep-borrar-plaza" data-plaza="${esc(a.id)}" style="padding:6px 12px; font-size:12.5px; color:var(--danger);">🗑 Borrar ésta</button>
-        </div>`; }).join('')}
-      </div>`; }).join('')}
-    </div>` : '';
+    const avisoRepes = avisoRepesHtml(todas);
 
     // Cuántas de las 36 hojas (vacías incluidas) tienen plaza con ítems cargados: es lo que decide
     // si vale la pena ofrecer «cargar todo de una».
@@ -23497,7 +23504,7 @@ const ITEMIZADO_EPEC = [
       dif.sort((x,y)=> parseFloat(x.id) - parseFloat(y.id));
       if(dif.length) ambar(`<b>${dif.length}</b> ítem(s) distintos de lo que <b>certificó la Municipalidad</b> (hoja «${esc(hoja.n)}»): ${dif.slice(0,5).map(d=> `${esc(d.id)}: Muni ${nn(d.c)} / acá ${nn(d.m)}`).join(' · ')}${dif.length > 5 ? '…' : ''}. El detalle está en el informe «Certificado municipal vs. Calculadora».`);
       else info(`Coincide ítem por ítem con lo que certificó la Municipalidad (hoja «${esc(hoja.n)}»).`);
-    } else if(!hoja && a.yaEjecutada) info(`Es una de las 36 ya ejecutadas pero <b>no cruza</b> con ninguna hoja del certificado de la Municipalidad: asignale la hoja desde «Traer lo certificado».`);
+    } else if(!hoja && a.yaEjecutada && window.CERTIF_MUNI_ACTIVO) info(`Es una de las 36 ya ejecutadas pero <b>no cruza</b> con ninguna hoja del certificado de la Municipalidad: asignale la hoja desde «Traer lo certificado».`);
 
     // 8) estado del proyecto
     if(window.CO && window.CO.estado(a).fijado) info(`Proyecto <b>fijado</b>${window.CO.estado(a).cerrado ? ' y cerrado' : ''}: los cambios entran como ajustes con motivo.`);
@@ -24081,7 +24088,7 @@ const ITEMIZADO_EPEC = [
       // si no cruza, en vez de desaparecer ofrece un selector para elegir la hoja a mano. Antes se
       // escondía cuando el cruce fallaba, y el usuario se quedaba sin saber por qué: *"ya no está
       // la base para extraer de otra plaza de muni para que se autocomplete"*.
-      if(typeof window.certifDePlaza === 'function'){
+      if(typeof window.certifDePlaza === 'function' && window.CERTIF_MUNI_ACTIVO){
         const cert = window.certifDePlaza(a);
         const como = (typeof window.certifComoCruzo === 'function') ? window.certifComoCruzo(a) : '';
         const hojas = (typeof window.certifHojas === 'function') ? window.certifHojas() : [];
@@ -27510,6 +27517,18 @@ const ITEMIZADO_EPEC = [
   // San Cayetano, Vuelta de Obligado y Aycardoz. Las otras 31 están finalizadas.
   // `al` son los nombres con los que se la puede llamar: el de la planilla, las variantes conocidas
   // («MALVADISCOS» está mal escrito en la hoja; la plaza es MALVAVISCO) y el barrio del ANEXO VI.
+  // ==========================================================================================
+  // EL CERTIFICADO DE LA MUNICIPALIDAD ESTÁ APAGADO (2026-09-21)
+  // ==========================================================================================
+  // El usuario: *"es al pedo el certificado de la Municipalidad, no está aprobado ése"*. La planilla
+  // «CERTIF. PLAZAS ITEM MUNI.xlsx» nunca fue aprobada, así que NO sirve ni como fuente ni como
+  // espejo. Con esta llave en `false` desaparece de toda la herramienta: el botón «Traer lo
+  // certificado», el panel de cruce de hojas, el informe «Certificado municipal vs. Calculadora»,
+  // las comparaciones «Muni X / acá Y» del Chequeo y del informe de luminarias, y el cruce por hoja
+  // en las plazas repetidas. Los datos quedan guardados abajo por si algún día se aprueba: se vuelve
+  // a poner en `true` y todo reaparece.
+  const CERTIF_MUNI_ACTIVO = false;
+  window.CERTIF_MUNI_ACTIVO = CERTIF_MUNI_ACTIVO;
   const CERTIF = {
     fuente: 'CERTIF. PLAZAS ITEM MUNI.xlsx',
     fecha: '07/09/2026',
@@ -27576,6 +27595,7 @@ const ITEMIZADO_EPEC = [
   // *"ya no está la base para extraer de otra plaza de muni para que se autocomplete"*.
   // Además de esto, cada plaza puede tener una hoja ELEGIDA A MANO, que gana sobre todo lo demás.
   function certifDe(a){
+    if(!CERTIF_MUNI_ACTIVO) return null;      // apagado: ninguna plaza cruza con la planilla
     if(!a) return null;
     // 0) lo que el usuario eligió a mano manda siempre
     if(a.certifHoja){
@@ -27676,12 +27696,14 @@ const ITEMIZADO_EPEC = [
   // Solo las hojas que TIENEN cantidades: ofrecer las cuatro vacías (Hípica, Vicor, San Cayetano y
   // Aycardoz) sería ofrecer algo que no trae nada.
   function certifHojas(){
+    if(!CERTIF_MUNI_ACTIVO) return [];
     return CERTIF.plazas.filter(x=>Object.keys(x.it).length)
       .map(x=>({ n:x.n, ids:x.ids.join(' / '), items:Object.keys(x.it).length, it:x.it, obra:!!x.obra }))
       .sort((p,q)=>p.n.localeCompare(q.n, 'es'));
   }
   // TODAS las hojas, vacías incluidas: es lo que usa «cargar las 36 de una».
   window.certifTodas = function(){
+    if(!CERTIF_MUNI_ACTIVO) return [];
     // `al` (los nombres alternativos) va desde el 08/09/2026: lo necesitan los controles de
     // duplicados, para saber que «ELEODORO FIERRO» y «ELEODORO FIERRO CERRUTI» son la misma.
     return CERTIF.plazas.map(x=>({ n:x.n, ids:x.ids.slice(), al:(x.al||[]).slice(), items:Object.keys(x.it).length, obra:!!x.obra }));
@@ -27790,6 +27812,7 @@ const ITEMIZADO_EPEC = [
       secciones:[['resumen','Resumen por material',1],['detalle','Movimiento por movimiento',1]],
       construir: infPanol },
   ];
+  if(!CERTIF_MUNI_ACTIVO){ const i = TIPOS.findIndex(t=> t.id === 'plazas-certif'); if(i >= 0) TIPOS.splice(i, 1); }
   const tipoDe = id => TIPOS.find(t=>t.id === id) || TIPOS[0];
   // El certificado se comparte con el Itemizado 2026, que lo usa para el botón «Traer lo
   // certificado en la Municipalidad». Sale de acá porque acá vive el dato (2026-09-07).
