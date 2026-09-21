@@ -2032,6 +2032,10 @@
   .it-buscador input[type="text"]{ flex:1 1 260px; min-width:0; margin:0; }
   .it-chk{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-soft); white-space:nowrap; }
   .it-chk input{ width:auto; margin:0; }
+  /* Casillero «Llevan acometida nueva» de Columnas existentes (2026-09-21): como .it-chk pero con el texto que envuelve */
+  .ex-chk{ display:flex; align-items:flex-start; gap:8px; margin-top:10px; font-size:13px; color:var(--text); line-height:1.4; cursor:pointer; }
+  .ex-chk input{ width:auto; margin:3px 0 0; flex:none; }
+  #cardExistentes .card-header-row h2{ min-width:0; overflow-wrap:anywhere; }
   .it-plaza{ padding:14px 18px 12px; }
   /* 5 columnas: flecha · nombre · plata · % · botón de imprimir. Antes eran 4 para 5 hijos, así que
      el botón de imprimir caía solo en una segunda fila, dentro de la columna de 20 px de la flecha:
@@ -2475,6 +2479,21 @@
                     background:rgba(245,158,11,.12); color:#6b5312; }
   .it-previa-dudas ul{ margin:6px 0 0; padding-left:20px; }
   .it-previa-info{ background:rgba(148,163,184,.14); color:var(--text-soft); }
+  /* Cuadro «Reacondicionamiento» de la previa (2026-09-21) */
+  .it-previa-reac{ margin-top:12px; border-radius:10px; padding:10px 14px; font-size:12.5px; line-height:1.5;
+                   background:rgba(14,116,144,.10); border:1px solid rgba(14,116,144,.28); color:var(--text); }
+  .it-reac-cab{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:baseline; }
+  .it-reac-grid{ display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:8px; margin-top:8px; }
+  .it-reac-c{ background:var(--card); border:1px solid var(--border); border-radius:8px; padding:6px 8px; text-align:center;
+              display:flex; flex-direction:column; gap:1px; min-width:0; }
+  .it-reac-c b{ font-size:18px; color:#0e7490; }
+  .it-reac-cero{ opacity:.55; }
+  .it-reac-cero b{ color:var(--text-soft); }
+  .it-reac-it{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-soft); }
+  .it-reac-t{ font-size:11px; color:var(--text-soft); line-height:1.25; }
+  .it-reac-desc{ margin-top:8px; }
+  .it-reac-desc ul{ margin:4px 0 0; padding-left:20px; }
+  @media (max-width:640px){ .it-reac-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
   .it-previa-pie{ display:flex; justify-content:flex-end; gap:10px; margin-top:14px; flex-wrap:wrap; }
   @media (max-width:640px){
     .it-previa-fila{ grid-template-columns:24px minmax(0,1fr); }
@@ -3143,7 +3162,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 11:20 · 4434f6</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 12:32 · 1b0ea6</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3257,27 +3276,60 @@
         <div class="hint" id="columnaGruposSummary" style="margin-top:10px;"></div>
         <input type="hidden" id="colCantidad" value="7">
 
-        <!-- Columnas metálicas EXISTENTES que se reutilizan (2026-09-06). Solo para Metálica. -->
-        <div id="colExistBloque" style="display:none; margin-top:14px; padding:12px; border:1px dashed var(--border); border-radius:10px; background:var(--panel);">
-          <label style="margin-top:0;" for="colExistentes">Columnas metálicas <b>EXISTENTES</b> que se reutilizan</label>
-          <input type="number" id="colExistentes" min="0" value="0" style="width:140px;">
-          <div class="hint" style="margin-top:4px;">Las que ya están en la plaza y se quedan (con brazos, luminarias y caja <b>nuevos</b>). <b>No se compran</b>, por eso no van en las alturas de arriba, pero llevan lo suyo: caja estanca <b>externa</b> a 2,50 m (ítem <b>42</b> / 14.1 del cómputo oficial, plano AP-PL-003), <b>terminal banderita + bloquete</b> de PAT (AP-TC-005 2/2), su <b>jabalina</b>, y el <b>reacondicionamiento</b> (ítem 41: limpieza, lijado y pintado). Ej.: Alberto Pío ID 3191 = 1 nueva + 8 existentes.<br>
-          <b>Ojo:</b> en «Vínculos de columnas» contalas <b>también</b> — ahí van sus brazos, luminarias, BPN y fusibles — así que ese total tiene que ser <b>nuevas + existentes</b>.</div>
-          <div class="row2" style="margin-top:8px;">
-            <div>
-              <label for="colExistLum">Luminarias que van sobre esas existentes</label>
-              <input type="number" id="colExistLum" min="0" value="0">
-              <div class="hint" style="margin-top:2px;">Ítem <b>44</b> «montaje, conexionado y energización de luminaria LED en columna existente». Si dejás 0 se estima por el vínculo de la plaza.</div>
-            </div>
-            <div>
-              <label for="colExistAplomar">De esas, a aplomar o reubicar</label>
-              <input type="number" id="colExistAplomar" min="0" value="0">
-              <div class="hint" style="margin-top:2px;">Ítem <b>43</b> «aplomado». Las reubicadas llevan además fundación nueva: sumalas en <b>Obra civil</b>.</div>
-            </div>
+        <div class="hint">Esta sección controla la compra de la columna en sí (poste, altura y pintura si es metálica). Los vínculos/acoples, luminarias y protecciones se cargan aparte, en "Vínculos de columnas" — se puede activar o desactivar de forma independiente.</div>
+      </div>
+
+      <!-- ============================================================
+           COLUMNAS EXISTENTES — REACONDICIONAMIENTO (2026-09-21)
+           Era un bloque escondido adentro de «Columnas», visible solo si el tipo era Metálica. El
+           usuario: *"la Calculadora no toma en cuenta plazas que son reacondicionar, y en el
+           itemizado cambian varios ítems"* y *"el aplomado no lo llevan todas: deberíamos poder marcar
+           cuántas"*. Ahora es una sección propia, con su interruptor, visible sea cual sea el tipo de
+           columna nueva (una plaza con PRFV nuevas puede tener metálicas existentes que se
+           reacondicionan), y con todo lo que decide el itemizado: cuántas (41), luminarias nuevas
+           sobre ellas (44), viejas que se retiran (45, precargado una por columna), a aplomar (43) y
+           si llevan acometida nueva (42). Caso testigo: Eleodoro Fierro ID 2063 — 0 nuevas + 4
+           existentes con vínculo triple = 12 luminarias, tablero aéreo nuevo, 93 m de zanja.
+           ============================================================ -->
+      <div class="card" id="cardExistentes">
+        <div class="card-header-row">
+          <h2><span class="dot"></span>Columnas existentes — reacondicionamiento</h2>
+          <div class="toggle-wrap">
+            <span class="toggle-txt">Incluir esta tarea</span>
+            <label class="switch"><input type="checkbox" id="toggleExistentes"><span class="slider"></span></label>
           </div>
         </div>
-
-        <div class="hint">Esta sección controla la compra de la columna en sí (poste, altura y pintura si es metálica). Los vínculos/acoples, luminarias y protecciones se cargan aparte, en "Vínculos de columnas" — se puede activar o desactivar de forma independiente.</div>
+        <div class="hint" style="margin-top:0;">Las columnas <b>metálicas que ya están en la plaza y se quedan</b>. <b>No se compran</b> —por eso no van en «Columnas»— pero llevan lo suyo, y en el itemizado
+          son otros ítems: <b>41</b> reacondicionamiento (limpieza, lijado y pintado, AP-TC-023), <b>42</b> acometida nueva con caja externa (AP-PL-002/003) y PAT completa, <b>43</b> aplomado, <b>44</b> luminaria LED sobre columna existente y <b>45</b> retiro de la luminaria vieja.
+          Sirve para una plaza <b>toda</b> de existentes (Eleodoro Fierro: 0 nuevas + 4 existentes) o mezclada con nuevas metálicas o PRFV (Alberto Pío: 1 nueva + 8 existentes).<br>
+          <b>Ojo:</b> en «Vínculos de columnas» contalas <b>también</b> — ahí van sus brazos, luminarias, BPN y fusibles — así que ese total tiene que ser <b>nuevas + existentes</b>.</div>
+        <div class="row2" style="margin-top:10px;">
+          <div>
+            <label for="colExistentes">Columnas existentes que se reacondicionan</label>
+            <input type="number" id="colExistentes" min="0" value="0">
+            <div class="hint" style="margin-top:2px;">Ítem <b>41</b>, una por columna. Con acometida nueva, su jabalina, banderita y bloquete salen solos en Puesta a tierra.</div>
+          </div>
+          <div>
+            <label for="colExistLum">Luminarias nuevas que van sobre ellas</label>
+            <input type="number" id="colExistLum" min="0" value="0">
+            <div class="hint" style="margin-top:2px;">Ítem <b>44</b>, una por artefacto (una columna triple son 3). Si dejás 0 se estima por el vínculo de la plaza.</div>
+          </div>
+        </div>
+        <div class="row2" style="margin-top:8px;">
+          <div>
+            <label for="colExistRetiroLum">Luminarias viejas que se retiran de ellas</label>
+            <input type="number" id="colExistRetiroLum" min="0" value="0">
+            <div class="hint" style="margin-top:2px;">Ítem <b>45</b>. Viene <b>una por columna</b>; corregilo si alguna ya estaba sin artefacto o tenía dos. Las luminarias de las columnas que se <b>retiran enteras</b> van en «Retiros», no acá.</div>
+          </div>
+          <div>
+            <label for="colExistAplomar">De esas, cuántas se aploman o reubican</label>
+            <input type="number" id="colExistAplomar" min="0" value="0">
+            <div class="hint" style="margin-top:2px;">Ítem <b>43</b>. <b>No lo llevan todas</b>: solo las que están fuera de plomo. Las reubicadas llevan además fundación nueva: sumalas en <b>Obra civil</b>.</div>
+          </div>
+        </div>
+        <label class="ex-chk"><input type="checkbox" id="colExistAcometida" checked> <span><b>Llevan acometida nueva</b> (ítem <b>42</b>): caja estanca externa a 2,50 m, BPN, portafusible, fusibles, tramo 3×1,5, acrílico y <b>PAT completa con medición</b></span></label>
+        <div class="hint" style="margin-top:2px;">Destildalo solo si la caja y la acometida existentes se conservan tal cual. Sin el 42 no salen la caja externa ni su ferretería, y la PAT de esas columnas no se descuenta de los ítems 75/74/81.</div>
+        <div class="hint" id="colExistResumen" style="margin-top:8px;"></div>
       </div>
 
       <div class="card" id="cardVinculos">
@@ -3633,7 +3685,7 @@
 
         <label for="retiroLum">Luminarias existentes a retirar</label>
         <input type="number" id="retiroLum" min="0" value="0">
-        <div class="hint" style="margin-top:2px;">Ítem <b>45</b> «retiro de luminaria de A°P° existente, incluye el traslado al depósito de la Municipalidad». Es el retiro más común: las farolas o globos viejos que se bajan de las columnas que se reutilizan. Cuando elegís una plaza del buscador, se precarga si su itemizado lo traía.</div>
+        <div class="hint" style="margin-top:2px;">Ítem <b>45</b> «retiro de luminaria de A°P° existente, incluye el traslado al depósito de la Municipalidad». Acá van las que se bajan de columnas o postes <b>que se retiran</b>, o sueltas. <b>Las de las columnas que se reacondicionan ya se cuentan en «Columnas existentes — reacondicionamiento»</b> (no las pongas dos veces). Cuando elegís una plaza del buscador, se precarga si su itemizado lo traía.</div>
 
         <div class="checkbox-line">
           <input type="checkbox" id="podaCheck">
@@ -6333,6 +6385,7 @@ const SECTION_CARD = {
   toggleTablero:'cardTablero',
   toggleCruce:'cardCruce',
   toggleRetiros:'cardRetiros',
+  toggleExistentes:'cardExistentes', // columnas existentes — reacondicionamiento (2026-09-21)
   toggleTabElem:'cardTabElem',      // elementos interiores del tablero (2026-09-07)
   toggleEmpalmes:'cardEmpalmes',    // empalmes 78/79 y medición de aislación 80 (2026-09-07)
 };
@@ -7290,13 +7343,29 @@ window.emparejarTipoCol = emparejarTipoCol;
   if(e) e.addEventListener('change', pintarTipoColDesync);
 });
 
-// El bloque de columnas EXISTENTES solo tiene sentido en metálica: en PRFV todo es nuevo.
-function pintarColExistBloque(){
-  const b = document.getElementById('colExistBloque');
-  if(b) b.style.display = colTipoEl.value === 'Metálica' ? '' : 'none';
+// Columnas EXISTENTES (2026-09-21): dejó de depender del tipo de columna nueva — es una sección
+// propia, «Columnas existentes — reacondicionamiento», con su interruptor. Acá queda solo la
+// precarga de las luminarias viejas a retirar: UNA POR COLUMNA mientras el usuario no la toque.
+(function(){
+  const cant = document.getElementById('colExistentes'), ret = document.getElementById('colExistRetiroLum');
+  if(!cant || !ret) return;
+  ret.addEventListener('input', ()=>{ ret.dataset.tocado = '1'; });
+  cant.addEventListener('input', ()=>{ if(!ret.dataset.tocado) ret.value = cant.value; pintarResumenExistentes(); });
+  ['colExistLum','colExistRetiroLum','colExistAplomar','colExistAcometida','toggleExistentes'].forEach(id=>{
+    const e = document.getElementById(id); if(e){ e.addEventListener('input', pintarResumenExistentes); e.addEventListener('change', pintarResumenExistentes); }
+  });
+})();
+function pintarResumenExistentes(){
+  const out = document.getElementById('colExistResumen'); if(!out) return;
+  const n = id=>{ const e = document.getElementById(id); return e ? Math.max(0, parseInt(e.value, 10) || 0) : 0; };
+  const on = (document.getElementById('toggleExistentes')||{}).checked;
+  const ex = n('colExistentes');
+  if(!on || !ex){ out.innerHTML = ''; return; }
+  const lum = n('colExistLum'), ret = n('colExistRetiroLum'), apl = Math.min(n('colExistAplomar'), ex);
+  const acom = !!(document.getElementById('colExistAcometida')||{}).checked;
+  out.innerHTML = `<b>Al itemizado van:</b> ítem 41 × <b>${ex}</b> · ítem 42 × <b>${acom ? ex : 0}</b> · ítem 43 × <b>${apl}</b> · ítem 44 × <b>${lum || '(se estima por el vínculo)'}</b> · ítem 45 × <b>${ret}</b>.
+    Y se <b>descuentan</b>: ${ex} vínculo(s) de los ítems de columna nueva (1 a 8)${acom ? `, y ${ex} jabalina(s), tomacable(s) y medición(es) de los ítems 75/74/81 (la PAT ya está en el 42)` : ''}. Sin fundación${apl ? ` (salvo las ${apl} reubicadas, que van en Obra civil)` : ''}.`;
 }
-colTipoEl.addEventListener('change', pintarColExistBloque);
-pintarColExistBloque();
 
 // ============================================================
 // GRUPOS DE ALTURA DE COLUMNA (2026-08-22)
@@ -7387,10 +7456,15 @@ const PB_CALIBRE_TXT = {   // como lo escribe el itemizado viejo → como lo esp
 function pbExtras(ph){
   const x = { tramos:[], zanjaTerreno:null, zanjaOtros:[], retiroCol:0, retiroTab:0, retiroLum:0,
               poda:0, cruceMl:0, cruceTipoTxt:'', tablero:0, luminariasExistentes:0,
-              acometidaTipo:null, cablePiloto:0, reacondicionadas:0 };
+              acometidaTipo:null, cablePiloto:0, reacondicionadas:0, acometidasNuevas:0, aplomadas:0 };
   (ph.it||[]).forEach(r=>{
     const cant = parseFloat(r[1])||0, d = String(r[2]||'');
     if(!cant) return;
+    // Lo que el itemizado viejo ya trae mapeado a los ítems 42 y 43 del Anexo I (2026-09-21): así
+    // la sección «Columnas existentes» se precarga entera, no solo las luminarias.
+    const nuevo = String(r[3] || '');
+    if(nuevo === '42'){ x.acometidasNuevas = Math.max(x.acometidasNuevas, cant); }
+    if(nuevo === '43'){ x.aplomadas = Math.max(x.aplomadas, cant); return; }
     // Cable en zanja: «Cable 4×2,5 mm² tendido en zanja»
     const mc = d.match(/^Cable\s+(\d+)\s*[x×]\s*(\d+(?:[,.]\d+)?)\s*mm/i);
     if(mc && /zanja/i.test(d)){
@@ -7638,23 +7712,32 @@ function pbElegir(i){
         llenados.push(`la <b>poda</b> (${pbFmt(X.poda,0)} árbol/es)`); }
       if(X.tablero > 0){ enc('toggleTablero', true); }
 
+      const faltan = [];
+      // Desde el 21/09/2026 «Columnas existentes — reacondicionamiento» es una sección propia y se
+      // precarga entera: cuántas (por el 41 o el 42 del itemizado viejo), las luminarias nuevas (44),
+      // las aplomadas (43) y si llevaron acometida nueva (42). El retiro de luminarias (45) del
+      // itemizado viejo queda en «Retiros», que es donde siempre estuvo, así no se cuenta dos veces.
+      const exN = Math.round(Math.max(X.reacondicionadas, X.acometidasNuevas));
+      if(exN > 0 || X.luminariasExistentes > 0){
+        enc('toggleExistentes', true);
+        const rt = document.getElementById('colExistRetiroLum'); if(rt){ rt.value = '0'; rt.dataset.tocado = '1'; }
+        if(exN > 0) set('colExistentes', String(exN));
+        set('colExistLum', String(Math.round(X.luminariasExistentes)));
+        set('colExistAplomar', String(Math.round(Math.min(X.aplomadas, exN))));
+        const ac = document.getElementById('colExistAcometida');
+        if(ac){ ac.checked = exN === 0 || X.acometidasNuevas > 0; ac.dispatchEvent(new Event('change', {bubbles:true})); }
+        if(exN > 0){
+          llenados.push(`<b>${exN} columna(s) existente(s)</b> a reacondicionar (${pbFmt(X.luminariasExistentes,0)} luminaria(s) sobre ellas${X.aplomadas ? ', ' + pbFmt(Math.min(X.aplomadas, exN),0) + ' a aplomar' : ''}${X.acometidasNuevas > 0 ? ', con acometida nueva' : ', sin acometida nueva'})`);
+        } else {
+          faltan.push(`<b>${pbFmt(X.luminariasExistentes,0)} luminaria(s) van sobre columnas existentes</b> (ya quedaron cargadas): falta que pongas <b>cuántas columnas existentes</b> son, en «Columnas existentes — reacondicionamiento»${d.tipo !== 'Metálica' ? ' — el itemizado viejo las trae aunque la plaza figure como PRFV' : ''}`);
+        }
+      }
       if(llenados.length) avisos.push('También se precargaron ' + llenados.join(', ') + '.');
 
       // Lo que el itemizado viejo NO puede decir: hay que mirarlo en el plano sí o sí.
-      const faltan = [];
       if(X.tramos.length) faltan.push('el <b>largo de cada tramo</b> del circuito: el itemizado viejo solo da el total por calibre, así que se repartió en partes iguales entre las columnas');
       if(!X.tramos.length) faltan.push('los <b>circuitos y el cable</b> (el itemizado viejo de esta plaza no trae cable en zanja)');
       if(X.zanjaOtros.length) faltan.push(`hay <b>${X.zanjaOtros.map(z=>pbFmt(z.ml,0)+' m de zanja en '+(z.t==='hormigon'?'piso de hormigón':'vereda de baldosas')).join(' y ')}</b>, y el formulario toma un solo tipo de terreno`);
-      // Luminarias sobre columna existente (ítem 44): desde el 06/09/2026 tienen campo. El itemizado
-      // viejo trae las luminarias pero NO cuántas columnas existentes son: eso queda a cargo suyo.
-      if(X.luminariasExistentes > 0){
-        set('colExistLum', String(Math.round(X.luminariasExistentes)));
-        if(d.tipo === 'Metálica'){
-          faltan.push(`<b>${pbFmt(X.luminariasExistentes,0)} luminaria(s) van sobre columnas existentes</b> (ya quedaron cargadas): falta que pongas <b>cuántas columnas existentes</b> son, en Columnas → «Columnas metálicas EXISTENTES»`);
-        } else {
-          faltan.push(`<b>${pbFmt(X.luminariasExistentes,0)} luminaria(s) sobre columna existente</b> — el itemizado viejo las trae aunque la plaza figure como PRFV: revisá si hay columnas metálicas existentes y cargalas en Columnas`);
-        }
-      }
       if(X.cablePiloto > 0) faltan.push(`esta plaza lleva <b>cable piloto</b> (${pbFmt(X.cablePiloto,0)} m), que no tiene campo propio`);
       if(faltan.length) avisos.push('<b>Ojo, esto lo tenés que cargar o corregir a mano:</b> ' + faltan.join(' · ') + '.');
       const tot = d.cols.reduce((a,c)=>a+c.columnas,0);
@@ -13870,7 +13953,23 @@ function restaurarFormulario(snap){
   try{ actualizarResumenCircuitos(); }catch(e){}
 
   // Los interruptores de sección abren/cierran su panel desde el evento `change`.
-  ['toggleColumnas','toggleVinculos','toggleCableado','toggleCivil','toggleTablero','toggleCruce','toggleRetiros','toggleTabElem','toggleEmpalmes']
+  // Un cómputo de antes del 21/09/2026 no tiene el interruptor de existentes: si traía columnas
+  // existentes cargadas (adentro de Columnas, como era antes), la sección nueva se prende sola.
+  if(!Object.prototype.hasOwnProperty.call(snap.campos, 'toggleExistentes')){
+    // Antes las existentes solo contaban con Columnas prendida y en Metálica: se respeta eso, así
+    // un cómputo viejo calcula igual que el día que se guardó.
+    const eraMet = !!snap.campos.toggleColumnas && String(snap.campos.colTipo || '') === 'Metálica';
+    const ex = document.getElementById('toggleExistentes');
+    if(ex) ex.checked = eraMet && (parseInt(snap.campos.colExistentes, 10) || 0) > 0;
+    // Y los casilleros que no existían: acometida nueva SIEMPRE (era lo único que había) y ningún
+    // retiro acá (los retiros de luminaria de esos cómputos ya están en «Retiros»).
+    const ac = document.getElementById('colExistAcometida'); if(ac) ac.checked = true;
+    const rt = document.getElementById('colExistRetiroLum'); if(rt){ rt.value = '0'; rt.dataset.tocado = '1'; }
+  } else {
+    // Cómputo nuevo: el retiro que trae es el que vale; que la precarga «una por columna» no lo pise.
+    const rt = document.getElementById('colExistRetiroLum'); if(rt) rt.dataset.tocado = '1';
+  }
+  ['toggleColumnas','toggleVinculos','toggleCableado','toggleCivil','toggleTablero','toggleCruce','toggleRetiros','toggleExistentes','toggleTabElem','toggleEmpalmes']
     .forEach(id=>{ const el = document.getElementById(id); if(el) el.dispatchEvent(new Event('change', {bubbles:true})); });
   return true;
 }
@@ -13951,20 +14050,28 @@ function calcular(){
   // Columnas metálicas EXISTENTES que se reutilizan (2026-09-06): no se compran, pero llevan caja
   // externa, banderita + bloquete, jabalina y reacondicionamiento. Solo cuentan en Metálica.
   const leerN = id=>{ const e = document.getElementById(id); return e ? Math.max(0, parseInt(e.value, 10) || 0) : 0; };
-  let colExist = 0, colExistLum = 0, colExistAplomar = 0;
+  // Desde el 21/09/2026 las existentes tienen SECCIÓN PROPIA («Columnas existentes —
+  // reacondicionamiento»), con su interruptor, y se leen sea cual sea el tipo de columna nueva.
+  const exOn = !!(document.getElementById('toggleExistentes')||{}).checked;
+  let colExist = 0, colExistLum = 0, colExistAplomar = 0, colExistRetiroLum = 0, colExistAcom = 0;
+  if(exOn){
+    colExist          = leerN('colExistentes');
+    colExistLum       = leerN('colExistLum');
+    colExistAplomar   = Math.min(leerN('colExistAplomar'), colExist);
+    colExistRetiroLum = leerN('colExistRetiroLum');
+    // Acometida nueva (ítem 42): caja externa, ferretería y PAT completa. Si se conserva la
+    // existente, nada de eso se computa ni se descuenta.
+    colExistAcom      = (document.getElementById('colExistAcometida')||{checked:true}).checked ? colExist : 0;
+    if(colExist > 0) tareasIncluidas.push('Columnas existentes');
+  }
   if(colOn){
     tipoCol = colTipoEl.value;
     gruposCol = columnaGrupos.filter(g=>(g.columnas||0) > 0);
     cantCol = gruposCol.reduce((a,g)=>a+g.columnas, 0);
-    if(tipoCol === 'Metálica'){
-      colExist        = leerN('colExistentes');
-      colExistLum     = leerN('colExistLum');
-      colExistAplomar = Math.min(leerN('colExistAplomar'), colExist);
-    }
 
     // Una plaza puede ser TODA de columnas existentes (0 nuevas): se acepta si cargó existentes.
     if(cantCol <= 0 && colExist <= 0){
-      if(!window.__calcSilencioso) alert('Ingresá al menos 1 columna en la sección Columnas (nuevas o existentes), o apagá esa sección si no corresponde a esta orden.');
+      if(!window.__calcSilencioso) alert('Ingresá al menos 1 columna en la sección Columnas, o apagá esa sección y cargá las existentes en «Columnas existentes — reacondicionamiento».');
       return;
     }
     altura = gruposCol.length ? gruposCol.slice().sort((a,b)=>b.columnas-a.columnas)[0].altura : 7;
@@ -14487,35 +14594,41 @@ function calcular(){
   // del proyecto ejecutivo de Alberto Pío ID 3191 (1 nueva + 8 existentes), que es el caso testigo.
   // Lo que NO se computa acá porque ya lo hacen otras secciones cuando se cuentan ahí: los brazos,
   // luminarias, BPN y fusibles (Vínculos) y la jabalina (Puesta a tierra suma las existentes).
-  if(colOn && colExist > 0){
+  if(colExist > 0){
     const itemsEx = [];
     let lumEx = colExistLum;
     let lumExOrigen = 'cargadas a mano';
     if(!lumEx && vincOn && vincCant > 0){
       const porCol = totalLuminarias / vincCant;
       lumEx = Math.round(porCol * colExist);
-      lumExOrigen = `estimadas: ${fmt(porCol,2)} luminarias por columna según Vínculos × ${colExist} existentes — si no es así, cargalas en Columnas`;
+      lumExOrigen = `estimadas: ${fmt(porCol,2)} luminarias por columna según Vínculos × ${colExist} existentes — si no es así, cargalas en «Columnas existentes»`;
     }
-    itemsEx.push({...M(6003, 'caja estanca EXTERNA, 1 por columna existente, montada a 2,50 m del piso, con el tablerito de conexionado s/ AP-CC-014 A y C adentro'), cant:colExist, un:'Un.', ref:'Ítem 42 · 14.1 del cómputo oficial · AP-PL-003'});
-    itemsEx.push({desc:'Juego de abrazaderas (2 semiabrazaderas) para sujetar la caja externa a la columna — <b>2 juegos por caja</b> · la medida es el <b>diámetro de la columna a 2,50 m</b>: medilo con cinta (perímetro ÷ 3,14) y pedí la medida igual o inmediatamente superior', cant:2*colExist, un:'Un.', ref:'AP-PL-003 · criterio de campo'});
-    itemsEx.push({desc:'Riel DIN NS 35 — <b>14 cm por caja</b> s/ despiece del plano', cant:0.14*colExist, un:'m', ref:'AP-PL-003 b'});
-    itemsEx.push({desc:'Tornillo cabeza tanque 6×3/8 para el riel DIN — 2 por caja', cant:2*colExist, un:'Un.', ref:'AP-PL-003 b'});
-    itemsEx.push({desc:'Prensacable <b>metálico</b> Ø3/4" rosca BSC (ZA3) o Ø1/2" rosca BSP (ZA11) — entrada del cable a la caja externa, 1 por caja', cant:colExist, un:'Un.', ref:'AP-PL-003 b · catálogo CONEXTUBE ZA'});
-    itemsEx.push({...M(7018, 'de Cu estañado p/ cable de 10 mm², ojal Ø14,6 — <b>1 por columna existente</b> (en las nuevas NO va: usan el bulón PAT que trae la caja AP-CC-001/004)'), cant:colExist, un:'Un.', ref:'AP-TC-005 (2/2) · AP-TC-006'});
-    itemsEx.push({...M(7003, 'de latón, soldado a la columna en todo su perímetro — 1 por columna existente'), cant:colExist, un:'Un.', ref:'AP-TC-005 (2/2) · ETG cap. 14.3'});
-    itemsEx.push({...T, desc:'Torta de mortero cementicio sobre el bloquete de PAT — cubre el bloquete y deja visible la mitad superior de la banderita, 1 por columna existente', cant:colExist, un:'Un.', ref:'Ítem 12.5 del cómputo oficial · memoria del proyecto'});
+    // La caja externa y su ferretería, la banderita, el bloquete y la torta van SOLO con acometida
+    // nueva (ítem 42), que es lo que las paga. Si la acometida se conserva, no se computan (2026-09-21).
+    if(colExistAcom > 0){
+      itemsEx.push({...M(6003, 'caja estanca EXTERNA, 1 por columna existente, montada a 2,50 m del piso, con el tablerito de conexionado s/ AP-CC-014 A y C adentro'), cant:colExistAcom, un:'Un.', ref:'Ítem 42 · 14.1 del cómputo oficial · AP-PL-003'});
+      itemsEx.push({desc:'Juego de abrazaderas (2 semiabrazaderas) para sujetar la caja externa a la columna — <b>2 juegos por caja</b> · la medida es el <b>diámetro de la columna a 2,50 m</b>: medilo con cinta (perímetro ÷ 3,14) y pedí la medida igual o inmediatamente superior', cant:2*colExistAcom, un:'Un.', ref:'AP-PL-003 · criterio de campo'});
+      itemsEx.push({desc:'Riel DIN NS 35 — <b>14 cm por caja</b> s/ despiece del plano', cant:0.14*colExistAcom, un:'m', ref:'AP-PL-003 b'});
+      itemsEx.push({desc:'Tornillo cabeza tanque 6×3/8 para el riel DIN — 2 por caja', cant:2*colExistAcom, un:'Un.', ref:'AP-PL-003 b'});
+      itemsEx.push({desc:'Prensacable <b>metálico</b> Ø3/4" rosca BSC (ZA3) o Ø1/2" rosca BSP (ZA11) — entrada del cable a la caja externa, 1 por caja', cant:colExistAcom, un:'Un.', ref:'AP-PL-003 b · catálogo CONEXTUBE ZA'});
+      itemsEx.push({...M(7018, 'de Cu estañado p/ cable de 10 mm², ojal Ø14,6 — <b>1 por columna existente</b> (en las nuevas NO va: usan el bulón PAT que trae la caja AP-CC-001/004)'), cant:colExistAcom, un:'Un.', ref:'AP-TC-005 (2/2) · AP-TC-006'});
+      itemsEx.push({...M(7003, 'de latón, soldado a la columna en todo su perímetro — 1 por columna existente'), cant:colExistAcom, un:'Un.', ref:'AP-TC-005 (2/2) · ETG cap. 14.3'});
+      itemsEx.push({...T, desc:'Torta de mortero cementicio sobre el bloquete de PAT — cubre el bloquete y deja visible la mitad superior de la banderita, 1 por columna existente', cant:colExistAcom, un:'Un.', ref:'Ítem 12.5 del cómputo oficial · memoria del proyecto'});
+    }
     itemsEx.push({...T, desc:'Reacondicionamiento de columna metálica existente — <b>limpieza, lijado y pintado</b> s/ AP-TC-023, 1 por columna', cant:colExist, un:'Un.', ref:'Ítem 41'});
-    itemsEx.push({...T, desc:'Nueva acometida subterránea en columna existente — BPN, portafusible p/ riel DIN, fusibles 2/4 A, terminales, tramo 3×1,5, acrílico y <b>PAT completa con medición</b>; es el ítem que paga la caja y la ferretería de arriba', cant:colExist, un:'Un.', ref:'Ítem 42'});
+    if(colExistAcom > 0) itemsEx.push({...T, desc:'Nueva acometida subterránea en columna existente — BPN, portafusible p/ riel DIN, fusibles 2/4 A, terminales, tramo 3×1,5, acrílico y <b>PAT completa con medición</b>; es el ítem que paga la caja y la ferretería de arriba', cant:colExistAcom, un:'Un.', ref:'Ítem 42'});
+    else itemsEx.push({desc:'ℹ <b>Sin acometida nueva (ítem 42):</b> se conserva la caja y la acometida existente. Por eso no salen la caja externa ni su ferretería, y la PAT de estas columnas <b>no se descuenta</b> de los ítems 75/74/81.', cant:'—', un:'—', ref:'Columnas existentes'});
+    if(colExistRetiroLum > 0) itemsEx.push({...T, desc:`Retiro de luminaria de A°P° existente — de las columnas que se reacondicionan${colExistRetiroLum === colExist ? ' (una por columna)' : ''}; incluye el traslado al depósito de la Municipalidad`, cant:colExistRetiroLum, un:'Un.', ref:'Ítem 45'});
     if(lumEx > 0) itemsEx.push({...T, desc:`Montaje, conexionado y energización de luminaria LED sobre columna existente — ${lumExOrigen}`, cant:lumEx, un:'Un.', ref:'Ítem 44'});
     else {
       // Sin luminarias cargadas ni vínculo para estimarlas: se avisa en el propio cómputo, porque
       // si esto queda en cero el itemizado no trae el 44 y el informe cuenta las luminarias de
       // menos (2026-09-17).
-      itemsEx.push({desc:'⚠ <b>Luminarias sobre columna existente: 0.</b> No cargaste cuántas van (casillero «Luminarias que van sobre esas existentes») y no hay vínculo para estimarlas. Si estas columnas llevan luminaria nueva, cargalas: es el <b>ítem 44</b>, una unidad por artefacto, y sin eso el itemizado y el informe de luminarias las cuentan de menos.', cant:'—', un:'—', ref:'Ítem 44'});
-      alertas.push(`<b>Columnas existentes sin luminaria:</b> tenés <b>${colExist}</b> existente(s) y <b>0</b> luminarias sobre ellas. Si llevan artefacto nuevo, cargá cuántas en «Luminarias que van sobre esas existentes» (ítem 44); si no, el itemizado y el informe las cuentan de menos.`);
+      itemsEx.push({desc:'⚠ <b>Luminarias sobre columna existente: 0.</b> No cargaste cuántas van (casillero «Luminarias nuevas que van sobre ellas») y no hay vínculo para estimarlas. Si estas columnas llevan luminaria nueva, cargalas: es el <b>ítem 44</b>, una unidad por artefacto, y sin eso el itemizado y el informe de luminarias las cuentan de menos.', cant:'—', un:'—', ref:'Ítem 44'});
+      alertas.push(`<b>Columnas existentes sin luminaria:</b> tenés <b>${colExist}</b> existente(s) y <b>0</b> luminarias sobre ellas. Si llevan artefacto nuevo, cargá cuántas en «Luminarias nuevas que van sobre ellas» (ítem 44); si no, el itemizado y el informe las cuentan de menos.`);
     }
     if(colExistAplomar > 0) itemsEx.push({...T, desc:'Aplomado / reubicación de columna existente fuera de plomo — las reubicadas llevan <b>fundación nueva</b>: cargala en Obra civil', cant:colExistAplomar, un:'Un.', ref:'Ítem 43 · 10.9 del cómputo oficial'});
-    itemsEx.push({desc:'ℹ Las columnas existentes se cuentan <b>también en Vínculos</b> (brazos, luminarias, BPN, fusibles) y en <b>Puesta a tierra</b> (una jabalina por columna, ya sumadas ahí). <b>No</b> se cuentan en las alturas de Columnas (no se compran) ni en las fundaciones de Obra civil, salvo las reubicadas.', cant:'—', un:'—', ref:'Criterio de la herramienta'});
+    itemsEx.push({desc:`ℹ <b>Resumen del reacondicionamiento para el itemizado:</b> ítem 41 × ${colExist} · ítem 42 × ${colExistAcom} · ítem 43 × ${colExistAplomar} · ítem 44 × ${lumEx} · ítem 45 × ${colExistRetiroLum}. Estas columnas se cuentan <b>también en Vínculos</b> (brazos, luminarias, BPN, fusibles)${colExistAcom ? ' y en <b>Puesta a tierra</b> (una jabalina por columna, ya sumadas ahí)' : ''}. <b>No</b> se cuentan en las alturas de Columnas (no se compran) ni en las fundaciones de Obra civil, salvo las reubicadas.`, cant:'—', un:'—', ref:'Criterio de la herramienta'});
     itemsEx.push({desc:'ℹ Caso testigo — <b>Alberto Pío ID 3191</b>: 1 columna nueva + 8 existentes. Su cómputo oficial dio 14.1 = <b>8</b> cajas externas, 14.2 = <b>1</b> tablerito, pintura 3.3 = 8 y 3.5 = 1, torta 12.5 = <b>9</b>, aplomado 10.9 = <b>3</b>, 9 acoples triples y 27 luminarias.', cant:'—', un:'—', ref:'Proyecto ejecutivo ID 3191'});
     secciones.push({titulo:'COLUMNAS EXISTENTES (se reutilizan)', items:itemsEx});
     tiles.push({num:colExist, lbl:'Columnas existentes reutilizadas'});
@@ -15260,7 +15373,7 @@ function calcular(){
     // 1 POR COLUMNA metálica, así que se contradecía a sí mismo.
     // Las columnas EXISTENTES reutilizadas también llevan su jabalina (ítem 42: «instalación completa
     // de puesta a tierra y su medición»), así que se suman acá (2026-09-06).
-    const colMetalicas = (colOn && tipoCol === 'Metálica') ? cantCol + colExist : 0;
+    const colMetalicas = ((colOn && tipoCol === 'Metálica') ? cantCol : 0) + colExistAcom;
     const patPorColumna = colMetalicas > 0;
     const jabalinasCircuito = patPorColumna ? colMetalicas : circuitos;
     const dispersoresPAT = jabalinasCircuito + 1;     // + la del tablero general
@@ -15269,7 +15382,7 @@ function calcular(){
     const cablePATcircuitos = jabalinasCircuito * mPorJabalina;
     const cablePATml = cablePATtablero + cablePATcircuitos;
     const dondeVan = patPorColumna
-      ? `1 por cada una de las ${colMetalicas} columnas metálicas${colExist?` (${cantCol} nuevas + ${colExist} existentes)`:''} + 1 en el tablero general`
+      ? `1 por cada una de las ${colMetalicas} columnas metálicas${colExistAcom?` (${(colOn && tipoCol === 'Metálica') ? cantCol : 0} nuevas + ${colExistAcom} existentes con acometida nueva)`:''} + 1 en el tablero general`
       : '1 al final de cada circuito + 1 en el tablero general';
     const itemsPAT = [
       {...M(7015, dondeVan), cant:dispersoresPAT, un:'Un.', ref:'Ítem 15.67 / ítem 75 · IRAM 2309'},
@@ -15302,7 +15415,7 @@ function calcular(){
       //     10 mm² de la jabalina y el de 2,5 mm² del artefacto LED.
       // Como el cómputo no sabe cuáles columnas son nuevas y cuáles existentes, se emite la línea
       // solo como aviso con el criterio, en vez de inventar una cantidad.
-      itemsPAT.push({desc:`ℹ <b>Terminal banderita y bloquete: solo en columnas EXISTENTES.</b> S/ AP-TC-005 (2/2) y AP-TC-006, cada columna metálica ya instalada lleva <b>1 terminal banderita</b> de Cu estañado p/cable de 10 mm² y ojal Ø14,6 (ítem 7018 del pañol) más <b>1 bloquete Q-320E de bronce</b> (ítem 7003). En las columnas <b>NUEVAS no van</b>: el borne principal de tierra es el bulón PAT de bronce que viene en la caja de conexión (AP-CC-001/004). ${colExist ? `Las <b>${colExist} existentes</b> que cargaste ya tienen su banderita y bloquete computados en «Columnas existentes».` : `Si hay columnas existentes, cargalas en Columnas → «Columnas metálicas EXISTENTES» y salen solos.`}`, cant:'—', un:'—', ref:'AP-TC-005 (2/2) · AP-TC-006'});
+      itemsPAT.push({desc:`ℹ <b>Terminal banderita y bloquete: solo en columnas EXISTENTES.</b> S/ AP-TC-005 (2/2) y AP-TC-006, cada columna metálica ya instalada lleva <b>1 terminal banderita</b> de Cu estañado p/cable de 10 mm² y ojal Ø14,6 (ítem 7018 del pañol) más <b>1 bloquete Q-320E de bronce</b> (ítem 7003). En las columnas <b>NUEVAS no van</b>: el borne principal de tierra es el bulón PAT de bronce que viene en la caja de conexión (AP-CC-001/004). ${colExist ? `Las <b>${colExist} existentes</b> que cargaste ya tienen su banderita y bloquete computados en «Columnas existentes».` : `Si hay columnas existentes con acometida nueva, cargalas en «Columnas existentes — reacondicionamiento» y salen solos.`}`, cant:'—', un:'—', ref:'AP-TC-005 (2/2) · AP-TC-006'});
       itemsPAT.push({desc:`ℹ En columnas METÁLICAS va una jabalina por columna (no una por circuito): ${colMetalicas} columnas + 1 del tablero = ${dispersoresPAT}. Es lo que dice el ítem 2.01 del pliego y lo que se computó en el proyecto ejecutivo de Plaza Hípica (15 columnas → 16 PAT). El metraje de ${fmt(PAT_CABLE_COLUMNA_M,0)} m por columna sale de ese mismo proyecto (64 m de cable 1×10 para 16 PAT).`, cant:'—', un:'—', ref:'Pliego LP21478 ítem 2.01'});
     }
     secciones.push({titulo:'PUESTA A TIERRA', items:itemsPAT});
@@ -15338,7 +15451,7 @@ function calcular(){
       // Los cómputos oficiales separan 14.1 (caja estanca externa, columnas reutilizadas) de 14.2
       // (tablerito interno, columnas nuevas). Ej. Alberto Pío: 14.1 = 8 y 14.2 = 1, con 1 columna
       // nueva y 8 existentes. Como el cómputo no sabe cuántas son existentes, va como aviso.
-      itemsCajas.push({desc:'ℹ <b>Columnas EXISTENTES: van con caja estanca EXTERNA</b>, que es el <b>ítem 14.1</b> de los cómputos oficiales, no el 14.2. Es la caja de aluminio inyectado <b>200×150×100 IP65</b> (plano AP-PL-002, ítem 6003 del pañol) o la de <b>200×200×100</b> (AP-PL-003), abrochada a la columna con <b>2 juegos de abrazaderas</b> y montada a 2,50 m del piso. Ej. real: Alberto Pío ID 3191 computó 14.1 = 8 cajas externas y 14.2 = 1 tablerito, porque tenía 1 columna nueva y 8 existentes. ' + (colExist ? `<b>Las ${colExist} existentes que cargaste ya están computadas</b> en la sección «Columnas existentes».` : 'Si hay existentes, cargalas en Columnas → «Columnas metálicas EXISTENTES» y salen solas.') + '', cant:'—', un:'—', ref:'AP-PL-002 / AP-PL-003 · ítem 14.1'});
+      itemsCajas.push({desc:'ℹ <b>Columnas EXISTENTES: van con caja estanca EXTERNA</b>, que es el <b>ítem 14.1</b> de los cómputos oficiales, no el 14.2. Es la caja de aluminio inyectado <b>200×150×100 IP65</b> (plano AP-PL-002, ítem 6003 del pañol) o la de <b>200×200×100</b> (AP-PL-003), abrochada a la columna con <b>2 juegos de abrazaderas</b> y montada a 2,50 m del piso. Ej. real: Alberto Pío ID 3191 computó 14.1 = 8 cajas externas y 14.2 = 1 tablerito, porque tenía 1 columna nueva y 8 existentes. ' + (colExist ? `<b>Las ${colExist} existentes que cargaste ya están computadas</b> en la sección «Columnas existentes».` : 'Si hay existentes con acometida nueva, cargalas en «Columnas existentes — reacondicionamiento» y salen solas.') + '', cant:'—', un:'—', ref:'AP-PL-002 / AP-PL-003 · ítem 14.1'});
       itemsCajas.push({desc:'⚠ <b>Contradicción a resolver con la Inspección — armado de la caja.</b> Los planos tipo <b>AP-PL-002 b, AP-PL-003 b y AP-CC-014-A</b> piden <b>3 juegos de base portafusible serie BMF, tamaño 8,5 × 31,5 mm</b> para riel DIN, <b>con fusible cerámico de 4 A</b> (uno por fase: F1-R, F2-S, F3-T en TN-S), más <b>bornes BPN con puente seccionable</b> y <b>4 borneras BPN-16</b>. Tu armado real —el de la foto y el que usan los proyectos ejecutivos 2026— es de <b>2 tabaqueras 10 × 38 con 2 A por artefacto</b>. La calculadora sigue TU armado, que es lo que está en obra, pero la diferencia es grande (3 portafusibles de 4 A contra 2 de 2/4 A) y conviene tenerla por escrito antes de certificar.', cant:'—', un:'—', ref:'AP-PL-002 b vs armado real'});
       itemsCajas.push({desc:'ℹ Nota del AP-PL-002 b / AP-PL-003 b: <b>en esquema TT los tres artefactos de una columna se alimentan desde UNA SOLA fase</b>, y se distribuye cada columna sobre las tres fases para equilibrar. En <b>TN-S</b> cada artefacto va a una fase distinta (R, S, T). Fijate cuál esquema declara el proyecto de la plaza antes de armar.', cant:'—', un:'—', ref:'AP-PL-002 b / AP-PL-003 b'});
       itemsCajas.push({desc:'⚠ Cables internos de la columna que el plano AP-CC-014-C/015-C muestra y esta calculadora <b>todavía no computa</b>: <b>1×6 mm² IRAM 247-3</b> del borne principal de tierra a la bornera, y <b>1×2,5 mm² IRAM 247-3</b> de la bornera al portafusible. Son pocos metros por columna pero hay que pedirlos.', cant:'—', un:'—', ref:'AP-CC-014-C / 015-C'});
@@ -20148,6 +20261,26 @@ function poblarParteObraDatalist(){
   }
 
   // Traduce un cómputo a renglones del itemizado. Devuelve [{item, cantidad, motivo, duda}].
+  // Las columnas EXISTENTES según la foto del formulario (2026-09-21). Una foto de antes del
+  // 21/09/2026 no tiene el interruptor de la sección: ahí valían solo con Columnas prendida y en
+  // Metálica, siempre con acometida nueva, y sin retiro propio (iba en «Retiros»).
+  function existentesDeLaFoto(C){
+    const num = (k)=> n2(C[k], 0);
+    const on = (k)=> C[k] === true || C[k] === 'true';
+    const nueva = Object.prototype.hasOwnProperty.call(C, 'toggleExistentes');
+    const activa = nueva ? on('toggleExistentes') : (on('toggleColumnas') && String(C.colTipo || '') === 'Metálica');
+    const cant = activa ? Math.max(0, Math.round(num('colExistentes'))) : 0;
+    if(!cant) return { cant:0, lum:0, aplomar:0, retiro:0, acometida:true };
+    return {
+      cant,
+      lum: Math.max(0, Math.round(num('colExistLum'))),
+      aplomar: Math.min(cant, Math.max(0, Math.round(num('colExistAplomar')))),
+      retiro: nueva ? Math.max(0, Math.round(num('colExistRetiroLum'))) : 0,
+      acometida: nueva ? (Object.prototype.hasOwnProperty.call(C, 'colExistAcometida') ? on('colExistAcometida') : true) : true,
+    };
+  }
+  window.epecExistentesDeLaFoto = existentesDeLaFoto;
+
   function itemizadoDesdeComputo(h){
     const out = [], dudas = [];
     const f = h && h.form;
@@ -20161,6 +20294,7 @@ function poblarParteObraDatalist(){
       if(ya){ ya.cantidad += cant; ya.motivo += ' + ' + motivo; }
       else out.push({ item, cantidad:cant, motivo });
     };
+    let vincDescontados = 0;   // vínculos que van sobre existentes, sacados de los ítems 1–8
 
     // ---------- Columnas ----------
     if(on('toggleColumnas')){
@@ -20175,7 +20309,7 @@ function poblarParteObraDatalist(){
       // pero sus brazos NO son ítems 1 a 8: se descuentan antes de repartir, empezando por el
       // grupo más numeroso — el mismo criterio que la vía del listado (2026-09-17). Antes esta vía
       // los repartía todos entre las nuevas y cargaba columnas nuevas de más.
-      const exCols = (tipo === 'Metálica') ? numC('colExistentes') : 0;
+      const exCols = existentesDeLaFoto(C).cant;
       if(exCols > 0 && gruposVinc.length){
         let aDescontar = exCols;
         gruposVinc.sort((a,b)=> b.columnas - a.columnas).forEach(g=>{
@@ -20184,7 +20318,8 @@ function poblarParteObraDatalist(){
           g.columnas -= usa; aDescontar -= usa;
         });
         for(let i = gruposVinc.length - 1; i >= 0; i--) if(gruposVinc[i].columnas <= 0) gruposVinc.splice(i, 1);
-        dudas.push(`${exCols} de los vínculos van sobre <b>columnas existentes</b>: sus brazos <b>no tienen ítem propio</b> en el Anexo I (esas columnas se cobran por 41, 42 y 44), así que se descontaron de los ítems de columna nueva. Si el reparto entre triples y dobles no es ese, corregilo a mano.`);
+        vincDescontados = exCols - aDescontar;
+        if(vincDescontados > 0) dudas.push(`${vincDescontados} de los vínculos van sobre <b>columnas existentes</b>: sus brazos <b>no tienen ítem propio</b> en el Anexo I (esas columnas se cobran por 41, 42 y 44), así que se descontaron de los ítems de columna nueva. Si el reparto entre triples y dobles no es ese, corregilo a mano.`);
       }
 
       const de10 = gruposCol.filter(g=>n2(g.altura) === 10).reduce((t,g)=>t+n2(g.columnas), 0);
@@ -20233,14 +20368,19 @@ function poblarParteObraDatalist(){
     // las columnas nuevas. Se lee igual que el listado: la caja y el reacondicionamiento (42 y 41)
     // por columna, el aplomado (43) por las marcadas, y la luminaria (44) por las cargadas o, si
     // quedó en cero, estimada por el vínculo de la plaza, como hace la Calculadora.
-    if(on('toggleColumnas') && String(C.colTipo||'') === 'Metálica'){
-      const ex = numC('colExistentes');
+    // Desde el 21/09/2026 es una sección propia («Columnas existentes — reacondicionamiento»), con
+    // su interruptor y sea cual sea el tipo de columna nueva; el 42 va solo si marcó acometida
+    // nueva y el 45 sale de las luminarias viejas que se retiran de esas columnas.
+    {
+      const E = existentesDeLaFoto(C);
+      const ex = E.cant;
       if(ex > 0){
         push(41, ex, `${ex} columna(s) existente(s) a reacondicionar`);
-        push(42, ex, `${ex} acometida(s) nueva(s) en columna existente (incluye la caja externa 14.1)`);
-        const apl = Math.min(numC('colExistAplomar'), ex);
-        if(apl > 0) push(43, apl, `${apl} columna(s) existente(s) a aplomar`);
-        let lumEx = numC('colExistLum');
+        if(E.acometida) push(42, ex, `${ex} acometida(s) nueva(s) en columna existente (incluye la caja externa 14.1)`);
+        else dudas.push(`Las ${ex} columna(s) existente(s) <b>conservan su acometida</b> (así lo marcaste en la Calculadora): no va el ítem 42, y su PAT no se descuenta de 75/74/81.`);
+        if(E.aplomar > 0) push(43, E.aplomar, `${E.aplomar} columna(s) existente(s) a aplomar`);
+        if(E.retiro > 0) push(45, E.retiro, `${E.retiro} luminaria(s) vieja(s) retirada(s) de las columnas que se reacondicionan`);
+        let lumEx = E.lum;
         let origen = 'cargadas en la Calculadora';
         if(!lumEx && on('toggleVinculos')){
           const vinc = leer(()=> VINCULOS) || [];
@@ -20250,6 +20390,9 @@ function poblarParteObraDatalist(){
           if(cols > 0){ lumEx = Math.round(lums / cols * ex); origen = `estimadas: ${fmt(lums/cols,2)} luminarias por columna según Vínculos × ${ex} existentes`; }
         }
         if(lumEx > 0) push(44, lumEx, `${lumEx} luminaria(s) sobre columna existente (${origen})`);
+        // La PAT de la columna existente CON acometida nueva ya está adentro del 42 («instalación
+        // completa de puesta a tierra y su medición»). Esta vía no trae 75/74/81 (no están en la
+        // foto), así que acá no hay nada que descontar; se deja dicho en el cuadro de resumen.
       }
     }
 
@@ -20356,7 +20499,9 @@ function poblarParteObraDatalist(){
       dudas.push('Este itemizado salió de la foto del formulario, no del listado de materiales: las <b>jabalinas (88)</b> y, si las puso EMA, las luminarias (85) y los cables (86, 87) hay que cargarlos a mano. Si volvés a calcular la plaza, salen solos.');
     }
     avisarExistentesSin44(out, dudas);
-    return { filas:out, dudas };
+    const E = existentesDeLaFoto(C);
+    const reacond = armarReacond(out, { existentes: E.cant, vinculos: vincDescontados, pat: 0, acometida: E.acometida });
+    return { filas:out, dudas, reacond };
   }
 
 
@@ -20407,6 +20552,8 @@ function poblarParteObraDatalist(){
     const vincPorBrazos = {};    // 1..4 -> n
     let tipoCol = null;
     let colExistentes = 0;       // columnas metálicas existentes reutilizadas (sección nueva del 06/09/2026)
+    let exCaja = 0, ex41 = 0;    // cómo se contaron: por la caja externa (cómputos viejos) o por el 41
+    let ex45 = 0;                // luminarias viejas retiradas de las que se reacondicionan (2026-09-21)
     // Para los ítems de PROVISIÓN 83.1–89 (2026-09-06): qué material hay en el cómputo.
     const ctx = { jabalinas:0, tableroAereo:0, lum75:0, lum180:0, cable15:0, cableVA:0 };
 
@@ -20445,6 +20592,15 @@ function poblarParteObraDatalist(){
         if(/^V[ií]nculo/i.test(d) || /^Capuch[oó]n/i.test(d)){
           const b = d.match(/(\d+)\s*artefactos?/i);
           if(b){ const nb = parseInt(b[1],10); vincPorBrazos[nb] = (vincPorBrazos[nb]||0) + cant; }
+          return;
+        }
+        // ---- Acometida EPEC ↔ tablero: aérea (11) o subterránea (12) (2026-09-21) ----
+        // El renglón del conductor dice «acometida aérea/subterránea EPEC → tablero». Hasta hoy solo
+        // se leía si el cable era «Cable Cu…»: el preensamblado de ALUMINIO de la acometida aérea no
+        // se traía y el ítem 11 quedaba afuera (Eleodoro Fierro: 14 m de acometida aérea).
+        if(/^(Cable|Acometida)\b/i.test(d) && /acometida\s+(a[eé]rea|subterr[aá]nea)\s+EPEC/i.test(d)){
+          if(/subterr[aá]nea\s+EPEC/i.test(d)) push(12, cant, `${fmt(cant,2)} m de acometida subterránea EPEC ↔ tablero`);
+          else push(11, cant, `${fmt(cant,2)} m de acometida aérea EPEC ↔ tablero`);
           return;
         }
         // ---- Cable troncal: los METROS DE ZANJA salen escritos en el propio renglón ----
@@ -20530,8 +20686,11 @@ function poblarParteObraDatalist(){
         if(/^Tomacable/i.test(d)){ push(74, cant, `${fmt(cant,0)} tomacable WGC/TGC`); return; }
         if(/^Fotocontrol/i.test(d)){ push(64, cant, `${fmt(cant,0)} fotocontrol`); return; }
         // ---- Columnas EXISTENTES reutilizadas (sección nueva del 06/09/2026) ----
-        if(/^CAJA ESTANCA ALUMINIO/i.test(d) && /columna existente/i.test(d)){ colExistentes += cant; return; }
-        if(/^Reacondicionamiento de columna met[aá]lica existente/i.test(d)){ push(41, cant, `${fmt(cant,0)} columna(s) existente(s) a reacondicionar`); return; }
+        // Desde el 21/09/2026 la caja externa sale SOLO con acometida nueva, así que las existentes
+        // se cuentan por el renglón del 41 (que va siempre) y la caja queda de respaldo para los
+        // cómputos viejos.
+        if(/^CAJA ESTANCA ALUMINIO/i.test(d) && /columna existente/i.test(d)){ exCaja += cant; return; }
+        if(/^Reacondicionamiento de columna met[aá]lica existente/i.test(d)){ ex41 += cant; push(41, cant, `${fmt(cant,0)} columna(s) existente(s) a reacondicionar`); return; }
         if(/^Nueva acometida subterr[aá]nea en columna existente/i.test(d)){ push(42, cant, `${fmt(cant,0)} acometida(s) nueva(s) en columna existente (incluye la caja externa 14.1)`); return; }
         if(/^Aplomado/i.test(d)){ push(43, cant, `${fmt(cant,0)} columna(s) a aplomar`); return; }
         if(/^Montaje, conexionado y energizaci[oó]n de luminaria LED sobre columna existente/i.test(d)){ push(44, cant, `${fmt(cant,0)} luminaria(s) sobre columna existente`); return; }
@@ -20543,7 +20702,11 @@ function poblarParteObraDatalist(){
         if(/^Retiro de poste de hormig[oó]n/i.test(d)){ push(47, cant, `${fmt(cant,0)} poste(s) de hormigón armado a retirar`); return; }
         if(/^Retiro de poste de madera/i.test(d)){ push(48, cant, `${fmt(cant,0)} poste(s) de madera a retirar`); return; }
         if(/^Retiro de columna/i.test(d)){ push(46, cant, `${fmt(cant,0)} columna(s) metálica(s) a retirar`); return; }
-        if(/^Retiro de luminaria/i.test(d)){ push(45, cant, `${fmt(cant,0)} luminaria(s) a retirar`); return; }
+        if(/^Retiro de luminaria/i.test(d)){
+          if(/columnas que se reacondicionan/i.test(d)){ ex45 += cant; push(45, cant, `${fmt(cant,0)} luminaria(s) vieja(s) retirada(s) de las columnas que se reacondicionan`); }
+          else push(45, cant, `${fmt(cant,0)} luminaria(s) a retirar`);
+          return;
+        }
         if(/retiro de tablero existente/i.test(d)){ push(49, cant, `${fmt(cant,0)} tablero(s) a retirar`); return; }
         if(/^Poda/i.test(d)){ push(82, cant, `${fmt(cant,0)} árbol(es) a podar`); return; }
       });
@@ -20555,6 +20718,7 @@ function poblarParteObraDatalist(){
     const tipo = tipoCol || 'PRFV';
     const de10 = colsPorAltura[10] || 0;
     const de7  = colsPorAltura[7]  || 0;
+    colExistentes = Math.max(exCaja, ex41);
     Object.keys(colsPorAltura).forEach(k=>{
       if(k !== '7' && k !== '10')
         dudas.push(`Hay ${colsPorAltura[k]} columna(s) de ${k} m: el itemizado solo tiene de 7 m y de 10 m, así que esas no se pudieron cargar.`);
@@ -20565,6 +20729,7 @@ function poblarParteObraDatalist(){
     // (luminarias). Su vínculo nuevo NO tiene ítem propio en el Anexo I. Así que acá se descuentan
     // esas columnas de los vínculos antes de repartir, empezando por el grupo más numeroso, y se
     // avisa. Ej. Alberto Pío: 9 triples − 8 existentes = 1 → ítem 3 = 1, no 9.
+    let vincDescontados = 0;
     if(colExistentes > 0){
       let aDescontar = colExistentes;
       Object.keys(vincPorBrazos).sort((a,b)=>vincPorBrazos[b]-vincPorBrazos[a]).forEach(k=>{
@@ -20573,7 +20738,8 @@ function poblarParteObraDatalist(){
         vincPorBrazos[k] -= usa; aDescontar -= usa;
         if(vincPorBrazos[k] <= 0) delete vincPorBrazos[k];
       });
-      dudas.push(`${colExistentes} de los vínculos van sobre <b>columnas existentes</b>: sus brazos <b>no tienen ítem propio</b> en el Anexo I (esas columnas se cobran por 41, 42 y 44), así que se descontaron de los ítems de columna nueva. Si el reparto entre triples y dobles no es ese, corregilo a mano.`);
+      vincDescontados = colExistentes - aDescontar;
+      if(vincDescontados > 0) dudas.push(`${vincDescontados} de los vínculos van sobre <b>columnas existentes</b>: sus brazos <b>no tienen ítem propio</b> en el Anexo I (esas columnas se cobran por 41, 42 y 44), así que se descontaron de los ítems de columna nueva. Si el reparto entre triples y dobles no es ese, corregilo a mano.`);
     }
     const brazos = Object.keys(vincPorBrazos).map(k=>({ brazos:parseInt(k,10), columnas:vincPorBrazos[k] }))
                      .sort((a,b)=>b.brazos - a.brazos);
@@ -20619,6 +20785,7 @@ function poblarParteObraDatalist(){
     const colMetNuevas = tipo === 'Metálica' ? (de7 + de10) : 0;
     const con42 = (out.find(x=>x.item === 42) || {}).cantidad || 0;
     const patAdentro = colMetNuevas + con42;
+    let patDescontadaEx = 0;   // cuánta de la PAT descontada corresponde a las existentes (para el cuadro)
     if(patAdentro > 0){
       const quitar = (item)=>{
         const r = out.find(x=>x.item === item);
@@ -20630,6 +20797,7 @@ function poblarParteObraDatalist(){
         return q;
       };
       const q75 = quitar(75); quitar(74); quitar(81);
+      patDescontadaEx = Math.min(con42, q75);
       if(q75 > 0) dudas.push(`Columnas <b>metálicas</b>: se descontaron <b>${q75}</b> jabalina(s), tomacable(s) y medición(es) de los ítems 75, 74 y 81 porque la PAT <b>ya está adentro</b>${colMetNuevas ? ` de los ítems 1 a 4 (${colMetNuevas} columna(s) nueva(s))` : ''}${colMetNuevas && con42 ? ' y' : ''}${con42 ? ` del ítem 42 (${con42} existente(s) con acometida nueva)` : ''}: «instalación completa de puesta a tierra y su medición». ${out.find(x=>x.item===75) ? 'Lo que quedó en 75/74/81 es la PAT del tablero.' : ''} La <b>provisión</b> de todas las jabalinas (ítem 88) sí se cobra: esos ítems la excluyen.`);
     }
 
@@ -20641,7 +20809,29 @@ function poblarParteObraDatalist(){
     // columnas no van a existir en el itemizado ni en el informe, y el usuario ya se comió una:
     // *"no me están contando todas… no sé si no me está tomando las columnas restauradas"*.
     avisarExistentesSin44(out, dudas);
-    return { filas:out, dudas, origen: deDonde };
+    const reacond = armarReacond(out, { existentes: colExistentes, vinculos: vincDescontados, pat: patDescontadaEx, acometida: con42 > 0 });
+    return { filas:out, dudas, origen: deDonde, reacond };
+  }
+  // El cuadro «Reacondicionamiento» de la previa (2026-09-21): los ítems 41 a 45 juntos y qué se
+  // descontó por ellos, para que se vea de una si la plaza reacondicionada quedó bien leída.
+  // `x`: { existentes, vinculos (descontados de 1–8), pat (descontada de 75/74/81), acometida }.
+  function armarReacond(out, x){
+    x = x || {};
+    const cant = it => (out.find(r=> String(r.item) === String(it)) || {}).cantidad || 0;
+    const ex = Math.max(cant(41), cant(42), n2(x.existentes, 0));
+    if(ex <= 0) return null;
+    const desc = [];
+    if(n2(x.vinculos, 0) > 0) desc.push(`<b>${x.vinculos}</b> vínculo(s) de los ítems de columna nueva (1 a 8): los brazos de una columna existente no tienen ítem propio`);
+    if(n2(x.pat, 0) > 0) desc.push(`<b>${x.pat}</b> jabalina(s), tomacable(s) y medición(es) de los ítems 75/74/81: la PAT ya está adentro del 42`);
+    else if(cant(42) > 0) desc.push('nada de 75/74/81 por esta vía (la PAT de estas columnas ya va adentro del 42)');
+    else if(ex > 0 && x.acometida === false) desc.push('nada de la PAT (75/74/81): se conserva la acometida existente, así que no hay 42 que la incluya');
+    desc.push(`ninguna columna ni fundación nueva por estas ${ex} columna(s)${cant(43) ? ` — las <b>${cant(43)}</b> a aplomar/reubicar llevan fundación nueva, que va por Obra civil` : ''}`);
+    return {
+      existentes: ex,
+      i41: cant(41), i42: cant(42), i43: cant(43), i44: cant(44), i45: cant(45),
+      acometida: cant(42) > 0,
+      descuentos: desc,
+    };
   }
   function avisarExistentesSin44(out, dudas){
     const cant = it => (out.find(x=> String(x.item) === String(it)) || {}).cantidad || 0;
@@ -20698,7 +20888,7 @@ function poblarParteObraDatalist(){
     'Los ítems de <b>provisión 83.1 a 89</b> salen solos según lo marcado en «¿Quién pone el material?» de la Calculadora (o, en cómputos viejos, como en las plazas ya hechas). Si en esta plaza fue distinto, destildá el renglón o agregalo abajo con el selector.',
     'Las protecciones del tablero (térmicas, diferencial, contactor, reloj, portafusible NH) — ítems 50 a 67.',
     'Empalmes (78 y 79) y medición de aislación de conductores existentes (80).',
-    'Reacondicionamiento y aplomado de columnas existentes (41, 43), luminarias sobre columna existente (44) y retiro de luminarias (45): salen solos SI en la Calculadora cargaste «Columnas metálicas EXISTENTES» y los retiros; si no, van a mano.',
+    'Reacondicionamiento (41), acometida nueva (42), aplomado (43), luminarias sobre columna existente (44) y retiro de las viejas (45): salen solos SI en la Calculadora prendiste «Columnas existentes — reacondicionamiento» y cargaste cada casillero; si no, van a mano. El cuadro «Reacondicionamiento» de arriba muestra cómo quedaron.',
   ];
 
   let previa = {};   // idDePlaza -> { filas, dudas, computo }
@@ -20914,6 +21104,22 @@ function poblarParteObraDatalist(){
           </div>
         </label>`;
       }).join('') + `</div>`;
+    }
+    if(p.reacond && p.reacond.existentes > 0){
+      // Cuadro «Reacondicionamiento» (2026-09-21): los 41 a 45 juntos y qué se descontó por ellos.
+      const R = p.reacond;
+      const celda = (it, n, t)=> `<div class="it-reac-c${n > 0 ? '' : ' it-reac-cero'}"><span class="it-reac-it">ítem ${it}</span><b>${fmt(n, Number.isInteger(n)?0:2)}</b><span class="it-reac-t">${t}</span></div>`;
+      x += `<div class="it-previa-reac">
+        <div class="it-reac-cab"><b>🔧 Reacondicionamiento — ${R.existentes} columna(s) existente(s)</b><span class="it-cat">${R.acometida ? 'con acometida nueva (42)' : 'conservan su acometida: sin ítem 42'}</span></div>
+        <div class="it-reac-grid">
+          ${celda(41, R.i41, 'limpieza, lijado y pintado')}
+          ${celda(42, R.i42, 'acometida nueva + PAT')}
+          ${celda(43, R.i43, 'aplomado')}
+          ${celda(44, R.i44, 'luminaria LED sobre existente')}
+          ${celda(45, R.i45, 'retiro de luminaria vieja')}
+        </div>
+        <div class="it-reac-desc"><b>Se descontó por estas columnas:</b><ul>${R.descuentos.map(d=>`<li>${d}</li>`).join('')}</ul></div>
+      </div>`;
     }
     if(p.dudas && p.dudas.length){
       // Las dudas las escribe la propia herramienta (traen negritas); no llevan texto del usuario.
@@ -21476,6 +21682,8 @@ function poblarParteObraDatalist(){
     let tipoCol = null, hayCol = false, hayVinc = false, hayCivil = false,
         hayTablero = false, hayCruce = false, hayRetiros = false, hayCable = false;
     let idSeq = 1;
+    // Columnas existentes — reacondicionamiento (2026-09-21): se reconstruyen desde sus renglones.
+    const ex = { cant:0, lum:0, apl:0, ret:0, acom:0 };
 
     (h.secciones||[]).forEach(sec=>{
       const T = norm(sec.titulo).toUpperCase();
@@ -21526,12 +21734,27 @@ function poblarParteObraDatalist(){
           campos.tableroTipo = /a nivel/i.test(d) ? 'nivel_prfv' : 'aereo_prfv';
           hayTablero = true; return;
         }
+        // La acometida al tablero: el preensamblado de aluminio de la AÉREA no empieza con «Cable Cu»
+        // y antes no se reconstruía (2026-09-21).
+        if(/^(Cable|Acometida)\b/i.test(d) && /acometida\s+(a[eé]rea|subterr[aá]nea)\s+EPEC/i.test(d)){
+          campos.acometidaTipo = /subterr[aá]nea\s+EPEC/i.test(d) ? 'subterranea' : 'aerea';
+          campos.acometidaMl = String(cant);
+          hayTablero = true; return;
+        }
         if(/^Cable Cu/i.test(d) && /acometida/i.test(d)){
           campos.acometidaTipo = /subterr/i.test(d) ? 'subterranea' : 'aerea';
           campos.acometidaMl = String(cant);
           hayTablero = true; return;
         }
         if(/^Cable Cu/i.test(d) && /m de zanja/i.test(d)) { hayCable = true; return; }
+        // ---- Columnas existentes — reacondicionamiento (2026-09-21) ----
+        if(/^Reacondicionamiento de columna met[aá]lica existente/i.test(d)){ ex.cant = Math.max(ex.cant, Math.round(cant)); return; }
+        if(/^CAJA ESTANCA ALUMINIO/i.test(d) && /columna existente/i.test(d)){ ex.cant = Math.max(ex.cant, Math.round(cant)); ex.acom = Math.max(ex.acom, Math.round(cant)); return; }
+        if(/^Nueva acometida subterr[aá]nea en columna existente/i.test(d)){ ex.acom = Math.max(ex.acom, Math.round(cant)); return; }
+        if(/^Aplomado/i.test(d)){ ex.apl = Math.round(cant); return; }
+        if(/^Montaje, conexionado y energizaci[oó]n de luminaria LED sobre columna existente/i.test(d)){ ex.lum = Math.round(cant); return; }
+        if(/^Retiro de luminaria/i.test(d) && /columnas que se reacondicionan/i.test(d)){ ex.ret = Math.round(cant); return; }
+        if(/^Retiro de luminaria/i.test(d)){ campos.retiroLum = String(Math.round(cant)); hayRetiros = true; return; }
         if(T.indexOf('CRUCE') >= 0){
           if(/tunelera en seco \(m[eé]todo/i.test(d)) { campos.cruceTipo='tunelera'; campos.cruceMl=String(cant); hayCruce=true; return; }
           if(/cielo abierto.*calle de tierra/i.test(d)){ campos.cruceTipo='tierra';   campos.cruceMl=String(cant); hayCruce=true; return; }
@@ -21550,7 +21773,8 @@ function poblarParteObraDatalist(){
     campos.obraBarrio = h.barrio || '';
     if(tipoCol){ campos.colTipo = tipoCol; campos.vincTipoCol = tipoCol; }
     const totalCol = columnaGrupos.reduce((t,g)=>t+g.columnas, 0);
-    if(totalCol) campos.vincCantCol = String(totalCol);
+    // Vínculos cuenta nuevas + existentes (las existentes llevan brazos, luminarias, BPN y fusibles).
+    if(totalCol + ex.cant) campos.vincCantCol = String(totalCol + ex.cant);
 
     campos.toggleColumnas = hayCol;
     campos.toggleVinculos = hayVinc;
@@ -21559,9 +21783,18 @@ function poblarParteObraDatalist(){
     campos.toggleCruce    = hayCruce;
     campos.toggleRetiros  = hayRetiros;
     campos.toggleCableado = false;   // no se puede reconstruir: ver el comentario de arriba
+    campos.toggleExistentes = ex.cant > 0;
+    if(ex.cant > 0){
+      campos.colExistentes = String(ex.cant);
+      campos.colExistLum = String(ex.lum);
+      campos.colExistAplomar = String(Math.min(ex.apl, ex.cant));
+      campos.colExistRetiroLum = String(ex.ret);
+      campos.colExistAcometida = ex.acom > 0;
+    }
 
     if(hayCol)     cargado.push(`Columnas: ${columnaGrupos.map(g=>`${g.columnas} de ${fmt(g.altura,g.altura%1?1:0)} m`).join(' + ')} (${tipoCol})`);
     if(hayVinc)    cargado.push(`Vínculos: ${vinculoGrupos.length} grupo(s), ${vinculoGrupos.reduce((t,g)=>t+g.columnas,0)} columna(s)`);
+    if(ex.cant > 0) cargado.push(`Columnas existentes: ${ex.cant} a reacondicionar, ${ex.lum} luminaria(s) nueva(s), ${ex.ret} vieja(s) a retirar, ${Math.min(ex.apl, ex.cant)} a aplomar, ${ex.acom > 0 ? 'con' : 'sin'} acometida nueva`);
     if(hayCivil)   cargado.push(`Obra civil: ${campos.civilZanjaMl||0} m de zanja de ${(campos.civilZanjaProf||'0.6').replace('.',',')} m` +
                                 (campos.civilZanjaTerreno ? ` en ${campos.civilZanjaTerreno === 'natural' ? 'terreno natural' : (campos.civilZanjaTerreno==='baldosa'?'vereda de baldosas':'piso de hormigón')}` : ''));
     if(hayTablero) cargado.push(`Tablero ${campos.tableroTipo === 'nivel_prfv' ? 'a nivel' : 'aéreo'}` +
@@ -27094,7 +27327,7 @@ const ITEMIZADO_EPEC = [
   // ================= CRITERIOS =================
   C({ id:'Jerarquía de documentos', grupo:'Criterios', tit:'Cuando dos documentos se contradicen, ¿cuál manda?', que:'Los planos tipo y las ETG son de <b>2022</b>; los proyectos ejecutivos y algunos planos, de <b>2026</b>. El orden: <b>1)</b> el proyecto ejecutivo de esa plaza (el más nuevo y específico, y contra lo que se certifica) · <b>2)</b> los planos tipo 2026 (AP-TC-003-A, AP-C-033-A) · <b>3)</b> los planos tipo 2022 · <b>4)</b> las ETG 2022 · <b>5)</b> el pliego y el itemizado, que definen qué se paga. Lo que no cambia con el tiempo (normas IRAM/IEC, cotas, resistencias de PAT, dosajes) se toma tal cual.', usa:'Todas las contradicciones del cómputo se resuelven con este orden y se declaran en la nota «Contradicciones ya detectadas».', tags:'jerarquia manda contradiccion proyecto plano etg pliego' });
   C({ id:'Contradicciones detectadas', grupo:'Criterios', tit:'Las contradicciones ya detectadas y cómo se resolvieron', que:'<b>Portafusible</b>: planos 2022 piden 3 bases 8,5 × 31,5 con 4 A; proyectos 2026 y obra usan 2 tabaqueras 10 × 38 con 2 A → se sigue 2026. <b>Fotocontrol</b>: AP-T-007/008 electromecánico vs datos garantizados electrónico → pendiente. <b>Profundidad de zanja</b>: ETG 600 mm vs Renacimiento V2 1000 mm → manda el proyecto. <b>Pegotes</b>: AP-TC-001 inicio/medio/fin vs proyectos cada 5 o 10 m → manda el proyecto. <b>Cable a la luminaria</b>: ETG 3×2,5 o 3×1,5 → todos los proyectos usan 3×1,5. <b>Ángulo de la luminaria</b>: ±5° en la ETG vs ±15° en el Anexo C → manda el Anexo C. <b>Cruce</b>: ítem 21 un caño Ø160 vs AP-TC-002 dos Ø110 → abierto.', usa:'Notas del cómputo y control de cobertura.', tags:'contradiccion portafusible fotocontrol zanja pegotes cruce angulo' });
-  C({ id:'Columna existente vs nueva', grupo:'Criterios', tit:'Qué lleva una columna metálica existente que se reutiliza', que:'No se compra, pero lleva: <b>caja externa</b> AP-PL-003 a 2,50 m con su tablerito (14.1 oficial → ítem 42) · <b>banderita + bloquete</b> de PAT (AP-TC-005 2/2) · <b>jabalina</b> propia · <b>torta</b> · <b>reacondicionamiento</b> (ítem 41) · luminarias nuevas (ítem 44) · aplomado si está fuera de plomo (43). Sus brazos nuevos <b>no tienen ítem propio</b>. Caso testigo: Alberto Pío ID 3191, 1 nueva + 8 existentes.', usa:'Bloque «Columnas metálicas EXISTENTES» de la Calculadora.', rel:['AP-PL-003','AP-TC-005'], tags:'existente reutilizar 41 42 43 44 caja externa' });
+  C({ id:'Columna existente vs nueva', grupo:'Criterios', tit:'Qué lleva una columna metálica existente que se reutiliza', que:'No se compra, pero lleva: <b>caja externa</b> AP-PL-003 a 2,50 m con su tablerito (14.1 oficial → ítem 42) · <b>banderita + bloquete</b> de PAT (AP-TC-005 2/2) · <b>jabalina</b> propia · <b>torta</b> · <b>reacondicionamiento</b> (ítem 41) · luminarias nuevas (ítem 44) · aplomado si está fuera de plomo (43). Sus brazos nuevos <b>no tienen ítem propio</b>. Caso testigo: Alberto Pío ID 3191, 1 nueva + 8 existentes.', usa:'Sección «Columnas existentes — reacondicionamiento» de la Calculadora (propia desde el 21/09/2026, para cualquier tipo de columna nueva).', rel:['AP-PL-003','AP-TC-005'], tags:'existente reutilizar 41 42 43 44 caja externa' });
 
 
   // ================= PLANOS QUE APARECIERON EN LAS FOTOS (OCR del 06/09/2026) =================
