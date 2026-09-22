@@ -162,6 +162,19 @@
     margin-bottom:14px;
   }
   .card-header-row h2{margin:0;}
+  /* Subtítulo del encabezado de cada sección de la Calculadora (2026-09-21): dice qué se está
+     llenando — nuevas / existentes / todas — para que no se confundan. */
+  .h2-sub{ display:block; flex:0 0 100%; width:100%; font-size:11px; font-weight:600; text-transform:none; letter-spacing:0; color:var(--text-soft); margin-top:2px; padding-left:16px; line-height:1.3; }
+  /* Con subtítulo, el h2 deja de ser flex: el punto queda pegado a la primera palabra y el título
+     se parte entre palabras como un párrafo (en flex, el punto se iba solo a una línea). */
+  .card h2:has(.h2-sub){ display:block; line-height:1.25; }
+  .card h2:has(.h2-sub) .dot{ margin-right:8px; vertical-align:middle; position:relative; top:-1px; }
+  /* En el celular, el título necesita el ancho: el rótulo «INCLUIR ESTA TAREA» del interruptor se
+     esconde (el interruptor solo ya se entiende) y el título puede partirse entre palabras. */
+  @media (max-width:640px){
+    .card-header-row .toggle-wrap .toggle-txt{ display:none; }
+    .card-header-row h2{ min-width:0; overflow-wrap:normal; }
+  }
   .card h2{
     margin:0 0 14px;
     font-size:15px;
@@ -2035,7 +2048,7 @@
   /* Casillero «Llevan acometida nueva» de Columnas existentes (2026-09-21): como .it-chk pero con el texto que envuelve */
   .ex-chk{ display:flex; align-items:flex-start; gap:8px; margin-top:10px; font-size:13px; color:var(--text); line-height:1.4; cursor:pointer; }
   .ex-chk input{ width:auto; margin:3px 0 0; flex:none; }
-  #cardExistentes .card-header-row h2{ min-width:0; overflow-wrap:anywhere; }
+  #cardExistentes .card-header-row h2{ min-width:0; }
   .it-plaza{ padding:14px 18px 12px; }
   /* 5 columnas: flecha · nombre · plata · % · botón de imprimir. Antes eran 4 para 5 hijos, así que
      el botón de imprimir caía solo en una segunda fila, dentro de la columna de 20 px de la flecha:
@@ -3162,7 +3175,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 19:11 · 201633</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 19:50 · 4a672a</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3245,13 +3258,13 @@
 
       <div class="card" id="cardColumnas">
         <div class="card-header-row">
-          <h2><span class="dot"></span>Columnas</h2>
+          <h2><span class="dot"></span>Columnas NUEVAS <span class="h2-sub">se compran e instalan · ítems 1 a 8</span></h2>
           <div class="toggle-wrap">
             <span class="toggle-txt">Incluir esta tarea</span>
             <label class="switch"><input type="checkbox" id="toggleColumnas" checked><span class="slider"></span></label>
           </div>
         </div>
-        <label for="colTipo">Tipo de columna</label>
+        <label for="colTipo">Tipo de columna NUEVA</label>
         <select id="colTipo">
           <option value="PRFV">PRFV (poliéster reforzado c/ fibra de vidrio)</option>
           <option value="Metálica">Metálica</option>
@@ -3293,7 +3306,7 @@
            ============================================================ -->
       <div class="card" id="cardExistentes">
         <div class="card-header-row">
-          <h2><span class="dot"></span>Columnas existentes — reacondicionamiento</h2>
+          <h2><span class="dot"></span>Columnas EXISTENTES a reacondicionar <span class="h2-sub">ya están en la plaza · ítems 41 a 45</span></h2>
           <div class="toggle-wrap">
             <span class="toggle-txt">Incluir esta tarea</span>
             <label class="switch"><input type="checkbox" id="toggleExistentes"><span class="slider"></span></label>
@@ -3334,7 +3347,7 @@
 
       <div class="card" id="cardVinculos">
         <div class="card-header-row">
-          <h2><span class="dot"></span>Vínculos de columnas (artefactos y protecciones)</h2>
+          <h2><span class="dot"></span>Vínculos y luminarias — de TODAS las columnas <span class="h2-sub">nuevas + existentes · marcá sobre cuál va cada grupo</span></h2>
           <div class="toggle-wrap">
             <span class="toggle-txt">Incluir esta tarea</span>
             <label class="switch"><input type="checkbox" id="toggleVinculos" checked><span class="slider"></span></label>
@@ -3349,7 +3362,7 @@
         </select>
         <div class="hint">Define cómo se cuenta la caja de la columna: en <b>PRFV</b> las cantidades son fijas por columna y se editan más abajo (portafusibles y borneras gris / celeste / verde); en <b>Metálica</b> va 1 portafusible y 1 bornera de fase y de neutro por luminaria real.</div>
 
-        <label for="vincCantCol">Cantidad de columnas</label>
+        <label for="vincCantCol">Cantidad de columnas que llevan vínculo <span style="font-weight:400; color:var(--text-soft);">— nuevas + existentes</span></label>
         <input type="number" id="vincCantCol" min="0" value="7">
 
         <label>Potencia de la luminaria LED</label>
@@ -3439,11 +3452,20 @@
              hay un interruptor, apagado por defecto, para certificarlas aparte si la Inspección lo acepta. -->
         <label class="ex-chk" style="margin-top:14px;"><input type="checkbox" id="cajaCertificarAparte"> <span><b>Certificar las cajas de las columnas NUEVAS aparte</b>, por los ítems <b>62/63</b> (BPN), <b>69</b> (portafusible tabaquera) y <b>68</b> (fusible) — solo si la Inspección lo acepta</span></label>
         <div class="hint" style="margin-top:2px;">Apagado, el itemizado toma las BPN, los portafusibles y los fusibles de la caja de columna nueva como parte de los ítems 1 a 8 («acometida subterránea», como el 42 lo llama para las existentes) y no los carga. Prendido, «Traer las cantidades» carga BPN 4 mm² → 62, BPN 6 mm² → 63, tabaqueras → 69 y fusibles → 68, <b>solo por las columnas nuevas</b> (las existentes ya lo tienen adentro del 42). Dejalo asentado por escrito con la Inspección antes de certificar.</div>
+        <!-- Ítem 30 (2026-09-21): el cable 3×1,5 a la luminaria. Decisión EMA (07/09 y 13/09): se
+             certifica por el ítem 30 en TODAS las columnas. Pero el Anexo I dice que en columna
+             nueva la instalación va adentro de 1–8 (excluyen solo la PROVISIÓN, ítem 86) y el 42
+             incluye «tramo de conductor 3×1,5» en la existente con acometida nueva; el itemizado
+             prevé apenas 200 m del 30 contra 3.219 m del 36. Por eso hay interruptor: prendido
+             (por defecto) sigue la decisión EMA; apagado, el 30 queda solo para las luminarias
+             sobre columnas existentes SIN acometida nueva, que es la lectura literal del pliego. -->
+        <label class="ex-chk" style="margin-top:10px;"><input type="checkbox" id="cable30Todas" checked> <span><b>Certificar el cable 3×1,5 a la luminaria por el ítem 30 en TODAS las columnas</b> (nuevas y existentes con acometida 42) — decisión EMA. Destildado: el 30 va solo en las existentes <b>sin</b> acometida nueva</span></label>
+        <div class="hint" style="margin-top:2px;">Tildado (como se viene certificando), «Traer las cantidades» carga todo el 3×1,5 por el ítem 30. Ojo: el Anexo I dice que en columna nueva la <b>instalación</b> ya va adentro de los ítems 1 a 8 (excluyen solo la provisión, ítem 86) y el 42 incluye el «tramo de conductor 3×1,5» de la existente con acometida nueva; el itemizado prevé apenas 200 m del 30. Si la Inspección lo rebota, destildá y queda solo lo de las existentes sin acometida nueva.</div>
       </div>
 
       <div class="card" id="cardCableado">
         <div class="card-header-row">
-          <h2><span class="dot"></span>Cableado por circuitos</h2>
+          <h2><span class="dot"></span>Cableado por circuitos <span class="h2-sub">troncal en zanja + subidas por columna</span></h2>
           <div class="toggle-wrap">
             <span class="toggle-txt">Incluir esta tarea</span>
             <label class="switch"><input type="checkbox" id="toggleCableado" checked><span class="slider"></span></label>
@@ -3468,7 +3490,7 @@
 
       <div class="card" id="cardCivil">
         <div class="card-header-row">
-          <h2><span class="dot"></span>Obra civil (fundaciones y zanjeo)</h2>
+          <h2><span class="dot"></span>Obra civil <span class="h2-sub">fundaciones de las columnas NUEVAS (y reubicadas) · zanjeo</span></h2>
           <div class="toggle-wrap">
             <span class="toggle-txt">Incluir esta tarea</span>
             <label class="switch"><input type="checkbox" id="toggleCivil" checked><span class="slider"></span></label>
@@ -3555,7 +3577,7 @@
 
       <div class="card" id="cardTablero">
         <div class="card-header-row">
-          <h2><span class="dot"></span>Tablero y acometida</h2>
+          <h2><span class="dot"></span>Tablero general y acometida EPEC <span class="h2-sub">tablero, apoyo, acometida, puesta a tierra</span></h2>
           <div class="toggle-wrap">
             <span class="toggle-txt">Incluir esta tarea</span>
             <label class="switch"><input type="checkbox" id="toggleTablero" checked><span class="slider"></span></label>
@@ -3677,7 +3699,7 @@
 
       <div class="card" id="cardRetiros">
         <div class="card-header-row">
-          <h2><span class="dot"></span>Retiros y otras tareas</h2>
+          <h2><span class="dot"></span>Retiros y poda <span class="h2-sub">columnas, postes y tableros que se sacan · luminarias sueltas</span></h2>
           <div class="toggle-wrap">
             <span class="toggle-txt">Incluir esta tarea</span>
             <label class="switch"><input type="checkbox" id="toggleRetiros" checked><span class="slider"></span></label>
@@ -3729,7 +3751,7 @@
            ya lo emite y el itemizado ya lo carga: ponerlo dos veces lo cobraría dos veces. ==== -->
       <div class="card" id="cardTabElem">
         <div class="card-header-row">
-          <h2><span class="dot"></span>Tablero — elementos interiores</h2>
+          <h2><span class="dot"></span>Tablero general — elementos interiores <span class="h2-sub">ítems 50 a 70 · no es la caja de la columna</span></h2>
           <div class="toggle-wrap">
             <span class="toggle-txt">Incluir esta tarea</span>
             <label class="switch"><input type="checkbox" id="toggleTabElem"><span class="slider"></span></label>
@@ -14053,6 +14075,14 @@ function restaurarFormulario(snap){
   if(!Object.prototype.hasOwnProperty.call(snap.campos, 'tableroApoyo')){
     const ap = document.getElementById('tableroApoyo'); if(ap) ap.value = 'prfv_nuevo';
   }
+  // Ídem para los dos interruptores de certificación de Vínculos (2026-09-21): una foto de antes
+  // no los tiene, y se ponen como estaban ese día (cajas adentro de 1–8; el 30 en todas).
+  if(!Object.prototype.hasOwnProperty.call(snap.campos, 'cable30Todas')){
+    const c30 = document.getElementById('cable30Todas'); if(c30) c30.checked = true;
+  }
+  if(!Object.prototype.hasOwnProperty.call(snap.campos, 'cajaCertificarAparte')){
+    const ca = document.getElementById('cajaCertificarAparte'); if(ca) ca.checked = false;
+  }
   ['toggleColumnas','toggleVinculos','toggleCableado','toggleCivil','toggleTablero','toggleCruce','toggleRetiros','toggleExistentes','toggleTabElem','toggleEmpalmes']
     .forEach(id=>{ const el = document.getElementById(id); if(el) el.dispatchEvent(new Event('change', {bubbles:true})); });
   return true;
@@ -14871,6 +14901,25 @@ function calcular(){
         ...M(6001, `F: gris · N: celeste · T: verde · <b>cable aparte, uno por artefacto</b> · ${subidasTotales} tirada(s): ${detalleSubidas.join(' + ')}`),
         cant:cableInternoMl, un:'m', ref:`(${fmt(altSubida,0)} − ${fmt(alturaCajaColumna(vincTipo),2)}) + brazo + 0,60 · ítem 7.7 del proyecto`
       });
+      // ---- Ítem 30: ¿en todas las columnas o solo en existentes sin acometida nueva? (2026-09-21) ----
+      // Interruptor «cable30Todas» de Vínculos (prendido por defecto = decisión EMA de certificar el
+      // 30 en todas). Apagado, se deja un renglón que «Traer las cantidades» sabe leer con los
+      // metros que SÍ van por el 30: solo las luminarias sobre columnas existentes SIN acometida
+      // nueva (en las nuevas está adentro de 1–8; con acometida nueva, adentro del 42).
+      {
+        const todas30 = (document.getElementById('cable30Todas')||{checked:true}).checked;
+        let m30 = 0;
+        if(colExist > 0 && colExistAcom <= 0){
+          if(gruposVincEx.length) m30 = gruposVincEx.reduce((t,g)=>{ const v = VINCULOS.find(x=>x.id===g.tipo); return t + (v ? g.columnas * v.lum * cableSubidaPorArtefacto(v.brazoM, altSubida, vincTipo) : 0); }, 0);
+          else m30 = colExistLum * cableSubidaPorArtefacto(0.425, altSubida, vincTipo);
+          m30 = Math.min(m30, cableInternoMl);
+        }
+        if(todas30){
+          itemsCable.push({desc:`ℹ El cable 3×1,5 a la luminaria se certifica por el <b>ítem 30</b> en <b>todas</b> las columnas (${fmt(cableInternoMl,2)} m) — decisión EMA del 07/09/2026. Ojo: el Anexo I dice que en columna nueva la instalación ya va adentro de los ítems 1 a 8 (excluyen solo la provisión, ítem 86) y el 42 incluye el «tramo de conductor 3×1,5» de la existente con acometida nueva; el itemizado prevé 200 m del 30 contra 3.219 m del 36. Si la Inspección lo rebota, destildá «Certificar… por el ítem 30 en TODAS las columnas» en Vínculos${m30 > 0 ? ` y quedan ${fmt(m30,2)} m (las existentes sin acometida nueva)` : ' y no queda nada por el 30 (no hay existentes sin acometida nueva)'}.`, cant:'—', un:'—', ref:'Anexo I · ítems 1–8 / 30 / 42 / 86'});
+        } else {
+          itemsCable.push({desc:`Ítem 30 solo en columnas existentes sin acometida nueva: ${fmt(m30,2)} m — el resto del 3×1,5 (${fmt(Math.max(0, cableInternoMl - m30),2)} m) va adentro de los ítems 1 a 8 (columnas nuevas) y del 42 (existentes con acometida nueva) y <b>no se certifica por el 30</b>. Así lo marcaste en Vínculos.`, cant:'—', un:'—', ref:'Anexo I · ítems 1–8 / 30 / 42'});
+        }
+      }
       // Cap. 5.3 de las ETG (Anexo II, 2022): la sección del cable a la luminaria NO está fija.
       itemsCable.push({desc:'⚠ <b>La sección del cable a la luminaria la decide la Inspección.</b> El cap. 5.3 de las ETG dice textual: «La formación será de <b>3×2,5 mm² (F-N-T) o bien de 3×1,5 mm² (F-N-T), según lo determine la Inspección</b>». Acá se computa <b>3×1,5</b>, que es lo que usan todos los proyectos que leímos (ítem 7.7). Si en tu plaza la Inspección pide 3×2,5, cambiá la sección: el metraje es el mismo, el precio no.', cant:'—', un:'—', ref:'ETG cap. 5.3'});
       itemsCable.push({desc:'ℹ Si en alguna columna el cable de <b>puesta a tierra de la luminaria va separado</b> (de la luminaria al borne de tierra de la caja), la ETG pide <b>1×2,5 mm² verde-amarillo s/ IRAM 247-3</b>. Y los conductores internos de la propia luminaria son de <b>1 mm² mínimo aislados en silicona</b>.', cant:'—', un:'—', ref:'ETG cap. 5.3 y 5.4'});
@@ -20563,6 +20612,10 @@ function poblarParteObraDatalist(){
 
     if(on('cajaCertificarAparte'))
       dudas.push('En Vínculos marcaste <b>certificar las cajas de columna nueva aparte</b> (62/63/68/69), pero esta vía —la foto del formulario— no tiene las cantidades de BPN, tabaqueras y fusibles. Volvé a calcular la plaza para que salgan del listado, o cargalas a mano.');
+    // El ítem 30 (cable 3×1,5 a la luminaria) tampoco sale de la foto: los metros están solo en el
+    // listado de materiales (2026-09-21).
+    if(on('toggleVinculos'))
+      dudas.push('El <b>ítem 30</b> (cable 3×1,5 a la luminaria) no sale de esta vía —la foto del formulario no trae los metros—. Volvé a calcular la plaza para que salga del listado, o cargalo a mano.');
     // ---------- Zanjeo ----------
     if(on('toggleCivil')){
       const ml = numC('civilZanjaMl');
@@ -20742,6 +20795,14 @@ function poblarParteObraDatalist(){
     let ex45 = 0;                // luminarias viejas retiradas de las que se reacondicionan (2026-09-21)
     // Para los ítems de PROVISIÓN 83.1–89 (2026-09-06): qué material hay en el cómputo.
     const ctx = { jabalinas:0, tableroAereo:0, lum75:0, lum180:0, cable15:0, cableVA:0 };
+    // ---- Ítem 30 (2026-09-21): si el cómputo trae el renglón «Ítem 30 solo en columnas existentes
+    // sin acometida nueva: N m», el interruptor de Vínculos estaba apagado y por el 30 van solo
+    // esos metros; si no lo trae (cómputos viejos o interruptor prendido), va todo el 3×1,5.
+    let solo30 = null;
+    (secs||[]).forEach(sec=> (sec.items||[]).forEach(it=>{
+      const mm = norm(it.desc).match(/^[ÍI]tem 30 solo en columnas existentes sin acometida nueva:\s*([\d.,]+)\s*m/i);
+      if(mm) solo30 = numAR(mm[1]);
+    }));
 
     (secs||[]).forEach(sec=>{
       const T = norm(sec.titulo).toUpperCase();
@@ -20843,7 +20904,15 @@ function poblarParteObraDatalist(){
             // cubierto por el 30, pero «Traer las cantidades» no lo traía y había que cargarlo a
             // mano: en una plaza de 6 columnas son 81 m ≈ 7,29 K que se perdían.
             // La PROVISIÓN es aparte (ítem 86) y la decide la tarjeta «¿Quién pone el material?».
-            push(30, cant, `${fmt(cant,2)} m de cable 3×1,5 mm² instalado en columna (el ítem 30 paga la instalación; la provisión, si la puso EMA, va por el 86)`);
+            // (2026-09-21) Con el interruptor de Vínculos apagado, el cómputo trae los metros que SÍ
+            // van por el 30 (existentes sin acometida nueva); el resto está adentro de 1–8 y del 42.
+            if(solo30 === null){
+              push(30, cant, `${fmt(cant,2)} m de cable 3×1,5 mm² instalado en columna, en TODAS las columnas (decisión EMA: el ítem 30 paga la instalación; la provisión, si la puso EMA, va por el 86)`);
+              dudas.push(`<b>Ítem 30 en todas las columnas</b> (${fmt(cant,2)} m): así se viene certificando (decisión EMA). El Anexo I dice que en columna nueva la instalación del 3×1,5 ya está adentro de los ítems 1 a 8 (excluyen solo la provisión, ítem 86) y el 42 incluye el «tramo de conductor 3×1,5» de la existente con acometida nueva. Si la Inspección lo rebota, destildá «Certificar… por el ítem 30 en TODAS las columnas» en Vínculos y volvé a calcular.`);
+            } else {
+              if(solo30 > 0) push(30, solo30, `${fmt(solo30,2)} m de cable 3×1,5 mm² en columnas existentes sin acometida nueva (el resto, ${fmt(Math.max(0, cant - solo30),2)} m, va adentro de los ítems 1 a 8 y del 42)`);
+              dudas.push(`<b>Ítem 30 solo en existentes sin acometida nueva</b>: ${fmt(solo30,2)} m de ${fmt(cant,2)} m de 3×1,5. El resto va adentro de los ítems 1 a 8 y del 42 (interruptor de Vínculos apagado). Si querés certificar todo el 3×1,5 por el 30, tildalo y volvé a calcular.`);
+            }
           }
           if(clave === '1x10' && /verde/i.test(d)) ctx.cableVA += cant;
           return;   // el resto de los cables (subida 3×1,5, PAT, cruce) no van por estos ítems
@@ -21919,6 +21988,8 @@ function poblarParteObraDatalist(){
     let idSeq = 1;
     // Columnas existentes — reacondicionamiento (2026-09-21): se reconstruyen desde sus renglones.
     const ex = { cant:0, lum:0, apl:0, ret:0, acom:0 };
+    // Interruptores de certificación de Vínculos (2026-09-21): se reconocen por su renglón marcador.
+    let cajasAparte = false, solo30 = false;
 
     (h.secciones||[]).forEach(sec=>{
       const T = norm(sec.titulo).toUpperCase();
@@ -21926,6 +21997,8 @@ function poblarParteObraDatalist(){
         const d = norm(it.desc);
         const cant = n2(it.cant != null ? it.cant : it.cantNecesaria, 0);
         if(!d) return;
+        if(/^Cajas de columna nueva certificadas aparte/i.test(d)){ cajasAparte = true; return; }
+        if(/^[ÍI]tem 30 solo en columnas existentes sin acometida nueva/i.test(d)){ solo30 = true; return; }
 
         let m = d.match(/^Columna\s+(PRFV|met[aá]lica)\s+recta,?\s+([\d.,]+)\s*m/i);
         if(m){
@@ -22022,6 +22095,8 @@ function poblarParteObraDatalist(){
     campos.toggleRetiros  = hayRetiros;
     campos.toggleCableado = false;   // no se puede reconstruir: ver el comentario de arriba
     campos.toggleExistentes = ex.cant > 0;
+    campos.cajaCertificarAparte = cajasAparte;
+    campos.cable30Todas = !solo30;
     if(ex.cant > 0){
       campos.colExistentes = String(ex.cant);
       campos.colExistLum = String(ex.lum);
@@ -22584,7 +22659,7 @@ const ITEMIZADO_EPEC = [
       cobro:'<b>Cada jabalina se certifica por este ítem</b>, salvo las de columna <b>metálica nueva</b>, cuya PAT ya está adentro del ítem 1–4 (queda la del tablero, y todas en las plazas de PRFV). Si el terreno no da los 40 Ω y hubo que hincar la segunda o la tercera, van 2 o 3 unidades en ese punto, no 1. No incluye la provisión de la jabalina: el <b>88</b> va aparte si la puso EMA — y ése sí, por todas.' },
     '30': { coincide:true,
       porque:'La ETG cap. 5.3 deja elegir entre <b>3×1,5 y 3×2,5 mm²</b> «según lo determine la Inspección». Todos los proyectos leídos usan 3×1,5.',
-      cobro:'El metraje es el mismo con cualquiera de las dos secciones; el precio no. Si en tu plaza pidieron 3×2,5, verificá que se esté certificando por el ítem correcto. Ojo: es para tirar el cable en una columna <b>existente</b>; en columna nueva ya está adentro de los ítems 1 a 8. No incluye la provisión del cable (ítem 86), que en esta obra la da EPEC.' },
+      cobro:'El metraje es el mismo con cualquiera de las dos secciones; el precio no. Si en tu plaza pidieron 3×2,5, verificá que se esté certificando por el ítem correcto. <b>Decisión EMA (07/09/2026): se certifica por el 30 en todas las columnas</b>, y así lo carga «Traer las cantidades». Pero la letra del Anexo I dice otra cosa: en columna nueva la instalación ya va adentro de los ítems 1 a 8 (excluyen solo la provisión, ítem 86) y el 42 incluye el «tramo de conductor 3×1,5» de la existente con acometida nueva — literalmente, el 30 sería solo para tirarlo suelto en una existente sin acometida nueva, y el itemizado prevé apenas 200 m. Si la Inspección lo rebota, en Vínculos hay un interruptor para dejarlo solo en esas. No incluye la provisión del cable (ítem 86), que en esta obra la da EPEC.' },
     '21': { coincide:null,
       obra:'Varios proyectos ejecutivos (Renacimiento, Los Tártaros) especifican caño de <b>Ø110 mm</b>, no el Ø160 del ítem.',
       porque:'El ítem describe el cruce con tunelera en seco en 1 caño PVC de Ø160 mm.',
@@ -22634,7 +22709,7 @@ const ITEMIZADO_EPEC = [
       cobro:'4,37 K por columna, además del ítem 4. Vale la misma nota que el 83.1: el ítem 4 excluye expresamente su provisión aunque en la descripción diga «provisión… de columna». Se cobra igual y se deja por escrito.' },
     '86': { coincide:true,
       obra:'<b>El cable 3×1,5 lo da EPEC</b> en esta obra (confirmado 06/09/2026).',
-      cobro:'No se cobra. Solo si lo pusiera EMA, por metro (0,02 K/m). Su <b>instalación</b> ya está adentro de los ítems 1 a 8; el ítem 30 es para tirarlo suelto en una columna existente.' },
+      cobro:'No se cobra. Solo si lo pusiera EMA, por metro (0,02 K/m). Su <b>instalación</b> se está certificando por el ítem 30 (decisión EMA), aunque el Anexo I la da por incluida en los ítems 1 a 8 y en el 42: ver la nota del ítem 30.' },
     '87': { coincide:true,
       obra:'<b>El cable verde-amarillo de 10 mm² lo da EPEC</b> en esta obra (confirmado 06/09/2026).',
       cobro:'No se cobra. Solo si lo pusiera EMA, por metro (0,02 K/m). Lo excluyen los ítems 1 a 4, 42 y 77.' },
@@ -23213,6 +23288,8 @@ const ITEMIZADO_EPEC = [
       porque:'Ítem 63: bornera BPN (para RSTN+T) de 10 mm² – 6 mm². En el Anexo I está bajo «ELEMENTOS DE TABLERO», así que se cobra por las del <b>tablero general</b>.' },
     { re:/^Cajas de columna nueva certificadas aparte/i, tipo:'item', item:'62/63/68/69',
       porque:'Interruptor de Vínculos: las BPN, tabaqueras y fusibles de las cajas de columna nueva se certifican aparte, por acuerdo con la Inspección.' },
+    { re:/^[ÍI]tem 30 solo en columnas existentes sin acometida nueva/i, tipo:'item', item:30,
+      porque:'Interruptor de Vínculos apagado: el 3×1,5 va por el ítem 30 solo en las existentes sin acometida nueva; el resto está adentro de los ítems 1 a 8 y del 42.' },
     { re:/^Portafusible tabaquera del tablero/i, tipo:'item', item:69,
       porque:'Ítem 69: portafusible tabaquera con fusible 1 / 6 / 10 A. Cargado en «Tablero — elementos interiores»: es del tablero general.' },
     { re:/^Fusible cer[aá]mico del tablero/i, tipo:'item', item:68,
