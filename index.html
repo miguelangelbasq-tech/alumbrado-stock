@@ -285,6 +285,17 @@
     margin-bottom:8px;
   }
   .vinc-row select, .vinc-row input{margin:0;}
+  /* Tramos de zanja con otro piso (2026-09-22): N° · metros · piso · profundidad · quitar */
+  .zan-row, .zan-labels{ display:grid; grid-template-columns:34px 1fr 1.5fr 1.2fr 26px; gap:8px; align-items:center; }
+  .zan-row{ margin-bottom:8px; } .zan-row select, .zan-row input{ margin:0; min-width:0; }
+  .zan-labels{ font-size:11px; color:var(--text-soft); font-weight:600; margin-bottom:6px; }
+  /* Tableros adicionales T2, T3… (2026-09-22): una mini-tarjeta por tablero dentro de la sección */
+  .tbx{ border:1px solid var(--border); border-radius:10px; padding:10px 12px 12px; margin:10px 0; background:rgba(21,42,83,.025); }
+  .tbx-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
+  .tbx-head b{ font-size:13px; color:var(--navy); letter-spacing:.3px; }
+  .tbx label{ margin-top:8px; font-size:12px; }
+  .tbx .row2{ gap:8px; }
+  .tbx select, .tbx input{ margin:0; min-width:0; }
   .vinc-labels{
     display:grid;
     grid-template-columns:34px 2fr 1fr 1.2fr 26px;
@@ -3175,7 +3186,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-21 19:50 · 4a672a</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-22 11:59 · 714760</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -3512,19 +3523,19 @@
         <div class="hint" id="civilGruposSummary" style="margin-top:10px;"></div>
         <input type="hidden" id="civilCantBases" value="0">
 
-        <label for="civilZanjaMl">Metros de zanja</label>
+        <label for="civilZanjaMl">Metros de zanja — total de la plaza</label>
         <input type="number" id="civilZanjaMl" min="0" value="0">
 
         <div class="row2">
           <div>
-            <label for="civilZanjaProf">Profundidad de zanjeo</label>
+            <label for="civilZanjaProf">Profundidad de zanjeo (la general)</label>
             <select id="civilZanjaProf">
               <option value="0.6">0,60 m (estándar)</option>
               <option value="1.0">1,00 m (cruces / especial)</option>
             </select>
           </div>
           <div>
-            <label for="civilZanjaTerreno">Tipo de terreno</label>
+            <label for="civilZanjaTerreno">Tipo de piso (el predominante)</label>
             <select id="civilZanjaTerreno">
               <option value="natural">Natural</option>
               <option value="baldosa">Vereda de baldosas</option>
@@ -3532,6 +3543,15 @@
             </select>
           </div>
         </div>
+        <!-- Tramos de zanja con otro piso o profundidad (2026-09-22). El usuario: «tenés que
+             seleccionar todo el zanjeo y por ahí solo tenemos alguna parte chica o varios tramos
+             chicos con piso de baldosa». Cada tramo se DESCUENTA del total de arriba y sale con su
+             propio renglón de zanjeo → su propio ítem del Anexo I (15 a 20). -->
+        <label style="margin-top:12px;">Tramos con otro piso o profundidad <span style="font-weight:500;color:var(--text-soft);">(opcional — se descuentan del total)</span></label>
+        <div class="hint" style="margin-top:0;">Si solo una parte va por vereda de baldosas o piso de hormigón (o a 1,00 m), cargala acá: metros + piso + profundidad. El resto del total queda con el piso y la profundidad de arriba. Cada tramo sale con su ítem (15 a 20) en el cómputo y en el itemizado.</div>
+        <div id="zanjaTramosContainer"></div>
+        <button type="button" class="btn-auto" id="zanjaAddTramoBtn">+ Agregar tramo con otro piso</button>
+        <div class="hint" id="zanjaTramosSummary" style="margin-top:10px;margin-bottom:14px;"></div>
 
         <div class="row2">
           <div>
@@ -3658,6 +3678,18 @@
         <label for="circuitos">Cantidad de circuitos del tablero</label>
         <input type="number" id="circuitos" min="1" value="1">
         <div class="hint">Se usa para calcular dispersores de puesta a tierra (1 por circuito + 1 para el tablero).</div>
+
+        <!-- Más de un tablero por plaza (2026-09-22). El usuario: «hacer dos tableros en la plaza no me
+             está tomando: dos postes de PRFV para tablero, o dos tableros, o la acometida por tablero y
+             el tipo de acometida por tablero». Lo de arriba es el tablero T1; acá se agregan T2, T3…
+             cada uno con su tipo, su apoyo, su acometida (tipo, metros y cable), sus circuitos y su Ø
+             de poste. El cómputo repite el bloque de tablero por cada uno; la PAT suma una jabalina
+             por tablero y los circuitos de todos. -->
+        <label style="margin-top:16px;">Otros tableros de la plaza <span style="font-weight:500;color:var(--text-soft);">(T2, T3… — opcional)</span></label>
+        <div class="hint" style="margin-top:0;">Lo de arriba es el <b>tablero T1</b>. Si la plaza tiene más de un tablero, agregalo acá con <b>su</b> tipo, <b>su</b> apoyo, <b>su</b> acometida (aérea o subterránea, con sus metros y su cable) y <b>sus</b> circuitos: sale un bloque «Tablero y acometida — T2» en el cómputo, y el itemizado suma 9/10, 13, 11/12, 73 y la PAT por cada uno. En <b>Cableado</b>, los circuitos que salen de este tablero se cargan con «Tablero 2».</div>
+        <div id="tablerosExtraContainer"></div>
+        <button type="button" class="btn-auto" id="tableroAddBtn">+ Agregar otro tablero</button>
+        <div class="hint" id="tablerosExtraSummary" style="margin-top:10px;"></div>
       </div>
 
       <div class="card" id="cardCruce">
@@ -7735,6 +7767,8 @@ function pbElegir(i){
         if(typeof renderVinculoGrupos === 'function') renderVinculoGrupos();
       }
       if(d.zanjeo > 0) set('civilZanjaMl', String(Math.round(d.zanjeo)));
+      // Los tramos con otro piso son de la plaza anterior: se limpian (el itemizado viejo no los trae).
+      if(typeof zanjaTramos !== 'undefined'){ zanjaTramos = []; if(typeof renderZanjaTramos === 'function') renderZanjaTramos(); }
 
       // ---- El resto del formulario, para que no queden valores por defecto inventados ----
       const X = pbExtras(p.ph);
@@ -8102,6 +8136,176 @@ document.getElementById('civilAddAlturaBtn').addEventListener('click', ()=>{
   renderCivilGrupos();
 });
 
+// ---- Tramos de zanja con otro piso o profundidad (2026-09-22) ----
+// Antes había UN solo piso y UNA profundidad para todo el zanjeo. El usuario: *"tenés que seleccionar
+// todo el zanjeo y por ahí solo tenemos alguna parte chica o varios tramos chicos con piso baldosa"*.
+// Cada tramo cargado acá se descuenta del total de «Metros de zanja» y sale con su propio renglón
+// (y su propio ítem 15–20). El total sigue siendo el total: así la precarga desde Cableado y desde
+// las plazas hechas no cambia.
+let zanjaTramoIdSeq = 1;
+let zanjaTramos = [];
+const ZANJA_TERRENO_NOMBRE = { natural:'terreno natural', baldosa:'vereda de baldosas', hormigon:'piso de hormigón' };
+const ZANJA_ITEM_ANEXO = { '0.6|natural':15, '0.6|baldosa':16, '0.6|hormigon':17, '1.0|natural':18, '1.0|baldosa':19, '1.0|hormigon':20 };
+function zanjaProfClave(p){ return (parseFloat(p) || 0.6) >= 0.9 ? '1.0' : '0.6'; }
+function renderZanjaTramos(){
+  const cont = document.getElementById('zanjaTramosContainer');
+  if(!cont) return;
+  let html = zanjaTramos.length ? `<div class="zan-labels"><div></div><div>Metros</div><div>Piso</div><div>Profundidad</div><div></div></div>` : '';
+  zanjaTramos.forEach((t, idx)=>{
+    html += `<div class="zan-row" data-zantramo="${t.id}">
+      <div class="tramo-num">Z${idx+1}</div>
+      <input type="number" min="0" step="0.5" data-field="ml" value="${t.ml}" placeholder="m">
+      <select data-field="terreno">
+        <option value="natural" ${t.terreno==='natural'?'selected':''}>Natural</option>
+        <option value="baldosa" ${t.terreno==='baldosa'?'selected':''}>Baldosas</option>
+        <option value="hormigon" ${t.terreno==='hormigon'?'selected':''}>Hormigón</option>
+      </select>
+      <select data-field="prof">
+        <option value="0.6" ${zanjaProfClave(t.prof)==='0.6'?'selected':''}>0,60 m</option>
+        <option value="1.0" ${zanjaProfClave(t.prof)==='1.0'?'selected':''}>1,00 m</option>
+      </select>
+      <button type="button" class="tramo-remove" data-action="remove" title="Quitar tramo">×</button>
+    </div>`;
+  });
+  cont.innerHTML = html;
+  const resumen = document.getElementById('zanjaTramosSummary');
+  if(resumen){
+    const total = parseFloat((document.getElementById('civilZanjaMl')||{}).value) || 0;
+    const conMl = zanjaTramos.filter(t=>(t.ml||0) > 0);
+    const suma = conMl.reduce((a,t)=>a+t.ml, 0);
+    const resto = total - suma;
+    if(!conMl.length) resumen.innerHTML = 'Sin tramos aparte: todo el zanjeo va con el piso y la profundidad de arriba.';
+    else {
+      const det = conMl.map(t=>`${fmt(t.ml,1)} m en ${ZANJA_TERRENO_NOMBRE[t.terreno]||t.terreno} a ${fmt(parseFloat(zanjaProfClave(t.prof)),2)} m (ítem ${ZANJA_ITEM_ANEXO[zanjaProfClave(t.prof)+'|'+t.terreno]||'?'})`).join(' · ');
+      resumen.innerHTML = resto >= 0
+        ? `Tramos aparte: <b>${fmt(suma,1)} m</b> — ${det}. Quedan <b>${fmt(resto,1)} m</b> con el piso y la profundidad de arriba.`
+        : `<span style="color:#b3261e;"><b>⚠ Los tramos suman ${fmt(suma,1)} m y el total es ${fmt(total,1)} m.</b> Subí el total o bajá los tramos: no puede haber más tramos que zanja.</span>`;
+    }
+  }
+  const civToggle = document.getElementById('toggleCivil');
+  if(civToggle && !civToggle.checked) cont.querySelectorAll('input, select, button').forEach(el=>el.disabled=true);
+}
+document.getElementById('zanjaTramosContainer').addEventListener('input', (e)=>{
+  const row = e.target.closest('[data-zantramo]'); if(!row) return;
+  const t = zanjaTramos.find(x=>x.id===parseInt(row.dataset.zantramo)); if(!t) return;
+  if(e.target.dataset.field === 'ml') t.ml = parseFloat(e.target.value) || 0;
+  else if(e.target.dataset.field === 'terreno') t.terreno = e.target.value;
+  else if(e.target.dataset.field === 'prof') t.prof = e.target.value;
+  // Solo se redibuja el resumen (no la fila) para no perder el foco mientras se escribe.
+  const foco = e.target; const sel = foco.selectionStart;
+  renderZanjaTramos();
+  const de = document.querySelector(`[data-zantramo="${t.id}"] [data-field="${foco.dataset.field}"]`);
+  if(de){ de.focus(); try{ if(sel != null && de.type !== 'number') de.setSelectionRange(sel, sel); }catch(x){} }
+});
+document.getElementById('zanjaTramosContainer').addEventListener('change', (e)=>{
+  const row = e.target.closest('[data-zantramo]'); if(!row) return;
+  const t = zanjaTramos.find(x=>x.id===parseInt(row.dataset.zantramo)); if(!t) return;
+  if(e.target.dataset.field === 'terreno') t.terreno = e.target.value;
+  else if(e.target.dataset.field === 'prof') t.prof = e.target.value;
+  renderZanjaTramos();
+});
+document.getElementById('zanjaTramosContainer').addEventListener('click', (e)=>{
+  const btn = e.target.closest('[data-action="remove"]'); if(!btn) return;
+  const row = btn.closest('[data-zantramo]'); if(!row) return;
+  zanjaTramos = zanjaTramos.filter(x=>x.id!==parseInt(row.dataset.zantramo));
+  renderZanjaTramos();
+});
+document.getElementById('zanjaAddTramoBtn').addEventListener('click', ()=>{
+  zanjaTramos.push({ id: zanjaTramoIdSeq++, ml: 0, terreno: 'baldosa', prof: (document.getElementById('civilZanjaProf')||{}).value || '0.6' });
+  renderZanjaTramos();
+  const ult = document.querySelector(`[data-zantramo="${zanjaTramoIdSeq-1}"] [data-field="ml"]`); if(ult) ult.focus();
+});
+document.getElementById('civilZanjaMl').addEventListener('input', ()=> renderZanjaTramos());
+document.getElementById('civilZanjaTerreno').addEventListener('change', ()=> renderZanjaTramos());
+renderZanjaTramos();
+
+// ---- Otros tableros de la plaza: T2, T3… (2026-09-22) ----
+// El tablero T1 sigue siendo el de los campos de la sección. Cada tablero adicional guarda lo que
+// cambia el cómputo: tipo (aéreo / a nivel), sobre qué se monta, tipo y metros de acometida, cable
+// de acometida, circuitos que salen de él y el Ø del poste para las abrazaderas.
+let tableroExtraIdSeq = 1;
+let tablerosExtra = [];
+function nuevoTableroExtra(){
+  return { id: tableroExtraIdSeq++, tipo:'aereo_prfv', apoyo:'prfv_nuevo', acomTipo:'aerea', acomMl:10,
+           cableId: ((CABLES_ACOMETIDA.aerea||[])[0]||{}).id || '', circuitos:1, diamMm:null };
+}
+function renderTablerosExtra(){
+  const cont = document.getElementById('tablerosExtraContainer');
+  if(!cont) return;
+  const APOYOS = [['prfv_nuevo','Apoyo de PRFV NUEVO (AP-T-018/019) — ítem 13'],
+                  ['hormigon_existente','Poste de H°A° EXISTENTE de EPEC — caño de bajada, zuncho y hebillas'],
+                  ['hormigon_nuevo','Poste de H°A° NUEVO 8,5 m — se compra el poste + caño de bajada']];
+  cont.innerHTML = tablerosExtra.map((t, idx)=>{
+    const n = idx + 2;
+    const cables = CABLES_ACOMETIDA[t.acomTipo] || [];
+    return `<div class="tbx" data-tbx="${t.id}">
+      <div class="tbx-head"><b>Tablero T${n}</b><button type="button" class="tramo-remove" data-action="remove" title="Quitar este tablero">×</button></div>
+      <label>Tipo de tablero</label>
+      <select data-field="tipo">
+        <option value="aereo_prfv" ${t.tipo==='aereo_prfv'?'selected':''}>Aéreo PRFV (ítem 9)</option>
+        <option value="nivel_prfv" ${t.tipo==='nivel_prfv'?'selected':''}>A nivel PRFV, sobre base de mampostería (ítem 10)</option>
+      </select>
+      ${t.tipo==='aereo_prfv' ? `<label>Sobre qué se monta</label>
+      <select data-field="apoyo">${APOYOS.map(a=>`<option value="${a[0]}" ${t.apoyo===a[0]?'selected':''}>${a[1]}</option>`).join('')}</select>` : ''}
+      <div class="row2">
+        <div><label>Acometida EPEC → T${n}</label>
+          <select data-field="acomTipo"><option value="aerea" ${t.acomTipo==='aerea'?'selected':''}>Aérea</option><option value="subterranea" ${t.acomTipo==='subterranea'?'selected':''}>Subterránea</option></select></div>
+        <div><label>Longitud (m)</label><input type="number" min="0" step="0.5" data-field="acomMl" value="${t.acomMl}"></div>
+      </div>
+      <label>Cable de acometida</label>
+      <select data-field="cableId">${cables.map(c=>`<option value="${c.id}" ${t.cableId===c.id?'selected':''}>${escHtml(c.label)}</option>`).join('')}</select>
+      <div class="row2">
+        <div><label>Circuitos que salen de T${n}</label><input type="number" min="1" step="1" data-field="circuitos" value="${t.circuitos}"></div>
+        <div><label>Ø del poste (mm) — para las abrazaderas</label><input type="number" min="40" max="600" step="1" data-field="diamMm" value="${t.diamMm==null?'':t.diamMm}" placeholder="ej. 180"></div>
+      </div>
+    </div>`;
+  }).join('');
+  const res = document.getElementById('tablerosExtraSummary');
+  if(res){
+    const n = tablerosExtra.length;
+    const totCirc = tablerosExtra.reduce((a,t)=>a+(parseInt(t.circuitos)||1), parseInt((document.getElementById('circuitos')||{}).value)||1);
+    res.innerHTML = n
+      ? `La plaza tiene <b>${n+1} tableros</b>: T1 (los campos de arriba)${tablerosExtra.map((t,i)=>` · T${i+2} ${t.tipo==='nivel_prfv'?'a nivel':'aéreo'}${t.tipo==='aereo_prfv'?({prfv_nuevo:' sobre PRFV nuevo',hormigon_existente:' sobre H°A° existente',hormigon_nuevo:' sobre H°A° nuevo'}[t.apoyo]||''):''}, acometida ${t.acomTipo==='aerea'?'aérea':'subterránea'} de ${fmt(t.acomMl||0,0)} m, ${t.circuitos||1} circuito(s)`).join('')}. En total <b>${totCirc} circuitos</b>.`
+      : 'Un solo tablero (T1). Agregá otro solo si la plaza tiene dos o más.';
+  }
+  const tg = document.getElementById('toggleTablero');
+  if(tg && !tg.checked) cont.querySelectorAll('input, select, button').forEach(el=>el.disabled=true);
+}
+(function(){
+  const cont = document.getElementById('tablerosExtraContainer');
+  const buscar = e => { const row = e.target.closest('[data-tbx]'); return row ? tablerosExtra.find(x=>x.id===parseInt(row.dataset.tbx)) : null; };
+  cont.addEventListener('input', (e)=>{
+    const t = buscar(e); if(!t) return;
+    const f = e.target.dataset.field;
+    if(f === 'acomMl') t.acomMl = parseFloat(e.target.value) || 0;
+    else if(f === 'circuitos') t.circuitos = parseInt(e.target.value) || 1;
+    else if(f === 'diamMm'){ const v = parseFloat(e.target.value); t.diamMm = (isFinite(v) && v > 0) ? v : null; }
+    else return;
+    // Solo se refresca el resumen: redibujar la fila mientras se escribe hace perder el foco.
+    const res = document.getElementById('tablerosExtraSummary');
+    if(res){ const foco = e.target; const html = cont.innerHTML; renderTablerosExtra(); const de = document.querySelector(`[data-tbx="${t.id}"] [data-field="${f}"]`); if(de){ de.focus(); } }
+  });
+  cont.addEventListener('change', (e)=>{
+    const t = buscar(e); if(!t) return;
+    const f = e.target.dataset.field;
+    if(f === 'tipo') t.tipo = e.target.value;
+    else if(f === 'apoyo') t.apoyo = e.target.value;
+    else if(f === 'acomTipo'){ t.acomTipo = e.target.value; const l = CABLES_ACOMETIDA[t.acomTipo] || []; if(!l.some(c=>c.id===t.cableId)) t.cableId = (l[0]||{}).id || ''; }
+    else if(f === 'cableId') t.cableId = e.target.value;
+    else return;
+    renderTablerosExtra();
+  });
+  cont.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-action="remove"]'); if(!btn) return;
+    const row = btn.closest('[data-tbx]'); if(!row) return;
+    tablerosExtra = tablerosExtra.filter(x=>x.id!==parseInt(row.dataset.tbx));
+    renderTablerosExtra();
+  });
+  document.getElementById('tableroAddBtn').addEventListener('click', ()=>{ tablerosExtra.push(nuevoTableroExtra()); renderTablerosExtra(); });
+  document.getElementById('circuitos').addEventListener('input', ()=>{ if(tablerosExtra.length) renderTablerosExtra(); });
+  renderTablerosExtra();
+})();
+
 // Ancho de zanja: 0,20 m para un cable y 0,40 m si van dos o tres (confirmado por el usuario), con
 // la opción de escribir otro valor. De acá salen la arena y los ladrillos por metro.
 // Espesores de arena editables (2026-08-22). Se leen de la interfaz en cada cálculo; si el campo
@@ -8140,6 +8344,7 @@ document.getElementById('civilAutoBtn').addEventListener('click', ()=>{
   renderCivilGrupos();
   const sumaMl = tramos.reduce((a,t)=>a+(t.ml||0),0);
   document.getElementById('civilZanjaMl').value = sumaMl;
+  if(typeof renderZanjaTramos === 'function') renderZanjaTramos();
 });
 
 // ============================================================
@@ -13989,7 +14194,8 @@ function snapshotFormulario(){
   return { v:1, campos,
            columnaGrupos: copia(columnaGrupos), vinculoGrupos: copia(vinculoGrupos),
            civilGrupos:   copia(civilGrupos),   circuitos:     copia(circuitos),
-           tramos:        copia(tramos) };
+           tramos:        copia(tramos),        zanjaTramos:   copia(zanjaTramos),
+           tablerosExtra: copia(tablerosExtra) };
 }
 
 // Vuelve a poner el formulario tal como estaba. Primero las listas (que se dibujan solas), después
@@ -14005,6 +14211,10 @@ function restaurarFormulario(snap){
   const cg = arr(snap.columnaGrupos); if(cg) columnaGrupos = cg;
   const vg = arr(snap.vinculoGrupos); if(vg) vinculoGrupos = vg;
   const fg = arr(snap.civilGrupos);   if(fg) civilGrupos   = fg;
+  // Tramos de zanja con otro piso (2026-09-22): una foto de antes no los tiene → lista vacía.
+  zanjaTramos = arr(snap.zanjaTramos) || [];
+  // Otros tableros T2, T3… (2026-09-22): una foto de antes no los tiene → solo el T1.
+  tablerosExtra = arr(snap.tablerosExtra) || [];
   const ci = arr(snap.circuitos);     if(ci) circuitos = ci;
   const tr = arr(snap.tramos);        if(tr) tramos = tr;
 
@@ -14014,6 +14224,8 @@ function restaurarFormulario(snap){
   columnaGrupoIdSeq = maxId(columnaGrupos,'id') + 1;
   vinculoGrupoIdSeq = maxId(vinculoGrupos,'id') + 1;
   civilGrupoIdSeq   = maxId(civilGrupos,'id')   + 1;
+  zanjaTramoIdSeq   = maxId(zanjaTramos,'id')   + 1;
+  tableroExtraIdSeq = maxId(tablerosExtra,'id') + 1;
   tramoIdSeq        = maxId(tramos,'id')        + 1;
   circuitoIdSeq     = maxId(circuitos,'id')     + 1;
   puntoIdSeq        = circuitos.reduce((m,c)=>Math.max(m, maxId(c.puntos,'id')), 0) + 1;
@@ -14049,6 +14261,8 @@ function restaurarFormulario(snap){
   // El armado de la caja metálica se redibuja con los casilleros «a mano» que vinieron en la foto.
   try{ if(typeof renderBpnMetPanel === 'function') renderBpnMetPanel(true); }catch(e){}
   try{ renderCivilGrupos(); }catch(e){}
+  try{ renderZanjaTramos(); }catch(e){}
+  try{ renderTablerosExtra(); }catch(e){}
   try{ renderCircuitos(); }catch(e){}
   try{ renderTramos(); }catch(e){}
   try{ actualizarResumenCircuitos(); }catch(e){}
@@ -14139,6 +14353,28 @@ function calcular(){
   const civilOn = document.getElementById('toggleCivil').checked;
   const tableroOn = document.getElementById('toggleTablero').checked;
   const cruceOn = document.getElementById('toggleCruce').checked;
+  // ---- Todos los tableros de la plaza (2026-09-22): T1 = los campos de la sección; T2, T3… = la
+  // lista «Otros tableros». El bloque de tablero se repite por cada uno, y los circuitos se suman
+  // para las jabalinas de PAT, los finales de circuito (BPN) y los prensacables.
+  const tipoT1 = document.getElementById('tableroTipo').value;
+  const tablerosCfg = [{
+    n:1, tipo:tipoT1,
+    apoyo: tipoT1 === 'aereo_prfv' ? String((document.getElementById('tableroApoyo')||{value:'prfv_nuevo'}).value || 'prfv_nuevo') : null,
+    acomTipo: document.getElementById('acometidaTipo').value,
+    acomMl: parseFloat(document.getElementById('acometidaMl').value) || 0,
+    circuitos: parseInt(document.getElementById('circuitos').value) || 1,
+    cableId: (document.getElementById('acometidaCable')||{}).value || '',
+    dPoste: diamPosteMm()
+  }].concat((typeof tablerosExtra !== 'undefined' ? tablerosExtra : []).map((t, i)=>({
+    n:i+2, tipo: t.tipo === 'nivel_prfv' ? 'nivel_prfv' : 'aereo_prfv',
+    apoyo: t.tipo === 'nivel_prfv' ? null : (t.apoyo || 'prfv_nuevo'),
+    acomTipo: t.acomTipo === 'subterranea' ? 'subterranea' : 'aerea',
+    acomMl: parseFloat(t.acomMl) || 0,
+    circuitos: parseInt(t.circuitos) || 1,
+    cableId: t.cableId || '',
+    dPoste: (isFinite(parseFloat(t.diamMm)) && parseFloat(t.diamMm) > 0) ? parseFloat(t.diamMm) : null
+  })));
+  const circuitosTotales = tablerosCfg.reduce((a,t)=> a + t.circuitos, 0);
   const retirosOn = document.getElementById('toggleRetiros').checked;
   // Secciones nuevas del 07/09/2026 (plazas viejas a restaurar). Vienen apagadas por defecto: en
   // una plaza nueva el tablero se cobra armado por el ítem 9 o 10 y no hay empalmes.
@@ -14448,7 +14684,7 @@ function calcular(){
     // troncal de 4 conductores, pero conviene contrastarlo contra un tablerito real.
     const terminalesTiffDoblePorGauge = {};
     const conductoresDeCalibre = v => parseInt(String(v).split('x')[0]) || 0;
-    const circuitosTiff = parseInt(document.getElementById('circuitos').value) || 1;
+    const circuitosTiff = circuitosTotales;   // de todos los tableros (2026-09-22)
     if(cableOn && tramos.length){
       // Si hay más de un tramo (calibre) Y más de un grupo de vínculo a la vez, no sabemos qué columnas
       // puntuales de cada tramo llevan cada vínculo — se reparte proporcionalmente por cantidad de
@@ -14820,7 +15056,7 @@ function calcular(){
     if(exacta){
       gananciaPorTramo = tramos.map(t => exacta[t.calibre] || 0);
     } else {
-      const circuitosCable = parseInt(document.getElementById('circuitos').value) || 1;
+      const circuitosCable = circuitosTotales;   // de todos los tableros (2026-09-22)
       const gananciaInput = document.getElementById('cableGanancia').value;
       const mPorSubida = gananciaInput === '' ? gananciaPorDefecto(altura != null ? altura : 7, tipoCol) : (parseFloat(gananciaInput) || 0);
       const gananciaTotal = Math.max(0, 2*colsTotalTramos - circuitosCable) * mPorSubida;
@@ -15057,11 +15293,39 @@ function calcular(){
         itemsFundacion.push({desc:'Elastómero de sellado aprobado (relleno de vacíos remanentes)', cant:civCant, un:'Un.', ref:'Plano AP-TC-003-A'});
       }
     }
+    // ---- Tramos de zanja con otro piso o profundidad (2026-09-22) ----
+    // El total de «Metros de zanja» se reparte: los tramos cargados aparte (baldosa, hormigón, 1,00 m)
+    // se descuentan y el resto queda con el piso y la profundidad generales. Un renglón de zanjeo por
+    // cada combinación piso+profundidad → un ítem 15–20 por cada una en el itemizado.
+    const zanTramosOk = (typeof zanjaTramos !== 'undefined' ? zanjaTramos : []).filter(t=> (parseFloat(t.ml)||0) > 0);
+    const zanSumaTramos = zanTramosOk.reduce((a,t)=> a + (parseFloat(t.ml)||0), 0);
+    let zanResto = civZanjaMl - zanSumaTramos;
+    if(civZanjaMl > 0 && zanResto < -0.001){
+      alertas.push(`<b>Los tramos de zanja con otro piso suman ${fmt(zanSumaTramos,1)} m y el total de zanja es ${fmt(civZanjaMl,1)} m.</b> Se computaron los tramos y el resto quedó en 0: subí el total o bajá los tramos.`);
+      zanResto = 0;
+    }
+    const zanSegmentos = [];
+    const zanAgregar = (ml, prof, terr)=>{
+      if(!(ml > 0)) return;
+      const pk = (parseFloat(prof) || 0.6) >= 0.9 ? 1.0 : 0.6;
+      const ya = zanSegmentos.find(z=> z.prof === pk && z.terr === terr);
+      if(ya) ya.ml += ml; else zanSegmentos.push({ ml, prof:pk, terr });
+    };
+    zanAgregar(zanResto, civProf, civTerreno);
+    zanTramosOk.forEach(t=> zanAgregar(parseFloat(t.ml)||0, t.prof, t.terreno || 'natural'));
     if(civZanjaMl > 0){
-      const terrenoLabel = {natural:'terreno natural', baldosa:'vereda de baldosas', hormigon:'piso de hormigón'}[civTerreno];
+      const NOMBRE_TERR = {natural:'terreno natural', baldosa:'vereda de baldosas', hormigon:'piso de hormigón'};
+      const ITEM_ZANJA = { '0.6|natural':15, '0.6|baldosa':16, '0.6|hormigon':17, '1|natural':18, '1|baldosa':19, '1|hormigon':20 };
+      const terrenoLabel = NOMBRE_TERR[civTerreno];
       const civAncho = anchoZanjaActual();
       const tendidoPead = (document.getElementById('civilTipoTendido')||{}).value === 'pead';
-      itemsZanjeo.push({...T, desc:`Zanjeo en vía pública sobre ${terrenoLabel} (profundidad ${fmt(civProf,2)} m, ancho ${fmt(civAncho,2)} m) — ${tendidoPead?'cable en tubo de PEAD':'cable directamente enterrado'}`, cant:civZanjaMl, un:'m', ref:'Ítem 15-20 pliego / AP-TC-001'});
+      zanSegmentos.forEach(z=>{
+        const nItem = ITEM_ZANJA[`${z.prof}|${z.terr}`];
+        itemsZanjeo.push({...T, desc:`Zanjeo en vía pública sobre ${NOMBRE_TERR[z.terr]} (profundidad ${fmt(z.prof,2)} m, ancho ${fmt(civAncho,2)} m) — ${tendidoPead?'cable en tubo de PEAD':'cable directamente enterrado'}${zanSegmentos.length > 1 ? ` · tramo de ${fmt(z.ml,1)} m de los ${fmt(civZanjaMl,1)} m totales` : ''}`, cant:z.ml, un:'m', ref:`Ítem ${nItem || '15-20'} pliego / AP-TC-001`});
+      });
+      if(zanSegmentos.length > 1){
+        itemsZanjeo.push({desc:`ℹ La zanja va partida por piso y profundidad: ${zanSegmentos.map(z=>`<b>${fmt(z.ml,1)} m</b> en ${NOMBRE_TERR[z.terr]} a ${fmt(z.prof,2)} m (ítem ${ITEM_ZANJA[`${z.prof}|${z.terr}`]||'?'})`).join(' · ')} = ${fmt(civZanjaMl,1)} m. Arena, ladrillo, malla y pegotes van por el total; la reposición de vereda o de hormigón, solo por sus tramos.`, cant:'—', un:'—', ref:'Anexo I · ítems 15 a 20'});
+      }
       // El plano AP-TC-001 acota 150 mm de paquete arena+cable POR DEBAJO de la tapada nominal, así
       // que la excavación real es más profunda que el número del ítem. Sale como línea informativa
       // para que el volumen de tierra a sacar y a reponer no quede corto.
@@ -15070,7 +15334,8 @@ function calcular(){
       // controlan en obra y se rechaza el trabajo si no se cumplen.
       itemsZanjeo.push({desc:'ℹ <b>Reglas de zanjeo (ETG cap. 3.1, sobre la ET 1011 de EPEC):</b> profundidad mínima <b>600 mm</b> desde el lomo del cable · en distribución subterránea vial el <b>eje de la zanja va a 500 mm hacia adentro del borde externo del cordón</b> · extracción <b>manual con pala</b>, pidiendo antes el permiso de liberación de traza a cada servicio (agua, gas, telecomunicaciones) · en espacios verdes hay que pedir el <b>certificado de liberación de traza</b> · relleno con el mismo material, compactado <b>en capas de 150 mm</b> · <b>la zanja se abre y se cierra el mismo día</b>: solo se rompe la longitud que se pueda completar en la jornada.', cant:'—', un:'—', ref:'ETG cap. 3.1'});
       itemsZanjeo.push({desc:'ℹ <b>Reposición de vereda (ETG cap. 3.2):</b> se repone con los <b>mismos materiales en calidad y color</b>, con <b>mosaicos nuevos sin uso</b> salvo que la Inspección autorice reutilizar los removidos en perfecto estado · tierra compactada por <b>medios mecánicos en capas de 15 cm regando con agua</b> · <b>al día siguiente van los contrapisos</b> y <b>al tercer día tiene que estar terminada la reposición</b> · donde el material sea difícil de conseguir (laja negra, mosaicos no convencionales) hay que <b>recuperar el removido</b>. Si se rompe una cañería de otro servicio, la reparación es a cargo de la contratista.', cant:'—', un:'—', ref:'ETG cap. 3.2'});
-      itemsZanjeo.push({desc:`— Excavación real: ${fmt(profExcav,2)} m de profundidad (${fmt(civProf,2)} m de tapada del ítem + ${fmt(ZANJA.camaFondo*100,0)} cm de cama de arena y cable que acota el plano) × ${fmt(civAncho,2)} m = ${fmt(civZanjaMl*civAncho*profExcav,2)} m³ de tierra`, cant:'—', un:'—', ref:'AP-TC-001, cota 150'});
+      const m3Excav = zanSegmentos.reduce((a,z)=> a + z.ml * civAncho * (z.prof + ZANJA.camaFondo), 0);
+      itemsZanjeo.push({desc:`— Excavación real: ${fmt(profExcav,2)} m de profundidad (${fmt(civProf,2)} m de tapada del ítem + ${fmt(ZANJA.camaFondo*100,0)} cm de cama de arena y cable que acota el plano) × ${fmt(civAncho,2)} m = ${fmt(m3Excav,2)} m³ de tierra${zanSegmentos.some(z=> z.prof !== (civProf >= 0.9 ? 1.0 : 0.6)) ? ' (sumando los tramos a otra profundidad con la suya)' : ''}`, cant:'—', un:'—', ref:'AP-TC-001, cota 150'});
 
       // --- Materiales de la zanja, desglosados por metro (2026-08-22) ---
       // Arena: cama debajo del cable + cubrimiento por encima, en todo el ancho de la zanja.
@@ -15129,13 +15394,18 @@ function calcular(){
           : `${pegoteCorto} — <b>${pegotes} pegote${pegotes===1?'':'s'}</b>, al inicio, promedio y final de cada vano (${vanosZanja} vano(s) × ${pegotesPorVano}) · cada uno de ${fmt(ZANJA.pegoteLargo,2)} m × ${fmt(civAncho,2)} m de ancho × ${fmt(ZANJA.pegoteEspesor,2)} m de espesor = ${fmt(pegoteVolUnit,3)} m³ · espesor de 5 cm estimado, el plano no lo acota`,
         cod:8015, cant: pegoteVolTotal, un:'m³', ref:'AP-TC-001 (nota de pegotes)'});
 
-      // Reposición según el terreno roto.
-      if(civTerreno === 'baldosa'){
-        itemsZanjeo.push({desc:`Contrapiso de hormigón pobre para reposición de vereda (e=${fmt(ZANJA.espesorContrapiso*100,0)} cm × ${fmt(civAncho,2)} m de ancho)`, cant:civZanjaMl*civAncho*ZANJA.espesorContrapiso, un:'m³', ref:'Ítem 16/19 pliego (espesor estimado)'});
-        itemsZanjeo.push({desc:`Mortero de asiento de baldosas (e=${fmt(ZANJA.espesorMortero*100,0)} cm, cemento + cal + arena)`, cant:civZanjaMl*civAncho*ZANJA.espesorMortero, un:'m³', ref:'Ítem 16/19 pliego (espesor estimado)'});
-        itemsZanjeo.push({desc:'Baldosas de vereda para reposición (superficie rota)', cant:civZanjaMl*civAncho, un:'m²', ref:'Ítem 16/19 pliego'});
-      } else if(civTerreno === 'hormigon'){
-        itemsZanjeo.push({desc:`Hormigón de reposición de piso (e=${fmt(ZANJA.espesorHormigonRepo*100,0)} cm × ${fmt(civAncho,2)} m de ancho)`, cant:civZanjaMl*civAncho*ZANJA.espesorHormigonRepo, un:'m³', ref:'Ítem 17/20 pliego (espesor estimado)'});
+      // Reposición según el terreno roto — por los metros de CADA piso (2026-09-22: antes era todo
+      // el zanjeo con un solo piso).
+      const mlBaldosa = zanSegmentos.filter(z=> z.terr === 'baldosa').reduce((a,z)=> a + z.ml, 0);
+      const mlHormigon = zanSegmentos.filter(z=> z.terr === 'hormigon').reduce((a,z)=> a + z.ml, 0);
+      const parcial = (ml)=> zanSegmentos.length > 1 ? ` — por los ${fmt(ml,1)} m de ese piso` : '';
+      if(mlBaldosa > 0){
+        itemsZanjeo.push({desc:`Contrapiso de hormigón pobre para reposición de vereda (e=${fmt(ZANJA.espesorContrapiso*100,0)} cm × ${fmt(civAncho,2)} m de ancho)${parcial(mlBaldosa)}`, cant:mlBaldosa*civAncho*ZANJA.espesorContrapiso, un:'m³', ref:'Ítem 16/19 pliego (espesor estimado)'});
+        itemsZanjeo.push({desc:`Mortero de asiento de baldosas (e=${fmt(ZANJA.espesorMortero*100,0)} cm, cemento + cal + arena)${parcial(mlBaldosa)}`, cant:mlBaldosa*civAncho*ZANJA.espesorMortero, un:'m³', ref:'Ítem 16/19 pliego (espesor estimado)'});
+        itemsZanjeo.push({desc:`Baldosas de vereda para reposición (superficie rota)${parcial(mlBaldosa)}`, cant:mlBaldosa*civAncho, un:'m²', ref:'Ítem 16/19 pliego'});
+      }
+      if(mlHormigon > 0){
+        itemsZanjeo.push({desc:`Hormigón de reposición de piso (e=${fmt(ZANJA.espesorHormigonRepo*100,0)} cm × ${fmt(civAncho,2)} m de ancho)${parcial(mlHormigon)}`, cant:mlHormigon*civAncho*ZANJA.espesorHormigonRepo, un:'m³', ref:'Ítem 17/20 pliego (espesor estimado)'});
       }
     }
 
@@ -15144,7 +15414,10 @@ function calcular(){
     if(civPeadMl > 0){
       itemsZanjeo.push({...M(5005,'protección del cable bajo estructuras de hormigón, canales o veredas'), cant:civPeadMl, un:'m', ref:'Memoria del proyecto (7081) / Ítem 8.01 pliego'});
     }
-    if(tableroTipoVal === 'nivel_prfv'){
+    // Una base por cada tablero A NIVEL de la plaza (2026-09-22: antes solo el T1). Los tableros
+    // adicionales usan el mismo tamaño de base y la misma forma de ejecución que el T1.
+    const tablerosNivel = tablerosCfg.filter(t=> t.tipo === 'nivel_prfv');
+    tablerosNivel.forEach(tbn=>{
       // ---- Base del tablero a nivel, desglosada s/PLANO AP-TC-007 (2026-08-26) ----
       // Antes era una sola línea sin materiales. Ahora sale la base completa.
       const TN = TABLERO_NIVEL;
@@ -15152,7 +15425,8 @@ function calcular(){
       const dim = TN.tipos[tipoBase] || TN.tipos.A;
       const ejec = (document.getElementById('tableroNivelEjec')||{value:'mamposteria'}).value;
       const perimetro = 2*(dim.largo + dim.ancho);
-      const circuitosTab = parseInt(document.getElementById('circuitos').value) || 1;
+      const circuitosTab = tbn.circuitos;
+      if(tablerosNivel.length > 1) itemsBaseTablero.push({desc:`ℹ <b>Base del tablero T${tbn.n}</b> (${tablerosNivel.length} tableros a nivel en la plaza: una base cada uno, del mismo tamaño «${tipoBase}» y ejecución que el T1).`, cant:'—', un:'—', ref:`Tablero T${tbn.n}`});
 
       itemsBaseTablero.push({desc:`Base para tablero a nivel «${tipoBase}» — ${fmt(dim.largo,3)} × ${fmt(dim.ancho,2)} m en planta, ${fmt(TN.altura,2)} m de altura`, cant:1, un:'Un.', ref:'AP-TC-007 (nota 6)'});
       // Nota del plano AP-T-003 «Tablero a nivel — elementos comunes»: a diferencia del aéreo, acá
@@ -15201,7 +15475,7 @@ function calcular(){
       itemsBaseTablero.push({desc:'Sellador elástico de junta entre el gabinete y la base', cant:perimetro, un:'m', ref:'AP-TC-007 (Detalle «B»)'});
       itemsBaseTablero.push({desc:'Mortero calcáreo de relleno de la junta', cant:perimetro*0.005, un:'m³', ref:'AP-TC-007 (Detalle «B»)'});
       itemsBaseTablero.push({desc:'Relleno y compactación del perímetro exterior de la base', cant:perimetro*TN.baseAncho*0.3, un:'m³', ref:'AP-TC-007'});
-    }
+    });
 
     // Tres secciones separadas — cada una se puede imprimir sola y se le entrega a su cuadrilla.
     if(itemsFundacion.length){
@@ -15223,9 +15497,14 @@ function calcular(){
   // ---------------- Tablero y acometida + Puesta a tierra ----------------
   if(tableroOn){
     tareasIncluidas.push('Tablero');
-    const acometidaTipo = document.getElementById('acometidaTipo').value;
-    const acometidaMl = parseFloat(document.getElementById('acometidaMl').value) || 0;
-    const circuitos = parseInt(document.getElementById('circuitos').value) || 1;
+    // (2026-09-22) Un bloque por tablero: T1 son los campos de la sección; T2, T3… la lista «Otros
+    // tableros». Todo lo que sigue lee de `tb`, nunca del formulario directo.
+    tablerosCfg.forEach((tb, ti)=>{
+    const tableroTipoVal = tb.tipo;
+    const acometidaTipo = tb.acomTipo;
+    const acometidaMl = tb.acomMl;
+    const circuitos = tb.circuitos;
+    const sufT = tablerosCfg.length > 1 ? ` — T${tb.n}` : '';
 
     // El tablero general (térmicas, contactor, borneras internas, etc.) se arma según el proyecto
     // ejecutivo / unifilar de cada obra y normalmente se manda a armar y se compra YA ENSAMBLADO —
@@ -15235,12 +15514,11 @@ function calcular(){
     // (más abajo, dentro del bloque del tablero aéreo) como la del rack (dentro del bloque de la
     // acometida aérea), que son dos `if` distintos. Declararlo adentro de uno lo dejaba fuera de
     // alcance del otro — que es justo el error que apareció al probarlo.
-    const dPoste = diamPosteMm();
+    const dPoste = tb.dPoste;
     const itemsTablero = [];
     // Sobre qué se monta el tablero aéreo (2026-09-21): apoyo PRFV nuevo (AP-T-018/019) o poste de
     // H°A° existente de EPEC (AP-T-011/012). Decide el poste, la espuma y el babero, y la bajada.
-    const tableroApoyo = (tableroTipoVal === 'aereo_prfv')
-      ? String((document.getElementById('tableroApoyo')||{value:'prfv_nuevo'}).value || 'prfv_nuevo') : null;
+    const tableroApoyo = (tableroTipoVal === 'aereo_prfv') ? (tb.apoyo || 'prfv_nuevo') : null;
     const posteNuevoPrfv = tableroTipoVal === 'aereo_prfv' && tableroApoyo === 'prfv_nuevo';
     if(tableroTipoVal === 'aereo_prfv'){
       itemsTablero.push({...M(3058,'aéreo, armado según proyecto ejecutivo / unifilar (se compra ensamblado)'), cant:1, un:'Un.', ref:'AP-T-007/008'});
@@ -15305,7 +15583,7 @@ function calcular(){
     // Ahora el cable sale del selector (opciones acotadas a lo que permite el pliego) y, si la
     // acometida es AÉREA, se computan los herrajes y la morsetería que enumera el ítem 6.04 del
     // pliego LP 21478 — que hasta ahora no estaban en ningún lado del cómputo.
-    const cableAcom = (CABLES_ACOMETIDA[acometidaTipo]||[]).find(c=>c.id===document.getElementById('acometidaCable').value)
+    const cableAcom = (CABLES_ACOMETIDA[acometidaTipo]||[]).find(c=>c.id===tb.cableId)
                     || (CABLES_ACOMETIDA[acometidaTipo]||[])[0];
     itemsTablero.push({
       ...((cableAcom && cableAcom.cod) ? M(cableAcom.cod, `acometida ${acometidaTipo==='aerea'?'aérea':'subterránea'} EPEC → tablero`)
@@ -15431,7 +15709,9 @@ function calcular(){
     if(posteNuevoPrfv){
       itemsTablero.push({desc:`— Montaje s/AP-T-019: poste de PRFV a ${fmt(POSTE_PRFV_DIST_CORDON_M,1)} m de la línea de cordón · puerta del gabinete orientada al espacio verde · tiro flojo máx. ${TIRO_FLOJO_MAX_M} m · rack orientado lo más perpendicular posible al preensamblado · interior del tablero s/AP-T-007 (TT o TN-C) o AP-T-008 (TN-S)`, cant:'—', un:'—', ref:'AP-T-019 notas 3-8'});
     }
-    secciones.push({titulo:'TABLERO Y ACOMETIDA', items:itemsTablero, estimado:true});
+    if(tablerosCfg.length > 1) itemsTablero.unshift({desc:`ℹ <b>Tablero T${tb.n} de ${tablerosCfg.length}</b> — ${tableroTipoVal === 'nivel_prfv' ? 'a nivel' : 'aéreo'}${tableroApoyo ? ({prfv_nuevo:' sobre apoyo de PRFV nuevo', hormigon_existente:' sobre poste de H°A° existente', hormigon_nuevo:' sobre poste de H°A° nuevo'}[tableroApoyo]||'') : ''}, acometida ${acometidaTipo === 'aerea' ? 'aérea' : 'subterránea'} de ${fmt(acometidaMl,1)} m, ${circuitos} circuito(s)${tb.n > 1 ? ' (cargado en «Otros tableros de la plaza»)' : ' (los campos de la sección)'}.`, cant:'—', un:'—', ref:`Tablero T${tb.n}`});
+    secciones.push({titulo:'TABLERO Y ACOMETIDA' + sufT, items:itemsTablero, estimado:true});
+    });   // fin del bloque por tablero
   }
 
   // ---------------- Cruce de calle (2026-08-22) ----------------
@@ -15546,7 +15826,8 @@ function calcular(){
   // ---------------- Puesta a tierra ----------------
   // Depende del tablero porque la cantidad de jabalinas sale de los circuitos del tablero.
   if(tableroOn){
-    const circuitos = parseInt(document.getElementById('circuitos').value) || 1;
+    const circuitos = circuitosTotales;          // de todos los tableros (2026-09-22)
+    const nTableros = tablerosCfg.length;        // una jabalina y 10 m de bajada por cada tablero general
     // ---- Metraje real por jabalina y su ferretería (2026-08-22) ----
     // El usuario marcó que esto estaba mal contabilizado: *"el cable verde amarillo 1x10 para las
     // jabalinas: usamos para el tablero general 10 metros, y para las jabalinas que van al final de
@@ -15574,17 +15855,17 @@ function calcular(){
     const colMetalicas = ((colOn && tipoCol === 'Metálica') ? cantCol : 0) + colExistAcom;
     const patPorColumna = colMetalicas > 0;
     const jabalinasCircuito = patPorColumna ? colMetalicas : circuitos;
-    const dispersoresPAT = jabalinasCircuito + 1;     // + la del tablero general
-    const cablePATtablero = PAT_CABLE_TABLERO_M;
+    const dispersoresPAT = jabalinasCircuito + nTableros;     // + la de cada tablero general
+    const cablePATtablero = PAT_CABLE_TABLERO_M * nTableros;
     const mPorJabalina = patPorColumna ? PAT_CABLE_COLUMNA_M : PAT_CABLE_CIRCUITO_M;
     const cablePATcircuitos = jabalinasCircuito * mPorJabalina;
     const cablePATml = cablePATtablero + cablePATcircuitos;
     const dondeVan = patPorColumna
-      ? `1 por cada una de las ${colMetalicas} columnas metálicas${colExistAcom?` (${(colOn && tipoCol === 'Metálica') ? cantCol : 0} nuevas + ${colExistAcom} existentes con acometida nueva)`:''} + 1 en el tablero general`
-      : '1 al final de cada circuito + 1 en el tablero general';
+      ? `1 por cada una de las ${colMetalicas} columnas metálicas${colExistAcom?` (${(colOn && tipoCol === 'Metálica') ? cantCol : 0} nuevas + ${colExistAcom} existentes con acometida nueva)`:''} + ${nTableros > 1 ? `1 en cada uno de los ${nTableros} tableros generales` : '1 en el tablero general'}`
+      : (nTableros > 1 ? `1 al final de cada uno de los ${circuitos} circuitos + 1 en cada uno de los ${nTableros} tableros generales` : '1 al final de cada circuito + 1 en el tablero general');
     const itemsPAT = [
       {...M(7015, dondeVan), cant:dispersoresPAT, un:'Un.', ref:'Ítem 15.67 / ítem 75 · IRAM 2309'},
-      {...M(7010,`bajada de PAT — ${fmt(PAT_CABLE_TABLERO_M,0)} m del tablero general + ${jabalinasCircuito} × ${fmt(mPorJabalina,0)} m ${patPorColumna?'de la jabalina de cada columna metálica':'de las jabalinas de fin de circuito'}`), cant:cablePATml, un:'m', ref:'IRAM 247-3 · medida exacta de obra'},
+      {...M(7010,`bajada de PAT — ${nTableros > 1 ? `${nTableros} × ${fmt(PAT_CABLE_TABLERO_M,0)} m de los tableros generales` : `${fmt(PAT_CABLE_TABLERO_M,0)} m del tablero general`} + ${jabalinasCircuito} × ${fmt(mPorJabalina,0)} m ${patPorColumna?'de la jabalina de cada columna metálica':'de las jabalinas de fin de circuito'}`), cant:cablePATml, un:'m', ref:'IRAM 247-3 · medida exacta de obra'},
       {...M(7019,'conexión de la jabalina al cable de PAT, 1 por jabalina'), cant:dispersoresPAT, un:'Un.', ref:'Ítem 15.66 / ítem 74'},
       {...M(2029,'punta del cable verde-amarillo que entra a la bornera BPN, 1 por jabalina'), cant:dispersoresPAT, un:'Un.', ref:'Medida exacta de obra'},
       {...T, desc:'Medición de resistencia de PAT', cant:dispersoresPAT, un:'Un.', ref:'Ítem 81'},
@@ -20621,10 +20902,20 @@ function poblarParteObraDatalist(){
       const ml = numC('civilZanjaMl');
       const prof = String(C.civilZanjaProf || '0.6');
       const terr = String(C.civilZanjaTerreno || 'natural');
-      const it = ZANJA_A_ITEM[`${prof}|${terr}`];
-      const nombreTerr = terr==='natural' ? 'terreno natural' : (terr==='baldosa' ? 'vereda de baldosas' : 'piso de hormigón');
-      if(it) push(it, ml, `${fmt(ml,2)} m de zanja de ${prof.replace('.',',')} m en ${nombreTerr}`);
-      else if(ml > 0) dudas.push(`No hay ítem de zanjeo para ${prof} m en ${nombreTerr}.`);
+      const nomTerr = t => t==='natural' ? 'terreno natural' : (t==='baldosa' ? 'vereda de baldosas' : 'piso de hormigón');
+      // Tramos con otro piso o profundidad (2026-09-22): se descuentan del total; el resto va con lo general.
+      const tramosZ = (Array.isArray(f.zanjaTramos) ? f.zanjaTramos : []).filter(t=> n2(t.ml, 0) > 0);
+      const sumaZ = tramosZ.reduce((a,t)=> a + n2(t.ml, 0), 0);
+      const resto = Math.max(0, ml - sumaZ);
+      const cargar = (m, p, t)=>{
+        const pk = (parseFloat(p) || 0.6) >= 0.9 ? '1.0' : '0.6';
+        const it = ZANJA_A_ITEM[`${pk}|${t}`];
+        if(it) push(it, m, `${fmt(m,2)} m de zanja de ${pk.replace('.',',')} m en ${nomTerr(t)}`);
+        else if(m > 0) dudas.push(`No hay ítem de zanjeo para ${pk} m en ${nomTerr(t)}.`);
+      };
+      cargar(resto, prof, terr);
+      tramosZ.forEach(t=> cargar(n2(t.ml, 0), t.prof, t.terreno || 'natural'));
+      if(ml > 0 && sumaZ > ml + 0.001) dudas.push(`Los tramos de zanja con otro piso suman ${fmt(sumaZ,1)} m y el total cargado es ${fmt(ml,1)} m: se cargaron los tramos y el resto en 0. Revisá el total.`);
     }
 
     // ---------- Cruce de calle ----------
@@ -20693,6 +20984,22 @@ function poblarParteObraDatalist(){
       const at = String(C.acometidaTipo || '');
       if(at === 'aerea')            push(11, aml, `${fmt(aml,2)} m de acometida aérea EPEC ↔ tablero`);
       else if(at === 'subterranea') push(12, aml, `${fmt(aml,2)} m de acometida subterránea EPEC ↔ tablero`);
+      // ---- Otros tableros de la plaza, T2, T3… (2026-09-22): cada uno con su tipo, apoyo y acometida ----
+      (Array.isArray(f.tablerosExtra) ? f.tablerosExtra : []).forEach((t, i)=>{
+        const n = i + 2;
+        if(t.tipo === 'nivel_prfv') push(10, 1, `Tablero T${n} a nivel, sobre base de mampostería`);
+        else {
+          push(9, 1, `Tablero T${n} aéreo de medición, protección y comando`);
+          const ap = String(t.apoyo || 'prfv_nuevo');
+          if(ap === 'prfv_nuevo') push(13, 1, `Apoyo PRFV h=8 m Ro1050 (AP-T-018) del tablero T${n}`);
+          else dudas.push(`El tablero T${n} va sobre un poste de H°A° ${ap === 'hormigon_nuevo' ? 'NUEVO (el Anexo I no tiene ítem para apoyo de hormigón)' : 'existente'}: no se cargó el ítem 13.`);
+        }
+        const m = n2(t.acomMl, 0);
+        if(t.acomTipo === 'subterranea') push(12, m, `${fmt(m,2)} m de acometida subterránea EPEC ↔ tablero T${n}`);
+        else push(11, m, `${fmt(m,2)} m de acometida aérea EPEC ↔ tablero T${n}`);
+      });
+      if(Array.isArray(f.tablerosExtra) && f.tablerosExtra.length)
+        dudas.push(`La plaza tiene <b>${f.tablerosExtra.length + 1} tableros</b>: esta vía —la foto— cargó 9/10, 13 y 11/12 por cada uno; el 73, los caños de bajada (76/71/72) y la PAT de cada tablero salen del listado. Volvé a calcular la plaza si te faltan.`);
     }
 
     // ---------- Retiros y poda ----------
@@ -21990,6 +22297,11 @@ function poblarParteObraDatalist(){
     const ex = { cant:0, lum:0, apl:0, ret:0, acom:0 };
     // Interruptores de certificación de Vínculos (2026-09-21): se reconocen por su renglón marcador.
     let cajasAparte = false, solo30 = false;
+    const zanjaRows = [];   // renglones de zanjeo (uno por piso/profundidad desde el 22/09/2026)
+    const zanjaTramosSnap = [];
+    // Otros tableros T2, T3… (2026-09-22): sus renglones vienen en secciones «TABLERO Y ACOMETIDA — Tn».
+    const tbxMap = {};
+    const tbxDe = n => tbxMap[n] || (tbxMap[n] = { n, tipo:'aereo_prfv', apoyo:'hormigon_existente', acomTipo:'aerea', acomMl:0, circuitos:1, diamMm:null, vistoApoyo:false });
 
     (h.secciones||[]).forEach(sec=>{
       const T = norm(sec.titulo).toUpperCase();
@@ -22025,10 +22337,11 @@ function poblarParteObraDatalist(){
           return;
         }
         if(/^Zanjeo en v[ií]a p[uú]blica/i.test(d)){
-          campos.civilZanjaMl = String(cant);
+          // Puede haber varios renglones (uno por piso/profundidad, 2026-09-22): el más largo es el
+          // general y los demás quedan como tramos aparte; el total es la suma.
           const pm = d.match(/profundidad\s+([\d.,]+)\s*m/i);
-          campos.civilZanjaProf = (pm && numAR(pm[1]) >= 0.9) ? '1.0' : '0.6';
-          campos.civilZanjaTerreno = /baldosa|vereda/i.test(d) ? 'baldosa' : (/hormig[oó]n/i.test(d) ? 'hormigon' : 'natural');
+          zanjaRows.push({ ml:cant, prof:(pm && numAR(pm[1]) >= 0.9) ? '1.0' : '0.6',
+                           terreno: /baldosa|vereda/i.test(d) ? 'baldosa' : (/hormig[oó]n/i.test(d) ? 'hormigon' : 'natural') });
           const am = d.match(/ancho\s+([\d.,]+)\s*m/i);
           if(am){
             const a = numAR(am[1]);
@@ -22038,6 +22351,25 @@ function poblarParteObraDatalist(){
           return;
         }
         if(/^Fundaci[oó]n de hormig[oó]n/i.test(d)) { hayCivil = true; return; }
+        // ---- Secciones de los tableros T2, T3… (2026-09-22) ----
+        {
+          const mt = T.match(/^TABLERO Y ACOMETIDA\s*[-—]\s*T(\d+)$/);   // norm() pasa el «—» a «-»
+          if(mt && parseInt(mt[1], 10) >= 2){
+            const tb = tbxDe(parseInt(mt[1], 10));
+            const mc = d.match(/^ℹ\s*(?:<b>)?Tablero T\d+ de \d+.*?(\d+)\s*circuito/i);
+            if(mc){ tb.circuitos = parseInt(mc[1], 10) || 1; return; }
+            if(/^Tablero de medici[oó]n/i.test(d)){ tb.tipo = /a nivel/i.test(d) ? 'nivel_prfv' : 'aereo_prfv'; hayTablero = true; return; }
+            if(/^(Poste|Apoyo)\b.*PRFV/i.test(d) && /AP-T-018|hl\s*=\s*8|Ro\s*1050|9,5\s*m/i.test(d)){ tb.apoyo = 'prfv_nuevo'; tb.vistoApoyo = true; return; }
+            if(/^(Poste|Apoyo)\b.*H°A°/i.test(d)){ tb.apoyo = 'hormigon_nuevo'; tb.vistoApoyo = true; return; }
+            if(/^(Cable|Acometida)\b/i.test(d) && /acometida\s+(a[eé]rea|subterr[aá]nea)\s+EPEC/i.test(d)){
+              tb.acomTipo = /subterr[aá]nea\s+EPEC/i.test(d) ? 'subterranea' : 'aerea'; tb.acomMl = cant;
+              const cab = (CABLES_ACOMETIDA[tb.acomTipo]||[]).find(c=> c.cod && String(it.cod) === String(c.cod)); if(cab) tb.cableId = cab.id;
+              return;
+            }
+            const md = d.match(/medida tomada de los\s+([\d.,]+)\s*mm/i); if(md){ tb.diamMm = numAR(md[1]); }
+            return;   // el resto de los materiales del tablero no se reconstruyen a mano
+          }
+        }
         if(/^Tablero de medici[oó]n/i.test(d)){
           campos.tableroTipo = /a nivel/i.test(d) ? 'nivel_prfv' : 'aereo_prfv';
           if(campos.tableroTipo === 'aereo_prfv' && !campos.tableroApoyo) campos.tableroApoyo = 'hormigon_existente';   // hasta que aparezca el poste PRFV
@@ -22094,6 +22426,17 @@ function poblarParteObraDatalist(){
     campos.toggleCruce    = hayCruce;
     campos.toggleRetiros  = hayRetiros;
     campos.toggleCableado = false;   // no se puede reconstruir: ver el comentario de arriba
+    if(zanjaRows.length){
+      zanjaRows.sort((a,b)=> b.ml - a.ml);
+      campos.civilZanjaMl = String(Math.round(zanjaRows.reduce((a,z)=> a + z.ml, 0) * 10) / 10);
+      campos.civilZanjaProf = zanjaRows[0].prof;
+      campos.civilZanjaTerreno = zanjaRows[0].terreno;
+      zanjaRows.slice(1).forEach((z, i)=> zanjaTramosSnap.push({ id:i+1, ml:z.ml, terreno:z.terreno, prof:z.prof }));
+    }
+    const tablerosExtraSnap = Object.keys(tbxMap).map(k=> parseInt(k, 10)).sort((a,b)=> a-b).map((n, i)=>{
+      const t = tbxMap[n];
+      return { id:i+1, tipo:t.tipo, apoyo:t.apoyo, acomTipo:t.acomTipo, acomMl:t.acomMl, cableId:t.cableId || (((CABLES_ACOMETIDA[t.acomTipo]||[])[0]||{}).id || ''), circuitos:t.circuitos, diamMm:t.diamMm };
+    });
     campos.toggleExistentes = ex.cant > 0;
     campos.cajaCertificarAparte = cajasAparte;
     campos.cable30Todas = !solo30;
@@ -22109,16 +22452,18 @@ function poblarParteObraDatalist(){
     if(hayVinc)    cargado.push(`Vínculos: ${vinculoGrupos.length} grupo(s), ${vinculoGrupos.reduce((t,g)=>t+g.columnas,0)} columna(s)`);
     if(ex.cant > 0) cargado.push(`Columnas existentes: ${ex.cant} a reacondicionar, ${ex.lum} luminaria(s) nueva(s), ${ex.ret} vieja(s) a retirar, ${Math.min(ex.apl, ex.cant)} a aplomar, ${ex.acom > 0 ? 'con' : 'sin'} acometida nueva`);
     if(hayCivil)   cargado.push(`Obra civil: ${campos.civilZanjaMl||0} m de zanja de ${(campos.civilZanjaProf||'0.6').replace('.',',')} m` +
-                                (campos.civilZanjaTerreno ? ` en ${campos.civilZanjaTerreno === 'natural' ? 'terreno natural' : (campos.civilZanjaTerreno==='baldosa'?'vereda de baldosas':'piso de hormigón')}` : ''));
+                                (campos.civilZanjaTerreno ? ` en ${campos.civilZanjaTerreno === 'natural' ? 'terreno natural' : (campos.civilZanjaTerreno==='baldosa'?'vereda de baldosas':'piso de hormigón')}` : '') +
+                                (zanjaTramosSnap.length ? ` + ${zanjaTramosSnap.length} tramo(s) con otro piso (${zanjaTramosSnap.map(z=>`${z.ml} m ${z.terreno}`).join(', ')})` : ''));
     if(hayTablero) cargado.push(`Tablero ${campos.tableroTipo === 'nivel_prfv' ? 'a nivel' : ({hormigon_existente:'aéreo sobre poste de H°A° existente', hormigon_nuevo:'aéreo sobre poste de H°A° nuevo'}[campos.tableroApoyo] || 'aéreo sobre apoyo PRFV nuevo')}` +
-                                (campos.acometidaMl ? ` · acometida ${campos.acometidaTipo === 'subterranea' ? 'subterránea' : 'aérea'} de ${campos.acometidaMl} m` : ''));
+                                (campos.acometidaMl ? ` · acometida ${campos.acometidaTipo === 'subterranea' ? 'subterránea' : 'aérea'} de ${campos.acometidaMl} m` : '') +
+                                (tablerosExtraSnap.length ? ` + ${tablerosExtraSnap.length} tablero(s) más (T2…): ${tablerosExtraSnap.map(t=>`${t.tipo==='nivel_prfv'?'a nivel':'aéreo'}, acometida ${t.acomTipo==='subterranea'?'subterránea':'aérea'} de ${t.acomMl} m, ${t.circuitos} circ.`).join(' · ')}` : ''));
     if(hayCruce)   cargado.push(`Cruce de calle: ${campos.cruceMl||0} m (${campos.cruceTipo})`);
     if(hayRetiros) cargado.push(`Retiros y poda: ${campos.retiroCol||0} columna(s), ${campos.retiroTab||0} tablero(s), ${campos.podaCant||0} árbol(es)`);
 
     if(hayCable) falta.push('El <b>Cableado por circuitos</b> quedó apagado. El listado viejo guarda los metros por calibre, pero no cómo estaban repartidos punto por punto — y de ese orden salen la ganancia exacta de cada subida y el calibre de cada bornera. Volvé a cargar los circuitos como están en el plano.');
     falta.push('Revisá los campos que la herramienta agregó después de esa fecha (potencia de la luminaria, anchos y espesores de la zanja, tipo de tendido) — quedaron en su valor por defecto.');
 
-    return { snap:{ v:1, campos, columnaGrupos, vinculoGrupos, civilGrupos:columnaGrupos.map(g=>({...g})), circuitos:[], tramos:[] },
+    return { snap:{ v:1, campos, columnaGrupos, vinculoGrupos, civilGrupos:columnaGrupos.map(g=>({...g})), circuitos:[], tramos:[], zanjaTramos:zanjaTramosSnap, tablerosExtra:tablerosExtraSnap },
              cargado, falta, dudoso };
   }
 
