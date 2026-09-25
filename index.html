@@ -3186,7 +3186,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-22 11:59 · 714760</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-22 13:58 · 041fee</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -4807,8 +4807,41 @@
         </div>
 
         <div id="stockMovEntradaCampos">
-          <label for="stockMovProveedor">Proveedor / comprobante</label>
-          <input type="text" id="stockMovProveedor" placeholder="Ej: Factura A Richetta, remito 0001-00023">
+          <!-- Entradas con precio y remito (2026-09-22). El usuario: «cuando hacemos entrada de material
+               no registra el precio, no tenemos cómo registrar el precio; y que tenga como memoria del
+               tema remitos: varios materiales en el mismo remito, no escribir de nuevo cada remito».
+               El proveedor y el remito quedan pegados entre una entrada y la siguiente (remito en curso);
+               el precio se guarda en el movimiento y arma el historial de precios de la solapa «Precios». -->
+          <div class="row2">
+            <div>
+              <label for="stockMovProveedor">Proveedor</label>
+              <input type="text" id="stockMovProveedor" list="stockProveedoresList" placeholder="Ej: Richetta" autocomplete="off">
+              <datalist id="stockProveedoresList"></datalist>
+            </div>
+            <div>
+              <label for="stockMovRemito">Remito / factura N°</label>
+              <input type="text" id="stockMovRemito" list="stockRemitosList" placeholder="Ej: 0001-00023" autocomplete="off">
+              <datalist id="stockRemitosList"></datalist>
+            </div>
+          </div>
+          <div class="hint" style="margin-top:2px;">Si escribís un remito que ya está cargado, se completan solos el proveedor y la fecha. Al registrar, el proveedor, el remito y la fecha <b>quedan puestos</b> para el renglón siguiente del mismo remito: solo cambiás producto, cantidad y precio.</div>
+          <div class="row2">
+            <div>
+              <label for="stockMovPrecio">Precio unitario sin IVA ($)</label>
+              <input type="number" id="stockMovPrecio" min="0" step="0.01" placeholder="0,00">
+            </div>
+            <div>
+              <label class="ex-chk" style="margin-top:26px;"><input type="checkbox" id="stockMovPrecioAlCatalogo" checked> <span>Dejar este precio como <b>costo actual</b> del producto en el catálogo (valoriza el stock y los gastos)</span></label>
+            </div>
+          </div>
+          <div class="hint" id="stockMovPrecioHint" style="margin-top:2px;">Elegí el producto y acá aparece su último precio cargado.</div>
+          <div id="stockRemitoPanel" style="display:none; margin-top:10px; background:#eef7f3; border:1px solid #bfe0d1; border-radius:8px; padding:8px 10px; font-size:12.5px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
+              <div id="stockRemitoPanelTxt"></div>
+              <button type="button" class="btn-ghost" id="stockRemitoCerrarBtn" style="padding:4px 10px; font-size:12px; white-space:nowrap;">✓ Terminar este remito</button>
+            </div>
+            <div id="stockRemitoPanelItems" style="margin-top:6px; color:var(--text-soft);"></div>
+          </div>
         </div>
         <div id="stockMovSalidaCampos" style="display:none">
           <label for="stockMovRetiradoPor">Retirado por</label>
@@ -4821,6 +4854,47 @@
 
         <button type="button" class="btn-primary" id="stockMovBtn" style="margin-top:14px;">Registrar movimiento</button>
         <div class="hint" id="stockMovMsg"></div>
+      </div>
+
+      <div class="card no-print" id="cardStockPrecios" style="margin-top:18px;">
+        <h2><span class="dot"></span>Precios de los materiales <span class="h2-sub">historial por producto: cuánto valía antes y cuánto ahora, de cada entrada con precio</span></h2>
+        <div class="hint" style="margin-top:0;">Cada <b>entrada</b> que se registra con precio queda acá con su fecha, su proveedor y su remito. La tabla muestra el <b>último precio</b> de cada producto y cuánto subió o bajó contra el anterior; tocá un renglón para ver toda la historia. También se puede cargar un precio <b>sin entrada</b> (una cotización, una lista de precios) desde el cuadro de abajo.</div>
+        <div class="row2">
+          <div>
+            <label for="stockPreciosBuscar">Buscar producto</label>
+            <input type="text" id="stockPreciosBuscar" placeholder="Código o nombre…" autocomplete="off">
+          </div>
+          <div>
+            <label for="stockPreciosOrden">Ordenar por</label>
+            <select id="stockPreciosOrden">
+              <option value="fecha">Último precio cargado (más reciente primero)</option>
+              <option value="subida">Mayor suba contra el precio anterior</option>
+              <option value="codigo">Código</option>
+            </select>
+          </div>
+        </div>
+        <div id="stockPreciosResumen" class="hint" style="margin-top:6px;"></div>
+        <div class="tabla-scroll" style="margin-top:8px; overflow-x:auto;">
+          <table id="stockPreciosTabla" style="min-width:640px;">
+            <thead><tr><th>Código</th><th>Producto</th><th>Último precio</th><th>Fecha</th><th>Proveedor · remito</th><th>vs. anterior</th><th>Cargas</th></tr></thead>
+            <tbody id="stockPreciosBody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:16px; border-top:1px solid var(--border); padding-top:12px;">
+          <label style="margin-top:0;">Cargar un precio sin entrada de material <span style="font-weight:500;color:var(--text-soft);">(cotización o lista de precios)</span></label>
+          <div class="hint" style="margin-top:0;">Queda en el historial como «precio» con fecha y proveedor, <b>sin mover el stock</b>. Sirve para tener el precio de hoy aunque todavía no se haya comprado.</div>
+          <label for="stockPrecioProducto">Producto</label>
+          <input type="text" id="stockPrecioProducto" list="stockDatalist" placeholder="Escribí el código o el nombre…" autocomplete="off">
+          <div class="row2">
+            <div><label for="stockPrecioValor">Precio unitario sin IVA ($)</label><input type="number" id="stockPrecioValor" min="0" step="0.01" placeholder="0,00"></div>
+            <div><label for="stockPrecioFecha">Fecha</label><input type="date" id="stockPrecioFecha"></div>
+          </div>
+          <label for="stockPrecioProveedor">Proveedor / origen del precio</label>
+          <input type="text" id="stockPrecioProveedor" list="stockProveedoresList" placeholder="Ej: cotización Richetta" autocomplete="off">
+          <label class="ex-chk"><input type="checkbox" id="stockPrecioAlCatalogo" checked> <span>Dejarlo como <b>costo actual</b> del producto en el catálogo</span></label>
+          <button type="button" class="btn-primary" id="stockPrecioBtn" style="margin-top:12px;">Guardar precio</button>
+          <div class="hint" id="stockPrecioMsg"></div>
+        </div>
       </div>
 
       <div class="card no-print" id="cardStockRespaldo" style="margin-top:18px;">
@@ -10039,11 +10113,29 @@ function actualizarStockMovProductoHint(){
   } else {
     hint.textContent = 'Elegí una opción de la lista (código — descripción). Stock actual: —';
   }
+  // Último precio del producto (2026-09-22): se muestra y se propone en el casillero de precio si
+  // está vacío — se puede pisar.
+  const ph = document.getElementById('stockMovPrecioHint');
+  const pi = document.getElementById('stockMovPrecio');
+  if(ph){
+    const ult = item && typeof stockUltimoPrecio === 'function' ? stockUltimoPrecio(item.codigo) : null;
+    if(item && ult){
+      ph.innerHTML = `Último precio cargado: <b>${formatMoney(ult.precioUnit)}</b> / ${escHtml(item.un)} el ${escHtml(fechaCorta(ult.fecha))}${ult.proveedor?` · ${escHtml(ult.proveedor)}`:''}${ult.remito?` · remito ${escHtml(ult.remito)}`:''}${(item.costo && Math.abs(item.costo - ult.precioUnit) > 0.005) ? ` · costo del catálogo: ${formatMoney(item.costo)}` : ''}.`;
+      if(pi && pi.value === '' && pi.dataset.codigoSugerido !== String(item.codigo)){ pi.value = ult.precioUnit; pi.dataset.codigoSugerido = String(item.codigo); }
+    } else if(item){
+      ph.innerHTML = item.costo ? `Sin precio cargado todavía. Costo que figura en el catálogo: <b>${formatMoney(item.costo)}</b>.` : 'Sin precio cargado todavía para este producto.';
+      if(pi && pi.dataset.codigoSugerido && pi.dataset.codigoSugerido !== String(item.codigo)){ pi.value = ''; pi.dataset.codigoSugerido = ''; }
+    } else {
+      ph.textContent = 'Elegí el producto y acá aparece su último precio cargado.';
+    }
+  }
 }
+function fechaCorta(iso){ const [y,m,d] = String(iso||'').split('-'); return (y&&m&&d) ? `${d}/${m}/${y}` : (iso||'—'); }
 
 document.getElementById('stockMovProducto').addEventListener('input', actualizarStockMovProductoHint);
 document.getElementById('stockMovTipo').addEventListener('change', function(){
   const esEntrada = this.value === 'entrada';
+  if(!esEntrada && typeof window.stockRemitoCerrar === 'function') window.stockRemitoCerrar();
   document.getElementById('stockMovEntradaCampos').style.display = esEntrada ? '' : 'none';
   document.getElementById('stockMovSalidaCampos').style.display = esEntrada ? 'none' : '';
   if(!esEntrada) poblarStockDestinoPlazas(); // se repuebla al abrir el formulario, por si se creó una plaza nueva recién
@@ -10157,6 +10249,11 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
                 usuario: (window.__fbUser && window.__fbUser.email) || '' };
   if(tipo==='entrada'){
     mov.proveedor = document.getElementById('stockMovProveedor').value.trim();
+    // Remito y precio (2026-09-22). El precio es opcional: si no se carga, la entrada queda como
+    // antes; si se carga, arma el historial de precios y (con el casillero) pasa al costo del catálogo.
+    mov.remito = (document.getElementById('stockMovRemito')||{value:''}).value.trim();
+    const pu = parseFloat((document.getElementById('stockMovPrecio')||{value:''}).value);
+    if(isFinite(pu) && pu >= 0 && String((document.getElementById('stockMovPrecio')||{value:''}).value).trim() !== ''){ mov.precioUnit = Math.round(pu * 100) / 100; mov.moneda = 'ARS'; }
   } else {
     mov.retiradoPor = document.getElementById('stockMovRetiradoPor').value.trim();
     const selPlaza = document.getElementById('stockMovDestinoPlaza');
@@ -10188,9 +10285,23 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
   }
   btn.disabled = false;
   if(nuevoId) window.__ultimoMovLocal = Object.assign({id:nuevoId}, mov);
+  // Costo del catálogo = este precio (si el casillero está tildado). Va aparte del movimiento: si
+  // falla, el movimiento ya quedó guardado y se avisa.
+  let avisoCosto = '';
+  if(tipo==='entrada' && mov.precioUnit != null && (document.getElementById('stockMovPrecioAlCatalogo')||{checked:false}).checked){
+    try{ await window.stockActualizarCostoCatalogo(item.codigo, mov.precioUnit); avisoCosto = ` Costo del catálogo actualizado a ${formatMoney(mov.precioUnit)}.`; }
+    catch(e){ avisoCosto = ' ⚠ El movimiento se guardó, pero no se pudo actualizar el costo del catálogo.'; }
+  }
   document.getElementById('stockMovProducto').value = '';
   document.getElementById('stockMovCantidad').value = 1;
-  document.getElementById('stockMovProveedor').value = '';
+  if(tipo==='entrada'){
+    // Remito en curso (2026-09-22): proveedor, remito y fecha QUEDAN para el renglón siguiente del
+    // mismo remito. Se limpian con «Terminar este remito» o al pasar a una salida.
+    const pr = document.getElementById('stockMovPrecio'); if(pr) pr.value = '';
+    if(typeof window.stockRemitoAnotar === 'function') window.stockRemitoAnotar(mov);
+  } else {
+    document.getElementById('stockMovProveedor').value = '';
+  }
   document.getElementById('stockMovRetiradoPor').value = '';
   document.getElementById('stockMovDestino').value = '';
   // El destino (plaza) NO se limpia a propósito: lo normal es cargar varias salidas seguidas para
@@ -10199,7 +10310,7 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
   msg.style.color = 'var(--teal-dark)';
   // Además del aviso, se ofrece el comprobante del movimiento recién cargado: es el momento en que
   // hace falta, con el que retira el material todavía parado en el pañol esperando su vale.
-  msg.innerHTML = `✓ ${tipo==='entrada'?'Entrada':'Salida'} registrada — nuevo stock de "${escHtml(item.desc)}": ${fmt(stockActual(item.codigo),2)} ${escHtml(item.un)}.`
+  msg.innerHTML = `✓ ${tipo==='entrada'?'Entrada':'Salida'} registrada — nuevo stock de "${escHtml(item.desc)}": ${fmt(stockActual(item.codigo),2)} ${escHtml(item.un)}.${mov.precioUnit != null ? ` Precio: ${formatMoney(mov.precioUnit)} / ${escHtml(item.un)}.` : ''}${escHtml(avisoCosto)}`
     + (nuevoId ? ` <button type="button" class="btn-ghost" onclick="verComprobanteMovimiento('${nuevoId}')" style="margin-left:6px; padding:3px 10px; font-size:12px;">🖨 Imprimir comprobante</button>` : '');
   // No hace falta llamar a renderStockTabla()/renderStockMovimientos()/actualizarStockResumen()
   // acá: el listener en vivo de Firestore (onSnapshot) ya los llama solo apenas confirma el
@@ -10207,6 +10318,223 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
 });
 
 document.getElementById('stockBuscar').addEventListener('input', renderStockTabla);
+
+// ============================================================
+// Precios de los materiales y memoria de remitos (2026-09-22)
+// ------------------------------------------------------------
+// Pedido: «cuando hacemos entrada de material no registra el precio; que tenga memoria de los
+// remitos (varios materiales en el mismo remito, no escribir de nuevo cada remito); un historial de
+// precio por material — cuánto valía hace mucho y cuánto ahora — en una solapa al lado de Acceso y
+// respaldo». Todo sale de los movimientos: cada ENTRADA con `precioUnit` es un punto del historial,
+// y un «precio sin entrada» es una entrada de cantidad 0 marcada `soloPrecio` (no mueve el stock,
+// no hace falta otra colección ni otras reglas en la base).
+// ============================================================
+function stockPreciosDe(codigo){
+  return (window.stockMovimientos || [])
+    .filter(m => !m.anulado && m.tipo === 'entrada' && String(m.codigo) === String(codigo) && m.precioUnit != null && isFinite(m.precioUnit))
+    .sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||'') || (b.ts||0) - (a.ts||0));
+}
+function stockUltimoPrecio(codigo){ return stockPreciosDe(codigo)[0] || null; }
+window.stockUltimoPrecio = stockUltimoPrecio;
+
+window.stockActualizarCostoCatalogo = async function(codigo, precio){
+  if(typeof window.fbGuardarProductoCatalogo !== 'function') throw new Error('sin base');
+  const it = (typeof catalogoCompleto === 'function' ? catalogoCompleto() : []).find(i => i.codigo === codigo) || {};
+  await window.fbGuardarProductoCatalogo({ codigo, desc: it.desc, un: it.un, costo: Math.round(precio * 100) / 100,
+    editadoPor: (window.__fbUser && window.__fbUser.email) || '', editadoTs: Date.now() });
+};
+
+// ---- Memoria de proveedores y remitos: los datalists salen de lo ya cargado ----
+window.poblarStockProveedoresRemitos = function(){
+  const movs = window.stockMovimientos || [];
+  const provs = [...new Set(movs.map(m => (m.proveedor||'').trim()).filter(Boolean))].sort((a,b)=> a.localeCompare(b,'es'));
+  const dp = document.getElementById('stockProveedoresList');
+  if(dp) dp.innerHTML = provs.map(p => `<option value="${escHtml(p)}"></option>`).join('');
+  const rem = new Map();
+  movs.filter(m => m.tipo === 'entrada' && (m.remito||'').trim()).forEach(m => {
+    const k = m.remito.trim(); const prev = rem.get(k);
+    if(!prev || (m.fecha||'') > (prev.fecha||'')) rem.set(k, { remito:k, proveedor:m.proveedor||'', fecha:m.fecha||'' });
+  });
+  const dr = document.getElementById('stockRemitosList');
+  if(dr) dr.innerHTML = [...rem.values()].sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||'')).slice(0, 200)
+    .map(r => `<option value="${escHtml(r.remito)}">${escHtml((r.proveedor ? r.proveedor + ' · ' : '') + fechaCorta(r.fecha))}</option>`).join('');
+};
+function stockRemitoConocido(nro){
+  const k = String(nro||'').trim(); if(!k) return null;
+  const movs = (window.stockMovimientos || []).filter(m => m.tipo === 'entrada' && String(m.remito||'').trim() === k);
+  if(!movs.length) return null;
+  movs.sort((a,b)=> (b.ts||0) - (a.ts||0));
+  return { remito:k, proveedor: movs.find(m => m.proveedor)?.proveedor || '', fecha: movs[0].fecha || '', renglones: movs.length };
+}
+(function(){
+  const rem = document.getElementById('stockMovRemito');
+  if(!rem) return;
+  const completar = ()=>{
+    const c = stockRemitoConocido(rem.value);
+    if(!c) return;
+    const pv = document.getElementById('stockMovProveedor'); if(pv && !pv.value.trim() && c.proveedor) pv.value = c.proveedor;
+    const f = document.getElementById('stockMovFecha'); if(f && c.fecha) f.value = c.fecha;
+    stockRemitoPintar();
+  };
+  rem.addEventListener('change', completar);
+  rem.addEventListener('input', ()=>{ if(stockRemitoConocido(rem.value)) completar(); });
+})();
+
+// ---- Remito en curso: lo que ya se cargó de este remito en esta sesión ----
+window.__remitoEnCurso = { clave:'', items:[] };
+function stockRemitoClave(){
+  const pv = (document.getElementById('stockMovProveedor')||{value:''}).value.trim();
+  const rm = (document.getElementById('stockMovRemito')||{value:''}).value.trim();
+  return (pv || rm) ? `${pv}|${rm}` : '';
+}
+function stockRemitoPintar(){
+  const panel = document.getElementById('stockRemitoPanel'); if(!panel) return;
+  const pv = (document.getElementById('stockMovProveedor')||{value:''}).value.trim();
+  const rm = (document.getElementById('stockMovRemito')||{value:''}).value.trim();
+  const f = (document.getElementById('stockMovFecha')||{value:''}).value;
+  const R = window.__remitoEnCurso;
+  if(R.clave && R.clave !== stockRemitoClave()) R.items = [];   // cambió el remito: arranca otro
+  const conocido = stockRemitoConocido(rm);
+  const yaEnBase = conocido ? conocido.renglones : 0;
+  if(!R.items.length && !yaEnBase){ panel.style.display = 'none'; return; }
+  panel.style.display = '';
+  const total = R.items.reduce((a,i)=> a + (i.precioUnit != null ? i.precioUnit * i.cantidad : 0), 0);
+  document.getElementById('stockRemitoPanelTxt').innerHTML = `📦 <b>Remito en curso:</b> ${rm ? escHtml(rm) : '(sin número)'}${pv ? ' · ' + escHtml(pv) : ''} · ${escHtml(fechaCorta(f))} — <b>${R.items.length}</b> renglón(es) cargado(s) ahora${yaEnBase > R.items.length ? ` (${yaEnBase} en total en la base)` : ''}${total ? ` · ${formatMoney(total)} sin IVA` : ''}. Cargá el siguiente producto: proveedor, remito y fecha ya quedan puestos.`;
+  document.getElementById('stockRemitoPanelItems').innerHTML = R.items.map(i => `• ${escHtml(i.desc)} — ${fmt(i.cantidad,2)} ${escHtml(i.un)}${i.precioUnit != null ? ` × ${formatMoney(i.precioUnit)}` : ''}`).join('<br>');
+}
+window.stockRemitoAnotar = function(mov){
+  const R = window.__remitoEnCurso;
+  const clave = stockRemitoClave();
+  if(R.clave !== clave){ R.clave = clave; R.items = []; }
+  R.items.push({ desc:mov.desc, cantidad:mov.cantidad, un:mov.un, precioUnit: mov.precioUnit != null ? mov.precioUnit : null });
+  stockRemitoPintar();
+};
+window.stockRemitoCerrar = function(){
+  window.__remitoEnCurso = { clave:'', items:[] };
+  ['stockMovProveedor','stockMovRemito','stockMovPrecio'].forEach(id => { const e = document.getElementById(id); if(e) e.value = ''; });
+  const pi = document.getElementById('stockMovPrecio'); if(pi) pi.dataset.codigoSugerido = '';
+  const panel = document.getElementById('stockRemitoPanel'); if(panel) panel.style.display = 'none';
+};
+(function(){
+  const b = document.getElementById('stockRemitoCerrarBtn'); if(b) b.addEventListener('click', ()=> window.stockRemitoCerrar());
+  ['stockMovProveedor','stockMovFecha'].forEach(id => { const e = document.getElementById(id); if(e) e.addEventListener('input', stockRemitoPintar); });
+})();
+
+// ---- Solapa «Precios»: último precio por producto + historia ----
+const __preciosAbiertos = new Set();
+window.renderStockPrecios = function(){
+  const body = document.getElementById('stockPreciosBody'); if(!body) return;
+  const q = ((document.getElementById('stockPreciosBuscar')||{}).value || '').trim().toLowerCase();
+  const orden = (document.getElementById('stockPreciosOrden')||{value:'fecha'}).value;
+  const cat = (typeof catalogoCompleto === 'function' ? catalogoCompleto() : []);
+  const filas = [];
+  cat.forEach(it => {
+    const hist = stockPreciosDe(it.codigo);
+    if(!hist.length) return;
+    if(q && !(`${it.codigo} ${it.desc}`.toLowerCase().includes(q))) return;
+    const ult = hist[0], ant = hist[1] || null;
+    const var_ = ant && ant.precioUnit > 0 ? (ult.precioUnit - ant.precioUnit) / ant.precioUnit : null;
+    filas.push({ it, hist, ult, ant, var_ });
+  });
+  const res = document.getElementById('stockPreciosResumen');
+  const conPrecio = cat.filter(it => stockPreciosDe(it.codigo).length).length;
+  if(res) res.innerHTML = conPrecio
+    ? `<b>${conPrecio}</b> producto(s) con precio cargado de ${cat.length} del catálogo${q ? ` · ${filas.length} coinciden con «${escHtml(q)}»` : ''}.`
+    : 'Todavía no hay precios cargados: registrá una entrada con precio en «+ Registrar movimiento», o cargá uno abajo sin entrada.';
+  if(orden === 'subida') filas.sort((a,b)=> ((b.var_ == null ? -Infinity : b.var_) - (a.var_ == null ? -Infinity : a.var_)));
+  else if(orden === 'codigo') filas.sort((a,b)=> a.it.codigo - b.it.codigo);
+  else filas.sort((a,b)=> (b.ult.fecha||'').localeCompare(a.ult.fecha||'') || (b.ult.ts||0) - (a.ult.ts||0));
+  if(!filas.length){ body.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-soft); padding:16px;">${conPrecio ? 'Ningún producto coincide con la búsqueda.' : 'Sin precios cargados todavía.'}</td></tr>`; return; }
+  body.innerHTML = filas.map(f => {
+    const abierto = __preciosAbiertos.has(f.it.codigo);
+    const varTxt = f.var_ == null ? '<span style="color:var(--text-soft);">— (primer precio)</span>'
+      : `<span style="color:${f.var_ > 0.001 ? '#b3261e' : (f.var_ < -0.001 ? '#1b7f4b' : 'var(--text-soft)')}; font-weight:700;">${f.var_ > 0 ? '▲' : (f.var_ < 0 ? '▼' : '=')} ${fmt(Math.abs(f.var_)*100,1)} %</span><br><span style="font-size:11px; color:var(--text-soft);">antes ${formatMoney(f.ant.precioUnit)} (${escHtml(fechaCorta(f.ant.fecha))})</span>`;
+    const catDif = (f.it.costo && Math.abs(f.it.costo - f.ult.precioUnit) > 0.005) ? `<br><span style="font-size:11px; color:#b3261e;">catálogo: ${formatMoney(f.it.costo)} <button type="button" class="btn-ghost" style="padding:1px 7px; font-size:11px;" onclick="stockCostoDesdeUltimoPrecio(${f.it.codigo})" title="Poner este último precio como costo del catálogo">→ usar</button></span>` : '';
+    const fila = `<tr class="sp-fila" data-cod="${f.it.codigo}" style="cursor:pointer;" title="Ver la historia de precios">
+      <td>${f.it.codigo}</td>
+      <td>${escHtml(f.it.desc)} <span style="color:var(--text-soft); font-size:11px;">(${escHtml(f.it.un)})</span></td>
+      <td style="white-space:nowrap;"><b>${formatMoney(f.ult.precioUnit)}</b>${catDif}</td>
+      <td>${escHtml(fechaCorta(f.ult.fecha))}</td>
+      <td>${escHtml(f.ult.proveedor||'—')}${f.ult.remito ? `<br><span style="font-size:11px; color:var(--text-soft);">remito ${escHtml(f.ult.remito)}</span>` : ''}${f.ult.soloPrecio ? '<br><span style="font-size:11px; color:var(--text-soft);">precio sin entrada</span>' : ''}</td>
+      <td>${varTxt}</td>
+      <td>${f.hist.length} ${abierto ? '▴' : '▾'}</td>
+    </tr>`;
+    if(!abierto) return fila;
+    const hist = f.hist.map((h, i) => {
+      const sig = f.hist[i+1];
+      const v = sig && sig.precioUnit > 0 ? (h.precioUnit - sig.precioUnit) / sig.precioUnit : null;
+      return `<tr style="background:rgba(21,42,83,.03); font-size:12px;">
+        <td></td>
+        <td style="color:var(--text-soft);">${escHtml(fechaCorta(h.fecha))}${h.usuario ? ` · ${escHtml(h.usuario)}` : ''}</td>
+        <td style="white-space:nowrap;">${formatMoney(h.precioUnit)} <button type="button" class="btn-ghost" style="padding:1px 7px; font-size:11px;" onclick="stockCorregirPrecio('${escHtml(h.id)}')" title="Corregir este precio">✎</button></td>
+        <td>${h.soloPrecio ? '💲 precio' : `➕ ${fmt(h.cantidad,2)} ${escHtml(h.un||'')}`}</td>
+        <td>${escHtml(h.proveedor||'—')}${h.remito ? ` · remito ${escHtml(h.remito)}` : ''}</td>
+        <td>${v == null ? '<span style="color:var(--text-soft);">—</span>' : `<span style="color:${v > 0.001 ? '#b3261e' : (v < -0.001 ? '#1b7f4b' : 'var(--text-soft)')};">${v > 0 ? '▲' : (v < 0 ? '▼' : '=')} ${fmt(Math.abs(v)*100,1)} %</span>`}</td>
+        <td></td>
+      </tr>`;
+    }).join('');
+    return fila + hist;
+  }).join('');
+};
+(function(){
+  const body = document.getElementById('stockPreciosBody'); if(!body) return;
+  body.addEventListener('click', (e)=>{
+    if(e.target.closest('button')) return;
+    const tr = e.target.closest('tr.sp-fila'); if(!tr) return;
+    const c = parseInt(tr.dataset.cod, 10);
+    if(__preciosAbiertos.has(c)) __preciosAbiertos.delete(c); else __preciosAbiertos.add(c);
+    window.renderStockPrecios();
+  });
+  const bq = document.getElementById('stockPreciosBuscar'); if(bq) bq.addEventListener('input', ()=> window.renderStockPrecios());
+  const so = document.getElementById('stockPreciosOrden'); if(so) so.addEventListener('change', ()=> window.renderStockPrecios());
+  const f = document.getElementById('stockPrecioFecha'); if(f && !f.value) f.value = fechaAISO(new Date());
+})();
+window.stockCostoDesdeUltimoPrecio = async function(codigo){
+  const u = stockUltimoPrecio(codigo); if(!u) return;
+  if(!window.__fbUser){ alert('Iniciá sesión (Acceso y respaldo) para editar el catálogo.'); return; }
+  if(!confirm(`¿Poner ${formatMoney(u.precioUnit)} como costo actual del producto ${codigo} en el catálogo?`)) return;
+  try{ await window.stockActualizarCostoCatalogo(codigo, u.precioUnit); }catch(e){ alert('No se pudo guardar (revisá tu conexión a internet).'); }
+};
+window.stockCorregirPrecio = async function(id){
+  const m = (window.stockMovimientos || []).find(x => x.id === id); if(!m) return;
+  if(!window.__fbUser){ alert('Iniciá sesión (Acceso y respaldo) para corregir precios.'); return; }
+  const v = prompt(`Precio unitario sin IVA de «${m.desc}» del ${fechaCorta(m.fecha)}${m.proveedor ? ' · ' + m.proveedor : ''}:`, String(m.precioUnit));
+  if(v == null) return;
+  const n = parseFloat(String(v).replace(',', '.'));
+  if(!isFinite(n) || n < 0){ alert('Precio inválido.'); return; }
+  try{ await window.fbUpdateMovimiento(id, { precioUnit: Math.round(n * 100) / 100, precioCorregidoPor: (window.__fbUser && window.__fbUser.email) || '', precioCorregidoTs: Date.now() }); }
+  catch(e){ alert('No se pudo guardar (revisá tu conexión a internet).'); }
+};
+// ---- Precio sin entrada (cotización / lista): entrada de cantidad 0 marcada soloPrecio ----
+(function(){
+  const btn = document.getElementById('stockPrecioBtn'); if(!btn) return;
+  btn.addEventListener('click', async function(){
+    const msg = document.getElementById('stockPrecioMsg'); msg.style.color = 'var(--danger)';
+    if(!stockFirebaseListo()){ msg.textContent = '⚠ No se pudo conectar con la base compartida — revisá tu conexión a internet y recargá la página.'; return; }
+    if(!window.__fbUser){ msg.textContent = '⚠ Iniciá sesión (Acceso y respaldo) para cargar precios.'; return; }
+    const item = stockParsearProducto(document.getElementById('stockPrecioProducto').value);
+    const precio = parseFloat(document.getElementById('stockPrecioValor').value);
+    const fecha = document.getElementById('stockPrecioFecha').value;
+    if(!item){ msg.textContent = '⚠ Elegí un producto válido de la lista (código o nombre).'; return; }
+    if(!isFinite(precio) || precio < 0 || document.getElementById('stockPrecioValor').value.trim() === ''){ msg.textContent = '⚠ Escribí el precio.'; return; }
+    if(!fecha){ msg.textContent = '⚠ Elegí una fecha.'; return; }
+    const mov = { tipo:'entrada', soloPrecio:true, codigo:item.codigo, desc:item.desc, un:item.un, cantidad:0, fecha, ts:Date.now(),
+                  usuario:(window.__fbUser && window.__fbUser.email) || '', proveedor: document.getElementById('stockPrecioProveedor').value.trim(), remito:'',
+                  precioUnit: Math.round(precio * 100) / 100, moneda:'ARS' };
+    btn.disabled = true;
+    try{ await window.fbAddMovimiento(mov); }
+    catch(e){ btn.disabled = false; msg.textContent = '⚠ No se pudo guardar el precio (revisá tu conexión a internet). No se registró nada.'; return; }
+    let extra = '';
+    if((document.getElementById('stockPrecioAlCatalogo')||{checked:false}).checked){
+      try{ await window.stockActualizarCostoCatalogo(item.codigo, mov.precioUnit); extra = ' Costo del catálogo actualizado.'; }
+      catch(e){ extra = ' ⚠ El precio quedó guardado, pero no se pudo actualizar el costo del catálogo.'; }
+    }
+    btn.disabled = false;
+    document.getElementById('stockPrecioProducto').value = ''; document.getElementById('stockPrecioValor').value = '';
+    msg.style.color = 'var(--teal-dark)';
+    msg.textContent = `✓ Precio de «${item.desc}» guardado: ${formatMoney(mov.precioUnit)} / ${item.un} (${fechaCorta(fecha)}).${extra}`;
+  });
+})();
 // ---- Movimientos: panel desplegable arriba de todo (2026-08-27) ----
 // El usuario lo pidió así: *"cuando vemos los movimientos del stock está muy atrás; si se puede
 // tener más arriba, que no sea invasivo, como apretar un botón y se despliegue"*.
@@ -10633,8 +10961,9 @@ function renderStockMovimientos(){
     const [y,mo,d] = (m.fecha||'').split('-');
     const fechaFmt = (y&&mo&&d) ? `${d}/${mo}/${y}` : (m.fecha||'—');
     const quien = m.usuario ? `<br><span style="color:var(--text-soft); font-size:11px;">Cargó: ${escHtml(m.usuario)}</span>` : '';
+    const precioTxt = (m.precioUnit != null && isFinite(m.precioUnit)) ? `<br><span style="font-size:11.5px;">💲 ${formatMoney(m.precioUnit)} / ${escHtml(m.un||'')}${m.cantidad ? ` · total ${formatMoney(m.precioUnit * m.cantidad)}` : ''}</span>` : '';
     const detalle = (m.tipo==='entrada'
-      ? (m.proveedor ? `Prov./comp.: ${escHtml(m.proveedor)}` : '—')
+      ? (([m.proveedor ? `Prov.: ${escHtml(m.proveedor)}` : '', m.remito ? `Remito ${escHtml(m.remito)}` : ''].filter(Boolean).join(' · ') || '—') + precioTxt)
       : ([m.retiradoPor?`Retirado por: ${escHtml(m.retiradoPor)}`:'', m.destino?`Destino: ${escHtml(m.destino)}`:''].filter(Boolean).join(' · ') || '—')) + quien;
     const anuladoInfo = m.anulado
       ? `<br><span style="color:var(--danger); font-size:11px;">⊘ ANULADO${m.anuladoMotivo?`: ${escHtml(m.anuladoMotivo)}`:''}${m.anuladoPor?` — por ${escHtml(m.anuladoPor)}`:''}</span>`
@@ -10646,7 +10975,7 @@ function renderStockMovimientos(){
       : `<button type="button" class="btn-ghost" onclick="anularStockMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px; color:var(--danger);" title="Anular este movimiento (queda en el registro pero deja de contar)">⊘</button>`);
     return `<tr${estiloFila}>
       <td>${fechaFmt}</td>
-      <td>${m.tipo==='entrada'?'➕ Entrada':'➖ Salida'}</td>
+      <td>${m.soloPrecio ? '💲 Precio' : (m.tipo==='entrada'?'➕ Entrada':'➖ Salida')}</td>
       <td>${m.codigo}</td>
       <td>${escHtml(m.desc)}</td>
       <td>${fmt(m.cantidad,2)} ${escHtml(m.un)}</td>
@@ -10668,7 +10997,7 @@ function movimientosFiltrados(){
   const hasta = ((document.getElementById('stockMovHasta')||{}).value||'');
   return stockMovimientos.filter(m=>{
     if(q){
-      const texto = `${m.codigo} ${m.desc||''} ${m.destino||''} ${m.retiradoPor||''} ${m.proveedor||''} ${m.usuario||''}`.toLowerCase();
+      const texto = `${m.codigo} ${m.desc||''} ${m.destino||''} ${m.retiradoPor||''} ${m.proveedor||''} ${m.remito||''} ${m.usuario||''}`.toLowerCase();
       if(!texto.includes(q)) return false;
     }
     if(plaza && String(m.plazaId||'') !== plaza) return false;
@@ -10727,11 +11056,11 @@ async function reactivarStockMovimiento(id){
 // Exporta EXACTAMENTE lo que se está viendo (con los filtros aplicados) — se abre directo en Excel.
 function exportarMovimientosCSV(){
   const filas = movimientosFiltrados().sort((a,b)=> (a.fecha||'').localeCompare(b.fecha||'') || (a.ts||0)-(b.ts||0));
-  let csv = 'Fecha,Tipo,Código,Producto,Cantidad,Unidad,Plaza / destino,ID obra,Retirado por,Proveedor / comprobante,Cargó,Anulado,Motivo de anulación\n';
+  let csv = 'Fecha,Tipo,Código,Producto,Cantidad,Unidad,Plaza / destino,ID obra,Retirado por,Proveedor / comprobante,Cargó,Anulado,Motivo de anulación,Remito,Precio unitario sin IVA,Importe sin IVA\n';
   filas.forEach(m=>{
-    csv += [m.fecha||'', m.tipo==='entrada'?'Entrada':'Salida', m.codigo, m.desc, m.cantidad, m.un,
+    csv += [m.fecha||'', m.soloPrecio ? 'Precio' : (m.tipo==='entrada'?'Entrada':'Salida'), m.codigo, m.desc, m.cantidad, m.un,
             m.destino||'', m.obraId||'', m.retiradoPor||'', m.proveedor||'', m.usuario||'',
-            m.anulado?'SÍ':'', m.anuladoMotivo||'']
+            m.anulado?'SÍ':'', m.anuladoMotivo||'', m.remito||'', m.precioUnit != null ? m.precioUnit : '', (m.precioUnit != null && m.cantidad) ? (m.precioUnit * m.cantidad).toFixed(2) : '']
       .map(v => `"${String(v==null?'':v).replace(/"/g,'""')}"`).join(',') + '\n';
   });
   descargarArchivo(csv, `movimientos_stock_${fechaAISO(new Date())}.csv`, 'text/csv;charset=utf-8;');
@@ -17427,6 +17756,8 @@ function poblarParteObraDatalist(){
     if(typeof window.poblarStockDatalist === 'function') window.poblarStockDatalist();
     if(typeof window.actualizarStockMovBadge === 'function') window.actualizarStockMovBadge();
     if(typeof window.renderGastos === 'function') window.renderGastos();   // los costos del catálogo valorizan los gastos (2026-09-10)
+    if(typeof window.renderStockPrecios === 'function') window.renderStockPrecios();   // historial de precios (2026-09-22)
+    if(typeof window.poblarStockProveedoresRemitos === 'function') window.poblarStockProveedoresRemitos();
   }
 
   function actualizarStockAuthUI(user){
@@ -18378,6 +18709,7 @@ function poblarParteObraDatalist(){
     { id:'movimientos', label:'Movimientos / entregas', cards:['cardStockMov'] },
     { id:'registrar',   label:'+ Registrar movimiento', cards:['cardStockRegistrar'] },
     { id:'productos',   label:'Alta de productos',   cards:['cardStockCatalogo'] },
+    { id:'precios',     label:'💲 Precios',           cards:['cardStockPrecios'] },
     { id:'acceso',      label:'Acceso y respaldo',   cards:['stockAuthCard','cardStockRespaldo','cardStockSoloStock'] },
   ];
   let subStock = 'inventario';
