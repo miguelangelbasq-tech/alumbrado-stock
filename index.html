@@ -3186,7 +3186,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-22 13:58 · 041fee</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-25 18:17 · 56a798</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -4525,8 +4525,21 @@
         Con el detalle tildado, abajo de cada renglón sale <b>todo lo que incluye ese trabajo</b>, para que no haya discusión después.</span>
     </div>
     <div class="hint" style="margin-top:8px;">Es <b>el mismo itemizado</b> —los mismos ítems, las mismas unidades— pero con <b>lo que le pagamos al contratista</b>
-      por cada unidad que hace. Arranca en el <b>25 % del valor del pliego sin IVA</b>, y cualquier precio se puede escribir a mano.
+      por cada unidad que hace. Arranca en un <b>porcentaje del valor de cada ítem</b> —su coeficiente K × el módulo sin IVA— (25 % si no lo cambiás; se ajusta acá abajo), y cualquier precio se puede escribir a mano.
       <b>No toca el itemizado de EPEC</b>: lo que se le cobra a EPEC sigue siendo el 100 %. La diferencia es el margen de EMA.</div>
+    <!-- Porcentaje sobre el pliego, A LA VISTA (2026-09-25). Estaba adentro de la tarjeta plegada
+         «De dónde salen los precios de arranque», al final de la pestaña, y no se encontraba: el
+         usuario pidió «agregá para cambiar el porcentaje del total, que no sea fijo 25». Mismo
+         casillero y mismo botón (mismos ids), movidos acá arriba. -->
+    <div class="ctr-cfg no-print" id="ctrPctCaja" style="margin-top:10px; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:rgba(21,42,83,.03);">
+      <label for="ctrPct" style="margin:0 0 4px;">Porcentaje que se le paga al contratista sobre el valor de cada ítem <span style="font-weight:500;color:var(--text-soft);">(coeficiente K × módulo sin IVA)</span></label>
+      <div class="ctr-pct-caja">
+        <input type="number" min="0" max="100" step="any" id="ctrPct" value="25"> <span>%</span>
+        <button type="button" class="btn-auto" id="ctrPctBtn" style="margin:0;">Aplicar</button>
+        <span class="hint" id="ctrPctEstado" style="margin:0 0 0 8px;"></span>
+      </div>
+      <span class="hint" style="margin:4px 0 0;">El valor de cada ítem sale del itemizado: <b>su coeficiente K × el valor del módulo sin IVA</b> (el módulo se carga en «Itemizado 2026»). Al contratista se le paga este porcentaje de eso. Subilo o bajalo cuando quieras: recalcula <b>todos los ítems que no tengan un precio escrito a mano</b> (los que sí lo tengan no se tocan) y queda guardado para todo el equipo. Con la lista <b>fijada</b> no se mueve: primero reabrila.</span>
+    </div>
     <!-- Las tres listas de la misma hoja (2026-09-15) -->
     <div class="ctr-vistas no-print">
       <button type="button" class="ctr-vista activo" data-vista="completo" title="Para un contratista que hace todo el trabajo: la parte civil y la eléctrica">Completo · civil + eléctrico</button>
@@ -4594,14 +4607,7 @@
         <b>No toca el itemizado de EPEC</b>: lo que se le cobra a EPEC sigue siendo el 100 %. La diferencia es el margen de EMA.</div>
     <div class="ctr-banda" id="ctrBandaBase"></div>
     <div id="ctrVistaCompleto">
-    <div class="ctr-cfg no-print">
-      <label for="ctrPct">Porcentaje del valor de pliego</label>
-      <div class="ctr-pct-caja">
-        <input type="number" min="0" max="100" step="any" id="ctrPct" value="25"> <span>%</span>
-        <button type="button" class="btn-auto" id="ctrPctBtn" style="margin:0;">Aplicar</button>
-      </div>
-      <span class="hint" style="margin:0;">Se usa para <b>todos los ítems que no tengan un precio escrito a mano</b>. Los que sí lo tengan no se tocan.</span>
-    </div>
+    <div class="hint no-print" style="margin-top:6px;">El porcentaje sobre el pliego se cambia <b>arriba de todo</b>, en la tarjeta principal («Porcentaje del valor del pliego»). Acá abajo se ve, ítem por ítem, qué precio sale con ese porcentaje.</div>
     <div class="ctr-acc no-print">
       <button type="button" class="btn-ghost" id="ctrResetTodo">↺ Volver todos al porcentaje</button>
       <span class="hint" id="ctrMsg" style="margin:0;"></span>
@@ -25425,6 +25431,8 @@ const ITEMIZADO_EPEC = [
     const fijado = !!contratistaFijado;
     const inpPct = document.getElementById('ctrPct');
     if(inpPct && document.activeElement !== inpPct){ inpPct.value = contratistaPct; inpPct.disabled = fijado; }
+    { const est = document.getElementById('ctrPctEstado');
+      if(est) est.innerHTML = fijado ? '<b>Lista fijada</b>: el porcentaje no la mueve hasta reabrirla.' : `Hoy: <b>${fmt(n2(contratistaPct), n2(contratistaPct)%1?1:0)} %</b> de K × módulo${n2(epecBase) > 0 ? ` (módulo ${formatMoney(n2(epecBase))} sin IVA → el ítem de K = 1 se paga ${formatMoney(n2(epecBase) * n2(contratistaPct) / 100)})` : ' (falta cargar el valor del módulo en «Itemizado 2026»)'}${(!contratistaFijado && Object.keys(contratistaPrecios).length) ? ` · ${Object.keys(contratistaPrecios).length} ítem(s) con precio a mano que no se tocan` : ''}.`; }
     // Con la lista fijada no se edita nada: ése es el sentido de fijarla. Primero se reabre.
     const edit = puedeEditar() && !fijado;
     const dis = edit ? '' : 'disabled';
@@ -25444,7 +25452,7 @@ const ITEMIZADO_EPEC = [
         <td class="qty">
           <div class="ctr-cel">
             ${edit && epecBase>0
-              ? `<input type="number" min="0" step="any" class="ctr-precio" data-item="${esc(it.id)}" value="${manual?n2(contratistaPrecios[String(it.id)]):''}" placeholder="${fmt(contratistaAuto(it.id),2)}" title="Escribí acá el precio acordado para este ítem. Si lo dejás vacío, vale el ${fmt(contratistaPct,0)} % del pliego.">`
+              ? `<input type="number" min="0" step="any" class="ctr-precio" data-item="${esc(it.id)}" value="${manual?n2(contratistaPrecios[String(it.id)]):''}" placeholder="${fmt(contratistaAuto(it.id),2)}" title="Escribí acá el precio acordado para este ítem. Si lo dejás vacío, vale el ${fmt(contratistaPct,0)} % de K × módulo.">`
               : ''}
             <div class="ctr-efectivo"><b class="ctr-txt">${epecBase>0?plata(pu):'—'}</b>${epecBase>0?` <span class="it-un">por ${esc(it.un)}</span>`:''}</div>
           </div>
@@ -26450,7 +26458,7 @@ const ITEMIZADO_EPEC = [
         if(contratistaFijado){ alert('La lista está fijada: primero reabrila.'); return; }
         const n = Object.keys(contratistaPrecios).length;
         if(!n){ const m = document.getElementById('ctrMsg'); if(m){ m.style.color='var(--text-soft)'; m.textContent='No hay ningún precio escrito a mano: ya están todos al ' + fmt(contratistaPct,0) + ' %.'; } return; }
-        if(!confirm(`¿Borrar los ${n} precio(s) escritos a mano y dejar TODOS los ítems al ${fmt(contratistaPct,0)} % del pliego?\n\nEsto no toca el itemizado de EPEC ni ninguna plaza cargada.`)) return;
+        if(!confirm(`¿Borrar los ${n} precio(s) escritos a mano y dejar TODOS los ítems al ${fmt(contratistaPct,0)} % de su valor (K × módulo)?\n\nEsto no toca el itemizado de EPEC ni ninguna plaza cargada.`)) return;
         contratistaPrecios = {};
         renderContratista();
         guardarContratista(document.getElementById('ctrMsg'));
@@ -26463,7 +26471,7 @@ const ITEMIZADO_EPEC = [
         if(!(v > 0) || v > 100){ const m = document.getElementById('ctrMsg'); if(m){ m.style.color='var(--danger)'; m.textContent='El porcentaje tiene que ser un número entre 0 y 100.'; } return; }
         contratistaPct = v;
         renderContratista(); renderEpec();
-        guardarContratista(document.getElementById('ctrMsg'), `✔ Guardado: los ítems sin precio a mano quedan al ${fmt(v, v%1?1:0)} % del pliego.`);
+        guardarContratista(document.getElementById('ctrMsg'), `✔ Guardado: los ítems sin precio a mano quedan al ${fmt(v, v%1?1:0)} % de su valor (K × módulo sin IVA).`);
         return;
       }
       // ---- Cambiar de lista: Completo / Civil / Eléctrico (2026-09-15) ----
@@ -29662,7 +29670,7 @@ const ITEMIZADO_EPEC = [
     const m = { titulo:'Pago a contratista',
                 subtitulo:`${o.items.length} plaza(s) · ANEXO I — LPE 5589 · SIC 21760 · precios SIN IVA` +
                           (FIJ ? ` · precios FIJADOS el ${fCorta(FIJ.fecha)}` : '') +
-                          (neto > 0 ? ` · módulo ${plata(neto)} sin IVA · ${nf(PCT, PCT % 1 ? 1 : 0)} % del pliego` : ' · falta el valor del módulo'),
+                          (neto > 0 ? ` · módulo ${plata(neto)} sin IVA · se paga el ${nf(PCT, PCT % 1 ? 1 : 0)} % de K × módulo` : ' · falta el valor del módulo'),
                 tiles:[], avisos:[], secciones:[] };
     if(neto <= 0) m.avisos.push('El <b>valor del módulo</b> no está cargado en el Itemizado 2026, así que todos los precios de contratista salen en cero. Cargalo en Obras → Itemizado 2026 y volvé a generar.');
     m.avisos.push(FIJ
