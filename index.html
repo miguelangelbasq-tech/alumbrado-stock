@@ -174,6 +174,12 @@
   @media (max-width:640px){
     .card-header-row .toggle-wrap .toggle-txt{ display:none; }
     .card-header-row h2{ min-width:0; overflow-wrap:normal; }
+    /* Tabla del cómputo en el celular (2026-09-26): la columna Referencia se esconde y la tabla
+       se desliza de costado si igual no entra, en vez de empujar toda la página. */
+    .tabla-computo{ display:block; overflow-x:auto; max-width:100%; -webkit-overflow-scrolling:touch; }
+    .tabla-computo .col-ref{ display:none; }
+    .tabla-computo th:first-child{ width:auto; }
+    .tabla-computo thead th, .tabla-computo tbody td{ padding:6px 7px; }
   }
   .card h2{
     margin:0 0 14px;
@@ -289,6 +295,8 @@
   .zan-row, .zan-labels{ display:grid; grid-template-columns:34px 1fr 1.5fr 1.2fr 26px; gap:8px; align-items:center; }
   .zan-row{ margin-bottom:8px; } .zan-row select, .zan-row input{ margin:0; min-width:0; }
   .zan-labels{ font-size:11px; color:var(--text-soft); font-weight:600; margin-bottom:6px; }
+  .sm-grid{ grid-template-columns:34px minmax(0,2.4fr) 90px 110px 26px; }
+  @media (max-width:640px){ .sm-grid{ grid-template-columns:24px minmax(0,1fr) 66px 78px 22px; gap:5px; } .sm-grid input{ font-size:13px; padding-left:6px; padding-right:4px; } }
   /* Tableros adicionales T2, T3… (2026-09-22): una mini-tarjeta por tablero dentro de la sección */
   .tbx{ border:1px solid var(--border); border-radius:10px; padding:10px 12px 12px; margin:10px 0; background:rgba(21,42,83,.025); }
   .tbx-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
@@ -3060,6 +3068,257 @@
     a[href]{ color:inherit; text-decoration:none; }
   }
 </style>
+<style id="polishImpeccable">
+/* ==================================================================
+   PULIDO VISUAL — Impeccable «polish», 2026-09-27 (aprobado por el usuario)
+   Para volver atrás: borrar este <style id="polishImpeccable"> entero. No toca ninguna función.
+   Solo apariencia. Misma estructura, mismos ids/clases. Corrige lo que
+   marcó el detector (contraste, texto chico, bordes laterales gruesos,
+   sombras «borde fino + halo ancho») y aplica el piso de calidad.
+   ================================================================== */
+:root{
+  --text-soft:#526074;            /* 6.3:1 sobre blanco, 5.9:1 sobre el panel (antes 4.47) */
+  --teal-dark:#0369a1;            /* 6.0:1 sobre blanco (antes 4.1) */
+  --border:#dde3ec; --line:#dde3ec;
+  --sombra-sm:0 1px 2px rgba(15,30,51,.06);
+  --sombra-md:0 1px 2px rgba(15,30,51,.05), 0 6px 14px -8px rgba(15,30,51,.16);
+  --ring:rgba(3,105,161,.28);
+}
+/* Superficies del navegador: foco, selección, scroll */
+:focus-visible{ outline:2px solid var(--teal-dark); outline-offset:2px; border-radius:6px; }
+input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--teal-dark) !important; box-shadow:0 0 0 3px var(--ring) !important; }
+::selection{ background:rgba(3,105,161,.18); }
+*{ scrollbar-width:thin; scrollbar-color:#c3ccd8 transparent; }
+::-webkit-scrollbar{ height:8px; width:8px; } ::-webkit-scrollbar-thumb{ background:#c3ccd8; border-radius:99px; }
+/* Tipografía: una sola familia, pasos claros, sin texto por debajo de 12 px */
+body{ font-size:14px; }
+.hint, .h2-sub, .tile .lbl, .toggle-wrap .toggle-txt, .stock-badge, .zan-labels, .vinc-labels, .circ-head label, .circ-nums label,
+.plan-day-date, .plan-ot-dato, .av-etapa, .av-ver, .av-leyenda, .imp-item span.imp-n, .prov-op small, .ret-it, .ses-hint, .ses-msg,
+.badge-etapa, .badge-lista, .avance-gauge-etapa, .avance-fecha-row label, .it-cat, .ep-pesos, .plan-entry label, .plan-ot-tareas{ font-size:12.5px !important; line-height:1.45; }
+.h2-sub{ font-size:12.5px !important; font-weight:600; }
+thead th{ font-size:12px; letter-spacing:.35px; }
+.card h2{ font-size:14.5px; letter-spacing:.5px; }
+.card h2:has(.h2-sub){ line-height:1.3; }
+/* Números tabulares y a la derecha donde hay cantidades */
+table{ font-variant-numeric:tabular-nums; }
+.tabla-computo td:nth-child(2), .hist-table td:nth-child(4), .hist-table td:nth-child(6), .hist-table td:nth-child(7),
+.hist-table th:nth-child(4), .hist-table th:nth-child(6), .hist-table th:nth-child(7){ text-align:right; }
+tbody tr:hover td{ background:rgba(3,105,161,.035); }
+/* Tarjetas y espaciado: grupos apretados, separación generosa, más aire arriba de los títulos */
+.card{ border-radius:14px; box-shadow:var(--sombra-md); }
+.card + .card{ margin-top:18px; }
+.card label{ margin-top:14px; }
+.card .hint{ margin-top:5px; }
+.card h2{ margin-bottom:16px; }
+/* Bordes laterales gruesos (side-tab) → acento sutil */
+[style*="border-left:4px"], [style*="border-left: 4px"], [style*="border-left:3px"], [style*="border-left: 3px"]{ border-left-width:1px !important; }
+.computo-alerta{ border-left-width:1px !important; background:#fff7ed; border:1px solid #fed7aa; color:#7c2d12; }
+/* Botones: un solo vocabulario, estados completos */
+.btn-primary{ background:var(--teal-dark); border-color:var(--teal-dark); color:#fff; font-weight:700; border-radius:10px;
+  transition:background .15s, transform .05s, box-shadow .15s; box-shadow:0 1px 2px rgba(3,105,161,.25); }
+.btn-primary:hover{ background:#075985; } .btn-primary:active{ transform:translateY(1px); }
+.btn-primary:disabled{ background:#9fb3c8; border-color:#9fb3c8; box-shadow:none; }
+.btn-ghost, .btn-auto{ border-radius:10px; border:1px solid #cfd8e3; background:#fff; color:var(--navy); font-weight:600; transition:background .15s, border-color .15s; }
+.btn-ghost:hover, .btn-auto:hover{ background:#f3f6fa; border-color:#b9c5d4; }
+/* Campos: misma altura y borde en toda la app */
+input[type="text"], input[type="number"], input[type="date"], input[type="email"], input[type="password"], select, textarea{
+  border:1px solid #cfd8e3; border-radius:10px; min-height:42px; font-size:14px; background:#fff; transition:border-color .15s, box-shadow .15s; }
+input::placeholder, textarea::placeholder{ color:#6b7686; }
+/* Tiles: número protagonista, rótulo legible, sin uppercase espaciado */
+.tile{ border-radius:12px; border:1px solid var(--border); box-shadow:none; background:var(--panel); }
+.tile .num{ font-size:24px; letter-spacing:-.3px; font-variant-numeric:tabular-nums; }
+.tile .lbl{ text-transform:none; letter-spacing:0; font-weight:600; }
+/* Estados con color estable (rojo = falta, ámbar = atención, verde = ok) */
+.stock-badge{ font-size:12px !important; padding:3px 9px; border-radius:999px; letter-spacing:0; }
+.stock-badge-sin{ background:#fee2e2; color:#991b1b; } .stock-badge-poco{ background:#fef3c7; color:#92400e; } .stock-badge-ok{ background:#dcfce7; color:#166534; }
+.stock-row-sin td{ background:#fff5f5 !important; } .stock-row-poco td{ background:#fffbeb !important; }
+/* Subpestañas y pestañas de arriba: pastilla más alta, activa clara */
+.subtab{ padding:8px 14px; font-size:13px; border-radius:999px; }
+.subtab.activo{ background:var(--navy); color:#fff; }
+.tab-btn.active{ box-shadow:none; }
+/* Interruptor de sección: rótulo legible */
+.toggle-wrap .toggle-txt{ font-size:12px !important; letter-spacing:.2px; }
+/* Sombra «borde fino + halo ancho» → sombra con desplazamiento y desenfoque suave */
+.inicio-acceso, .inicio-plaza, .it-plaza, .av-card{ box-shadow:var(--sombra-md) !important; }
+/* Header: subtítulo legible */
+.header-sub{ font-size:11.5px !important; color:#526074; }
+/* Celular */
+@media (max-width:640px){
+  .nav-txt{ font-size:11px !important; letter-spacing:0; }
+  .nav-ico{ font-size:19px; }
+  .nav-item{ padding:7px 0 5px; min-height:52px; }
+  body{ padding-bottom:80px; }
+  .card{ padding:16px 14px; }
+  .btn-primary, .btn-ghost, .btn-auto{ min-height:42px; }
+  .subtab{ padding:9px 13px; }
+  .header-sub{ font-size:11px !important; }
+  /* Tablas anchas (historial, inventario): se deslizan de costado en vez de empujar la página. */
+  .hist-table{ display:block; overflow-x:auto; max-width:100%; -webkit-overflow-scrolling:touch; }
+  .hist-table thead th, .hist-table tbody td{ padding:7px 8px; }
+}
+</style>
+<style id="temaIndustrial">
+/* ==================================================================
+   TEMA «INDUSTRIAL» — 2026-09-27
+   Elegido por el usuario entre tres modelos generados con la skill UI UX Pro Max
+   (receta «Flat Design · pizarra + verde stock + naranja de seguridad»), con los tamaños
+   del modelo «Legible» en el celular (letra 16 px, controles de 48 px) y el riel de
+   navegación a la izquierda del modelo «Operaciones» en pantalla ancha.
+   Solo apariencia: mismos ids, mismas clases, misma función. Para volver atrás: borrar
+   este <style id="temaIndustrial"> entero. Se apoya en el pulido (#polishImpeccable).
+   Logo: el real de EMA Servicios (PNG sin fondo) en dos versiones, color y blanco.
+   ================================================================== */
+:root{
+  --bg:#e9edf2; --panel:#f1f4f8; --card:#fff; --border:#c7d0dc; --line:#c7d0dc;
+  --text:#111827; --text-soft:#475569;
+  --navy:#28285e; --navy-dark:#1c1c45;            /* azul del logo */
+  --teal:#84c3da; --teal-dark:#1f6b8f;            /* celeste del logo y su versión legible */
+  --amber:#ea580c; --verde:#15803d; --pizarra:#334155; --pizarra-dark:#1e293b;
+  --radius:6px; --ring:rgba(234,88,12,.35); --sombra-sm:none; --sombra-md:none;
+  --logo-color:url("data:image/png;base64,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");
+  --logo-blanco:url("data:image/png;base64,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");
+}
+body{ font-size:14px; background:var(--bg); }
+
+/* ---- Cabecera con el azul del logo y la línea celeste; logo real ---- */
+header{ background:var(--navy); color:#fff; border-bottom:4px solid var(--teal); box-shadow:none; padding:10px 22px; }
+header h1{ color:#fff; font-size:15px; letter-spacing:1px; }
+.header-sub{ color:#c8d6e8 !important; font-size:12px !important; }
+.btn-menu span{ background:#fff; } .btn-menu:hover{ background:rgba(255,255,255,.12); }
+.logo-badge svg{ display:none !important; }
+.logo-badge{ width:124px; height:36px; padding:0 !important; border:none !important; box-shadow:none !important; border-radius:0 !important;
+  background:var(--logo-blanco) center / contain no-repeat !important; }
+#portada svg{ display:none !important; }
+#portada > div::before{ content:""; display:block; width:200px; height:58px; margin:0 auto 8px; background:var(--logo-color) center / contain no-repeat; }
+
+/* ---- Tarjetas: planas, sin sombra, título en bloque pizarra ---- */
+.card, .subtabs, .acceso-card, .plaza-card, .tile, .it-plaza, .av-card, .inicio-acceso, .inicio-plaza{ border-radius:6px !important; box-shadow:none !important; }
+.card{ border:none; background:#fff; }
+.card + .card{ margin-top:14px; }
+.card > h2:first-child, .card > .card-header-row:first-child{
+  background:var(--pizarra); color:#fff; margin:-20px -22px 16px; padding:11px 22px; border-radius:6px 6px 0 0; max-width:none; }
+.card > .card-header-row:first-child > h2{ color:#fff; margin:0; }
+.card > h2:first-child, .card > .card-header-row:first-child > h2{ font-size:13px; letter-spacing:.6px; }
+.card > .card-header-row:first-child > h2{ flex:1 1 auto; min-width:0; }
+.card > .card-header-row:first-child .toggle-wrap{ flex:0 0 auto; }
+.card h2 .dot{ width:10px; height:10px; border-radius:0; background:var(--teal); }
+.card > h2:first-child .h2-sub, .card > .card-header-row:first-child .h2-sub{ color:#cbd5e1; font-weight:500; font-size:12.5px !important; text-transform:none; letter-spacing:0; }
+.card > h2:first-child .pleg-btn, .card > .card-header-row:first-child .pleg-btn{ background:transparent; border-color:#94a3b8; color:#fff; }
+.card > .card-header-row:first-child .toggle-txt{ color:#e2e8f0; }
+.card h2:not(:first-child){ color:var(--pizarra); }
+.card label{ font-size:13px; font-weight:700; color:#1f2937; }
+.section-title{ background:#0f172a !important; color:#fff !important; border-radius:0; border-left:6px solid var(--amber); font-size:12.5px; letter-spacing:1px; padding:8px 12px; }
+.computo-sec.sec-civil{ border-radius:0; border:none; background:#fdf3e7; }
+.computo-sec.sec-civil .section-title{ background:#7c2d12 !important; border-left-color:#fdba74; }
+.computo-alerta{ border:none !important; border-left:6px solid var(--amber) !important; background:#fff7ed; border-radius:0; color:#7c2d12; }
+
+/* ---- Tiles con la barrita de color arriba ---- */
+.tile{ background:var(--panel); border:none !important; border-top:4px solid var(--pizarra) !important; padding:12px 14px; }
+.tile:nth-child(2){ border-top-color:#dc2626 !important; } .tile:nth-child(3){ border-top-color:var(--amber) !important; } .tile:nth-child(4){ border-top-color:var(--verde) !important; }
+.tile .num{ font-size:26px; font-weight:800; color:#0f172a; }
+.tile .lbl{ font-size:12px !important; letter-spacing:.5px; font-weight:700; color:var(--text-soft); }
+
+/* ---- Botones y campos ---- */
+.btn-primary{ background:var(--amber); border-color:var(--amber); color:#fff; border-radius:4px; font-weight:800; letter-spacing:.6px; font-size:13px; min-height:44px; box-shadow:none; }
+.btn-primary:hover{ background:#c2410c; } .btn-primary:disabled{ background:#cbd5e1; border-color:#cbd5e1; color:#64748b; }
+.btn-ghost, .btn-auto, .subtab-accion{ border-radius:4px !important; border:none !important; background:var(--pizarra) !important; color:#fff !important; font-weight:700; letter-spacing:.4px; font-size:12.5px; box-shadow:none !important; }
+.btn-ghost:hover, .btn-auto:hover, .subtab-accion:hover{ background:var(--pizarra-dark) !important; }
+.pleg-btn{ border-radius:3px; }
+input[type="text"], input[type="number"], input[type="date"], input[type="email"], input[type="password"], input[type="tel"], select, textarea, .inicio-buscador input{
+  border:none !important; border-bottom:2px solid #64748b !important; border-radius:4px 4px 0 0 !important; background:var(--panel) !important; min-height:44px !important; font-size:15px !important; box-shadow:none !important; }
+input:focus, select:focus, textarea:focus{ border-bottom-color:var(--amber) !important; background:#fff !important; box-shadow:none !important; outline:none; }
+:focus-visible{ outline:3px solid var(--teal-dark); outline-offset:2px; }
+.switch .slider{ border-radius:3px; } .switch .slider:before{ border-radius:2px; } .switch input:checked + .slider{ background:var(--verde); }
+
+/* ---- Subpestañas como solapas ---- */
+.subtabs{ background:#fff; border:none; padding:0 !important; gap:0 !important; overflow-x:auto; }
+.subtab{ border:none; border-radius:0; padding:13px 18px; font-size:13px; font-weight:800; letter-spacing:.5px; color:var(--text-soft); background:#fff; }
+.subtab:hover{ background:var(--panel); color:#0f172a; }
+.subtab.activo{ background:var(--pizarra) !important; color:#fff !important; box-shadow:inset 0 -4px 0 var(--teal); }
+.subtab-accion{ margin:6px 8px; }
+
+/* ---- Tablas y estados ---- */
+thead th{ background:var(--pizarra) !important; color:#fff !important; font-size:11.5px !important; letter-spacing:.8px; border:none !important; padding:9px 10px; }
+td{ padding:9px 10px; border-bottom:1px solid #e2e8f0 !important; }
+tbody tr:nth-child(even) td{ background:#f8fafc; } tbody tr:hover td{ background:#fff7ed; }
+.stock-badge{ border-radius:3px !important; font-weight:800; font-size:11.5px !important; letter-spacing:.4px; padding:3px 8px; }
+.stock-badge-sin{ background:#dc2626; color:#fff; } .stock-badge-poco{ background:var(--amber); color:#fff; } .stock-badge-ok{ background:var(--verde); color:#fff; }
+.stock-row-sin td{ background:#fef2f2 !important; } .stock-row-poco td{ background:#fff7ed !important; }
+.pl-pct, .pl-mat, .chip, .chip .chip-n, .badge-etapa, .badge-lista{ border-radius:3px; }
+.pl-mat.ok{ background:var(--verde); color:#fff; } .pl-mat.falta{ background:var(--amber); color:#fff; }
+
+/* ---- Inicio ---- */
+.acceso-card{ background:#fff; border:none !important; border-left:6px solid var(--pizarra) !important; align-items:flex-start; text-align:left; padding:14px 14px 12px; }
+.acceso-card:nth-child(1){ border-left-color:var(--amber) !important; } .acceso-card:nth-child(2){ border-left-color:var(--teal-dark) !important; }
+.acceso-card:nth-child(3){ border-left-color:var(--verde) !important; } .acceso-card:nth-child(4){ border-left-color:#0f172a !important; }
+.acceso-card:hover{ transform:none; background:var(--panel); }
+.acceso-ico{ border-radius:4px; width:40px; height:40px; font-size:19px; }
+.acceso-titulo{ font-size:14px; letter-spacing:.4px; }
+.plaza-card{ background:#fff; border:none !important; border-left:6px solid var(--teal) !important; }
+.plaza-card:hover{ transform:none; background:var(--panel); }
+.pl-barra{ border-radius:0; height:8px; } .pl-barra > span{ border-radius:0; background:var(--verde); }
+.pl-exp{ color:var(--teal-dark); }
+.chip{ border:none; background:#fff; color:var(--text); font-weight:700; } .chip.activo{ background:var(--pizarra); color:#fff; }
+.inicio-seccion-titulo{ letter-spacing:.8px; font-size:13px; }
+
+/* ---- Barra de navegación: oscura, con la marca naranja en el activo ---- */
+#navAbajo{ background:var(--pizarra-dark); border-top:none; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none; gap:0; }
+.nav-item{ color:#cbd5e1; border-radius:0; font-weight:700; }
+.nav-item:hover{ background:#0f172a; color:#fff; }
+.nav-item.activo{ color:#fff; box-shadow:inset 0 4px 0 var(--amber); }
+.nav-item.activo .nav-ico{ background:transparent; }
+.nav-ico{ filter:grayscale(1) brightness(1.6); } .nav-item.activo .nav-ico{ filter:none; }
+#calcFlotante button{ border-radius:4px; }
+
+/* ---- Pantalla ancha: riel a la izquierda (el mismo #navAbajo, parado) ---- */
+@media (min-width:900px){
+  #navAbajo{ top:0; bottom:0; right:auto; left:0; width:92px; flex-direction:column; justify-content:flex-start; align-items:stretch;
+    padding:12px 0 12px; border-right:1px solid #0f172a; }
+  .nav-item{ flex:0 0 auto; width:100%; padding:11px 2px 9px; font-size:11px; letter-spacing:.3px; gap:4px; }
+  .nav-item.activo{ background:#0f172a; box-shadow:inset 4px 0 0 var(--amber); }
+  .nav-badge{ left:calc(50% + 8px); }
+  header{ padding-left:114px; } header .header-inner{ max-width:none; }
+  .wrap{ padding-left:116px; padding-right:24px; }
+  body{ padding-bottom:24px; }
+  #calcFlotante{ bottom:24px; }
+}
+
+/* ---- Celular: tamaños del modelo «Legible» ---- */
+@media (max-width:640px){
+  body{ font-size:16px; padding-bottom:88px; }
+  .card{ padding:16px 14px; }
+  .card > h2:first-child, .card > .card-header-row:first-child{ margin:-16px -14px 14px; padding:10px 14px; }
+  .card label{ font-size:15px; margin-top:14px; }
+  .hint, .h2-sub, .tile .lbl, .pl-barrio, .pl-estado, .acceso-sub, .zan-labels, .vinc-labels{ font-size:13.5px !important; }
+  input[type="text"], input[type="number"], input[type="date"], input[type="email"], input[type="password"], input[type="tel"], select, textarea, .inicio-buscador input{ min-height:48px !important; font-size:16px !important; }
+  .btn-primary, .btn-ghost, .btn-auto, .subtab-accion{ min-height:48px; font-size:13.5px; }
+  .subtab{ padding:13px 14px; font-size:13px; }
+  .chip{ padding:9px 14px; font-size:14px; }
+  .tile .num{ font-size:28px; }
+  td{ font-size:14.5px; padding:10px 8px; }
+  .acceso-card{ align-items:center; text-align:center; border-left:none !important; border-top:6px solid var(--pizarra) !important; }
+  .acceso-card:nth-child(1){ border-top-color:var(--amber) !important; } .acceso-card:nth-child(2){ border-top-color:var(--teal-dark) !important; }
+  .acceso-card:nth-child(3){ border-top-color:var(--verde) !important; } .acceso-card:nth-child(4){ border-top-color:#0f172a !important; }
+  .acceso-titulo{ font-size:15px; }
+  #navAbajo{ padding:0 2px calc(0px + env(safe-area-inset-bottom,0px)); }
+  .nav-item{ min-height:58px; padding:9px 0 7px; } .nav-txt{ font-size:11.5px !important; } .nav-ico{ font-size:21px; }
+  .logo-badge{ width:88px; height:26px; }
+  header h1{ font-size:14px; letter-spacing:.6px; }
+}
+
+/* ---- Papel: el membrete vuelve al logo en color y nada de fondos oscuros ---- */
+@media print{
+  header{ border-bottom-color:#183028 !important; }
+  .logo-badge{ background-image:var(--logo-color) !important; }
+  header h1, .header-sub{ color:#183028 !important; }
+  .card > h2:first-child, .card > .card-header-row:first-child{ background:transparent; color:#111; margin:0 0 10px; padding:0; border-bottom:1.5px solid #333; border-radius:0; }
+  .card > .card-header-row:first-child > h2, .card > h2:first-child .h2-sub{ color:#111; }
+  .section-title{ background:#eee !important; color:#111 !important; border-left-color:#333; }
+  thead th{ background:#eee !important; color:#111 !important; }
+  #navAbajo{ display:none !important; }
+}
+
+</style>
 </head>
 <body>
 <noscript><div style="position:fixed; inset:0; z-index:100000; background:#122a4a; color:#fff; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px; font:16px/1.5 system-ui, sans-serif;">Esta herramienta necesita JavaScript para funcionar. Activalo en el navegador y volvé a cargar la página.</div></noscript>
@@ -3186,7 +3445,7 @@
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-25 18:17 · 56a798</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-27 19:28 · 75d0f1</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -4841,6 +5100,30 @@
             </div>
           </div>
           <div class="hint" id="stockMovPrecioHint" style="margin-top:2px;">Elegí el producto y acá aparece su último precio cargado.</div>
+          <label for="stockMovFoto" style="margin-top:10px;">📷 Foto del remito <span style="font-weight:500;color:var(--text-soft);">(opcional — queda pegada a los renglones de este remito)</span></label>
+          <input type="file" id="stockMovFoto" accept="image/*" capture="environment" style="font-size:12.5px;">
+          <div class="hint" id="stockMovFotoHint" style="margin-top:2px;"></div>
+          <label class="ex-chk" style="margin-top:10px;"><input type="checkbox" id="stockMovEsDevolucion"> <span><b>Es una devolución</b>: una persona trae de vuelta material que tenía en su poder</span></label>
+          <div id="stockMovDevolucionCampos" style="display:none;">
+            <label for="stockMovDevuelvePersona">¿Quién lo devuelve?</label>
+            <input type="text" id="stockMovDevuelvePersona" list="personalLista" placeholder="Nombre" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
+            <div class="hint" id="stockMovDevuelveHint" style="margin-top:2px;"></div>
+          </div>
+          <!-- Carga masiva del remito (2026-09-26): varios renglones de una vez, con el mismo
+               proveedor, remito y fecha de arriba. -->
+          <div style="margin-top:10px;">
+            <button type="button" class="btn-ghost" id="stockMasivoToggle" style="padding:5px 12px; font-size:12.5px;">📋 Cargar varios renglones de este remito de una vez</button>
+          </div>
+          <div id="stockMasivoPanel" style="display:none; margin-top:8px; border:1px solid var(--border); border-radius:10px; padding:10px 12px; background:rgba(21,42,83,.02);">
+            <div class="hint" style="margin-top:0;">Una fila por material: producto (código o nombre), cantidad y precio unitario sin IVA (opcional). Todos salen con el <b>proveedor, remito y fecha de arriba</b>. Se pueden agregar las filas que hagan falta.</div>
+            <div class="zan-labels sm-grid"><div></div><div>Producto</div><div>Cantidad</div><div>Precio s/IVA</div><div></div></div>
+            <div id="stockMasivoFilas"></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:6px;">
+              <button type="button" class="btn-auto" id="stockMasivoAdd" style="margin:0;">+ Fila</button>
+              <button type="button" class="btn-primary" id="stockMasivoBtn" style="margin:0; padding:8px 14px;">Registrar todas las filas</button>
+              <span class="hint" id="stockMasivoMsg" style="margin:0;"></span>
+            </div>
+          </div>
           <div id="stockRemitoPanel" style="display:none; margin-top:10px; background:#eef7f3; border:1px solid #bfe0d1; border-radius:8px; padding:8px 10px; font-size:12.5px;">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
               <div id="stockRemitoPanelTxt"></div>
@@ -4854,6 +5137,15 @@
           <input type="text" id="stockMovRetiradoPor" placeholder="Nombre">
           <label for="stockMovDestinoPlaza">Destino / obra</label>
           <select id="stockMovDestinoPlaza"></select>
+          <!-- Material en poder de una persona (2026-09-25). El usuario: «que cada personal tenga la
+               opción de darle materiales, y que entremos al nombre de esa persona y nos diga lo que
+               tiene de lo que le dimos». La salida se registra igual (baja el stock) pero queda
+               marcada «en cargo» de esa persona; se descuenta cuando lo devuelve o lo usa en una plaza. -->
+          <div id="stockMovPersonaCampos" style="display:none; margin-top:6px;">
+            <label for="stockMovPersona">¿A quién se le entrega? <span style="font-weight:500;color:var(--text-soft);">(queda en su poder hasta que lo devuelva o lo use en una plaza)</span></label>
+            <input type="text" id="stockMovPersona" list="personalLista" placeholder="Nombre (de la nómina del Equipo)" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
+            <div class="hint" id="stockMovPersonaHint" style="margin-top:2px;"></div>
+          </div>
           <div class="hint" style="margin-top:2px;">Elegí la plaza a la que va el material. Así después se puede comparar, plaza por plaza, lo que calculó la herramienta contra lo que realmente salió del pañol (pestaña «Registros»). Si no va a una plaza, elegí «Otro destino» y escribilo.</div>
           <input type="text" id="stockMovDestino" placeholder="Ej: Cuadrilla 1, taller, galpón..." style="display:none;">
         </div>
@@ -4903,6 +5195,33 @@
         </div>
       </div>
 
+      <div class="card" id="cardStockPersonas" style="margin-top:18px;">
+        <h2><span class="dot"></span>Materiales por persona <span class="h2-sub">qué tiene cada uno en su poder de lo que le dio el pañol</span></h2>
+        <div class="hint no-print" style="margin-top:0;">Cuando le entregás material a alguien para que lo tenga (herramienta, cable, morsetería…), registrá la salida con destino <b>«Queda en poder de una persona»</b>. Acá elegís el nombre y ves <b>lo que tiene ahora</b>: lo entregado, menos lo que devolvió y lo que usó en una plaza. Desde cada renglón se registra la devolución o el uso en obra.</div>
+        <div class="row2 no-print">
+          <div>
+            <label for="stockPersonaSel">Persona</label>
+            <select id="stockPersonaSel"></select>
+          </div>
+          <div>
+            <label for="stockPersonaBuscar">Buscar material</label>
+            <input type="text" id="stockPersonaBuscar" placeholder="Código o nombre…" autocomplete="off">
+          </div>
+        </div>
+        <div id="stockPersonaResumen" class="hint" style="margin-top:6px;"></div>
+        <div class="tabla-scroll" style="margin-top:8px; overflow-x:auto;">
+          <table id="stockPersonaTabla" style="min-width:620px;">
+            <thead><tr><th>Código</th><th>Material</th><th>Entregado</th><th>Devuelto</th><th>Usado en obra</th><th>Tiene ahora</th><th class="no-print"></th></tr></thead>
+            <tbody id="stockPersonaBody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:14px;">
+          <label style="margin-top:0;">Movimientos de esta persona</label>
+          <div id="stockPersonaHist" class="hint" style="margin-top:2px;"></div>
+        </div>
+        <div class="no-print" style="margin-top:10px;"><button type="button" class="btn-ghost" onclick="imprimir()">🖨 Imprimir lo que tiene</button></div>
+      </div>
+
       <div class="card no-print" id="cardStockRespaldo" style="margin-top:18px;">
         <h2><span class="dot"></span>Respaldo de TODA la herramienta</h2>
         <div class="hint" style="margin-top:0;">Baja un solo archivo con <b>todo</b> lo que hay en la base compartida: movimientos, catálogo de productos, plazas con su avance e itemizado, órdenes de trabajo, historial de etapas y cómputos de la calculadora. Es el seguro contra un borrado accidental — <b>hacelo una vez por semana</b> y guardá el archivo en algún lado.</div>
@@ -4912,6 +5231,25 @@
           <input type="file" id="respaldoImportInput" accept="application/json" style="display:none">
         </div>
         <div class="hint" id="respaldoMsg" style="margin-top:8px;"></div>
+      </div>
+
+      <!-- Salud de la herramienta y auditoría (2026-09-26) -->
+      <div class="card no-print" id="cardStockSalud" style="margin-top:18px;">
+        <div class="card-header-row">
+          <h2><span class="dot"></span>Salud de la herramienta <span class="h2-sub">versión, sincronización, respaldo y qué computadora tiene qué versión</span></h2>
+          <button type="button" class="btn-ghost" id="saludRefrescar" style="white-space:nowrap;">↻ Actualizar</button>
+        </div>
+        <div id="saludCuerpo" class="hint" style="margin-top:6px;">Tocá «Actualizar».</div>
+      </div>
+      <div class="card no-print" id="cardStockAuditoria" style="margin-top:18px;">
+        <div class="card-header-row">
+          <h2><span class="dot"></span>Auditoría de cambios <span class="h2-sub">quién cambió un precio, borró una plaza, anuló un movimiento, dio de alta un producto…</span></h2>
+          <button type="button" class="btn-ghost" id="auditoriaCargar" style="white-space:nowrap;">Cargar los últimos 200</button>
+        </div>
+        <input type="text" id="auditoriaBuscar" placeholder="Filtrar por texto, usuario o acción…" autocomplete="off" style="margin-top:6px;">
+        <div class="tabla-scroll" style="overflow-x:auto; margin-top:8px;">
+          <table style="min-width:640px;"><thead><tr><th>Cuándo</th><th>Quién</th><th>Acción</th><th>Detalle</th></tr></thead><tbody id="auditoriaBody"><tr><td colspan="4" style="text-align:center; color:var(--text-soft); padding:12px;">Todavía no se cargó.</td></tr></tbody></table>
+        </div>
       </div>
 
       <div class="card no-print" id="cardStockSoloStock" style="margin-top:18px;">
@@ -4982,7 +5320,7 @@
         <input type="text" id="stockBuscar" placeholder="Ej: cable, BPN, terminal..." autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
         <div class="checkbox-line" style="margin-top:8px;">
           <input type="checkbox" id="stockSoloFaltantes">
-          <label style="margin:0;" for="stockSoloFaltantes">Mostrar solo faltantes / poca cantidad (≤3)</label>
+          <label style="margin:0;" for="stockSoloFaltantes">Mostrar solo faltantes / bajo mínimo (o ≤3 si el producto no tiene mínimo)</label>
         </div>
 
         <div style="overflow-x:auto; margin-top:10px;">
@@ -4994,6 +5332,45 @@
         </table>
         </div>
         <div class="hint" id="stockTablaCount" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- Lista de compras (2026-09-26): lo que hay que comprar para volver al mínimo, y lo que
+           falta comprar para una plaza (cómputo − stock − lo que ya salió a esa plaza). -->
+      <div class="card" id="cardStockCompras" style="margin-top:18px;">
+        <h2><span class="dot"></span>🛒 Lista de compras <span class="h2-sub">qué hay que comprar: por mínimo del pañol, o para una plaza en particular</span></h2>
+        <div class="hint no-print" style="margin-top:0;">Arriba, los productos que quedaron <b>por debajo de su mínimo</b> (el mínimo se carga en «Alta de productos»). Abajo, para una plaza registrada: <b>lo que pide el cómputo − lo que ya salió del pañol a esa plaza − lo que hay en stock</b> = lo que falta comprar, con el último precio cargado. Las dos listas se imprimen y se bajan en CSV.</div>
+        <label style="margin-top:10px;">Para volver al mínimo del pañol</label>
+        <div id="comprasMinResumen" class="hint" style="margin-top:2px;"></div>
+        <div class="tabla-scroll" style="overflow-x:auto; margin-top:6px;">
+          <table style="min-width:620px;"><thead><tr><th>Código</th><th>Producto</th><th>Stock</th><th>Mínimo</th><th>Pedir</th><th>Último precio</th><th>Importe</th></tr></thead><tbody id="comprasMinBody"></tbody></table>
+        </div>
+        <div class="hist-actions no-print" style="margin-top:8px;">
+          <button type="button" class="btn-ghost" onclick="exportarComprasCSV('minimo')">⬇ CSV</button>
+          <button type="button" class="btn-ghost" onclick="imprimir()">🖨 Imprimir</button>
+        </div>
+        <div style="margin-top:16px; border-top:1px solid var(--border); padding-top:12px;">
+          <div class="row2 no-print">
+            <div>
+              <label for="comprasPlazaSel" style="margin-top:0;">Para una plaza</label>
+              <select id="comprasPlazaSel"></select>
+            </div>
+            <div>
+              <label style="margin-top:0;">Mostrar</label>
+              <select id="comprasPlazaModo">
+                <option value="comprar">Solo lo que falta comprar</option>
+                <option value="todo">Todo el cómputo con su balance</option>
+              </select>
+            </div>
+          </div>
+          <div id="comprasPlazaResumen" class="hint" style="margin-top:6px;"></div>
+          <div class="tabla-scroll" style="overflow-x:auto; margin-top:6px;">
+            <table style="min-width:760px;"><thead><tr><th>Código</th><th>Material</th><th>Cómputo</th><th>Ya salió a la plaza</th><th>Falta llevar</th><th>En stock</th><th>Comprar</th><th>Último precio</th><th>Importe</th></tr></thead><tbody id="comprasPlazaBody"></tbody></table>
+          </div>
+          <div class="hist-actions no-print" style="margin-top:8px;">
+            <button type="button" class="btn-ghost" onclick="exportarComprasCSV('plaza')">⬇ CSV</button>
+            <button type="button" class="btn-ghost" onclick="imprimir()">🖨 Imprimir</button>
+          </div>
+        </div>
       </div>
 
       <div class="card no-print" id="cardStockCatalogo" style="margin-top:18px;">
@@ -5026,6 +5403,9 @@
             <input type="number" id="catCosto" step="0.01" value="0">
           </div>
         </div>
+        <label for="catMinimo">Stock mínimo <span style="font-weight:500;color:var(--text-soft);">(alerta y lista de compras — 0 = sin mínimo)</span></label>
+        <input type="number" id="catMinimo" step="0.01" min="0" value="0">
+        <div class="hint" style="margin-top:2px;">Cuando el stock queda <b>por debajo del mínimo</b>, el producto aparece en rojo/ámbar en el inventario y entra solo en la <b>🛒 Lista de compras</b> (con cuánto pedir para volver al mínimo y a qué precio).</div>
         <div class="hint" style="margin-top:2px;">El <b>stock inicial</b> es el punto de partida: los movimientos de entrada y salida se suman y restan sobre ese número. Si el producto es nuevo y todavía no llegó, dejalo en 0 y cargá la entrada cuando llegue.</div>
         <input type="hidden" id="catEditandoCodigo" value="">
         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
@@ -9940,7 +10320,7 @@ function catalogo(){
     const previo = porCodigo.get(c.codigo);
     // Solo se pisan los campos que el cambio realmente trae (undefined = no tocar).
     const merged = { ...(previo || {codigo:c.codigo, un:'c/a', sector:'pañol', stock:0, costo:0}) };
-    ['desc','un','sector','stock','costo','activo'].forEach(k=>{
+    ['desc','un','sector','stock','costo','activo','minimo'].forEach(k=>{
       if(c[k] !== undefined && c[k] !== null) merged[k] = c[k];
     });
     merged.origen = previo ? 'editado' : 'nuevo';
@@ -10063,9 +10443,17 @@ function stockActual(codigo){
 
 // Movimientos que SÍ cuentan (no anulados) — base de todos los cálculos y balances.
 function stockMovimientosVigentes(){ return stockMovimientos.filter(m=>!m.anulado); }
-function stockEstado(cant){
+// Estado del stock (2026-09-26: con MÍNIMO por producto). Si el producto tiene un mínimo cargado
+// en el catálogo, «POCO» es estar por debajo de ese mínimo; si no, se mantiene el ≤3 de siempre.
+function stockMinimoDe(codigo){
+  const it = (typeof catalogoCompleto === 'function' ? catalogoCompleto() : []).find(i => i.codigo === codigo);
+  const m = it ? parseFloat(it.minimo) : NaN;
+  return (isFinite(m) && m > 0) ? m : 0;
+}
+function stockEstado(cant, minimo){
   if(cant<=0) return 'SIN STOCK';
-  if(cant<=3) return 'POCO';
+  const min = (minimo != null) ? minimo : 0;
+  if(min > 0 ? cant < min : cant<=3) return 'POCO';
   return 'OK';
 }
 
@@ -10088,6 +10476,7 @@ function poblarStockDestinoPlazas(){
   const ordenadas = [...avanceObras].sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||'')));
   sel.innerHTML = `<option value="">— Elegí la plaza —</option>`
     + ordenadas.map(a=>`<option value="${escHtml(a.id)}">${escHtml(a.nombre)}${a.obraId?` (ID ${escHtml(a.obraId)})`:''}</option>`).join('')
+    + `<option value="__persona">👷 Queda en poder de una persona (en cargo)</option>`
     + `<option value="__otro">Otro destino (escribir a mano)</option>`;
   if(previo && [...sel.options].some(o=>o.value===previo)) sel.value = previo;
 }
@@ -10148,6 +10537,7 @@ document.getElementById('stockMovTipo').addEventListener('change', function(){
 });
 document.getElementById('stockMovDestinoPlaza').addEventListener('change', function(){
   document.getElementById('stockMovDestino').style.display = (this.value === '__otro') ? '' : 'none';
+  const pc = document.getElementById('stockMovPersonaCampos'); if(pc) pc.style.display = (this.value === '__persona') ? '' : 'none';
 });
 document.getElementById('stockMovFecha').value = fechaAISO(new Date());
 
@@ -10258,8 +10648,20 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
     // Remito y precio (2026-09-22). El precio es opcional: si no se carga, la entrada queda como
     // antes; si se carga, arma el historial de precios y (con el casillero) pasa al costo del catálogo.
     mov.remito = (document.getElementById('stockMovRemito')||{value:''}).value.trim();
+    if((document.getElementById('stockMovEsDevolucion')||{checked:false}).checked){
+      const nom = (document.getElementById('stockMovDevuelvePersona')||{value:''}).value.trim();
+      if(!nom){ msg.textContent = '⚠ Escribí quién devuelve el material.'; return; }
+      mov.devolucion = true; mov.personaNombre = nom;
+      const lg = (typeof window.legajoDeNombre === 'function') ? window.legajoDeNombre(nom) : null;
+      if(lg) mov.personaLegajo = String(lg);
+      const tiene = (typeof window.cargoDePersona === 'function') ? window.cargoDePersona(nom).find(x=> x.codigo === item.codigo) : null;
+      if(!tiene || tiene.enPoder <= 0){ if(!confirm(`Según el pañol, ${nom} no tiene «${item.desc}» en su poder. ¿Registrar la devolución igual?`)) return; }
+      else if(cantidad > tiene.enPoder + 0.0001){ if(!confirm(`${nom} tiene ${fmt(tiene.enPoder,2)} ${item.un} de «${item.desc}» y está devolviendo ${fmt(cantidad,2)}. ¿Registrar igual?`)) return; }
+    }
     const pu = parseFloat((document.getElementById('stockMovPrecio')||{value:''}).value);
-    if(isFinite(pu) && pu >= 0 && String((document.getElementById('stockMovPrecio')||{value:''}).value).trim() !== ''){ mov.precioUnit = Math.round(pu * 100) / 100; mov.moneda = 'ARS'; }
+    // Una devolución no es una compra: no lleva precio ni remito (no toca el historial de precios).
+    if(!mov.devolucion && isFinite(pu) && pu >= 0 && String((document.getElementById('stockMovPrecio')||{value:''}).value).trim() !== ''){ mov.precioUnit = Math.round(pu * 100) / 100; mov.moneda = 'ARS'; }
+    if(mov.devolucion){ mov.remito = ''; }
   } else {
     mov.retiradoPor = document.getElementById('stockMovRetiradoPor').value.trim();
     const selPlaza = document.getElementById('stockMovDestinoPlaza');
@@ -10268,6 +10670,16 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
     if(valPlaza === '__otro'){
       mov.destino = document.getElementById('stockMovDestino').value.trim();
       if(!mov.destino){ msg.textContent = '⚠ Escribí cuál es el otro destino.'; return; }
+    } else if(valPlaza === '__persona'){
+      // En cargo de una persona (2026-09-25): baja el stock como cualquier salida y queda marcado
+      // de quién es; se descuenta con una devolución o cuando lo usa en una plaza.
+      const nom = document.getElementById('stockMovPersona').value.trim();
+      if(!nom){ msg.textContent = '⚠ Escribí a quién se le entrega el material.'; return; }
+      mov.enCargo = true; mov.personaNombre = nom;
+      const lg = (typeof window.legajoDeNombre === 'function') ? window.legajoDeNombre(nom) : null;
+      if(lg) mov.personaLegajo = String(lg);
+      if(!mov.retiradoPor) mov.retiradoPor = nom;
+      mov.destino = `En poder de ${nom}`;
     } else {
       const plaza = avanceObras.find(x=>x.id===valPlaza);
       if(!plaza){ msg.textContent = '⚠ No se encontró esa plaza — recargá la página y probá de nuevo.'; return; }
@@ -10291,6 +10703,10 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
   }
   btn.disabled = false;
   if(nuevoId) window.__ultimoMovLocal = Object.assign({id:nuevoId}, mov);
+  // Foto del remito (2026-09-26): se sube una vez y se referencia desde cada renglón del remito.
+  if(tipo==='entrada' && nuevoId && typeof window.stockAdjuntarFotoRemito === 'function'){
+    try{ await window.stockAdjuntarFotoRemito(nuevoId, mov); }catch(e){ console.warn('foto remito', e); }
+  }
   // Costo del catálogo = este precio (si el casillero está tildado). Va aparte del movimiento: si
   // falla, el movimiento ya quedó guardado y se avisa.
   let avisoCosto = '';
@@ -10304,7 +10720,7 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
     // Remito en curso (2026-09-22): proveedor, remito y fecha QUEDAN para el renglón siguiente del
     // mismo remito. Se limpian con «Terminar este remito» o al pasar a una salida.
     const pr = document.getElementById('stockMovPrecio'); if(pr) pr.value = '';
-    if(typeof window.stockRemitoAnotar === 'function') window.stockRemitoAnotar(mov);
+    if(!mov.devolucion && typeof window.stockRemitoAnotar === 'function') window.stockRemitoAnotar(mov);
   } else {
     document.getElementById('stockMovProveedor').value = '';
   }
@@ -10417,6 +10833,7 @@ window.stockRemitoAnotar = function(mov){
 };
 window.stockRemitoCerrar = function(){
   window.__remitoEnCurso = { clave:'', items:[] };
+  { const f = document.getElementById('stockMovFoto'); if(f) f.value = ''; const h = document.getElementById('stockMovFotoHint'); if(h) h.textContent = ''; }
   ['stockMovProveedor','stockMovRemito','stockMovPrecio'].forEach(id => { const e = document.getElementById(id); if(e) e.value = ''; });
   const pi = document.getElementById('stockMovPrecio'); if(pi) pi.dataset.codigoSugerido = '';
   const panel = document.getElementById('stockRemitoPanel'); if(panel) panel.style.display = 'none';
@@ -10511,6 +10928,417 @@ window.stockCorregirPrecio = async function(id){
   try{ await window.fbUpdateMovimiento(id, { precioUnit: Math.round(n * 100) / 100, precioCorregidoPor: (window.__fbUser && window.__fbUser.email) || '', precioCorregidoTs: Date.now() }); }
   catch(e){ alert('No se pudo guardar (revisá tu conexión a internet).'); }
 };
+
+// ============================================================
+// Materiales en poder de cada persona («en cargo») — 2026-09-25
+// ------------------------------------------------------------
+// Pedido: «que cada personal tenga la opción de darle materiales, y que entremos al nombre de esa
+// persona y nos diga lo que esa persona tiene de lo que le dimos». Todo sale de los movimientos:
+//   · salida con `enCargo:true` + `personaNombre`  → se lo entregamos, lo tiene;
+//   · entrada con `devolucion:true` + `personaNombre` → lo devolvió al pañol;
+//   · «lo usó en una plaza» = una devolución + una salida normal a esa plaza con `usoDeCargo:true`
+//     (el stock queda igual, la plaza recibe su salida y la persona deja de tenerlo).
+// ============================================================
+const numCargo = v => { const x = parseFloat(v); return isFinite(x) ? x : 0; };
+function personaClave(n){ return String(n||'').trim().toLowerCase().replace(/\s+/g,' '); }
+function movsDePersona(nombre){
+  const k = personaClave(nombre);
+  return (window.stockMovimientos || []).filter(m => !m.anulado && (m.enCargo || m.devolucion) && personaClave(m.personaNombre) === k);
+}
+window.cargoDePersona = function(nombre){
+  const porCod = new Map();
+  movsDePersona(nombre).forEach(m => {
+    const r = porCod.get(m.codigo) || { codigo:m.codigo, desc:m.desc, un:m.un, entregado:0, devuelto:0, usado:0, enPoder:0 };
+    if(m.tipo === 'salida' && m.enCargo) r.entregado += numCargo(m.cantidad);
+    else if(m.tipo === 'entrada' && m.devolucion){ if(m.usoDeCargo) r.usado += numCargo(m.cantidad); else r.devuelto += numCargo(m.cantidad); }
+    porCod.set(m.codigo, r);
+  });
+  return [...porCod.values()].map(r => ({ ...r, enPoder: Math.round((r.entregado - r.devuelto - r.usado) * 1000) / 1000 })).sort((a,b)=> a.codigo - b.codigo);
+};
+function personasConCargo(){
+  const vistos = new Map();
+  (window.stockMovimientos || []).forEach(m => { if(!m.anulado && (m.enCargo || m.devolucion) && m.personaNombre){ const k = personaClave(m.personaNombre); if(!vistos.has(k)) vistos.set(k, m.personaNombre.trim()); } });
+  const nom = (typeof window.nominaEquipo === 'function') ? window.nominaEquipo() : [];
+  nom.forEach(p => { const n = String(p.nombre||'').trim(); if(n && p.activo !== false && !vistos.has(personaClave(n))) vistos.set(personaClave(n), n); });
+  return [...vistos.values()].sort((a,b)=> a.localeCompare(b,'es'));
+}
+let __personaSel = '';
+window.renderStockPersonas = function(){
+  const sel = document.getElementById('stockPersonaSel'); const body = document.getElementById('stockPersonaBody');
+  if(!sel || !body) return;
+  const personas = personasConCargo();
+  const conAlgo = new Set(personas.filter(n => window.cargoDePersona(n).some(r => Math.abs(r.enPoder) > 0.0001 || r.entregado > 0)).map(personaClave));
+  const previo = sel.value || __personaSel;
+  sel.innerHTML = `<option value="">— Elegí una persona —</option>` + personas.map(n => `<option value="${escHtml(n)}">${escHtml(n)}${conAlgo.has(personaClave(n)) ? ' · tiene material' : ''}</option>`).join('');
+  if(previo && personas.some(n => personaClave(n) === personaClave(previo))) sel.value = personas.find(n => personaClave(n) === personaClave(previo));
+  __personaSel = sel.value;
+  const res = document.getElementById('stockPersonaResumen'); const hist = document.getElementById('stockPersonaHist');
+  if(!sel.value){
+    const cuantos = [...conAlgo].length;
+    res.innerHTML = cuantos ? `<b>${cuantos}</b> persona(s) tienen o tuvieron material en su poder. Elegí una para ver el detalle.` : 'Todavía nadie tiene material en su poder. Para entregarle algo a alguien, registrá una salida con destino «Queda en poder de una persona».';
+    body.innerHTML = ''; hist.innerHTML = ''; return;
+  }
+  const q = ((document.getElementById('stockPersonaBuscar')||{}).value || '').trim().toLowerCase();
+  const filas = window.cargoDePersona(sel.value).filter(r => !q || `${r.codigo} ${r.desc}`.toLowerCase().includes(q));
+  const tiene = filas.filter(r => r.enPoder > 0.0001);
+  const totalItems = window.cargoDePersona(sel.value).filter(r => r.enPoder > 0.0001).length;
+  res.innerHTML = `<b>${escHtml(sel.value)}</b> tiene ahora <b>${totalItems}</b> material(es) en su poder${q ? ` · ${filas.length} coinciden con «${escHtml(q)}»` : ''}.`;
+  if(!filas.length){ body.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-soft); padding:14px;">${q ? 'Nada coincide con la búsqueda.' : 'No se le entregó material todavía.'}</td></tr>`; }
+  else body.innerHTML = filas.map(r => `<tr data-cod="${r.codigo}" style="${r.enPoder > 0.0001 ? '' : 'opacity:.6;'}">
+      <td>${r.codigo}</td><td>${escHtml(r.desc)} <span style="color:var(--text-soft); font-size:11px;">(${escHtml(r.un)})</span></td>
+      <td>${fmt(r.entregado,2)}</td><td>${fmt(r.devuelto,2)}</td><td>${fmt(r.usado,2)}</td>
+      <td><b style="${r.enPoder < -0.0001 ? 'color:var(--danger);' : ''}">${fmt(r.enPoder,2)} ${escHtml(r.un)}</b></td>
+      <td class="no-print" style="white-space:nowrap;">${r.enPoder > 0.0001 ? `<button type="button" class="btn-ghost" style="padding:3px 9px; font-size:12px;" data-accion="devolver" data-cod="${r.codigo}">↩ Devolvió</button> <button type="button" class="btn-ghost" style="padding:3px 9px; font-size:12px;" data-accion="uso" data-cod="${r.codigo}">→ Lo usó en una plaza</button>` : ''}</td>
+    </tr>`).join('');
+  const movs = movsDePersona(sel.value).sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||'') || (b.ts||0) - (a.ts||0));
+  hist.innerHTML = movs.length ? movs.slice(0, 60).map(m => `${escHtml(fechaCorta(m.fecha))} · ${m.tipo === 'salida' ? '<b>se le entregó</b>' : (m.usoDeCargo ? `<b>usó en ${escHtml(m.usoPlazaNombre||'una plaza')}</b>` : '<b>devolvió</b>')} ${fmt(m.cantidad,2)} ${escHtml(m.un||'')} de ${escHtml(m.desc)}${m.usuario ? ` <span style="opacity:.7;">(cargó ${escHtml(m.usuario)})</span>` : ''}`).join('<br>') + (movs.length > 60 ? `<br>… y ${movs.length - 60} más` : '') : '—';
+};
+(function(){
+  const sel = document.getElementById('stockPersonaSel'); if(!sel) return;
+  sel.addEventListener('change', ()=>{ __personaSel = sel.value; window.renderStockPersonas(); });
+  const bq = document.getElementById('stockPersonaBuscar'); if(bq) bq.addEventListener('input', ()=> window.renderStockPersonas());
+  // Acciones por renglón: devolución al pañol, o uso en una plaza (devolución + salida a la plaza)
+  document.getElementById('stockPersonaBody').addEventListener('click', async (e)=>{
+    const b = e.target.closest('button[data-accion]'); if(!b) return;
+    const nombre = sel.value; const codigo = parseInt(b.dataset.cod, 10);
+    const r = window.cargoDePersona(nombre).find(x => x.codigo === codigo); if(!r) return;
+    if(!window.__fbUser){ alert('Iniciá sesión (Acceso y respaldo) para registrar movimientos.'); return; }
+    const tr = b.closest('tr'); let form = tr.nextElementSibling;
+    if(form && form.classList.contains('sp-form')) form.remove();
+    form = document.createElement('tr'); form.className = 'sp-form no-print';
+    const plazas = [...avanceObras].sort((a,c)=> String(a.nombre||'').localeCompare(String(c.nombre||''), 'es'));
+    const esUso = b.dataset.accion === 'uso';
+    form.innerHTML = `<td colspan="7" style="background:rgba(21,42,83,.03);">
+      <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap;">
+        <div><label style="margin:0; font-size:12px;">Cantidad (${escHtml(r.un)})</label><input type="number" min="0" step="0.01" value="${r.enPoder}" data-f="cant" style="width:110px; margin:0;"></div>
+        ${esUso ? `<div style="flex:1 1 220px; min-width:0;"><label style="margin:0; font-size:12px;">Plaza donde lo usó</label><select data-f="plaza" style="margin:0;">${plazas.map(p => `<option value="${escHtml(p.id)}">${escHtml(p.nombre)}${p.obraId ? ` (ID ${escHtml(p.obraId)})` : ''}</option>`).join('')}</select></div>` : ''}
+        <div><label style="margin:0; font-size:12px;">Fecha</label><input type="date" value="${fechaAISO(new Date())}" data-f="fecha" style="margin:0;"></div>
+        <button type="button" class="btn-primary" data-f="ok" style="margin:0; padding:8px 14px;">${esUso ? 'Registrar uso en la plaza' : 'Registrar devolución'}</button>
+        <button type="button" class="btn-ghost" data-f="no" style="margin:0;">Cancelar</button>
+      </div><div class="hint" data-f="msg" style="margin:4px 0 0;"></div></td>`;
+    tr.after(form);
+    form.querySelector('[data-f="no"]').addEventListener('click', ()=> form.remove());
+    form.querySelector('[data-f="ok"]').addEventListener('click', async ()=>{
+      const cant = parseFloat(form.querySelector('[data-f="cant"]').value) || 0;
+      const fecha = form.querySelector('[data-f="fecha"]').value;
+      const msg = form.querySelector('[data-f="msg"]');
+      if(!(cant > 0)){ msg.textContent = 'La cantidad tiene que ser mayor a 0.'; return; }
+      if(cant > r.enPoder + 0.0001 && !confirm(`${nombre} tiene ${fmt(r.enPoder,2)} ${r.un} y estás registrando ${fmt(cant,2)}. ¿Seguir igual?`)) return;
+      const base = { codigo:r.codigo, desc:r.desc, un:r.un, cantidad:cant, fecha, ts:Date.now(), usuario:(window.__fbUser && window.__fbUser.email) || '', personaNombre:nombre };
+      const lg = (typeof window.legajoDeNombre === 'function') ? window.legajoDeNombre(nombre) : null; if(lg) base.personaLegajo = String(lg);
+      try{
+        if(esUso){
+          const plazaId = form.querySelector('[data-f="plaza"]').value; const plaza = avanceObras.find(p => p.id === plazaId);
+          if(!plaza){ msg.textContent = 'Elegí la plaza.'; return; }
+          await window.fbAddMovimiento({ ...base, tipo:'entrada', devolucion:true, usoDeCargo:true, usoPlazaId:plaza.id, usoPlazaNombre:plaza.nombre, proveedor:'', remito:'' });
+          await window.fbAddMovimiento({ ...base, ts:Date.now() + 1, tipo:'salida', usoDeCargo:true, retiradoPor:nombre, plazaId:plaza.id, obraId:String(plaza.obraId||''), destino:plaza.nombre });
+        } else {
+          await window.fbAddMovimiento({ ...base, tipo:'entrada', devolucion:true, proveedor:'', remito:'' });
+        }
+      }catch(err){ msg.textContent = '⚠ No se pudo guardar (revisá tu conexión a internet).'; return; }
+      form.remove(); window.renderStockPersonas();
+    });
+  });
+  // Formulario de Registrar: hints y campos de devolución
+  const chk = document.getElementById('stockMovEsDevolucion');
+  if(chk) chk.addEventListener('change', ()=>{ const c = document.getElementById('stockMovDevolucionCampos'); if(c) c.style.display = chk.checked ? '' : 'none'; });
+  const pintarTiene = (inputId, hintId)=>{
+    const inp = document.getElementById(inputId), h = document.getElementById(hintId); if(!inp || !h) return;
+    const n = inp.value.trim(); if(!n){ h.textContent = ''; return; }
+    const t = window.cargoDePersona(n).filter(r => r.enPoder > 0.0001);
+    h.innerHTML = t.length ? `${escHtml(n)} tiene ahora: ${t.slice(0,6).map(r => `${fmt(r.enPoder,2)} ${escHtml(r.un)} de ${escHtml(r.desc)}`).join(' · ')}${t.length > 6 ? ` · … (${t.length} en total, ver «👷 Por persona»)` : ''}.` : `${escHtml(n)} no tiene material en su poder según el pañol.`;
+  };
+  const p1 = document.getElementById('stockMovPersona'); if(p1) p1.addEventListener('input', ()=> pintarTiene('stockMovPersona', 'stockMovPersonaHint'));
+  const p2 = document.getElementById('stockMovDevuelvePersona'); if(p2) p2.addEventListener('input', ()=> pintarTiene('stockMovDevuelvePersona', 'stockMovDevuelveHint'));
+})();
+
+
+// ============================================================
+// Lista de compras (2026-09-26): por mínimo del pañol y por plaza
+// ============================================================
+function comprasPorMinimo(){
+  return (typeof catalogo === 'function' ? catalogo() : []).map(i => {
+    const minimo = stockMinimoDe(i.codigo); if(!(minimo > 0)) return null;
+    const actual = stockActual(i.codigo); if(actual >= minimo) return null;
+    const pedir = Math.round((minimo - actual) * 100) / 100;
+    const ult = (typeof stockUltimoPrecio === 'function') ? stockUltimoPrecio(i.codigo) : null;
+    const precio = ult ? ult.precioUnit : (i.costo || 0);
+    return { codigo:i.codigo, desc:i.desc, un:i.un, actual, minimo, pedir, precio, origenPrecio: ult ? `último (${fechaCorta(ult.fecha)})` : (i.costo ? 'costo del catálogo' : ''), importe: pedir * precio };
+  }).filter(Boolean).sort((a,b)=> (b.importe - a.importe) || a.codigo - b.codigo);
+}
+// Cómputo − lo que ya salió a esa plaza − stock = lo que falta comprar.
+function comprasParaPlaza(a){
+  if(!a) return [];
+  const nec = new Map();
+  (a.secciones || []).forEach(sec => (sec.items || []).forEach(it => {
+    if(it.cod == null || it.tarea) return;
+    const c = (typeof it.cantNecesaria === 'number') ? it.cantNecesaria : (typeof it.cant === 'number' ? it.cant : null);
+    if(c == null || !(c > 0)) return;
+    const r = nec.get(it.cod) || { codigo:it.cod, desc:it.desc ? String(it.desc).split(' — ')[0].replace(/<[^>]*>/g,'') : '', un:it.un || '', computo:0 };
+    r.computo += c; nec.set(it.cod, r);
+  }));
+  const salidas = new Map();
+  (window.stockMovimientos || []).forEach(m => {
+    if(m.anulado || String(m.plazaId||'') !== String(a.id)) return;
+    const v = (m.tipo === 'salida' ? 1 : -1) * (parseFloat(m.cantidad) || 0);   // una entrada con plaza es devolución
+    salidas.set(m.codigo, (salidas.get(m.codigo) || 0) + v);
+  });
+  return [...nec.values()].map(r => {
+    const cat = (typeof catalogoCompleto === 'function' ? catalogoCompleto() : []).find(i => i.codigo === r.codigo) || {};
+    const salio = Math.max(0, salidas.get(r.codigo) || 0);
+    const falta = Math.max(0, r.computo - salio);
+    const stock = stockActual(r.codigo);
+    const comprar = Math.max(0, Math.round((falta - Math.max(0, stock)) * 100) / 100);
+    const ult = (typeof stockUltimoPrecio === 'function') ? stockUltimoPrecio(r.codigo) : null;
+    const precio = ult ? ult.precioUnit : (cat.costo || 0);
+    return { ...r, desc: cat.desc || r.desc, un: cat.un || r.un, salio, falta, stock, comprar, precio, origenPrecio: ult ? `último (${fechaCorta(ult.fecha)})` : (cat.costo ? 'costo del catálogo' : ''), importe: comprar * precio };
+  }).sort((a,b)=> (b.comprar > 0) - (a.comprar > 0) || b.importe - a.importe || a.codigo - b.codigo);
+}
+window.renderStockCompras = function(){
+  const bodyM = document.getElementById('comprasMinBody'); if(!bodyM) return;
+  const min = comprasPorMinimo();
+  const totM = min.reduce((t,r)=> t + r.importe, 0);
+  const conMin = (typeof catalogo === 'function' ? catalogo() : []).filter(i => stockMinimoDe(i.codigo) > 0).length;
+  document.getElementById('comprasMinResumen').innerHTML = conMin
+    ? (min.length ? `<b>${min.length}</b> producto(s) por debajo del mínimo (de ${conMin} con mínimo cargado) · a comprar ≈ <b>${formatMoney(totM)}</b> sin IVA (con el último precio cargado; los que no tienen precio suman $ 0).` : `Los ${conMin} producto(s) con mínimo están por encima de su mínimo. Nada que comprar.`)
+    : 'Ningún producto tiene mínimo cargado todavía. Poneles un mínimo en «Alta de productos» → editar, y acá aparece solo qué comprar.';
+  bodyM.innerHTML = min.length ? min.map(r => `<tr><td>${r.codigo}</td><td>${escHtml(r.desc)} <span style="color:var(--text-soft); font-size:11px;">(${escHtml(r.un)})</span></td><td>${fmt(r.actual,2)}</td><td>${fmt(r.minimo,2)}</td><td><b>${fmt(r.pedir,2)} ${escHtml(r.un)}</b></td><td>${r.precio ? formatMoney(r.precio) + `<br><span style="font-size:11px; color:var(--text-soft);">${escHtml(r.origenPrecio)}</span>` : '<span style="color:var(--text-soft);">sin precio</span>'}</td><td>${r.precio ? formatMoney(r.importe) : '—'}</td></tr>`).join('')
+    : `<tr><td colspan="7" style="text-align:center; color:var(--text-soft); padding:12px;">—</td></tr>`;
+  // Por plaza
+  const sel = document.getElementById('comprasPlazaSel'); const bodyP = document.getElementById('comprasPlazaBody');
+  const previo = sel.value;
+  const todas = (typeof avanceObras !== 'undefined' && Array.isArray(avanceObras)) ? avanceObras : (window.avanceObras || []);
+  const plazas = [...todas].filter(a => (a.secciones||[]).some(sec => (sec.items||[]).length)).sort((a,b)=> String(a.nombre||'').localeCompare(String(b.nombre||''), 'es'));
+  sel.innerHTML = `<option value="">— Elegí una plaza registrada con cómputo —</option>` + plazas.map(a => `<option value="${escHtml(a.id)}">${escHtml(a.nombre)}${a.obraId ? ` (ID ${escHtml(a.obraId)})` : ''}</option>`).join('');
+  if(previo && plazas.some(a => String(a.id) === previo)) sel.value = previo;
+  const a = plazas.find(x => String(x.id) === sel.value);
+  const res = document.getElementById('comprasPlazaResumen');
+  if(!a){ res.innerHTML = plazas.length ? 'Elegí la plaza.' : 'No hay plazas registradas con cómputo de materiales.'; bodyP.innerHTML = ''; return; }
+  const modo = (document.getElementById('comprasPlazaModo')||{value:'comprar'}).value;
+  const filas = comprasParaPlaza(a); const aComprar = filas.filter(r => r.comprar > 0);
+  const tot = aComprar.reduce((t,r)=> t + r.importe, 0); const sinPrecio = aComprar.filter(r => !r.precio).length;
+  res.innerHTML = `<b>${escHtml(a.nombre)}</b>: ${filas.length} material(es) con código en el cómputo · <b>${aComprar.length}</b> hay que comprar · ≈ <b>${formatMoney(tot)}</b> sin IVA${sinPrecio ? ` (${sinPrecio} sin precio cargado, suman $ 0)` : ''}. Los renglones del cómputo <b>sin código</b> no entran acá: dalos de alta desde la Calculadora.`;
+  const lista = modo === 'todo' ? filas : aComprar;
+  bodyP.innerHTML = lista.length ? lista.map(r => `<tr style="${r.comprar > 0 ? '' : 'opacity:.6;'}"><td>${r.codigo}</td><td>${escHtml(r.desc)} <span style="color:var(--text-soft); font-size:11px;">(${escHtml(r.un)})</span></td><td>${fmt(r.computo,2)}</td><td>${fmt(r.salio,2)}</td><td>${fmt(r.falta,2)}</td><td>${fmt(r.stock,2)}</td><td><b>${r.comprar > 0 ? fmt(r.comprar,2) + ' ' + escHtml(r.un) : '—'}</b></td><td>${r.precio ? formatMoney(r.precio) + `<br><span style="font-size:11px; color:var(--text-soft);">${escHtml(r.origenPrecio)}</span>` : '<span style="color:var(--text-soft);">sin precio</span>'}</td><td>${r.comprar > 0 && r.precio ? formatMoney(r.importe) : '—'}</td></tr>`).join('')
+    : `<tr><td colspan="9" style="text-align:center; color:var(--text-soft); padding:12px;">Con lo que hay en el pañol y lo que ya salió, no falta comprar nada para esta plaza.</td></tr>`;
+};
+window.exportarComprasCSV = function(cual){
+  let csv = '';
+  if(cual === 'minimo'){
+    csv = 'Código,Producto,Unidad,Stock,Mínimo,Pedir,Último precio,Importe\n';
+    comprasPorMinimo().forEach(r => { csv += [r.codigo, r.desc, r.un, r.actual, r.minimo, r.pedir, r.precio || '', r.precio ? r.importe.toFixed(2) : ''].map(v => `"${String(v==null?'':v).replace(/"/g,'""')}"`).join(',') + '\n'; });
+    descargarArchivo(csv, `compras_minimo_${fechaAISO(new Date())}.csv`, 'text/csv;charset=utf-8;');
+  } else {
+    const todas = (typeof avanceObras !== 'undefined' && Array.isArray(avanceObras)) ? avanceObras : (window.avanceObras || []);
+    const a = todas.find(x => String(x.id) === (document.getElementById('comprasPlazaSel')||{}).value); if(!a){ alert('Elegí la plaza.'); return; }
+    csv = 'Código,Material,Unidad,Cómputo,Ya salió,Falta llevar,En stock,Comprar,Último precio,Importe\n';
+    comprasParaPlaza(a).forEach(r => { csv += [r.codigo, r.desc, r.un, r.computo, r.salio, r.falta, r.stock, r.comprar, r.precio || '', (r.comprar > 0 && r.precio) ? r.importe.toFixed(2) : ''].map(v => `"${String(v==null?'':v).replace(/"/g,'""')}"`).join(',') + '\n'; });
+    descargarArchivo(csv, `compras_${String(a.nombre||'plaza').replace(/[^\w]+/g,'_')}_${fechaAISO(new Date())}.csv`, 'text/csv;charset=utf-8;');
+  }
+};
+(function(){
+  const s1 = document.getElementById('comprasPlazaSel'), s2 = document.getElementById('comprasPlazaModo');
+  if(s1) s1.addEventListener('change', ()=> window.renderStockCompras());
+  if(s2) s2.addEventListener('change', ()=> window.renderStockCompras());
+})();
+
+
+// ---- Carga masiva de un remito (2026-09-26) ----
+(function(){
+  const panel = document.getElementById('stockMasivoPanel'); if(!panel) return;
+  const filas = document.getElementById('stockMasivoFilas');
+  const fila = ()=>{
+    const d = document.createElement('div'); d.className = 'zan-row sm-fila sm-grid';
+    d.innerHTML = `<div class="tramo-num">${filas.children.length + 1}</div>
+      <input type="text" data-f="prod" list="stockDatalist" placeholder="Código o nombre…" autocomplete="off">
+      <input type="number" data-f="cant" min="0" step="0.01" placeholder="cant.">
+      <input type="number" data-f="precio" min="0" step="0.01" placeholder="$">
+      <button type="button" class="tramo-remove" data-f="quitar" title="Quitar fila">×</button>`;
+    filas.appendChild(d);
+    d.querySelector('[data-f="quitar"]').addEventListener('click', ()=>{ d.remove(); [...filas.children].forEach((x,i)=> x.querySelector('.tramo-num').textContent = i + 1); });
+    d.querySelector('[data-f="prod"]').addEventListener('change', ()=>{
+      const it = stockParsearProducto(d.querySelector('[data-f="prod"]').value); const pi = d.querySelector('[data-f="precio"]');
+      const u = it && typeof stockUltimoPrecio === 'function' ? stockUltimoPrecio(it.codigo) : null;
+      if(u && pi.value === '') pi.value = u.precioUnit;
+    });
+    return d;
+  };
+  document.getElementById('stockMasivoToggle').addEventListener('click', ()=>{
+    const abierto = panel.style.display !== 'none';
+    panel.style.display = abierto ? 'none' : '';
+    if(!abierto && !filas.children.length){ for(let i = 0; i < 5; i++) fila(); }
+  });
+  document.getElementById('stockMasivoAdd').addEventListener('click', ()=>{ const d = fila(); d.querySelector('[data-f="prod"]').focus(); });
+  document.getElementById('stockMasivoBtn').addEventListener('click', async function(){
+    const btn = this; const msg = document.getElementById('stockMasivoMsg'); msg.style.color = 'var(--danger)';
+    if(!stockFirebaseListo()){ msg.textContent = '⚠ No se pudo conectar con la base compartida.'; return; }
+    if(!window.__fbUser){ msg.textContent = '⚠ Iniciá sesión (Acceso y respaldo) para registrar.'; return; }
+    const fecha = document.getElementById('stockMovFecha').value; if(!fecha){ msg.textContent = '⚠ Elegí la fecha arriba.'; return; }
+    const proveedor = document.getElementById('stockMovProveedor').value.trim(); const remito = document.getElementById('stockMovRemito').value.trim();
+    const alCat = (document.getElementById('stockMovPrecioAlCatalogo')||{checked:false}).checked;
+    const lista = []; const errores = [];
+    [...filas.children].forEach((d, i)=>{
+      const txt = d.querySelector('[data-f="prod"]').value.trim(); if(!txt) return;
+      const it = stockParsearProducto(txt); const cant = parseFloat(d.querySelector('[data-f="cant"]').value) || 0; const pv = d.querySelector('[data-f="precio"]').value;
+      if(!it){ errores.push(`fila ${i+1}: producto no reconocido («${txt}»)`); return; }
+      if(!(cant > 0)){ errores.push(`fila ${i+1}: cantidad`); return; }
+      const mov = { tipo:'entrada', codigo:it.codigo, desc:it.desc, un:it.un, cantidad:cant, fecha, ts:Date.now() + i, usuario:(window.__fbUser && window.__fbUser.email) || '', proveedor, remito };
+      const pu = parseFloat(pv); if(String(pv).trim() !== '' && isFinite(pu) && pu >= 0){ mov.precioUnit = Math.round(pu * 100) / 100; mov.moneda = 'ARS'; }
+      lista.push({ mov, it, d });
+    });
+    if(errores.length){ msg.textContent = '⚠ Revisá: ' + errores.join(' · '); return; }
+    if(!lista.length){ msg.textContent = '⚠ No hay filas cargadas.'; return; }
+    btn.disabled = true; let ok = 0;
+    for(const x of lista){
+      try{
+        const idNuevo = await window.fbAddMovimiento(x.mov); ok++;
+        if(idNuevo && typeof window.stockAdjuntarFotoRemito === 'function'){ try{ await window.stockAdjuntarFotoRemito(idNuevo, x.mov); }catch(e){} }
+        if(alCat && x.mov.precioUnit != null){ try{ await window.stockActualizarCostoCatalogo(x.it.codigo, x.mov.precioUnit); }catch(e){} }
+        if(typeof window.stockRemitoAnotar === 'function') window.stockRemitoAnotar(x.mov);
+        x.d.remove();
+      }catch(e){ msg.textContent = `⚠ Se registraron ${ok} de ${lista.length}; la fila «${x.it.desc}» falló (revisá la conexión). Las que quedan en la grilla no se guardaron.`; btn.disabled = false; return; }
+    }
+    btn.disabled = false; [...filas.children].forEach((x,i)=> x.querySelector('.tramo-num').textContent = i + 1);
+    msg.style.color = 'var(--teal-dark)'; msg.textContent = `✓ ${ok} renglón(es) registrados en el remito ${remito || '(sin número)'}${proveedor ? ' de ' + proveedor : ''}.`;
+    if(!filas.children.length){ for(let i = 0; i < 3; i++) fila(); }
+  });
+})();
+
+
+// ============================================================
+// Adjuntos: fotos de remitos y de plazas (2026-09-26)
+// ============================================================
+// Comprime la imagen en el navegador (lado mayor 1024 px, JPEG) hasta que pese menos de ~350 KB,
+// así entra cómoda en un documento de Firestore (límite 1 MB) sin necesitar Storage.
+function comprimirImagen(file, maxLado, topeBytes){
+  maxLado = maxLado || 1024; topeBytes = topeBytes || 350 * 1024;
+  return new Promise((resolve, reject)=>{
+    const fr = new FileReader();
+    fr.onerror = ()=> reject(new Error('No se pudo leer la imagen'));
+    fr.onload = ()=>{
+      const img = new Image();
+      img.onerror = ()=> reject(new Error('El archivo no es una imagen válida'));
+      img.onload = ()=>{
+        let w = img.width, h = img.height; const esc = Math.min(1, maxLado / Math.max(w, h)); w = Math.round(w * esc); h = Math.round(h * esc);
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        let q = 0.8, out = cv.toDataURL('image/jpeg', q);
+        while(out.length * 0.75 > topeBytes && q > 0.35){ q -= 0.1; out = cv.toDataURL('image/jpeg', q); }
+        resolve({ dataUrl: out, w, h, bytes: Math.round(out.length * 0.75) });
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+async function subirAdjunto(file, meta){
+  if(typeof window.fbAdjuntoGuardar !== 'function') throw new Error('sin base');
+  const c = await comprimirImagen(file);
+  const doc = { ...meta, dataUrl:c.dataUrl, w:c.w, h:c.h, bytes:c.bytes, nombre:file.name || '', ts:Date.now(), usuario:(window.__fbUser && window.__fbUser.email) || '' };
+  return await window.fbAdjuntoGuardar(doc);
+}
+const __adjCache = new Map();
+window.verAdjunto = async function(id){
+  let fondo = document.getElementById('adjuntoFondo');
+  if(!fondo){
+    fondo = document.createElement('div'); fondo.id = 'adjuntoFondo';
+    fondo.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,.82); z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; padding:16px;';
+    fondo.innerHTML = '<div id="adjuntoCuerpo" style="color:#fff; font-size:13px;">Cargando…</div><div style="display:flex; gap:8px;"><a id="adjuntoBajar" class="btn-ghost" style="background:#fff; padding:6px 12px; border-radius:8px; text-decoration:none; font-size:13px;" download="foto.jpg">⬇ Bajar</a><button type="button" class="btn-ghost" style="background:#fff; padding:6px 12px;" onclick="document.getElementById(\'adjuntoFondo\').style.display=\'none\'">Cerrar</button></div>';
+    fondo.addEventListener('click', (e)=>{ if(e.target === fondo) fondo.style.display = 'none'; });
+    document.body.appendChild(fondo);
+  }
+  fondo.style.display = 'flex';
+  const cuerpo = document.getElementById('adjuntoCuerpo'); cuerpo.textContent = 'Cargando…';
+  try{
+    let d = __adjCache.get(id);
+    if(!d){ d = await window.fbAdjuntoLeer(id); if(d) __adjCache.set(id, d); }
+    if(!d){ cuerpo.textContent = 'La foto ya no está en la base.'; return; }
+    cuerpo.innerHTML = `<img src="${d.dataUrl}" alt="" style="max-width:92vw; max-height:78vh; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,.5);"><div style="margin-top:6px; text-align:center; opacity:.85;">${escHtml(d.tipo === 'remito' ? `Remito ${d.remito || ''} ${d.proveedor ? '· ' + d.proveedor : ''}` : (d.nota || ''))} · ${escHtml(fechaCorta(d.fecha || ''))}${d.usuario ? ' · ' + escHtml(d.usuario) : ''} · ${Math.round((d.bytes||0)/1024)} KB</div>`;
+    const a = document.getElementById('adjuntoBajar'); a.href = d.dataUrl; a.download = `foto_${d.tipo||'adj'}_${d.fecha||''}.jpg`;
+  }catch(e){ cuerpo.textContent = 'No se pudo cargar la foto (revisá tu conexión a internet).'; }
+};
+// Foto del remito: se sube con el primer renglón y los siguientes del mismo remito la comparten.
+window.stockAdjuntarFotoRemito = async function(movId, mov){
+  const inp = document.getElementById('stockMovFoto'); const hint = document.getElementById('stockMovFotoHint');
+  const R = window.__remitoEnCurso || {};
+  if(inp && inp.files && inp.files[0]){
+    if(hint) hint.textContent = 'Subiendo la foto del remito…';
+    const id = await subirAdjunto(inp.files[0], { tipo:'remito', remito:mov.remito || '', proveedor:mov.proveedor || '', fecha:mov.fecha || '', movId });
+    await window.fbUpdateMovimiento(movId, { fotoId:id });
+    R.fotoId = id; R.fotoClave = `${mov.proveedor||''}|${mov.remito||''}`;
+    inp.value = '';
+    if(hint) hint.textContent = '✓ Foto guardada: los renglones siguientes de este remito la comparten.';
+    return id;
+  }
+  if(R.fotoId && R.fotoClave === `${mov.proveedor||''}|${mov.remito||''}`){
+    await window.fbUpdateMovimiento(movId, { fotoId:R.fotoId }); return R.fotoId;
+  }
+  return null;
+};
+window.avSubirFoto = async function(plazaId){
+  const a = avanceObras.find(x=> x.id === plazaId); const inp = document.getElementById('avFotoInput'); const msg = document.getElementById('avFotoMsg');
+  if(!a || !inp) return;
+  if(!window.__fbUser){ msg.textContent = 'Iniciá sesión para subir fotos.'; return; }
+  if(!inp.files || !inp.files[0]){ msg.textContent = 'Elegí una foto primero.'; return; }
+  msg.textContent = 'Subiendo…';
+  try{
+    const nota = (document.getElementById('avFotoNota')||{value:''}).value.trim();
+    const id = await subirAdjunto(inp.files[0], { tipo:'plaza', plazaId:a.id, plazaNombre:a.nombre || '', nota, fecha:fechaAISO(new Date()) });
+    a.fotos = (Array.isArray(a.fotos) ? a.fotos : []).concat([{ id, fecha:fechaAISO(new Date()), nota, usuario:(window.__fbUser && window.__fbUser.email) || '' }]);
+    await guardarAvanceObras(a);
+    msg.textContent = '✓ Foto guardada.'; renderAvanceDetalle();
+  }catch(e){ msg.textContent = 'No se pudo subir la foto (revisá tu conexión a internet). ' + (e && e.message ? e.message : ''); }
+};
+
+
+// ============================================================
+// Salud de la herramienta y auditoría (2026-09-26)
+// ============================================================
+(function(){
+  const NOMBRES = { movimientos:'Movimientos de pañol', catalogoProductos:'Catálogo (cambios)', avanceObras:'Plazas', ordenesTrabajo:'Órdenes de trabajo', gastosObra:'Gastos de obra', planSemanal:'Plan semanal', historialEtapas:'Historial de etapas', historialCalculos:'Cómputos guardados' };
+  const ACCIONES = { producto:'Producto editado / alta', producto_baja:'Producto dado de baja', producto_deshacer:'Corrección deshecha', movimiento_anulado:'Movimiento anulado', movimiento_reactivado:'Movimiento reactivado', precio_corregido:'Precio corregido', plaza_alta:'Plaza registrada', plaza_borrada:'Plaza borrada', precios_config:'Precios / itemizado / contratista', respaldo:'Respaldo bajado' };
+  const hace = ts => { if(!ts) return '—'; const m = Math.round((Date.now() - ts) / 60000); if(m < 1) return 'recién'; if(m < 60) return `hace ${m} min`; const h = Math.round(m / 60); if(h < 48) return `hace ${h} h`; return `hace ${Math.round(h/24)} días`; };
+  const fechaHora = ts => { const d = new Date(ts); return isNaN(d) ? '—' : d.toLocaleString('es-AR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' }); };
+  window.renderSalud = async function(){
+    const c = document.getElementById('saludCuerpo'); if(!c) return;
+    const miVersion = ((document.getElementById('appVersion')||{}).textContent || '').replace(/^·\s*v\s*/, '').trim();
+    const sync = window.__sync || {};
+    let html = `<div><b>Esta computadora:</b> versión <b>${escHtml(miVersion || '?')}</b> · sesión: ${escHtml((window.__fbUser && window.__fbUser.email) || 'sin iniciar')} · conexión con la base: <b>${window.__stockConnOk ? 'OK' : 'sin confirmar'}</b>${navigator.onLine === false ? ' · <span style="color:var(--danger);">SIN INTERNET</span>' : ''}</div>`;
+    html += `<div style="margin-top:8px;"><b>Sincronización en vivo</b> (última vez que llegó cada colección):</div><table style="margin-top:4px; max-width:560px;"><tbody>` +
+      Object.keys(NOMBRES).map(k => { const s = sync[k]; return `<tr><td>${escHtml(NOMBRES[k])}</td><td>${s ? `${s.n} doc(s)` : '—'}</td><td style="color:${s ? 'var(--text)' : 'var(--danger)'};">${s ? hace(s.ts) + ' (' + fechaHora(s.ts) + ')' : 'nunca en esta sesión'}</td></tr>`; }).join('') + `</tbody></table>`;
+    c.innerHTML = html + '<div style="margin-top:8px;">Consultando respaldo y computadoras…</div>';
+    let salud = null, pres = {};
+    try{ salud = typeof window.fbSaludLeer === 'function' ? await window.fbSaludLeer() : null; }catch(e){}
+    try{ pres = typeof window.fbPresenciaLeer === 'function' ? await window.fbPresenciaLeer() : {}; }catch(e){}
+    const ur = salud && salud.ultimoRespaldo;
+    const diasResp = ur ? (Date.now() - ur.ts) / 86400000 : null;
+    html += `<div style="margin-top:10px;"><b>Último respaldo completo:</b> ${ur ? `${fechaHora(ur.ts)} (${hace(ur.ts)}) por ${escHtml(ur.usuario||'')}${ur.resumen ? ' — ' + escHtml(ur.resumen) : ''}` : 'no hay registro (bajá uno con el botón de arriba)'}${diasResp != null && diasResp > 7 ? ' <span style="color:var(--danger); font-weight:700;">⚠ hace más de una semana</span>' : ''}</div>`;
+    const lista = Object.keys(pres || {}).map(k => ({ id:k, ...(pres[k]||{}) })).filter(x => x.ts).sort((a,b)=> b.ts - a.ts);
+    html += `<div style="margin-top:10px;"><b>Computadoras / celulares que abrieron la herramienta</b> (con sesión iniciada, últimos 30 días):</div>`;
+    const recientes = lista.filter(x => Date.now() - x.ts < 30 * 86400000);
+    html += recientes.length ? `<table style="margin-top:4px; max-width:720px;"><thead><tr><th>Equipo</th><th>Usuario</th><th>Versión</th><th>Última vez</th></tr></thead><tbody>` +
+      recientes.map(x => { const vieja = miVersion && x.version && x.version !== miVersion; return `<tr><td>${escHtml(x.equipo||'')} <span style="color:var(--text-soft); font-size:11px;">${escHtml(x.pantalla||'')}</span></td><td>${escHtml(x.usuario||'')}</td><td style="${vieja ? 'color:var(--danger); font-weight:700;' : ''}">${escHtml(x.version||'?')}${vieja ? ' ⚠ distinta' : ''}</td><td>${hace(x.ts)}</td></tr>`; }).join('') + `</tbody></table><div class="hint" style="margin-top:4px;">Si una computadora figura con una versión distinta a la tuya, hay que recargar la página ahí (o subir el index.html nuevo a GitHub Pages).</div>`
+      : `<div class="hint">Nadie registrado todavía: se anota solo cada 5 minutos mientras haya sesión iniciada.</div>`;
+    c.innerHTML = html;
+  };
+  const b = document.getElementById('saludRefrescar'); if(b) b.addEventListener('click', ()=> window.renderSalud());
+  // Auditoría
+  let audit = [];
+  const pintarAudit = ()=>{
+    const body = document.getElementById('auditoriaBody'); if(!body) return;
+    const q = ((document.getElementById('auditoriaBuscar')||{}).value || '').trim().toLowerCase();
+    const filas = audit.filter(a => !q || `${a.usuario} ${a.accion} ${ACCIONES[a.accion]||''} ${a.detalle}`.toLowerCase().includes(q));
+    body.innerHTML = filas.length ? filas.map(a => `<tr><td style="white-space:nowrap;">${fechaHora(a.ts)}</td><td>${escHtml(a.usuario||'')}</td><td><b>${escHtml(ACCIONES[a.accion] || a.accion || '')}</b></td><td>${escHtml(a.detalle||'')}${a.version ? `<br><span style="font-size:11px; color:var(--text-soft);">${escHtml(a.version)}</span>` : ''}</td></tr>`).join('')
+      : `<tr><td colspan="4" style="text-align:center; color:var(--text-soft); padding:12px;">${audit.length ? 'Nada coincide con el filtro.' : 'Sin registros todavía (la auditoría arranca con esta versión).'}</td></tr>`;
+  };
+  const ba = document.getElementById('auditoriaCargar');
+  if(ba) ba.addEventListener('click', async ()=>{
+    const body = document.getElementById('auditoriaBody'); body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:12px;">Cargando…</td></tr>';
+    try{ audit = await window.fbAuditoriaLeer(200); pintarAudit(); }
+    catch(e){ body.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--danger); padding:12px;">No se pudo leer la auditoría: ${escHtml(e && e.message || '')}</td></tr>`; }
+  });
+  const bq = document.getElementById('auditoriaBuscar'); if(bq) bq.addEventListener('input', pintarAudit);
+})();
+
 // ---- Precio sin entrada (cotización / lista): entrada de cantidad 0 marcada soloPrecio ----
 (function(){
   const btn = document.getElementById('stockPrecioBtn'); if(!btn) return;
@@ -10601,6 +11429,7 @@ function catLimpiarFormulario(){
   document.getElementById('catUn').value = 'c/a';
   document.getElementById('catStock').value = '0';
   document.getElementById('catCosto').value = '0';
+  { const m = document.getElementById('catMinimo'); if(m) m.value = '0'; }
   document.getElementById('catEditandoCodigo').value = '';
   document.getElementById('catCancelarBtn').style.display = 'none';
   document.getElementById('catGuardarBtn').textContent = 'Guardar producto';
@@ -10613,6 +11442,7 @@ function catEditarProducto(codigo){
   document.getElementById('catUn').value = it.un || 'c/a';
   document.getElementById('catStock').value = it.stock != null ? it.stock : 0;
   document.getElementById('catCosto').value = it.costo != null ? it.costo : 0;
+  { const m = document.getElementById('catMinimo'); if(m) m.value = it.minimo != null ? it.minimo : 0; }
   document.getElementById('catEditandoCodigo').value = String(codigo);
   const selFam = document.getElementById('catFamilia');
   if(selFam) selFam.value = String(Math.floor(codigo/1000)*1000);
@@ -10637,6 +11467,7 @@ async function catGuardarProducto(){
     sector: 'pañol',
     stock: parseFloat(document.getElementById('catStock').value) || 0,
     costo: parseFloat(document.getElementById('catCosto').value) || 0,
+    minimo: parseFloat((document.getElementById('catMinimo')||{value:0}).value) || 0,
     activo: true,
     editadoPor: (window.__fbUser && window.__fbUser.email) || '',
     editadoTs: Date.now()
@@ -10924,7 +11755,7 @@ function renderStockTabla(){
     .map(i=>({...i, actual: stockActual(i.codigo)}))
     .filter(i=>{
       if(q && !(String(i.codigo).includes(q) || i.desc.toLowerCase().includes(q))) return false;
-      if(soloFaltantes && i.actual>3) return false;
+      if(soloFaltantes && stockEstado(i.actual, stockMinimoDe(i.codigo)) === 'OK') return false;
       return true;
     })
     .sort((a,b)=>a.desc.localeCompare(b.desc));
@@ -10934,7 +11765,8 @@ function renderStockTabla(){
     return;
   }
   body.innerHTML = rows.map(i=>{
-    const estado = stockEstado(i.actual);
+    const minimo = stockMinimoDe(i.codigo);
+    const estado = stockEstado(i.actual, minimo);
     const rowClass = estado==='SIN STOCK' ? 'stock-row-sin' : (estado==='POCO' ? 'stock-row-poco' : '');
     const badgeClass = estado==='SIN STOCK' ? 'stock-badge-sin' : (estado==='POCO' ? 'stock-badge-poco' : 'stock-badge-ok');
     const importe = i.actual * i.costo;
@@ -10942,8 +11774,8 @@ function renderStockTabla(){
       <td>${i.codigo}</td>
       <td>${escHtml(i.desc)}</td>
       <td>${escHtml(i.un)}</td>
-      <td>${fmt(i.actual,2)}</td>
-      <td><span class="stock-badge ${badgeClass}">${estado}</span></td>
+      <td>${fmt(i.actual,2)}${minimo ? `<br><span style="font-size:11px; color:var(--text-soft);">mín. ${fmt(minimo,0)}</span>` : ''}</td>
+      <td><span class="stock-badge ${badgeClass}">${estado === 'POCO' && minimo ? 'BAJO MÍNIMO' : estado}</span></td>
       <td>${i.costo?formatMoney(i.costo):'—'}</td>
       <td>${i.costo?formatMoney(importe):'—'}</td>
     </tr>`;
@@ -10970,12 +11802,13 @@ function renderStockMovimientos(){
     const precioTxt = (m.precioUnit != null && isFinite(m.precioUnit)) ? `<br><span style="font-size:11.5px;">💲 ${formatMoney(m.precioUnit)} / ${escHtml(m.un||'')}${m.cantidad ? ` · total ${formatMoney(m.precioUnit * m.cantidad)}` : ''}</span>` : '';
     const detalle = (m.tipo==='entrada'
       ? (([m.proveedor ? `Prov.: ${escHtml(m.proveedor)}` : '', m.remito ? `Remito ${escHtml(m.remito)}` : ''].filter(Boolean).join(' · ') || '—') + precioTxt)
-      : ([m.retiradoPor?`Retirado por: ${escHtml(m.retiradoPor)}`:'', m.destino?`Destino: ${escHtml(m.destino)}`:''].filter(Boolean).join(' · ') || '—')) + quien;
+      : ([m.retiradoPor?`Retirado por: ${escHtml(m.retiradoPor)}`:'', m.destino?`Destino: ${escHtml(m.destino)}`:'', m.enCargo?'<b>👷 en cargo</b>':'', m.usoDeCargo?`(de lo que tenía ${escHtml(m.personaNombre||'')})`:''].filter(Boolean).join(' · ') || '—')) + (m.devolucion ? `<br><span style="font-size:11.5px;">↩ Devolución de <b>${escHtml(m.personaNombre||'')}</b></span>` : '') + quien;
     const anuladoInfo = m.anulado
       ? `<br><span style="color:var(--danger); font-size:11px;">⊘ ANULADO${m.anuladoMotivo?`: ${escHtml(m.anuladoMotivo)}`:''}${m.anuladoPor?` — por ${escHtml(m.anuladoPor)}`:''}</span>`
       : '';
     const estiloFila = m.anulado ? ' style="opacity:.55; text-decoration:line-through;"' : '';
-    const btnImp = `<button type="button" class="btn-ghost" onclick="verComprobanteMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px;" title="Ver e imprimir el comprobante de este movimiento (vale con firmas)">🖨</button>`;
+    const btnFoto = m.fotoId ? `<button type="button" class="btn-ghost" onclick="verAdjunto('${escHtml(m.fotoId)}')" style="padding:4px 10px; font-size:12px;" title="Ver la foto del remito">📷</button> ` : '';
+    const btnImp = btnFoto + `<button type="button" class="btn-ghost" onclick="verComprobanteMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px;" title="Ver e imprimir el comprobante de este movimiento (vale con firmas)">🖨</button>`;
     const btn = btnImp + ' ' + (m.anulado
       ? `<button type="button" class="btn-ghost" onclick="reactivarStockMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px;" title="Volver a contar este movimiento">↺</button>`
       : `<button type="button" class="btn-ghost" onclick="anularStockMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px; color:var(--danger);" title="Anular este movimiento (queda en el registro pero deja de contar)">⊘</button>`);
@@ -11003,7 +11836,7 @@ function movimientosFiltrados(){
   const hasta = ((document.getElementById('stockMovHasta')||{}).value||'');
   return stockMovimientos.filter(m=>{
     if(q){
-      const texto = `${m.codigo} ${m.desc||''} ${m.destino||''} ${m.retiradoPor||''} ${m.proveedor||''} ${m.remito||''} ${m.usuario||''}`.toLowerCase();
+      const texto = `${m.codigo} ${m.desc||''} ${m.destino||''} ${m.retiradoPor||''} ${m.proveedor||''} ${m.remito||''} ${m.personaNombre||''} ${m.usuario||''}`.toLowerCase();
       if(!texto.includes(q)) return false;
     }
     if(plaza && String(m.plazaId||'') !== plaza) return false;
@@ -11104,7 +11937,7 @@ function actualizarStockResumen(){
   let sinStock=0, poco=0, importeTotal=0;
   catalogo().forEach(i=>{
     const actual = stockActual(i.codigo);
-    const estado = stockEstado(actual);
+    const estado = stockEstado(actual, stockMinimoDe(i.codigo));
     if(estado==='SIN STOCK') sinStock++;
     else if(estado==='POCO') poco++;
     importeTotal += actual*i.costo;
@@ -11112,7 +11945,7 @@ function actualizarStockResumen(){
   document.getElementById('stockResumenTiles').innerHTML = `
     <div class="tile"><div class="num">${catalogo().length}</div><div class="lbl">Productos en catálogo</div></div>
     <div class="tile"><div class="num" style="color:var(--danger);">${sinStock}</div><div class="lbl">Sin stock</div></div>
-    <div class="tile"><div class="num" style="color:var(--amber);">${poco}</div><div class="lbl">Poca cantidad (≤3)</div></div>
+    <div class="tile"><div class="num" style="color:var(--amber);">${poco}</div><div class="lbl">Bajo mínimo / poca cantidad</div></div>
     <div class="tile"><div class="num" style="font-size:17px;">${formatMoney(importeTotal)}</div><div class="lbl">Importe total inventario</div></div>
     <div class="tile"><div class="num">${stockMovimientos.length}</div><div class="lbl">Movimientos nuevos</div></div>
   `;
@@ -11122,7 +11955,7 @@ function exportarStockCSV(){
   let csv = 'Código,Descripción,Unidad,Stock actual,Estado,Costo unitario,Importe\n';
   catalogo().forEach(i=>{
     const actual = stockActual(i.codigo);
-    csv += [i.codigo, i.desc, i.un, fmt(actual,2), stockEstado(actual), i.costo, (actual*i.costo).toFixed(2)]
+    csv += [i.codigo, i.desc, i.un, fmt(actual,2), stockEstado(actual, stockMinimoDe(i.codigo)), i.costo, (actual*i.costo).toFixed(2)]
       .map(v => `"${String(v).replace(/"/g,'""')}"`).join(',') + '\n';
   });
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
@@ -11174,6 +12007,9 @@ function exportarRespaldoCompleto(){
     data[c.clave] = lista;
     resumen.push(`${lista.length} ${c.titulo.toLowerCase()}`);
   });
+  // Queda registrado cuándo fue el último respaldo (para «Salud») y en la auditoría (2026-09-26).
+  try{ if(window.__fbUser && typeof window.fbSaludGuardar === 'function') window.fbSaludGuardar({ ultimoRespaldo:{ ts:Date.now(), usuario:(window.__fbUser && window.__fbUser.email) || '', resumen:resumen.join(' · ') } }); }catch(e){}
+  try{ if(typeof window.fbAuditar === 'function') window.fbAuditar('respaldo', resumen.join(' · '), {}); }catch(e){}
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -12711,6 +13547,21 @@ function renderAvanceDetalle(){
     }
   });
 
+  // ---- Fotos de la plaza (2026-09-26) ----
+  {
+    const fotos = Array.isArray(a.fotos) ? a.fotos : [];
+    html += `<div class="av-fotos" style="margin-top:18px; border-top:1px solid var(--border); padding-top:12px;">
+      <h3 style="margin:0 0 6px;">📷 Fotos de la plaza <span style="font-weight:500; color:var(--text-soft); font-size:12px;">(${fotos.length})</span></h3>
+      <div class="hint no-print" style="margin-top:0;">Fotos del estado de la obra, del replanteo, de lo que encontraron. Se guardan comprimidas en la base compartida y las ve todo el equipo. Se cargan al tocarlas.</div>
+      <div id="avFotosLista" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">${fotos.map(f=>`<button type="button" class="btn-ghost" onclick="verAdjunto('${escHtml(f.id)}')" style="padding:6px 10px; font-size:12px;" title="${escHtml(f.nota||'')}">🖼 ${escHtml(fechaCorta(f.fecha||''))}${f.nota ? ' · ' + escHtml(String(f.nota).slice(0,28)) : ''}</button>`).join('') || '<span class="hint" style="margin:0;">Sin fotos todavía.</span>'}</div>
+      <div class="no-print" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+        <input type="file" id="avFotoInput" accept="image/*" capture="environment" style="font-size:12.5px; max-width:260px;">
+        <input type="text" id="avFotoNota" placeholder="Nota (opcional): p. ej. «columna 3 torcida»" style="margin:0; flex:1 1 200px; min-width:0;">
+        <button type="button" class="btn-primary" style="margin:0; padding:7px 12px;" onclick="avSubirFoto('${escHtml(a.id)}')">Subir foto</button>
+        <span class="hint" id="avFotoMsg" style="margin:0;"></span>
+      </div>
+    </div>`;
+  }
   card.innerHTML = html;
   // El balance se dibuja después de volcar el HTML, porque necesita que #balanceContenedor exista.
   if(typeof renderBalance === 'function') renderBalance();
@@ -14839,7 +15690,21 @@ function calcular(){
       // ---- Procedimiento y espesores del cap. 1.3 de las ETG (Anexo II, edición 2022) ----
       itemsPint.push({desc:'ℹ <b>Espesores exigidos (ETG cap. 1.3):</b> pintura de base ≥ <b>50 µm</b> de película seca · terminación ≥ <b>80 µm</b> · <b>total mínimo 130 µm</b>. Aspecto s/ IRAM 1109 B2, película homogénea, sin chorreos ni desniveles, color y brillo uniformes. La Inspección puede exigir que los pasos se hagan en su presencia y ordenar ensayos s/ IRAM 1023 y 1107. En lo no previsto rige IRAM 1042.', cant:'—', un:'—', ref:'ETG cap. 1.3'});
       itemsPint.push({desc:'ℹ <b>Columna NUEVA (ETG):</b> limpieza por <b>arenado o granallado</b> · <b>anticorrosiva epoxídica autoimprimante</b> en el primer tramo y <b>antióxido al cromato de zinc</b> en los restantes (IRAM 1182) · después <b>una mano</b> de poliuretánica en el primer tramo y de sintética en los demás · <b>la segunda mano se da con la columna ya instalada en obra</b>. <b>Columna INSTALADA o de mantenimiento:</b> preparación previa (rasqueteado, cepillado, amolado o lavado a presión) · <b>2 manos</b> de base · <b>2 capas</b> de terminación de ≥80 µm.', cant:'—', un:'—', ref:'ETG cap. 1.3'});
-      itemsPint.push({desc:'⚠ <b>Pintura asfáltica — falta computarla.</b> La ETG manda pintar la columna con <b>pintura asfáltica por dentro y por fuera hasta 300 mm por encima de la línea de empotramiento</b>. Es el ítem <b>8023</b> del pañol, que sigue sin cantidad. Y la <b>pintura dieléctrica</b> (anti pegatina, apta para 1 kV, ensayos s/ IRAM 2070) debe cubrir <b>desde la base hasta 2,50 m sobre el nivel de piso terminado</b>.', cant:'—', un:'—', ref:'ETG cap. 1.3'});
+      // ---- Pintura asfáltica, COMPUTADA (2026-09-26; antes era solo un aviso) ----
+      // ETG: por dentro y por fuera, desde la base hasta 300 mm por encima de la línea de
+      // empotramiento. Superficie ≈ perímetro del pie (π × Ø del AP-C-005) × (empotramiento + 0,30) × 2 caras.
+      {
+        let m2 = 0; const det = [];
+        gruposCol.forEach(g=>{
+          const c = COLUMNA_MET[g.altura]; if(!c) return;
+          const alto = (c.emp || 0.7) + 0.30, per = Math.PI * (c.d1 || 114) / 1000;
+          const porCol = per * alto * 2;
+          m2 += porCol * g.columnas;
+          det.push(`${g.columnas} × (π × ${c.d1} mm × ${fmt(alto,2)} m × 2 caras = ${fmt(porCol,2)} m²)`);
+        });
+        if(m2 > 0) itemsPint.push({...M(8023, `zona de empotramiento, <b>por dentro y por fuera hasta 300 mm sobre la línea de empotramiento</b> (ETG cap. 1.3) — ${det.join(' + ')}`), cant:Math.round(m2*100)/100, un:'m²', ref:'ETG cap. 1.3 · AP-C-005 (Ø y empotramiento)'});
+        itemsPint.push({desc:'ℹ <b>Pintura dieléctrica</b> (anti pegatina, apta para 1 kV, ensayos s/ IRAM 2070): <b>desde la base hasta 2,50 m sobre el nivel de piso terminado</b>. Es parte del «tipo 2» del AP-TC-023 — se computa por columna con el renglón de pintura de arriba, no en litros.', cant:'—', un:'—', ref:'ETG cap. 1.3 · AP-TC-023'});
+      }
       itemsPint.push({desc:'ℹ <b>Columnas oxidadas en la zona de empotramiento (ETG):</b> <b>tipo A</b> base oxidada → excavar, esmerilar hasta 300 mm sobre el suelo, 2 capas de convertidor o epoxi + 2 de poliuretánica ≥80 µm · <b>tipo B</b> base picada → igual pero decapando primero · <b>tipo C</b> base perforada → <b>se retira la columna y se reemplaza por una nueva</b>. Después de pintar: secado mínimo 1 hora, rellenar y reponer vereda con material del mismo tipo y color.', cant:'—', un:'—', ref:'ETG cap. 1.3'});
       itemsPint.push({desc:'ℹ <b>Colores (nota del AP-TC-023):</b> convertidor de óxido <b>rojo</b> o sus tonalidades · antipegatina <b>gris RAL 7024</b>, con propiedades aislantes s/ ETG · poliuretánica y sintética <b>gris RAL 7043</b>.', cant:'—', un:'—', ref:'AP-TC-023'});
       itemsPint.push({desc:'⚠ Falta definir <b>tipo 1 o tipo 2</b> (los ítems 3.03 a 3.08 del pliego cruzan el tipo con el tramo de altura): la diferencia es si esa columna lleva antipegatina abajo, y eso lo define la Inspección. Los seis proyectos ejecutivos que leímos usan todos <b>tipo 1</b>. Tampoco están computados los litros ni los m² de superficie — los ítems 8023 y 9002 del pañol quedan sin cantidad.', cant:'—', un:'—', ref:'Pliego ítems 3.03–3.08'});
@@ -15191,7 +16056,18 @@ function calcular(){
     ];
     // La puntera de 1,5 mm² va sobre el cable que alimenta el ARTEFACTO, así que se arma junto con la
     // luminaria y no adentro de la caja: por eso queda en la sección LUMINARIAS (pedido del usuario).
-    itemsLuminarias.push({...M(2028,'conexión a portafusible: entrada desde BPN + salida a luminaria (2 por portafusible)'), cant:totalPortafusibles*2, un:'Un.', ref:'Criterio de campo'});
+    if(vincTipo === 'Metálica'){
+      // ---- Puente BPN → portafusible de 2,5 mm² (2026-09-26, plano AP-CC-014-C / 015-C) ----
+      // El plano del tablerito de la columna metálica dibuja un conductor de 1×2,5 mm² IRAM 247-3
+      // de la bornera al portafusible. Hasta hoy la calculadora ponía 2 punteras de 1,5 por
+      // portafusible como si el cable de la luminaria entrara y saliera del portafusible; según el
+      // plano la entrada es el puente de 2,5 (con sus dos punteras de 2,5) y la salida el 3×1,5.
+      itemsLuminarias.push({...M(2028,'salida del portafusible a la luminaria (1 por portafusible) — la entrada es el puente de 2,5 mm² desde la BPN, s/ AP-CC-014-C / 015-C'), cant:totalPortafusibles, un:'Un.', ref:'AP-CC-014-C / 015-C'});
+      itemsLuminarias.push({desc:'Cable unipolar 1×2,5 mm² IRAM NM 247-3 — <b>puente de la bornera BPN de fase al portafusible</b>, ~0,30 m por portafusible s/ plano del tablerito · ⚠ sin código en el pañol: darlo de alta', cant:Math.round(0.3*totalPortafusibles*100)/100, un:'m', ref:'AP-CC-014-C / 015-C'});
+      itemsLuminarias.push({...M(2030,'puente BPN → portafusible de 2,5 mm²: una punta en la bornera y otra en el portafusible (2 por portafusible)'), cant:2*totalPortafusibles, un:'Un.', ref:'AP-CC-014-C / 015-C'});
+    } else {
+      itemsLuminarias.push({...M(2028,'conexión a portafusible: entrada desde BPN + salida a luminaria (2 por portafusible)'), cant:totalPortafusibles*2, un:'Un.', ref:'Criterio de campo'});
+    }
     // ---- Regla de compra en PRFV: neutro y tierra SIEMPRE de 6 mm² (2026-08-26) ----
     // El usuario la fijó: *"las BPN que pedimos para las columnas de PRFV, ya sean de 10 o 7 de
     // altura libre, las VERDE y CELESTES que sean siempre de 6 mm sin importar el tamaño del cable"*.
@@ -16202,9 +17078,32 @@ function calcular(){
       {...M(7015, dondeVan), cant:dispersoresPAT, un:'Un.', ref:'Ítem 15.67 / ítem 75 · IRAM 2309'},
       {...M(7010,`bajada de PAT — ${nTableros > 1 ? `${nTableros} × ${fmt(PAT_CABLE_TABLERO_M,0)} m de los tableros generales` : `${fmt(PAT_CABLE_TABLERO_M,0)} m del tablero general`} + ${jabalinasCircuito} × ${fmt(mPorJabalina,0)} m ${patPorColumna?'de la jabalina de cada columna metálica':'de las jabalinas de fin de circuito'}`), cant:cablePATml, un:'m', ref:'IRAM 247-3 · medida exacta de obra'},
       {...M(7019,'conexión de la jabalina al cable de PAT, 1 por jabalina'), cant:dispersoresPAT, un:'Un.', ref:'Ítem 15.66 / ítem 74'},
-      {...M(2029,'punta del cable verde-amarillo que entra a la bornera BPN, 1 por jabalina'), cant:dispersoresPAT, un:'Un.', ref:'Medida exacta de obra'},
+      // ---- La OTRA punta del cable de PAT: depende de a qué se conecta (2026-09-26) ----
+      // Antes salía una puntera TIFF 10 mm² «que entra a la bornera BPN» por CADA jabalina, para todo
+      // tipo de columna. El usuario: *"¿estás tomando en cuenta el terminal ojal de la puesta a
+      // tierra? me parece que no"*. Tenía razón. Según los tipos constructivos:
+      //   · Columna metálica NUEVA (AP-TC-005 1/2 + AP-CC-001/004): el cable de 1×10 sube por el caño
+      //     de PVC y se ABULONA al bulón PAT de bronce de la caja de conexión → TERMINAL DE OJAL de
+      //     10 mm² (ETG cap. 14.3: terminal a compresión estanco de Cu estañado, ojal 5/16").
+      //   · Columna metálica EXISTENTE (AP-TC-005 2/2 / AP-TC-006): el terminal ES la banderita 7018
+      //     (con su ojal Ø14,6 al bloquete), que ya sale en «Columnas existentes». Nada más.
+      //   · PRFV (fin de circuito): el cable entra a la bornera BPN verde de la caja → puntera TIFF.
+      //   · TABLERO GENERAL: el 1×10 va a la BARRA de PAT del tablero → terminal de OJAL (ETG 14.3:
+      //     «en el tablero, el cable de 1×10 va a la barra de PAT con terminal estanco a compresión
+      //     hexagonal de ojal 5/16"»), no TIFF.
+      ...(()=>{
+        const metNuevas = (colOn && tipoCol === 'Metálica') ? cantCol : 0;
+        const prfvJab = patPorColumna ? 0 : circuitos;
+        const filas = [];
+        if(metNuevas > 0) filas.push({...M(2045, `punta del cable de PAT que se <b>abulona al bulón PAT de bronce</b> de la caja de conexión (AP-CC-001/004) — <b>1 por columna metálica nueva</b> (${metNuevas}) · terminal a compresión estanco, ojal 5/16" s/ ETG cap. 14.3`), cant:metNuevas, un:'Un.', ref:'AP-TC-005 (1/2) · ETG cap. 14.3'});
+        if(prfvJab > 0) filas.push({...M(2029, `punta del cable verde-amarillo que entra a la bornera BPN verde de la caja de columna PRFV — 1 por jabalina de fin de circuito (${prfvJab})`), cant:prfvJab, un:'Un.', ref:'Medida exacta de obra'});
+        filas.push({...M(2045, `punta del cable de PAT del <b>tablero general</b>, abulonada a la <b>barra de PAT</b> del tablero — 1 por tablero (${nTableros}) · terminal a compresión hexagonal, ojal 5/16" s/ ETG cap. 14.3`), cant:nTableros, un:'Un.', ref:'ETG cap. 14.3 · AP-T-007/008'});
+        if(colExistAcom > 0) filas.push({desc:`ℹ Las <b>${colExistAcom} columna(s) existente(s)</b> no llevan ojal ni puntera en la PAT: el terminal es la <b>banderita</b> (7018) con su ojal Ø14,6 al bloquete, que ya está computada en «Columnas existentes».`, cant:'—', un:'—', ref:'AP-TC-005 (2/2) · AP-TC-006'});
+        if(metNuevas > 0) filas.push({desc:'ℹ En la columna metálica nueva, del <b>bulón PAT</b> a la <b>bornera de tierra</b> del tablerito va un puente de <b>1×6 mm²</b> (ojal en el bulón, puntera en la BPN) s/ AP-CC-014-C / 015-C: sale computado en «Cajas de conexión y seguridad eléctrica».', cant:'—', un:'—', ref:'AP-CC-014-C / 015-C'});
+        return filas;
+      })(),
       {...T, desc:'Medición de resistencia de PAT', cant:dispersoresPAT, un:'Un.', ref:'Ítem 81'},
-      {desc:'Bornera BPN verde-amarilla — NO se computa: en el tablero general viene con el tablero armado, y en las columnas el cable entra al grupo de tierra que ya está calculado arriba', cant:'—', un:'—', ref:'No se compra aparte'},
+      {desc:`Bornera BPN verde-amarilla — NO se computa: en el tablero general la PAT va a la barra de tierra que viene con el tablero armado${patPorColumna ? ', y en la columna metálica al bulón PAT de la caja' : ', y en las columnas el cable entra al grupo de tierra que ya está calculado arriba'}`, cant:'—', un:'—', ref:'No se compra aparte'},
       // ---- Capítulos 14 y 15 de las ETG (Anexo II, 2022) — cargados el 05/09/2026 ----
       // Es el capítulo que faltaba: define el dispersor, cómo se conecta y qué valor tiene que dar
       // la medición. Todo lo de acá abajo son condiciones que la Inspección controla y que hacen
@@ -16268,8 +17167,19 @@ function calcular(){
       itemsCajas.push({desc:'ℹ <b>Columnas EXISTENTES: van con caja estanca EXTERNA</b>, que es el <b>ítem 14.1</b> de los cómputos oficiales, no el 14.2. Es la caja de aluminio inyectado <b>200×150×100 IP65</b> (plano AP-PL-002, ítem 6003 del pañol) o la de <b>200×200×100</b> (AP-PL-003), abrochada a la columna con <b>2 juegos de abrazaderas</b> y montada a 2,50 m del piso. Ej. real: Alberto Pío ID 3191 computó 14.1 = 8 cajas externas y 14.2 = 1 tablerito, porque tenía 1 columna nueva y 8 existentes. ' + (colExist ? `<b>Las ${colExist} existentes que cargaste ya están computadas</b> en la sección «Columnas existentes».` : 'Si hay existentes con acometida nueva, cargalas en «Columnas existentes — reacondicionamiento» y salen solas.') + '', cant:'—', un:'—', ref:'AP-PL-002 / AP-PL-003 · ítem 14.1'});
       itemsCajas.push({desc:'⚠ <b>Contradicción a resolver con la Inspección — armado de la caja.</b> Los planos tipo <b>AP-PL-002 b, AP-PL-003 b y AP-CC-014-A</b> piden <b>3 juegos de base portafusible serie BMF, tamaño 8,5 × 31,5 mm</b> para riel DIN, <b>con fusible cerámico de 4 A</b> (uno por fase: F1-R, F2-S, F3-T en TN-S), más <b>bornes BPN con puente seccionable</b> y <b>4 borneras BPN-16</b>. Tu armado real —el de la foto y el que usan los proyectos ejecutivos 2026— es de <b>2 tabaqueras 10 × 38 con 2 A por artefacto</b>. La calculadora sigue TU armado, que es lo que está en obra, pero la diferencia es grande (3 portafusibles de 4 A contra 2 de 2/4 A) y conviene tenerla por escrito antes de certificar.', cant:'—', un:'—', ref:'AP-PL-002 b vs armado real'});
       itemsCajas.push({desc:'ℹ Nota del AP-PL-002 b / AP-PL-003 b: <b>en esquema TT los tres artefactos de una columna se alimentan desde UNA SOLA fase</b>, y se distribuye cada columna sobre las tres fases para equilibrar. En <b>TN-S</b> cada artefacto va a una fase distinta (R, S, T). Fijate cuál esquema declara el proyecto de la plaza antes de armar.', cant:'—', un:'—', ref:'AP-PL-002 b / AP-PL-003 b'});
-      itemsCajas.push({desc:'⚠ Cables internos de la columna que el plano AP-CC-014-C/015-C muestra y esta calculadora <b>todavía no computa</b>: <b>1×6 mm² IRAM 247-3</b> del borne principal de tierra a la bornera, y <b>1×2,5 mm² IRAM 247-3</b> de la bornera al portafusible. Son pocos metros por columna pero hay que pedirlos.', cant:'—', un:'—', ref:'AP-CC-014-C / 015-C'});
-      itemsCajas.push({desc:'⚠ <b>Acrílico de protección — es obligatorio, no opcional.</b> El cap. 16.1 de las ETG lo pide en <b>la caja de conexión de cada columna</b> y también <b>en los tableros</b>, aéreos y a nivel, para tapar bases portafusibles, fusibles NH y partes activas, «con cartelería que advierta el riesgo contra choque eléctrico». Los tableros además llevan <b>contratapa calada</b>. Es el ítem 15.64/15.70 del pliego y <b>sigue sin computarse</b>: uno por columna más los del tablero.', cant:'—', un:'—', ref:'ETG cap. 16.1'});
+      // ---- Cables internos de la caja s/ AP-CC-014-C / 015-C (computados el 2026-09-26) ----
+      // Antes era solo un aviso «todavía no computa». El plano dibuja 1×6 mm² IRAM 247-3 del borne
+      // principal de tierra (el bulón PAT) a la bornera de tierra, y 1×2,5 mm² de la bornera al
+      // portafusible (ese va en LUMINARIAS, junto a los portafusibles). El puente de 6 termina en
+      // OJAL en el bulón y en PUNTERA en la BPN — el terminal ojal de la PAT que faltaba.
+      itemsCajas.push({desc:'Cable unipolar <b>1×6 mm² verde-amarillo IRAM NM 247-3</b> — <b>puente del borne principal de tierra (bulón PAT) a la bornera BPN de tierra</b>, ~0,50 m por caja s/ plano del tablerito · ⚠ sin código en el pañol (hay 1×6 celeste 1030 y negro 1031, no verde-amarillo): darlo de alta', cant:Math.round(0.5*cantCol*100)/100, un:'m', ref:'AP-CC-014-C / 015-C'});
+      itemsCajas.push({...M(2049,'punta del puente de 6 mm² que se <b>abulona al bulón PAT</b> de la caja de conexión — 1 por caja (el ojal del cable de 10 mm² de la jabalina sale en Puesta a tierra)'), cant:cantCol, un:'Un.', ref:'AP-CC-014-C / 015-C · ETG cap. 14.3'});
+      itemsCajas.push({...M(2032,'punta del puente de 6 mm² que entra a la <b>bornera BPN de tierra</b> — 1 por caja'), cant:cantCol, un:'Un.', ref:'AP-CC-014-C / 015-C'});
+      // ---- Acrílico de protección, COMPUTADO (2026-09-26; antes era solo un aviso) ----
+      // ETG cap. 16.1: en la caja de conexión de cada columna (y en los tableros, que va en su
+      // sección) para tapar bases portafusible, fusibles y partes activas, con cartel de riesgo.
+      itemsCajas.push({desc:'Acrílico de protección de partes activas para la caja de conexión de la columna, con cartel de riesgo eléctrico — <b>obligatorio (ETG cap. 16.1)</b>, 1 por caja · ítem 15.64/15.70 del pliego · ⚠ sin código en el pañol: darlo de alta', cant:cantCol, un:'Un.', ref:'ETG cap. 16.1 · pliego 15.64/15.70'});
+      itemsCajas.push({desc:'ℹ El <b>acrílico del tablero general</b> (aéreo o a nivel) y su <b>contratapa calada</b> también son obligatorios (ETG cap. 16.1): vienen con el tablero armado — verificalo en el remito del proveedor.', cant:'—', un:'—', ref:'ETG cap. 16.1'});
       itemsCajas.push({desc:'ℹ <b>Si la caja no llega a 2,50 m del piso, lleva cerramiento especial.</b> El cap. 16.1 exige la caja de conexión a <b>2,50 m medidos entre su base y el nivel de piso terminado</b>; las columnas que no cumplan «deberán presentar un <b>cerramiento especial para la tapa</b>». Es un adicional a prever en las columnas viejas que se reutilizan.', cant:'—', un:'—', ref:'ETG cap. 16.1'});
     } else {
       // ---- Columna PRFV: DOS tableritos por columna (2026-09-05) ----
@@ -16435,6 +17345,12 @@ function calcular(){
         + `Si es una orden parcial a propósito, dejalo; si no, corregí el tipo en las tres secciones (o usá «Cargar automáticamente») y volvé a calcular.`);
     }
   }
+  // ---- Enlace por NOMBRE de los renglones sin código (2026-09-26) ----
+  // Los materiales que la Calculadora escribe con nombre pero sin código (el 1×6 verde-amarillo, el
+  // acrílico, las columnas de 8/9/12 m…) se enlazan solos al catálogo si existe un producto con ese
+  // mismo nombre corto — así, una vez dados de alta desde «materiales sin código», el cómputo
+  // siguiente ya sale con código y el balance/pañol los cruza.
+  enlazarSinCodigoPorNombre(secciones);
   const resultado = {nombre, id, barrio, cantCol: colOn?cantCol:null, tipoCol, altura, vincCant: vincOn?vincCant:null, secciones, totalLuminarias, tiles, tareas: tareasIncluidas, alertas,
                      provision: leerProvision()};   // quién pone el material (2026-09-06)
   // Modo silencioso (2026-09-06): lo usa «actualizar un cómputo viejo con la versión nueva». Calcula
@@ -16454,7 +17370,100 @@ function calcular(){
 // Apenas se calcula una obra, se avisa si esa plaza ya está registrada o no, y si no lo está se
 // ofrece registrarla ahí mismo, con el cómputo adentro. Antes había que acordarse de ir a Avance de
 // obra y usar "Traer plaza calculada", que además solo funcionaba en la misma computadora.
+// ---- Materiales sin código: detección, enlace por nombre y alta desde el cómputo (2026-09-26) ----
+function nombreCortoMaterial(desc){
+  return String(desc||'').replace(/<[^>]*>/g,'').split(' — ')[0].replace(/^[⚠ℹ—•]\s*/,'').replace(/\s*·\s*⚠.*$/,'').trim();
+}
+function claveNombre(t){ return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[×x]/g,'x').replace(/\s+/g,' ').replace(/[«»"']/g,'').trim(); }
+// Renglones que son TAREAS o conceptos aunque no lleven la marca `tarea` (pintura, retiros,
+// poda, base del tablero, excavación…): no se ofrecen para dar de alta como producto.
+const NO_ES_MATERIAL = /^(Pintura de columna|Retiro de|Desconexi[oó]n|Poda de|Base para tablero|Excavaci[oó]n|Relleno y compactaci[oó]n|Sellado de base|Contrabase|Reacondicionamiento|Nueva acometida|Montaje, conexionado|Aplomado|Medici[oó]n|Zanjeo|Fundaci[oó]n|Reposici[oó]n|Cruce de|Tendido|Instalaci[oó]n|Colocaci[oó]n)/i;
+function esMaterialSinCodigo(it){
+  if(!it || it.cod != null || it.tarea) return false;
+  if(typeof it.cant !== 'number' || !(it.cant > 0)) return false;
+  const d = String(it.desc||'').replace(/<[^>]*>/g,'').trim();
+  return !/^[⚠ℹ—•]/.test(d) && !NO_ES_MATERIAL.test(d);
+}
+function enlazarSinCodigoPorNombre(secciones){
+  try{
+    const cat = catalogoCompleto();
+    const porNombre = new Map(cat.map(i => [claveNombre(i.desc), i]));
+    (secciones||[]).forEach(sec => (sec.items||[]).forEach(it => {
+      if(!esMaterialSinCodigo(it)) return;
+      const p = porNombre.get(claveNombre(nombreCortoMaterial(it.desc)));
+      if(p){ it.cod = p.codigo; it.corto = p.desc; if(!it.un || it.un === '—') it.un = p.un; }
+    }));
+  }catch(e){}
+}
+function familiaSugerida(secTitulo, desc){
+  const d = claveNombre(desc), t = String(secTitulo||'').toUpperCase();
+  if(/^cable|conductor|preensambl/.test(d)) return 1000;
+  if(/terminal|puntera|bornera|bpn|ojal|acrilico|separador|puente/.test(d)) return 2000;
+  if(/fusible|portafus|termomag|contactor|fotocontrol|interruptor|seccionador/.test(d)) return 3000;
+  if(/abrazadera|zuncho|fleje|hebilla|bulon|tornillo|arandela|rack|aislador|morseto|capuchon|grampa|herraje/.test(d)) return 4000;
+  if(/ca[nñ]o|pead|pvc|curva|prensacable|ojal de goma/.test(d)) return 5000;
+  if(/columna|vinculo|brazo|poste|luminaria|apoyo|artefacto/.test(d)) return 6000;
+  if(/jabalina|dispersor|tomacable|bloquete|banderita|puesta a tierra/.test(d) || /PUESTA A TIERRA/.test(t)) return 7000;
+  if(/cemento|arena|piedra|ladrillo|hormigon|mortero|malla|pintura|baldosa|molde|hierro|revoque|sellador/.test(d) || /OBRA CIVIL|PINTURA/.test(t)) return 8000;
+  return 9000;
+}
+function materialesSinCodigoDe(r){
+  const vistos = new Map();
+  (r && r.secciones || []).forEach(sec => (sec.items||[]).forEach(it => {
+    if(!esMaterialSinCodigo(it)) return;
+    const nombre = nombreCortoMaterial(it.desc); const k = claveNombre(nombre); if(!k) return;
+    const v = vistos.get(k) || { nombre, un: it.un && it.un !== '—' ? it.un : 'Un.', cant:0, sec:sec.titulo, familia: familiaSugerida(sec.titulo, nombre) };
+    v.cant += it.cant; vistos.set(k, v);
+  }));
+  return [...vistos.values()];
+}
+function renderAvisoSinCodigo(){
+  const cont = document.getElementById('avisoSinCodigo'); if(!cont) return;
+  const r = window.__computoParaAlta; const lista = r ? materialesSinCodigoDe(r) : [];
+  if(!lista.length){ cont.innerHTML = ''; cont.style.display = 'none'; return; }
+  cont.style.display = '';
+  cont.innerHTML = `<div style="background:#f2f6ff; border:1px solid #cfdcf7; border-radius:8px; padding:10px 12px; font-size:13px;">
+    <b>${lista.length} material(es) del cómputo no tienen código en el pañol</b> — así no se pueden mover del stock ni entrar en el balance ni en la lista de compras. Dalos de alta desde acá (revisá el nombre, la unidad y la familia) y volvé a calcular: el cómputo los enlaza solo por el nombre.
+    <button type="button" class="btn-ghost" style="margin-left:8px; padding:3px 10px; font-size:12px;" onclick="document.getElementById('sinCodigoLista').style.display = document.getElementById('sinCodigoLista').style.display === 'none' ? '' : 'none';">Ver / ocultar</button>
+    <div id="sinCodigoLista" style="display:none; margin-top:8px;">
+      ${lista.map((m,i)=>`<div class="sc-fila" style="display:grid; grid-template-columns:22px minmax(0,2fr) 70px minmax(0,1.4fr); gap:6px; align-items:center; margin-bottom:6px;">
+        <input type="checkbox" data-sc="chk" data-i="${i}" checked style="width:auto; margin:0;">
+        <input type="text" data-sc="nombre" data-i="${i}" value="${escHtml(m.nombre)}" style="margin:0; font-size:12.5px;" title="Sección: ${escHtml(m.sec)} · ${fmt(m.cant,2)} en este cómputo">
+        <input type="text" data-sc="un" data-i="${i}" value="${escHtml(m.un)}" style="margin:0; font-size:12.5px;">
+        <select data-sc="fam" data-i="${i}" style="margin:0; font-size:12.5px;">${FAMILIAS_CATALOGO.map(f=>`<option value="${f.base}" ${f.base===m.familia?'selected':''}>${f.base+1}–${f.base+999} · ${escHtml(f.nombre)}</option>`).join('')}</select>
+      </div>`).join('')}
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px;">
+        <button type="button" class="btn-primary" style="padding:5px 12px; font-size:12.5px;" onclick="darDeAltaSinCodigo()">＋ Dar de alta los tildados en el pañol</button>
+        <span class="hint" id="sinCodigoMsg" style="margin:0;"></span>
+      </div>
+    </div></div>`;
+}
+window.darDeAltaSinCodigo = async function(){
+  const msg = document.getElementById('sinCodigoMsg'); if(!msg) return;
+  if(!window.__fbUser){ msg.style.color = 'var(--danger)'; msg.textContent = 'Iniciá sesión (Pañol → Acceso y respaldo) para dar de alta productos.'; return; }
+  if(typeof window.fbGuardarProductoCatalogo !== 'function'){ msg.style.color = 'var(--danger)'; msg.textContent = 'No hay conexión con la base compartida.'; return; }
+  const filas = [...document.querySelectorAll('#sinCodigoLista .sc-fila')];
+  const usados = new Set(catalogoCompleto().map(i=>i.codigo)); let hechos = 0, errores = 0; const creados = [];
+  for(const f of filas){
+    if(!f.querySelector('[data-sc="chk"]').checked) continue;
+    const nombre = f.querySelector('[data-sc="nombre"]').value.trim(); const un = f.querySelector('[data-sc="un"]').value.trim() || 'Un.';
+    const base = parseInt(f.querySelector('[data-sc="fam"]').value, 10) || 9000;
+    if(!nombre) continue;
+    // Si ya existe uno con ese nombre, no se duplica.
+    if(catalogoCompleto().some(i => claveNombre(i.desc) === claveNombre(nombre))){ hechos++; continue; }
+    let codigo = null; for(let n = base + 1; n <= base + 999; n++){ if(!usados.has(n)){ codigo = n; break; } }
+    if(!codigo){ errores++; continue; }
+    usados.add(codigo);
+    try{
+      await window.fbGuardarProductoCatalogo({ codigo, desc:nombre, un, sector:'pañol', stock:0, costo:0, minimo:0, activo:true, editadoPor:(window.__fbUser && window.__fbUser.email) || '', editadoTs:Date.now(), origenAlta:'calculadora' });
+      creados.push(`${codigo} ${nombre}`); hechos++;
+    }catch(e){ errores++; }
+  }
+  msg.style.color = errores ? 'var(--danger)' : 'var(--teal-dark)';
+  msg.innerHTML = `${hechos ? `✓ ${hechos} producto(s) en el catálogo${creados.length ? ': ' + creados.map(escHtml).join(' · ') : ''}.` : ''}${errores ? ` ⚠ ${errores} no se pudieron guardar.` : ''} ${hechos ? '<b>Volvé a calcular</b> para que el cómputo salga con los códigos.' : ''}`;
+};
 function renderAvisoAltaComputo(){
+  renderAvisoSinCodigo();
   const cont = document.getElementById('avisoAltaComputo');
   if(!cont) return;
   const r = window.__computoParaAlta;
@@ -16481,6 +17490,7 @@ function renderResultado(r){
 
   html += `<h2 style="margin-top:0;"><span class="dot"></span>${escHtml(r.nombre)}${r.id ? ' — ID '+escHtml(r.id) : ''}</h2>`;
   html += `<div class="no-print" id="avisoAltaComputo" style="margin-bottom:12px;"></div>`;
+  html += `<div class="no-print" id="avisoSinCodigo" style="margin-bottom:12px; display:none;"></div>`;
   // Si el cómputo viene del historial trae `fecha` (se la agrega agregarHistorial); el recién
   // calculado no. Sirve para avisar en pantalla que lo que se está mirando es una obra guardada y
   // no el resultado del formulario de arriba — sin ese aviso es fácil confundirse y creer que los
@@ -17764,6 +18774,8 @@ function poblarParteObraDatalist(){
     if(typeof window.renderGastos === 'function') window.renderGastos();   // los costos del catálogo valorizan los gastos (2026-09-10)
     if(typeof window.renderStockPrecios === 'function') window.renderStockPrecios();   // historial de precios (2026-09-22)
     if(typeof window.poblarStockProveedoresRemitos === 'function') window.poblarStockProveedoresRemitos();
+    if(typeof window.renderStockPersonas === 'function') window.renderStockPersonas();   // material en poder de cada persona (2026-09-25)
+    if(typeof window.renderStockCompras === 'function') window.renderStockCompras();     // lista de compras (2026-09-26)
   }
 
   function actualizarStockAuthUI(user){
@@ -17816,6 +18828,7 @@ function poblarParteObraDatalist(){
     // aparezca al instante en todos lados, sin recargar.
     if(typeof window.poblarStockDestinoPlazas === 'function') window.poblarStockDestinoPlazas();
     if(typeof window.poblarStockFiltroPlazas === 'function') window.poblarStockFiltroPlazas();
+    if(typeof window.renderStockCompras === 'function') window.renderStockCompras();   // lista de compras por plaza (2026-09-26)
     if(typeof window.poblarOtPlazas === 'function') window.poblarOtPlazas();
     if(typeof window.poblarHistPlazas === 'function') window.poblarHistPlazas();
     if(typeof window.renderRegistros === 'function') window.renderRegistros();
@@ -17823,6 +18836,7 @@ function poblarParteObraDatalist(){
 
   if(fbAvailable){
     fbDb.collection('movimientos').onSnapshot(snapshot => {
+      (window.__sync = window.__sync || {})['movimientos'] = { ts:Date.now(), n:snapshot.size };
       window.stockMovimientos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       window.__stockConnOk = true;
       const banner = document.getElementById('stockConnBanner');
@@ -17843,6 +18857,7 @@ function poblarParteObraDatalist(){
     // Catálogo de productos (2026-08-27): los cambios y altas sobre la foto del Excel. Se escucha
     // en vivo, así que si el pañol agrega un producto, aparece al instante en todas las compus.
     fbDb.collection('catalogoProductos').onSnapshot(snapshot => {
+      (window.__sync = window.__sync || {})['catalogoProductos'] = { ts:Date.now(), n:snapshot.size };
       window.catalogoCambios = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       if(typeof window.invalidarCatalogo === 'function') window.invalidarCatalogo();
       refrescarStockUI();
@@ -17851,6 +18866,7 @@ function poblarParteObraDatalist(){
 
     // Historial de etapas (2026-08-22): registro que solo crece, se escucha en vivo igual que el resto.
     fbDb.collection('historialEtapas').onSnapshot(snapshot => {
+      (window.__sync = window.__sync || {})['historialEtapas'] = { ts:Date.now(), n:snapshot.size };
       // Asignación directa (sin `window.`): este bloque es un <script> clásico y comparte el scope
       // léxico con el `let historialEtapas` de más arriba — mismo criterio que `avanceObras`.
       historialEtapas = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -17859,6 +18875,7 @@ function poblarParteObraDatalist(){
 
     // Planificación semanal (2026-08-27) — ahora compartida.
     fbDb.collection('planSemanal').onSnapshot(snapshot => {
+      (window.__sync = window.__sync || {})['planSemanal'] = { ts:Date.now(), n:snapshot.size };
       planEntries = snapshot.docs.map(d => ({ ...d.data(), docId: d.id }));
       window.__planListo = true;
       // Si alguien está tipeando en la grilla, NO se redibuja: se le iría el foco a mitad de una
@@ -17889,6 +18906,7 @@ function poblarParteObraDatalist(){
 
     // Historial de cómputos de la Calculadora (2026-08-27) — ahora compartido.
     fbDb.collection('historialCalculos').onSnapshot(snapshot => {
+      (window.__sync = window.__sync || {})['historialCalculos'] = { ts:Date.now(), n:snapshot.size };
       // OJO: `docId`, no `id`. En estos registros `id` ya es el ID DE OBRA que se carga en la
       // Calculadora; si se usara `id` para el documento, uno pisaría al otro.
       historial = snapshot.docs.map(d => ({ ...d.data(), docId: d.id }))
@@ -17904,6 +18922,7 @@ function poblarParteObraDatalist(){
 
     // Órdenes de trabajo (2026-08-22).
     fbDb.collection('ordenesTrabajo').onSnapshot(snapshot => {
+      (window.__sync = window.__sync || {})['ordenesTrabajo'] = { ts:Date.now(), n:snapshot.size };
       ordenesTrabajo = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       if(typeof window.renderRegistros === 'function') window.renderRegistros();
       // La planificación semanal muestra las órdenes emitidas en su fecha: se redibuja con cada cambio.
@@ -17919,11 +18938,13 @@ function poblarParteObraDatalist(){
     // Gastos de obra (2026-09-10): lo que se gastó de verdad en cada plaza, aparte del itemizado
     // del pliego. Cada documento es un gasto suelto con `plazaId` (id del documento de avanceObras).
     fbDb.collection('gastosObra').onSnapshot(snapshot => {
+      (window.__sync = window.__sync || {})['gastosObra'] = { ts:Date.now(), n:snapshot.size };
       window.gastosObra = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       if(typeof window.renderGastos === 'function') window.renderGastos();
     }, err => console.error('Error escuchando gastos de obra:', err));
 
     fbDb.collection('avanceObras').onSnapshot(snapshot => {
+      (window.__sync = window.__sync || {})['avanceObras'] = { ts:Date.now(), n:snapshot.size };
       avanceObras = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       if(typeof window.resembrarAvanceItemIdSeq === 'function') window.resembrarAvanceItemIdSeq();
       window.__stockConnOk = true;
@@ -17941,6 +18962,8 @@ function poblarParteObraDatalist(){
     fbAuth.onAuthStateChanged(user => {
       window.__fbUser = user;
       actualizarStockAuthUI(user);
+      // Presencia (2026-09-26): qué computadora tiene abierta qué versión — se ve en «Salud».
+      if(user){ try{ window.fbPresenciaMarcar(); }catch(e){} if(!window.__presenciaTimer) window.__presenciaTimer = setInterval(()=>{ try{ window.fbPresenciaMarcar(); }catch(e){} }, 5 * 60 * 1000); }
     });
   } else {
     actualizarStockAuthUI(null);
@@ -17962,10 +18985,13 @@ function poblarParteObraDatalist(){
   window.fbGuardarProductoCatalogo = async function(datos){
     if(!fbAvailable) throw new Error('Firebase no disponible');
     await fbDb.collection('catalogoProductos').doc(String(datos.codigo)).set(datos, {merge:true});
+    const partes = []; if(datos.desc != null) partes.push(datos.desc); if(datos.costo != null) partes.push('costo ' + datos.costo); if(datos.minimo != null) partes.push('mínimo ' + datos.minimo); if(datos.activo === false) partes.push('BAJA');
+    window.fbAuditar(datos.activo === false ? 'producto_baja' : 'producto', `${datos.codigo}: ${partes.join(' · ')}`, { ref:String(datos.codigo) });
   };
   window.fbBorrarProductoCatalogo = async function(id){
     if(!fbAvailable) throw new Error('Firebase no disponible');
     await fbDb.collection('catalogoProductos').doc(id).delete();
+    window.fbAuditar('producto_deshacer', `Se deshizo la corrección del producto ${id}`, { ref:String(id) });
   };
   // Devuelve el id del documento creado (2026-08-27): lo necesita el comprobante que se ofrece
   // imprimir apenas se registra el movimiento.
@@ -17981,6 +19007,13 @@ function poblarParteObraDatalist(){
   // Actualiza campos sueltos de un movimiento sin reescribirlo entero (2026-08-22) — se usa para
   // anular/reactivar, que solo tocan los campos `anulado*`.
   window.fbUpdateMovimiento = async function(id, patch){
+    try{
+      const m = (window.stockMovimientos || []).find(x => x.id === id) || {};
+      const que = `${m.desc || ''} ${m.cantidad != null ? fmt(m.cantidad,2) + ' ' + (m.un||'') : ''} (${m.fecha || ''})`;
+      if(patch && patch.anulado === true) window.fbAuditar('movimiento_anulado', `${que} — motivo: ${patch.anuladoMotivo || ''}`, { ref:id });
+      else if(patch && patch.anulado === false) window.fbAuditar('movimiento_reactivado', que, { ref:id });
+      else if(patch && patch.precioUnit != null) window.fbAuditar('precio_corregido', `${que}: ${m.precioUnit != null ? formatMoney(m.precioUnit) : '—'} → ${formatMoney(patch.precioUnit)}`, { ref:id });
+    }catch(e){}
     if(!fbAvailable) throw new Error('Firebase no disponible');
     await fbDb.collection('movimientos').doc(id).update(patch);
   };
@@ -18061,6 +19094,7 @@ function poblarParteObraDatalist(){
 
   // ---- Precios del itemizado corregidos/agregados por el equipo (2026-09-02) ----
   window.fbPreciosGuardar = async function(datos){
+    try{ const k = Object.keys(datos || {}); window.fbAuditar('precios_config', `Se guardó ${k.join(', ')}` + (datos && datos.contratistaPct != null ? ` · contratista ${datos.contratistaPct} %` : '') + (datos && datos.baseEpec != null ? ` · módulo ${datos.baseEpec}` : '') + (datos && datos.contratistaFijado ? ' · lista FIJADA' : ''), {}); }catch(e){}
     if(!fbAvailable) throw new Error('Firebase no disponible');
     await fbDb.collection('configEquipo').doc('precios').set(datos, { merge:true });
   };
@@ -18092,17 +19126,75 @@ function poblarParteObraDatalist(){
   };
 
   // Avance de obra — escritura (2026-08-15). Una plaza = un documento completo en 'avanceObras'.
+  // ---- Auditoría de cambios (2026-09-26): registro que solo crece, en `auditoria` ----
+  // Quién hizo qué y cuándo: alta/baja/edición de productos, precios corregidos, movimientos
+  // anulados, plazas creadas o borradas, precios del itemizado/contratista, respaldos. Se escribe
+  // «a fuego y olvido»: si falla, no frena la acción original (se ve en la consola).
+  window.fbAuditar = function(accion, detalle, extra){
+    try{
+      if(!fbAvailable) return;
+      const doc = { ts:Date.now(), fecha:new Date().toISOString(), usuario:(window.__fbUser && window.__fbUser.email) || '(sin sesión)',
+                    accion:String(accion||''), detalle:String(detalle||'').slice(0, 500), version:(document.getElementById('appVersion')||{}).textContent || '', ...(extra || {}) };
+      fbDb.collection('auditoria').add(doc).catch(e => console.warn('auditoría:', e && e.message));
+    }catch(e){ console.warn('auditoría:', e); }
+  };
+  window.fbAuditoriaLeer = async function(limite){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    const q = await fbDb.collection('auditoria').orderBy('ts', 'desc').limit(limite || 200).get();
+    return q.docs.map(d => ({ id:d.id, ...d.data() }));
+  };
+  // ---- Salud: último respaldo y presencia de cada computadora (configEquipo/salud y /presencia) ----
+  window.fbSaludGuardar = async function(datos){
+    if(!fbAvailable) return;
+    await fbDb.collection('configEquipo').doc('salud').set(datos, { merge:true });
+  };
+  window.fbSaludLeer = async function(){
+    if(!fbAvailable) return null;
+    const d = await fbDb.collection('configEquipo').doc('salud').get(); return d.exists ? d.data() : null;
+  };
+  window.fbPresenciaMarcar = async function(){
+    if(!fbAvailable || !window.__fbUser) return;
+    let dev = ''; try{ dev = localStorage.getItem('ema_device_id'); if(!dev){ dev = 'd' + Math.random().toString(36).slice(2, 10); localStorage.setItem('ema_device_id', dev); } }catch(e){ dev = 'd_sin_storage'; }
+    const ua = navigator.userAgent || '';
+    const nombre = /Android/i.test(ua) ? 'Android' : (/iPhone|iPad/i.test(ua) ? 'iPhone/iPad' : (/Windows/i.test(ua) ? 'Windows' : (/Mac/i.test(ua) ? 'Mac' : (/Linux/i.test(ua) ? 'Linux' : 'Equipo'))));
+    const doc = {}; doc[dev] = { ts:Date.now(), usuario:window.__fbUser.email || '', version:((document.getElementById('appVersion')||{}).textContent || '').replace(/^·\s*v\s*/, ''), equipo:nombre, pantalla:`${screen.width}×${screen.height}` };
+    await fbDb.collection('configEquipo').doc('presencia').set(doc, { merge:true });
+  };
+  window.fbPresenciaLeer = async function(){
+    if(!fbAvailable) return {};
+    const d = await fbDb.collection('configEquipo').doc('presencia').get(); return d.exists ? d.data() : {};
+  };
   window.fbAvanceCrear = async function(avanceSinId){
     if(!fbAvailable) throw new Error('Firebase no disponible');
     const ref = await fbDb.collection('avanceObras').add(avanceSinId);
+    window.fbAuditar('plaza_alta', `Plaza «${avanceSinId && avanceSinId.nombre || ''}»${avanceSinId && avanceSinId.obraId ? ' (ID ' + avanceSinId.obraId + ')' : ''}`, { ref:ref.id });
     return ref.id;
   };
   window.fbAvanceGuardar = async function(id, datosSinId){
     if(!fbAvailable) throw new Error('Firebase no disponible');
     await fbDb.collection('avanceObras').doc(id).set(datosSinId);
   };
+  // ---- Adjuntos: fotos de remitos y de plazas (2026-09-26) ----
+  // Van como imagen comprimida (JPEG ≤ 1024 px) dentro de un documento propio de la colección
+  // `adjuntos`: no hace falta Storage ni otra configuración. Se leen SOLO a pedido (get), nunca con
+  // un listener, así las fotos no viajan cada vez que se abre la app.
+  window.fbAdjuntoGuardar = async function(doc){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    const ref = await fbDb.collection('adjuntos').add(doc);
+    return ref.id;
+  };
+  window.fbAdjuntoLeer = async function(id){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    const d = await fbDb.collection('adjuntos').doc(id).get();
+    return d.exists ? { id:d.id, ...d.data() } : null;
+  };
+  window.fbAdjuntoBorrar = async function(id){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    await fbDb.collection('adjuntos').doc(id).delete();
+  };
   window.fbAvanceEliminar = async function(id){
     if(!fbAvailable) throw new Error('Firebase no disponible');
+    { const a = (typeof avanceObras !== 'undefined' ? avanceObras : []).find(x => x.id === id); window.fbAuditar('plaza_borrada', `Plaza «${a ? a.nombre : id}»${a && a.obraId ? ' (ID ' + a.obraId + ')' : ''} borrada del tablero`, { ref:id }); }
     await fbDb.collection('avanceObras').doc(id).delete();
   };
 
@@ -18711,12 +19803,13 @@ function poblarParteObraDatalist(){
   // SUB-PESTAÑAS DE PAÑOL
   // ==================================================================
   const GRUPOS_STOCK = [
-    { id:'inventario',  label:'Catálogo pañol',      cards:['cardStockInventario'] },
+    { id:'inventario',  label:'Catálogo pañol',      cards:['cardStockInventario','cardStockCompras'] },
     { id:'movimientos', label:'Movimientos / entregas', cards:['cardStockMov'] },
     { id:'registrar',   label:'+ Registrar movimiento', cards:['cardStockRegistrar'] },
     { id:'productos',   label:'Alta de productos',   cards:['cardStockCatalogo'] },
     { id:'precios',     label:'💲 Precios',           cards:['cardStockPrecios'] },
-    { id:'acceso',      label:'Acceso y respaldo',   cards:['stockAuthCard','cardStockRespaldo','cardStockSoloStock'] },
+    { id:'personas',    label:'👷 Por persona',        cards:['cardStockPersonas'] },
+    { id:'acceso',      label:'Acceso y respaldo',   cards:['stockAuthCard','cardStockRespaldo','cardStockSalud','cardStockAuditoria','cardStockSoloStock'] },
   ];
   let subStock = 'inventario';
 
@@ -19100,6 +20193,7 @@ function poblarParteObraDatalist(){
   }
   // La nómina, para que Gastos de obra pueda valorizar las horas (2026-09-10).
   window.nominaEquipo = ()=> nomina;
+  window.legajoDeNombre = legajoDe;
   window.agregarFilaPersonal = function(){
     nomina = leerTablaPersonal();
     nomina.push({ legajo:'', nombre:'', rol:'Ayudante', activo:true });
@@ -24013,6 +25107,8 @@ const ITEMIZADO_EPEC = [
     { re:/^Medici[oó]n de resistencia de aislaci[oó]n/i, tipo:'item', item:80, porque:'Ítem 80, cada 100 metros lineales de conductor subterráneo.' },
     { re:/^(Terminal banderita|Grampa terminal PAT|Bloquete)/i, tipo:'dentro', item:'75-77',
       porque:'Piezas del sistema de puesta a tierra: entran en el ítem 77 o —en metálicas— en el de columna.' },
+    { re:/^Terminal de ojal de Cu estañado 10 mm²/i, tipo:'dentro', item:'74-77',
+      porque:'El ojal con que el cable de PAT se abulona al bulón de la columna o a la barra del tablero es parte del sistema de puesta a tierra (ETG cap. 14.3): entra en 74/75/77 o —en metálicas— en el ítem de columna. No tiene ítem propio.' },
 
     // ---------- Retiros y poda ----------
     { re:/^Retiro de luminaria/i, tipo:'item', item:45, porque:'Ítem 45, incluye el traslado al depósito de la EPEC.' },
@@ -24097,7 +25193,7 @@ const ITEMIZADO_EPEC = [
   // provisión** de los ítems 88 (jabalina), 87 (cable verde-amarillo), 83.1 (columna metálica),
   // 86 (cable 3×1,5) y 85.1 (luminaria). O sea que si esos materiales los puso la contratista, se
   // certifican aparte. Los ítems 5 a 8 excluyen menos cosas: 85.1, 84.1 y 86.
-  const PAT_EN_METALICA = /^(Dispersor \(jabalina\)|Jabalina|Tomacable|Ca[ñn]o de H[°º]G|Medici[oó]n de resistencia de PAT|Terminal banderita|Grampa terminal PAT|Bloquete)/i;
+  const PAT_EN_METALICA = /^(Dispersor \(jabalina\)|Jabalina|Tomacable|Ca[ñn]o de H[°º]G|Medici[oó]n de resistencia de PAT|Terminal banderita|Grampa terminal PAT|Bloquete|Terminal de ojal de Cu estañado 10 mm²)/i;
 
   // Recorre el cómputo guardado de una plaza y devuelve los tres grupos.
   function coberturaDePlaza(a){
