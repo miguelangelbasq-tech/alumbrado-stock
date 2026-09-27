@@ -3302,44 +3302,44 @@ tbody tr:hover td{ background:rgba(255,255,255,.55); }
 .inicio-seccion-titulo{ font:700 17px var(--disp); letter-spacing:-.02em; color:var(--text); text-transform:none; }
 .inicio-seccion-titulo .dot{ display:none; }
 
-/* ---- Barra de navegación: píldora de vidrio flotante (celular) ---- */
-#navAbajo{ left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom,0px)); border-radius:999px; padding:6px;
-  background:rgba(255,255,255,.72) !important; -webkit-backdrop-filter:blur(30px) saturate(1.6); backdrop-filter:blur(30px) saturate(1.6);
-  border:1px solid rgba(40,40,94,.10) !important; box-shadow:0 20px 44px -18px rgba(40,40,94,.6), inset 0 1px 0 rgba(255,255,255,.9) !important; gap:2px; }
-.nav-item{ border-radius:999px; color:var(--text-soft); font-weight:600; box-shadow:none; }
-.nav-item:hover{ background:rgba(40,40,94,.06); color:var(--text); }
-.nav-ico{ filter:saturate(.25) opacity(.75); transition:filter .2s, transform .2s; }
-.nav-item.activo{ background:#fff; color:var(--navy); box-shadow:0 6px 16px -8px rgba(40,40,94,.55); }
-.nav-item.activo .nav-ico{ background:transparent; filter:none; transform:scale(1.08); padding:0; }
+/* ---- Navegación: SOLO desde las tres rayitas (pedido del usuario 27/09). La barra de atajos se oculta
+   en todos los tamaños; el HTML y el JS siguen igual (los numeritos de OT/Obras se siguen calculando
+   y alimentan el puntito rojo de las tres rayitas). ---- */
+#navAbajo{ display:none !important; }
+body{ padding-bottom:36px; }
+#calcFlotante{ bottom:18px; }
+/* Cabecera fija: EMA y las tres rayitas quedan arriba mientras se baja */
+header{ position:sticky; top:0; z-index:950; }
+.btn-menu{ width:44px; height:44px; border-radius:999px; background:rgba(255,255,255,.7); border:1px solid rgba(40,40,94,.10); box-shadow:0 6px 16px -10px rgba(40,40,94,.5); position:relative; padding:0 12px; }
+.btn-menu:hover{ background:#fff; }
+.btn-menu span{ height:2px; }
+/* Puntito rojo en las tres rayitas cuando hay órdenes abiertas u obras pendientes (lo enciende el JS
+   de siempre al mostrar los numeritos de la barra oculta) */
+body:has(#navBadgeOt[style*="block"]) .btn-menu::after, body:has(#navBadgeObras[style*="block"]) .btn-menu::after{
+  content:""; position:absolute; top:6px; right:6px; width:9px; height:9px; border-radius:50%; background:var(--danger); box-shadow:0 0 0 2px #fff; }
 #calcFlotante button{ border-radius:999px !important; box-shadow:0 16px 34px -12px rgba(40,40,94,.7) !important; }
-.menu-panel{ -webkit-backdrop-filter:blur(30px); backdrop-filter:blur(30px); background:rgba(255,255,255,.82) !important; border-radius:0 28px 28px 0 !important; }
+.menu-panel{ -webkit-backdrop-filter:blur(30px); backdrop-filter:blur(30px); background:rgba(255,255,255,.86) !important; border-radius:0 28px 28px 0 !important; width:min(320px,86vw); }
+.menu-item{ border-radius:999px; padding:12px 14px; font-size:14.5px; min-height:46px; }
+.menu-item:hover{ background:rgba(40,40,94,.06); }
+.menu-item.activo{ background:var(--navy); color:#fff; }
+.menu-item.activo .menu-ico{ filter:none; }
 .alta-fondo, #menuLateral .menu-fondo{ background:rgba(28,28,69,.28) !important; -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
 .alta-caja{ background:rgba(255,255,255,.9) !important; }
 
-/* ---- Pantalla ancha: riel de vidrio a la izquierda (el mismo #navAbajo) ---- */
+/* ---- Pantalla ancha: sin riel; contenido centrado ---- */
 @media (min-width:900px){
-  #navAbajo{ top:14px; bottom:14px; left:14px; right:auto; width:92px; flex-direction:column; justify-content:flex-start; align-items:center;
-    border-radius:28px; padding:10px 8px; gap:4px; }
-  .nav-item{ flex:0 0 auto; width:76px; min-height:62px; border-radius:20px; padding:8px 2px 6px; font-size:11px; gap:4px; }
-  .nav-ico{ font-size:21px; }
-  .nav-badge{ left:calc(50% + 8px); }
-  header{ margin-left:120px; border-radius:0 0 22px 22px; } header .header-inner{ max-width:none; }
-  .wrap{ padding-left:128px; padding-right:28px; }
-  body{ padding-bottom:24px; }
-  #calcFlotante{ bottom:24px; }
+  .wrap{ padding-left:28px; padding-right:28px; }
   .wrap::before{ font-size:42px; }
 }
 /* ---- Celular ---- */
 @media (max-width:640px){
-  body{ font-size:15px; padding-bottom:104px; }
+  body{ font-size:15px; padding-bottom:40px; }
   .wrap{ padding:14px 14px 40px; }
   .wrap::before{ font-size:34px; margin-bottom:14px; }
   .card{ padding:18px 16px 18px; border-radius:24px !important; }
   input[type="text"], input[type="number"], input[type="date"], input[type="email"], input[type="password"], input[type="tel"], select, textarea{ min-height:48px !important; font-size:16px !important; }
   .btn-primary, .btn-ghost, .btn-auto, .subtab-accion{ min-height:46px; }
-  #navAbajo{ left:8px; right:8px; padding:5px; gap:0; }
-  .nav-item{ min-height:54px; padding:7px 0 5px; gap:3px; } .nav-txt{ font-size:10px !important; letter-spacing:-.01em; text-overflow:clip !important; } .nav-ico{ font-size:20px; }
-  #calcFlotante{ bottom:92px; }
+  #calcFlotante{ bottom:16px; }
   .logo-badge{ width:96px; height:29px; }
   header h1{ font-size:14px; }
   .tile .num{ font-size:26px; }
@@ -3485,7 +3485,7 @@ tbody tr:hover td{ background:rgba(255,255,255,.55); }
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-27 20:17 · c52bf2</span></div>
+      <div class="header-sub">Plazas <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-27 23:05 · 0daccc</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
