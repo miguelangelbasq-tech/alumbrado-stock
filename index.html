@@ -3713,7 +3713,7 @@ html, body{ forced-color-adjust:none; }
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-28 17:19 · 555f2b</span></div>
+      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-28 18:46 · 6ccc1c</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -34936,6 +34936,113 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       + `<br><span style="font-size:12px;">La obra/persona y quién devuelve quedan puestos por si hay que cargar otra devolución.</span>`;
   };
   window.__devolucion = { elegir, agregarFila, filas, estado: ()=> ({ origen, elegido }) };
+})();
+</script>
+
+<!-- ============================================================================================
+     PLANIFICACIÓN SEMANAL: PLAZAS, BARRIOS Y OTRAS OBRAS POR COLOR (2026-09-28)
+     Pedido: «en la semanal vamos cargando cosas de plazas y barrios, hay que separarlo por color».
+     Solo agrega: después de dibujar la semana, cada tarea y cada orden de trabajo se pinta según el
+     tipo de obra (el de «Registrar obra»). Si la obra escrita no está registrada, se elige el tipo
+     en la misma tarjeta (queda guardado en la tarea como `tipoObra`). Arriba, botones para ver solo
+     plazas, solo barrios u otras.
+     ============================================================================================ -->
+<style id="estiloPlanTipos">
+.pt-barra{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:0 0 10px; font:700 12.5px var(--fuente); color:var(--text-soft); }
+.pt-btn{ border:1px solid var(--border); background:var(--vidrio-2); border-radius:999px; padding:6px 12px; font:700 12.5px var(--fuente); color:var(--text); cursor:pointer; }
+.pt-btn .n{ opacity:.6; margin-left:4px; font-weight:600; }
+.pt-btn.on{ background:var(--navy); color:#fff; border-color:var(--navy); }
+.pt-btn[data-t="plaza"]{ box-shadow:inset 4px 0 0 #1f9d6b; } .pt-btn[data-t="barrio"]{ box-shadow:inset 4px 0 0 #7a4fd6; } .pt-btn[data-t="otro"]{ box-shadow:inset 4px 0 0 #e08600; }
+.plan-entry.tipo-plaza, .plan-ot.tipo-plaza{ border-left:5px solid #1f9d6b !important; background:#eaf7f0 !important; }
+.plan-entry.tipo-barrio, .plan-ot.tipo-barrio{ border-left:5px solid #7a4fd6 !important; background:#f2edff !important; }
+.plan-entry.tipo-otro, .plan-ot.tipo-otro{ border-left:5px solid #e08600 !important; background:#fff4e3 !important; }
+.pt-tag{ display:inline-flex; align-items:center; gap:4px; font:800 10.5px var(--fuente); border-radius:999px; padding:2px 8px; margin:0 0 6px; }
+.pt-tag.t-plaza{ background:#1f9d6b; color:#fff; } .pt-tag.t-barrio{ background:#7a4fd6; color:#fff; } .pt-tag.t-otro{ background:#e08600; color:#fff; }
+.pt-tag small{ font-weight:600; opacity:.85; }
+.pt-elegir{ display:flex; gap:4px; margin:0 0 6px; flex-wrap:wrap; align-items:center; font-size:11px; color:var(--text-soft); }
+.pt-elegir button{ border:1px solid var(--border); background:#fff; border-radius:999px; padding:3px 8px; font:700 11px var(--fuente); cursor:pointer; color:var(--text); min-height:0 !important; }
+.pt-elegir button.on{ background:var(--navy); color:#fff; border-color:var(--navy); }
+.plan-entry.pt-oculta, .plan-ot.pt-oculta{ display:none !important; }
+@media print{ .pt-barra, .pt-elegir{ display:none !important; } .plan-entry, .plan-ot, .pt-tag{ -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+</style>
+<script id="planTipos">
+(function(){
+  const $ = id => document.getElementById(id);
+  const grid = $('planGrid'); if(!grid || typeof window.renderPlanGrid !== 'function') return;
+  const TIPOS = { plaza:['🌳','Plaza'], barrio:['🏘','Barrio'], otro:['📍','Otra obra'] };
+  let filtro = 'todas';
+  const obras = ()=>{ try{ return (typeof avanceObras !== 'undefined' && Array.isArray(avanceObras)) ? avanceObras : []; }catch(e){ return []; } };
+  function obraDe(nombre, id){
+    if(!String(nombre||'').trim() && !id) return null;
+    try{ if(typeof plazaYaRegistrada === 'function') return plazaYaRegistrada(nombre, id || ''); }catch(e){}
+    const k = String(nombre||'').trim().toLowerCase();
+    return obras().find(a => String(a.nombre||'').trim().toLowerCase() === k) || null;
+  }
+  function tipoDeEntrada(e){
+    const o = obraDe(e.obra, '');
+    if(o) return { t: o.tipoObra || 'plaza', auto:true };
+    if(e.tipoObra && TIPOS[e.tipoObra]) return { t:e.tipoObra, auto:false };
+    return { t: String(e.obra||'').trim() ? '' : '', auto:false };
+  }
+  function tag(t, auto){ return t ? `<span class="pt-tag t-${t}">${TIPOS[t][0]} ${TIPOS[t][1]}${auto ? '' : ' <small>(a mano)</small>'}</span>` : ''; }
+  function pintarEntrada(el){
+    const e = (typeof planPorKey === 'function') ? planPorKey(el.dataset.entry) : null; if(!e) return;
+    const { t, auto } = tipoDeEntrada(e);
+    el.classList.remove('tipo-plaza','tipo-barrio','tipo-otro'); if(t) el.classList.add('tipo-' + t);
+    el.dataset.tipo = t || '';
+    let cab = el.querySelector('.pt-cab');
+    if(!cab){ cab = document.createElement('div'); cab.className = 'pt-cab'; el.insertAdjacentElement('afterbegin', cab); }
+    const escrita = String(e.obra||'').trim();
+    cab.innerHTML = auto ? tag(t, true)
+      : (escrita ? `<div class="pt-elegir no-print"><span>¿Qué es?</span>${Object.entries(TIPOS).map(([k,v]) => `<button type="button" data-pt="${k}" class="${e.tipoObra === k ? 'on' : ''}">${v[0]} ${v[1]}</button>`).join('')}</div>` + (t ? tag(t, false) : '') : '');
+  }
+  function pintarOt(el){
+    const b = el.querySelector('.plan-ot-btn'); const m = b && String(b.getAttribute('onclick')||'').match(/verOrdenTrabajo\('([^']+)'\)/);
+    let o = null; try{ o = m && (ordenesTrabajo || []).find(x => x.id === m[1]); }catch(err){}
+    const obra = o ? obraDe(o.plazaNombre, o.obraId || '') : obraDe((el.querySelector('.plan-ot-plaza')||{}).textContent, '');
+    const t = obra ? (obra.tipoObra || 'plaza') : '';
+    el.classList.remove('tipo-plaza','tipo-barrio','tipo-otro'); if(t) el.classList.add('tipo-' + t);
+    el.dataset.tipo = t;
+    if(t && !el.querySelector('.pt-tag')) el.insertAdjacentHTML('afterbegin', tag(t, true));
+  }
+  function aplicarFiltro(){
+    grid.querySelectorAll('.plan-entry, .plan-ot').forEach(el => {
+      const t = el.dataset.tipo || '';
+      el.classList.toggle('pt-oculta', filtro !== 'todas' && !!t && t !== filtro || (filtro !== 'todas' && !t && el.classList.contains('plan-ot')));
+    });
+  }
+  function barra(){
+    let bar = $('planTiposBarra');
+    if(!bar){ bar = document.createElement('div'); bar.id = 'planTiposBarra'; bar.className = 'pt-barra no-print'; grid.insertAdjacentElement('beforebegin', bar); }
+    const cuenta = t => grid.querySelectorAll(`.plan-entry[data-tipo="${t}"], .plan-ot[data-tipo="${t}"]`).length;
+    const total = grid.querySelectorAll('.plan-entry, .plan-ot').length;
+    bar.innerHTML = `<span>Ver:</span><button type="button" class="pt-btn${filtro === 'todas' ? ' on' : ''}" data-f="todas">Todo<span class="n">${total}</span></button>`
+      + Object.entries(TIPOS).map(([k,v]) => `<button type="button" class="pt-btn${filtro === k ? ' on' : ''}" data-f="${k}" data-t="${k}">${v[0]} ${k === 'otro' ? 'Otras' : v[1] + 's'}<span class="n">${cuenta(k)}</span></button>`).join('');
+  }
+  function decorar(){
+    grid.querySelectorAll('.plan-entry').forEach(pintarEntrada);
+    grid.querySelectorAll('.plan-ot').forEach(pintarOt);
+    barra(); aplicarFiltro();
+  }
+  const orig = window.renderPlanGrid;
+  window.renderPlanGrid = function(){ const r = orig.apply(this, arguments); try{ decorar(); }catch(e){ console.warn('plan tipos', e); } return r; };
+  // Mientras se escribe la obra, el color se actualiza en esa tarjeta sin redibujar la semana.
+  grid.addEventListener('input', e => { if(e.target.dataset.field !== 'obra') return; const el = e.target.closest('.plan-entry'); if(el){ setTimeout(()=>{ pintarEntrada(el); barra(); aplicarFiltro(); }, 0); } });
+  grid.addEventListener('click', async e => {
+    const b = e.target.closest('.pt-elegir button[data-pt]'); if(!b) return;
+    const el = b.closest('.plan-entry'); const entry = planPorKey(el.dataset.entry); if(!entry) return;
+    entry.tipoObra = entry.tipoObra === b.dataset.pt ? '' : b.dataset.pt;
+    pintarEntrada(el); barra(); aplicarFiltro();
+    if(entry.docId && typeof planCompartidoListo === 'function' && planCompartidoListo() && typeof window.fbPlanUpdate === 'function'){
+      try{ await window.fbPlanUpdate(entry.docId, { tipoObra: entry.tipoObra || '' }); }catch(err){ console.warn('tipo de la tarea', err); }
+    } else if(typeof guardarPlanEntries === 'function') guardarPlanEntries();
+  });
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('#planTiposBarra .pt-btn'); if(!b) return;
+    filtro = b.dataset.f; barra(); aplicarFiltro();
+  });
+  try{ decorar(); }catch(e){}
+  window.PLAN_TIPOS = { decorar, filtro: f => { filtro = f; barra(); aplicarFiltro(); } };
 })();
 </script>
 
