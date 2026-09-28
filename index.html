@@ -3658,7 +3658,7 @@ html, body{ forced-color-adjust:none; }
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-28 11:04 · bf5d98</span></div>
+      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-28 13:47 · 4509c7</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -5266,6 +5266,7 @@ html, body{ forced-color-adjust:none; }
         <select id="stockMovTipo">
           <option value="entrada">➕ Entrada (ingreso de material)</option>
           <option value="salida">➖ Salida (retiro de material)</option>
+          <option value="devolucion">↩ Devolución (vuelve material al pañol)</option>
         </select>
 
         <label for="stockMovProducto">Producto (código o nombre)</label>
@@ -5316,7 +5317,9 @@ html, body{ forced-color-adjust:none; }
           <label for="stockMovFoto" style="margin-top:10px;">📷 Foto del remito <span style="font-weight:500;color:var(--text-soft);">(opcional — queda pegada a los renglones de este remito)</span></label>
           <input type="file" id="stockMovFoto" accept="image/*" capture="environment" style="font-size:12.5px;">
           <div class="hint" id="stockMovFotoHint" style="margin-top:2px;"></div>
-          <label class="ex-chk" style="margin-top:10px;"><input type="checkbox" id="stockMovEsDevolucion"> <span><b>Es una devolución</b>: una persona trae de vuelta material que tenía en su poder</span></label>
+          <!-- 2026-09-28: las devoluciones tienen su propio tipo de movimiento («↩ Devolución»). Este
+               casillero viejo queda escondido (sigue funcionando por dentro, pero ya no se ofrece). -->
+          <label class="ex-chk" style="margin-top:10px; display:none;"><input type="checkbox" id="stockMovEsDevolucion"> <span><b>Es una devolución</b>: una persona trae de vuelta material que tenía en su poder</span></label>
           <div id="stockMovDevolucionCampos" style="display:none;">
             <label for="stockMovDevuelvePersona">¿Quién lo devuelve?</label>
             <input type="text" id="stockMovDevuelvePersona" list="personalLista" placeholder="Nombre" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
@@ -5361,6 +5364,60 @@ html, body{ forced-color-adjust:none; }
           </div>
           <div class="hint" style="margin-top:2px;">Elegí la plaza a la que va el material. Así después se puede comparar, plaza por plaza, lo que calculó la herramienta contra lo que realmente salió del pañol (pestaña «Registros»). Si no va a una plaza, elegí «Otro destino» y escribilo.</div>
           <input type="text" id="stockMovDestino" placeholder="Ej: Cuadrilla 1, taller, galpón..." style="display:none;">
+        </div>
+
+        <!-- DEVOLUCIONES (2026-09-28). Pedido: «en tipo de movimiento están entradas y salidas, estaría
+             bueno tener devoluciones también, y que diga de qué obra es la devolución (qué plaza) o si
+             es una devolución del stock de una persona; fácil para buscar esa obra o persona; que diga
+             quién lo devuelve y lo que consideres necesario».
+             Se guarda como ENTRADA con `devolucion:true` (así el stock, el balance de la plaza y lo
+             que tiene cada persona lo cuentan solos, con las mismas cuentas de siempre):
+               · de una obra → lleva `plazaId` (el balance de la plaza lo descuenta de lo entregado);
+               · de una persona → lleva `personaNombre` (se descuenta de lo que tiene en su poder).
+             Estado «Roto»: además se registra una salida de baja por el mismo material, así vuelve
+             de la obra/persona pero NO suma al stock usable. -->
+        <div id="stockMovDevolCampos" style="display:none">
+          <label style="margin-top:12px;">¿De dónde vuelve el material?</label>
+          <div class="dv-seg" role="tablist">
+            <button type="button" class="dv-seg-btn activo" data-origen="obra">🏗 De una obra</button>
+            <button type="button" class="dv-seg-btn" data-origen="persona">👷 De una persona</button>
+          </div>
+          <div class="dv-buscar">
+            <label for="stockDevolOrigen" id="stockDevolOrigenLbl">Buscá la plaza</label>
+            <div class="dv-buscar-caja">
+              <input type="text" id="stockDevolOrigen" placeholder="Escribí el nombre, el barrio o el ID…" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
+              <button type="button" class="dv-limpiar" id="stockDevolOrigenX" title="Borrar" aria-label="Borrar" style="display:none;">×</button>
+            </div>
+            <div class="dv-sugerencias" id="stockDevolSug" style="display:none;"></div>
+            <div class="dv-elegido" id="stockDevolElegido" style="display:none;"></div>
+          </div>
+          <div class="row2">
+            <div>
+              <label for="stockDevolQuien">¿Quién lo devuelve?</label>
+              <input type="text" id="stockDevolQuien" list="personalLista" placeholder="Nombre de quien trae el material" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
+            </div>
+            <div>
+              <label for="stockDevolMotivo">Motivo</label>
+              <select id="stockDevolMotivo">
+                <option value="Sobrante de obra">Sobrante de obra</option>
+                <option value="Obra terminada">Obra terminada</option>
+                <option value="No se usó / se cambió">No se usó / se cambió</option>
+                <option value="Retiro de instalación vieja">Retiro de instalación vieja</option>
+                <option value="Devuelve lo que tenía en su poder">Devuelve lo que tenía en su poder</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+          </div>
+          <label>Estado del material</label>
+          <div class="dv-estado">
+            <label class="dv-est dv-est-ok"><input type="radio" name="stockDevolEstado" value="bueno" checked><span>✓ Bueno</span></label>
+            <label class="dv-est dv-est-rev"><input type="radio" name="stockDevolEstado" value="revisar"><span>🔍 A revisar</span></label>
+            <label class="dv-est dv-est-roto"><input type="radio" name="stockDevolEstado" value="roto"><span>✗ Roto</span></label>
+          </div>
+          <div class="hint" id="stockDevolEstadoHint" style="margin-top:4px;">Bueno y A revisar vuelven al stock. Roto queda anotado pero <b>no suma</b> al stock.</div>
+          <label for="stockDevolObs">Observaciones <span style="font-weight:500;color:var(--text-soft);">(opcional)</span></label>
+          <input type="text" id="stockDevolObs" placeholder="Ej: 2 rollos abiertos, faltan 3 m…" autocomplete="off">
+          <div class="hint" id="stockDevolRecibe" style="margin-top:6px;"></div>
         </div>
 
         <button type="button" class="btn-primary" id="stockMovBtn" style="margin-top:14px;">Registrar movimiento</button>
@@ -10845,6 +10902,8 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
   if(!stockFirebaseListo()){ msg.textContent = '⚠ No se pudo conectar con la base de stock compartida — revisá tu conexión a internet y recargá la página.'; return; }
   if(!window.__fbUser){ msg.textContent = '⚠ Iniciá sesión (arriba, "Acceso para editar Stock") para poder registrar movimientos.'; return; }
   const tipo = document.getElementById('stockMovTipo').value;
+  // Devolución (2026-09-28): tiene su propio registro, más abajo (bloque «DEVOLUCIONES»).
+  if(tipo==='devolucion'){ if(typeof window.stockRegistrarDevolucion === 'function') await window.stockRegistrarDevolucion(btn, msg); return; }
   const item = stockParsearProducto(document.getElementById('stockMovProducto').value);
   const cantidad = parseFloat(document.getElementById('stockMovCantidad').value) || 0;
   const fecha = document.getElementById('stockMovFecha').value;
@@ -11823,12 +11882,12 @@ function imprimirMovimientos(){
   const periodo = (desde||hasta) ? `${desde?formatFechaCorta(desde):'inicio'} a ${hasta?formatFechaCorta(hasta):'hoy'}` : 'Todo el período';
   const cuerpo = filas.length ? filas.map(m=>`<tr${m.anulado?' style="opacity:.55;"':''}>
       <td>${escHtml(formatFechaCorta(m.fecha)||'—')}</td>
-      <td>${m.tipo==='entrada'?'Entrada':'Salida'}</td>
+      <td>${etiquetaTipoMov(m, false)}</td>
       <td>${escHtml(String(m.codigo))}</td>
       <td>${escHtml(m.desc||'')}</td>
       <td style="text-align:right;">${fmt(m.cantidad,2)} ${escHtml(m.un||'')}</td>
       <td>${escHtml(m.destino||m.proveedor||'—')}</td>
-      <td>${escHtml(m.retiradoPor||'')}</td>
+      <td>${escHtml(m.retiradoPor||m.devueltoPor||'')}</td>
       <td>${escHtml(m.usuario||'')}</td>
       <td>${m.anulado?'ANULADO':''}</td>
     </tr>`).join('') : `<tr><td colspan="9" style="text-align:center; padding:16px;">Sin movimientos para este filtro.</td></tr>`;
@@ -11852,13 +11911,36 @@ function imprimirMovimientos(){
 // el id interno de la base, que no cambia nunca: si alguna vez se borrara un movimiento viejo de
 // verdad (no anular, borrar), el correlativo de los siguientes se correría y el id sigue siendo la
 // referencia firme.
+// Nombre del tipo de movimiento para mostrar (2026-09-28, con las devoluciones).
+function etiquetaTipoMov(m, conIcono){
+  const t = m.soloPrecio ? ['💲','Precio']
+    : (m.devolucion && m.devolOrigen) ? ['↩','Devolución']
+    : (m.devolucion && m.usoDeCargo) ? ['↔','Pasa a obra']
+    : (m.devolucion) ? ['↩','Devolución']
+    : m.bajaRotura ? ['🗑','Baja (roto)']
+    : (m.tipo==='entrada' ? ['➕','Entrada'] : ['➖','Salida']);
+  return conIcono ? `${t[0]} ${t[1]}` : t[1];
+}
+function detalleDevolucion(m){
+  const est = ({ bueno:['✓ Bueno','ok'], revisar:['🔍 A revisar','rev'], roto:['✗ Roto — no suma al stock','roto'] })[m.devolEstado] || null;
+  const origen = m.devolOrigen === 'obra'
+    ? `↩ De la obra <b>${escHtml(m.destino||'—')}</b>${m.obraId ? ` <span style="opacity:.7;">(ID ${escHtml(m.obraId)})</span>` : ''}`
+    : `↩ Del stock de <b>${escHtml(m.personaNombre||'—')}</b>`;
+  return [origen,
+    m.devueltoPor ? `Devolvió: ${escHtml(m.devueltoPor)}` : '',
+    [m.devolMotivo ? escHtml(m.devolMotivo) : '', est ? `<span class="dv-chip dv-chip-${est[1]}">${est[0]}</span>` : ''].filter(Boolean).join(' · '),
+    m.devolObs ? `<span style="font-size:11.5px;">📝 ${escHtml(m.devolObs)}</span>` : ''
+  ].filter(Boolean).join('<br>');
+}
 function numeroComprobante(m){
+  // Las devoluciones llevan su propia numeración (D-0001…), como las entradas (E-) y las salidas (S-).
+  const serie = x => x.devolucion && x.devolOrigen ? 'D' : (x.tipo==='entrada' ? 'E' : 'S');
   const mismos = (window.stockMovimientos||[])
-    .filter(x=>x.tipo===m.tipo)
+    .filter(x=>serie(x)===serie(m))
     .sort((a,b)=> (a.ts||0)-(b.ts||0) || String(a.id||'').localeCompare(String(b.id||'')));
   const pos = mismos.findIndex(x=>x.id===m.id);
   const n = pos >= 0 ? pos+1 : mismos.length+1;
-  return `${m.tipo==='entrada'?'E':'S'}-${String(n).padStart(4,'0')}`;
+  return `${serie(m)}-${String(n).padStart(4,'0')}`;
 }
 
 function verComprobanteMovimiento(id){
@@ -11868,7 +11950,8 @@ function verComprobanteMovimiento(id){
   if(!m && window.__ultimoMovLocal && window.__ultimoMovLocal.id===id) m = window.__ultimoMovLocal;
   if(!m){ alert('No se encontró ese movimiento. Recargá la página y probá de nuevo.'); return; }
   const esEntrada = m.tipo==='entrada';
-  const titulo = esEntrada ? 'Comprobante de entrada de material' : 'Vale de salida de material';
+  const esDevol = !!(m.devolucion && m.devolOrigen);
+  const titulo = esDevol ? 'Comprobante de devolución de material' : (esEntrada ? 'Comprobante de entrada de material' : 'Vale de salida de material');
   const nro = numeroComprobante(m);
   const fila = (rot, val) => val ? `<tr><th style="width:34%; background:#eef5f2;">${escHtml(rot)}</th><td>${escHtml(val)}</td></tr>` : '';
   const restante = (typeof stockActual === 'function') ? stockActual(m.codigo) : null;
@@ -11876,10 +11959,15 @@ function verComprobanteMovimiento(id){
   const datos = [
     fila('Comprobante N°', nro),
     fila('Fecha del movimiento', formatFechaCorta(m.fecha) || m.fecha || '—'),
-    fila('Tipo', esEntrada ? 'ENTRADA — ingreso de material al pañol' : 'SALIDA — retiro de material del pañol'),
-    esEntrada ? fila('Proveedor / comprobante', m.proveedor || '—')
-              : fila('Destino (plaza / obra)', m.destino || '—'),
-    esEntrada ? '' : fila('Retirado por', m.retiradoPor || '—'),
+    fila('Tipo', esDevol ? 'DEVOLUCIÓN — el material vuelve al pañol' : (esEntrada ? 'ENTRADA — ingreso de material al pañol' : 'SALIDA — retiro de material del pañol')),
+    esDevol ? fila('Vuelve de', m.devolOrigen === 'obra' ? `Obra: ${m.destino || '—'}${m.obraId ? ` (ID ${m.obraId})` : ''}` : `Stock de la persona: ${m.personaNombre || '—'}`) : '',
+    esDevol ? fila('Devuelto por', m.devueltoPor || '—') : '',
+    esDevol ? fila('Motivo', m.devolMotivo || '') : '',
+    esDevol ? fila('Estado del material', ({bueno:'Bueno', revisar:'A revisar', roto:'Roto / no sirve — no vuelve al stock'})[m.devolEstado] || '') : '',
+    esDevol ? fila('Observaciones', m.devolObs || '') : '',
+    esDevol ? '' : (esEntrada ? fila('Proveedor / comprobante', m.proveedor || '—')
+              : fila('Destino (plaza / obra)', m.destino || '—')),
+    (esEntrada || esDevol) ? '' : fila('Retirado por', m.retiradoPor || '—'),
     fila('Cargado por', m.usuario || '—'),
   ].join('');
 
@@ -11902,7 +11990,7 @@ function verComprobanteMovimiento(id){
   const firmas = `<table style="margin-top:26px; border:none;">
       <tr>
         <td style="border:none; width:50%; padding-top:34px;"><div style="border-top:1px solid #183028; padding-top:5px;">${esEntrada?'Recibió (pañol) — aclaración y firma':'Entregó (pañol) — aclaración y firma'}</div></td>
-        <td style="border:none; width:50%; padding-top:34px; padding-left:24px;"><div style="border-top:1px solid #183028; padding-top:5px;">${esEntrada?'Entregó (proveedor / transporte)':'Recibió el material — aclaración y firma'}</div></td>
+        <td style="border:none; width:50%; padding-top:34px; padding-left:24px;"><div style="border-top:1px solid #183028; padding-top:5px;">${esDevol?'Devolvió — aclaración y firma':(esEntrada?'Entregó (proveedor / transporte)':'Recibió el material — aclaración y firma')}</div></td>
       </tr></table>`;
 
   const pie = (restante !== null && isFinite(restante))
@@ -12013,9 +12101,9 @@ function renderStockMovimientos(){
     const fechaFmt = (y&&mo&&d) ? `${d}/${mo}/${y}` : (m.fecha||'—');
     const quien = m.usuario ? `<br><span style="color:var(--text-soft); font-size:11px;">Cargó: ${escHtml(m.usuario)}</span>` : '';
     const precioTxt = (m.precioUnit != null && isFinite(m.precioUnit)) ? `<br><span style="font-size:11.5px;">💲 ${formatMoney(m.precioUnit)} / ${escHtml(m.un||'')}${m.cantidad ? ` · total ${formatMoney(m.precioUnit * m.cantidad)}` : ''}</span>` : '';
-    const detalle = (m.tipo==='entrada'
+    const detalle = (m.devolucion && m.devolOrigen) ? (detalleDevolucion(m) + quien) : (m.tipo==='entrada'
       ? (([m.proveedor ? `Prov.: ${escHtml(m.proveedor)}` : '', m.remito ? `Remito ${escHtml(m.remito)}` : ''].filter(Boolean).join(' · ') || '—') + precioTxt)
-      : ([m.retiradoPor?`Retirado por: ${escHtml(m.retiradoPor)}`:'', m.destino?`Destino: ${escHtml(m.destino)}`:'', m.enCargo?'<b>👷 en cargo</b>':'', m.usoDeCargo?`(de lo que tenía ${escHtml(m.personaNombre||'')})`:''].filter(Boolean).join(' · ') || '—')) + (m.devolucion ? `<br><span style="font-size:11.5px;">↩ Devolución de <b>${escHtml(m.personaNombre||'')}</b></span>` : '') + quien;
+      : ([m.retiradoPor?`Retirado por: ${escHtml(m.retiradoPor)}`:'', m.destino?`Destino: ${escHtml(m.destino)}`:'', m.enCargo?'<b>👷 en cargo</b>':'', m.usoDeCargo?`(de lo que tenía ${escHtml(m.personaNombre||'')})`:'', m.bajaRotura?'<b>material roto: no vuelve al stock</b>':''].filter(Boolean).join(' · ') || '—')) + (m.devolucion ? `<br><span style="font-size:11.5px;">↩ Devolución de <b>${escHtml(m.personaNombre||'')}</b></span>` : '') + quien;
     const anuladoInfo = m.anulado
       ? `<br><span style="color:var(--danger); font-size:11px;">⊘ ANULADO${m.anuladoMotivo?`: ${escHtml(m.anuladoMotivo)}`:''}${m.anuladoPor?` — por ${escHtml(m.anuladoPor)}`:''}</span>`
       : '';
@@ -12027,7 +12115,7 @@ function renderStockMovimientos(){
       : `<button type="button" class="btn-ghost" onclick="anularStockMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px; color:var(--danger);" title="Anular este movimiento (queda en el registro pero deja de contar)">⊘</button>`);
     return `<tr${estiloFila}>
       <td>${fechaFmt}</td>
-      <td>${m.soloPrecio ? '💲 Precio' : (m.tipo==='entrada'?'➕ Entrada':'➖ Salida')}</td>
+      <td>${etiquetaTipoMov(m, true)}</td>
       <td>${m.codigo}</td>
       <td>${escHtml(m.desc)}</td>
       <td>${fmt(m.cantidad,2)} ${escHtml(m.un)}</td>
@@ -12049,7 +12137,7 @@ function movimientosFiltrados(){
   const hasta = ((document.getElementById('stockMovHasta')||{}).value||'');
   return stockMovimientos.filter(m=>{
     if(q){
-      const texto = `${m.codigo} ${m.desc||''} ${m.destino||''} ${m.retiradoPor||''} ${m.proveedor||''} ${m.remito||''} ${m.personaNombre||''} ${m.usuario||''}`.toLowerCase();
+      const texto = `${m.codigo} ${m.desc||''} ${m.destino||''} ${m.retiradoPor||''} ${m.proveedor||''} ${m.remito||''} ${m.personaNombre||''} ${m.usuario||''} ${m.devueltoPor||''} ${m.devolMotivo||''} ${m.devolObs||''} ${m.devolucion?'devolución devolucion':''}`.toLowerCase();
       if(!texto.includes(q)) return false;
     }
     if(plaza && String(m.plazaId||'') !== plaza) return false;
@@ -12078,7 +12166,7 @@ async function anularStockMovimiento(id){
   if(!window.__fbUser){ alert('Iniciá sesión (arriba, "Acceso para editar Stock") para poder anular movimientos.'); return; }
   const mov = stockMovimientos.find(m=>m.id===id);
   if(!mov) return;
-  const motivo = prompt(`Anular "${mov.tipo==='entrada'?'Entrada':'Salida'} de ${mov.cantidad} ${mov.un} — ${mov.desc}".\n\nEl movimiento NO se borra: queda en el registro pero deja de contar para el stock.\n\n¿Motivo? (ej. cargado por error, cantidad equivocada, devuelto al pañol)`, '');
+  const motivo = prompt(`Anular "${etiquetaTipoMov(mov, false)} de ${mov.cantidad} ${mov.un} — ${mov.desc}".\n\nEl movimiento NO se borra: queda en el registro pero deja de contar para el stock.\n\n¿Motivo? (ej. cargado por error, cantidad equivocada, devuelto al pañol)`, '');
   if(motivo === null) return; // canceló
   try{
     await window.fbUpdateMovimiento(id, {
@@ -12087,6 +12175,9 @@ async function anularStockMovimiento(id){
       anuladoPor: (window.__fbUser && window.__fbUser.email) || '',
       anuladoTs: Date.now()
     });
+    // Devolución de material roto (2026-09-28): su baja va atada; si se anula una, se anula la otra.
+    const par = mov.bajaRotura ? mov.devolucionId : mov.bajaRoturaId;
+    if(par) await window.fbUpdateMovimiento(par, { anulado:true, anuladoMotivo:'Anulado junto con su devolución: ' + String(motivo||'').trim(), anuladoPor:(window.__fbUser && window.__fbUser.email) || '', anuladoTs:Date.now() });
   }catch(e){
     alert('No se pudo anular el movimiento (revisá tu conexión a internet).');
   }
@@ -12097,9 +12188,11 @@ async function reactivarStockMovimiento(id){
   if(!window.__fbUser){ alert('Iniciá sesión (arriba, "Acceso para editar Stock") para poder reactivar movimientos.'); return; }
   const mov = stockMovimientos.find(m=>m.id===id);
   if(!mov) return;
-  if(!confirm(`¿Volver a contar este movimiento? "${mov.tipo==='entrada'?'Entrada':'Salida'} de ${mov.cantidad} ${mov.un} — ${mov.desc}" vuelve a afectar el stock de todo el equipo.`)) return;
+  if(!confirm(`¿Volver a contar este movimiento? "${etiquetaTipoMov(mov, false)} de ${mov.cantidad} ${mov.un} — ${mov.desc}" vuelve a afectar el stock de todo el equipo.`)) return;
   try{
     await window.fbUpdateMovimiento(id, { anulado:false, anuladoMotivo:'', anuladoPor:'', anuladoTs:null });
+    const par = mov.bajaRotura ? mov.devolucionId : mov.bajaRoturaId;
+    if(par) await window.fbUpdateMovimiento(par, { anulado:false, anuladoMotivo:'', anuladoPor:'', anuladoTs:null });
   }catch(e){
     alert('No se pudo reactivar el movimiento (revisá tu conexión a internet).');
   }
@@ -12110,8 +12203,8 @@ function exportarMovimientosCSV(){
   const filas = movimientosFiltrados().sort((a,b)=> (a.fecha||'').localeCompare(b.fecha||'') || (a.ts||0)-(b.ts||0));
   let csv = 'Fecha,Tipo,Código,Producto,Cantidad,Unidad,Plaza / destino,ID obra,Retirado por,Proveedor / comprobante,Cargó,Anulado,Motivo de anulación,Remito,Precio unitario sin IVA,Importe sin IVA\n';
   filas.forEach(m=>{
-    csv += [m.fecha||'', m.soloPrecio ? 'Precio' : (m.tipo==='entrada'?'Entrada':'Salida'), m.codigo, m.desc, m.cantidad, m.un,
-            m.destino||'', m.obraId||'', m.retiradoPor||'', m.proveedor||'', m.usuario||'',
+    csv += [m.fecha||'', etiquetaTipoMov(m, false), m.codigo, m.desc, m.cantidad, m.un,
+            m.destino||(m.devolOrigen==='persona' ? `Stock de ${m.personaNombre||''}` : ''), m.obraId||'', m.retiradoPor||m.devueltoPor||'', m.proveedor||(m.devolucion ? [m.devolMotivo, m.devolEstado ? 'estado: '+m.devolEstado : '', m.devolObs].filter(Boolean).join(' · ') : ''), m.usuario||'',
             m.anulado?'SÍ':'', m.anuladoMotivo||'', m.remito||'', m.precioUnit != null ? m.precioUnit : '', (m.precioUnit != null && m.cantidad) ? (m.precioUnit * m.cantidad).toFixed(2) : '']
       .map(v => `"${String(v==null?'':v).replace(/"/g,'""')}"`).join(',') + '\n';
   });
@@ -33027,6 +33120,849 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 })();
 </script>
 
+<!-- ============================================================================================
+     MI TABLERO — hoja personal tipo Trello (2026-09-28)
+     ============================================================================================
+     Pedido: «una hoja nueva abajo de normas y planos, una hoja personal por usuario, tipo Trello:
+     notas, recordatorios diarios, crea algo lindo, para cambiar color de notas, visualmente lindo».
+     Decisiones con el usuario (28/09):
+       · Cada uno ELIGE SU NOMBRE de la nómina (la cuenta del equipo es compartida) y puede poner un
+         PIN de 4 números. El aparato recuerda quién es.
+       · Se guarda EN LA NUBE (colección `tableros`, un documento por persona) para verlo igual en el
+         celu y en la compu. Sin sesión iniciada queda guardado en el aparato y se sube al iniciarla.
+     Es un bloque aparte: no toca ninguna función de la herramienta.
+     ============================================================================================ -->
+<div class="wrap" id="viewTablero" style="display:none"><div id="tbApp"></div></div>
+<style id="estiloTablero">
+#viewTablero::before{ content:"Mi tablero"; }
+.menu-item[data-vista="tablero"] .menu-ico{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%223%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%223%22/%3E%3Cpath%20d%3D%22M8%207v8M12%207v4M16%207v10%22/%3E%3C/svg%3E");}
+.tb-menu-n{ margin-left:auto; min-width:22px; height:22px; padding:0 7px; border-radius:999px; background:#ff3b30; color:#fff; font:700 12px/22px var(--fuente); text-align:center; }
+#viewTablero{ max-width:none; }
+#tbApp{ --tb-r:18px; font-family:var(--fuente); color:var(--text); }
+#tbApp button{ font-family:inherit; }
+/* ---- Cabecera ---- */
+.tb-top{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 14px; }
+.tb-yo{ display:flex; align-items:center; gap:12px; flex:1 1 auto; min-width:0; }
+.tb-avatar{ width:48px; height:48px; border-radius:16px; border:none; color:#fff; font:800 17px/48px var(--disp); text-align:center; cursor:pointer; flex:0 0 48px; box-shadow:0 10px 22px -12px rgba(40,40,94,.8); padding:0; }
+.tb-hola{ font:800 20px/1.15 var(--disp); letter-spacing:-.02em; }
+.tb-fecha{ color:var(--text-soft); font-size:13px; margin-top:2px; text-transform:none; }
+.tb-estado{ font-size:12px; font-weight:600; color:var(--text-soft); background:var(--vidrio-2); border:1px solid var(--canto); border-radius:999px; padding:6px 12px; white-space:nowrap; }
+.tb-estado.pend{ color:#a15c00; background:#fff4e0; border-color:#ffd08a; }
+/* ---- Resumen del día ---- */
+.tb-hoy{ display:flex; gap:8px; margin:0 0 12px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+.tb-hoy::-webkit-scrollbar{ display:none; }
+.tb-kpi{ flex:0 0 auto; display:flex; align-items:center; gap:8px; border:1px solid var(--canto); background:var(--vidrio); border-radius:16px; padding:10px 14px; font:600 13px/1.2 var(--fuente); color:var(--text); cursor:pointer; box-shadow:var(--sombra-sm); transition:transform .12s, background .15s; }
+.tb-kpi b{ font:800 20px/1 var(--disp); }
+.tb-kpi .tb-kpi-ico{ font-size:18px; }
+.tb-kpi.activo{ background:var(--navy); color:#fff; border-color:var(--navy); }
+.tb-kpi.rojo b{ color:#ff3b30; } .tb-kpi.rojo.activo b{ color:#ffd0cd; }
+.tb-kpi:active{ transform:scale(.97); }
+/* ---- Barra ---- */
+.tb-barra{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:0 0 14px; }
+.tb-rapida{ flex:2 1 320px; display:flex; gap:8px; margin:0; background:var(--vidrio); border:1px solid var(--canto); border-radius:16px; padding:6px 6px 6px 14px; box-shadow:var(--sombra-sm); }
+.tb-rapida input{ flex:1 1 auto; border:none !important; background:transparent !important; box-shadow:none !important; padding:8px 0 !important; margin:0 !important; font-size:16px; min-width:0; outline:none; }
+.tb-rapida button{ flex:0 0 auto; border:none; background:var(--navy); color:#fff; border-radius:12px; padding:0 16px; font-weight:700; font-size:14px; cursor:pointer; min-height:40px; }
+.tb-busca{ flex:1 1 200px; position:relative; }
+.tb-busca input{ width:100%; margin:0 !important; border-radius:14px !important; padding-left:38px !important; }
+.tb-busca span{ position:absolute; left:13px; top:50%; transform:translateY(-50%); opacity:.55; pointer-events:none; }
+.tb-puntos{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.tb-punto{ width:26px; height:26px; border-radius:50%; border:2px solid #fff; cursor:pointer; box-shadow:0 0 0 1px rgba(40,40,94,.15); padding:0; transition:transform .12s; }
+.tb-punto.activo{ transform:scale(1.18); box-shadow:0 0 0 2px var(--navy); }
+.tb-punto-todos{ width:auto; padding:0 10px; border-radius:999px; font:700 11.5px/22px var(--fuente); background:var(--vidrio); color:var(--text-soft); }
+/* ---- Tablero ---- */
+.tb-board{ display:flex; gap:14px; align-items:flex-start; overflow-x:auto; padding:14px; margin:0 -4px; border-radius:26px; min-height:60vh; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch; transition:background .3s; }
+.tb-board.f-vidrio{ background:rgba(255,255,255,.18); }
+.tb-board.f-cielo{ background:linear-gradient(135deg,#d6e6ff 0%,#efe4ff 100%); }
+.tb-board.f-menta{ background:linear-gradient(135deg,#d4f5e8 0%,#e3f3ff 100%); }
+.tb-board.f-atardecer{ background:linear-gradient(135deg,#ffe0cc 0%,#ffd3e6 60%,#e9dcff 100%); }
+.tb-board.f-noche{ background:linear-gradient(135deg,#1f1f4d 0%,#3d3f8a 100%); }
+.tb-board.f-noche .tb-col{ background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.18); }
+.tb-board.f-noche .tb-col-tit, .tb-board.f-noche .tb-col-n, .tb-board.f-noche .tb-agregar, .tb-board.f-noche .tb-col-menu{ color:#fff; }
+.tb-board.f-noche .tb-col-nueva{ color:#fff; border-color:rgba(255,255,255,.35); }
+.tb-col{ flex:0 0 292px; max-width:292px; background:rgba(255,255,255,.58); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.85); border-radius:22px; padding:12px 10px 10px; box-shadow:0 16px 36px -28px rgba(40,40,94,.6); scroll-snap-align:start; display:flex; flex-direction:column; max-height:calc(100vh - 150px); }
+.tb-col-cab{ display:flex; align-items:center; gap:6px; padding:0 4px 10px; }
+.tb-col-tit{ flex:1 1 auto; font:800 15px/1.2 var(--disp); letter-spacing:-.01em; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:text; }
+.tb-col-tit-in{ flex:1 1 auto; font:800 15px var(--disp); margin:0 !important; padding:6px 8px !important; border-radius:10px !important; }
+.tb-col-n{ font:700 12px/1 var(--fuente); color:var(--text-soft); background:rgba(40,40,94,.07); border-radius:999px; padding:4px 8px; }
+.tb-col-menu{ border:none; background:transparent; width:32px; height:32px; border-radius:10px; cursor:pointer; font-size:18px; color:var(--text-soft); line-height:1; }
+.tb-col-menu:hover{ background:rgba(40,40,94,.08); }
+.tb-lista{ display:flex; flex-direction:column; gap:9px; min-height:14px; overflow-y:auto; padding:2px 2px 4px; overscroll-behavior:contain; }
+.tb-agregar{ margin-top:8px; border:none; background:transparent; color:var(--text-soft); font:600 13.5px var(--fuente); text-align:left; padding:10px; border-radius:12px; cursor:pointer; }
+.tb-agregar:hover{ background:rgba(40,40,94,.06); color:var(--text); }
+.tb-nueva-caja{ margin-top:8px; }
+.tb-nueva-caja textarea{ width:100%; min-height:64px; margin:0 0 6px !important; border-radius:14px !important; font-size:15px; resize:vertical; }
+.tb-nueva-caja .tb-fila{ display:flex; gap:6px; }
+.tb-btn{ border:none; border-radius:12px; padding:10px 14px; font:700 13.5px var(--fuente); cursor:pointer; min-height:40px; }
+.tb-btn-pri{ background:var(--navy); color:#fff; }
+.tb-btn-sec{ background:rgba(40,40,94,.07); color:var(--text); }
+.tb-btn-peligro{ background:#ffe7e5; color:#b3261e; }
+.tb-col-nueva{ flex:0 0 240px; border:2px dashed rgba(40,40,94,.2); background:transparent; border-radius:22px; min-height:64px; color:var(--text-soft); font:700 14px var(--fuente); cursor:pointer; scroll-snap-align:start; }
+.tb-col-nueva:hover{ background:rgba(255,255,255,.35); }
+/* ---- Tarjetas ---- */
+.tb-card{ position:relative; border-radius:16px; padding:12px 12px 10px 44px; background:var(--tc,#fff); box-shadow:0 1px 1px rgba(40,40,94,.06), 0 8px 18px -14px rgba(40,40,94,.55); cursor:pointer; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; transition:transform .15s, box-shadow .15s, opacity .2s; border:1px solid rgba(40,40,94,.06); touch-action:pan-x pan-y; }
+.tb-card::before{ content:""; position:absolute; left:0; top:12px; bottom:12px; width:4px; border-radius:0 4px 4px 0; background:var(--tb,#d5d9e6); }
+.tb-card:hover{ box-shadow:0 1px 1px rgba(40,40,94,.06), 0 14px 26px -16px rgba(40,40,94,.6); transform:translateY(-1px); }
+.tb-card-tit{ font:700 14.5px/1.3 var(--fuente); word-break:break-word; }
+.tb-card-nota{ font-size:12.5px; line-height:1.4; color:rgba(13,20,36,.68); margin-top:4px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; white-space:pre-line; word-break:break-word; }
+.tb-badges{ display:flex; gap:5px; flex-wrap:wrap; margin-top:8px; }
+.tb-badges:empty{ display:none; }
+.tb-bdg{ font:700 11px/1 var(--fuente); border-radius:999px; padding:5px 8px; background:rgba(255,255,255,.65); color:rgba(13,20,36,.75); }
+.tb-bdg.hoy{ background:#fff0cf; color:#8a5200; }
+.tb-bdg.vencida{ background:#ff3b30; color:#fff; }
+.tb-bdg.diaria{ background:rgba(40,40,94,.1); color:var(--navy); }
+.tb-bdg.lista-ok{ background:#34c759; color:#fff; }
+.tb-check{ position:absolute; left:10px; top:11px; width:24px; height:24px; border-radius:50%; border:2px solid rgba(40,40,94,.35); background:rgba(255,255,255,.7); cursor:pointer; padding:0; display:grid; place-items:center; transition:all .15s; }
+.tb-check::after{ content:""; width:10px; height:6px; border:2.5px solid #fff; border-top:none; border-right:none; transform:rotate(-45deg) translate(1px,-1px); opacity:0; }
+.tb-check::before{ content:""; position:absolute; inset:-10px; }
+.tb-card.hecha .tb-check{ background:#34c759; border-color:#34c759; }
+.tb-card.hecha .tb-check::after{ opacity:1; }
+.tb-card.hecha .tb-card-tit{ text-decoration:line-through; opacity:.55; }
+.tb-card.hecha{ opacity:.78; }
+.tb-card.oscura{ color:#fff; }
+.tb-card.oscura .tb-card-nota{ color:rgba(255,255,255,.75); }
+.tb-card.oscura .tb-bdg{ background:rgba(255,255,255,.16); color:#fff; }
+.tb-card.oscura .tb-check{ border-color:rgba(255,255,255,.6); background:rgba(255,255,255,.12); }
+.tb-card.atenuada{ opacity:.28; }
+.tb-card.levantada{ opacity:0; }
+.tb-fantasma{ position:fixed; z-index:9999; pointer-events:none; transform:rotate(3deg) scale(1.03); box-shadow:0 24px 44px -18px rgba(40,40,94,.75) !important; opacity:.97; }
+.tb-hueco{ border-radius:16px; background:rgba(40,40,94,.09); border:2px dashed rgba(40,40,94,.22); }
+.tb-arrastrando, .tb-arrastrando *{ cursor:grabbing !important; }
+@keyframes tbEntra{ from{ opacity:0; transform:translateY(6px) scale(.98); } to{ opacity:1; transform:none; } }
+.tb-card.nueva{ animation:tbEntra .28s ease; }
+/* ---- Modal / hoja ---- */
+.tb-modal{ position:fixed; inset:0; z-index:9000; background:rgba(15,18,40,.38); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:16px; animation:tbFondo .18s ease; }
+@keyframes tbFondo{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes tbSube{ from{ transform:translateY(24px); opacity:0; } to{ transform:none; opacity:1; } }
+.tb-hoja{ width:100%; max-width:560px; max-height:calc(100vh - 32px); overflow-y:auto; background:#fff; border-radius:26px; box-shadow:0 30px 70px -30px rgba(15,18,40,.7); animation:tbSube .22s ease; overscroll-behavior:contain; }
+.tb-hoja-color{ height:14px; background:var(--tb,#d5d9e6); }
+.tb-hoja-cuerpo{ padding:16px 20px 20px; }
+.tb-hoja input[type=text], .tb-hoja textarea, .tb-hoja input[type=date], .tb-hoja input[type=time], .tb-hoja select{ font-size:16px; }
+.tb-ed-tit{ width:100%; border:none !important; box-shadow:none !important; background:transparent !important; font:800 22px/1.2 var(--disp) !important; padding:4px 0 !important; margin:0 0 6px !important; outline:none; }
+.tb-ed-nota{ width:100%; min-height:96px; margin:0 !important; border-radius:14px !important; resize:vertical; line-height:1.45; }
+.tb-ed-lbl{ font:700 12px/1 var(--fuente); color:var(--text-soft); margin:16px 0 8px; letter-spacing:.2px; }
+.tb-colores{ display:flex; gap:9px; flex-wrap:wrap; }
+.tb-color{ width:36px; height:36px; border-radius:12px; border:2px solid rgba(255,255,255,.9); box-shadow:0 0 0 1px rgba(40,40,94,.14); cursor:pointer; padding:0; position:relative; transition:transform .12s; }
+.tb-color.activo{ transform:scale(1.1); box-shadow:0 0 0 2.5px var(--navy); }
+.tb-color.activo::after{ content:"✓"; position:absolute; inset:0; display:grid; place-items:center; font:800 15px var(--fuente); color:var(--navy); }
+.tb-color[data-c="marino"].activo::after{ color:#fff; }
+.tb-fila2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.tb-fila2 input, .tb-fila2 select{ margin:0 !important; width:100%; border-radius:12px !important; }
+.tb-switch{ display:flex; align-items:center; gap:12px; margin-top:12px; padding:12px 14px; border-radius:16px; background:rgba(40,40,94,.05); cursor:pointer; }
+.tb-switch input{ position:absolute; opacity:0; pointer-events:none; }
+.tb-switch .tb-sw{ flex:0 0 46px; height:28px; border-radius:999px; background:rgba(40,40,94,.2); position:relative; transition:background .2s; }
+.tb-switch .tb-sw::after{ content:""; position:absolute; left:3px; top:3px; width:22px; height:22px; border-radius:50%; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,.2); transition:transform .2s; }
+.tb-switch input:checked + .tb-sw{ background:#34c759; }
+.tb-switch input:checked + .tb-sw::after{ transform:translateX(18px); }
+.tb-switch .tb-sw-txt{ font-size:13.5px; line-height:1.35; }
+.tb-switch .tb-sw-txt small{ display:block; color:var(--text-soft); font-size:12px; }
+.tb-check-lista{ display:flex; flex-direction:column; gap:4px; }
+.tb-item{ display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:10px; }
+.tb-item input[type=checkbox]{ width:20px; height:20px; margin:0; accent-color:#34c759; flex:0 0 20px; }
+.tb-item input[type=text]{ flex:1 1 auto; margin:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; padding:6px 0 !important; }
+.tb-item.ok input[type=text]{ text-decoration:line-through; opacity:.55; }
+.tb-item button{ border:none; background:transparent; font-size:18px; color:var(--text-3); cursor:pointer; width:32px; height:32px; border-radius:8px; }
+.tb-barra-prog{ height:6px; border-radius:999px; background:rgba(40,40,94,.08); overflow:hidden; margin-bottom:6px; }
+.tb-barra-prog i{ display:block; height:100%; background:#34c759; border-radius:999px; transition:width .25s; }
+.tb-add-item{ display:flex; gap:8px; margin-top:6px; }
+.tb-add-item input{ flex:1 1 auto; margin:0 !important; border-radius:12px !important; }
+.tb-hoja-pie{ display:flex; gap:8px; justify-content:space-between; align-items:center; margin-top:20px; flex-wrap:wrap; }
+.tb-pop{ position:fixed; z-index:9100; background:#fff; border-radius:18px; box-shadow:0 24px 50px -20px rgba(15,18,40,.6); padding:6px; min-width:220px; animation:tbSube .16s ease; }
+.tb-pop button{ display:flex; width:100%; align-items:center; gap:10px; border:none; background:transparent; text-align:left; padding:11px 12px; border-radius:12px; font:600 14px var(--fuente); cursor:pointer; color:var(--text); }
+.tb-pop button:hover{ background:rgba(40,40,94,.06); }
+.tb-pop .tb-pop-sep{ height:1px; background:rgba(40,40,94,.08); margin:4px 6px; }
+.tb-pop .peligro{ color:#b3261e; }
+.tb-fondos{ display:flex; gap:8px; padding:6px 10px 10px; }
+.tb-fondo{ width:36px; height:36px; border-radius:12px; border:2px solid #fff; box-shadow:0 0 0 1px rgba(40,40,94,.15); cursor:pointer; padding:0 !important; }
+.tb-fondo.activo{ box-shadow:0 0 0 2.5px var(--navy); }
+/* ---- ¿Quién sos? / PIN ---- */
+.tb-quien{ max-width:620px; margin:6px auto 0; text-align:center; }
+.tb-quien h3{ font:800 24px/1.2 var(--disp); margin:6px 0 4px; letter-spacing:-.02em; }
+.tb-quien p{ color:var(--text-soft); margin:0 0 18px; font-size:14px; }
+.tb-personas{ display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; text-align:center; }
+.tb-persona{ border:1px solid var(--canto); background:var(--vidrio); border-radius:20px; padding:16px 10px 12px; cursor:pointer; box-shadow:var(--sombra-sm); font:600 13.5px/1.25 var(--fuente); color:var(--text); transition:transform .12s; }
+.tb-persona:active{ transform:scale(.97); }
+.tb-persona .tb-avatar{ margin:0 auto 8px; display:block; cursor:inherit; }
+.tb-otro{ display:flex; gap:8px; margin-top:16px; }
+.tb-otro input{ flex:1 1 auto; margin:0 !important; border-radius:14px !important; }
+.tb-pin{ max-width:340px; margin:10px auto 0; text-align:center; }
+.tb-pin-dots{ display:flex; gap:14px; justify-content:center; margin:18px 0 8px; }
+.tb-pin-dots i{ width:16px; height:16px; border-radius:50%; border:2px solid var(--navy); transition:background .15s; }
+.tb-pin-dots i.lleno{ background:var(--navy); }
+.tb-pin-dots.mal{ animation:tbTiembla .35s; }
+@keyframes tbTiembla{ 20%,60%{ transform:translateX(-8px); } 40%,80%{ transform:translateX(8px); } }
+.tb-teclado{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:18px auto 0; max-width:280px; }
+.tb-tecla{ height:64px; border-radius:50%; aspect-ratio:1; margin:0 auto; border:1px solid var(--canto); background:var(--vidrio); font:600 24px var(--disp); cursor:pointer; color:var(--text); box-shadow:var(--sombra-sm); }
+.tb-tecla:active{ background:var(--navy); color:#fff; }
+.tb-tecla.tx{ font-size:14px; background:transparent; border:none; box-shadow:none; }
+.tb-pin-msg{ min-height:20px; font-size:13px; color:var(--text-soft); }
+.tb-pin-msg.mal{ color:#ff3b30; }
+/* ---- Aviso flotante ---- */
+.tb-toast{ position:fixed; left:50%; bottom:max(20px, env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:9500; background:#1d1f45; color:#fff; border-radius:16px; padding:12px 14px 12px 16px; display:flex; align-items:center; gap:12px; box-shadow:0 20px 40px -18px rgba(0,0,0,.6); font:600 14px/1.3 var(--fuente); max-width:calc(100vw - 32px); animation:tbSube .2s ease; }
+.tb-toast button{ border:none; background:rgba(255,255,255,.16); color:#fff; border-radius:10px; padding:8px 12px; font:700 13px var(--fuente); cursor:pointer; white-space:nowrap; }
+/* ---- Celular ---- */
+@media (max-width:700px){
+  .tb-board{ margin:0 -16px; border-radius:0; padding:12px 16px 18px; gap:12px; min-height:62vh; scroll-snap-type:x mandatory; scroll-padding:0 16px; }
+  .tb-col{ flex:0 0 84vw; max-width:84vw; max-height:none; }
+  .tb-lista{ overflow:visible; }
+  .tb-col-nueva{ flex:0 0 60vw; }
+  .tb-hoja{ align-self:flex-end; max-height:92vh; border-radius:26px 26px 0 0; }
+  .tb-modal{ padding:0; align-items:flex-end; }
+  .tb-hoja-cuerpo{ padding-bottom:calc(20px + env(safe-area-inset-bottom)); }
+  .tb-hola{ font-size:18px; }
+  .tb-barra{ gap:8px; }
+  .tb-puntos{ overflow-x:auto; flex-wrap:nowrap; padding:2px; }
+}
+/* Los toques de 44px del celular no van en los círculos y puntos chicos (tienen su zona de toque propia) */
+#tbApp .tb-check, #tbApp .tb-punto:not(.tb-punto-todos), .tb-color, .tb-fondo{ min-height:0 !important; min-width:0 !important; }
+#tbApp .tb-check{ width:24px !important; height:24px !important; }
+#tbApp .tb-punto:not(.tb-punto-todos){ width:26px !important; height:26px !important; flex:0 0 26px; }
+#tbApp .tb-punto-todos{ min-height:0 !important; height:26px; flex:0 0 auto; }
+.tb-color{ width:36px !important; height:36px !important; }
+.tb-fondo{ width:36px !important; height:36px !important; }
+#tbApp .tb-col-menu, .tb-item button{ min-height:0 !important; }
+.tb-tecla.tx{ font-size:12.5px; line-height:1.15; }
+@media (max-width:700px){ .tb-kpi{ padding:9px 12px; } .tb-kpi b{ font-size:18px; } }
+@media print{ #viewTablero{ display:none !important; } }
+</style>
+<script id="tableroPersonal">
+(function(){
+  const $ = id => document.getElementById(id);
+  const app = $('tbApp'); if(!app) return;
+  const esc = s => (typeof escHtml === 'function') ? escHtml(s) : String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const norm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+  const claveDe = n => norm(n).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'sin-nombre';
+  const hoyISO = ()=>{ const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+  const ahoraHM = ()=>{ const d = new Date(); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+  const uid = ()=> Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  const LS = {
+    get(k, def){ try{ const v = localStorage.getItem(k); return v == null ? def : JSON.parse(v); }catch(e){ return def; } },
+    set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+    del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+  };
+  // PIN: es una traba para que otro no abra tu tablero por error, no una caja fuerte.
+  const hashPin = (clave, pin)=>{ let h = 0x811c9dc5; const s = 'ema|' + clave + '|' + pin; for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16); };
+
+  const COLORES = {
+    amarillo:{ bg:'#fff1a8', b:'#f2cf3a', n:'Amarillo' }, durazno:{ bg:'#ffdcc6', b:'#ff9f6b', n:'Durazno' },
+    rosa:{ bg:'#ffd6e3', b:'#ff7fa6', n:'Rosa' },        lila:{ bg:'#e7ddff', b:'#9d7cff', n:'Lila' },
+    celeste:{ bg:'#d5eefa', b:'#5fb3d6', n:'Celeste' },   menta:{ bg:'#d3f5e3', b:'#3fc47f', n:'Menta' },
+    lima:{ bg:'#ebf7c9', b:'#a8d33f', n:'Lima' },         arena:{ bg:'#f2ece3', b:'#c9b394', n:'Arena' },
+    blanco:{ bg:'#ffffff', b:'#c9cfdf', n:'Blanco' },      marino:{ bg:'#2f2f6b', b:'#84c3da', n:'Azul EMA', oscuro:true }
+  };
+  const FONDOS = { vidrio:'rgba(255,255,255,.5)', cielo:'linear-gradient(135deg,#d6e6ff,#efe4ff)', menta:'linear-gradient(135deg,#d4f5e8,#e3f3ff)', atardecer:'linear-gradient(135deg,#ffe0cc,#ffd3e6,#e9dcff)', noche:'linear-gradient(135deg,#1f1f4d,#3d3f8a)' };
+  const AVATAR = ['#28285e','#3d3f8a','#5f5bd6','#2a8fb8','#1f9d6b','#d9822b','#d6456f','#7a4fd6'];
+  const colorAvatar = n => { let h = 0; for(const c of String(n)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return AVATAR[h % AVATAR.length]; };
+  const iniciales = n => String(n||'?').trim().split(/\s+/).slice(0,2).map(p => p[0] || '').join('').toUpperCase() || '?';
+  const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const fechaLarga = ()=>{ const d = new Date(); return `${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`; };
+  const fechaCortaTb = iso => { if(!iso) return ''; const h = hoyISO(); if(iso === h) return 'hoy'; const d = new Date(iso + 'T12:00:00'); const man = new Date(); man.setDate(man.getDate()+1);
+    const mISO = `${man.getFullYear()}-${String(man.getMonth()+1).padStart(2,'0')}-${String(man.getDate()).padStart(2,'0')}`; if(iso === mISO) return 'mañana';
+    return `${d.getDate()} ${MESES[d.getMonth()].slice(0,3)}`; };
+
+  function tableroNuevo(nombre){
+    const h = hoyISO();
+    return { nombre, clave:claveDe(nombre), pin:'', fondo:'cielo', creado:Date.now(), actualizado:Date.now(),
+      columnas:[ { id:'hacer', titulo:'📌 Para hacer' }, { id:'hoy', titulo:'☀️ Hoy' }, { id:'curso', titulo:'🔧 En curso' }, { id:'listo', titulo:'✅ Listo' } ],
+      tarjetas:[
+        { id:uid(), col:'hacer', orden:1, titulo:'👋 ¡Bienvenido a tu tablero!', color:'amarillo', fecha:'', hora:'', repetir:'', hechoEl:'', hecha:false,
+          nota:'Tocá una tarjeta para escribir, cambiarle el color o ponerle fecha.\nMantenela apretada y arrastrala para cambiarla de lista.', lista:[
+            { t:'Anotar algo arriba y apretar Enter', ok:false }, { t:'Cambiarle el color a una nota', ok:false }, { t:'Crear un recordatorio diario', ok:false } ], creada:Date.now() },
+        { id:uid(), col:'hoy', orden:1, titulo:'Revisar lo que hay que hacer hoy', color:'celeste', fecha:'', hora:'08:00', repetir:'diario', hechoEl:'', hecha:false,
+          nota:'Ejemplo de recordatorio diario: se vuelve a activar todos los días.', lista:[], creada:Date.now() }
+      ] };
+  }
+  function normalizar(t){
+    if(!t || typeof t !== 'object') return null;
+    t.columnas = Array.isArray(t.columnas) && t.columnas.length ? t.columnas.filter(c => c && c.id) : tableroNuevo(t.nombre||'').columnas;
+    t.tarjetas = (Array.isArray(t.tarjetas) ? t.tarjetas : []).filter(c => c && c.id).map(c => ({ titulo:'', nota:'', color:'amarillo', fecha:'', hora:'', repetir:'', hechoEl:'', hecha:false, lista:[], orden:0, ...c,
+      lista: Array.isArray(c.lista) ? c.lista.filter(Boolean) : [] }));
+    const ids = new Set(t.columnas.map(c => c.id));
+    t.tarjetas.forEach(c => { if(!ids.has(c.col)) c.col = t.columnas[0].id; });
+    if(!FONDOS[t.fondo]) t.fondo = 'cielo';
+    return t;
+  }
+
+  // ---------- Estado ----------
+  let yo = LS.get('ema.tablero.yo', '');           // clave de la persona de este aparato
+  let tab = null;                                   // el tablero
+  let pantalla = 'quien';                           // quien | pin | tablero | pin-nuevo
+  let pendiente = LS.get('ema.tablero.pend', false);
+  let filtro = { texto:'', color:'', foco:'' };
+  let abierta = null;                               // id de la tarjeta en el editor
+  let agregandoEn = null;                           // id de columna con la caja de «agregar» abierta
+  let renombrando = null;
+  let unsub = null, timerGuardar = null, suprimirClick = false;
+
+  const db = ()=>{ try{ return (window.firebase && firebase.apps && firebase.apps.length) ? firebase.firestore() : null; }catch(e){ return null; } };
+  const haySesion = ()=> !!window.__fbUser;
+  function escuchar(clave){
+    if(unsub){ try{ unsub(); }catch(e){} unsub = null; }
+    const d = db(); if(!d) return;
+    try{
+      unsub = d.collection('tableros').doc(clave).onSnapshot(doc => {
+        if(!doc.exists){ if(tab && tab.clave === clave && haySesion()) programarGuardado(0); return; }
+        if(pendiente) return;             // hay cambios de este aparato sin subir: mandan esos
+        const remoto = normalizar(doc.data());
+        if(!remoto) return;
+        if(tab && tab.clave === clave && (remoto.actualizado||0) <= (tab.actualizado||0) && JSON.stringify(remoto) === JSON.stringify(tab)) return;
+        if(tab && tab.clave === clave && (remoto.actualizado||0) < (tab.actualizado||0)) return;
+        tab = remoto; LS.set('ema.tablero.cache.' + clave, tab);
+        if(pantalla === 'pin' || pantalla === 'tablero') decidirPantalla();
+        if(!arrastre) render();
+      }, err => console.warn('tablero', err));
+    }catch(e){ console.warn('tablero', e); }
+  }
+  function programarGuardado(ms){
+    clearTimeout(timerGuardar);
+    timerGuardar = setTimeout(subir, ms == null ? 600 : ms);
+  }
+  async function subir(){
+    if(!tab) return;
+    const d = db();
+    if(!d || !haySesion()){ pendiente = true; LS.set('ema.tablero.pend', true); pintarEstado(); return; }
+    try{
+      await d.collection('tableros').doc(tab.clave).set(JSON.parse(JSON.stringify({ ...tab, actualizadoPor:(window.__fbUser && window.__fbUser.email) || '' })));
+      pendiente = false; LS.set('ema.tablero.pend', false);
+    }catch(e){ pendiente = true; LS.set('ema.tablero.pend', true); }
+    pintarEstado();
+  }
+  function guardar(){
+    if(!tab) return;
+    tab.actualizado = Date.now();
+    LS.set('ema.tablero.cache.' + tab.clave, tab);
+    pendiente = true; LS.set('ema.tablero.pend', true);
+    pintarEstado();
+    programarGuardado();
+    pintarMenuN();
+  }
+  setInterval(()=>{ if(pendiente && tab && haySesion() && db()) subir(); }, 15000);
+  function pintarEstado(){
+    const e = $('tbEstado'); if(!e) return;
+    const sinNube = !db();
+    e.classList.toggle('pend', pendiente);
+    e.textContent = pendiente ? (haySesion() && !sinNube ? '☁ Guardando…' : '📱 Guardado en este aparato · iniciá sesión para subirlo') : '☁ Guardado en la nube';
+  }
+
+  // ---------- Pantallas ----------
+  function decidirPantalla(){
+    if(!yo || !tab){ pantalla = 'quien'; return; }
+    if(tab.pin && LS.get('ema.tablero.ok.' + tab.clave, '') !== tab.pin) pantalla = 'pin';
+    else if(pantalla !== 'pin-nuevo') pantalla = 'tablero';
+  }
+  async function elegirPersona(nombre){
+    nombre = String(nombre||'').trim(); if(!nombre) return;
+    const clave = claveDe(nombre);
+    yo = clave; LS.set('ema.tablero.yo', clave);
+    tab = normalizar(LS.get('ema.tablero.cache.' + clave, null));
+    const d = db();
+    if(d){
+      try{ const doc = await d.collection('tableros').doc(clave).get(); if(doc.exists){ const r = normalizar(doc.data()); if(r && (!tab || (r.actualizado||0) >= (tab.actualizado||0))) tab = r; } }catch(e){}
+    }
+    if(!tab){ tab = tableroNuevo(nombre); guardar(); }
+    LS.set('ema.tablero.cache.' + clave, tab);
+    escuchar(clave);
+    pantalla = ''; decidirPantalla();
+    render();
+  }
+  function cambiarPersona(){
+    if(unsub){ try{ unsub(); }catch(e){} unsub = null; }
+    yo = ''; LS.del('ema.tablero.yo'); tab = null; pantalla = 'quien'; render();
+  }
+
+  function nominaNombres(){
+    let l = [];
+    try{ if(typeof window.nominaEquipo === 'function') l = (window.nominaEquipo() || []).filter(p => p && p.activo !== false).map(p => String(p.nombre||'').trim()).filter(Boolean); }catch(e){}
+    return [...new Set(l)].sort((a,b)=> a.localeCompare(b,'es'));
+  }
+  function htmlQuien(){
+    const ns = nominaNombres();
+    return `<div class="tb-quien">
+      <div style="font-size:44px;">🗒</div>
+      <h3>¿Quién sos?</h3>
+      <p>Tu tablero es tuyo: tus notas, tus pendientes y tus recordatorios. Elegí tu nombre una vez y este aparato te recuerda.</p>
+      ${ns.length ? `<div class="tb-personas">${ns.map(n => `<button type="button" class="tb-persona" data-a="soy" data-n="${esc(n)}"><span class="tb-avatar" style="background:${colorAvatar(n)}">${esc(iniciales(n))}</span>${esc(n)}</button>`).join('')}</div>` : ''}
+      <form class="tb-otro" data-a="soy-otro"><input type="text" id="tbOtroNombre" placeholder="${ns.length ? 'O escribí tu nombre…' : 'Escribí tu nombre…'}" autocomplete="off"><button type="submit" class="tb-btn tb-btn-pri">Entrar</button></form>
+    </div>`;
+  }
+  let pinBuf = '', pinPaso = 1, pinPrimero = '';
+  function htmlPin(nuevo){
+    const n = tab ? tab.nombre : '';
+    return `<div class="tb-pin">
+      <span class="tb-avatar" style="background:${colorAvatar(n)}; display:inline-block;">${esc(iniciales(n))}</span>
+      <h3 style="font:800 21px/1.2 var(--disp); margin:10px 0 2px;">${nuevo ? (pinPaso === 1 ? 'Elegí un PIN de 4 números' : 'Repetilo para confirmar') : `Hola, ${esc(n.split(' ')[0])}`}</h3>
+      <div class="tb-pin-msg" id="tbPinMsg">${nuevo ? 'Lo vas a pedir para abrir tu tablero en otro aparato.' : 'Poné tu PIN para abrir tu tablero'}</div>
+      <div class="tb-pin-dots" id="tbPinDots">${[0,1,2,3].map(i => `<i class="${i < pinBuf.length ? 'lleno' : ''}"></i>`).join('')}</div>
+      <div class="tb-teclado">${[1,2,3,4,5,6,7,8,9].map(k => `<button type="button" class="tb-tecla" data-a="tecla" data-k="${k}">${k}</button>`).join('')}
+        <button type="button" class="tb-tecla tx" data-a="${nuevo ? 'pin-cancelar' : 'no-soy'}">${nuevo ? 'Cancelar' : 'No soy yo'}</button>
+        <button type="button" class="tb-tecla" data-a="tecla" data-k="0">0</button>
+        <button type="button" class="tb-tecla tx" data-a="tecla" data-k="borrar" aria-label="Borrar">⌫</button></div>
+    </div>`;
+  }
+  function tecla(k){
+    if(k === 'borrar'){ pinBuf = pinBuf.slice(0,-1); }
+    else if(pinBuf.length < 4) pinBuf += k;
+    const dots = $('tbPinDots'); if(dots) dots.innerHTML = [0,1,2,3].map(i => `<i class="${i < pinBuf.length ? 'lleno' : ''}"></i>`).join('');
+    if(pinBuf.length < 4) return;
+    const pin = pinBuf; pinBuf = '';
+    if(pantalla === 'pin'){
+      if(hashPin(tab.clave, pin) === tab.pin){ LS.set('ema.tablero.ok.' + tab.clave, tab.pin); pantalla = 'tablero'; render(); }
+      else { const m = $('tbPinMsg'); if(m){ m.textContent = 'PIN incorrecto, probá de nuevo'; m.classList.add('mal'); } if(dots){ dots.classList.remove('mal'); void dots.offsetWidth; dots.classList.add('mal'); setTimeout(()=>{ dots.innerHTML = '<i></i><i></i><i></i><i></i>'; }, 350); } }
+    } else if(pantalla === 'pin-nuevo'){
+      if(pinPaso === 1){ pinPrimero = pin; pinPaso = 2; render(); }
+      else if(pin === pinPrimero){ tab.pin = hashPin(tab.clave, pin); LS.set('ema.tablero.ok.' + tab.clave, tab.pin); guardar(); pantalla = 'tablero'; render(); toast('🔒 PIN guardado'); }
+      else { pinPaso = 1; pinPrimero = ''; render(); const m = $('tbPinMsg'); if(m){ m.textContent = 'No coinciden. Empezá de nuevo.'; m.classList.add('mal'); } }
+    }
+  }
+
+  // ---------- Cuentas del día ----------
+  const esDiaria = c => c.repetir === 'diario';
+  const estaHecha = c => esDiaria(c) ? c.hechoEl === hoyISO() : !!c.hecha;
+  const venceHoy = c => !estaHecha(c) && !esDiaria(c) && c.fecha === hoyISO();
+  const vencida = c => !estaHecha(c) && !esDiaria(c) && c.fecha && c.fecha < hoyISO();
+  function resumen(){
+    const ts = tab ? tab.tarjetas : [];
+    const diarias = ts.filter(esDiaria);
+    return { hoy: ts.filter(c => venceHoy(c) || (esDiaria(c) && !estaHecha(c))).length, vencidas: ts.filter(vencida).length,
+             diarias: diarias.length, diariasHechas: diarias.filter(estaHecha).length };
+  }
+  function pasaFiltro(c){
+    if(filtro.color && c.color !== filtro.color) return false;
+    if(filtro.texto){ const t = norm(filtro.texto); if(!norm(`${c.titulo} ${c.nota} ${(c.lista||[]).map(x=>x.t).join(' ')}`).includes(t)) return false; }
+    if(filtro.foco === 'hoy' && !(venceHoy(c) || (esDiaria(c) && !estaHecha(c)))) return false;
+    if(filtro.foco === 'vencidas' && !vencida(c)) return false;
+    if(filtro.foco === 'diarias' && !esDiaria(c)) return false;
+    return true;
+  }
+
+  // ---------- Dibujo ----------
+  function htmlTarjeta(c){
+    const col = COLORES[c.color] || COLORES.amarillo;
+    const b = [];
+    if(esDiaria(c)) b.push(`<span class="tb-bdg diaria">🔁 diaria${c.hora ? ' · ' + esc(c.hora) : ''}</span>`);
+    else if(c.fecha) b.push(`<span class="tb-bdg ${vencida(c) ? 'vencida' : (venceHoy(c) ? 'hoy' : '')}">📅 ${esc(fechaCortaTb(c.fecha))}${c.hora ? ' ' + esc(c.hora) : ''}${vencida(c) ? ' · vencida' : ''}</span>`);
+    const li = c.lista || []; if(li.length){ const k = li.filter(x=>x.ok).length; b.push(`<span class="tb-bdg ${k === li.length ? 'lista-ok' : ''}">☑ ${k}/${li.length}</span>`); }
+    if(c.nota && !c.nota.trim()) {}
+    return `<article class="tb-card${col.oscuro ? ' oscura' : ''}${estaHecha(c) ? ' hecha' : ''}${pasaFiltro(c) ? '' : ' atenuada'}" data-id="${esc(c.id)}" style="--tc:${col.bg}; --tb:${col.b};" tabindex="0">
+      <button type="button" class="tb-check" data-a="check" aria-label="${estaHecha(c) ? 'Desmarcar' : 'Marcar como hecha'}" title="${esDiaria(c) ? 'Hecha hoy' : 'Hecha'}"></button>
+      <div class="tb-card-tit">${esc(c.titulo || 'Sin título')}</div>
+      ${c.nota ? `<div class="tb-card-nota">${esc(c.nota)}</div>` : ''}
+      <div class="tb-badges">${b.join('')}</div>
+    </article>`;
+  }
+  const tarjetasDe = colId => tab.tarjetas.filter(c => c.col === colId).sort((a,b)=> (a.orden||0) - (b.orden||0));
+  function htmlTablero(){
+    const r = resumen(); const n = tab.nombre;
+    return `<div class="tb-top">
+        <div class="tb-yo"><button type="button" class="tb-avatar" data-a="menu-yo" style="background:${colorAvatar(n)}" title="Opciones">${esc(iniciales(n))}</button>
+          <div style="min-width:0;"><div class="tb-hola">Hola, ${esc(n.split(' ')[0])} 👋</div><div class="tb-fecha">${esc(fechaLarga())} · ${tab.tarjetas.filter(c=>!estaHecha(c)).length} pendientes</div></div></div>
+        <div class="tb-estado" id="tbEstado"></div>
+      </div>
+      <div class="tb-hoy">
+        <button type="button" class="tb-kpi${filtro.foco === 'hoy' ? ' activo' : ''}" data-a="foco" data-f="hoy"><span class="tb-kpi-ico">☀️</span><b>${r.hoy}</b> para hoy</button>
+        <button type="button" class="tb-kpi rojo${filtro.foco === 'vencidas' ? ' activo' : ''}" data-a="foco" data-f="vencidas"><span class="tb-kpi-ico">⏰</span><b>${r.vencidas}</b> ${r.vencidas === 1 ? 'vencida' : 'vencidas'}</button>
+        <button type="button" class="tb-kpi${filtro.foco === 'diarias' ? ' activo' : ''}" data-a="foco" data-f="diarias"><span class="tb-kpi-ico">🔁</span><b>${r.diariasHechas}/${r.diarias}</b> diarias hechas</button>
+      </div>
+      <div class="tb-barra">
+        <form class="tb-rapida" data-a="rapida"><input type="text" id="tbRapida" placeholder="✏️ Anotá algo y apretá Enter…" autocomplete="off" enterkeyhint="done"><button type="submit">Agregar</button></form>
+        <div class="tb-busca"><span>🔍</span><input type="search" id="tbBuscar" placeholder="Buscar en mis notas" value="${esc(filtro.texto)}" autocomplete="off"></div>
+        <div class="tb-puntos"><button type="button" class="tb-punto tb-punto-todos${filtro.color ? '' : ' activo'}" data-a="fcolor" data-c="">Todas</button>${Object.entries(COLORES).map(([k,v]) => `<button type="button" class="tb-punto${filtro.color === k ? ' activo' : ''}" data-a="fcolor" data-c="${k}" style="background:${v.bg}" title="${esc(v.n)}" aria-label="Filtrar ${esc(v.n)}"></button>`).join('')}</div>
+      </div>
+      <div class="tb-board f-${esc(tab.fondo)}" id="tbBoard">
+        ${tab.columnas.map(col => {
+          const cs = tarjetasDe(col.id);
+          return `<section class="tb-col" data-col="${esc(col.id)}">
+            <div class="tb-col-cab">${renombrando === col.id ? `<input type="text" class="tb-col-tit-in" id="tbRenombrar" value="${esc(col.titulo)}">` : `<div class="tb-col-tit" data-a="renombrar" title="Tocá para cambiar el nombre">${esc(col.titulo)}</div>`}
+              <span class="tb-col-n">${cs.length}</span><button type="button" class="tb-col-menu" data-a="menu-col" aria-label="Opciones de la lista">⋯</button></div>
+            <div class="tb-lista" data-col="${esc(col.id)}">${cs.map(htmlTarjeta).join('')}</div>
+            ${agregandoEn === col.id ? `<div class="tb-nueva-caja"><textarea id="tbNuevaTxt" placeholder="¿Qué hay que hacer?"></textarea><div class="tb-fila"><button type="button" class="tb-btn tb-btn-pri" data-a="agregar-ok">Agregar tarjeta</button><button type="button" class="tb-btn tb-btn-sec" data-a="agregar-no">✕</button></div></div>`
+              : `<button type="button" class="tb-agregar" data-a="agregar">＋ Agregar tarjeta</button>`}
+          </section>`; }).join('')}
+        <button type="button" class="tb-col-nueva" data-a="col-nueva">＋ Nueva lista</button>
+      </div>`;
+  }
+  function render(){
+    if(pantalla === 'quien' || !tab) app.innerHTML = htmlQuien();
+    else if(pantalla === 'pin') app.innerHTML = htmlPin(false);
+    else if(pantalla === 'pin-nuevo') app.innerHTML = htmlPin(true);
+    else {
+      const sx = ($('tbBoard')||{}).scrollLeft || 0;
+      app.innerHTML = htmlTablero();
+      const bd = $('tbBoard'); if(bd) bd.scrollLeft = sx;
+      pintarEstado();
+      const ta = $('tbNuevaTxt'); if(ta) ta.focus();
+      const rn = $('tbRenombrar'); if(rn){ rn.focus(); rn.select(); }
+      if(abierta) pintarEditor();
+    }
+    pintarMenuN();
+  }
+
+  // ---------- Acciones sobre tarjetas ----------
+  function nuevaTarjeta(colId, titulo, extra){
+    const cs = tarjetasDe(colId);
+    const c = { id:uid(), col:colId, orden:(cs.length ? cs[cs.length-1].orden : 0) + 1, titulo:String(titulo||'').trim(), nota:'', color:'amarillo', fecha:'', hora:'', repetir:'', hechoEl:'', hecha:false, lista:[], creada:Date.now(), ...(extra||{}) };
+    tab.tarjetas.push(c); guardar(); return c;
+  }
+  const colListo = ()=> (tab.columnas.find(c => c.id === 'listo') || tab.columnas[tab.columnas.length-1]).id;
+  function alternarHecha(c){
+    if(esDiaria(c)){ c.hechoEl = (c.hechoEl === hoyISO()) ? '' : hoyISO(); }
+    else if(!c.hecha){ c.hecha = true; c.colPrevia = c.col; const l = colListo(); if(c.col !== l){ c.col = l; c.orden = -Date.now(); } }
+    else { c.hecha = false; if(c.colPrevia && tab.columnas.some(x => x.id === c.colPrevia)){ c.col = c.colPrevia; c.orden = Date.now(); } }
+    guardar(); render();
+    if(estaHecha(c)) toast(esDiaria(c) ? '🔁 ¡Hecha por hoy! Mañana vuelve.' : '✅ ¡Hecha!', esDiaria(c) ? null : { txt:'Deshacer', fn:()=>{ alternarHecha(c); } });
+  }
+  let borrada = null;
+  function borrarTarjeta(id){
+    const i = tab.tarjetas.findIndex(c => c.id === id); if(i < 0) return;
+    borrada = tab.tarjetas[i]; tab.tarjetas.splice(i,1); abierta = null; cerrarModal(); guardar(); render();
+    toast('🗑 Tarjeta borrada', { txt:'Deshacer', fn:()=>{ if(borrada){ tab.tarjetas.push(borrada); borrada = null; guardar(); render(); } } });
+  }
+
+  // ---------- Editor ----------
+  function abrirEditor(id){ abierta = id; pintarEditor(true); }
+  function cerrarModal(){ const m = $('tbModal'); if(m) m.remove(); }
+  function pintarEditor(primera){
+    const c = tab && tab.tarjetas.find(x => x.id === abierta); if(!c){ cerrarModal(); abierta = null; return; }
+    let m = $('tbModal');
+    const conservar = m && !primera;
+    if(conservar){ // refresca solo lo que cambia sin perder el foco del texto
+      const col = COLORES[c.color] || COLORES.amarillo;
+      m.querySelector('.tb-hoja-color').style.background = col.b;
+      m.querySelectorAll('.tb-color').forEach(b => b.classList.toggle('activo', b.dataset.c === c.color));
+      pintarLista(m, c); return;
+    }
+    if(!m){ m = document.createElement('div'); m.id = 'tbModal'; m.className = 'tb-modal'; document.body.appendChild(m); }
+    const col = COLORES[c.color] || COLORES.amarillo;
+    m.innerHTML = `<div class="tb-hoja" role="dialog" aria-modal="true" aria-label="Tarjeta">
+      <div class="tb-hoja-color" style="background:${col.b}"></div>
+      <div class="tb-hoja-cuerpo">
+        <input type="text" class="tb-ed-tit" data-e="titulo" value="${esc(c.titulo)}" placeholder="Título" autocomplete="off">
+        <textarea class="tb-ed-nota" data-e="nota" placeholder="Escribí una nota…">${esc(c.nota)}</textarea>
+        <div class="tb-ed-lbl">COLOR</div>
+        <div class="tb-colores">${Object.entries(COLORES).map(([k,v]) => `<button type="button" class="tb-color${c.color === k ? ' activo' : ''}" data-e="color" data-c="${k}" style="background:${v.bg}" title="${esc(v.n)}" aria-label="${esc(v.n)}"></button>`).join('')}</div>
+        <div class="tb-ed-lbl">RECORDATORIO</div>
+        <div class="tb-fila2"><input type="date" data-e="fecha" value="${esc(c.fecha)}" aria-label="Fecha"><input type="time" data-e="hora" value="${esc(c.hora)}" aria-label="Hora"></div>
+        <label class="tb-switch"><input type="checkbox" data-e="repetir" ${esDiaria(c) ? 'checked' : ''}><span class="tb-sw"></span><span class="tb-sw-txt"><b>🔁 Repetir todos los días</b><small>Recordatorio diario: la marcás hecha y mañana vuelve sola. Con hora, te aviso a esa hora si la app está abierta.</small></span></label>
+        <div class="tb-ed-lbl">LISTA DE PASOS</div>
+        <div id="tbEdLista"></div>
+        <form class="tb-add-item" data-e="item-add"><input type="text" id="tbItemNuevo" placeholder="Agregar un paso…" autocomplete="off" enterkeyhint="done"><button type="submit" class="tb-btn tb-btn-sec">＋</button></form>
+        <div class="tb-ed-lbl">LISTA DEL TABLERO</div>
+        <select data-e="col" style="margin:0; width:100%; border-radius:12px;">${tab.columnas.map(x => `<option value="${esc(x.id)}" ${x.id === c.col ? 'selected' : ''}>${esc(x.titulo)}</option>`).join('')}</select>
+        <div class="tb-hoja-pie"><button type="button" class="tb-btn tb-btn-peligro" data-e="borrar">🗑 Borrar</button><button type="button" class="tb-btn tb-btn-pri" data-e="cerrar" style="min-width:120px;">Listo</button></div>
+      </div></div>`;
+    pintarLista(m, c);
+    if(primera){ const t = m.querySelector('[data-e="titulo"]'); if(t && !c.titulo) t.focus(); }
+  }
+  function pintarLista(m, c){
+    const cont = m.querySelector('#tbEdLista'); if(!cont) return;
+    const li = c.lista || []; const k = li.filter(x=>x.ok).length;
+    cont.innerHTML = (li.length ? `<div class="tb-barra-prog"><i style="width:${Math.round(k*100/li.length)}%"></i></div>` : '')
+      + `<div class="tb-check-lista">${li.map((x,i) => `<div class="tb-item${x.ok ? ' ok' : ''}"><input type="checkbox" data-e="item-ok" data-i="${i}" ${x.ok ? 'checked' : ''}><input type="text" data-e="item-t" data-i="${i}" value="${esc(x.t)}"><button type="button" data-e="item-x" data-i="${i}" aria-label="Quitar">×</button></div>`).join('')}</div>`;
+  }
+  document.addEventListener('input', e => {
+    const m = e.target.closest && e.target.closest('#tbModal'); if(!m) return;
+    const c = tab && tab.tarjetas.find(x => x.id === abierta); if(!c) return;
+    const k = e.target.dataset.e;
+    if(k === 'titulo' || k === 'nota'){ c[k] = e.target.value; guardar(); }
+    else if(k === 'item-t'){ c.lista[+e.target.dataset.i].t = e.target.value; guardar(); }
+  });
+  document.addEventListener('change', e => {
+    const m = e.target.closest && e.target.closest('#tbModal'); if(!m) return;
+    const c = tab && tab.tarjetas.find(x => x.id === abierta); if(!c) return;
+    const k = e.target.dataset.e;
+    if(k === 'fecha' || k === 'hora'){ c[k] = e.target.value; guardar(); }
+    else if(k === 'repetir'){ c.repetir = e.target.checked ? 'diario' : ''; if(c.repetir){ c.hecha = false; } guardar(); }
+    else if(k === 'col'){ c.col = e.target.value; c.orden = Date.now(); guardar(); }
+    else if(k === 'item-ok'){ c.lista[+e.target.dataset.i].ok = e.target.checked; guardar(); pintarLista(m, c); }
+    else return;
+    render();
+  });
+  document.addEventListener('submit', e => {
+    const f = e.target;
+    if(f.dataset && f.dataset.e === 'item-add'){
+      e.preventDefault(); const c = tab && tab.tarjetas.find(x => x.id === abierta); const i = $('tbItemNuevo'); if(!c || !i || !i.value.trim()) return;
+      c.lista.push({ t:i.value.trim(), ok:false }); i.value = ''; guardar(); pintarLista($('tbModal'), c); render(); i.focus(); return;
+    }
+    if(!app.contains(f)) return;
+    e.preventDefault();
+    if(f.dataset.a === 'rapida'){
+      const i = $('tbRapida'); const t = (i.value||'').trim(); if(!t) return;
+      const destino = tab.columnas[0].id; const c = nuevaTarjeta(destino, t);
+      render(); const i2 = $('tbRapida'); if(i2) i2.focus();
+      const el = app.querySelector(`.tb-card[data-id="${c.id}"]`); if(el){ el.classList.add('nueva'); }
+      toast(`＋ Anotado en «${tab.columnas[0].titulo}»`);
+    } else if(f.dataset.a === 'soy-otro'){ const v = ($('tbOtroNombre').value||'').trim(); if(v) elegirPersona(v); }
+  });
+  document.addEventListener('click', e => {
+    const m = $('tbModal');
+    if(m && e.target === m){ cerrarEditor(); return; }
+    const b = e.target.closest && e.target.closest('#tbModal [data-e]'); if(!b) return;
+    const c = tab && tab.tarjetas.find(x => x.id === abierta); if(!c) return;
+    const k = b.dataset.e;
+    if(k === 'color'){ c.color = b.dataset.c; guardar(); pintarEditor(); render(); }
+    else if(k === 'item-x'){ c.lista.splice(+b.dataset.i, 1); guardar(); pintarLista(m, c); render(); }
+    else if(k === 'borrar'){ borrarTarjeta(c.id); }
+    else if(k === 'cerrar'){ cerrarEditor(); }
+  });
+  function cerrarEditor(){
+    const c = tab && tab.tarjetas.find(x => x.id === abierta);
+    if(c && !c.titulo.trim() && !c.nota.trim() && !(c.lista||[]).length){ tab.tarjetas = tab.tarjetas.filter(x => x !== c); guardar(); }
+    abierta = null; cerrarModal(); render();
+  }
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){ if($('tbPop')){ cerrarPop(); return; } if($('tbModal')){ cerrarEditor(); return; } if(agregandoEn){ agregandoEn = null; render(); return; } }
+    if(e.target && e.target.id === 'tbNuevaTxt' && e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); agregarDesdeCaja(); }
+    if(e.target && e.target.id === 'tbRenombrar'){ if(e.key === 'Enter'){ e.preventDefault(); e.target.blur(); } if(e.key === 'Escape'){ renombrando = null; render(); } }
+    if(e.target && e.target.classList && e.target.classList.contains('tb-card') && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); abrirEditor(e.target.dataset.id); }
+    if(pantalla.startsWith('pin') && /^[0-9]$/.test(e.key) && $('viewTablero').style.display !== 'none'){ tecla(e.key); }
+    if(pantalla.startsWith('pin') && e.key === 'Backspace' && $('viewTablero').style.display !== 'none'){ tecla('borrar'); }
+  });
+  function agregarDesdeCaja(){
+    const ta = $('tbNuevaTxt'); if(!ta || !agregandoEn) return;
+    const lineas = ta.value.split('\n').map(s => s.trim()).filter(Boolean);
+    lineas.forEach(t => nuevaTarjeta(agregandoEn, t));
+    render();
+  }
+  app.addEventListener('focusout', e => {
+    if(e.target && e.target.id === 'tbRenombrar'){
+      const col = tab.columnas.find(x => x.id === renombrando); const v = e.target.value.trim();
+      if(col && v){ col.titulo = v; guardar(); } renombrando = null; setTimeout(render, 0);
+    }
+  });
+  app.addEventListener('input', e => { if(e.target && e.target.id === 'tbBuscar'){ filtro.texto = e.target.value; app.querySelectorAll('.tb-card').forEach(el => { const c = tab.tarjetas.find(x => x.id === el.dataset.id); if(c) el.classList.toggle('atenuada', !pasaFiltro(c)); }); } });
+
+  // ---------- Clicks del tablero ----------
+  app.addEventListener('click', e => {
+    if(suprimirClick){ suprimirClick = false; e.stopPropagation(); e.preventDefault(); return; }
+    const a = e.target.closest('[data-a]');
+    const card = e.target.closest('.tb-card');
+    if(agregandoEn && !e.target.closest('.tb-nueva-caja') && !(a && a.dataset.a === 'agregar')){ const ta = $('tbNuevaTxt'); if(ta && !ta.value.trim()){ agregandoEn = null; if(!a && !card){ render(); return; } } }
+    if(a && a.dataset.a === 'check' && card){ const c = tab.tarjetas.find(x => x.id === card.dataset.id); if(c) alternarHecha(c); return; }
+    if(!a){ if(card) abrirEditor(card.dataset.id); return; }
+    const colEl = a.closest('.tb-col'); const colId = colEl && colEl.dataset.col;
+    switch(a.dataset.a){
+      case 'soy': elegirPersona(a.dataset.n); break;
+      case 'no-soy': cambiarPersona(); break;
+      case 'tecla': tecla(a.dataset.k); break;
+      case 'pin-cancelar': pinBuf = ''; pinPaso = 1; pantalla = 'tablero'; render(); break;
+      case 'foco': filtro.foco = (filtro.foco === a.dataset.f) ? '' : a.dataset.f; render(); break;
+      case 'fcolor': filtro.color = a.dataset.c; render(); break;
+      case 'agregar': agregandoEn = colId; render(); break;
+      case 'agregar-no': agregandoEn = null; render(); break;
+      case 'agregar-ok': agregarDesdeCaja(); break;
+      case 'renombrar': renombrando = colId; render(); break;
+      case 'menu-col': abrirPop(a, menuColumna(colId)); break;
+      case 'menu-yo': abrirPop(a, menuYo()); break;
+      case 'col-nueva': { const id = uid(); tab.columnas.push({ id, titulo:'Nueva lista' }); renombrando = id; guardar(); render(); const bd = $('tbBoard'); if(bd) bd.scrollLeft = bd.scrollWidth; break; }
+    }
+  });
+
+  // ---------- Menús chicos ----------
+  function cerrarPop(){ const p = $('tbPop'); if(p) p.remove(); }
+  function abrirPop(ancla, items){
+    cerrarPop();
+    const p = document.createElement('div'); p.id = 'tbPop'; p.className = 'tb-pop';
+    p.innerHTML = items.map(it => it === '-' ? '<div class="tb-pop-sep"></div>' : (it.html ? it.html : `<button type="button" class="${it.peligro ? 'peligro' : ''}" data-i="${items.indexOf(it)}">${it.txt}</button>`)).join('');
+    document.body.appendChild(p);
+    const r = ancla.getBoundingClientRect(); const w = p.offsetWidth, h = p.offsetHeight;
+    let x = Math.min(Math.max(8, r.left), window.innerWidth - w - 8); let y = r.bottom + 6; if(y + h > window.innerHeight - 8) y = Math.max(8, r.top - h - 6);
+    p.style.left = x + 'px'; p.style.top = y + 'px';
+    p.addEventListener('click', ev => {
+      const b = ev.target.closest('button'); if(!b) return;
+      if(b.dataset.fondo){ tab.fondo = b.dataset.fondo; guardar(); cerrarPop(); render(); return; }
+      const it = items[+b.dataset.i]; cerrarPop(); if(it && it.fn) it.fn();
+    });
+    setTimeout(()=> document.addEventListener('pointerdown', function fuera(ev){ if(!p.contains(ev.target)){ cerrarPop(); document.removeEventListener('pointerdown', fuera, true); } }, true), 0);
+  }
+  function menuColumna(colId){
+    const i = tab.columnas.findIndex(x => x.id === colId);
+    return [
+      { txt:'✏️ Cambiar el nombre', fn:()=>{ renombrando = colId; render(); } },
+      { txt:'＋ Agregar tarjeta', fn:()=>{ agregandoEn = colId; render(); } },
+      '-',
+      i > 0 ? { txt:'← Mover a la izquierda', fn:()=>{ const [c] = tab.columnas.splice(i,1); tab.columnas.splice(i-1,0,c); guardar(); render(); } } : null,
+      i < tab.columnas.length - 1 ? { txt:'→ Mover a la derecha', fn:()=>{ const [c] = tab.columnas.splice(i,1); tab.columnas.splice(i+1,0,c); guardar(); render(); } } : null,
+      tarjetasDe(colId).some(estaHecha) ? { txt:'🧹 Borrar las hechas de esta lista', fn:()=>{ const n = tarjetasDe(colId).filter(c => estaHecha(c) && !esDiaria(c)).length; tab.tarjetas = tab.tarjetas.filter(c => !(c.col === colId && estaHecha(c) && !esDiaria(c))); guardar(); render(); toast(`🧹 ${n} tarjeta(s) borradas`); } } : null,
+      '-',
+      tab.columnas.length > 1 ? { txt:'🗑 Borrar la lista', peligro:true, fn:()=>{
+        const cs = tarjetasDe(colId); const dest = tab.columnas.find(x => x.id !== colId);
+        const quitada = tab.columnas[i];
+        cs.forEach(c => { c.col = dest.id; c.orden = Date.now() + (c.orden||0); });
+        tab.columnas.splice(i,1); guardar(); render();
+        toast(cs.length ? `Lista borrada · sus ${cs.length} tarjeta(s) pasaron a «${dest.titulo}»` : 'Lista borrada', { txt:'Deshacer', fn:()=>{ tab.columnas.splice(i,0,quitada); cs.forEach(c => c.col = colId); guardar(); render(); } });
+      } } : null
+    ].filter(Boolean);
+  }
+  function menuYo(){
+    const avisos = ('Notification' in window) ? Notification.permission : 'no';
+    return [
+      { html:`<div style="padding:8px 12px 2px; font:700 12px var(--fuente); color:var(--text-soft);">FONDO DEL TABLERO</div><div class="tb-fondos">${Object.entries(FONDOS).map(([k,v]) => `<button type="button" class="tb-fondo${tab.fondo === k ? ' activo' : ''}" data-fondo="${k}" style="background:${v}" title="${k}"></button>`).join('')}</div>` },
+      '-',
+      { txt: tab.pin ? '🔒 Cambiar mi PIN' : '🔒 Ponerle PIN a mi tablero', fn:()=>{ pinBuf = ''; pinPaso = 1; pinPrimero = ''; pantalla = 'pin-nuevo'; render(); } },
+      tab.pin ? { txt:'🔓 Sacar el PIN', fn:()=>{ tab.pin = ''; guardar(); render(); toast('PIN sacado'); } } : null,
+      avisos === 'default' ? { txt:'🔔 Activar avisos de recordatorios', fn:()=>{ try{ Notification.requestPermission().then(p => toast(p === 'granted' ? '🔔 Listo: te aviso a la hora de cada recordatorio' : 'No se activaron los avisos')); }catch(e){} } } : null,
+      '-',
+      { txt:'👤 No soy yo / cambiar de persona', fn: cambiarPersona }
+    ].filter(Boolean);
+  }
+
+  // ---------- Arrastrar (mouse y dedo) ----------
+  let arrastre = null;
+  app.addEventListener('pointerdown', e => {
+    const card = e.target.closest('.tb-card'); if(!card || e.target.closest('.tb-check') || e.button > 0) return;
+    const inicio = { x:e.clientX, y:e.clientY, id:card.dataset.id, card, tipo:e.pointerType, t:null, activo:false, pid:e.pointerId };
+    arrastre = inicio;
+    if(e.pointerType !== 'mouse') inicio.t = setTimeout(()=>{ if(arrastre === inicio) empezar(inicio, e.clientX, e.clientY); }, 320);
+  });
+  function empezar(a, x, y){
+    a.activo = true;
+    const r = a.card.getBoundingClientRect();
+    a.dx = x - r.left; a.dy = y - r.top;
+    const g = a.card.cloneNode(true); g.classList.add('tb-fantasma'); g.style.width = r.width + 'px'; g.style.left = r.left + 'px'; g.style.top = r.top + 'px';
+    document.body.appendChild(g); a.g = g;
+    const h = document.createElement('div'); h.className = 'tb-hueco'; h.style.height = r.height + 'px'; a.card.after(h); a.h = h;
+    a.card.classList.add('levantada'); a.card.style.display = 'none';
+    document.body.classList.add('tb-arrastrando');
+    if(navigator.vibrate) try{ navigator.vibrate(12); }catch(e){}
+  }
+  function mover(a, x, y){
+    a.g.style.left = (x - a.dx) + 'px'; a.g.style.top = (y - a.dy) + 'px';
+    const bd = $('tbBoard');
+    const bajo = document.elementFromPoint(x, y);
+    let lista = bajo && bajo.closest('.tb-lista');
+    if(!lista){ const col = bajo && bajo.closest('.tb-col'); if(col) lista = col.querySelector('.tb-lista'); }
+    if(lista){
+      const hijos = [...lista.querySelectorAll('.tb-card:not(.levantada)')];
+      const antes = hijos.find(el => { const r = el.getBoundingClientRect(); return y < r.top + r.height / 2; });
+      if(antes) lista.insertBefore(a.h, antes); else lista.appendChild(a.h);
+    }
+    if(bd){ const r = bd.getBoundingClientRect(); const v = 18; if(x > r.right - 50) bd.scrollLeft += v; else if(x < r.left + 50) bd.scrollLeft -= v; }
+    if(y < 70) window.scrollBy(0, -14); else if(y > window.innerHeight - 70) window.scrollBy(0, 14);
+  }
+  function soltar(a){
+    const lista = a.h && a.h.parentElement;
+    if(lista && lista.dataset.col){
+      const c = tab.tarjetas.find(x => x.id === a.id);
+      const orden = [...lista.children].filter(el => el === a.h || (el.classList.contains('tb-card') && !el.classList.contains('levantada'))).map(el => el === a.h ? a.id : el.dataset.id);
+      if(c){
+        const cambioLista = c.col !== lista.dataset.col;
+        c.col = lista.dataset.col;
+        orden.forEach((id, i) => { const t = tab.tarjetas.find(x => x.id === id); if(t) t.orden = i + 1; });
+        if(cambioLista && c.col === colListo() && !esDiaria(c) && !c.hecha){ c.hecha = true; }
+        else if(cambioLista && c.col !== colListo() && c.hecha){ c.hecha = false; }
+        guardar();
+      }
+    }
+    if(a.g) a.g.remove(); document.body.classList.remove('tb-arrastrando');
+    suprimirClick = true; setTimeout(()=>{ suprimirClick = false; }, 60);
+    render();
+  }
+  window.addEventListener('pointermove', e => {
+    const a = arrastre; if(!a || e.pointerId !== a.pid) return;
+    const dx = e.clientX - a.x, dy = e.clientY - a.y;
+    if(!a.activo){
+      if(a.tipo === 'mouse'){ if(Math.hypot(dx,dy) > 6) empezar(a, a.x, a.y); else return; }
+      else { if(Math.hypot(dx,dy) > 10){ clearTimeout(a.t); arrastre = null; } return; }
+    }
+    e.preventDefault(); mover(a, e.clientX, e.clientY);
+  }, { passive:false });
+  const terminar = e => { const a = arrastre; if(!a || (e && e.pointerId !== a.pid)) return; clearTimeout(a.t); arrastre = null; if(a.activo) soltar(a); };
+  window.addEventListener('pointerup', terminar);
+  window.addEventListener('pointercancel', e => { const a = arrastre; if(a && a.activo) return; terminar(e); });
+  // Con el dedo, mientras se arrastra, la pantalla no tiene que desplazarse
+  document.addEventListener('touchmove', e => { const a = arrastre; if(a && a.activo){ e.preventDefault(); const t = e.touches[0]; if(t) mover(a, t.clientX, t.clientY); } }, { passive:false });
+  document.addEventListener('touchend', ()=>{ const a = arrastre; if(a && a.activo){ clearTimeout(a.t); arrastre = null; soltar(a); } });
+  app.addEventListener('contextmenu', e => { if(e.target.closest('.tb-card')) e.preventDefault(); });
+
+  // ---------- Avisos ----------
+  let toastTimer = null;
+  function toast(txt, accion){
+    let t = $('tbToast'); if(t) t.remove();
+    t = document.createElement('div'); t.id = 'tbToast'; t.className = 'tb-toast'; t.setAttribute('role','status');
+    t.innerHTML = `<span>${esc(txt)}</span>${accion ? `<button type="button">${esc(accion.txt)}</button>` : ''}`;
+    document.body.appendChild(t);
+    if(accion) t.querySelector('button').addEventListener('click', ()=>{ t.remove(); accion.fn(); });
+    clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ t.remove(); }, accion ? 6000 : 2600);
+  }
+  // Recordatorios con hora: mientras la app esté abierta (en cualquier hoja), avisa a esa hora.
+  function revisarRecordatorios(){
+    if(!tab) return;
+    const h = hoyISO(), hm = ahoraHM();
+    const avisados = LS.get('ema.tablero.avisados', {});
+    let cambio = false;
+    tab.tarjetas.forEach(c => {
+      if(!c.hora || estaHecha(c)) return;
+      const toca = esDiaria(c) || c.fecha === h; if(!toca || c.hora > hm) return;
+      const k = c.id + '|' + h; if(avisados[k]) return;
+      avisados[k] = 1; cambio = true;
+      toast(`⏰ ${c.titulo || 'Recordatorio'}`, { txt:'Ver', fn:()=>{ if(typeof mostrarVista === 'function') mostrarVista('tablero'); abrirEditor(c.id); } });
+      try{
+        if('Notification' in window && Notification.permission === 'granted'){
+          const op = { body: c.nota ? String(c.nota).slice(0,120) : 'Recordatorio de tu tablero', tag:'tb-' + c.id, icon:'app/icono-192-v3.png' };
+          if(navigator.serviceWorker && navigator.serviceWorker.getRegistration) navigator.serviceWorker.getRegistration().then(r => r ? r.showNotification('⏰ ' + (c.titulo || 'Recordatorio'), op) : new Notification('⏰ ' + (c.titulo || 'Recordatorio'), op)).catch(()=>{});
+          else new Notification('⏰ ' + (c.titulo || 'Recordatorio'), op);
+        }
+      }catch(e){}
+    });
+    if(cambio){ Object.keys(avisados).forEach(k => { if(!k.endsWith('|' + h)) delete avisados[k]; }); LS.set('ema.tablero.avisados', avisados); }
+  }
+  setInterval(revisarRecordatorios, 30000);
+
+  // ---------- Menú lateral: entrada «Mi tablero» debajo de Normas, con el número de pendientes ----------
+  function pintarMenuN(){
+    const b = $('menuTablero'); if(!b) return;
+    let n = b.querySelector('.tb-menu-n');
+    const r = tab ? resumen() : null; const k = r ? r.hoy + r.vencidas : 0;
+    if(!k){ if(n) n.remove(); return; }
+    if(!n){ n = document.createElement('span'); n.className = 'tb-menu-n'; b.appendChild(n); }
+    n.textContent = k;
+  }
+  const menuLista = $('menuLista');
+  if(menuLista){
+    new MutationObserver(()=>{
+      if($('menuTablero')) return;
+      const ref = menuLista.querySelector('.menu-item[data-vista="normas"]'); if(!ref) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'menu-item'; b.id = 'menuTablero'; b.dataset.vista = 'tablero';
+      b.innerHTML = '<span class="menu-ico">🗒</span>Mi tablero';
+      ref.insertAdjacentElement('afterend', b);
+      if(document.body.dataset.vista === 'tablero') b.classList.add('activo');
+      pintarMenuN();
+    }).observe(menuLista, { childList:true });
+  }
+
+  // ---------- La vista ----------
+  const previa = window.mostrarVista;
+  window.mostrarVista = function(v){
+    const vista = $('viewTablero');
+    if(v === 'tablero'){
+      document.querySelectorAll('.wrap[id^="view"]').forEach(el => { if(el.id !== 'viewTablero') el.style.display = 'none'; });
+      const f = $('mainFooter'); if(f) f.style.display = 'none';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#navAbajo .nav-item, #menuLista .menu-item').forEach(b => b.classList.toggle('activo', b.dataset.vista === 'tablero'));
+      if(vista) vista.style.display = '';
+      document.body.dataset.vista = 'tablero';
+      if(yo && !tab){ const c = normalizar(LS.get('ema.tablero.cache.' + yo, null)); if(c){ tab = c; escuchar(c.clave); } }
+      decidirPantalla(); render();
+      window.scrollTo({ top:0, behavior:'auto' });
+      return;
+    }
+    if(vista) vista.style.display = 'none';
+    cerrarPop(); if($('tbModal')){ abierta = null; cerrarModal(); }
+    return previa.apply(this, arguments);
+  };
+
+  // Arranque: si este aparato ya sabe quién es, se carga su tablero (para los avisos y el número del menú)
+  if(yo){
+    const c = normalizar(LS.get('ema.tablero.cache.' + yo, null));
+    if(c){ tab = c; decidirPantalla(); }
+    const arrancar = ()=>{ if(tab) escuchar(tab.clave); };
+    setTimeout(arrancar, 1500);
+  }
+  setTimeout(revisarRecordatorios, 4000);
+  window.TABLERO = { estado: ()=> ({ yo, tab, pantalla, pendiente, filtro }), elegirPersona, render, revisarRecordatorios, subir, hashPin };
+})();
+</script>
+
 <script>
 // ============================================================
 // SALIR DE LA PANTALLA COMPLETA DEL MAPA AL CAMBIAR DE PESTAÑA (2026-09-16)
@@ -33062,7 +33998,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 (function(){
   const NOMBRE = { viewInicio:'Inicio', viewCalculadora:'Cálculo de materiales', viewParteDiario:'Órdenes de trabajo',
     viewPlanificacion:'Planificación semanal', viewAvance:'Avance de obra', viewMapa:'Mapa de plazas', viewStock:'Pañol',
-    viewProduccion:'Producción del personal', viewInforme:'Informes', viewGastos:'Gastos de obra', viewNormas:'Normas y planos' };
+    viewProduccion:'Producción del personal', viewInforme:'Informes', viewGastos:'Gastos de obra', viewNormas:'Normas y planos', viewTablero:'Mi tablero' };
   const limpiar = t => String(t||'').replace(/^[^0-9A-Za-zÁÉÍÓÚÑáéíóúñ]+/, '').replace(/\s+/g,' ').trim();
   function hojaActual(){
     const vista = Object.keys(NOMBRE).map(id => document.getElementById(id))
@@ -33183,6 +34119,252 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   setTimeout(() => revisarVersion(true), 15000);
 })();
 </script>
+<!-- ============================================================================================
+     DEVOLUCIONES AL PAÑOL (2026-09-28) — ver el comentario del formulario en «Registrar movimiento».
+     Solo agrega: el tipo «↩ Devolución», su buscador de obra/persona y su registro. Las cuentas del
+     stock, del balance de cada plaza y de lo que tiene cada persona no se tocaron: una devolución es
+     una entrada con `devolucion:true`, que esas cuentas ya sabían leer.
+     ============================================================================================ -->
+<style id="estiloDevoluciones">
+.dv-seg{display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 2px;}
+.dv-seg-btn{flex:1 1 0; min-width:0; border:1px solid var(--border); background:var(--vidrio-2); color:var(--text); border-radius:14px; padding:11px 12px; font:600 13.5px/1.2 var(--fuente); cursor:pointer; transition:background .15s, box-shadow .15s, color .15s;}
+.dv-seg-btn.activo{background:var(--navy); color:#fff; border-color:var(--navy); box-shadow:0 8px 20px -12px rgba(40,40,94,.8);}
+.dv-buscar{margin-top:8px;}
+.dv-buscar-caja{position:relative;}
+.dv-buscar-caja input{padding-right:40px;}
+.dv-limpiar{position:absolute; right:6px; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; border:none; background:rgba(40,40,94,.08); color:var(--text-soft); font-size:18px; line-height:1; cursor:pointer;}
+.dv-sugerencias{margin-top:6px; border:1px solid var(--border); border-radius:14px; background:var(--card); overflow:hidden; max-height:320px; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+.dv-sug-tit{padding:7px 12px 4px; font:600 11px/1.2 var(--fuente); color:var(--text-3); letter-spacing:.3px;}
+.dv-sug{display:flex; align-items:center; gap:10px; width:100%; text-align:left; border:none; border-top:1px solid var(--border); background:transparent; padding:11px 12px; cursor:pointer; font:500 13.5px/1.3 var(--fuente); color:var(--text); min-height:48px;}
+.dv-sug:first-of-type{border-top:none;}
+.dv-sug:hover,.dv-sug:focus{background:rgba(132,195,218,.18); outline:none;}
+.dv-sug .dv-sug-ico{flex:0 0 32px; height:32px; border-radius:10px; display:grid; place-items:center; background:rgba(40,40,94,.07); font-size:16px;}
+.dv-sug .dv-sug-txt{flex:1 1 auto; min-width:0;}
+.dv-sug .dv-sug-sub{display:block; font-size:11.5px; color:var(--text-soft); font-weight:500;}
+.dv-sug .dv-sug-dato{flex:0 0 auto; font-size:11.5px; font-weight:700; color:var(--navy); background:rgba(132,195,218,.28); border-radius:999px; padding:3px 9px; white-space:nowrap;}
+.dv-sug-vacio{padding:12px; color:var(--text-soft); font-size:13px;}
+.dv-elegido{margin-top:8px; display:flex; align-items:center; gap:10px; border-radius:14px; padding:10px 12px; background:linear-gradient(135deg, rgba(132,195,218,.28), rgba(255,255,255,.6)); border:1px solid rgba(132,195,218,.6);}
+.dv-elegido .dv-sug-ico{flex:0 0 36px; height:36px; border-radius:11px; display:grid; place-items:center; background:#fff; font-size:18px;}
+.dv-elegido .dv-el-txt{flex:1 1 auto; min-width:0; font-size:13.5px;}
+.dv-elegido .dv-el-txt small{display:block; color:var(--text-soft); font-size:12px; margin-top:2px;}
+.dv-elegido button{flex:0 0 auto; border:1px solid var(--border); background:#fff; border-radius:999px; padding:6px 12px; font:600 12px var(--fuente); cursor:pointer; color:var(--navy);}
+.dv-estado{display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;}
+.dv-est{flex:1 1 0; min-width:0; margin:0 !important; cursor:pointer;}
+.dv-est input{position:absolute; opacity:0; pointer-events:none;}
+.dv-est span{display:block; text-align:center; border:1px solid var(--border); border-radius:12px; padding:11px 8px; font:600 13px/1.2 var(--fuente); background:var(--vidrio-2); color:var(--text-soft); transition:all .15s;}
+.dv-est-ok input:checked + span{background:#e3f6ea; border-color:#34c759; color:#1d7a3a;}
+.dv-est-rev input:checked + span{background:#fff4e0; border-color:#ff9f0a; color:#a15c00;}
+.dv-est-roto input:checked + span{background:#ffe7e5; border-color:#ff3b30; color:#b3261e;}
+.dv-est input:focus-visible + span{box-shadow:0 0 0 3px var(--ring);}
+.dv-chip{display:inline-block; border-radius:999px; padding:1px 8px; font-size:11px; font-weight:700;}
+.dv-chip-ok{background:#e3f6ea; color:#1d7a3a;}
+.dv-chip-rev{background:#fff4e0; color:#a15c00;}
+.dv-chip-roto{background:#ffe7e5; color:#b3261e;}
+</style>
+<script id="devoluciones">
+(function(){
+  const $ = id => document.getElementById(id);
+  const selTipo = $('stockMovTipo'), campos = $('stockMovDevolCampos');
+  if(!selTipo || !campos) return;
+  const norm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+  const n2 = v => { const x = parseFloat(v); return isFinite(x) ? x : 0; };
+  const plazas = ()=> (typeof avanceObras !== 'undefined' && Array.isArray(avanceObras)) ? avanceObras : (window.avanceObras || []);
+  const movs = ()=> (window.stockMovimientos || []).filter(m => !m.anulado);
+  let origen = 'obra';        // 'obra' | 'persona'
+  let elegido = null;         // { tipo, id?, nombre, obraId?, barrio? }
+
+  const productoActual = ()=> (typeof stockParsearProducto === 'function') ? stockParsearProducto(($('stockMovProducto')||{}).value) : null;
+  // Cuánto de un producto quedó en una plaza (salió menos lo que ya volvió).
+  function netoEnPlaza(plazaId, codigo){
+    let v = 0;
+    movs().forEach(m => { if(String(m.plazaId||'') === String(plazaId) && String(m.codigo) === String(codigo)) v += (m.tipo === 'entrada' ? -1 : 1) * n2(m.cantidad); });
+    return Math.round(v * 1000) / 1000;
+  }
+  function ultimaSalidaPlaza(plazaId){
+    let f = '';
+    movs().forEach(m => { if(m.tipo === 'salida' && String(m.plazaId||'') === String(plazaId) && (m.fecha||'') > f) f = m.fecha || ''; });
+    return f;
+  }
+  function enPoderDe(nombre, codigo){
+    if(typeof window.cargoDePersona !== 'function') return null;
+    const lista = window.cargoDePersona(nombre);
+    if(codigo == null) return lista.filter(r => r.enPoder > 0.0001);
+    const r = lista.find(x => String(x.codigo) === String(codigo));
+    return r ? r.enPoder : 0;
+  }
+  function listaPersonas(){
+    let l = [];
+    try{ if(typeof personasConCargo === 'function') l = personasConCargo(); }catch(e){}
+    if(!l.length && typeof window.nominaEquipo === 'function') l = (window.nominaEquipo() || []).map(p => String(p.nombre||'').trim()).filter(Boolean);
+    return l;
+  }
+
+  // ---------- Buscador ----------
+  const inp = $('stockDevolOrigen'), sug = $('stockDevolSug'), el = $('stockDevolElegido'), x = $('stockDevolOrigenX');
+  function pintarSugerencias(){
+    if(elegido){ sug.style.display = 'none'; return; }
+    const q = norm(inp.value);
+    const prod = productoActual();
+    let html = '';
+    if(origen === 'obra'){
+      let lista = plazas().map(p => ({ p, clave: norm(`${p.nombre} ${p.obraId||''} ${p.barrio||''} ${p.direccion||''}`),
+                                        neto: prod ? netoEnPlaza(p.id, prod.codigo) : 0, ult: ultimaSalidaPlaza(p.id) }));
+      if(q) lista = lista.filter(o => q.split(' ').every(t => o.clave.includes(t)));
+      lista.sort((a,b)=> (b.neto > 0) - (a.neto > 0) || (b.ult||'').localeCompare(a.ult||'') || String(a.p.nombre||'').localeCompare(String(b.p.nombre||''), 'es'));
+      const tit = q ? `${lista.length} plaza(s)` : (prod ? `Primero las plazas que tienen ${prod.desc}` : 'Plazas con salidas más recientes');
+      html = `<div class="dv-sug-tit">${escHtml(tit)}</div>` + (lista.length ? lista.slice(0, 8).map(o => `<button type="button" class="dv-sug" data-id="${escHtml(o.p.id)}">
+          <span class="dv-sug-ico">🏗</span>
+          <span class="dv-sug-txt">${escHtml(o.p.nombre||'Sin nombre')}<span class="dv-sug-sub">${[o.p.obraId ? 'ID ' + o.p.obraId : '', o.p.barrio || '', o.ult ? 'última salida ' + fechaCorta(o.ult) : ''].filter(Boolean).map(escHtml).join(' · ')}</span></span>
+          ${prod && o.neto > 0 ? `<span class="dv-sug-dato">tiene ${fmt(o.neto,2)} ${escHtml(prod.un)}</span>` : ''}
+        </button>`).join('') : `<div class="dv-sug-vacio">No hay ninguna plaza con «${escHtml(inp.value)}». Probá con otra parte del nombre, el barrio o el ID.</div>`);
+    } else {
+      let lista = listaPersonas().map(n => ({ n, clave: norm(n), tiene: enPoderDe(n, null) || [], deEste: prod ? (enPoderDe(n, prod.codigo) || 0) : 0 }));
+      if(q) lista = lista.filter(o => q.split(' ').every(t => o.clave.includes(t)));
+      lista.sort((a,b)=> (b.deEste > 0) - (a.deEste > 0) || (b.tiene.length > 0) - (a.tiene.length > 0) || a.n.localeCompare(b.n, 'es'));
+      const tit = q ? `${lista.length} persona(s)` : 'Primero quienes tienen material en su poder';
+      html = `<div class="dv-sug-tit">${escHtml(tit)}</div>` + (lista.length ? lista.slice(0, 8).map(o => `<button type="button" class="dv-sug" data-nombre="${escHtml(o.n)}">
+          <span class="dv-sug-ico">👷</span>
+          <span class="dv-sug-txt">${escHtml(o.n)}<span class="dv-sug-sub">${o.tiene.length ? `tiene ${o.tiene.length} material(es) en su poder` : 'no tiene material en su poder'}</span></span>
+          ${prod && o.deEste > 0 ? `<span class="dv-sug-dato">tiene ${fmt(o.deEste,2)} ${escHtml(prod.un)}</span>` : ''}
+        </button>`).join('') : `<div class="dv-sug-vacio">No aparece nadie con «${escHtml(inp.value)}». Revisá el nombre (la lista sale de la nómina del Equipo).</div>`);
+    }
+    sug.innerHTML = html;
+    sug.style.display = '';
+  }
+  function pintarElegido(){
+    x.style.display = (inp.value && !elegido) ? '' : 'none';
+    if(!elegido){ el.style.display = 'none'; inp.parentElement.style.display = ''; return; }
+    inp.parentElement.style.display = 'none';
+    const prod = productoActual();
+    let dato = '';
+    if(elegido.tipo === 'obra'){
+      if(prod){ const n = netoEnPlaza(elegido.id, prod.codigo); dato = n > 0 ? `A esta plaza salieron <b>${fmt(n,2)} ${escHtml(prod.un)}</b> de ${escHtml(prod.desc)} (ya descontado lo que volvió).` : `No figura ${escHtml(prod.desc)} entregado a esta plaza.`; }
+      else dato = 'Elegí el producto arriba y te digo cuánto salió a esta plaza.';
+    } else {
+      if(prod){ const n = enPoderDe(elegido.nombre, prod.codigo) || 0; dato = n > 0 ? `Tiene en su poder <b>${fmt(n,2)} ${escHtml(prod.un)}</b> de ${escHtml(prod.desc)}.` : `Según el pañol no tiene ${escHtml(prod.desc)} en su poder.`; }
+      else { const t = enPoderDe(elegido.nombre, null) || []; dato = t.length ? `Tiene ${t.length} material(es) en su poder. Elegí el producto arriba.` : 'No tiene material en su poder según el pañol.'; }
+    }
+    el.innerHTML = `<span class="dv-sug-ico">${elegido.tipo === 'obra' ? '🏗' : '👷'}</span>
+      <span class="dv-el-txt"><b>${escHtml(elegido.nombre)}</b>${elegido.obraId ? ` <span style="color:var(--text-soft);">· ID ${escHtml(elegido.obraId)}</span>` : ''}<small>${dato}</small></span>
+      <button type="button" data-f="cambiar">Cambiar</button>`;
+    el.style.display = '';
+  }
+  function elegir(o){
+    elegido = o;
+    if(o.tipo === 'persona'){
+      const q = $('stockDevolQuien'); if(q && !q.value.trim()) q.value = o.nombre;
+      $('stockDevolMotivo').value = 'Devuelve lo que tenía en su poder';
+    } else if($('stockDevolMotivo').value === 'Devuelve lo que tenía en su poder') $('stockDevolMotivo').value = 'Sobrante de obra';
+    sug.style.display = 'none';
+    pintarElegido();
+  }
+  function soltar(){ elegido = null; inp.value = ''; pintarElegido(); inp.focus(); pintarSugerencias(); }
+  inp.addEventListener('input', ()=>{ pintarElegido(); pintarSugerencias(); });
+  inp.addEventListener('focus', pintarSugerencias);
+  inp.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){ const b = sug.querySelector('.dv-sug'); if(b){ e.preventDefault(); b.click(); } }
+    if(e.key === 'Escape'){ sug.style.display = 'none'; }
+  });
+  x.addEventListener('click', soltar);
+  sug.addEventListener('click', e => {
+    const b = e.target.closest('.dv-sug'); if(!b) return;
+    if(b.dataset.id){ const p = plazas().find(z => String(z.id) === b.dataset.id); if(p) elegir({ tipo:'obra', id:p.id, nombre:p.nombre || 'Plaza', obraId:String(p.obraId||''), barrio:p.barrio||'' }); }
+    else elegir({ tipo:'persona', nombre:b.dataset.nombre });
+  });
+  el.addEventListener('click', e => { if(e.target.closest('[data-f="cambiar"]')) soltar(); });
+  document.addEventListener('click', e => { if(!e.target.closest('.dv-buscar')) sug.style.display = 'none'; });
+  campos.querySelectorAll('.dv-seg-btn').forEach(b => b.addEventListener('click', ()=>{
+    if(origen === b.dataset.origen) return;
+    origen = b.dataset.origen;
+    campos.querySelectorAll('.dv-seg-btn').forEach(z => z.classList.toggle('activo', z === b));
+    $('stockDevolOrigenLbl').textContent = origen === 'obra' ? 'Buscá la plaza' : 'Buscá la persona';
+    inp.placeholder = origen === 'obra' ? 'Escribí el nombre, el barrio o el ID…' : 'Escribí el nombre de la persona…';
+    elegido = null; inp.value = ''; pintarElegido();
+    if(origen === 'persona') $('stockDevolMotivo').value = 'Devuelve lo que tenía en su poder';
+    else if($('stockDevolMotivo').value === 'Devuelve lo que tenía en su poder') $('stockDevolMotivo').value = 'Sobrante de obra';
+  }));
+  const prodInp = $('stockMovProducto');
+  if(prodInp) prodInp.addEventListener('input', ()=>{ if(selTipo.value !== 'devolucion') return; if(elegido) pintarElegido(); else if(sug.style.display !== 'none') pintarSugerencias(); });
+  document.querySelectorAll('input[name="stockDevolEstado"]').forEach(r => r.addEventListener('change', ()=>{
+    const v = (document.querySelector('input[name="stockDevolEstado"]:checked')||{}).value;
+    $('stockDevolEstadoHint').innerHTML = v === 'roto' ? '⚠ Queda registrado que volvió (se descuenta de la obra o de la persona) pero <b>no suma al stock</b>: se anota también su baja.'
+      : v === 'revisar' ? 'Vuelve al stock. Queda marcado <b>para revisar</b> en el registro.'
+      : 'Bueno y A revisar vuelven al stock. Roto queda anotado pero <b>no suma</b> al stock.';
+  }));
+
+  // ---------- Mostrar/ocultar según el tipo ----------
+  function alCambiarTipo(){
+    const esDev = selTipo.value === 'devolucion';
+    campos.style.display = esDev ? '' : 'none';
+    if(esDev){
+      $('stockMovEntradaCampos').style.display = 'none';
+      $('stockMovSalidaCampos').style.display = 'none';
+      const u = (window.__fbUser && window.__fbUser.email) || '';
+      $('stockDevolRecibe').innerHTML = u ? `Lo recibe en el pañol: <b>${escHtml(u)}</b> (la sesión iniciada) · la fecha es la de arriba.` : '⚠ Para registrar la devolución hay que iniciar sesión (Acceso para editar Stock).';
+    }
+    const btn = $('stockMovBtn'); if(btn) btn.textContent = esDev ? 'Registrar devolución' : 'Registrar movimiento';
+  }
+  selTipo.addEventListener('change', alCambiarTipo);
+
+  // ---------- Registrar ----------
+  window.stockRegistrarDevolucion = async function(btn, msg){
+    msg.style.color = 'var(--danger)';
+    const item = productoActual();
+    const cantidad = parseFloat(($('stockMovCantidad')||{}).value) || 0;
+    const fecha = ($('stockMovFecha')||{}).value;
+    const quien = ($('stockDevolQuien').value || '').trim();
+    const estado = (document.querySelector('input[name="stockDevolEstado"]:checked')||{}).value || 'bueno';
+    if(!item){ msg.textContent = '⚠ Elegí un producto válido de la lista (código o nombre).'; return; }
+    if(cantidad <= 0){ msg.textContent = '⚠ La cantidad tiene que ser mayor a 0.'; return; }
+    if(!fecha){ msg.textContent = '⚠ Elegí una fecha.'; return; }
+    if(!elegido){ msg.textContent = origen === 'obra' ? '⚠ Buscá y elegí de qué plaza vuelve el material.' : '⚠ Buscá y elegí de qué persona es el material que vuelve.'; inp.focus(); return; }
+    if(!quien){ msg.textContent = '⚠ Escribí quién devuelve el material.'; $('stockDevolQuien').focus(); return; }
+    if(elegido.tipo === 'obra'){
+      const n = netoEnPlaza(elegido.id, item.codigo);
+      if(n <= 0){ if(!confirm(`Según el pañol, a ${elegido.nombre} no le salió «${item.desc}». ¿Registrar la devolución igual?`)) return; }
+      else if(cantidad > n + 0.0001){ if(!confirm(`A ${elegido.nombre} salieron ${fmt(n,2)} ${item.un} de «${item.desc}» y están volviendo ${fmt(cantidad,2)}. ¿Registrar igual?`)) return; }
+    } else {
+      const n = enPoderDe(elegido.nombre, item.codigo) || 0;
+      if(n <= 0){ if(!confirm(`Según el pañol, ${elegido.nombre} no tiene «${item.desc}» en su poder. ¿Registrar la devolución igual?`)) return; }
+      else if(cantidad > n + 0.0001){ if(!confirm(`${elegido.nombre} tiene ${fmt(n,2)} ${item.un} de «${item.desc}» y está devolviendo ${fmt(cantidad,2)}. ¿Registrar igual?`)) return; }
+    }
+    const usuario = (window.__fbUser && window.__fbUser.email) || '';
+    const mov = { tipo:'entrada', devolucion:true, devolOrigen:elegido.tipo, codigo:item.codigo, desc:item.desc, un:item.un, cantidad, fecha, ts:Date.now(), usuario,
+                  devueltoPor:quien, devolMotivo:$('stockDevolMotivo').value, devolEstado:estado, devolObs:($('stockDevolObs').value||'').trim(), proveedor:'', remito:'' };
+    if(elegido.tipo === 'obra'){ mov.plazaId = elegido.id; mov.obraId = elegido.obraId || ''; mov.destino = elegido.nombre; }
+    else {
+      mov.personaNombre = elegido.nombre;
+      const lg = (typeof window.legajoDeNombre === 'function') ? window.legajoDeNombre(elegido.nombre) : null;
+      if(lg) mov.personaLegajo = String(lg);
+    }
+    btn.disabled = true;
+    let id = '';
+    try{ id = await window.fbAddMovimiento(mov); }
+    catch(e){ btn.disabled = false; msg.textContent = '⚠ No se pudo guardar la devolución (revisá tu conexión a internet). No se registró nada.'; return; }
+    let aviso = '';
+    if(estado === 'roto'){
+      try{
+        const bajaId = await window.fbAddMovimiento({ tipo:'salida', bajaRotura:true, devolucionId:id, codigo:item.codigo, desc:item.desc, un:item.un, cantidad, fecha, ts:Date.now() + 1, usuario,
+                                                      destino:'Baja — material roto (devolución)', retiradoPor:'', devolObs:mov.devolObs });
+        if(id && bajaId && typeof window.fbUpdateMovimiento === 'function') await window.fbUpdateMovimiento(id, { bajaRoturaId: bajaId });
+        aviso = ' Como volvió roto, se anotó su baja: el stock usable no cambia.';
+      }catch(e){ aviso = ' ⚠ La devolución se guardó, pero no se pudo anotar la baja del material roto: anulá la devolución y cargala de nuevo, o registrá una salida a mano.'; }
+    }
+    btn.disabled = false;
+    if(id) window.__ultimoMovLocal = Object.assign({ id }, mov);
+    $('stockMovProducto').value = ''; $('stockMovCantidad').value = 1; $('stockDevolObs').value = '';
+    const r = document.querySelector('input[name="stockDevolEstado"][value="bueno"]'); if(r){ r.checked = true; r.dispatchEvent(new Event('change')); }
+    if(typeof actualizarStockMovProductoHint === 'function') actualizarStockMovProductoHint();
+    pintarElegido();
+    msg.style.color = 'var(--teal-dark)';
+    msg.innerHTML = `✓ Devolución registrada — ${fmt(cantidad,2)} ${escHtml(item.un)} de «${escHtml(item.desc)}» ${elegido.tipo === 'obra' ? 'desde la obra ' : 'del stock de '}<b>${escHtml(elegido.nombre)}</b>. Stock de ese producto: ${fmt(stockActual(item.codigo),2)} ${escHtml(item.un)}.${escHtml(aviso)}`
+      + (id ? ` <button type="button" class="btn-ghost" onclick="verComprobanteMovimiento('${id}')" style="margin-left:6px; padding:3px 10px; font-size:12px;">🖨 Imprimir comprobante</button>` : '')
+      + `<br><span style="font-size:12px;">La obra/persona y quién devuelve quedan puestos para cargar otro material de la misma devolución.</span>`;
+  };
+  window.__devolucion = { elegir, estado: ()=> ({ origen, elegido }) };
+})();
+</script>
+
 <script id="appCelular">
 /* ==================================================================
    TANDA 1 — QUE SE SIENTA APP EN EL CELULAR (28/09/2026)
