@@ -3219,6 +3219,12 @@ header h1{ color:var(--navy) !important; font-family:var(--disp); font-size:15.5
 #portada svg{ display:none !important; }
 #portadaBtn{ background:linear-gradient(135deg,var(--navy),var(--navy-2)) !important; border:none !important; border-radius:999px !important; color:#fff !important; font-weight:700 !important; box-shadow:0 14px 30px -14px rgba(40,40,94,.7) !important; }
 #portadaClave{ border-radius:14px !important; }
+#portadaLogin input{ display:block; width:100%; box-sizing:border-box; margin-top:10px; padding:13px 14px; font-size:16px; border:1px solid #e4e8f0; border-radius:14px; background:#f3f5f9; color:#16233f; }
+#portadaLogin input:focus{ outline:none; border-color:#84c3da; box-shadow:0 0 0 3px rgba(132,195,218,.35); background:#fff; }
+#portadaEntrar{ width:100%; margin-top:14px; padding:13px; font-size:15px; font-weight:700; color:#fff; background:linear-gradient(135deg,var(--navy),var(--navy-2)); border:none; border-radius:999px; cursor:pointer; box-shadow:0 14px 30px -14px rgba(40,40,94,.7); }
+#portadaEntrar[disabled]{ opacity:.6; }
+.pt-recordar{ display:flex; align-items:center; justify-content:center; gap:6px; margin-top:10px; font-size:12px; color:#8b93a1; cursor:pointer; }
+.pt-recordar input{ width:auto !important; margin:0 !important; }
 #portada > div::before{ content:""; display:block; width:210px; height:60px; margin:0 auto 10px; background:var(--logo-color) center / contain no-repeat; }
 
 /* ---- Título grande de cada pantalla (solo CSS) ---- */
@@ -3561,15 +3567,21 @@ html, body{ forced-color-adjust:none; }
     </svg>
     <div style="font-size:17px; font-weight:800; color:#16233f;">Alumbrado Público</div>
     <div style="font-size:12.5px; color:#8b93a1; margin-top:2px; letter-spacing:.4px;">EMA SERVICIOS</div>
-    <div style="font-size:13.5px; color:#16233f; margin-top:18px;">Poné la clave de entrada para continuar</div>
-    <!-- La clave va adentro de su propio <form> (2026-09-16). El usuario: *"apenas entro al inicio
-         para buscar una obra me sale mi correo en el buscador"*. Era el navegador: veía un campo
-         `password` suelto, no encontraba ningún casillero de usuario cerca, y le metía el correo
-         guardado al PRIMER casillero de texto de la página — que es el buscador del Inicio.
-         Con el <form> propio, la búsqueda del gestor de contraseñas termina acá adentro y no llega
-         al buscador. `autocomplete="one-time-code"` termina de decirle que esto es un código de
-         entrada y no un usuario y contraseña que haya que recordar. -->
-    <form id="portadaForm" autocomplete="off" onsubmit="return false;" style="margin:0;">
+    <!-- ENTRADA CON USUARIO (2026-09-28). Pedido: «que entren a la app con esos usuarios, con
+         permisos, y que el usuario sea algo más rápido que el correo entero». Se escribe el usuario
+         corto (ej. «angel») o el correo, y la contraseña. Firebase recuerda la sesión en el aparato.
+         La clave vieja del equipo queda SOLO para cuando no hay conexión con la base (y entra para
+         mirar): con internet no alcanza con la clave. -->
+    <div id="portadaCargando" class="pt-cargando" style="font-size:13.5px; color:#16233f; margin-top:18px;">Entrando…</div>
+    <form id="portadaLogin" class="pt-login" autocomplete="on" onsubmit="return false;" style="display:none; margin:0;">
+      <div style="font-size:13.5px; color:#16233f; margin-top:16px;">Entrá con tu usuario</div>
+      <input type="text" id="portadaUsuario" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="Usuario" aria-label="Usuario">
+      <input type="password" id="portadaPass" name="password" autocomplete="current-password" enterkeyhint="go" placeholder="Contraseña" aria-label="Contraseña">
+      <button type="submit" id="portadaEntrar">Entrar</button>
+      <label class="pt-recordar"><input type="checkbox" id="portadaRecordarSesion" checked> Recordarme en este aparato</label>
+    </form>
+    <form id="portadaForm" autocomplete="off" onsubmit="return false;" style="display:none; margin:0;">
+      <div id="portadaSinConexion" style="font-size:13px; color:#16233f; margin-top:16px; line-height:1.4;">No hay conexión con la base de datos. Podés entrar <b>solo para mirar</b> con la clave del equipo.</div>
       <input type="password" id="portadaClave" inputmode="numeric" autocomplete="one-time-code" enterkeyhint="go" aria-label="Clave de entrada"
              name="clave-de-entrada" data-lpignore="true" data-1p-ignore data-form-type="other"
              style="width:100%; margin-top:10px; padding:12px 14px; font-size:17px; text-align:center; letter-spacing:3px; border:1px solid #e4e8f0; border-radius:10px; background:#f3f5f9; color:#16233f; box-sizing:border-box;">
@@ -3577,19 +3589,12 @@ html, body{ forced-color-adjust:none; }
               style="width:100%; margin-top:12px; padding:12px; font-size:15px; font-weight:700; color:#fff; background:#4fa8cc; border:none; border-radius:10px; cursor:pointer;">Entrar</button>
     </form>
     <div id="portadaMsg" style="font-size:12.5px; color:#c0392b; margin-top:10px; min-height:17px;"></div>
-    <label style="display:flex; align-items:center; justify-content:center; gap:6px; margin-top:6px; font-size:12px; color:#8b93a1; cursor:pointer;">
-      <input type="checkbox" id="portadaRecordar" checked style="width:auto; margin:0;"> No volver a pedirla en este dispositivo
-    </label>
   </div>
 </div>
 <script>
 (function(){
-  // Huella de la clave. NO es la clave: es el resultado de pasarla por hashClave(), para que abrir
-  // el código de la página no la muestre escrita. Clave actual: la que el usuario pidió (2026).
+  // Clave de EMERGENCIA (sin conexión con la base). Se guarda la huella, no la clave (2026).
   var CLAVE_ENTRADA_HUELLA = 'a37a8dd940aa0399';
-  var LS_KEY = 'ema_entrada_v1';
-  var DIAS_RECORDAR = 60;
-
   function hashClave(txt){
     var s = 'ema-alumbrado-2026|' + String(txt).trim().toLowerCase();
     var h1 = 0x811c9dc5 >>> 0, h2 = 0x01000193 >>> 0;
@@ -3600,49 +3605,95 @@ html, body{ forced-color-adjust:none; }
     }
     return h1.toString(16).padStart(8,'0') + h2.toString(16).padStart(8,'0');
   }
-
+  function $(id){ return document.getElementById(id); }
   function abrir(){
-    var p = document.getElementById('portada');
+    var p = $('portada');
     if(p && p.parentNode) p.parentNode.removeChild(p);
     document.body.style.overflow = '';
+    window.__portadaAbierta = true;
+    try{ document.dispatchEvent(new Event('portada-abierta')); }catch(e){}
   }
-
-  // ¿Ya la puso antes en este dispositivo? Se guarda la huella, no la clave: si mañana se cambia la
-  // clave, la huella guardada deja de coincidir y la vuelve a pedir sola, sin tener que avisarle a
-  // nadie que borre nada.
-  try{
-    var g = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
-    if(g && g.h === CLAVE_ENTRADA_HUELLA && (Date.now() - (g.ts||0)) < DIAS_RECORDAR*86400000){
-      abrir();
-      return;
-    }
-  }catch(e){}
-
+  function modo(m){           // 'cargando' | 'login' | 'emergencia'
+    var c = $('portadaCargando'), l = $('portadaLogin'), f = $('portadaForm');
+    if(c) c.style.display = m === 'cargando' ? '' : 'none';
+    if(l) l.style.display = m === 'login' ? '' : 'none';
+    if(f) f.style.display = m === 'emergencia' ? '' : 'none';
+    var foco = m === 'login' ? ($('portadaUsuario') && $('portadaUsuario').value ? $('portadaPass') : $('portadaUsuario')) : (m === 'emergencia' ? $('portadaClave') : null);
+    if(foco) setTimeout(function(){ try{ foco.focus(); }catch(e){} }, 60);
+  }
+  function msg(t){ var m = $('portadaMsg'); if(m) m.textContent = t || ''; }
   document.body.style.overflow = 'hidden';
-
   function probar(){
-    var inp = document.getElementById('portadaClave');
-    var msg = document.getElementById('portadaMsg');
+    var inp = $('portadaClave');
     if(hashClave(inp.value) !== CLAVE_ENTRADA_HUELLA){
-      msg.textContent = 'Esa no es la clave. Probá de nuevo.';
-      inp.value = '';
-      inp.focus();
+      msg('Esa no es la clave. Probá de nuevo.');
+      inp.value = ''; inp.focus();
       return;
     }
-    if(document.getElementById('portadaRecordar').checked){
-      try{ localStorage.setItem(LS_KEY, JSON.stringify({ h: CLAVE_ENTRADA_HUELLA, ts: Date.now() })); }catch(e){}
-    }
+    window.__modoEmergencia = true;
     abrir();
   }
-
   document.addEventListener('DOMContentLoaded', function(){
-    var inp = document.getElementById('portadaClave');
-    var btn = document.getElementById('portadaBtn');
+    var inp = $('portadaClave'), btn = $('portadaBtn');
     if(!inp || !btn) return;
     btn.addEventListener('click', probar);
     inp.addEventListener('keydown', function(ev){ if(ev.key === 'Enter') probar(); });
-    setTimeout(function(){ try{ inp.focus(); }catch(e){} }, 80);
   });
+  // ---- Entrada con usuario (Firebase Authentication) ----
+  var DOMINIO_CORTO = 'ema-alumbrado.app';   // «angel» → angel@ema-alumbrado.app si no tiene correo propio
+  function hayFirebase(){ try{ return typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0 && !!firebase.auth; }catch(e){ return false; } }
+  async function correoDe(usuario){
+    var u = String(usuario || '').trim();
+    if(u.indexOf('@') >= 0) return u.toLowerCase();
+    var k = u.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'');
+    try{
+      var d = await firebase.firestore().collection('configEquipo').doc('alias').get();
+      if(d.exists && d.data() && d.data()[k]) return String(d.data()[k]).toLowerCase();
+    }catch(e){}
+    return k + '@' + DOMINIO_CORTO;
+  }
+  async function entrar(){
+    var b = $('portadaEntrar'), u = ($('portadaUsuario').value || '').trim(), pw = $('portadaPass').value || '';
+    if(!u || !pw){ msg('Completá el usuario y la contraseña.'); return; }
+    if(!hayFirebase()){ modo('emergencia'); return; }
+    b.disabled = true; b.textContent = 'Entrando…'; msg('');
+    try{
+      var auth = firebase.auth();
+      try{ await auth.setPersistence($('portadaRecordarSesion').checked ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION); }catch(e){}
+      var mail = await correoDe(u);
+      await auth.signInWithEmailAndPassword(mail, pw);
+      $('portadaPass').value = '';
+    }catch(e){
+      var c = String((e && e.code) || '');
+      msg(/wrong-password|user-not-found|invalid-credential|invalid-login|invalid-email/.test(c) ? 'Usuario o contraseña incorrectos.'
+        : /too-many-requests/.test(c) ? 'Demasiados intentos. Esperá unos minutos y probá de nuevo.'
+        : /network/.test(c) ? 'Sin conexión a internet. Revisala y probá de nuevo.'
+        : 'No se pudo entrar. ' + (e && e.message ? e.message : ''));
+    }
+    b.disabled = false; b.textContent = 'Entrar';
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    var f = $('portadaLogin');
+    if(f) f.addEventListener('submit', function(ev){ ev.preventDefault(); entrar(); });
+    if(!hayFirebase()){ modo('emergencia'); return; }
+    var auth = firebase.auth();
+    var espera = setTimeout(function(){ if(!window.__portadaAbierta) modo('login'); }, 8000);
+    auth.onAuthStateChanged(async function(u){
+      clearTimeout(espera);
+      if(u){
+        // Usuario desactivado por el administrador: no entra.
+        try{
+          var d = await firebase.firestore().collection('usuarios').doc(u.uid).get();
+          if(d.exists && d.data() && d.data().activo === false){ await auth.signOut(); modo('login'); msg('Tu usuario está desactivado. Hablá con el administrador.'); return; }
+        }catch(e){}
+        if(!window.__portadaAbierta) abrir();
+      } else {
+        if(window.__portadaAbierta && !window.__modoEmergencia){ location.reload(); return; }   // cerró sesión
+        if(!window.__portadaAbierta) modo('login');
+      }
+    });
+  });
+  window.PORTADA = { abrir: abrir, modo: modo, msg: msg, correoDe: correoDe, DOMINIO_CORTO: DOMINIO_CORTO };
 })();
 </script>
 
@@ -3662,7 +3713,7 @@ html, body{ forced-color-adjust:none; }
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-28 15:14 · e9db1c</span></div>
+      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-28 17:19 · 555f2b</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -33268,7 +33319,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 .mapa-tipo-tag.t-barrio{ background:#efe8ff; color:#5a35b8; }
 .mapa-tipo-tag.t-otro{ background:#fff1dc; color:#9a5a00; }
 @media (max-width:760px){
-  #obApp .ob-grid{ grid-template-columns:1fr; }
+  #obApp .ob-grid{ grid-template-columns:minmax(0,1fr); }
   #obMapa{ height:240px; }
   .ob-item{ flex-wrap:wrap; }
   .ob-item .ob-txt{ flex:1 1 calc(100% - 50px); }
@@ -34381,6 +34432,9 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       if(vista) vista.style.display = '';
       document.body.dataset.vista = 'tablero';
       if(yo && !tab){ const c = normalizar(LS.get('ema.tablero.cache.' + yo, null)); if(c){ tab = c; escuchar(c.clave); } }
+      // Con usuario propio (2026-09-28) el tablero ya sabe quién sos: no hace falta elegir el nombre.
+      const miUsuario = (window.PERMISOS && typeof PERMISOS.yo === 'function') ? PERMISOS.yo() : null;
+      if(!yo && miUsuario && miUsuario.nombre && !window.__modoEmergencia){ elegirPersona(miUsuario.nombre); window.scrollTo({ top:0, behavior:'auto' }); return; }
       decidirPantalla(); render();
       window.scrollTo({ top:0, behavior:'auto' });
       return;
@@ -34437,7 +34491,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 (function(){
   const NOMBRE = { viewInicio:'Inicio', viewCalculadora:'Cálculo de materiales', viewParteDiario:'Órdenes de trabajo',
     viewPlanificacion:'Planificación semanal', viewAvance:'Avance de obra', viewMapa:'Mapa de plazas', viewStock:'Pañol',
-    viewProduccion:'Producción del personal', viewInforme:'Informes', viewGastos:'Gastos de obra', viewNormas:'Normas y planos', viewTablero:'Mi tablero', viewRegistro:'Registrar obra' };
+    viewProduccion:'Producción del personal', viewInforme:'Informes', viewGastos:'Gastos de obra', viewNormas:'Normas y planos', viewTablero:'Mi tablero', viewRegistro:'Registrar obra', viewUsuarios:'Usuarios y permisos' };
   const limpiar = t => String(t||'').replace(/^[^0-9A-Za-zÁÉÍÓÚÑáéíóúñ]+/, '').replace(/\s+/g,' ').trim();
   function hojaActual(){
     const vista = Object.keys(NOMBRE).map(id => document.getElementById(id))
@@ -34882,6 +34936,414 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       + `<br><span style="font-size:12px;">La obra/persona y quién devuelve quedan puestos por si hay que cargar otra devolución.</span>`;
   };
   window.__devolucion = { elegir, agregarFila, filas, estado: ()=> ({ origen, elegido }) };
+})();
+</script>
+
+<!-- ============================================================================================
+     USUARIOS Y PERMISOS (2026-09-28)
+     ============================================================================================
+     Pedido: «estoy agregando usuarios; la idea es que entren a la app con esos usuarios y que
+     tengan permisos, algunos para unas cosas y otros para otras». Decidido con el usuario:
+       · Roles armados (Administrador, Oficina, Pañol, Cuadrilla, Solo mirar) + ajuste hoja por hoja.
+       · Por hoja: Oculta (no aparece), Ver (solo mirar) o Cargar (puede cambiar datos).
+     Dónde vive: colección `usuarios/{uid}` (un documento por persona) y `configEquipo/alias`
+     (usuario corto → correo, para entrar sin escribir el correo entero).
+     Mientras no haya un ADMINISTRADOR, todo funciona como antes (sin restricciones). El primero que
+     entra a «Usuarios y permisos» se puede nombrar administrador.
+     Cómo se hace cumplir: el menú esconde lo oculto, la hoja oculta no abre, y toda escritura a la
+     base (las funciones window.fb…) se frena si en la hoja actual no hay permiso de «Cargar».
+     Para que la base también lo exija del lado del servidor, están las reglas de Firestore que
+     se pegan en la consola de Firebase (ver notas).
+     ============================================================================================ -->
+<div class="wrap" id="viewUsuarios" style="display:none"><div id="usApp"></div></div>
+<style id="estiloUsuarios">
+#viewUsuarios::before{ content:"Usuarios"; }
+.menu-item[data-vista="usuarios"] .menu-ico{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%229%22%20cy%3D%228%22%20r%3D%223.5%22/%3E%3Cpath%20d%3D%22M2.5%2020c.8-3.6%203.4-5.5%206.5-5.5s5.7%201.9%206.5%205.5%22/%3E%3Cpath%20d%3D%22M16%204.5a3.3%203.3%200%200%201%200%206.5M18%2014.8c1.9.7%203.1%202.4%203.5%205.2%22/%3E%3C/svg%3E");}
+.perm-aviso{ display:flex; align-items:center; gap:10px; margin:0 0 14px; padding:11px 14px; border-radius:16px; background:#fff7e6; border:1px solid #ffd79a; color:#7a4a00; font:600 13.5px/1.35 var(--fuente); }
+.perm-aviso b{ font-weight:800; }
+.perm-toast{ position:fixed; left:50%; bottom:max(20px, env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:9600; background:#3a1d1d; color:#fff; border-radius:16px; padding:12px 16px; font:600 14px/1.35 var(--fuente); box-shadow:0 20px 40px -18px rgba(0,0,0,.6); max-width:calc(100vw - 32px); }
+.ses-rol{ display:inline-block; margin-top:4px; font:800 11px var(--fuente); border-radius:999px; padding:3px 9px; background:rgba(40,40,94,.1); color:var(--navy); }
+/* Hoja */
+#usApp .us-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.6fr); gap:18px; align-items:start; }
+.us-boot{ border-radius:18px; padding:16px; background:linear-gradient(135deg,#fff4e0,#fff); border:1px solid #ffd08a; margin-bottom:18px; }
+.us-boot h3{ margin:0 0 6px; font:800 17px var(--disp); }
+.us-roles{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; margin-top:6px; }
+.us-rol{ border:1px solid var(--border); background:var(--vidrio-2); border-radius:14px; padding:10px; cursor:pointer; text-align:left; font:600 12.5px/1.3 var(--fuente); color:var(--text); }
+.us-rol b{ display:block; font-size:13.5px; margin-bottom:2px; }
+.us-rol.activo{ background:var(--navy); color:#fff; border-color:var(--navy); }
+.us-rol.activo small{ color:rgba(255,255,255,.8); }
+.us-rol small{ color:var(--text-soft); }
+.us-lista{ display:flex; flex-direction:column; gap:8px; }
+.us-item{ border:1px solid var(--border); background:var(--vidrio-2); border-radius:16px; padding:12px; }
+.us-cab{ display:flex; align-items:center; gap:10px; }
+.us-av{ flex:0 0 40px; height:40px; border-radius:13px; color:#fff; display:grid; place-items:center; font:800 15px var(--disp); }
+.us-txt{ flex:1 1 auto; min-width:0; font-weight:700; font-size:14px; }
+.us-txt small{ display:block; font-weight:500; color:var(--text-soft); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.us-chip{ flex:0 0 auto; font:800 11px var(--fuente); border-radius:999px; padding:4px 10px; background:rgba(40,40,94,.1); color:var(--navy); }
+.us-chip.admin{ background:var(--navy); color:#fff; }
+.us-chip.pend{ background:#fff1dc; color:#9a5a00; }
+.us-chip.off{ background:#ffe7e5; color:#b3261e; }
+.us-det{ margin-top:10px; border-top:1px solid var(--border); padding-top:10px; }
+.us-fila{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.us-fila select, .us-fila input{ margin:0 !important; width:auto !important; flex:1 1 160px; }
+#usApp input[type=email], #usApp input[type=text]{ width:100%; box-sizing:border-box; }
+#usApp input[type=email]{ padding:12px 14px; border-radius:14px; border:1px solid var(--border); background:#fff; font-size:16px; }
+.us-hojas{ display:grid; grid-template-columns:1fr; gap:4px; margin-top:10px; }
+.us-hoja{ display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:12px; background:rgba(255,255,255,.55); }
+.us-hoja .n{ flex:1 1 auto; min-width:0; font-size:13px; font-weight:600; }
+.us-hoja .n small{ color:#b36b00; font-weight:700; margin-left:4px; }
+.us-seg{ display:flex; border:1px solid var(--border); border-radius:10px; overflow:hidden; flex:0 0 auto; }
+.us-seg button{ border:none; background:#fff; padding:7px 10px; font:700 12px var(--fuente); color:var(--text-soft); cursor:pointer; min-height:0 !important; }
+.us-seg button + button{ border-left:1px solid var(--border); }
+.us-seg button.on[data-p="oculto"]{ background:#eceff4; color:#51607a; }
+.us-seg button.on[data-p="ver"]{ background:#fff4e0; color:#8a5200; }
+.us-seg button.on[data-p="editar"]{ background:#e3f6ea; color:#1d7a3a; }
+.us-seg button[disabled]{ cursor:default; opacity:.55; }
+.us-acc{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.us-msg{ font-size:12.5px; margin-top:6px; }
+.us-msg.mal{ color:var(--danger); } .us-msg.bien{ color:#1d7a3a; }
+@media (max-width:760px){ #usApp .us-grid{ grid-template-columns:minmax(0,1fr); } .us-seg button{ padding:7px 8px; } }
+@media print{ #viewUsuarios, .perm-aviso{ display:none !important; } }
+</style>
+<script id="usuariosPermisos">
+(function(){
+  const $ = id => document.getElementById(id);
+  const esc = s => escHtml(s);
+  const db = ()=>{ try{ return (window.firebase && firebase.apps && firebase.apps.length) ? firebase.firestore() : null; }catch(e){ return null; } };
+  const normU = s => String(s||'').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9._-]+/g,'');
+
+  // ---------- Hojas y roles ----------
+  const HOJAS = [
+    ['inicio','Inicio'], ['registro','Registrar obra'], ['calc','Cálculo de materiales'], ['parte','Órdenes de trabajo'],
+    ['plan','Planificación semanal'], ['avance','Avance de obra'], ['mapa','Mapa'], ['stock','Pañol / Stock'],
+    ['informe','Informes'], ['gastos','Gastos de obra'], ['produccion','Producción del personal'], ['normas','Normas y planos']
+  ];
+  const todas = p => Object.fromEntries(HOJAS.map(([k]) => [k, p]));
+  const ROLES = {
+    admin:{ nombre:'Administrador', txt:'Todo, y maneja los usuarios', hojas: todas('editar') },
+    oficina:{ nombre:'Oficina', txt:'Carga y cambia todo', hojas: todas('editar') },
+    panol:{ nombre:'Pañol', txt:'Carga en el pañol; mira obras y mapa', hojas:{ ...todas('oculto'), inicio:'ver', registro:'ver', avance:'ver', mapa:'ver', stock:'editar', normas:'ver' } },
+    cuadrilla:{ nombre:'Cuadrilla', txt:'Carga órdenes y avance; mira lo demás', hojas:{ ...todas('ver'), parte:'editar', avance:'editar', informe:'oculto', gastos:'oculto', produccion:'oculto' } },
+    mirar:{ nombre:'Solo mirar', txt:'Ve todo, no cambia nada', hojas:{ ...todas('ver'), gastos:'oculto', produccion:'oculto' } }
+  };
+  const VISTA_DE_ID = { viewInicio:'inicio', viewRegistro:'registro', viewCalculadora:'calc', viewParteDiario:'parte', viewPlanificacion:'plan', viewAvance:'avance',
+    viewMapa:'mapa', viewStock:'stock', viewInforme:'informe', viewGastos:'gastos', viewProduccion:'produccion', viewNormas:'normas', viewTablero:'tablero', viewUsuarios:'usuarios' };
+  const ID_DE_VISTA = Object.fromEntries(Object.entries(VISTA_DE_ID).map(([a,b]) => [b,a]));
+  const nombreHoja = h => (HOJAS.find(x => x[0] === h) || [h, h === 'usuarios' ? 'Usuarios y permisos' : (h === 'tablero' ? 'Mi tablero' : h)])[1];
+
+  // ---------- Estado ----------
+  let usuarios = {};          // uid -> doc
+  let alias = {};             // usuario corto -> correo
+  let cargado = false;
+  const uid = ()=> (window.__fbUser && window.__fbUser.uid) || '';
+  const hayAdmin = ()=> Object.values(usuarios).some(u => u && u.rol === 'admin' && u.activo !== false);
+  const yo = ()=> usuarios[uid()] || null;
+  const esAdmin = ()=> { const y = yo(); return !!(y && y.rol === 'admin' && y.activo !== false); };
+  function permiso(h){
+    if(h === 'tablero') return 'editar';
+    if(h === 'usuarios') return (!cargado || !window.__fbUser) ? 'oculto' : (!hayAdmin() || esAdmin() ? 'editar' : 'oculto');
+    if(!cargado || !hayAdmin()) return 'editar';                 // sin administrador: como siempre
+    if(!window.__fbUser) return 'ver';                            // entrada de emergencia (sin conexión)
+    const y = yo();
+    if(!y || y.activo === false) return (ROLES.mirar.hojas[h] || 'ver');
+    const base = (ROLES[y.rol] || ROLES.mirar).hojas[h] || 'ver';
+    const aj = y.ajustes && y.ajustes[h];
+    return (aj === 'oculto' || aj === 'ver' || aj === 'editar') ? aj : base;
+  }
+  function hojaActual(){
+    const v = Object.keys(VISTA_DE_ID).map(id => $(id)).find(el => el && el.style.display !== 'none' && getComputedStyle(el).display !== 'none');
+    return v ? VISTA_DE_ID[v.id] : 'inicio';
+  }
+
+  // ---------- Datos (en vivo) ----------
+  function escuchar(){
+    const d = db(); if(!d) return;
+    try{
+      d.collection('usuarios').onSnapshot(q => {
+        const m = {}; q.forEach(doc => { m[doc.id] = { ...doc.data(), uid:doc.id }; }); usuarios = m; cargado = true;
+        registrarmeSiFalta(); aplicar();
+        const y = yo(); if(y && y.activo === false && window.__fbUser){ try{ firebase.auth().signOut(); }catch(e){} }
+        if($('viewUsuarios') && $('viewUsuarios').style.display !== 'none') render();
+      }, e => { console.warn('usuarios', e); cargado = true; aplicar(); });
+      d.collection('configEquipo').doc('alias').onSnapshot(doc => { alias = (doc.exists && doc.data()) || {}; if($('viewUsuarios') && $('viewUsuarios').style.display !== 'none') render(); }, ()=>{});
+    }catch(e){ console.warn('usuarios', e); }
+  }
+  let registrando = false;
+  async function registrarmeSiFalta(){
+    const u = window.__fbUser, d = db();
+    if(!u || !d || !cargado || usuarios[u.uid] || registrando) return;
+    registrando = true;
+    const local = String(u.email || '').split('@')[0];
+    const doc = { email:String(u.email||'').toLowerCase(), usuario:normU(local), nombre:local, rol:'mirar', pendiente:true, activo:true, creado:Date.now() };
+    try{ await d.collection('usuarios').doc(u.uid).set(doc); }catch(e){ console.warn('registro usuario', e); }
+    registrando = false;
+  }
+
+  // ---------- Aplicar permisos en pantalla ----------
+  function aplicarMenu(){
+    const ml = $('menuLista'); if(!ml) return;
+    ml.querySelectorAll('.menu-item[data-vista]').forEach(b => { b.style.display = permiso(b.dataset.vista) === 'oculto' ? 'none' : ''; });
+    let b = $('menuUsuarios');
+    if(permiso('usuarios') !== 'oculto'){
+      if(!b){
+        b = document.createElement('button'); b.type = 'button'; b.className = 'menu-item'; b.id = 'menuUsuarios'; b.dataset.vista = 'usuarios';
+        b.innerHTML = '<span class="menu-ico">👥</span>Usuarios y permisos';
+        const ref = $('menuFuentes'); if(ref) ref.insertAdjacentElement('beforebegin', b); else ml.appendChild(b);
+      }
+      if(document.body.dataset.vista === 'usuarios') b.classList.add('activo');
+    } else if(b) b.remove();
+    pintarSesion();
+  }
+  function pintarSesion(){
+    const box = document.querySelector('#menuSesion .ses-caja.dentro'); if(!box) return;
+    const y = yo();
+    if(y && !box.querySelector('.ses-rol')){
+      const m = box.querySelector('.ses-mail');
+      if(m){ m.innerHTML = `<b>${esc(y.nombre || y.usuario || '')}</b> · ${esc(y.usuario || y.email || '')}`; m.insertAdjacentHTML('afterend', `<div class="ses-rol">${esc(hayAdmin() ? ((ROLES[y.rol] || ROLES.mirar).nombre + (y.pendiente ? ' · a confirmar' : '')) : 'Sin restricciones (todavía no hay administrador)')}</div>`); }
+      const hint = box.querySelector('.ses-hint');
+      if(hint && hayAdmin()){ const r = ROLES[y.rol] || ROLES.mirar; hint.textContent = y.rol === 'mirar' ? 'Tu usuario es para mirar: podés ver, pero no cargar ni cambiar datos.' + (y.pendiente ? ' El administrador todavía tiene que confirmarte.' : '') : `${r.txt}. Lo que guardes queda a tu nombre.`; }
+    }
+  }
+  function aplicarAviso(){
+    document.querySelectorAll('.perm-aviso').forEach(e => e.remove());
+    const h = hojaActual(); if(permiso(h) !== 'ver' || !window.__fbUser) return;
+    const v = $(ID_DE_VISTA[h]); if(!v) return;
+    v.insertAdjacentHTML('afterbegin', `<div class="perm-aviso">👁 <span>En <b>${esc(nombreHoja(h))}</b> tu usuario es <b>solo para mirar</b>: podés ver todo, pero no cargar ni cambiar datos.</span></div>`);
+  }
+  function primeraPermitida(){
+    const orden = ['inicio','registro','calc','parte','plan','avance','mapa','stock','informe','gastos','produccion','normas','tablero'];
+    return orden.find(h => permiso(h) !== 'oculto') || 'tablero';
+  }
+  function aplicar(){
+    aplicarMenu();
+    const h = hojaActual();
+    if(window.__portadaAbierta && permiso(h) === 'oculto'){ try{ mostrarVista(primeraPermitida()); }catch(e){} return; }
+    aplicarAviso();
+  }
+  const ml = $('menuLista');
+  if(ml) new MutationObserver(()=> aplicarMenu()).observe(ml, { childList:true });
+
+  let toastT = null;
+  function toast(t){
+    let e = $('permToast'); if(e) e.remove();
+    e = document.createElement('div'); e.id = 'permToast'; e.className = 'perm-toast'; e.setAttribute('role','alert'); e.textContent = t;
+    document.body.appendChild(e); clearTimeout(toastT); toastT = setTimeout(()=> e.remove(), 4200);
+  }
+
+  // ---------- Frenar escrituras sin permiso ----------
+  const LIBRES = new Set(['fbStockLogin','fbStockLogout','fbPresenciaMarcar','fbPresenciaLeer','fbSaludGuardar','fbSaludLeer','fbAuditar','fbAuditoriaLeer','fbAdjuntoLeer']);
+  Object.keys(window).filter(k => /^fb[A-Z]/.test(k) && typeof window[k] === 'function' && !LIBRES.has(k)).forEach(k => {
+    const orig = window[k];
+    window[k] = function(){
+      const h = hojaActual();
+      if(permiso(h) !== 'editar'){
+        toast(`🔒 Tu usuario no tiene permiso para cargar ni cambiar datos en «${nombreHoja(h)}».`);
+        const e = new Error('Sin permiso para cargar en ' + nombreHoja(h)); e.code = 'permission-denied';
+        return Promise.reject(e);
+      }
+      return orig.apply(this, arguments);
+    };
+  });
+
+  // ---------- Navegación ----------
+  const previa = window.mostrarVista;
+  window.mostrarVista = function(v){
+    const vista = $('viewUsuarios');
+    if(permiso(v) === 'oculto'){
+      toast(`🔒 Tu usuario no tiene acceso a «${nombreHoja(v)}».`);
+      if(hojaActual() && permiso(hojaActual()) !== 'oculto') return;
+      v = primeraPermitida();
+    }
+    if(v === 'usuarios'){
+      document.querySelectorAll('.wrap[id^="view"]').forEach(el => { if(el.id !== 'viewUsuarios') el.style.display = 'none'; });
+      const f = $('mainFooter'); if(f) f.style.display = 'none';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#navAbajo .nav-item, #menuLista .menu-item').forEach(b => b.classList.toggle('activo', b.dataset.vista === 'usuarios'));
+      if(vista) vista.style.display = '';
+      document.body.dataset.vista = 'usuarios';
+      render(); aplicarAviso();
+      window.scrollTo({ top:0, behavior:'auto' });
+      return;
+    }
+    if(vista) vista.style.display = 'none';
+    const r = previa.apply(this, arguments.length && arguments[0] !== v ? [v] : arguments);
+    setTimeout(aplicarAviso, 0);
+    return r;
+  };
+
+  // ---------- Hoja «Usuarios y permisos» ----------
+  const AV = ['#28285e','#3d3f8a','#5f5bd6','#2a8fb8','#1f9d6b','#d9822b','#d6456f','#7a4fd6'];
+  const colorAv = n => { let h = 0; for(const c of String(n)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return AV[h % AV.length]; };
+  const inic = n => String(n||'?').trim().split(/\s+/).slice(0,2).map(p => p[0] || '').join('').toUpperCase() || '?';
+  let abierto = null, rolNuevo = 'cuadrilla', msgNuevo = '';
+  function htmlUsuario(u){
+    const r = ROLES[u.rol] || ROLES.mirar;
+    const chip = u.activo === false ? '<span class="us-chip off">Desactivado</span>' : (u.pendiente ? '<span class="us-chip pend">A confirmar</span>' : `<span class="us-chip${u.rol === 'admin' ? ' admin' : ''}">${esc(r.nombre)}</span>`);
+    const soyYo = u.uid === uid();
+    const det = abierto === u.uid ? `<div class="us-det">
+        <div class="us-fila">
+          <label style="margin:0; font-size:12px; flex:0 0 auto;">Nombre</label><input type="text" data-u="nombre" value="${esc(u.nombre||'')}" placeholder="Nombre y apellido">
+          <label style="margin:0; font-size:12px; flex:0 0 auto;">Usuario</label><input type="text" data-u="usuario" value="${esc(u.usuario||'')}" placeholder="usuario corto" autocapitalize="none">
+        </div>
+        <div class="us-fila" style="margin-top:8px;">
+          <label style="margin:0; font-size:12px; flex:0 0 auto;">Rol</label>
+          <select data-u="rol" ${soyYo && u.rol === 'admin' ? 'disabled title="No te podés sacar a vos mismo de administrador"' : ''}>${Object.entries(ROLES).map(([k,v]) => `<option value="${k}" ${k === u.rol ? 'selected' : ''}>${esc(v.nombre)} — ${esc(v.txt)}</option>`).join('')}</select>
+        </div>
+        <div class="us-hojas">${HOJAS.map(([h, n]) => {
+          const base = (ROLES[u.rol] || ROLES.mirar).hojas[h];
+          const aj = u.ajustes && u.ajustes[h]; const ef = aj || base;
+          return `<div class="us-hoja"><span class="n">${esc(n)}${aj && aj !== base ? '<small>cambiado</small>' : ''}</span>
+            <span class="us-seg" data-hoja="${h}">${[['oculto','Oculta'],['ver','Ver'],['editar','Cargar']].map(([p,t]) => `<button type="button" data-p="${p}" class="${ef === p ? 'on' : ''}" ${u.rol === 'admin' ? 'disabled' : ''}>${t}</button>`).join('')}</span></div>`; }).join('')}</div>
+        <div class="us-acc">
+          ${u.ajustes && Object.keys(u.ajustes).length ? '<button type="button" class="btn-ghost" data-u="reset">↺ Volver a lo del rol</button>' : ''}
+          ${soyYo ? '' : `<button type="button" class="btn-ghost" data-u="activo" style="${u.activo === false ? '' : 'color:var(--danger);'}">${u.activo === false ? '✓ Volver a activar' : '⛔ Desactivar (no puede entrar)'}</button>`}
+        </div>
+        <div class="us-msg" id="usMsg_${esc(u.uid)}"></div>
+      </div>` : '';
+    return `<div class="us-item" data-uid="${esc(u.uid)}">
+      <div class="us-cab" data-u="abrir" style="cursor:pointer;">
+        <span class="us-av" style="background:${colorAv(u.nombre || u.email)}">${esc(inic(u.nombre || u.usuario || u.email))}</span>
+        <span class="us-txt">${esc(u.nombre || u.usuario || u.email)}${soyYo ? ' <span style="color:var(--text-soft); font-weight:600;">(vos)</span>' : ''}<small>entra con: <b>${esc(u.usuario || '')}</b> · ${esc(u.email || '')}</small></span>
+        ${chip}
+      </div>${det}</div>`;
+  }
+  function render(){
+    const app = $('usApp'); if(!app) return;
+    if(!db()){ app.innerHTML = '<div class="card">Sin conexión con la base: los usuarios se manejan con internet.</div>'; return; }
+    const lista = Object.values(usuarios).sort((a,b)=> (b.pendiente ? 1 : 0) - (a.pendiente ? 1 : 0) || (a.rol === 'admin' ? -1 : 0) - (b.rol === 'admin' ? -1 : 0) || String(a.nombre||a.email).localeCompare(String(b.nombre||b.email), 'es'));
+    const boot = !hayAdmin() ? `<div class="us-boot"><h3>Todavía no hay administrador</h3>
+        <div style="font-size:13.5px; line-height:1.45;">Mientras no haya uno, la app funciona como siempre: todos pueden todo. El administrador es el que da de alta usuarios y decide qué puede hacer cada uno.</div>
+        <button type="button" class="btn-primary" id="usHacermeAdmin" style="margin-top:12px;">👑 Hacerme administrador</button>
+        <div class="us-msg" id="usBootMsg"></div></div>` : '';
+    app.innerHTML = boot + `<div class="us-grid">
+      <div class="card" style="margin:0;">
+        <h2><span class="dot"></span>Nuevo usuario</h2>
+        ${!esAdmin() ? '<div class="hint" style="margin-top:0;">Solo el administrador puede crear usuarios.</div>' : ''}
+        <label for="usNombre" style="margin-top:0;">Nombre y apellido</label>
+        <input type="text" id="usNombre" placeholder="Ej: Mauricio Mainini" autocomplete="off" ${esAdmin() ? '' : 'disabled'}>
+        <label for="usUsuario">Usuario para entrar <span style="font-weight:500; color:var(--text-soft);">(corto, sin espacios)</span></label>
+        <input type="text" id="usUsuario" placeholder="Ej: mauricio" autocapitalize="none" autocomplete="off" ${esAdmin() ? '' : 'disabled'}>
+        <label for="usPass">Contraseña <span style="font-weight:500; color:var(--text-soft);">(mínimo 6)</span></label>
+        <div style="display:flex; gap:6px;"><input type="text" id="usPass" placeholder="Ej: ema2026" autocomplete="off" style="flex:1 1 auto; margin:0;" ${esAdmin() ? '' : 'disabled'}><button type="button" class="btn-ghost" id="usGenerar" ${esAdmin() ? '' : 'disabled'}>🎲</button></div>
+        <label for="usCorreo">Correo <span style="font-weight:500; color:var(--text-soft);">(opcional — si no tiene, se inventa uno interno)</span></label>
+        <input type="email" id="usCorreo" placeholder="Opcional" autocomplete="off" ${esAdmin() ? '' : 'disabled'}>
+        <label>Rol</label>
+        <div class="us-roles">${Object.entries(ROLES).map(([k,v]) => `<button type="button" class="us-rol${k === rolNuevo ? ' activo' : ''}" data-rol="${k}" ${esAdmin() ? '' : 'disabled'}><b>${esc(v.nombre)}</b><small>${esc(v.txt)}</small></button>`).join('')}</div>
+        <button type="button" class="btn-primary" id="usCrear" style="margin-top:14px; width:100%;" ${esAdmin() ? '' : 'disabled'}>Crear usuario</button>
+        <div class="us-msg" id="usNuevoMsg">${msgNuevo}</div>
+        <div class="hint" style="margin-top:10px;">Pasale a la persona su <b>usuario</b> y su <b>contraseña</b>: con eso entra desde el celu o la compu. Si alguien olvida la contraseña, se cambia desde la consola de Firebase (Authentication → Usuarios), o se lo desactiva y se le crea otro usuario.</div>
+      </div>
+      <div class="card" style="margin:0;">
+        <h2><span class="dot"></span>Usuarios del equipo <span class="h2-sub">${lista.length} en total${lista.some(u=>u.pendiente) ? ' · <b>' + lista.filter(u=>u.pendiente).length + ' a confirmar</b>' : ''}</span></h2>
+        <div class="hint" style="margin-top:0;">Tocá una persona para ver y cambiar su rol y qué puede hacer en cada hoja. Los usuarios creados en la consola de Firebase aparecen acá la primera vez que entran, como <b>«A confirmar»</b> y con permiso de solo mirar.</div>
+        <div class="us-lista">${lista.length ? lista.map(htmlUsuario).join('') : '<div class="hint">Todavía nadie entró con usuario propio.</div>'}</div>
+      </div>
+    </div>`;
+  }
+  async function guardarUsuario(u, cambios, msgId){
+    const d = db(); const m = $(msgId);
+    if(!esAdmin()){ if(m){ m.className = 'us-msg mal'; m.textContent = 'Solo el administrador puede cambiar usuarios.'; } return false; }
+    try{
+      await d.collection('usuarios').doc(u.uid).set({ ...cambios, actualizado:Date.now(), actualizadoPor:(window.__fbUser && window.__fbUser.email) || '' }, { merge:true });
+      return true;
+    }catch(e){ if(m){ m.className = 'us-msg mal'; m.textContent = '⚠ No se pudo guardar: ' + (e.message || e); } return false; }
+  }
+  async function guardarAlias(usuario, correo, anterior){
+    const d = db(); if(!d) return;
+    const ups = {}; if(anterior && anterior !== usuario) ups[anterior] = firebase.firestore.FieldValue.delete();
+    if(usuario) ups[usuario] = correo;
+    try{ await d.collection('configEquipo').doc('alias').set(ups, { merge:true }); }catch(e){ console.warn('alias', e); }
+  }
+  document.addEventListener('click', async e => {
+    const app = $('usApp'); if(!app || !app.contains(e.target)) return;
+    if(e.target.id === 'usHacermeAdmin'){
+      const u = window.__fbUser; const m = $('usBootMsg');
+      if(!u){ m.className = 'us-msg mal'; m.textContent = 'Primero iniciá sesión.'; return; }
+      if(hayAdmin()){ render(); return; }
+      if(!confirm('¿Quedar como administrador de la app? Vas a poder crear usuarios y decidir qué puede hacer cada uno.')) return;
+      try{
+        const local = String(u.email||'').split('@')[0];
+        await db().collection('usuarios').doc(u.uid).set({ email:String(u.email||'').toLowerCase(), usuario:(yo() && yo().usuario) || normU(local), nombre:(yo() && yo().nombre) || local, rol:'admin', pendiente:false, activo:true, actualizado:Date.now() }, { merge:true });
+        await guardarAlias((yo() && yo().usuario) || normU(local), String(u.email||'').toLowerCase());
+      }catch(err){ m.className = 'us-msg mal'; m.textContent = '⚠ No se pudo: ' + (err.message || err); }
+      return;
+    }
+    const rb = e.target.closest('.us-rol[data-rol]'); if(rb){ rolNuevo = rb.dataset.rol; app.querySelectorAll('.us-rol').forEach(x => x.classList.toggle('activo', x === rb)); return; }
+    if(e.target.id === 'usGenerar'){ const p = $('usPass'); p.value = 'ema' + Math.floor(1000 + Math.random() * 9000); return; }
+    if(e.target.id === 'usCrear'){ crearUsuario(); return; }
+    const item = e.target.closest('.us-item'); if(!item) return;
+    const u = usuarios[item.dataset.uid]; if(!u) return;
+    const acc = e.target.closest('[data-u]');
+    if(acc && acc.dataset.u === 'abrir'){ abierto = abierto === u.uid ? null : u.uid; render(); return; }
+    const seg = e.target.closest('.us-seg button[data-p]');
+    if(seg){
+      const h = seg.parentElement.dataset.hoja, p = seg.dataset.p; const base = (ROLES[u.rol] || ROLES.mirar).hojas[h];
+      const aj = { ...(u.ajustes || {}) }; if(p === base) delete aj[h]; else aj[h] = p;
+      if(await guardarUsuario(u, { ajustes: aj, pendiente:false }, 'usMsg_' + u.uid)){ /* el snapshot redibuja */ }
+      return;
+    }
+    if(acc && acc.dataset.u === 'reset'){ await guardarUsuario(u, { ajustes:{} }, 'usMsg_' + u.uid); return; }
+    if(acc && acc.dataset.u === 'activo'){
+      const nuevo = u.activo === false;
+      if(!nuevo && !confirm(`¿Desactivar a ${u.nombre || u.email}? No va a poder entrar a la app hasta que lo vuelvas a activar.`)) return;
+      await guardarUsuario(u, { activo:nuevo }, 'usMsg_' + u.uid); return;
+    }
+  });
+  document.addEventListener('change', async e => {
+    const app = $('usApp'); if(!app || !app.contains(e.target)) return;
+    const item = e.target.closest('.us-item'); if(!item) return;
+    const u = usuarios[item.dataset.uid]; if(!u) return;
+    const k = e.target.dataset.u;
+    if(k === 'rol'){ await guardarUsuario(u, { rol:e.target.value, pendiente:false }, 'usMsg_' + u.uid); }
+    else if(k === 'nombre'){ await guardarUsuario(u, { nombre:e.target.value.trim() }, 'usMsg_' + u.uid); }
+    else if(k === 'usuario'){
+      const nu = normU(e.target.value); const m = $('usMsg_' + u.uid);
+      if(!nu){ e.target.value = u.usuario || ''; return; }
+      const otro = Object.values(usuarios).find(x => x.uid !== u.uid && x.usuario === nu);
+      if(otro || (alias[nu] && alias[nu] !== u.email)){ if(m){ m.className = 'us-msg mal'; m.textContent = `⚠ El usuario «${nu}» ya lo tiene otra persona.`; } e.target.value = u.usuario || ''; return; }
+      if(await guardarUsuario(u, { usuario:nu }, 'usMsg_' + u.uid)) await guardarAlias(nu, u.email, u.usuario);
+    }
+  });
+  async function crearUsuario(){
+    const m = $('usNuevoMsg'); const set = (t, c) => { msgNuevo = ''; m.className = 'us-msg ' + (c || ''); m.innerHTML = t; };
+    if(!esAdmin()){ set('Solo el administrador puede crear usuarios.', 'mal'); return; }
+    const nombre = ($('usNombre').value || '').trim();
+    const usuario = normU($('usUsuario').value || nombre.split(' ')[0]);
+    const pass = $('usPass').value || '';
+    let correo = ($('usCorreo').value || '').trim().toLowerCase();
+    if(!nombre){ set('Poné el nombre.', 'mal'); return; }
+    if(!usuario){ set('Poné un usuario corto (letras y números).', 'mal'); return; }
+    if(pass.length < 6){ set('La contraseña tiene que tener 6 caracteres o más.', 'mal'); return; }
+    if(Object.values(usuarios).some(x => x.usuario === usuario) || alias[usuario]){ set(`El usuario «${usuario}» ya existe. Elegí otro.`, 'mal'); return; }
+    if(!correo) correo = `${usuario}@${(window.PORTADA && PORTADA.DOMINIO_CORTO) || 'ema-alumbrado.app'}`;
+    const b = $('usCrear'); b.disabled = true; set('Creando…');
+    let sec = null;
+    try{
+      // Se crea con una conexión aparte, para que el administrador NO quede logueado como el usuario nuevo.
+      sec = firebase.apps.find(a => a.name === 'altaUsuarios') || firebase.initializeApp(firebase.app().options, 'altaUsuarios');
+      const cred = await sec.auth().createUserWithEmailAndPassword(correo, pass);
+      const nuevoUid = cred.user.uid;
+      try{ await sec.auth().signOut(); }catch(e){}
+      await db().collection('usuarios').doc(nuevoUid).set({ email:correo, usuario, nombre, rol:rolNuevo, pendiente:false, activo:true, creado:Date.now(), creadoPor:(window.__fbUser && window.__fbUser.email) || '' });
+      await guardarAlias(usuario, correo);
+      msgNuevo = `✓ Listo: <b>${esc(nombre)}</b> entra con usuario <b>${esc(usuario)}</b> y contraseña <b>${esc(pass)}</b> (${esc(ROLES[rolNuevo].nombre)}). Anotalo y pasáselo.`;
+      render(); const mm = $('usNuevoMsg'); if(mm) mm.className = 'us-msg bien';
+    }catch(e){
+      const c = String((e && e.code) || '');
+      set(/email-already-in-use/.test(c) ? 'Ese correo ya tiene usuario en Firebase. Si es alguien que ya entró, está en la lista de la derecha.'
+        : /weak-password/.test(c) ? 'La contraseña es muy débil: usá 6 caracteres o más.'
+        : /invalid-email/.test(c) ? 'El correo no es válido.'
+        : /operation-not-allowed/.test(c) ? 'En Firebase está apagado el ingreso con correo y contraseña (Authentication → Método de acceso).'
+        : '⚠ No se pudo crear: ' + (e.message || e), 'mal');
+      b.disabled = false;
+    }
+  }
+
+  // ---------- Arranque ----------
+  escuchar();
+  try{ if(window.firebase && firebase.auth) firebase.auth().onAuthStateChanged(()=>{ registrarmeSiFalta(); aplicar(); }); }catch(e){}
+  document.addEventListener('portada-abierta', ()=> setTimeout(aplicar, 50));
+  window.PERMISOS = { permiso, hojaActual, ROLES, HOJAS, yo, esAdmin, hayAdmin, aplicar, render, _set:(u, c)=>{ usuarios = u; cargado = c !== false; aplicar(); } };
 })();
 </script>
 
