@@ -3447,7 +3447,9 @@ button, .chip, .subtab, .menu-item{ transition:transform .15s, filter .15s, back
 @media (min-width:641px){ #avisoApp{ align-items:center; } }
 @keyframes avFondo{ from{ opacity:0; } } @keyframes avSube{ from{ transform:translateY(40px); opacity:0; } }
 /* Cambio de pantalla con un leve deslizamiento, como en las apps */
-@media (max-width:640px){ .wrap.entra{ animation:pantallaEntra .22s cubic-bezier(.2,.8,.2,1); } }
+@media (max-width:640px){ .wrap.entra{ animation:pantallaEntra .22s cubic-bezier(.2,.8,.2,1); }
+  /* el deslizamiento de 18px no tiene que abrir un scroll de costado mientras dura (clip no rompe los encabezados fijos) */
+  html, body{ overflow-x:clip; } }
 @keyframes pantallaEntra{ from{ opacity:.35; transform:translateX(18px); } }
 @media (prefers-reduced-motion:reduce){ .wrap.entra, #avisoApp, #avisoApp .av-caja{ animation:none !important; } }
 @media print{ .ayuda-btn, #avisoApp{ display:none !important; } .ayuda-larga{ display:block !important; } }
@@ -3652,6 +3654,7 @@ html, body{ forced-color-adjust:none; }
     }catch(e){}
     return k + '@' + DOMINIO_CORTO;
   }
+  var loginManual = false;
   async function entrar(){
     var b = $('portadaEntrar'), u = ($('portadaUsuario').value || '').trim(), pw = $('portadaPass').value || '';
     if(!u || !pw){ msg('Completá el usuario y la contraseña.'); return; }
@@ -3661,10 +3664,17 @@ html, body{ forced-color-adjust:none; }
       var auth = firebase.auth();
       try{ await auth.setPersistence($('portadaRecordarSesion').checked ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION); }catch(e){}
       var mail = await correoDe(u);
+      loginManual = true;
       await auth.signInWithEmailAndPassword(mail, pw);
       $('portadaPass').value = '';
     }catch(e){
+      loginManual = false;
       var c = String((e && e.code) || '');
+      if(/network-request-failed/.test(c)){      // sin internet: se ofrece la entrada de emergencia (solo mirar lo guardado en el equipo)
+        modo('emergencia');
+        msg('Sin conexión a internet. Podés entrar solo a mirar con la clave de emergencia, o reconectarte y recargar.');
+        b.disabled = false; b.textContent = 'Entrar'; return;
+      }
       msg(/wrong-password|user-not-found|invalid-credential|invalid-login|invalid-email/.test(c) ? 'Usuario o contraseña incorrectos.'
         : /too-many-requests/.test(c) ? 'Demasiados intentos. Esperá unos minutos y probá de nuevo.'
         : /network/.test(c) ? 'Sin conexión a internet. Revisala y probá de nuevo.'
@@ -3686,6 +3696,9 @@ html, body{ forced-color-adjust:none; }
           var d = await firebase.firestore().collection('usuarios').doc(u.uid).get();
           if(d.exists && d.data() && d.data().activo === false){ await auth.signOut(); modo('login'); msg('Tu usuario está desactivado. Hablá con el administrador.'); return; }
         }catch(e){}
+        // Recién entró a mano: se recarga para que la app lea los datos YA con el usuario (con las reglas nuevas,
+        // lo que se pidió antes de entrar vuelve rechazado y no se reintenta solo).
+        if(loginManual && !window.__portadaAbierta){ modo('cargando'); location.reload(); return; }
         if(!window.__portadaAbierta) abrir();
       } else {
         if(window.__portadaAbierta && !window.__modoEmergencia){ location.reload(); return; }   // cerró sesión
@@ -3713,7 +3726,7 @@ html, body{ forced-color-adjust:none; }
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-28 18:46 · 6ccc1c</span></div>
+      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-29 10:48 · 6aca8e</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -11038,11 +11051,12 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
   try{
     nuevoId = await window.fbAddMovimiento(mov);
   }catch(e){
-    msg.textContent = '⚠ No se pudo guardar el movimiento (revisá tu conexión a internet). No se registró nada.';
+    msg.textContent = (e && e.code === 'permission-denied') ? '🔒 Tu usuario no tiene permiso para cargar en el pañol. No se registró nada.' : '⚠ No se pudo guardar el movimiento (revisá tu conexión a internet). No se registró nada.';
     btn.disabled = false;
     return;
   }
-  btn.disabled = false;
+  // El botón se vuelve a habilitar recién al final (después de la foto y el costo): antes, un segundo toque
+  // mientras subía la foto cargaba el mismo movimiento dos veces.
   if(nuevoId) window.__ultimoMovLocal = Object.assign({id:nuevoId}, mov);
   // Foto del remito (2026-09-26): se sube una vez y se referencia desde cada renglón del remito.
   if(tipo==='entrada' && nuevoId && typeof window.stockAdjuntarFotoRemito === 'function'){
@@ -11070,6 +11084,7 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
   // El destino (plaza) NO se limpia a propósito: lo normal es cargar varias salidas seguidas para
   // la misma plaza, y volver a elegirla en cada renglón era un paso de más en el celular.
   actualizarStockMovProductoHint();
+  btn.disabled = false;
   msg.style.color = 'var(--teal-dark)';
   // Además del aviso, se ofrece el comprobante del movimiento recién cargado: es el momento en que
   // hace falta, con el que retira el material todavía parado en el pañol esperando su vale.
@@ -12063,7 +12078,9 @@ function verComprobanteMovimiento(id){
         <td>${escHtml(m.un||'')}</td>
       </tr></tbody></table>`;
 
-  const anulado = m.anulado
+  // En una devolución de varios materiales, el cartel de «anulado» va solo si están anulados TODOS los renglones
+  // (si no, cada renglón anulado ya figura tachado en la tabla).
+  const anulado = (grupoDev.length > 1 ? grupoDev.every(x => x.anulado) : m.anulado)
     ? `<div style="margin:14px 0; border:2px solid #b3261e; color:#b3261e; border-radius:6px; padding:10px 12px; font-weight:700;">
          ⊘ ESTE MOVIMIENTO ESTÁ ANULADO — no cuenta para el stock.
          ${m.anuladoMotivo?`<div style="font-weight:400; margin-top:4px;">Motivo: ${escHtml(m.anuladoMotivo)}</div>`:''}
@@ -12289,12 +12306,22 @@ async function anularStockMovimiento(id){
       anuladoPor: (window.__fbUser && window.__fbUser.email) || '',
       anuladoTs: Date.now()
     });
-    // Devolución de material roto (2026-09-28): su baja va atada; si se anula una, se anula la otra.
-    const par = mov.bajaRotura ? mov.devolucionId : mov.bajaRoturaId;
-    if(par) await window.fbUpdateMovimiento(par, { anulado:true, anuladoMotivo:'Anulado junto con su devolución: ' + String(motivo||'').trim(), anuladoPor:(window.__fbUser && window.__fbUser.email) || '', anuladoTs:Date.now() });
   }catch(e){
-    alert('No se pudo anular el movimiento (revisá tu conexión a internet).');
+    alert(e && e.code === 'permission-denied' ? 'Tu usuario no tiene permiso para anular movimientos del pañol.' : 'No se pudo anular el movimiento (revisá tu conexión a internet).');
+    return;
   }
+  // Devolución de material roto (2026-09-28): al anular la devolución se anula también su baja (si no, la baja
+  // restaría del stock algo que nunca entró). Al revés no: anular solo la baja = «no estaba roto, vuelve al stock».
+  const par = bajaDeDevolucion(mov);
+  if(par && !par.anulado){
+    try{ await window.fbUpdateMovimiento(par.id, { anulado:true, anuladoMotivo:'Anulado junto con su devolución: ' + String(motivo||'').trim(), anuladoPor:(window.__fbUser && window.__fbUser.email) || '', anuladoTs:Date.now() }); }
+    catch(e){ alert('La devolución quedó anulada, pero NO su baja por material roto. Anulá también esa baja en el listado (si no, resta del stock).'); }
+  }
+}
+// La baja por rotura que va atada a una devolución (por el enlace guardado o, si falta, buscándola).
+function bajaDeDevolucion(mov){
+  if(!mov || !mov.devolucion) return null;
+  return stockMovimientos.find(m => m.id && ((mov.bajaRoturaId && m.id === mov.bajaRoturaId) || (m.bajaRotura && m.devolucionId === mov.id))) || null;
 }
 
 async function reactivarStockMovimiento(id){
@@ -12305,8 +12332,8 @@ async function reactivarStockMovimiento(id){
   if(!confirm(`¿Volver a contar este movimiento? "${etiquetaTipoMov(mov, false)} de ${mov.cantidad} ${mov.un} — ${mov.desc}" vuelve a afectar el stock de todo el equipo.`)) return;
   try{
     await window.fbUpdateMovimiento(id, { anulado:false, anuladoMotivo:'', anuladoPor:'', anuladoTs:null });
-    const par = mov.bajaRotura ? mov.devolucionId : mov.bajaRoturaId;
-    if(par) await window.fbUpdateMovimiento(par, { anulado:false, anuladoMotivo:'', anuladoPor:'', anuladoTs:null });
+    const par = bajaDeDevolucion(mov);   // vuelve también la baja que se había anulado junto con la devolución
+    if(par && par.anulado && /^Anulado junto con su devolución/.test(par.anuladoMotivo || '')) await window.fbUpdateMovimiento(par.id, { anulado:false, anuladoMotivo:'', anuladoPor:'', anuladoTs:null });
   }catch(e){
     alert('No se pudo reactivar el movimiento (revisá tu conexión a internet).');
   }
@@ -33289,6 +33316,16 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 .ob-ubi-botones{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
 .ob-ubi-botones button{ flex:1 1 auto; }
 .ob-ubi-txt{ font-size:12.5px; color:var(--text-soft); margin-top:6px; }
+/* Ubicar por la dirección (2026-09-29) */
+#obApp .ob-dir{ display:flex; gap:8px; align-items:stretch; }
+#obApp .ob-dir input{ flex:1 1 auto; min-width:0; margin:0; }
+#obApp .ob-dir button{ flex:0 0 auto; margin:0; white-space:nowrap; }
+.ob-dir-txt{ font-size:12.5px; line-height:1.4; color:var(--text-soft); margin-top:6px; min-height:0; }
+.ob-dir-txt:empty{ display:none; }
+.ob-dir-txt.ok{ color:#1d6b4a; } .ob-dir-txt.aprox{ color:#8a5a00; } .ob-dir-txt.mal{ color:var(--danger); }
+.ob-dir-ops{ display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+.ob-dir-ops button{ text-align:left; border:1px solid var(--border); background:var(--vidrio-2); border-radius:10px; padding:7px 10px; font:600 12.5px/1.3 var(--fuente); color:var(--text); cursor:pointer; min-height:0 !important; }
+.ob-dir-ops button.on{ border-color:var(--navy); box-shadow:inset 3px 0 0 var(--navy); }
 .ob-ubi-txt b{ color:var(--text); }
 .ob-ok{ margin-top:12px; border-radius:16px; padding:14px; background:#e3f6ea; border:1px solid #9fdfb5; color:#1d5e33; font-size:14px; }
 .ob-ok .ob-ok-acc{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
@@ -33359,7 +33396,10 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 
   // ---------- Estado de la hoja ----------
   let tipo = 'plaza', ubic = null, deLicitacion = null, ultimaCreada = null, filtro = 'todas', buscar = '', verTodas = false;
-  let mapa = null, pin = null;
+  let mapa = null, pin = null, gpsSeq = 0;
+  // Coordenadas razonables: dentro de la provincia de Córdoba (con margen). Fuera de eso, casi seguro es un error.
+  const coordOk = u => u && isFinite(u.lat) && isFinite(u.lng) && Math.abs(u.lat) <= 90 && Math.abs(u.lng) <= 180;
+  const enCordoba = u => coordOk(u) && u.lat > -35.5 && u.lat < -29 && u.lng > -66.5 && u.lng < -61.5;
 
   function htmlHoja(){
     const T = TIPOS[tipo];
@@ -33383,8 +33423,12 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
           <div><label for="obId">ID de obra</label><input type="text" id="obId" placeholder="Ej: 7081" autocomplete="off"></div>
           <div><label for="obBarrio">Barrio</label><input type="text" id="obBarrio" placeholder="Ej: Maipú 1ª Secc." autocomplete="off"></div>
         </div>
-        <label for="obDireccion">Dirección / entre calles</label>
-        <input type="text" id="obDireccion" placeholder="Calle y número, o entre qué calles" autocomplete="off">
+        <label for="obDireccion">Dirección / entre calles <span style="font-weight:500; color:var(--text-soft);">(la ubico sola en el mapa)</span></label>
+        <div class="ob-dir">
+          <input type="text" id="obDireccion" placeholder="Ej: Av. Colón 1234 o Tucumán y Colón" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
+          <button type="button" class="btn-ghost" id="obDirBuscar" title="Buscar esta dirección en el mapa">🔎 Ubicar</button>
+        </div>
+        <div class="ob-dir-txt" id="obDirTxt"></div>
         <label for="obNotas">Notas <span style="font-weight:500; color:var(--text-soft);">(opcional)</span></label>
         <input type="text" id="obNotas" placeholder="Ej: contacto del vecinal, horario, acceso…" autocomplete="off">
         <button type="button" class="btn-primary" id="obGuardar" style="margin-top:16px; width:100%;">Registrar ${esc(T.txt.toLowerCase())}</button>
@@ -33393,7 +33437,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       </div>
       <div class="card" style="margin:0;">
         <h2><span class="dot"></span>Ubicación</h2>
-        <div class="hint" style="margin-top:0;">Tocá el mapa donde está la obra, o usá tu ubicación si estás ahí. Se puede dejar para después (se ubica desde la hoja Mapa).</div>
+        <div class="hint" style="margin-top:0;">Escribí la dirección y la ubico sola. Si el pin no quedó justo, <b>arrastralo</b> o tocá el mapa donde está. También podés usar tu ubicación si estás ahí, o dejarlo para después.</div>
         <div id="obMapa"></div>
         <div class="ob-ubi-botones">
           <button type="button" class="btn-ghost" id="obGps">📍 Estoy acá (usar mi ubicación)</button>
@@ -33443,6 +33487,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     sug.style.display = '';
   }
   app.addEventListener('input', e => {
+    if(e.target.id === 'obDireccion' || e.target.id === 'obBarrio') programarUbicar();
     if(e.target.id === 'obPliegoBuscar') pintarPliego();
     if(e.target.id === 'obBuscar'){ buscar = e.target.value; pintarLista(); }
   });
@@ -33451,7 +33496,9 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     if(b){
       const x = (window.PLAZAS_LICITACION || []).find(y => String(y[1]) === b.dataset.id); if(!x) return;
       deLicitacion = x;
-      $('obNombre').value = `Plaza ${x[2]}`; $('obId').value = String(x[1]); $('obBarrio').value = String(x[2]||'');
+      // Si en el pliego hay más de una plaza en ese barrio, el ID va en el nombre (si no, quedan dos «Plaza X» iguales).
+      const mismoBarrio = (window.PLAZAS_LICITACION || []).filter(y => norm(y[2]) === norm(x[2])).length;
+      $('obNombre').value = mismoBarrio > 1 ? `Plaza ${x[2]} (ID ${x[1]})` : `Plaza ${x[2]}`; $('obId').value = String(x[1]); $('obBarrio').value = String(x[2]||'');
       ubic = { lat:Number(x[3]), lng:Number(x[4]), origen:'pliego' };
       $('obPliegoSug').style.display = 'none'; $('obPliegoBuscar').value = '';
       pintarUbic(); moverPin(true);
@@ -33463,7 +33510,10 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     if(e.target.closest('#obMasLista')){ verTodas = true; pintarLista(); return; }
     if(e.target.id === 'obGuardar'){ guardar(); return; }
     if(e.target.id === 'obGps'){ usarGps(); return; }
-    if(e.target.id === 'obSinUbi'){ ubic = null; pintarUbic(); moverPin(); return; }
+    if(e.target.id === 'obSinUbi'){ gpsSeq++; ubic = null; pintarUbic(); moverPin(); dirTxt(''); return; }
+    if(e.target.id === 'obDirBuscar'){ ubicarPorDireccion(true); return; }
+    const op = e.target.closest('.ob-dir-ops button[data-i]');
+    if(op){ const o = opcionesGeo[+op.dataset.i]; if(o){ gpsSeq++; ubic = { lat:o.lat, lng:o.lng, origen:'direccion' }; pintarUbic(); moverPin(true); op.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === op)); } return; }
     const k = e.target.closest('[data-acc]');
     if(k){
       if(k.dataset.acc === 'otra'){ ultimaCreada = null; deLicitacion = null; ubic = null; render(); $('obNombre').focus(); }
@@ -33476,16 +33526,25 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     const s = e.target.closest('select[data-cambiar-tipo]'); if(!s) return;
     const a = obras().find(x => String(x.id) === s.dataset.cambiarTipo); if(!a) return;
     if(typeof avanceGuardEdicion === 'function' && !avanceGuardEdicion()){ s.value = a.tipoObra || 'plaza'; return; }
-    a.tipoObra = s.value;
-    if(typeof guardarAvanceObras === 'function') await guardarAvanceObras(a);
-    pintarLista(); if(typeof renderMapaObras === 'function') try{ renderMapaObras(); }catch(err){}
+    const antes = a.tipoObra;
+    a.tipoObra = s.value; s.disabled = true;
+    try{ const { id, ...datos } = a; await window.fbAvanceGuardar(id, datos); }
+    catch(err){
+      // No se guardó: vuelve a como estaba (antes quedaba cambiado en pantalla aunque no se hubiera guardado).
+      if(antes === undefined) delete a.tipoObra; else a.tipoObra = antes;
+      alert(err && err.code === 'permission-denied' ? 'Tu usuario no tiene permiso para cambiar obras.' : 'No se pudo cambiar el tipo (revisá tu conexión a internet). Quedó como estaba.');
+    }
+    s.disabled = false;
+    pintarLista();
+    ['renderMapaObras'].forEach(f => { try{ if(typeof window[f] === 'function') window[f](); }catch(e){} });
+    try{ if(window.PLAN_TIPOS) window.PLAN_TIPOS.decorar(); }catch(e){}
   });
 
   // ---------- Ubicación ----------
   function pintarUbic(){
     const t = $('obUbiTxt'); if(!t) return;
     t.innerHTML = ubic
-      ? `📍 <b>Ubicada</b>${ubic.origen === 'pliego' ? ' con las coordenadas del pliego' : (ubic.origen === 'gps' ? ' con tu ubicación' : ' donde tocaste')} · <span style="font-family:ui-monospace,monospace;">${ubic.lat.toFixed(6)}, ${ubic.lng.toFixed(6)}</span>`
+      ? `📍 <b>Ubicada</b>${({ pliego:' con las coordenadas del pliego', gps:' con tu ubicación', direccion:' por la dirección', ajustada:' (la moviste a mano)' })[ubic.origen] || ' donde tocaste'} · <span style="font-family:ui-monospace,monospace;">${ubic.lat.toFixed(6)}, ${ubic.lng.toFixed(6)}</span>`
       : 'Sin ubicación todavía — tocá el mapa.';
   }
   function iniciarMapa(){
@@ -33495,7 +33554,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     try{
       mapa = L.map(cont).setView(ubic ? [ubic.lat, ubic.lng] : (typeof MAPA_CENTRO_CORDOBA !== 'undefined' ? MAPA_CENTRO_CORDOBA : [-31.4201,-64.1888]), ubic ? 16 : 12);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'&copy; OpenStreetMap' }).addTo(mapa);
-      mapa.on('click', e => { ubic = { lat:e.latlng.lat, lng:e.latlng.lng, origen:'toque' }; pintarUbic(); moverPin(); });
+      mapa.on('click', e => { gpsSeq++; ubic = { lat:e.latlng.lat, lng:e.latlng.lng, origen:'toque' }; pintarUbic(); moverPin(); });
       moverPin();
       setTimeout(()=>{ try{ mapa.invalidateSize(); }catch(e){} }, 80);
     }catch(e){ cont.innerHTML = '<div class="hint" style="padding:14px;">No se pudo abrir el mapa acá. Registrala igual y ubicala desde la hoja Mapa.</div>'; }
@@ -33506,7 +33565,9 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       if(pin){ try{ pin.remove(); }catch(e){} pin = null; }
       if(!ubic) return;
       const icono = L.divIcon({ className:'', html:`<div class="mapa-pin tipo-${tipo}" style="background:var(--navy);"><span>${TIPOS[tipo].ico}</span></div>`, iconSize:[26,26], iconAnchor:[13,13] });
-      pin = L.marker([ubic.lat, ubic.lng], { icon:icono }).addTo(mapa);
+      pin = L.marker([ubic.lat, ubic.lng], { icon:icono, draggable:true }).addTo(mapa);
+      // Arrastrar el pin = acomodarlo a mano (por ejemplo, después de ubicarla por la dirección).
+      pin.on('dragend', ()=>{ try{ const ll = pin.getLatLng(); gpsSeq++; ubic = { lat:ll.lat, lng:ll.lng, origen:'ajustada' }; pintarUbic(); }catch(e){} });
       if(volar) mapa.setView([ubic.lat, ubic.lng], 16);
     }catch(e){}
   }
@@ -33514,8 +33575,167 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     const t = $('obUbiTxt');
     if(!navigator.geolocation){ t.textContent = 'Este aparato no deja usar la ubicación. Tocá el mapa.'; return; }
     t.textContent = 'Buscando tu ubicación…';
-    navigator.geolocation.getCurrentPosition(p => { ubic = { lat:p.coords.latitude, lng:p.coords.longitude, origen:'gps' }; pintarUbic(); moverPin(true); },
-      () => { t.textContent = 'No se pudo tomar la ubicación (¿diste permiso?). Tocá el mapa donde está la obra.'; }, { enableHighAccuracy:true, timeout:12000 });
+    const n = ++gpsSeq;   // si mientras tanto se tocó el mapa (u otra vez el botón), esta respuesta ya no manda
+    navigator.geolocation.getCurrentPosition(p => { if(n !== gpsSeq) return; ubic = { lat:p.coords.latitude, lng:p.coords.longitude, origen:'gps' }; pintarUbic(); moverPin(true); },
+      () => { if(n !== gpsSeq) return; const tt = $('obUbiTxt'); if(tt) tt.textContent = 'No se pudo tomar la ubicación (¿diste permiso?). Tocá el mapa donde está la obra.'; }, { enableHighAccuracy:true, timeout:12000 });
+  }
+
+  // ---------- Ubicar por la dirección (2026-09-29) ----------
+  // Pedido: «que con la dirección me ubique solo, y si hay que mover algo lo muevo, pero ya estaría cerca».
+  // Usa el buscador de OpenStreetMap (Nominatim, gratis, sin clave), limitado a Córdoba capital. Entiende:
+  //   · calle y número ........ «Av. Colón 1234»
+  //   · esquina ............... «Tucumán y Colón», «Tucumán esq. Colón»
+  //   · entre calles .......... «Obispo Trejo e/ Caseros y Duarte Quirós», «… entre … y …»
+  //   · sin dirección ......... busca por el nombre de la plaza y, si no, el centro del barrio (aproximado).
+  // Las esquinas se sacan cruzando el trazado de las dos calles. Nominatim pide máx. 1 consulta por segundo:
+  // las consultas van en fila y se guardan en memoria.
+  const GEO_URL = 'https://nominatim.openstreetmap.org/search';
+  const GEO_CAJA = '-64.42,-31.26,-63.98,-31.58';          // Córdoba capital y alrededores (izq, arriba, der, abajo)
+  let geoTurno = 0; const geoCache = new Map(); let opcionesGeo = [];
+  async function geoConsulta(params){
+    const u = new URL(GEO_URL);
+    Object.entries({ format:'jsonv2', countrycodes:'ar', viewbox:GEO_CAJA, bounded:'1', 'accept-language':'es', limit:'8', ...params }).forEach(([k,v]) => u.searchParams.set(k, v));
+    const url = u.toString();
+    if(geoCache.has(url)) return geoCache.get(url);
+    const ahora = Date.now(), turno = Math.max(ahora, geoTurno + 1100); geoTurno = turno;
+    if(turno > ahora) await new Promise(r => setTimeout(r, turno - ahora));
+    const r = await fetch(url, { headers:{ 'Accept':'application/json' } });
+    if(!r.ok) throw new Error('El buscador de direcciones respondió ' + r.status);
+    const j = await r.json(); const out = Array.isArray(j) ? j : [];
+    geoCache.set(url, out); return out;
+  }
+  function limpiarCalle(t){
+    return String(t||'').replace(/\s+/g,' ').trim()
+      .replace(/\b(av|avda|avd)\b\.?\s*/gi, 'Avenida ').replace(/\b(bv|bvd|blvd|bvard)\b\.?\s*/gi, 'Bulevar ')
+      .replace(/\bgral\b\.?\s*/gi, 'General ').replace(/\bpje\b\.?\s*/gi, 'Pasaje ').replace(/\bdr\b\.?\s*/gi, 'Doctor ')
+      .replace(/\bpte\b\.?\s*/gi, 'Presidente ').replace(/\bsta\b\.?\s*/gi, 'Santa ').replace(/\bcnel\b\.?\s*/gi, 'Coronel ')
+      .replace(/\bing\b\.?\s*/gi, 'Ingeniero ').replace(/\s+/g,' ').trim();
+  }
+  // «A e/ B y C» · «A y B» · «A 1234»
+  function leerDireccion(t){
+    const d = String(t||'').replace(/\s+/g,' ').trim(); if(!d) return null;
+    let m = d.match(/^(.+?)\s+(?:e\s?\/|e\.|entre)\s*(.+?)\s+y\s+(.+)$/i);
+    if(m) return { tipo:'entre', a:limpiarCalle(m[1]), b:limpiarCalle(m[2]), c:limpiarCalle(m[3]) };
+    m = d.match(/^(.+?)\s+(?:y|esq\.?|esquina|&|\/)\s+(.+)$/i);
+    if(m && !/\s\d{1,5}$/.test(m[1].trim())) return { tipo:'esquina', a:limpiarCalle(m[1]), b:limpiarCalle(m[2].replace(/^esq\.?\s*/i,'')) };
+    const antesDeComa = d.split(',')[0].trim();          // «Colón 1234, B° Alberdi» → «Colón 1234»
+    m = antesDeComa.match(/^(.+)\s+(?:n[°º]?\s*)?(\d{1,5})$/i);
+    if(m) return { tipo:'numero', calle:limpiarCalle(m[1]), num:m[2], texto:limpiarCalle(d) };
+    return { tipo:'texto', texto:limpiarCalle(d) };
+  }
+  const distM = (a, b)=>{ const k = Math.PI/180, dLa = (b[0]-a[0])*k, dLo = (b[1]-a[1])*k*Math.cos((a[0]+b[0])/2*k); return 6371000 * Math.hypot(dLa, dLo); };
+  // El trazado de una calle: sus tramos (listas de puntos [lat, lng]).
+  async function trazado(calle){
+    const res = await geoConsulta({ q:calle, polygon_geojson:'1', limit:'10' });
+    const tramos = [];
+    res.filter(x => (x.category || x.class) === 'highway').forEach(x => {
+      const g = x.geojson; if(!g) return; const pt = c => [+c[1], +c[0]];
+      if(g.type === 'LineString') tramos.push(g.coordinates.map(pt));
+      else if(g.type === 'MultiLineString') g.coordinates.forEach(l => tramos.push(l.map(pt)));
+      else if(g.type === 'Point') tramos.push([pt(g.coordinates)]);
+    });
+    return tramos;
+  }
+  const puntosDe = tramos => [].concat(...tramos);
+  // Dónde se cruzan dos calles: se busca el par de segmentos más cercano (si se cortan, el punto de corte).
+  function cruce(ta, tb){
+    if(!ta.length || !tb.length) return null;
+    const ref = ta[0][0], k = Math.PI/180, cx = 6371000 * Math.cos(ref[0]*k);
+    const xy = p => [(p[1]-ref[1])*k*cx, (p[0]-ref[0])*k*6371000];
+    const deXY = q => [ref[0] + q[1]/(6371000*k), ref[1] + q[0]/(cx*k)];
+    const segs = tramos => { const out = []; tramos.forEach(t => { const q = t.map(xy); if(q.length === 1) out.push([q[0], q[0]]); for(let i = 0; i < q.length - 1; i++) out.push([q[i], q[i+1]]); }); return out; };
+    const proy = (p, a, b)=>{ const dx = b[0]-a[0], dy = b[1]-a[1], L = dx*dx + dy*dy; const t = L ? Math.max(0, Math.min(1, ((p[0]-a[0])*dx + (p[1]-a[1])*dy) / L)) : 0; return [a[0]+t*dx, a[1]+t*dy]; };
+    const d2 = (p, q)=> Math.hypot(p[0]-q[0], p[1]-q[1]);
+    let mejor = null;
+    const A = segs(ta), B = segs(tb);
+    for(const [a1, a2] of A) for(const [b1, b2] of B){
+      // ¿se cortan?
+      const r = [a2[0]-a1[0], a2[1]-a1[1]], s2 = [b2[0]-b1[0], b2[1]-b1[1]], den = r[0]*s2[1] - r[1]*s2[0];
+      if(Math.abs(den) > 1e-9){
+        const t = ((b1[0]-a1[0])*s2[1] - (b1[1]-a1[1])*s2[0]) / den, u = ((b1[0]-a1[0])*r[1] - (b1[1]-a1[1])*r[0]) / den;
+        if(t >= 0 && t <= 1 && u >= 0 && u <= 1){ const p = [a1[0]+t*r[0], a1[1]+t*r[1]]; mejor = { d:0, p }; continue; }
+      }
+      for(const [p, a, b] of [[a1, b1, b2], [a2, b1, b2], [b1, a1, a2], [b2, a1, a2]]){
+        const q = proy(p, a, b), d = d2(p, q);
+        if(!mejor || d < mejor.d) mejor = { d, p:[(p[0]+q[0])/2, (p[1]+q[1])/2] };
+      }
+    }
+    if(!mejor || mejor.d > 60) return null;                 // más de 60 m: esas calles no se cruzan (o no las encontró bien)
+    const [lat, lng] = deXY(mejor.p); return { d:mejor.d, lat, lng };
+  }
+  const corto = r => String(r.display_name || '').split(',').slice(0, 3).join(',').trim();
+  const aPunto = r => ({ lat:+r.lat, lng:+r.lon, txt:corto(r) });
+  async function centroBarrio(barrio){
+    if(!barrio) return null;
+    const r = await geoConsulta({ q:`Barrio ${barrio}`, limit:'3' });
+    return r.length ? aPunto(r[0]) : null;
+  }
+  async function geoBuscar(dir, barrio, nombre){
+    const d = leerDireccion(dir);
+    if(d && d.tipo === 'entre'){
+      const [pa, pb, pc] = [await trazado(d.a), await trazado(d.b), await trazado(d.c)];
+      const c1 = cruce(pa, pb), c2 = cruce(pa, pc);
+      if(c1 && c2) return { lat:(c1.lat+c2.lat)/2, lng:(c1.lng+c2.lng)/2, precision:'entre', txt:`sobre ${d.a}, entre ${d.b} y ${d.c}` };
+      if(c1 || c2) return { ...(c1 || c2), precision:'esquina', txt:`en ${d.a} y ${c1 ? d.b : d.c} (la otra esquina no la encontré)` };
+    }
+    if(d && d.tipo === 'esquina'){
+      const c = cruce(await trazado(d.a), await trazado(d.b));
+      if(c) return { ...c, precision:'esquina', txt:`en la esquina de ${d.a} y ${d.b}` };
+    }
+    if(d && (d.tipo === 'numero' || d.tipo === 'texto')){
+      const q = d.texto + (barrio ? ', ' + barrio : '');
+      let r = await geoConsulta({ q, addressdetails:'1', limit:'5' });
+      if(!r.length && barrio) r = await geoConsulta({ q:d.texto, addressdetails:'1', limit:'5' });
+      const conAltura = r.find(x => x.address && x.address.house_number);
+      if(conAltura) return { ...aPunto(conAltura), precision:'exacta', opciones:r.filter(x => x.address && x.address.house_number).map(aPunto) };
+      const calle = r.find(x => (x.category || x.class) === 'highway');
+      if(d.tipo === 'numero' && (calle || r.length)){
+        // Encontró la calle pero no la altura: se deja sobre la calle, lo más cerca del barrio que se pueda.
+        const cb = await centroBarrio(barrio);
+        const pts = cb ? puntosDe(await trazado(d.calle)) : [];
+        if(cb && pts.length){ const p = pts.reduce((m, x) => distM(x, [cb.lat, cb.lng]) < distM(m, [cb.lat, cb.lng]) ? x : m); return { lat:p[0], lng:p[1], precision:'calle', txt:`sobre ${d.calle}, cerca de ${barrio}` }; }
+        const x = calle || r[0]; return { ...aPunto(x), precision:'calle', txt:corto(x), opciones:r.map(aPunto) };
+      }
+      if(r.length) return { ...aPunto(r[0]), precision:'lugar', txt:corto(r[0]), opciones:r.map(aPunto) };
+    }
+    if(nombre){
+      const r = await geoConsulta({ q:nombre + (barrio ? ', ' + barrio : ''), limit:'5' });
+      const plaza = r.find(x => /park|garden|square|pitch|playground/.test(x.type || '')) || r[0];
+      if(plaza) return { ...aPunto(plaza), precision:'lugar', txt:corto(plaza), opciones:r.map(aPunto) };
+    }
+    const cb = await centroBarrio(barrio);
+    if(cb) return { ...cb, precision:'barrio', txt:`centro del barrio ${barrio}` };
+    return null;
+  }
+  function dirTxt(html, clase){ const t = $('obDirTxt'); if(!t) return; t.className = 'ob-dir-txt' + (clase ? ' ' + clase : ''); t.innerHTML = html; }
+  let timerUbicar = null;
+  function programarUbicar(){
+    clearTimeout(timerUbicar);
+    // Sola, solo si todavía no se ubicó de otra forma (pliego, GPS, toque o pin movido a mano): eso no se pisa.
+    if(ubic && ubic.origen !== 'direccion') return;
+    const dir = ($('obDireccion')||{}).value || '';
+    if(dir.trim().length < 5) return;
+    timerUbicar = setTimeout(()=> ubicarPorDireccion(false), 1400);
+  }
+  async function ubicarPorDireccion(aMano){
+    clearTimeout(timerUbicar);
+    const dir = (($('obDireccion')||{}).value || '').trim(), barrio = (($('obBarrio')||{}).value || '').trim(), nombre = (($('obNombre')||{}).value || '').trim();
+    if(!dir && !barrio && !nombre){ dirTxt('Escribí la dirección (o el barrio) para ubicarla.', 'mal'); return; }
+    if(!aMano && ubic && ubic.origen !== 'direccion') return;
+    const n = ++gpsSeq;
+    dirTxt('🔎 Buscando la dirección en el mapa…');
+    let r = null;
+    try{ r = await geoBuscar(dir, barrio, dir ? '' : nombre); }
+    catch(e){ if(n === gpsSeq) dirTxt('No pude buscar la dirección (¿sin internet?). Tocá el mapa donde está la obra.', 'mal'); return; }
+    if(n !== gpsSeq) return;               // mientras buscaba, se tocó el mapa, se movió el pin o se pidió otra búsqueda
+    if(!r){ dirTxt(`No encontré «${esc(dir || barrio || nombre)}» en Córdoba. Probá de otra forma (ej: «Tucumán y Colón», o con el barrio) o tocá el mapa.`, 'mal'); return; }
+    ubic = { lat:r.lat, lng:r.lng, origen:'direccion' };
+    pintarUbic(); moverPin(true);
+    const aprox = r.precision === 'calle' || r.precision === 'barrio' || r.precision === 'lugar';
+    const titulo = ({ exacta:'Ubicada por la dirección', esquina:'Ubicada', entre:'Ubicada', calle:'Encontré la calle pero no la altura: quedó', lugar:'Encontré', barrio:'Aproximada: la dejé en el' })[r.precision] || 'Ubicada';
+    opcionesGeo = (r.opciones || []).filter((o, i, a) => a.findIndex(x => distM([x.lat,x.lng],[o.lat,o.lng]) < 60) === i).slice(0, 4);
+    const ops = opcionesGeo.length > 1 ? `<div class="ob-dir-ops"><span>¿No es esa? Encontré ${opcionesGeo.length} lugares:</span>${opcionesGeo.map((o, i) => `<button type="button" data-i="${i}" class="${i === 0 ? 'on' : ''}">${esc(o.txt)}</button>`).join('')}</div>` : '';
+    dirTxt(`📍 ${titulo} <b>${esc(r.txt)}</b>. ${aprox ? 'Es aproximado: si' : 'Si'} no quedó justo, <b>arrastrá el pin</b> o tocá el mapa.${ops}`, aprox ? 'aprox' : 'ok');
   }
 
   // ---------- Guardar ----------
@@ -33527,11 +33747,13 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     if(typeof avanceGuardEdicion === 'function' && !avanceGuardEdicion()) return;
     const rep = (typeof plazaYaRegistrada === 'function') ? plazaYaRegistrada(nombre, obraId) : null;
     if(rep){ err.innerHTML = `⚠ Ya está registrada como <b>${esc(rep.nombre)}</b>${rep.obraId ? ` (ID ${esc(rep.obraId)})` : ''}. Si es la misma, no la cargues de nuevo: se duplicaría en el mapa, las órdenes y el pañol.`; return; }
+    if(ubic && !coordOk(ubic)){ err.textContent = '⚠ La ubicación no es válida. Tocá el mapa de nuevo o sacala («Sin ubicación»).'; return; }
+    if(ubic && !enCordoba(ubic) && !confirm('La ubicación marcada queda fuera de Córdoba. ¿Es correcta?\n\nAceptar = registrar igual · Cancelar = corregirla')) return;
     const nuevo = {
       nombre, tipoObra:tipo, obraId, barrio:($('obBarrio').value||'').trim(), direccion:($('obDireccion').value||'').trim(), notas:($('obNotas').value||'').trim(),
       creado:(typeof fechaAISO === 'function') ? fechaAISO(new Date()) : '', estado:'Pendiente',
       secciones:[{ titulo:'OTROS ÍTEMS (agregados a mano)', items:[], extra:true }], valorItems:[], valorItemsEpec:[], grupos:[], etapas:{},
-      fechaEncendido:'', listaParaEncender:false, lat: ubic ? ubic.lat : null, lng: ubic ? ubic.lng : null,
+      fechaEncendido:'', listaParaEncender:false, lat: ubic ? ubic.lat : null, lng: ubic ? ubic.lng : null, ubicOrigen: ubic ? ubic.origen : '',
       registradoPor:(window.__fbUser && window.__fbUser.email) || ''
     };
     const b = $('obGuardar'); b.disabled = true;
@@ -33544,7 +33766,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     ['renderAvanceTablero','poblarParteObraDatalist','poblarOtPlazas','poblarHistPlazas','poblarStockFiltroPlazas','renderMapaObras'].forEach(f => { try{ if(typeof window[f] === 'function') window[f](); }catch(e){} });
     const T = TIPOS[tipo];
     ['obNombre','obId','obBarrio','obDireccion','obNotas'].forEach(i => { const e = $(i); if(e) e.value = ''; });
-    ubic = null; deLicitacion = null; pintarUbic(); moverPin();
+    ubic = null; deLicitacion = null; pintarUbic(); moverPin(); dirTxt('');
     $('obOk').innerHTML = `<div class="ob-ok">✓ <b>${esc(nombre)}</b> quedó registrada como <b>${T.ico} ${esc(T.txt.toLowerCase())}</b>${nuevo.lat != null ? ', ya ubicada en el mapa' : ' (sin ubicar todavía)'}. Ya aparece en Avance, Mapa, órdenes y pañol.
       <div class="ob-ok-acc"><button type="button" class="btn-ghost" data-acc="calc">🧮 Calcular sus materiales</button><button type="button" class="btn-ghost" data-acc="mapa">🗺 Verla en el mapa</button><button type="button" class="btn-ghost" data-acc="otra">＋ Registrar otra</button></div></div>`;
     pintarLista();
@@ -33599,14 +33821,17 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       document.querySelectorAll('#navAbajo .nav-item, #menuLista .menu-item').forEach(b => b.classList.toggle('activo', b.dataset.vista === 'registro'));
       if(vista) vista.style.display = '';
       document.body.dataset.vista = 'registro';
-      render();
+      // La primera vez se arma la hoja; después solo se refresca la lista (antes, al volver se borraba lo que
+      // se estaba escribiendo en el formulario).
+      if(!$('obNombre')) render();
+      else { pintarLista(); setTimeout(()=>{ try{ if(mapa) mapa.invalidateSize(); }catch(e){} }, 80); }
       window.scrollTo({ top:0, behavior:'auto' });
       return;
     }
     if(vista) vista.style.display = 'none';
     return previa.apply(this, arguments);
   };
-  window.REGISTRO_OBRA = { render, estado:()=>({ tipo, ubic, deLicitacion, ultimaCreada, filtro }), guardar };
+  window.REGISTRO_OBRA = { render, estado:()=>({ tipo, ubic, deLicitacion, ultimaCreada, filtro }), guardar, leerDireccion, ubicarPorDireccion };
 })();
 </script>
 
@@ -33717,6 +33942,8 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 .tb-fantasma{ position:fixed; z-index:9999; pointer-events:none; transform:rotate(3deg) scale(1.03); box-shadow:0 24px 44px -18px rgba(40,40,94,.75) !important; opacity:.97; }
 .tb-hueco{ border-radius:16px; background:rgba(40,40,94,.09); border:2px dashed rgba(40,40,94,.22); }
 .tb-arrastrando, .tb-arrastrando *{ cursor:grabbing !important; }
+.tb-arrastrando .tb-board{ scroll-snap-type:none !important; }   /* si no, el tablero «salta» de lista mientras se arrastra en el celular */
+.tb-toast .tb-toast-x{ background:transparent !important; border:none !important; color:#fff; opacity:.7; font-size:15px; padding:2px 6px !important; min-height:0 !important; }
 @keyframes tbEntra{ from{ opacity:0; transform:translateY(6px) scale(.98); } to{ opacity:1; transform:none; } }
 .tb-card.nueva{ animation:tbEntra .28s ease; }
 /* ---- Modal / hoja ---- */
@@ -33877,29 +34104,84 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   let yo = LS.get('ema.tablero.yo', '');           // clave de la persona de este aparato
   let tab = null;                                   // el tablero
   let pantalla = 'quien';                           // quien | pin | tablero | pin-nuevo
-  let pendiente = LS.get('ema.tablero.pend', false);
+  let pendiente = false;                            // hay cambios de este aparato sin subir (del tablero abierto)
   let filtro = { texto:'', color:'', foco:'' };
   let abierta = null;                               // id de la tarjeta en el editor
   let agregandoEn = null;                           // id de columna con la caja de «agregar» abierta
   let renombrando = null;
   let unsub = null, timerGuardar = null, suprimirClick = false;
+  // Pendiente de subir: se anota POR TABLERO (antes era uno solo para el aparato).
+  const PEND = 'ema.tablero.pend.', BASE = 'ema.tablero.base.', CACHE = 'ema.tablero.cache.';
+  if(LS.get('ema.tablero.pend', false) && yo){ LS.set(PEND + yo, true); } LS.del('ema.tablero.pend');
+  function marcarPend(clave, v){ LS.set(PEND + clave, !!v); if(tab && tab.clave === clave) pendiente = !!v; }
+  const pendDe = clave => !!LS.get(PEND + clave, false);
+
+  // ---------- Mezcla de cambios (dos aparatos con el mismo tablero) ----------
+  // «base» = la última versión que este aparato sabe que está en la nube. Lo que cambió acá respecto de la base
+  // se conserva; lo que cambió en la nube también; si los dos tocaron la MISMA tarjeta, gana este aparato.
+  // Así, cargar algo en la compu no borra lo que se anotó en el celular (antes se pisaba el tablero entero).
+  const J = o => JSON.stringify(o, (k, v) => (v && typeof v === 'object' && !Array.isArray(v)) ? Object.keys(v).sort().reduce((a, x) => (a[x] = v[x], a), {}) : v);
+  const copia = o => o == null ? o : JSON.parse(JSON.stringify(o));
+  function mezclar(base, loc, rem){
+    if(!rem) return loc; if(!loc) return rem;
+    const b = base || {};
+    const out = { ...rem };
+    ['nombre','pin','fondo','columnas'].forEach(k => { out[k] = (J(loc[k]) === J(b[k])) ? rem[k] : loc[k]; });
+    const mapa = arr => new Map((arr || []).map(c => [c.id, c]));
+    const B = mapa(b.tarjetas), L = mapa(loc.tarjetas), R = mapa(rem.tarjetas);
+    out.tarjetas = [];
+    new Set([...L.keys(), ...R.keys()]).forEach(id => {
+      const bc = B.get(id), lc = L.get(id), rc = R.get(id);
+      if(lc && rc){ out.tarjetas.push(J(lc) === J(bc) ? rc : lc); return; }
+      if(lc){ if(!(bc && J(lc) === J(bc))) out.tarjetas.push(lc); return; }   // no está en la nube: nueva de acá (queda) o borrada allá (se va)
+      if(rc){ if(!(bc && J(rc) === J(bc))) out.tarjetas.push(rc); }           // no está acá: nueva de allá (queda) o borrada acá (se va)
+    });
+    out.actualizado = Math.max(loc.actualizado || 0, rem.actualizado || 0);
+    return normalizar(copia(out));
+  }
+  const sinMeta = t => { if(!t) return t; const { actualizado, actualizadoPor, ...r } = t; return r; };
 
   const db = ()=>{ try{ return (window.firebase && firebase.apps && firebase.apps.length) ? firebase.firestore() : null; }catch(e){ return null; } };
   const haySesion = ()=> !!window.__fbUser;
+  // Si se está escribiendo (en el tablero o en una tarjeta), lo que llega de la nube se dibuja al terminar.
+  let dibujoPendiente = false;
+  function escribiendo(){
+    const a = document.activeElement;
+    if(!a || !/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return false;
+    if(a.closest && a.closest('#tbModal')) return true;
+    if(!app.contains(a)) return false;
+    if(a.id === 'tbRapida' || a.id === 'tbBuscar') return !!a.value;    // vacíos: se redibuja y se les devuelve el foco
+    return true;
+  }
+  function redibujar(){
+    if(arrastre || escribiendo()){ dibujoPendiente = true; return; }
+    dibujoPendiente = false;
+    if(pantalla === 'pin' || pantalla === 'tablero') decidirPantalla();
+    if($('viewTablero') && $('viewTablero').style.display !== 'none'){
+      const foco = document.activeElement && document.activeElement.id;
+      render();
+      if((foco === 'tbRapida' || foco === 'tbBuscar') && $(foco)) try{ $(foco).focus({ preventScroll:true }); }catch(e){}
+    } else pintarMenuN();
+  }
+  document.addEventListener('focusout', ()=> setTimeout(()=>{ if(dibujoPendiente && !escribiendo()) redibujar(); }, 0));
+  function adoptar(nuevo){          // cambia el tablero en memoria solo si de verdad cambió algo
+    if(!nuevo || J(sinMeta(nuevo)) === J(sinMeta(tab))) return false;
+    tab = nuevo; LS.set(CACHE + tab.clave, tab); redibujar(); return true;
+  }
   function escuchar(clave){
     if(unsub){ try{ unsub(); }catch(e){} unsub = null; }
     const d = db(); if(!d) return;
     try{
       unsub = d.collection('tableros').doc(clave).onSnapshot(doc => {
-        if(!doc.exists){ if(tab && tab.clave === clave && haySesion()) programarGuardado(0); return; }
-        if(pendiente) return;             // hay cambios de este aparato sin subir: mandan esos
-        const remoto = normalizar(doc.data());
-        if(!remoto) return;
-        if(tab && tab.clave === clave && (remoto.actualizado||0) <= (tab.actualizado||0) && JSON.stringify(remoto) === JSON.stringify(tab)) return;
-        if(tab && tab.clave === clave && (remoto.actualizado||0) < (tab.actualizado||0)) return;
-        tab = remoto; LS.set('ema.tablero.cache.' + clave, tab);
-        if(pantalla === 'pin' || pantalla === 'tablero') decidirPantalla();
-        if(!arrastre) render();
+        if(!tab || tab.clave !== clave) return;
+        if(!doc.exists){ if(haySesion()) programarGuardado(0); return; }
+        if(doc.metadata && doc.metadata.hasPendingWrites) return;      // es el eco de lo que se está subiendo desde acá
+        const remoto = normalizar(doc.data()); if(!remoto) return;
+        const base = LS.get(BASE + clave, null);
+        const nuevo = pendiente ? mezclar(base, tab, remoto) : remoto;
+        LS.set(BASE + clave, remoto);
+        adoptar(nuevo);
+        if(pendiente) programarGuardado();
       }, err => console.warn('tablero', err));
     }catch(e){ console.warn('tablero', e); }
   }
@@ -33907,26 +34189,50 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     clearTimeout(timerGuardar);
     timerGuardar = setTimeout(subir, ms == null ? 600 : ms);
   }
+  let subiendo = false, otraVez = false;
   async function subir(){
-    if(!tab) return;
+    const t = tab; if(!t) return;
     const d = db();
-    if(!d || !haySesion()){ pendiente = true; LS.set('ema.tablero.pend', true); pintarEstado(); return; }
+    if(!d || !haySesion()){ marcarPend(t.clave, true); pintarEstado(); return; }
+    if(subiendo){ otraVez = true; return; }
+    subiendo = true;
+    const version = t.actualizado, foto = copia(t), clave = t.clave;
+    const baseAntes = LS.get(BASE + clave, null);
+    const ref = d.collection('tableros').doc(clave);
+    let escrito = null;
+    const armar = remDoc => {
+      const rem = (remDoc && remDoc.exists) ? normalizar(remDoc.data()) : null;
+      const m = rem ? mezclar(baseAntes, foto, rem) : foto;
+      escrito = copia({ ...m, actualizado: Date.now(), actualizadoPor:(window.__fbUser && window.__fbUser.email) || '' });
+      return escrito;
+    };
     try{
-      await d.collection('tableros').doc(tab.clave).set(JSON.parse(JSON.stringify({ ...tab, actualizadoPor:(window.__fbUser && window.__fbUser.email) || '' })));
-      pendiente = false; LS.set('ema.tablero.pend', false);
-    }catch(e){ pendiente = true; LS.set('ema.tablero.pend', true); }
+      // En una transacción: se lee lo que hay en la nube y se escribe la mezcla, sin pisar un cambio que entre en el medio.
+      if(typeof d.runTransaction === 'function') await d.runTransaction(async tx => { const r = await tx.get(ref); tx.set(ref, armar(r)); });
+      else { const r = await ref.get(); await ref.set(armar(r)); }
+      LS.set(BASE + clave, escrito);
+      if(tab && tab.clave === clave){
+        const cambioEnElMedio = tab.actualizado !== version;
+        adoptar(cambioEnElMedio ? mezclar(baseAntes, tab, escrito) : normalizar(copia(escrito)));
+        if(!cambioEnElMedio) marcarPend(clave, false); else programarGuardado();
+      } else marcarPend(clave, false);
+    }catch(e){ marcarPend(clave, true); console.warn('tablero: no se pudo subir', e && e.message); }
+    subiendo = false;
     pintarEstado();
+    if(otraVez){ otraVez = false; programarGuardado(0); }
   }
   function guardar(){
     if(!tab) return;
     tab.actualizado = Date.now();
-    LS.set('ema.tablero.cache.' + tab.clave, tab);
-    pendiente = true; LS.set('ema.tablero.pend', true);
+    LS.set(CACHE + tab.clave, tab);
+    marcarPend(tab.clave, true);
     pintarEstado();
     programarGuardado();
     pintarMenuN();
   }
   setInterval(()=>{ if(pendiente && tab && haySesion() && db()) subir(); }, 15000);
+  // Al cerrar la app o pasarla a segundo plano (celular), se sube lo que quedó.
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden' && pendiente && tab){ clearTimeout(timerGuardar); subir(); } });
   function pintarEstado(){
     const e = $('tbEstado'); if(!e) return;
     const sinNube = !db();
@@ -33943,21 +34249,37 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   async function elegirPersona(nombre){
     nombre = String(nombre||'').trim(); if(!nombre) return;
     const clave = claveDe(nombre);
+    if(tab && tab.clave !== clave && pendiente){ clearTimeout(timerGuardar); subir(); }   // lo del anterior, antes de cambiar
     yo = clave; LS.set('ema.tablero.yo', clave);
-    tab = normalizar(LS.get('ema.tablero.cache.' + clave, null));
+    tab = normalizar(LS.get(CACHE + clave, null));
+    pendiente = pendDe(clave);
+    let remoto = null, llegoNube = false;
     const d = db();
     if(d){
-      try{ const doc = await d.collection('tableros').doc(clave).get(); if(doc.exists){ const r = normalizar(doc.data()); if(r && (!tab || (r.actualizado||0) >= (tab.actualizado||0))) tab = r; } }catch(e){}
+      try{ const doc = await d.collection('tableros').doc(clave).get(); llegoNube = true; if(doc.exists) remoto = normalizar(doc.data()); }catch(e){}
     }
-    if(!tab){ tab = tableroNuevo(nombre); guardar(); }
-    LS.set('ema.tablero.cache.' + clave, tab);
+    if(yo !== clave) return;               // mientras esperaba la nube, se eligió a otra persona
+    if(remoto){
+      tab = (tab && pendiente) ? mezclar(LS.get(BASE + clave, null), tab, remoto) : remoto;
+      LS.set(BASE + clave, remoto);
+      if(!pendiente) marcarPend(clave, false);
+    } else if(!tab){
+      tab = tableroNuevo(nombre);
+      // Sin llegar a la nube (sin internet), el tablero de bienvenida es provisorio: si en la nube ya había uno,
+      // al conectarse se queda ese (más lo que se haya anotado acá), sin duplicar las tarjetas de ejemplo.
+      if(!llegoNube) LS.set(BASE + clave, copia(tab)); else LS.del(BASE + clave);
+      guardar();
+    }
+    LS.set(CACHE + clave, tab);
     escuchar(clave);
     pantalla = ''; decidirPantalla();
     render();
+    if(pendiente) programarGuardado(0);
   }
   function cambiarPersona(){
+    if(tab && pendiente){ clearTimeout(timerGuardar); subir(); }   // primero se sube lo que quedaba (subir toma el tablero al empezar)
     if(unsub){ try{ unsub(); }catch(e){} unsub = null; }
-    yo = ''; LS.del('ema.tablero.yo'); tab = null; pantalla = 'quien'; render();
+    yo = ''; LS.del('ema.tablero.yo'); tab = null; pendiente = false; pantalla = 'quien'; render();
   }
 
   function nominaNombres(){
@@ -34099,13 +34421,14 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     else if(!c.hecha){ c.hecha = true; c.colPrevia = c.col; const l = colListo(); if(c.col !== l){ c.col = l; c.orden = -Date.now(); } }
     else { c.hecha = false; if(c.colPrevia && tab.columnas.some(x => x.id === c.colPrevia)){ c.col = c.colPrevia; c.orden = Date.now(); } }
     guardar(); render();
-    if(estaHecha(c)) toast(esDiaria(c) ? '🔁 ¡Hecha por hoy! Mañana vuelve.' : '✅ ¡Hecha!', esDiaria(c) ? null : { txt:'Deshacer', fn:()=>{ alternarHecha(c); } });
+    const id = c.id, clave = tab.clave;
+    if(estaHecha(c)) toast(esDiaria(c) ? '🔁 ¡Hecha por hoy! Mañana vuelve.' : '✅ ¡Hecha!', esDiaria(c) ? null : { txt:'Deshacer', fn:()=>{ const cc = tab && tab.clave === clave && tab.tarjetas.find(x => x.id === id); if(cc && estaHecha(cc)) alternarHecha(cc); } });
   }
   let borrada = null;
   function borrarTarjeta(id){
     const i = tab.tarjetas.findIndex(c => c.id === id); if(i < 0) return;
-    borrada = tab.tarjetas[i]; tab.tarjetas.splice(i,1); abierta = null; cerrarModal(); guardar(); render();
-    toast('🗑 Tarjeta borrada', { txt:'Deshacer', fn:()=>{ if(borrada){ tab.tarjetas.push(borrada); borrada = null; guardar(); render(); } } });
+    borrada = { c: tab.tarjetas[i], clave: tab.clave }; tab.tarjetas.splice(i,1); abierta = null; cerrarModal(); guardar(); render();
+    toast('🗑 Tarjeta borrada', { txt:'Deshacer', fn:()=>{ if(borrada && tab && tab.clave === borrada.clave && !tab.tarjetas.some(x => x.id === borrada.c.id)){ tab.tarjetas.push(borrada.c); guardar(); render(); } borrada = null; } });
   }
 
   // ---------- Editor ----------
@@ -34160,7 +34483,12 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     const m = e.target.closest && e.target.closest('#tbModal'); if(!m) return;
     const c = tab && tab.tarjetas.find(x => x.id === abierta); if(!c) return;
     const k = e.target.dataset.e;
-    if(k === 'fecha' || k === 'hora'){ c[k] = e.target.value; guardar(); }
+    if(k === 'fecha' || k === 'hora'){
+      c[k] = e.target.value;
+      // Una hora sin fecha (y sin «todos los días») es para hoy: si no, el aviso no sabría qué día sonar.
+      if(k === 'hora' && c.hora && !c.fecha && !esDiaria(c)){ c.fecha = hoyISO(); const f = m.querySelector('[data-e="fecha"]'); if(f) f.value = c.fecha; }
+      guardar();
+    }
     else if(k === 'repetir'){ c.repetir = e.target.checked ? 'diario' : ''; if(c.repetir){ c.hecha = false; } guardar(); }
     else if(k === 'col'){ c.col = e.target.value; c.orden = Date.now(); guardar(); }
     else if(k === 'item-ok'){ c.lista[+e.target.dataset.i].ok = e.target.checked; guardar(); pintarLista(m, c); }
@@ -34196,7 +34524,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   });
   function cerrarEditor(){
     const c = tab && tab.tarjetas.find(x => x.id === abierta);
-    if(c && !c.titulo.trim() && !c.nota.trim() && !(c.lista||[]).length){ tab.tarjetas = tab.tarjetas.filter(x => x !== c); guardar(); }
+    if(c && !c.titulo.trim() && !c.nota.trim() && !(c.lista||[]).length && !c.fecha && !c.hora && !c.repetir){ tab.tarjetas = tab.tarjetas.filter(x => x !== c); guardar(); }
     abierta = null; cerrarModal(); render();
   }
   document.addEventListener('keydown', e => {
@@ -34272,14 +34600,18 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       '-',
       i > 0 ? { txt:'← Mover a la izquierda', fn:()=>{ const [c] = tab.columnas.splice(i,1); tab.columnas.splice(i-1,0,c); guardar(); render(); } } : null,
       i < tab.columnas.length - 1 ? { txt:'→ Mover a la derecha', fn:()=>{ const [c] = tab.columnas.splice(i,1); tab.columnas.splice(i+1,0,c); guardar(); render(); } } : null,
-      tarjetasDe(colId).some(estaHecha) ? { txt:'🧹 Borrar las hechas de esta lista', fn:()=>{ const n = tarjetasDe(colId).filter(c => estaHecha(c) && !esDiaria(c)).length; tab.tarjetas = tab.tarjetas.filter(c => !(c.col === colId && estaHecha(c) && !esDiaria(c))); guardar(); render(); toast(`🧹 ${n} tarjeta(s) borradas`); } } : null,
+      tarjetasDe(colId).some(c => estaHecha(c) && !esDiaria(c)) ? { txt:'🧹 Borrar las hechas de esta lista', fn:()=>{
+        const quitadas = tarjetasDe(colId).filter(c => estaHecha(c) && !esDiaria(c)); const clave = tab.clave;
+        tab.tarjetas = tab.tarjetas.filter(c => !quitadas.includes(c)); guardar(); render();
+        toast(`🧹 ${quitadas.length} tarjeta(s) borradas`, { txt:'Deshacer', fn:()=>{ if(!tab || tab.clave !== clave) return; quitadas.forEach(c => { if(!tab.tarjetas.some(x => x.id === c.id)) tab.tarjetas.push(c); }); guardar(); render(); } }); } } : null,
       '-',
       tab.columnas.length > 1 ? { txt:'🗑 Borrar la lista', peligro:true, fn:()=>{
         const cs = tarjetasDe(colId); const dest = tab.columnas.find(x => x.id !== colId);
         const quitada = tab.columnas[i];
         cs.forEach(c => { c.col = dest.id; c.orden = Date.now() + (c.orden||0); });
         tab.columnas.splice(i,1); guardar(); render();
-        toast(cs.length ? `Lista borrada · sus ${cs.length} tarjeta(s) pasaron a «${dest.titulo}»` : 'Lista borrada', { txt:'Deshacer', fn:()=>{ tab.columnas.splice(i,0,quitada); cs.forEach(c => c.col = colId); guardar(); render(); } });
+        const ids = cs.map(c => c.id), clave = tab.clave;
+        toast(cs.length ? `Lista borrada · sus ${cs.length} tarjeta(s) pasaron a «${dest.titulo}»` : 'Lista borrada', { txt:'Deshacer', fn:()=>{ if(!tab || tab.clave !== clave || tab.columnas.some(x => x.id === colId)) return; tab.columnas.splice(Math.min(i, tab.columnas.length),0,quitada); tab.tarjetas.forEach(c => { if(ids.includes(c.id)) c.col = colId; }); guardar(); render(); } });
       } } : null
     ].filter(Boolean);
   }
@@ -34330,6 +34662,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     if(y < 70) window.scrollBy(0, -14); else if(y > window.innerHeight - 70) window.scrollBy(0, 14);
   }
   function soltar(a){
+    if(!tab || !tab.tarjetas.some(x => x.id === a.id)){ if(a.g) a.g.remove(); document.body.classList.remove('tb-arrastrando'); render(); return; }
     const lista = a.h && a.h.parentElement;
     if(lista && lista.dataset.col){
       const c = tab.tarjetas.find(x => x.id === a.id);
@@ -34357,35 +34690,48 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     e.preventDefault(); mover(a, e.clientX, e.clientY);
   }, { passive:false });
   const terminar = e => { const a = arrastre; if(!a || (e && e.pointerId !== a.pid)) return; clearTimeout(a.t); arrastre = null; if(a.activo) soltar(a); };
+  // Si el arrastre se corta (llamada entrante, cambio de app, el sistema cancela el toque): la tarjeta vuelve a su lugar.
+  function cancelarArrastre(){
+    const a = arrastre; if(!a) return;
+    clearTimeout(a.t); arrastre = null;
+    if(!a.activo) return;
+    if(a.g) a.g.remove(); if(a.h) a.h.remove();
+    a.card.classList.remove('levantada'); a.card.style.display = '';
+    document.body.classList.remove('tb-arrastrando');
+    render();
+  }
   window.addEventListener('pointerup', terminar);
-  window.addEventListener('pointercancel', e => { const a = arrastre; if(a && a.activo) return; terminar(e); });
-  // Con el dedo, mientras se arrastra, la pantalla no tiene que desplazarse
-  document.addEventListener('touchmove', e => { const a = arrastre; if(a && a.activo){ e.preventDefault(); const t = e.touches[0]; if(t) mover(a, t.clientX, t.clientY); } }, { passive:false });
-  document.addEventListener('touchend', ()=>{ const a = arrastre; if(a && a.activo){ clearTimeout(a.t); arrastre = null; soltar(a); } });
+  window.addEventListener('pointercancel', e => { const a = arrastre; if(a && a.activo && a.tipo !== 'mouse') return; terminar(e); });   // con el dedo, el toque sigue por touchmove
+  window.addEventListener('blur', cancelarArrastre);
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') cancelarArrastre(); });
+  // Con el dedo, mientras se arrastra, la pantalla no tiene que desplazarse (el toque empieza en el tablero: se escucha ahí)
+  app.addEventListener('touchmove', e => { const a = arrastre; if(a && a.activo){ e.preventDefault(); const t = e.touches[0]; if(t) mover(a, t.clientX, t.clientY); } }, { passive:false });
+  app.addEventListener('touchend', ()=>{ const a = arrastre; if(a && a.activo){ clearTimeout(a.t); arrastre = null; soltar(a); } });
+  app.addEventListener('touchcancel', cancelarArrastre);
   app.addEventListener('contextmenu', e => { if(e.target.closest('.tb-card')) e.preventDefault(); });
 
   // ---------- Avisos ----------
   let toastTimer = null;
-  function toast(txt, accion){
+  function toast(txt, accion, fijo){
     let t = $('tbToast'); if(t) t.remove();
-    t = document.createElement('div'); t.id = 'tbToast'; t.className = 'tb-toast'; t.setAttribute('role','status');
-    t.innerHTML = `<span>${esc(txt)}</span>${accion ? `<button type="button">${esc(accion.txt)}</button>` : ''}`;
+    t = document.createElement('div'); t.id = 'tbToast'; t.className = 'tb-toast'; t.setAttribute('role', fijo ? 'alert' : 'status');
+    t.innerHTML = `<span>${esc(txt)}</span>${accion ? `<button type="button">${esc(accion.txt)}</button>` : ''}${fijo ? '<button type="button" class="tb-toast-x" aria-label="Cerrar">✕</button>' : ''}`;
     document.body.appendChild(t);
     if(accion) t.querySelector('button').addEventListener('click', ()=>{ t.remove(); accion.fn(); });
-    clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ t.remove(); }, accion ? 6000 : 2600);
+    const x = t.querySelector('.tb-toast-x'); if(x) x.addEventListener('click', ()=> t.remove());
+    clearTimeout(toastTimer); if(!fijo) toastTimer = setTimeout(()=>{ t.remove(); }, accion ? 6000 : 2600);   // los recordatorios quedan hasta que se cierran
   }
   // Recordatorios con hora: mientras la app esté abierta (en cualquier hoja), avisa a esa hora.
   function revisarRecordatorios(){
     if(!tab) return;
     const h = hoyISO(), hm = ahoraHM();
     const avisados = LS.get('ema.tablero.avisados', {});
-    let cambio = false;
+    let cambio = false; const tocan = [];
     tab.tarjetas.forEach(c => {
       if(!c.hora || estaHecha(c)) return;
       const toca = esDiaria(c) || c.fecha === h; if(!toca || c.hora > hm) return;
-      const k = c.id + '|' + h; if(avisados[k]) return;
-      avisados[k] = 1; cambio = true;
-      toast(`⏰ ${c.titulo || 'Recordatorio'}`, { txt:'Ver', fn:()=>{ if(typeof mostrarVista === 'function') mostrarVista('tablero'); abrirEditor(c.id); } });
+      const k = c.id + '|' + h + '|' + c.hora; if(avisados[k]) return;   // con la hora: si se cambia la hora, vuelve a avisar
+      avisados[k] = 1; cambio = true; tocan.push(c);
       try{
         if('Notification' in window && Notification.permission === 'granted'){
           const op = { body: c.nota ? String(c.nota).slice(0,120) : 'Recordatorio de tu tablero', tag:'tb-' + c.id, icon:'app/icono-192-v3.png' };
@@ -34394,8 +34740,21 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
         }
       }catch(e){}
     });
-    if(cambio){ Object.keys(avisados).forEach(k => { if(!k.endsWith('|' + h)) delete avisados[k]; }); LS.set('ema.tablero.avisados', avisados); }
+    if(cambio){ Object.keys(avisados).forEach(k => { if(k.split('|')[1] !== h) delete avisados[k]; }); LS.set('ema.tablero.avisados', avisados); }
+    if(tocan.length){
+      // Varios a la vez: un solo aviso que queda hasta que se cierra (antes uno tapaba al otro a los 6 segundos).
+      const txt = tocan.length === 1 ? `⏰ ${tocan[0].titulo || 'Recordatorio'}` : `⏰ ${tocan.length} recordatorios: ${tocan.map(c => c.titulo || 'Recordatorio').join(' · ')}`;
+      const id = tocan[0].id, clave = tab.clave;
+      toast(txt, { txt:'Ver', fn:()=>{
+        if(typeof mostrarVista === 'function') mostrarVista('tablero');
+        // Si el tablero tiene PIN y todavía no se puso, primero el PIN: el aviso no abre la tarjeta por la puerta de atrás.
+        if(tocan.length === 1 && pantalla === 'tablero' && tab && tab.clave === clave) abrirEditor(id);
+      } }, true);
+    }
+    // Pasó la medianoche: las diarias vuelven a estar pendientes y «hoy/mañana» cambian.
+    if(diaVisto !== h){ diaVisto = h; redibujar(); }
   }
+  let diaVisto = hoyISO();
   setInterval(revisarRecordatorios, 30000);
 
   // ---------- Menú lateral: entrada «Mi tablero» debajo de Normas, con el número de pendientes ----------
@@ -34431,7 +34790,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       document.querySelectorAll('#navAbajo .nav-item, #menuLista .menu-item').forEach(b => b.classList.toggle('activo', b.dataset.vista === 'tablero'));
       if(vista) vista.style.display = '';
       document.body.dataset.vista = 'tablero';
-      if(yo && !tab){ const c = normalizar(LS.get('ema.tablero.cache.' + yo, null)); if(c){ tab = c; escuchar(c.clave); } }
+      if(yo && !tab){ const c = normalizar(LS.get('ema.tablero.cache.' + yo, null)); if(c){ tab = c; pendiente = pendDe(c.clave); escuchar(c.clave); } }
       // Con usuario propio (2026-09-28) el tablero ya sabe quién sos: no hace falta elegir el nombre.
       const miUsuario = (window.PERMISOS && typeof PERMISOS.yo === 'function') ? PERMISOS.yo() : null;
       if(!yo && miUsuario && miUsuario.nombre && !window.__modoEmergencia){ elegirPersona(miUsuario.nombre); window.scrollTo({ top:0, behavior:'auto' }); return; }
@@ -34447,12 +34806,12 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   // Arranque: si este aparato ya sabe quién es, se carga su tablero (para los avisos y el número del menú)
   if(yo){
     const c = normalizar(LS.get('ema.tablero.cache.' + yo, null));
-    if(c){ tab = c; decidirPantalla(); }
-    const arrancar = ()=>{ if(tab) escuchar(tab.clave); };
+    if(c){ tab = c; pendiente = pendDe(c.clave); decidirPantalla(); }
+    const arrancar = ()=>{ if(tab){ escuchar(tab.clave); if(pendiente) programarGuardado(0); } };
     setTimeout(arrancar, 1500);
   }
   setTimeout(revisarRecordatorios, 4000);
-  window.TABLERO = { estado: ()=> ({ yo, tab, pantalla, pendiente, filtro }), elegirPersona, render, revisarRecordatorios, subir, hashPin };
+  window.TABLERO = { estado: ()=> ({ yo, tab, pantalla, pendiente, filtro }), elegirPersona, render, revisarRecordatorios, subir, hashPin, mezclar };
 })();
 </script>
 
@@ -34699,10 +35058,12 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     return r ? r.enPoder : 0;
   }
   function listaPersonas(){
-    let l = [];
-    try{ if(typeof personasConCargo === 'function') l = personasConCargo(); }catch(e){}
-    if(!l.length && typeof window.nominaEquipo === 'function') l = (window.nominaEquipo() || []).map(p => String(p.nombre||'').trim()).filter(Boolean);
-    return l;
+    // Los que tienen material a cargo + toda la nómina del equipo (sin repetir).
+    const vistos = new Map();
+    const sumar = n => { n = String(n||'').trim(); if(n && !vistos.has(norm(n))) vistos.set(norm(n), n); };
+    try{ if(typeof personasConCargo === 'function') (personasConCargo() || []).forEach(sumar); }catch(e){}
+    try{ if(typeof window.nominaEquipo === 'function') (window.nominaEquipo() || []).forEach(p => sumar(p && p.nombre)); }catch(e){}
+    return [...vistos.values()];
   }
   const cuantoTiene = (codigo)=> !elegido ? null : (elegido.tipo === 'obra' ? netoEnPlaza(elegido.id, codigo) : (enPoderDe(elegido.nombre, codigo) || 0));
 
@@ -34799,10 +35160,11 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     el.style.display = '';
     pintarFilas();
   }
+  let quienAuto = '';   // lo que puso la app sola en «quién devuelve» (si la persona cambia, se reemplaza)
   function elegir(o){
     elegido = o;
     if(o.tipo === 'persona'){
-      const q = $('stockDevolQuien'); if(q && !q.value.trim()) q.value = o.nombre;
+      const q = $('stockDevolQuien'); if(q && (!q.value.trim() || q.value.trim() === quienAuto)){ q.value = o.nombre; quienAuto = o.nombre; }
       $('stockDevolMotivo').value = 'Devuelve lo que tenía en su poder';
     } else if($('stockDevolMotivo').value === 'Devuelve lo que tenía en su poder') $('stockDevolMotivo').value = 'Sobrante de obra';
     sug.style.display = 'none';
@@ -34812,7 +35174,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   inp.addEventListener('input', ()=>{ pintarElegido(); pintarSugerencias(); });
   inp.addEventListener('focus', pintarSugerencias);
   inp.addEventListener('keydown', e => {
-    if(e.key === 'Enter'){ const b = sug.querySelector('.dv-sug'); if(b){ e.preventDefault(); b.click(); } }
+    if(e.key === 'Enter'){ const b = sug.style.display !== 'none' && sug.querySelector('.dv-sug'); if(b){ e.preventDefault(); b.click(); } else e.preventDefault(); }
     if(e.key === 'Escape'){ sug.style.display = 'none'; }
   });
   x.addEventListener('click', soltar);
@@ -34861,6 +35223,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     const btn = $('stockMovBtn'); if(btn) btn.textContent = esDev ? 'Registrar devolución' : 'Registrar movimiento';
   }
   selTipo.addEventListener('change', alCambiarTipo);
+  alCambiarTipo();   // por si el navegador recordó «Devolución» elegida al recargar
 
   // ---------- Registrar ----------
   window.stockRegistrarDevolucion = async function(btn, msg){
@@ -34902,28 +35265,35 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       if(lg) base.personaLegajo = String(lg);
     }
     btn.disabled = true;
+    const filasUsadas = filas().filter(f => f.querySelector('.dv-prod').value.trim() || filas().length === 1);
     const hechos = []; let aviso = ''; let primerId = '';
     for(const [i, l] of lineas.entries()){
       const mov = { ...base, codigo:l.item.codigo, desc:l.item.desc, un:l.item.un, cantidad:l.cant, devolEstado:l.estado, ts:Date.now() + i * 2 };
+      if(lineas.length > 1){ msg.style.color = 'var(--text-soft)'; msg.textContent = `Guardando ${i + 1} de ${lineas.length}…`; }
       let id = '';
       try{ id = await window.fbAddMovimiento(mov); }
       catch(e){
+        msg.style.color = 'var(--danger)';
+        const sinPermiso = e && e.code === 'permission-denied';
+        if(hechos.length){
+          // Se sacan del formulario las filas que YA se guardaron: así, al volver a tocar Registrar, no se duplican.
+          filasUsadas.slice(0, hechos.length).forEach(f => f.remove()); pintarFilas();
+          msg.textContent = `⚠ Se guardaron ${hechos.length} de ${lineas.length} materiales y se cortó en «${l.item.desc}» (${sinPermiso ? 'tu usuario no tiene permiso para cargar en el pañol' : 'revisá tu conexión a internet'}). Los guardados ya no están en la lista; tocá «Registrar devolución» otra vez para cargar los que faltan.`;
+        } else msg.textContent = sinPermiso ? '🔒 Tu usuario no tiene permiso para cargar en el pañol. No se registró nada.' : '⚠ No se pudo guardar la devolución (revisá tu conexión a internet). No se registró nada.';
         btn.disabled = false;
-        msg.textContent = hechos.length
-          ? `⚠ Se guardaron ${hechos.length} de ${lineas.length} materiales y se cortó en «${l.item.desc}» (revisá tu conexión a internet). Los que faltan se pueden cargar de nuevo.`
-          : '⚠ No se pudo guardar la devolución (revisá tu conexión a internet). No se registró nada.';
         return;
       }
-      if(!primerId) primerId = id;
-      if(id) window.__ultimoMovLocal = Object.assign({ id }, mov);
+      if(!primerId){ primerId = id; if(id) window.__ultimoMovLocal = Object.assign({ id }, mov); }
       hechos.push({ ...l, id });
       if(l.estado === 'roto'){
         try{
           const bajaId = await window.fbAddMovimiento({ tipo:'salida', bajaRotura:true, devolucionId:id, devolGrupo:grupo, codigo:l.item.codigo, desc:l.item.desc, un:l.item.un, cantidad:l.cant, fecha, ts:Date.now() + i * 2 + 1, usuario,
                                                         destino:'Baja — material roto (devolución)', retiradoPor:'', devolObs:mov.devolObs });
-          if(id && bajaId && typeof window.fbUpdateMovimiento === 'function') await window.fbUpdateMovimiento(id, { bajaRoturaId: bajaId });
           aviso = ' Lo que volvió roto quedó anotado con su baja: no suma al stock.';
-        }catch(e){ aviso = ' ⚠ No se pudo anotar la baja de algún material roto: revisalo en el listado.'; }
+          // El enlace devolución → baja es un extra (anular la devolución anula también su baja). Si falla, la baja
+          // igual quedó hecha y se encuentra por `devolucionId`.
+          if(id && bajaId && typeof window.fbUpdateMovimiento === 'function'){ try{ await window.fbUpdateMovimiento(id, { bajaRoturaId: bajaId }); }catch(e){} }
+        }catch(e){ aviso = ` ⚠ «${l.item.desc}» volvió roto pero NO se pudo anotar su baja: en el listado, cargá una salida de esa cantidad como baja por rotura (si no, figura como si sumara al stock).`; }
       }
     }
     btn.disabled = false;
@@ -34978,9 +35348,10 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     const k = String(nombre||'').trim().toLowerCase();
     return obras().find(a => String(a.nombre||'').trim().toLowerCase() === k) || null;
   }
+  const tipoValido = t => TIPOS[t] ? t : 'plaza';    // un tipo desconocido (dato viejo o mal cargado) cuenta como plaza
   function tipoDeEntrada(e){
     const o = obraDe(e.obra, '');
-    if(o) return { t: o.tipoObra || 'plaza', auto:true };
+    if(o) return { t: tipoValido(o.tipoObra), auto:true };
     if(e.tipoObra && TIPOS[e.tipoObra]) return { t:e.tipoObra, auto:false };
     return { t: String(e.obra||'').trim() ? '' : '', auto:false };
   }
@@ -35000,15 +35371,18 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     const b = el.querySelector('.plan-ot-btn'); const m = b && String(b.getAttribute('onclick')||'').match(/verOrdenTrabajo\('([^']+)'\)/);
     let o = null; try{ o = m && (ordenesTrabajo || []).find(x => x.id === m[1]); }catch(err){}
     const obra = o ? obraDe(o.plazaNombre, o.obraId || '') : obraDe((el.querySelector('.plan-ot-plaza')||{}).textContent, '');
-    const t = obra ? (obra.tipoObra || 'plaza') : '';
+    const t = obra ? tipoValido(obra.tipoObra) : '';
     el.classList.remove('tipo-plaza','tipo-barrio','tipo-otro'); if(t) el.classList.add('tipo-' + t);
     el.dataset.tipo = t;
-    if(t && !el.querySelector('.pt-tag')) el.insertAdjacentHTML('afterbegin', tag(t, true));
+    el.querySelectorAll(':scope > .pt-tag').forEach(x => x.remove());   // si cambió el tipo, la etiqueta vieja se va
+    if(t) el.insertAdjacentHTML('afterbegin', tag(t, true));
   }
   function aplicarFiltro(){
     grid.querySelectorAll('.plan-entry, .plan-ot').forEach(el => {
       const t = el.dataset.tipo || '';
-      el.classList.toggle('pt-oculta', filtro !== 'todas' && !!t && t !== filtro || (filtro !== 'todas' && !t && el.classList.contains('plan-ot')));
+      // Lo que no tiene tipo (tareas generales, órdenes de obras sin registrar) se sigue viendo con cualquier filtro;
+      // y la tarjeta que se está escribiendo nunca se esconde en la mano.
+      el.classList.toggle('pt-oculta', filtro !== 'todas' && !!t && t !== filtro && !el.contains(document.activeElement));
     });
   }
   function barra(){
@@ -35149,8 +35523,10 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   function permiso(h){
     if(h === 'tablero') return 'editar';
     if(h === 'usuarios') return (!cargado || !window.__fbUser) ? 'oculto' : (!hayAdmin() || esAdmin() ? 'editar' : 'oculto');
-    if(!cargado || !hayAdmin()) return 'editar';                 // sin administrador: como siempre
-    if(!window.__fbUser) return 'ver';                            // entrada de emergencia (sin conexión)
+    if(window.__modoEmergencia) return 'ver';                     // entrada de emergencia (sin conexión): solo mirar
+    if(!cargado) return window.__fbUser ? 'ver' : 'editar';       // con sesión, hasta que lleguen los usuarios: solo mirar
+    if(!hayAdmin()) return 'editar';                              // sin administrador: como siempre
+    if(!window.__fbUser) return 'ver';
     const y = yo();
     if(!y || y.activo === false) return (ROLES.mirar.hojas[h] || 'ver');
     const base = (ROLES[y.rol] || ROLES.mirar).hojas[h] || 'ver';
@@ -35163,16 +35539,19 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   }
 
   // ---------- Datos (en vivo) ----------
+  let desuscribir = [];
+  const hojaUsuariosVisible = ()=> $('viewUsuarios') && $('viewUsuarios').style.display !== 'none';
   function escuchar(){
+    desuscribir.forEach(f => { try{ f(); }catch(e){} }); desuscribir = [];
     const d = db(); if(!d) return;
     try{
-      d.collection('usuarios').onSnapshot(q => {
+      desuscribir.push(d.collection('usuarios').onSnapshot(q => {
         const m = {}; q.forEach(doc => { m[doc.id] = { ...doc.data(), uid:doc.id }; }); usuarios = m; cargado = true;
         registrarmeSiFalta(); aplicar();
         const y = yo(); if(y && y.activo === false && window.__fbUser){ try{ firebase.auth().signOut(); }catch(e){} }
-        if($('viewUsuarios') && $('viewUsuarios').style.display !== 'none') render();
-      }, e => { console.warn('usuarios', e); cargado = true; aplicar(); });
-      d.collection('configEquipo').doc('alias').onSnapshot(doc => { alias = (doc.exists && doc.data()) || {}; if($('viewUsuarios') && $('viewUsuarios').style.display !== 'none') render(); }, ()=>{});
+        if(hojaUsuariosVisible()) render(true);
+      }, e => { console.warn('usuarios', e); /* sin permiso para leer todavía (antes de entrar): se reintenta al iniciar sesión */ }));
+      desuscribir.push(d.collection('configEquipo').doc('alias').onSnapshot(doc => { alias = (doc.exists && doc.data()) || {}; if(hojaUsuariosVisible()) render(true); }, ()=>{}));
     }catch(e){ console.warn('usuarios', e); }
   }
   let registrando = false;
@@ -35180,9 +35559,14 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     const u = window.__fbUser, d = db();
     if(!u || !d || !cargado || usuarios[u.uid] || registrando) return;
     registrando = true;
-    const local = String(u.email || '').split('@')[0];
-    const doc = { email:String(u.email||'').toLowerCase(), usuario:normU(local), nombre:local, rol:'mirar', pendiente:true, activo:true, creado:Date.now() };
-    try{ await d.collection('usuarios').doc(u.uid).set(doc); }catch(e){ console.warn('registro usuario', e); }
+    try{
+      // Solo si de verdad no existe en el servidor: nunca pisar el documento de alguien (p. ej. el del administrador).
+      const ya = await d.collection('usuarios').doc(u.uid).get();
+      if(!ya.exists){
+        const local = String(u.email || '').split('@')[0];
+        await d.collection('usuarios').doc(u.uid).set({ email:String(u.email||'').toLowerCase(), usuario:normU(local), nombre:local, rol:'mirar', pendiente:true, activo:true, creado:Date.now() });
+      }
+    }catch(e){ console.warn('registro usuario', e); }
     registrando = false;
   }
 
@@ -35204,7 +35588,8 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   function pintarSesion(){
     const box = document.querySelector('#menuSesion .ses-caja.dentro'); if(!box) return;
     const y = yo();
-    if(y && !box.querySelector('.ses-rol')){
+    const viejo = box.querySelector('.ses-rol'); if(viejo) viejo.remove();
+    if(y){
       const m = box.querySelector('.ses-mail');
       if(m){ m.innerHTML = `<b>${esc(y.nombre || y.usuario || '')}</b> · ${esc(y.usuario || y.email || '')}`; m.insertAdjacentHTML('afterend', `<div class="ses-rol">${esc(hayAdmin() ? ((ROLES[y.rol] || ROLES.mirar).nombre + (y.pendiente ? ' · a confirmar' : '')) : 'Sin restricciones (todavía no hay administrador)')}</div>`); }
       const hint = box.querySelector('.ses-hint');
@@ -35213,8 +35598,13 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   }
   function aplicarAviso(){
     document.querySelectorAll('.perm-aviso').forEach(e => e.remove());
-    const h = hojaActual(); if(permiso(h) !== 'ver' || !window.__fbUser) return;
-    const v = $(ID_DE_VISTA[h]); if(!v) return;
+    const h = hojaActual(); const v = $(ID_DE_VISTA[h]); if(!v || !window.__fbUser) return;
+    const y = yo();
+    if(y && y.pendiente && hayAdmin()){
+      v.insertAdjacentHTML('afterbegin', `<div class="perm-aviso">⏳ <span>Tu usuario <b>todavía no fue confirmado</b> por el administrador. Hasta que te confirme, puede que no veas datos. Avisale.</span></div>`);
+      return;
+    }
+    if(permiso(h) !== 'ver') return;
     v.insertAdjacentHTML('afterbegin', `<div class="perm-aviso">👁 <span>En <b>${esc(nombreHoja(h))}</b> tu usuario es <b>solo para mirar</b>: podés ver todo, pero no cargar ni cambiar datos.</span></div>`);
   }
   function primeraPermitida(){
@@ -35229,6 +35619,11 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   }
   const ml = $('menuLista');
   if(ml) new MutationObserver(()=> aplicarMenu()).observe(ml, { childList:true });
+  // La caja de sesión la redibuja SESION.pintar() (al abrir el menú, al entrar/salir): después se le pone nombre y rol.
+  if(window.SESION && typeof window.SESION.pintar === 'function'){
+    const orig = window.SESION.pintar;
+    window.SESION.pintar = function(){ const r = orig.apply(this, arguments); try{ pintarSesion(); }catch(e){} return r; };
+  }
 
   let toastT = null;
   function toast(t){
@@ -35239,13 +35634,32 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 
   // ---------- Frenar escrituras sin permiso ----------
   const LIBRES = new Set(['fbStockLogin','fbStockLogout','fbPresenciaMarcar','fbPresenciaLeer','fbSaludGuardar','fbSaludLeer','fbAuditar','fbAuditoriaLeer','fbAdjuntoLeer']);
+  // Cada escritura se autoriza por la HOJA DUEÑA del dato (no por la que está en pantalla): así un guardado
+  // demorado no se pierde al cambiar de hoja, y desde una hoja no se escribe lo que es de otra.
+  // Tiene que coincidir con las reglas de Firestore (reglas_firestore.txt).
+  const DUENAS = {
+    fbAddMovimiento:['stock','avance'], fbUpdateMovimiento:['stock'], fbDeleteMovimiento:['stock'],
+    fbGuardarProductoCatalogo:['stock','calc'], fbBorrarProductoCatalogo:['stock'],
+    fbAvanceCrear:['registro','avance','calc','mapa','parte'], fbAvanceGuardar:['avance','registro','mapa','informe','calc'], fbAvanceEliminar:['avance','registro','mapa'],
+    fbHistorialEtapaAdd:['avance'], fbOtAdd:['parte','plan'], fbOtUpdate:['parte','plan','produccion'], fbOtEliminar:['parte','plan'],
+    fbPlanAdd:['plan'], fbPlanUpdate:['plan'], fbPlanEliminar:['plan'],
+    fbGastoAdd:['gastos'], fbGastoUpdate:['gastos'], fbGastoEliminar:['gastos'],
+    fbHistCalcAdd:['calc'], fbHistCalcUpdate:['calc'], fbHistCalcEliminar:['calc'], fbHistCalcVaciar:['calc'],
+    fbAdjuntoGuardar:['stock','avance','parte'], fbAdjuntoBorrar:['stock','avance','parte'],
+    fbBaremoGuardar:['produccion'], fbPersonalGuardar:['produccion','parte'], fbPreciosGuardar:['informe','avance','gastos','produccion']
+  };
+  const SOLO_ADMIN = new Set(['fbReplaceAllMovimientos','fbClearMovimientos']);   // borran o reemplazan TODO el pañol
   Object.keys(window).filter(k => /^fb[A-Z]/.test(k) && typeof window[k] === 'function' && !LIBRES.has(k)).forEach(k => {
     const orig = window[k];
     window[k] = function(){
-      const h = hojaActual();
-      if(permiso(h) !== 'editar'){
-        toast(`🔒 Tu usuario no tiene permiso para cargar ni cambiar datos en «${nombreHoja(h)}».`);
-        const e = new Error('Sin permiso para cargar en ' + nombreHoja(h)); e.code = 'permission-denied';
+      const rolesActivos = cargado && hayAdmin();
+      let ok, donde;
+      if(SOLO_ADMIN.has(k)){ ok = !rolesActivos || esAdmin(); donde = 'reemplazar o vaciar todo el pañol (solo el administrador)'; }
+      else if(DUENAS[k]){ ok = DUENAS[k].some(h => permiso(h) === 'editar'); donde = nombreHoja(DUENAS[k][0]); }
+      else { const h = hojaActual(); ok = permiso(h) === 'editar'; donde = nombreHoja(h); }
+      if(!ok){
+        toast(`🔒 Tu usuario no tiene permiso para cargar ni cambiar datos en «${donde}».`);
+        const e = new Error('Sin permiso para cargar en ' + donde); e.code = 'permission-denied';
         return Promise.reject(e);
       }
       return orig.apply(this, arguments);
@@ -35302,6 +35716,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
           return `<div class="us-hoja"><span class="n">${esc(n)}${aj && aj !== base ? '<small>cambiado</small>' : ''}</span>
             <span class="us-seg" data-hoja="${h}">${[['oculto','Oculta'],['ver','Ver'],['editar','Cargar']].map(([p,t]) => `<button type="button" data-p="${p}" class="${ef === p ? 'on' : ''}" ${u.rol === 'admin' ? 'disabled' : ''}>${t}</button>`).join('')}</span></div>`; }).join('')}</div>
         <div class="us-acc">
+          ${u.pendiente ? '<button type="button" class="btn-primary" data-u="confirmar" style="width:auto; margin:0;">✓ Confirmar con este rol</button>' : ''}
           ${u.ajustes && Object.keys(u.ajustes).length ? '<button type="button" class="btn-ghost" data-u="reset">↺ Volver a lo del rol</button>' : ''}
           ${soyYo ? '' : `<button type="button" class="btn-ghost" data-u="activo" style="${u.activo === false ? '' : 'color:var(--danger);'}">${u.activo === false ? '✓ Volver a activar' : '⛔ Desactivar (no puede entrar)'}</button>`}
         </div>
@@ -35314,8 +35729,10 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
         ${chip}
       </div>${det}</div>`;
   }
-  function render(){
+  function render(soloLista){
     const app = $('usApp'); if(!app) return;
+    if(soloLista && $('usListaCont') && !!$('usHacermeAdmin') === !hayAdmin() && app.dataset.admin === String(esAdmin())){ pintarLista(); return; }
+    app.dataset.admin = String(esAdmin());
     if(!db()){ app.innerHTML = '<div class="card">Sin conexión con la base: los usuarios se manejan con internet.</div>'; return; }
     const lista = Object.values(usuarios).sort((a,b)=> (b.pendiente ? 1 : 0) - (a.pendiente ? 1 : 0) || (a.rol === 'admin' ? -1 : 0) - (b.rol === 'admin' ? -1 : 0) || String(a.nombre||a.email).localeCompare(String(b.nombre||b.email), 'es'));
     const boot = !hayAdmin() ? `<div class="us-boot"><h3>Todavía no hay administrador</h3>
@@ -35343,21 +35760,30 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       <div class="card" style="margin:0;">
         <h2><span class="dot"></span>Usuarios del equipo <span class="h2-sub">${lista.length} en total${lista.some(u=>u.pendiente) ? ' · <b>' + lista.filter(u=>u.pendiente).length + ' a confirmar</b>' : ''}</span></h2>
         <div class="hint" style="margin-top:0;">Tocá una persona para ver y cambiar su rol y qué puede hacer en cada hoja. Los usuarios creados en la consola de Firebase aparecen acá la primera vez que entran, como <b>«A confirmar»</b> y con permiso de solo mirar.</div>
-        <div class="us-lista">${lista.length ? lista.map(htmlUsuario).join('') : '<div class="hint">Todavía nadie entró con usuario propio.</div>'}</div>
+        <div id="usListaCont"></div>
       </div>
     </div>`;
+    pintarLista();
+  }
+  function pintarLista(){
+    const c = $('usListaCont'); if(!c) return;
+    const lista = Object.values(usuarios).sort((a,b)=> (b.pendiente ? 1 : 0) - (a.pendiente ? 1 : 0) || (a.rol === 'admin' ? -1 : 0) - (b.rol === 'admin' ? -1 : 0) || String(a.nombre||a.email).localeCompare(String(b.nombre||b.email), 'es'));
+    c.innerHTML = `<div class="us-lista">${lista.length ? lista.map(htmlUsuario).join('') : '<div class="hint">Todavía nadie entró con usuario propio.</div>'}</div>`;
   }
   async function guardarUsuario(u, cambios, msgId){
     const d = db(); const m = $(msgId);
     if(!esAdmin()){ if(m){ m.className = 'us-msg mal'; m.textContent = 'Solo el administrador puede cambiar usuarios.'; } return false; }
     try{
-      await d.collection('usuarios').doc(u.uid).set({ ...cambios, actualizado:Date.now(), actualizadoPor:(window.__fbUser && window.__fbUser.email) || '' }, { merge:true });
+      // update (no set con merge): así un mapa como `ajustes` se REEMPLAZA entero y quitar un permiso lo quita de verdad.
+      await d.collection('usuarios').doc(u.uid).update({ ...cambios, actualizado:Date.now(), actualizadoPor:(window.__fbUser && window.__fbUser.email) || '' });
+      const usu = cambios.usuario || u.usuario;
+      if(usu && u.email && !alias[usu]) await guardarAlias(usu, u.email);   // que el «usuario corto» sirva para entrar
       return true;
     }catch(e){ if(m){ m.className = 'us-msg mal'; m.textContent = '⚠ No se pudo guardar: ' + (e.message || e); } return false; }
   }
   async function guardarAlias(usuario, correo, anterior){
     const d = db(); if(!d) return;
-    const ups = {}; if(anterior && anterior !== usuario) ups[anterior] = firebase.firestore.FieldValue.delete();
+    const ups = {}; if(anterior && anterior !== usuario && alias[anterior] === correo) ups[anterior] = firebase.firestore.FieldValue.delete();
     if(usuario) ups[usuario] = correo;
     try{ await d.collection('configEquipo').doc('alias').set(ups, { merge:true }); }catch(e){ console.warn('alias', e); }
   }
@@ -35390,6 +35816,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       return;
     }
     if(acc && acc.dataset.u === 'reset'){ await guardarUsuario(u, { ajustes:{} }, 'usMsg_' + u.uid); return; }
+    if(acc && acc.dataset.u === 'confirmar'){ await guardarUsuario(u, { pendiente:false }, 'usMsg_' + u.uid); return; }
     if(acc && acc.dataset.u === 'activo'){
       const nuevo = u.activo === false;
       if(!nuevo && !confirm(`¿Desactivar a ${u.nombre || u.email}? No va a poder entrar a la app hasta que lo vuelvas a activar.`)) return;
@@ -35431,7 +35858,8 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       const cred = await sec.auth().createUserWithEmailAndPassword(correo, pass);
       const nuevoUid = cred.user.uid;
       try{ await sec.auth().signOut(); }catch(e){}
-      await db().collection('usuarios').doc(nuevoUid).set({ email:correo, usuario, nombre, rol:rolNuevo, pendiente:false, activo:true, creado:Date.now(), creadoPor:(window.__fbUser && window.__fbUser.email) || '' });
+      try{ await db().collection('usuarios').doc(nuevoUid).set({ email:correo, usuario, nombre, rol:rolNuevo, pendiente:false, activo:true, creado:Date.now(), creadoPor:(window.__fbUser && window.__fbUser.email) || '' }); }
+      catch(e2){ set(`⚠ La cuenta de <b>${esc(usuario)}</b> quedó creada, pero no se pudo guardar su rol (${esc(e2.message || e2)}). Cuando entre por primera vez va a aparecer en la lista como «A confirmar»: dale el rol ahí.`, 'mal'); b.disabled = false; return; }
       await guardarAlias(usuario, correo);
       msgNuevo = `✓ Listo: <b>${esc(nombre)}</b> entra con usuario <b>${esc(usuario)}</b> y contraseña <b>${esc(pass)}</b> (${esc(ROLES[rolNuevo].nombre)}). Anotalo y pasáselo.`;
       render(); const mm = $('usNuevoMsg'); if(mm) mm.className = 'us-msg bien';
@@ -35448,9 +35876,9 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 
   // ---------- Arranque ----------
   escuchar();
-  try{ if(window.firebase && firebase.auth) firebase.auth().onAuthStateChanged(()=>{ registrarmeSiFalta(); aplicar(); }); }catch(e){}
+  try{ if(window.firebase && firebase.auth) firebase.auth().onAuthStateChanged(()=>{ escuchar(); registrarmeSiFalta(); aplicar(); }); }catch(e){}
   document.addEventListener('portada-abierta', ()=> setTimeout(aplicar, 50));
-  window.PERMISOS = { permiso, hojaActual, ROLES, HOJAS, yo, esAdmin, hayAdmin, aplicar, render, _set:(u, c)=>{ usuarios = u; cargado = c !== false; aplicar(); } };
+  window.PERMISOS = { permiso, hojaActual, ROLES, HOJAS, yo, esAdmin, hayAdmin, aplicar, render };
 })();
 </script>
 
@@ -35469,7 +35897,8 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
    ================================================================== */
 (function(){
   const VISTA_ID = { inicio:'viewInicio', calc:'viewCalculadora', parte:'viewParteDiario', plan:'viewPlanificacion', avance:'viewAvance',
-    mapa:'viewMapa', stock:'viewStock', informe:'viewInforme', gastos:'viewGastos', produccion:'viewProduccion', normas:'viewNormas' };
+    mapa:'viewMapa', stock:'viewStock', informe:'viewInforme', gastos:'viewGastos', produccion:'viewProduccion', normas:'viewNormas',
+    registro:'viewRegistro', tablero:'viewTablero', usuarios:'viewUsuarios' };
   const visible = el => el && getComputedStyle(el).display !== 'none';
   const vistaActual = () => Object.keys(VISTA_ID).find(k => visible(document.getElementById(VISTA_ID[k]))) || 'inicio';
   const menuAbierto = () => { const m = document.getElementById('menuLateral'); return !!m && m.style.display !== 'none' && m.classList.contains('abierto'); };
