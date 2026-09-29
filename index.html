@@ -303,6 +303,15 @@
   .zan-labels{ font-size:11px; color:var(--text-soft); font-weight:600; margin-bottom:6px; }
   .sm-grid{ grid-template-columns:34px minmax(0,2.4fr) 90px 110px 26px; }
   @media (max-width:640px){ .sm-grid{ grid-template-columns:24px minmax(0,1fr) 66px 78px 22px; gap:5px; } .sm-grid input{ font-size:13px; padding-left:6px; padding-right:4px; } }
+  /* Salida con varios materiales: en el celular, «hay en stock» va abajo del producto (así el producto se lee entero) */
+  @media (max-width:640px){
+    .ss-grid{ grid-template-columns:24px minmax(0,1fr) 70px 22px !important; row-gap:2px; }
+    .ss-grid > .tramo-num{ grid-column:1; grid-row:1; } .ss-grid > [data-f="prod"]{ grid-column:2; grid-row:1; }
+    .ss-grid > [data-f="cant"]{ grid-column:3; grid-row:1; } .ss-grid > [data-f="quitar"]{ grid-column:4; grid-row:1; }
+    .ss-grid > [data-f="disp"]{ grid-column:2 / 4; grid-row:2; font-size:11.5px !important; padding-left:4px; }
+    .ss-grid > [data-f="disp"]:not(:empty)::before{ content:"Hay en stock: "; }
+    .zan-labels.ss-grid > :nth-child(4){ display:none; }
+  }
   /* Tableros adicionales T2, T3… (2026-09-22): una mini-tarjeta por tablero dentro de la sección */
   .tbx{ border:1px solid var(--border); border-radius:10px; padding:10px 12px 12px; margin:10px 0; background:rgba(21,42,83,.025); }
   .tbx-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
@@ -3726,7 +3735,7 @@ html, body{ forced-color-adjust:none; }
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-29 10:48 · 6aca8e</span></div>
+      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-29 16:31 · 9c76f1</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -5351,6 +5360,17 @@ html, body{ forced-color-adjust:none; }
           <option value="salida">➖ Salida (retiro de material)</option>
           <option value="devolucion">↩ Devolución (vuelve material al pañol)</option>
         </select>
+        <!-- SECTOR (2026-09-29). Pedido: «hay un sector de ilícitos que también saca material; en la entrada y
+             la salida, un apartado para poner si es para ilícitos o para alumbrado, así busco ilícito y me
+             sale lo de ilícito». Se guarda en cada movimiento (`sector`: alumbrado | ilicitos; sin dato =
+             alumbrado). El stock es uno solo (el mismo pañol): el sector dice para quién fue cada cosa. -->
+        <label>¿Para qué sector?</label>
+        <div class="sec-seg" id="stockMovSectorSeg" role="radiogroup" aria-label="Sector">
+          <button type="button" class="sec-btn activo" data-sector="alumbrado" role="radio" aria-checked="true">💡 Alumbrado</button>
+          <button type="button" class="sec-btn" data-sector="ilicitos" role="radio" aria-checked="false">🚨 Ilícitos</button>
+        </div>
+        <input type="hidden" id="stockMovSector" value="alumbrado">
+        <div class="hint" id="stockMovSectorHint" style="margin-top:3px;"></div>
 
         <label for="stockMovProducto">Producto (código o nombre)</label>
         <input type="text" id="stockMovProducto" list="stockDatalist" placeholder="Escribí el código o el nombre...">
@@ -5433,7 +5453,7 @@ html, body{ forced-color-adjust:none; }
         </div>
         <div id="stockMovSalidaCampos" style="display:none">
           <label for="stockMovRetiradoPor">Retirado por</label>
-          <input type="text" id="stockMovRetiradoPor" placeholder="Nombre">
+          <input type="text" id="stockMovRetiradoPor" placeholder="Nombre (elegilo de la lista del equipo)" list="personalLista" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
           <label for="stockMovDestinoPlaza">Destino / obra</label>
           <select id="stockMovDestinoPlaza"></select>
           <!-- Material en poder de una persona (2026-09-25). El usuario: «que cada personal tenga la
@@ -5447,6 +5467,36 @@ html, body{ forced-color-adjust:none; }
           </div>
           <div class="hint" style="margin-top:2px;">Elegí la plaza a la que va el material. Así después se puede comparar, plaza por plaza, lo que calculó la herramienta contra lo que realmente salió del pañol (pestaña «Registros»). Si no va a una plaza, elegí «Otro destino» y escribilo.</div>
           <input type="text" id="stockMovDestino" placeholder="Ej: Cuadrilla 1, taller, galpón..." style="display:none;">
+          <!-- Salida con varios materiales en un mismo vale (2026-09-29). Pedido: «entrada y devolución tienen
+               lo de varios materiales en el mismo remito, salida no». Dos formas, como en la entrada:
+                 · de a uno con el formulario de arriba: destino y «retirado por» quedan puestos y todo va al
+                   mismo vale hasta tocar «Terminar este vale»;
+                 · o varios de una vez en la grilla de abajo.
+               Cada material es un movimiento (el stock y los balances no cambian), con `valeGrupo` en común:
+               el vale impreso sale uno solo con todos los materiales y un solo número (S-…). -->
+          <div style="margin-top:10px;">
+            <button type="button" class="btn-ghost" id="stockSalMasivoToggle" style="padding:5px 12px; font-size:12.5px;">📋 Cargar varios materiales en esta salida de una vez</button>
+          </div>
+          <div id="stockSalMasivoPanel" style="display:none; margin-top:8px; border:1px solid var(--border); border-radius:10px; padding:10px 12px; background:rgba(21,42,83,.02);">
+            <div class="hint" style="margin-top:0;">Una fila por material: producto (código o nombre) y cantidad. Todos salen al <b>destino, con el «retirado por» y la fecha de arriba</b>, en <b>un solo vale</b>.</div>
+            <div class="zan-labels sm-grid ss-grid"><div></div><div>Producto</div><div>Cantidad</div><div>Hay en stock</div><div></div></div>
+            <div id="stockSalMasivoFilas"></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:6px;">
+              <button type="button" class="btn-auto" id="stockSalMasivoAdd" style="margin:0;">+ Fila</button>
+              <button type="button" class="btn-primary" id="stockSalMasivoBtn" style="margin:0; padding:8px 14px;">Registrar todas las filas</button>
+              <span class="hint" id="stockSalMasivoMsg" style="margin:0;"></span>
+            </div>
+          </div>
+          <div id="stockValePanel" style="display:none; margin-top:10px; background:#eef3fb; border:1px solid #c5d4ee; border-radius:8px; padding:8px 10px; font-size:12.5px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
+              <div id="stockValePanelTxt"></div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button type="button" class="btn-ghost" id="stockValeImprimirBtn" style="padding:4px 10px; font-size:12px; white-space:nowrap;">🖨 Imprimir vale</button>
+                <button type="button" class="btn-ghost" id="stockValeCerrarBtn" style="padding:4px 10px; font-size:12px; white-space:nowrap;">✓ Terminar este vale</button>
+              </div>
+            </div>
+            <div id="stockValePanelItems" style="margin-top:6px; color:var(--text-soft);"></div>
+          </div>
         </div>
 
         <!-- DEVOLUCIONES (2026-09-28). Pedido: «en tipo de movimiento están entradas y salidas, estaría
@@ -5633,6 +5683,17 @@ html, body{ forced-color-adjust:none; }
             <label for="stockMovFiltroPlaza">Filtrar por plaza</label>
             <select id="stockMovFiltroPlaza"></select>
           </div>
+        </div>
+        <div class="row2">
+          <div>
+            <label for="stockMovFiltroSector">Sector</label>
+            <select id="stockMovFiltroSector">
+              <option value="">Todos los sectores</option>
+              <option value="alumbrado">💡 Solo Alumbrado</option>
+              <option value="ilicitos">🚨 Solo Ilícitos</option>
+            </select>
+          </div>
+          <div><label>&nbsp;</label><div class="hint" id="stockMovSectorCuenta" style="margin-top:6px;"></div></div>
         </div>
         <div class="row2">
           <div>
@@ -5857,7 +5918,7 @@ html, body{ forced-color-adjust:none; }
       <div id="personalAvisos"></div>
       <div style="overflow-x:auto;">
         <table id="tablaPersonal"><thead><tr>
-          <th style="width:110px;">Legajo</th><th>Nombre y apellido</th><th style="width:160px;">Rol habitual</th>
+          <th style="width:110px;">Legajo</th><th>Nombre y apellido</th><th style="width:150px;">Sector</th><th style="width:160px;">Rol habitual</th>
           <th style="width:120px;" title="Costo de una hora de esta persona para la empresa. Con esto se calcula sola la mano de obra en Gastos de obra.">Valor hora ($)</th>
           <th style="width:80px; text-align:center;">Activo</th><th class="no-print" style="width:40px;"></th>
         </tr></thead><tbody id="personalBody"></tbody></table>
@@ -10977,6 +11038,102 @@ document.getElementById('avanceAuthLogoutBtn').addEventListener('click', async f
   try{ await window.fbStockLogout(); }catch(e){}
 });
 
+// ---- Sector de cada movimiento: Alumbrado o Ilícitos (2026-09-29) ----
+const SECTORES = { alumbrado:{ ico:'💡', txt:'Alumbrado' }, ilicitos:{ ico:'🚨', txt:'Ilícitos' } };
+function sectorDeMov(m){ return m && m.sector === 'ilicitos' ? 'ilicitos' : 'alumbrado'; }
+function sectorElegido(){ return (document.getElementById('stockMovSector')||{}).value === 'ilicitos' ? 'ilicitos' : 'alumbrado'; }
+function etiquetaSector(m){ const k = sectorDeMov(m); return `<span class="sec-tag sec-${k}">${SECTORES[k].ico} ${SECTORES[k].txt}</span>`; }
+window.sectorDeMov = sectorDeMov; window.etiquetaSector = etiquetaSector;
+// Pone el sector en el formulario. `porque` (opcional) explica por qué se puso solo.
+window.stockPonerSector = function(k, porque){
+  k = k === 'ilicitos' ? 'ilicitos' : 'alumbrado';
+  const inp = document.getElementById('stockMovSector'); if(inp) inp.value = k;
+  document.querySelectorAll('#stockMovSectorSeg .sec-btn').forEach(b => { const on = b.dataset.sector === k; b.classList.toggle('activo', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); });
+  const h = document.getElementById('stockMovSectorHint'); if(h) h.innerHTML = porque ? `Se puso solo: ${porque}. Si no es así, cambialo.` : '';
+  try{ stockValePintar(); }catch(e){}
+};
+// Si la persona que retira / recibe / devuelve está en la nómina, su sector se pone solo.
+function stockSectorPorPersona(nombre){
+  const k = (typeof window.sectorDePersona === 'function') ? window.sectorDePersona(nombre) : null;
+  if(k && k !== sectorElegido()) window.stockPonerSector(k, `${escHtml(String(nombre).trim())} es de <b>${SECTORES[k].txt}</b> (nómina)`);
+}
+(function(){
+  const seg = document.getElementById('stockMovSectorSeg');
+  if(seg) seg.addEventListener('click', e => { const b = e.target.closest('.sec-btn'); if(b) window.stockPonerSector(b.dataset.sector); });
+  ['stockMovRetiradoPor','stockMovPersona'].forEach(id => { const e = document.getElementById(id); if(e) e.addEventListener('change', ()=> stockSectorPorPersona(e.value)); });
+  const t = document.getElementById('stockMovTipo'); if(t) t.addEventListener('change', ()=>{ const h = document.getElementById('stockMovSectorHint'); if(h) h.innerHTML = ''; });
+})();
+
+// Lo común de toda salida (destino, a quién, retirado por). Si falta algo, lo dice en `msg` y devuelve null.
+function stockLeerSalidaBase(msg){
+  const out = { retiradoPor: document.getElementById('stockMovRetiradoPor').value.trim() };
+  const valPlaza = document.getElementById('stockMovDestinoPlaza').value;
+  const mal = t => { msg.style.color = 'var(--danger)'; msg.textContent = t; return null; };
+  if(!valPlaza) return mal('⚠ Elegí el destino de la salida (una plaza, o «Otro destino»).');
+  if(valPlaza === '__otro'){
+    out.destino = document.getElementById('stockMovDestino').value.trim();
+    if(!out.destino) return mal('⚠ Escribí cuál es el otro destino.');
+  } else if(valPlaza === '__persona'){
+    // En cargo de una persona (2026-09-25): baja el stock como cualquier salida y queda marcado
+    // de quién es; se descuenta con una devolución o cuando lo usa en una plaza.
+    const nom = document.getElementById('stockMovPersona').value.trim();
+    if(!nom) return mal('⚠ Escribí a quién se le entrega el material.');
+    out.enCargo = true; out.personaNombre = nom;
+    const lg = (typeof window.legajoDeNombre === 'function') ? window.legajoDeNombre(nom) : null;
+    if(lg) out.personaLegajo = String(lg);
+    if(!out.retiradoPor) out.retiradoPor = nom;
+    out.destino = `En poder de ${nom}`;
+  } else {
+    const plaza = avanceObras.find(x=>x.id===valPlaza);
+    if(!plaza) return mal('⚠ No se encontró esa plaza — recargá la página y probá de nuevo.');
+    out.plazaId = plaza.id;              // id del documento de avanceObras — es la clave del balance
+    out.obraId = String(plaza.obraId||'');
+    out.destino = plaza.nombre;          // se sigue guardando el nombre legible, para el listado y el CSV
+  }
+  return out;
+}
+
+// ---- Vale de salida en curso (2026-09-29): lo que ya salió al mismo destino, con el mismo «retirado por» y fecha ----
+window.__valeEnCurso = { clave:'', grupo:'', items:[] };
+function stockValeClave(){
+  const v = id => ((document.getElementById(id)||{}).value || '').trim().toLowerCase();
+  return [v('stockMovDestinoPlaza'), v('stockMovDestinoPlaza') === '__persona' ? v('stockMovPersona') : '', v('stockMovDestinoPlaza') === '__otro' ? v('stockMovDestino') : '', v('stockMovRetiradoPor'), v('stockMovFecha'), v('stockMovSector')].join('|');
+}
+function stockValeGrupoPara(){
+  const V = window.__valeEnCurso, k = stockValeClave();
+  if(V.clave !== k || !V.grupo){ V.clave = k; V.grupo = 'VS' + Date.now().toString(36) + Math.random().toString(36).slice(2,5); V.items = []; }
+  return V.grupo;
+}
+function stockValeAnotar(mov, id){
+  const V = window.__valeEnCurso;
+  if(V.grupo !== mov.valeGrupo) return;
+  V.items.push({ id, desc:mov.desc, cantidad:mov.cantidad, un:mov.un });
+  stockValePintar();
+}
+function stockValePintar(){
+  const panel = document.getElementById('stockValePanel'); if(!panel) return;
+  const V = window.__valeEnCurso;
+  const tipo = (document.getElementById('stockMovTipo')||{}).value;
+  if(tipo !== 'salida' || !V.items.length || V.clave !== stockValeClave()){ panel.style.display = 'none'; return; }
+  panel.style.display = '';
+  const primero = (window.stockMovimientos||[]).find(x => x.id === V.items[0].id);
+  const nro = primero ? numeroComprobante(primero) : '';
+  const dest = (()=>{ const sel = document.getElementById('stockMovDestinoPlaza'); if(!sel) return ''; if(sel.value === '__persona') return 'En poder de ' + (document.getElementById('stockMovPersona').value || ''); if(sel.value === '__otro') return document.getElementById('stockMovDestino').value; const o = sel.options[sel.selectedIndex]; return o ? o.textContent : ''; })();
+  const ret = (document.getElementById('stockMovRetiradoPor')||{}).value || '';
+  document.getElementById('stockValePanelTxt').innerHTML = `🧾 <b>Vale de salida en curso${nro ? ' ' + escHtml(nro) : ''}:</b> ${etiquetaSector({ sector:sectorElegido() })} ${escHtml(dest)}${ret ? ' · retira ' + escHtml(ret) : ''} — <b>${V.items.length}</b> material(es). Cargá el siguiente: destino y quién retira ya quedan puestos.`;
+  document.getElementById('stockValePanelItems').innerHTML = V.items.map(i => `• ${escHtml(i.desc)} — ${fmt(i.cantidad,2)} ${escHtml(i.un)}`).join('<br>');
+}
+window.stockValeCerrar = function(){
+  window.__valeEnCurso = { clave:'', grupo:'', items:[] };
+  const r = document.getElementById('stockMovRetiradoPor'); if(r) r.value = '';
+  const panel = document.getElementById('stockValePanel'); if(panel) panel.style.display = 'none';
+};
+(function(){
+  const c = document.getElementById('stockValeCerrarBtn'); if(c) c.addEventListener('click', ()=> window.stockValeCerrar());
+  const i = document.getElementById('stockValeImprimirBtn'); if(i) i.addEventListener('click', ()=>{ const V = window.__valeEnCurso; if(V.items.length) verComprobanteMovimiento(V.items[0].id); });
+  ['stockMovDestinoPlaza','stockMovPersona','stockMovDestino','stockMovRetiradoPor','stockMovFecha','stockMovTipo'].forEach(id => { const e = document.getElementById(id); if(e){ e.addEventListener('input', stockValePintar); e.addEventListener('change', stockValePintar); } });
+})();
+
 document.getElementById('stockMovBtn').addEventListener('click', async function(){
   const btn = this;
   const msg = document.getElementById('stockMovMsg');
@@ -10996,7 +11153,7 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
   // compartida del equipo — si más adelante cada persona tiene su propio usuario, esto ya lo refleja
   // solo, sin tocar nada más.
   const mov = { tipo, codigo:item.codigo, desc:item.desc, un:item.un, cantidad, fecha, ts:Date.now(),
-                usuario: (window.__fbUser && window.__fbUser.email) || '' };
+                usuario: (window.__fbUser && window.__fbUser.email) || '', sector: sectorElegido() };
   if(tipo==='entrada'){
     mov.proveedor = document.getElementById('stockMovProveedor').value.trim();
     // Remito y precio (2026-09-22). El precio es opcional: si no se carga, la entrada queda como
@@ -11017,30 +11174,9 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
     if(!mov.devolucion && isFinite(pu) && pu >= 0 && String((document.getElementById('stockMovPrecio')||{value:''}).value).trim() !== ''){ mov.precioUnit = Math.round(pu * 100) / 100; mov.moneda = 'ARS'; }
     if(mov.devolucion){ mov.remito = ''; }
   } else {
-    mov.retiradoPor = document.getElementById('stockMovRetiradoPor').value.trim();
-    const selPlaza = document.getElementById('stockMovDestinoPlaza');
-    const valPlaza = selPlaza.value;
-    if(!valPlaza){ msg.textContent = '⚠ Elegí el destino de la salida (una plaza, o «Otro destino»).'; return; }
-    if(valPlaza === '__otro'){
-      mov.destino = document.getElementById('stockMovDestino').value.trim();
-      if(!mov.destino){ msg.textContent = '⚠ Escribí cuál es el otro destino.'; return; }
-    } else if(valPlaza === '__persona'){
-      // En cargo de una persona (2026-09-25): baja el stock como cualquier salida y queda marcado
-      // de quién es; se descuenta con una devolución o cuando lo usa en una plaza.
-      const nom = document.getElementById('stockMovPersona').value.trim();
-      if(!nom){ msg.textContent = '⚠ Escribí a quién se le entrega el material.'; return; }
-      mov.enCargo = true; mov.personaNombre = nom;
-      const lg = (typeof window.legajoDeNombre === 'function') ? window.legajoDeNombre(nom) : null;
-      if(lg) mov.personaLegajo = String(lg);
-      if(!mov.retiradoPor) mov.retiradoPor = nom;
-      mov.destino = `En poder de ${nom}`;
-    } else {
-      const plaza = avanceObras.find(x=>x.id===valPlaza);
-      if(!plaza){ msg.textContent = '⚠ No se encontró esa plaza — recargá la página y probá de nuevo.'; return; }
-      mov.plazaId = plaza.id;              // id del documento de avanceObras — es la clave del balance
-      mov.obraId = String(plaza.obraId||'');
-      mov.destino = plaza.nombre;          // se sigue guardando el nombre legible, para el listado y el CSV
-    }
+    const base = stockLeerSalidaBase(msg); if(!base) return;
+    Object.assign(mov, base);
+    mov.valeGrupo = stockValeGrupoPara();   // varios materiales al mismo destino = un solo vale
     const disponible = stockActual(item.codigo);
     if(cantidad > disponible){
       if(!confirm(`Esto deja el stock de "${item.desc}" en ${fmt(disponible-cantidad,2)} (negativo). ¿Registrar igual?`)) return;
@@ -11079,8 +11215,9 @@ document.getElementById('stockMovBtn').addEventListener('click', async function(
   } else {
     document.getElementById('stockMovProveedor').value = '';
   }
-  document.getElementById('stockMovRetiradoPor').value = '';
-  document.getElementById('stockMovDestino').value = '';
+  // En una salida, «retirado por» y el otro destino QUEDAN (2026-09-29): lo que sigue va al mismo vale.
+  if(tipo !== 'salida'){ document.getElementById('stockMovRetiradoPor').value = ''; document.getElementById('stockMovDestino').value = ''; }
+  else if(nuevoId) stockValeAnotar(mov, nuevoId);
   // El destino (plaza) NO se limpia a propósito: lo normal es cargar varias salidas seguidas para
   // la misma plaza, y volver a elegirla en cada renglón era un paso de más en el celular.
   actualizarStockMovProductoHint();
@@ -11325,7 +11462,8 @@ window.renderStockPersonas = function(){
   const personas = personasConCargo();
   const conAlgo = new Set(personas.filter(n => window.cargoDePersona(n).some(r => Math.abs(r.enPoder) > 0.0001 || r.entregado > 0)).map(personaClave));
   const previo = sel.value || __personaSel;
-  sel.innerHTML = `<option value="">— Elegí una persona —</option>` + personas.map(n => `<option value="${escHtml(n)}">${escHtml(n)}${conAlgo.has(personaClave(n)) ? ' · tiene material' : ''}</option>`).join('');
+  const secDe = n => (typeof window.sectorDePersona === 'function' && window.sectorDePersona(n) === 'ilicitos') ? ' · 🚨 Ilícitos' : '';
+  sel.innerHTML = `<option value="">— Elegí una persona —</option>` + personas.map(n => `<option value="${escHtml(n)}">${escHtml(n)}${secDe(n)}${conAlgo.has(personaClave(n)) ? ' · tiene material' : ''}</option>`).join('');
   if(previo && personas.some(n => personaClave(n) === personaClave(previo))) sel.value = personas.find(n => personaClave(n) === personaClave(previo));
   __personaSel = sel.value;
   const res = document.getElementById('stockPersonaResumen'); const hist = document.getElementById('stockPersonaHist');
@@ -11538,7 +11676,7 @@ window.exportarComprasCSV = function(cual){
       const it = stockParsearProducto(txt); const cant = parseFloat(d.querySelector('[data-f="cant"]').value) || 0; const pv = d.querySelector('[data-f="precio"]').value;
       if(!it){ errores.push(`fila ${i+1}: producto no reconocido («${txt}»)`); return; }
       if(!(cant > 0)){ errores.push(`fila ${i+1}: cantidad`); return; }
-      const mov = { tipo:'entrada', codigo:it.codigo, desc:it.desc, un:it.un, cantidad:cant, fecha, ts:Date.now() + i, usuario:(window.__fbUser && window.__fbUser.email) || '', proveedor, remito };
+      const mov = { tipo:'entrada', codigo:it.codigo, desc:it.desc, un:it.un, cantidad:cant, fecha, ts:Date.now() + i, usuario:(window.__fbUser && window.__fbUser.email) || '', proveedor, remito, sector: sectorElegido() };
       const pu = parseFloat(pv); if(String(pv).trim() !== '' && isFinite(pu) && pu >= 0){ mov.precioUnit = Math.round(pu * 100) / 100; mov.moneda = 'ARS'; }
       lista.push({ mov, it, d });
     });
@@ -11556,6 +11694,83 @@ window.exportarComprasCSV = function(cual){
     }
     btn.disabled = false; [...filas.children].forEach((x,i)=> x.querySelector('.tramo-num').textContent = i + 1);
     msg.style.color = 'var(--teal-dark)'; msg.textContent = `✓ ${ok} renglón(es) registrados en el remito ${remito || '(sin número)'}${proveedor ? ' de ' + proveedor : ''}.`;
+    if(!filas.children.length){ for(let i = 0; i < 3; i++) fila(); }
+  });
+})();
+
+
+// ---- Salida con varios materiales de una vez (2026-09-29): todos al mismo destino, en un solo vale ----
+(function(){
+  const panel = document.getElementById('stockSalMasivoPanel'); if(!panel) return;
+  const filas = document.getElementById('stockSalMasivoFilas');
+  const renumerar = ()=> [...filas.children].forEach((x,i)=> x.querySelector('.tramo-num').textContent = i + 1);
+  const pintarDisp = d => {
+    const it = stockParsearProducto(d.querySelector('[data-f="prod"]').value); const s = d.querySelector('[data-f="disp"]');
+    if(!it){ s.textContent = ''; s.style.color = ''; return; }
+    const hay = stockActual(it.codigo), cant = parseFloat(d.querySelector('[data-f="cant"]').value) || 0;
+    s.textContent = `${fmt(hay,2)} ${it.un || ''}`.trim();
+    s.style.color = cant > hay + 0.0001 ? 'var(--danger)' : 'var(--text-soft)';
+  };
+  const fila = ()=>{
+    const d = document.createElement('div'); d.className = 'zan-row sm-fila sm-grid ss-grid';
+    d.innerHTML = `<div class="tramo-num">${filas.children.length + 1}</div>
+      <input type="text" data-f="prod" list="stockDatalist" placeholder="Código o nombre…" autocomplete="off">
+      <input type="number" data-f="cant" min="0" step="0.01" placeholder="cant." inputmode="decimal">
+      <span data-f="disp" style="font-size:12px; align-self:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
+      <button type="button" class="tramo-remove" data-f="quitar" title="Quitar fila">×</button>`;
+    filas.appendChild(d);
+    d.querySelector('[data-f="quitar"]').addEventListener('click', ()=>{ d.remove(); renumerar(); });
+    ['change','input'].forEach(ev => { d.querySelector('[data-f="prod"]').addEventListener(ev, ()=> pintarDisp(d)); d.querySelector('[data-f="cant"]').addEventListener(ev, ()=> pintarDisp(d)); });
+    return d;
+  };
+  document.getElementById('stockSalMasivoToggle').addEventListener('click', ()=>{
+    const abierto = panel.style.display !== 'none';
+    panel.style.display = abierto ? 'none' : '';
+    if(!abierto && !filas.children.length){ for(let i = 0; i < 5; i++) fila(); }
+  });
+  document.getElementById('stockSalMasivoAdd').addEventListener('click', ()=>{ const d = fila(); d.querySelector('[data-f="prod"]').focus(); });
+  document.getElementById('stockSalMasivoBtn').addEventListener('click', async function(){
+    const btn = this; const msg = document.getElementById('stockSalMasivoMsg'); msg.style.color = 'var(--danger)';
+    if(!stockFirebaseListo()){ msg.textContent = '⚠ No se pudo conectar con la base compartida.'; return; }
+    if(!window.__fbUser){ msg.textContent = '⚠ Iniciá sesión para registrar.'; return; }
+    const fecha = document.getElementById('stockMovFecha').value; if(!fecha){ msg.textContent = '⚠ Elegí la fecha arriba.'; return; }
+    const base = stockLeerSalidaBase(msg); if(!base) return;
+    const lista = []; const errores = [];
+    [...filas.children].forEach((d, i)=>{
+      const txt = d.querySelector('[data-f="prod"]').value.trim(); if(!txt) return;
+      const it = stockParsearProducto(txt); const cant = parseFloat(d.querySelector('[data-f="cant"]').value) || 0;
+      if(!it){ errores.push(`fila ${i+1}: producto no reconocido («${txt}»)`); return; }
+      if(!(cant > 0)){ errores.push(`fila ${i+1} (${it.desc}): falta la cantidad`); return; }
+      lista.push({ it, cant, d });
+    });
+    if(errores.length){ msg.textContent = '⚠ Revisá: ' + errores.join(' · '); return; }
+    if(!lista.length){ msg.textContent = '⚠ No hay filas cargadas.'; return; }
+    // Stock que queda negativo: se avisa una sola vez, sumando las filas del mismo producto.
+    const porCod = new Map(); lista.forEach(x => porCod.set(x.it.codigo, (porCod.get(x.it.codigo) || 0) + x.cant));
+    const negativos = [];
+    porCod.forEach((cant, cod) => { const hay = stockActual(cod); if(cant > hay + 0.0001){ const it = lista.find(x => x.it.codigo === cod).it; negativos.push(`· ${it.desc}: hay ${fmt(hay,2)} ${it.un}, salen ${fmt(cant,2)}`); } });
+    if(negativos.length && !confirm(`Esto deja stock negativo en:\n${negativos.join('\n')}\n\n¿Registrar igual?`)) return;
+    const grupo = stockValeGrupoPara();
+    btn.disabled = true; let ok = 0; const usuario = (window.__fbUser && window.__fbUser.email) || '';
+    for(const [i, x] of lista.entries()){
+      msg.style.color = 'var(--text-soft)'; msg.textContent = `Guardando ${i + 1} de ${lista.length}…`;
+      const mov = { tipo:'salida', codigo:x.it.codigo, desc:x.it.desc, un:x.it.un, cantidad:x.cant, fecha, ts:Date.now() + i, usuario, ...base, valeGrupo:grupo, sector: sectorElegido() };
+      try{
+        const id = await window.fbAddMovimiento(mov); ok++;
+        if(id && ok === 1) window.__ultimoMovLocal = Object.assign({ id }, mov);
+        stockValeAnotar(mov, id);
+        x.d.remove();   // la que ya se guardó sale de la grilla: si algo falla, reintentar no la duplica
+      }catch(e){
+        msg.style.color = 'var(--danger)';
+        msg.textContent = (e && e.code === 'permission-denied') ? `🔒 Tu usuario no tiene permiso para cargar en el pañol. Se registraron ${ok} de ${lista.length}.`
+          : `⚠ Se registraron ${ok} de ${lista.length}; «${x.it.desc}» falló (revisá la conexión). Las que quedan en la grilla no se guardaron: tocá «Registrar todas las filas» otra vez.`;
+        btn.disabled = false; renumerar(); return;
+      }
+    }
+    btn.disabled = false; renumerar();
+    const V = window.__valeEnCurso;
+    msg.style.color = 'var(--teal-dark)';
+    msg.innerHTML = `✓ Listo: ${ok} registrado(s). El vale ${etiquetaSector({ sector:sectorElegido() })} para <b>${escHtml(base.destino)}</b> tiene ${V.items.length} material(es).` + (V.items.length ? ` <button type="button" class="btn-ghost" onclick="verComprobanteMovimiento('${V.items[0].id}')" style="margin-left:6px; padding:3px 10px; font-size:12px;">🖨 Imprimir vale</button>` : '');
     if(!filas.children.length){ for(let i = 0; i < 3; i++) fila(); }
   });
 })();
@@ -11942,12 +12157,12 @@ renderCatalogoTabla();
 
 document.getElementById('stockSoloFaltantes').addEventListener('change', renderStockTabla);
 
-['stockMovBuscar','stockMovFiltroPlaza','stockMovDesde','stockMovHasta'].forEach(id=>{
+['stockMovBuscar','stockMovFiltroPlaza','stockMovFiltroSector','stockMovDesde','stockMovHasta'].forEach(id=>{
   const el = document.getElementById(id);
   if(el) el.addEventListener(el.tagName==='SELECT'||el.type==='date' ? 'change' : 'input', renderStockMovimientos);
 });
 function limpiarFiltroMovimientos(){
-  ['stockMovBuscar','stockMovFiltroPlaza','stockMovDesde','stockMovHasta'].forEach(id=>{
+  ['stockMovBuscar','stockMovFiltroPlaza','stockMovFiltroSector','stockMovDesde','stockMovHasta'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.value = '';
   });
@@ -11967,6 +12182,7 @@ function imprimirMovimientos(){
   const cuerpo = filas.length ? filas.map(m=>`<tr${m.anulado?' style="opacity:.55;"':''}>
       <td>${escHtml(formatFechaCorta(m.fecha)||'—')}</td>
       <td>${etiquetaTipoMov(m, false)}</td>
+      <td>${SECTORES[sectorDeMov(m)].txt}</td>
       <td>${escHtml(String(m.codigo))}</td>
       <td>${escHtml(m.desc||'')}</td>
       <td style="text-align:right;">${fmt(m.cantidad,2)} ${escHtml(m.un||'')}</td>
@@ -11974,10 +12190,11 @@ function imprimirMovimientos(){
       <td>${escHtml(m.retiradoPor||m.devueltoPor||'')}</td>
       <td>${escHtml(m.usuario||'')}</td>
       <td>${m.anulado?'ANULADO':''}</td>
-    </tr>`).join('') : `<tr><td colspan="9" style="text-align:center; padding:16px;">Sin movimientos para este filtro.</td></tr>`;
+    </tr>`).join('') : `<tr><td colspan="10" style="text-align:center; padding:16px;">Sin movimientos para este filtro.</td></tr>`;
+  const secSel = (document.getElementById('stockMovFiltroSector')||{}).value || '';
   abrirHojaImpresion('Registro de movimientos de material', [
-    `<div><b>Plaza / destino:</b> ${escHtml(plazaTxt)} &nbsp;·&nbsp; <b>Período:</b> ${escHtml(periodo)} &nbsp;·&nbsp; <b>Movimientos:</b> ${filas.length}</div>`,
-    `<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Cód.</th><th>Producto</th><th>Cantidad</th><th>Destino / proveedor</th><th>Retirado por</th><th>Cargó</th><th></th></tr></thead><tbody>${cuerpo}</tbody></table>`
+    `<div><b>Plaza / destino:</b> ${escHtml(plazaTxt)} &nbsp;·&nbsp; <b>Sector:</b> ${secSel ? SECTORES[secSel].txt : 'Todos'} &nbsp;·&nbsp; <b>Período:</b> ${escHtml(periodo)} &nbsp;·&nbsp; <b>Movimientos:</b> ${filas.length}</div>`,
+    `<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Sector</th><th>Cód.</th><th>Producto</th><th>Cantidad</th><th>Destino / proveedor</th><th>Retirado por</th><th>Cargó</th><th></th></tr></thead><tbody>${cuerpo}</tbody></table>`
   ].join(''));
 }
 
@@ -12023,7 +12240,7 @@ function numeroComprobante(m){
     .filter(x=>serie(x)===serie(m))
     .sort((a,b)=> (a.ts||0)-(b.ts||0) || String(a.id||'').localeCompare(String(b.id||'')));
   // Una devolución con varios materiales es UN comprobante: se numera por grupo (2026-09-28).
-  const clave = x => (serie(x) === 'D' && x.devolGrupo) ? 'g:' + x.devolGrupo : 'm:' + x.id;
+  const clave = x => (serie(x) === 'D' && x.devolGrupo) ? 'g:' + x.devolGrupo : ((serie(x) === 'S' && x.valeGrupo) ? 'v:' + x.valeGrupo : 'm:' + x.id);   // un vale de varios materiales = un número
   const claves = [...new Set(mismos.map(clave))];
   const pos = claves.indexOf(clave(m));
   const n = pos >= 0 ? pos+1 : claves.length+1;
@@ -12042,16 +12259,18 @@ function verComprobanteMovimiento(id){
   const nro = numeroComprobante(m);
   const fila = (rot, val) => val ? `<tr><th style="width:34%; background:#eef5f2;">${escHtml(rot)}</th><td>${escHtml(val)}</td></tr>` : '';
   const restante = (typeof stockActual === 'function') ? stockActual(m.codigo) : null;
-  // Devolución de varios materiales: todos los renglones del mismo grupo van en este comprobante.
+  // Devolución o vale de salida de varios materiales: todos los renglones del mismo grupo van en este comprobante.
+  const esVale = !esEntrada && !esDevol && !!m.valeGrupo;
   const grupoDev = (esDevol && m.devolGrupo)
     ? (window.stockMovimientos||[]).filter(x => x.devolGrupo === m.devolGrupo && x.devolucion).sort((a,b)=> (a.ts||0)-(b.ts||0))
-    : [m];
-  if(esDevol && m.devolGrupo && !grupoDev.some(x=>x.id===m.id)) grupoDev.push(m);
+    : (esVale ? (window.stockMovimientos||[]).filter(x => x.valeGrupo === m.valeGrupo && x.tipo === 'salida').sort((a,b)=> (a.ts||0)-(b.ts||0)) : [m]);
+  if(((esDevol && m.devolGrupo) || esVale) && !grupoDev.some(x=>x.id===m.id)) grupoDev.push(m);
 
   const datos = [
     fila('Comprobante N°', nro),
     fila('Fecha del movimiento', formatFechaCorta(m.fecha) || m.fecha || '—'),
     fila('Tipo', esDevol ? 'DEVOLUCIÓN — el material vuelve al pañol' : (esEntrada ? 'ENTRADA — ingreso de material al pañol' : 'SALIDA — retiro de material del pañol')),
+    fila('Sector', sectorDeMov(m) === 'ilicitos' ? 'ILÍCITOS' : 'ALUMBRADO PÚBLICO'),
     esDevol ? fila('Vuelve de', m.devolOrigen === 'obra' ? `Obra: ${m.destino || '—'}${m.obraId ? ` (ID ${m.obraId})` : ''}` : `Stock de la persona: ${m.personaNombre || '—'}`) : '',
     esDevol ? fila('Devuelto por', m.devueltoPor || '—') : '',
     esDevol ? fila('Motivo', m.devolMotivo || '') : '',
@@ -12069,7 +12288,12 @@ function verComprobanteMovimiento(id){
       <tbody>${grupoDev.map(x => `<tr${x.anulado ? ' style="text-decoration:line-through; opacity:.6;"' : ''}>
         <td>${escHtml(String(x.codigo))}</td><td>${escHtml(x.desc||'')}${x.anulado ? ' <b>(ANULADO)</b>' : ''}</td>
         <td style="text-align:right; font-weight:700;">${fmt(x.cantidad,2)}</td><td>${escHtml(x.un||'')}</td><td>${escHtml(EST_TXT[x.devolEstado] || '')}</td></tr>`).join('')}</tbody>
-      <tfoot><tr><td colspan="5" style="font-weight:700;">${grupoDev.length} materiales en esta devolución</td></tr></tfoot></table>` : `<table style="margin-top:14px;">
+      <tfoot><tr><td colspan="5" style="font-weight:700;">${grupoDev.length} materiales en esta devolución</td></tr></tfoot></table>` : (esVale && grupoDev.length > 1) ? `<table style="margin-top:14px;">
+      <thead><tr><th style="width:14%;">Código</th><th>Producto</th><th style="width:16%; text-align:right;">Cantidad</th><th style="width:12%;">Unidad</th></tr></thead>
+      <tbody>${grupoDev.map(x => `<tr${x.anulado ? ' style="text-decoration:line-through; opacity:.6;"' : ''}>
+        <td>${escHtml(String(x.codigo))}</td><td>${escHtml(x.desc||'')}${x.anulado ? ' <b>(ANULADO)</b>' : ''}</td>
+        <td style="text-align:right; font-weight:700;">${fmt(x.cantidad,2)}</td><td>${escHtml(x.un||'')}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td colspan="4" style="font-weight:700;">${grupoDev.length} materiales en este vale</td></tr></tfoot></table>` : `<table style="margin-top:14px;">
       <thead><tr><th style="width:14%;">Código</th><th>Producto</th><th style="width:16%; text-align:right;">Cantidad</th><th style="width:12%;">Unidad</th></tr></thead>
       <tbody><tr>
         <td>${escHtml(String(m.codigo))}</td>
@@ -12223,6 +12447,8 @@ function renderStockMovimientos(){
   const ordenados = movimientosFiltrados().sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||'') || (b.ts||0)-(a.ts||0));
   const cont = document.getElementById('stockMovCount');
   if(cont) cont.textContent = `${ordenados.length} de ${stockMovimientos.length} movimiento(s).`;
+  { const sc = document.getElementById('stockMovSectorCuenta');
+    if(sc){ const vivos = ordenados.filter(m => !m.anulado); const il = vivos.filter(m => sectorDeMov(m) === 'ilicitos').length; sc.innerHTML = `En lo que se ve: 💡 <b>${vivos.length - il}</b> de Alumbrado · 🚨 <b>${il}</b> de Ilícitos`; } }
   if(!ordenados.length){
     body.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-soft); padding:20px;">Ningún movimiento coincide con el filtro.</td></tr>`;
     return;
@@ -12246,7 +12472,7 @@ function renderStockMovimientos(){
       : `<button type="button" class="btn-ghost" onclick="anularStockMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px; color:var(--danger);" title="Anular este movimiento (queda en el registro pero deja de contar)">⊘</button>`);
     return `<tr${estiloFila}>
       <td>${fechaFmt}</td>
-      <td>${etiquetaTipoMov(m, true)}</td>
+      <td>${etiquetaTipoMov(m, true)}<br>${etiquetaSector(m)}</td>
       <td>${m.codigo}</td>
       <td>${escHtml(m.desc)}</td>
       <td>${fmt(m.cantidad,2)} ${escHtml(m.un)}</td>
@@ -12264,13 +12490,15 @@ function renderStockMovimientos(){
 function movimientosFiltrados(){
   const q = ((document.getElementById('stockMovBuscar')||{}).value||'').trim().toLowerCase();
   const plaza = ((document.getElementById('stockMovFiltroPlaza')||{}).value||'');
+  const sector = ((document.getElementById('stockMovFiltroSector')||{}).value||'');
   const desde = ((document.getElementById('stockMovDesde')||{}).value||'');
   const hasta = ((document.getElementById('stockMovHasta')||{}).value||'');
   return stockMovimientos.filter(m=>{
     if(q){
-      const texto = `${m.codigo} ${m.desc||''} ${m.destino||''} ${m.retiradoPor||''} ${m.proveedor||''} ${m.remito||''} ${m.personaNombre||''} ${m.usuario||''} ${m.devueltoPor||''} ${m.devolMotivo||''} ${m.devolObs||''} ${m.devolucion?'devolución devolucion':''}`.toLowerCase();
-      if(!texto.includes(q)) return false;
+      const texto = `${m.codigo} ${m.desc||''} ${m.destino||''} ${m.retiradoPor||''} ${m.proveedor||''} ${m.remito||''} ${m.personaNombre||''} ${m.usuario||''} ${m.devueltoPor||''} ${m.devolMotivo||''} ${m.devolObs||''} ${m.devolucion?'devolución devolucion':''} ${sectorDeMov(m) === 'ilicitos' ? 'ilícitos ilicitos ilícito ilicito' : 'alumbrado'}`.toLowerCase();
+      if(!texto.includes(q) && !texto.normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(q.normalize('NFD').replace(/[\u0300-\u036f]/g,''))) return false;
     }
+    if(sector && sectorDeMov(m) !== sector) return false;
     if(plaza && String(m.plazaId||'') !== plaza) return false;
     if(desde && (m.fecha||'') < desde) return false;
     if(hasta && (m.fecha||'') > hasta) return false;
@@ -12342,11 +12570,11 @@ async function reactivarStockMovimiento(id){
 // Exporta EXACTAMENTE lo que se está viendo (con los filtros aplicados) — se abre directo en Excel.
 function exportarMovimientosCSV(){
   const filas = movimientosFiltrados().sort((a,b)=> (a.fecha||'').localeCompare(b.fecha||'') || (a.ts||0)-(b.ts||0));
-  let csv = 'Fecha,Tipo,Código,Producto,Cantidad,Unidad,Plaza / destino,ID obra,Retirado por,Proveedor / comprobante,Cargó,Anulado,Motivo de anulación,Remito,Precio unitario sin IVA,Importe sin IVA\n';
+  let csv = 'Fecha,Tipo,Código,Producto,Cantidad,Unidad,Plaza / destino,ID obra,Retirado por,Proveedor / comprobante,Cargó,Anulado,Motivo de anulación,Remito,Precio unitario sin IVA,Importe sin IVA,Sector\n';
   filas.forEach(m=>{
     csv += [m.fecha||'', etiquetaTipoMov(m, false), m.codigo, m.desc, m.cantidad, m.un,
             m.destino||(m.devolOrigen==='persona' ? `Stock de ${m.personaNombre||''}` : ''), m.obraId||'', m.retiradoPor||m.devueltoPor||'', m.proveedor||(m.devolucion ? [m.devolMotivo, m.devolEstado ? 'estado: '+m.devolEstado : '', m.devolObs].filter(Boolean).join(' · ') : ''), m.usuario||'',
-            m.anulado?'SÍ':'', m.anuladoMotivo||'', m.remito||'', m.precioUnit != null ? m.precioUnit : '', (m.precioUnit != null && m.cantidad) ? (m.precioUnit * m.cantidad).toFixed(2) : '']
+            m.anulado?'SÍ':'', m.anuladoMotivo||'', m.remito||'', m.precioUnit != null ? m.precioUnit : '', (m.precioUnit != null && m.cantidad) ? (m.precioUnit * m.cantidad).toFixed(2) : '', SECTORES[sectorDeMov(m)].txt]
       .map(v => `"${String(v==null?'':v).replace(/"/g,'""')}"`).join(',') + '\n';
   });
   descargarArchivo(csv, `movimientos_stock_${fechaAISO(new Date())}.csv`, 'text/csv;charset=utf-8;');
@@ -13715,7 +13943,10 @@ function renderAvanceDetalle(){
   const circGauge = 2*Math.PI*52;
   let html = `<div class="card-header-row no-print">
     <h2 style="margin:0;"><span class="dot"></span>${escHtml(a.nombre)}${a.obraId?' — ID '+escHtml(a.obraId):''}</h2>
-    <button type="button" class="btn-ghost" onclick="imprimir()">🖨 Imprimir avance</button>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      ${window.__fbUser && typeof window.editarDatosObra === 'function' ? `<button type="button" class="btn-ghost" onclick="editarDatosObra('${escHtml(a.id)}')" title="Cambiar nombre, ID, barrio, dirección, tipo o ubicación (se cambia en todos lados)">✏️ Editar datos</button>` : ''}
+      <button type="button" class="btn-ghost" onclick="imprimir()">🖨 Imprimir avance</button>
+    </div>
   </div>`;
   html += `<div class="avance-gauge-row">
     <div class="avance-gauge-wrap">
@@ -20594,7 +20825,7 @@ function poblarParteObraDatalist(){
       document.body.appendChild(dl);
     }
     dl.innerHTML = nomina.filter(p=>p.activo !== false && String(p.nombre||'').trim())
-      .map(p=>`<option value="${esc(p.nombre)}">${p.legajo?'Legajo '+esc(p.legajo):'sin legajo'} · ${esc(p.rol||'')}</option>`).join('');
+      .map(p=>`<option value="${esc(p.nombre)}">${p.legajo?'Legajo '+esc(p.legajo):'sin legajo'} · ${esc(p.rol||'')}${p.sector === 'ilicitos' ? ' · 🚨 Ilícitos' : ''}</option>`).join('');
   }
 
   // La orden de trabajo dibuja sus filas de personal con `renderPersonal()`. No se toca esa
@@ -20618,6 +20849,7 @@ function poblarParteObraDatalist(){
     body.innerHTML = nomina.map((p,i)=>`<tr data-i="${i}">
       <td><input type="text" class="per-legajo${p.legajo?'':' falta'}" value="${esc(p.legajo||'')}" placeholder="sin legajo"></td>
       <td><input type="text" class="per-nombre" value="${esc(p.nombre||'')}"></td>
+      <td><select class="per-sector${p.sector === 'ilicitos' ? ' ilicitos' : ''}" onchange="this.classList.toggle('ilicitos', this.value === 'ilicitos')"><option value="alumbrado" ${p.sector !== 'ilicitos' ? 'selected' : ''}>💡 Alumbrado</option><option value="ilicitos" ${p.sector === 'ilicitos' ? 'selected' : ''}>🚨 Ilícitos</option></select></td>
       <td><select class="per-rol">${roles.map(r=>`<option value="${esc(r)}" ${r===p.rol?'selected':''}>${esc(r)}</option>`).join('')}</select></td>
       <td><input type="number" class="per-valor${Number(p.valorHora)>0?'':' falta'}" min="0" step="0.01" inputmode="decimal" value="${Number(p.valorHora)>0?Number(p.valorHora):''}" placeholder="sin cargar" title="Costo por hora para la empresa (para Gastos de obra)"></td>
       <td style="text-align:center;"><input type="checkbox" class="per-activo" ${p.activo!==false?'checked':''}></td>
@@ -20640,6 +20872,8 @@ function poblarParteObraDatalist(){
       if(legRep.length) html += `<div class="per-aviso rojo">⚠ <b>Legajo repetido:</b> ${legRep.map(esc).join(', ')}. Dos personas no pueden tener el mismo.</div>`;
       if(nomRep.length) html += `<div class="per-aviso rojo">⚠ <b>Nombre repetido:</b> ${nomRep.map(esc).join(', ')}. Como en la orden de trabajo se escribe el nombre, dos iguales suman en el mismo montón.</div>`;
       const sinValor = nomina.filter(p=>p.activo!==false && String(p.nombre||'').trim() && !(Number(p.valorHora)>0));
+      const nIl = nomina.filter(p => p.sector === 'ilicitos' && String(p.nombre||'').trim()).length, nAl = nomina.filter(p => p.sector !== 'ilicitos' && String(p.nombre||'').trim()).length;
+      html += `<div class="hint" style="margin:0 0 8px;">💡 <b>${nAl}</b> de Alumbrado · 🚨 <b>${nIl}</b> de Ilícitos. El sector de cada persona se pone solo en las salidas y devoluciones del pañol que retire o devuelva.</div>`;
       if(sinValor.length) html += `<div class="per-aviso ambar">💰 <b>Sin valor hora:</b> ${sinValor.map(p=>esc(p.nombre)).join(', ')}. Hasta que lo cargues, sus horas salen como <b>pendientes</b> en Gastos de obra (no como cero).</div>`;
       av.innerHTML = html;
     }
@@ -20651,6 +20885,7 @@ function poblarParteObraDatalist(){
     return filas.map(tr=>({
       legajo: (tr.querySelector('.per-legajo').value||'').trim(),
       nombre: (tr.querySelector('.per-nombre').value||'').trim(),
+      sector: (tr.querySelector('.per-sector') || {}).value === 'ilicitos' ? 'ilicitos' : 'alumbrado',
       rol:    tr.querySelector('.per-rol').value,
       valorHora: (()=>{ const el = tr.querySelector('.per-valor'); const v = el ? Number(el.value) : 0; return isFinite(v) && v > 0 ? v : 0; })(),
       activo: tr.querySelector('.per-activo').checked
@@ -20659,9 +20894,15 @@ function poblarParteObraDatalist(){
   // La nómina, para que Gastos de obra pueda valorizar las horas (2026-09-10).
   window.nominaEquipo = ()=> nomina;
   window.legajoDeNombre = legajoDe;
+  // Sector de una persona de la nómina ('alumbrado' | 'ilicitos'), o null si no está en la nómina.
+  window.sectorDePersona = function(nombre){
+    const n = String(nombre||'').trim().toLowerCase(); if(!n) return null;
+    const p = nomina.find(x => String(x.nombre||'').trim().toLowerCase() === n);
+    return p ? (p.sector === 'ilicitos' ? 'ilicitos' : 'alumbrado') : null;
+  };
   window.agregarFilaPersonal = function(){
     nomina = leerTablaPersonal();
-    nomina.push({ legajo:'', nombre:'', rol:'Ayudante', activo:true });
+    nomina.push({ legajo:'', nombre:'', sector:'alumbrado', rol:'Ayudante', activo:true });
     renderPersonalEquipo();
   };
   window.quitarFilaPersonal = function(i){
@@ -22492,8 +22733,29 @@ function poblarParteObraDatalist(){
   window.epecContratistaCfg     = ()=> ({ contratistaPct: n2(contratistaPct), contratistaPrecios: { ...contratistaPrecios }, contratistaFijado, contratistaCivil: { ...contratistaCivil }, contratistaListas });
   // Lo que llega de la nube. Si el documento todavía no tiene estos campos (equipos que vienen de
   // antes del 14/09/2026), queda el 25 % de fábrica y ningún precio a mano: nada se pierde.
+  // ---- No pisar lo que se está escribiendo en el itemizado del contratista (2026-09-29) ----
+  // Pedido: «agrego un ítem, escribo el detalle, escribo un poco y como que me saca, tengo que volver a apretar».
+  // Pasaba así: a los 0,7 s de dejar de tipear se guarda; la nube devuelve lo guardado; eso redibujaba la
+  // tabla entera (el cursor se iba) y además reemplazaba los ítems en memoria por la versión que se había
+  // mandado, así que lo que se siguió escribiendo en el medio se perdía. Ahora, mientras el cursor esté en un
+  // casillero de esas tablas —o haya algo escrito sin guardar—, lo que llega de la nube espera, y la tabla no
+  // se redibuja; al salir del casillero (y guardarse) se aplica lo último.
+  let ctrSucio = false, ctrNubePendiente = null, ctrDibujoPendiente = false;
+  function ctrEscribiendo(){
+    const a = document.activeElement;
+    return !!(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.type !== 'checkbox' && a.closest && a.closest('#clTabla, #ctrTablaBody, #cardCtrPropios .cp-fila'));
+  }
+  document.addEventListener('input', e => { if(e.target && e.target.closest && e.target.closest('#clTabla, #ctrTablaBody, #cardCtrPropios .cp-fila')) ctrSucio = true; }, true);
+  document.addEventListener('focusout', ()=> setTimeout(ctrAlSalir, 0));
+  function ctrAlSalir(){
+    if(ctrEscribiendo()) return;
+    if(ctrNubePendiente && !ctrSucio){ const d = ctrNubePendiente; ctrNubePendiente = null; ctrDibujoPendiente = false; aplicarContratistaDeLaNube(d); return; }
+    if(ctrDibujoPendiente){ ctrDibujoPendiente = false; try{ renderContratista(); }catch(e){} }
+  }
   function aplicarContratistaDeLaNube(d){
     if(!d) return;
+    if(ctrEscribiendo() || ctrSucio){ ctrNubePendiente = d; return; }
+    ctrNubePendiente = null;
     if(d.contratistaPct != null && n2(d.contratistaPct) > 0) contratistaPct = n2(d.contratistaPct);
     if(d.contratistaPrecios && typeof d.contratistaPrecios === 'object') contratistaPrecios = { ...d.contratistaPrecios };
     if(d.contratistaFijado !== undefined) contratistaFijado = d.contratistaFijado || null;
@@ -26978,6 +27240,7 @@ const ITEMIZADO_EPEC = [
   function renderContratista(){
     const body = document.getElementById('ctrTablaBody');
     if(!body) return;
+    if(ctrEscribiendo()){ ctrDibujoPendiente = true; return; }   // se redibuja al salir del casillero
     // Las TRES pestañas son tres listas de contratista (2026-09-16): «completo» (civil + eléctrico),
     // «civil» y «electrico». Las tres se dibujan con renderListaRubro(). La tabla de los 92 ítems
     // dejó de ser una pestaña: vive plegada abajo, en «De dónde salen los precios de arranque»,
@@ -27254,11 +27517,13 @@ const ITEMIZADO_EPEC = [
   let ctrMsgTimer = null;
   async function guardarContratista(msgEl, txtOk){
     if(!puedeEditar()){
+      ctrSucio = false;   // sin sesión no hay nada que esperar de la nube
       if(msgEl){ msgEl.style.color='var(--amber)';
         msgEl.textContent='Se aplicó en esta computadora, pero para que lo vea todo el equipo hay que iniciar sesión.'; }
       return false;
     }
     if(msgEl){ msgEl.style.color='var(--text-soft)'; msgEl.textContent='Guardando…'; }
+    const sucioAntes = ctrSucio; ctrSucio = false;    // lo escrito hasta acá va en este guardado
     try{
       await window.fbPreciosGuardar({ overrides:preciosEditados, itemsPropios, mapeoCol, baseEpec:epecBase,
                                       contratistaPct, contratistaPrecios, contratistaFijado, contratistaCivil, contratistaPropios, contratistaListas,
@@ -27266,8 +27531,10 @@ const ITEMIZADO_EPEC = [
       if(msgEl){ msgEl.style.color='var(--teal-dark)'; msgEl.textContent = txtOk || '✔ Guardado para todo el equipo.'; }
       clearTimeout(ctrMsgTimer);
       ctrMsgTimer = setTimeout(()=>{ if(msgEl) msgEl.textContent = ''; }, 4000);
+      setTimeout(ctrAlSalir, 0);   // si ya no se está escribiendo, se aplica lo que haya quedado esperando
       return true;
     }catch(e){
+      ctrSucio = ctrSucio || sucioAntes;
       if(msgEl){ msgEl.style.color='var(--danger)'; msgEl.textContent='No se pudo guardar (revisá la conexión). El cambio quedó aplicado solo acá.'; }
       return false;
     }
@@ -33341,6 +33608,13 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 .ob-item .ob-txt{ flex:1 1 auto; min-width:0; font-weight:700; font-size:13.5px; }
 .ob-item .ob-txt small{ display:block; font-weight:500; color:var(--text-soft); font-size:12px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .ob-item select{ flex:0 0 auto; width:auto !important; margin:0 !important; padding:6px 8px !important; font-size:12.5px !important; border-radius:10px !important; min-height:0; }
+.ob-item .ob-ed{ flex:0 0 auto; border:1px solid var(--border); background:#fff; border-radius:10px; padding:7px 10px; font:600 12.5px var(--fuente); cursor:pointer; color:var(--navy); }
+.ob-editando{ border-radius:14px; padding:11px 13px; margin:0 0 12px; background:#fff7e6; border:1px solid #ffd79a; color:#6b4a00; font:600 13px/1.4 var(--fuente); }
+.ob-editando b{ font-weight:800; }
+#obApp .ob-botones-ed{ display:flex; gap:8px; margin-top:16px; }
+#obApp .ob-botones-ed .btn-primary{ flex:1 1 auto; margin:0; }
+#obApp .ob-botones-ed .btn-ghost{ flex:0 0 auto; margin:0; }
+.ob-item.editando{ border-color:var(--navy); box-shadow:inset 4px 0 0 var(--navy); }
 .ob-item .ob-map{ flex:0 0 auto; border:1px solid var(--border); background:#fff; border-radius:10px; padding:7px 10px; font:600 12.5px var(--fuente); cursor:pointer; color:var(--navy); }
 .ob-mas{ margin-top:8px; width:100%; border:1.5px dashed rgba(40,40,94,.25); background:transparent; border-radius:14px; padding:10px; font:700 13px var(--fuente); color:var(--navy); cursor:pointer; }
 /* Mapa: forma del pin según el tipo de obra */
@@ -33361,6 +33635,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   .ob-item{ flex-wrap:wrap; }
   .ob-item .ob-txt{ flex:1 1 calc(100% - 50px); }
   .ob-item select{ margin-left:46px !important; }
+  #obApp .ob-dir button{ padding-left:10px; padding-right:10px; }
 }
 @media print{ #viewRegistro{ display:none !important; } }
 </style>
@@ -33396,6 +33671,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 
   // ---------- Estado de la hoja ----------
   let tipo = 'plaza', ubic = null, deLicitacion = null, ultimaCreada = null, filtro = 'todas', buscar = '', verTodas = false;
+  let editando = null;        // id de la obra que se está editando (null = obra nueva)
   let mapa = null, pin = null, gpsSeq = 0;
   // Coordenadas razonables: dentro de la provincia de Córdoba (con margen). Fuera de eso, casi seguro es un error.
   const coordOk = u => u && isFinite(u.lat) && isFinite(u.lng) && Math.abs(u.lat) <= 90 && Math.abs(u.lng) <= 180;
@@ -33404,8 +33680,9 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   function htmlHoja(){
     const T = TIPOS[tipo];
     return `<div class="ob-grid">
-      <div class="card" style="margin:0;">
-        <h2><span class="dot"></span>Nueva obra</h2>
+      <div class="card" style="margin:0;" id="obFormCard">
+        <h2><span class="dot"></span>${editando ? 'Editar obra' : 'Nueva obra'}</h2>
+        ${editando ? (()=>{ const a = obras().find(x => String(x.id) === String(editando)); return `<div class="ob-editando">✏️ Estás editando <b>${esc(a ? a.nombre : '')}</b>${a && a.obraId ? ` (ID ${esc(a.obraId)})` : ''}. Si le cambiás el nombre o el ID, se cambia también en el pañol, las órdenes de trabajo, la semana, los gastos y los cómputos.</div>`; })() : ''}
         <label style="margin-top:0;">¿Qué es?</label>
         <div class="ob-tipos" id="obTipoSeg" data-destino="obTipo">
           ${Object.entries(TIPOS).map(([k,v]) => `<button type="button" class="ob-tipo${k === tipo ? ' activo' : ''}" data-t="${k}">${v.ico} ${v.txt}</button>`).join('')}
@@ -33431,7 +33708,9 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
         <div class="ob-dir-txt" id="obDirTxt"></div>
         <label for="obNotas">Notas <span style="font-weight:500; color:var(--text-soft);">(opcional)</span></label>
         <input type="text" id="obNotas" placeholder="Ej: contacto del vecinal, horario, acceso…" autocomplete="off">
-        <button type="button" class="btn-primary" id="obGuardar" style="margin-top:16px; width:100%;">Registrar ${esc(T.txt.toLowerCase())}</button>
+        ${editando
+          ? `<div class="ob-botones-ed"><button type="button" class="btn-primary" id="obGuardar">💾 Guardar cambios</button><button type="button" class="btn-ghost" id="obCancelarEd">Cancelar</button></div>`
+          : `<button type="button" class="btn-primary" id="obGuardar" style="margin-top:16px; width:100%;">Registrar ${esc(T.txt.toLowerCase())}</button>`}
         <div class="ob-err" id="obErr"></div>
         <div id="obOk"></div>
       </div>
@@ -33466,7 +33745,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     $('obTipoAyuda').textContent = T.ayuda;
     $('obNombreLbl').textContent = T.nom + ' *'; $('obNombre').placeholder = T.ph;
     $('obPliego').style.display = tipo === 'plaza' ? '' : 'none';
-    $('obGuardar').textContent = 'Registrar ' + T.txt.toLowerCase();
+    if(!editando) $('obGuardar').textContent = 'Registrar ' + T.txt.toLowerCase();
     if(tipo !== 'plaza') deLicitacion = null;
   });
 
@@ -33487,7 +33766,6 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     sug.style.display = '';
   }
   app.addEventListener('input', e => {
-    if(e.target.id === 'obDireccion' || e.target.id === 'obBarrio') programarUbicar();
     if(e.target.id === 'obPliegoBuscar') pintarPliego();
     if(e.target.id === 'obBuscar'){ buscar = e.target.value; pintarLista(); }
   });
@@ -33512,6 +33790,8 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     if(e.target.id === 'obGps'){ usarGps(); return; }
     if(e.target.id === 'obSinUbi'){ gpsSeq++; ubic = null; pintarUbic(); moverPin(); dirTxt(''); return; }
     if(e.target.id === 'obDirBuscar'){ ubicarPorDireccion(true); return; }
+    if(e.target.id === 'obCancelarEd'){ cancelarEdicion(); return; }
+    const ed = e.target.closest('[data-editar]'); if(ed){ editarObra(ed.dataset.editar); return; }
     const op = e.target.closest('.ob-dir-ops button[data-i]');
     if(op){ const o = opcionesGeo[+op.dataset.i]; if(o){ gpsSeq++; ubic = { lat:o.lat, lng:o.lng, origen:'direccion' }; pintarUbic(); moverPin(true); op.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === op)); } return; }
     const k = e.target.closest('[data-acc]');
@@ -33523,6 +33803,9 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     }
   });
   app.addEventListener('change', async e => {
+    // Al terminar de escribir la dirección (o el barrio) y salir del campo, se busca sola. No se busca letra por
+    // letra: el buscador de OpenStreetMap no permite usarlo como autocompletado.
+    if(e.target.id === 'obDireccion' || e.target.id === 'obBarrio'){ programarUbicar(); return; }
     const s = e.target.closest('select[data-cambiar-tipo]'); if(!s) return;
     const a = obras().find(x => String(x.id) === s.dataset.cambiarTipo); if(!a) return;
     if(typeof avanceGuardEdicion === 'function' && !avanceGuardEdicion()){ s.value = a.tipoObra || 'plaza'; return; }
@@ -33544,7 +33827,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   function pintarUbic(){
     const t = $('obUbiTxt'); if(!t) return;
     t.innerHTML = ubic
-      ? `📍 <b>Ubicada</b>${({ pliego:' con las coordenadas del pliego', gps:' con tu ubicación', direccion:' por la dirección', ajustada:' (la moviste a mano)' })[ubic.origen] || ' donde tocaste'} · <span style="font-family:ui-monospace,monospace;">${ubic.lat.toFixed(6)}, ${ubic.lng.toFixed(6)}</span>`
+      ? `📍 <b>Ubicada</b>${({ pliego:' con las coordenadas del pliego', gps:' con tu ubicación', direccion:' por la dirección', ajustada:' (la moviste a mano)', guardada:' (la que ya tenía)' })[ubic.origen] || ' donde tocaste'} · <span style="font-family:ui-monospace,monospace;">${ubic.lat.toFixed(6)}, ${ubic.lng.toFixed(6)}</span>`
       : 'Sin ubicación todavía — tocá el mapa.';
   }
   function iniciarMapa(){
@@ -33714,8 +33997,8 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     // Sola, solo si todavía no se ubicó de otra forma (pliego, GPS, toque o pin movido a mano): eso no se pisa.
     if(ubic && ubic.origen !== 'direccion') return;
     const dir = ($('obDireccion')||{}).value || '';
-    if(dir.trim().length < 5) return;
-    timerUbicar = setTimeout(()=> ubicarPorDireccion(false), 1400);
+    if(dir.trim().length < 4) return;
+    timerUbicar = setTimeout(()=> ubicarPorDireccion(false), 50);
   }
   async function ubicarPorDireccion(aMano){
     clearTimeout(timerUbicar);
@@ -33740,6 +34023,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 
   // ---------- Guardar ----------
   async function guardar(){
+    if(editando) return guardarEdicion();
     const err = $('obErr'); err.innerHTML = ''; $('obOk').innerHTML = '';
     const nombre = ($('obNombre').value || '').trim();
     const obraId = ($('obId').value || '').trim();
@@ -33772,6 +34056,154 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     pintarLista();
   }
 
+  // ---------- Editar una obra ya registrada (2026-09-29) ----------
+  // Pedido: «que se pueda editar después de registrarla, y que todo lo que usa ese nombre pase al nombre nuevo».
+  // El nombre de la obra está COPIADO en otros lados (así quedan legibles los listados y los comprobantes):
+  //   · pañol (movimientos: destino y obraId) · órdenes de trabajo (plazaNombre, obraId, barrio)
+  //   · gastos (plazaNombre, obraId) · historial de etapas (plazaNombre, obraId) · fotos (plazaNombre)
+  //   · cómputos de la Calculadora (nombre, id y los datos del formulario guardado) · tareas de la semana (obra)
+  // Todo se cambia en una sola tanda (batch) junto con la obra: o se cambia todo, o nada.
+  const mismoTxt = (x, y)=> String(x||'').trim().toLowerCase() === String(y||'').trim().toLowerCase();
+  const mismosIds = (x, y)=>{ const A = idsDePlaza(x), B = idsDePlaza(y); return A.length > 0 && A.length === B.length && A.every(i => B.includes(i)); };
+  const tocanIds = (x, y)=>{ const A = idsDePlaza(x), B = idsDePlaza(y); return A.some(i => B.includes(i)); };
+  function puedeEditarObras(){
+    if(!window.__fbUser || window.__modoEmergencia) return false;
+    const P = window.PERMISOS; if(!P) return true;
+    return P.permiso('registro') === 'editar' || P.permiso('avance') === 'editar';
+  }
+  function editarObra(id){
+    const a = obras().find(x => String(x.id) === String(id)); if(!a) return;
+    if(!puedeEditarObras()){ alert('Tu usuario no puede editar obras (hace falta sesión y permiso de «Cargar» en Registrar obra o Avance).'); return; }
+    editando = a.id; tipo = TIPOS[a.tipoObra] ? a.tipoObra : 'plaza'; deLicitacion = null; gpsSeq++;
+    ubic = (a.lat != null && a.lng != null && isFinite(+a.lat) && isFinite(+a.lng)) ? { lat:+a.lat, lng:+a.lng, origen:'guardada' } : null;
+    render();
+    const v = (i, x)=>{ const e = $(i); if(e) e.value = x == null ? '' : String(x); };
+    v('obNombre', a.nombre); v('obId', a.obraId); v('obBarrio', a.barrio); v('obDireccion', a.direccion); v('obNotas', a.notas);
+    const c = $('obFormCard'); if(c){ const h = (document.querySelector('header')||{}).offsetHeight || 80; window.scrollTo({ top: Math.max(0, c.getBoundingClientRect().top + window.scrollY - h - 12), behavior:'smooth' }); }
+  }
+  function cancelarEdicion(){ editando = null; ubic = null; deLicitacion = null; gpsSeq++; tipo = 'plaza'; render(); }
+  // Todo lo que hay que cambiar en otros lados si la obra `a` pasa a llamarse `n.nombre` / `n.obraId`.
+  function referencias(a, n){
+    const oldN = String(a.nombre||'').trim(), oldId = String(a.obraId||'').trim();
+    const cNom = oldN !== n.nombre, cId = oldId !== n.obraId, cBar = String(a.barrio||'').trim() !== n.barrio;
+    const ops = [], locales = [], cuenta = {};
+    const sumar = (etq)=> cuenta[etq] = (cuenta[etq] || 0) + 1;
+    const add = (col, id, patch, etq)=>{ if(id && Object.keys(patch).length){ ops.push({ col, id:String(id), patch }); sumar(etq); } };
+    const deEsta = x => String(x.plazaId||'') === String(a.id);
+    const esEste = (nombre, id)=> (oldId && id && tocanIds(id, oldId)) || (!!oldN && (mismoTxt(nombre, oldN) || (claveNombrePlaza(nombre) && claveNombrePlaza(nombre) === claveNombrePlaza(oldN))));
+    if(!cNom && !cId && !cBar) return { ops, locales, cuenta };
+    (window.stockMovimientos || []).filter(deEsta).forEach(m => {
+      const p = {}; if(cNom && mismoTxt(m.destino, oldN)) p.destino = n.nombre; if(cId && String(m.obraId||'').trim() === oldId) p.obraId = n.obraId;
+      add('movimientos', m.id, p, 'movimientos del pañol');
+    });
+    try{ (ordenesTrabajo || []).filter(deEsta).forEach(o => {
+      const p = {}; if(cNom && mismoTxt(o.plazaNombre, oldN)) p.plazaNombre = n.nombre; if(cId && String(o.obraId||'').trim() === oldId) p.obraId = n.obraId;
+      if(cBar && o.barrio != null && mismoTxt(o.barrio, a.barrio)) p.barrio = n.barrio;
+      add('ordenesTrabajo', o.id, p, 'órdenes de trabajo');
+    }); }catch(e){}
+    (window.gastosObra || []).filter(deEsta).forEach(g => {
+      const p = {}; if(cNom && mismoTxt(g.plazaNombre, oldN)) p.plazaNombre = n.nombre; if(cId && String(g.obraId||'').trim() === oldId) p.obraId = n.obraId;
+      add('gastosObra', g.id, p, 'gastos');
+    });
+    try{ (historialEtapas || []).filter(deEsta).forEach(h => {
+      const p = {}; if(cNom && mismoTxt(h.plazaNombre, oldN)) p.plazaNombre = n.nombre; if(cId && String(h.obraId||'').trim() === oldId) p.obraId = n.obraId;
+      add('historialEtapas', h.id, p, 'avances de etapa');
+    }); }catch(e){}
+    // Cómputos de la Calculadora: se reconocen por el ID o por el nombre (con o sin «Plaza», sin acentos).
+    try{ (historial || []).forEach(h => {
+      if(!esEste(h.nombre, h.id)) return;
+      const p = {};
+      if(cNom && !mismoTxt(h.nombre, n.nombre)) p.nombre = n.nombre;
+      if(cId && mismosIds(h.id, oldId)) p.id = n.obraId;
+      if(cBar && mismoTxt(h.barrio, a.barrio)) p.barrio = n.barrio;
+      const c = h.form && h.form.campos;
+      if(c && (p.nombre || p.id || p.barrio)){
+        const campos = { ...c };
+        if(p.nombre && 'obraNombre' in campos) campos.obraNombre = n.nombre;
+        if(p.id && 'obraId' in campos) campos.obraId = n.obraId;
+        if(p.barrio && 'obraBarrio' in campos) campos.obraBarrio = n.barrio;
+        p.form = { ...h.form, campos };
+      }
+      if(!Object.keys(p).length) return;
+      if(h.docId) add('historialCalculos', h.docId, p, 'cómputos');
+      else { locales.push(()=>{ Object.assign(h, p); try{ guardarHistorial(); }catch(e){} }); sumar('cómputos'); }
+    }); }catch(e){}
+    // Tareas de la semana: la obra va escrita.
+    if(cNom) try{ (planEntries || []).forEach(e => {
+      if(!e.obra || !esEste(e.obra, '') || mismoTxt(e.obra, n.nombre)) return;
+      if(e.docId) add('planSemanal', e.docId, { obra:n.nombre }, 'tareas de la semana');
+      else { locales.push(()=>{ e.obra = n.nombre; try{ guardarPlanEntries(); }catch(err){} }); sumar('tareas de la semana'); }
+    }); }catch(e){}
+    return { ops, locales, cuenta, cNom, cId };
+  }
+  async function guardarEdicion(){
+    const err = $('obErr'), ok = $('obOk'); err.innerHTML = ''; ok.innerHTML = '';
+    const a = obras().find(x => String(x.id) === String(editando));
+    if(!a){ err.textContent = '⚠ Esa obra ya no está (¿la borraron?).'; return; }
+    if(!puedeEditarObras()){ err.textContent = '🔒 Tu usuario no puede editar obras.'; return; }
+    const n = { nombre:($('obNombre').value||'').trim(), obraId:($('obId').value||'').trim(), barrio:($('obBarrio').value||'').trim(),
+                direccion:($('obDireccion').value||'').trim(), notas:($('obNotas').value||'').trim(), tipoObra:tipo };
+    if(!n.nombre){ err.textContent = '⚠ El nombre no puede quedar vacío.'; $('obNombre').focus(); return; }
+    const otra = obras().find(x => x.id !== a.id && (mismoTxt(x.nombre, n.nombre) || (n.obraId && tocanIds(x.obraId, n.obraId))));
+    if(otra){ err.innerHTML = `⚠ Ya hay otra obra con ese ${mismoTxt(otra.nombre, n.nombre) ? 'nombre' : 'ID'}: <b>${esc(otra.nombre)}</b>${otra.obraId ? ` (ID ${esc(otra.obraId)})` : ''}. Si son la misma, avisá para unirlas; si no, usá otro nombre.`; return; }
+    if(ubic && !coordOk(ubic)){ err.textContent = '⚠ La ubicación no es válida. Tocá el mapa de nuevo o sacala («Sin ubicación»).'; return; }
+    if(ubic && ubic.origen !== 'guardada' && !enCordoba(ubic) && !confirm('La ubicación marcada queda fuera de Córdoba. ¿Es correcta?')) return;
+    // Cambios de la obra misma (solo lo que cambió: así no se pisa lo que otro esté cargando en el avance)
+    const patch = {};
+    ['nombre','obraId','barrio','direccion','notas'].forEach(k => { if(String(a[k] == null ? '' : a[k]).trim() !== n[k]) patch[k] = n[k]; });
+    if((a.tipoObra || 'plaza') !== tipo) patch.tipoObra = tipo;
+    const lat = ubic ? ubic.lat : null, lng = ubic ? ubic.lng : null;
+    if((a.lat == null ? null : +a.lat) !== lat || (a.lng == null ? null : +a.lng) !== lng){ patch.lat = lat; patch.lng = lng; patch.ubicOrigen = ubic ? ubic.origen : ''; }
+    if(!Object.keys(patch).length){ err.textContent = 'No cambiaste nada.'; return; }
+    const R = referencias(a, n);
+    const lista = Object.entries(R.cuenta).map(([k, v]) => `${v} ${k}`);
+    if(lista.length && !confirm(`Se va a guardar «${n.nombre}»${n.obraId ? ` (ID ${n.obraId})` : ''} y se actualiza también en:\n\n· ${lista.join('\n· ')}\n\n¿Seguimos?`)) return;
+    patch.editadoPor = (window.__fbUser && window.__fbUser.email) || ''; patch.editadoTs = Date.now();
+    const b = $('obGuardar'); b.disabled = true; b.textContent = 'Guardando…';
+    let fotos = 0;
+    try{
+      const d = firebase.firestore();
+      // Fotos de la plaza: no están en memoria (se leen a pedido), se buscan en la base.
+      if(R.cNom){
+        try{
+          const q = await d.collection('adjuntos').where('plazaId', '==', a.id).get();
+          q.forEach(doc => { const x = doc.data() || {}; if(String(x.plazaId||'') === String(a.id) && mismoTxt(x.plazaNombre, a.nombre)){ R.ops.push({ col:'adjuntos', id:doc.id, patch:{ plazaNombre:n.nombre } }); fotos++; } });
+        }catch(e){ console.warn('fotos de la plaza', e); }
+      }
+      const todas = [{ col:'avanceObras', id:String(a.id), patch }, ...R.ops];
+      for(let i = 0; i < todas.length; i += 400){
+        const lote = d.batch();
+        todas.slice(i, i + 400).forEach(o => lote.update(d.collection(o.col).doc(o.id), o.patch));
+        await lote.commit();
+      }
+    }catch(e){
+      b.disabled = false; b.textContent = '💾 Guardar cambios';
+      err.innerHTML = (e && e.code === 'permission-denied')
+        ? '🔒 No se guardó nada: tu usuario no tiene permiso para cambiar todo lo que usa esta obra. Pedíselo a alguien de Oficina o al administrador.'
+        : '⚠ No se guardó nada (revisá tu conexión a internet) ' + (typeof porQueFallo === 'function' ? porQueFallo(e) : '');
+      return;
+    }
+    R.locales.forEach(f => { try{ f(); }catch(e){} });
+    const antes = { nombre:String(a.nombre||''), obraId:String(a.obraId||''), barrio:String(a.barrio||'') };
+    Object.assign(a, patch);                      // el listener lo confirma enseguida; esto es para verlo ya
+    // Si la Calculadora tiene abierta esta obra, también se le cambia el nombre / ID / barrio.
+    try{
+      const cN = $('obraNombre'), cI = $('obraId'), cB = $('obraBarrio');
+      if(cN && cN.value.trim() && (mismoTxt(cN.value, antes.nombre) || claveNombrePlaza(cN.value) === claveNombrePlaza(antes.nombre) || (cI && antes.obraId && mismosIds(cI.value, antes.obraId)))){
+        if('nombre' in patch) cN.value = n.nombre; if(cI && 'obraId' in patch) cI.value = n.obraId; if(cB && 'barrio' in patch && mismoTxt(cB.value, antes.barrio)) cB.value = n.barrio;
+      }
+    }catch(e){}
+    try{ if(typeof window.fbAuditar === 'function') window.fbAuditar('plaza_editada', `«${antes.nombre}» → «${n.nombre}»${'obraId' in patch ? ` · ID ${antes.obraId || '—'} → ${n.obraId || '—'}` : ''}`, { ref:a.id }); }catch(e){}
+    ['renderAvanceTablero','poblarParteObraDatalist','poblarOtPlazas','poblarHistPlazas','poblarStockFiltroPlazas','renderMapaObras','renderStockMovimientos','renderHistorial','renderPlanGrid'].forEach(f => { try{ if(typeof window[f] === 'function') window[f](); }catch(e){} });
+    try{ if(typeof avanceActivoId !== 'undefined' && avanceActivoId === a.id && typeof renderAvanceDetalle === 'function') renderAvanceDetalle(); }catch(e){}
+    if(fotos) R.cuenta['fotos'] = fotos;
+    const hecho = Object.entries(R.cuenta).map(([k, v]) => `${v} ${k}`);
+    editando = null; ubic = null; deLicitacion = null; tipo = 'plaza';
+    render();
+    $('obOk').innerHTML = `<div class="ob-ok">✓ <b>${esc(n.nombre)}</b> quedó guardada.${hecho.length ? ` También se actualizó en: ${esc(hecho.join(' · '))}.` : ''}</div>`;
+  }
+  window.editarDatosObra = function(id){ if(typeof mostrarVista === 'function') mostrarVista('registro'); editarObra(id); };
+
   // ---------- Lista ----------
   function pintarLista(){
     const cont = $('obLista'), chips = $('obChips'); if(!cont || !chips) return;
@@ -33789,10 +34221,11 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     cont.innerHTML = l.slice(0, max).map(a => {
       const t = a.tipoObra || 'plaza';
       const ubicada = a.lat != null && a.lng != null;
-      return `<div class="ob-item">
+      return `<div class="ob-item${String(a.id) === String(editando) ? ' editando' : ''}">
         <span class="ob-ico">${TIPOS[t] ? TIPOS[t].ico : '🌳'}</span>
         <span class="ob-txt">${esc(a.nombre || 'Sin nombre')}<small>${[a.obraId ? 'ID ' + a.obraId : '', a.barrio || '', ubicada ? '📍 ubicada' : 'sin ubicar'].filter(Boolean).map(esc).join(' · ')}</small></span>
         <select data-cambiar-tipo="${esc(a.id)}" ${edit ? '' : 'disabled title="Iniciá sesión para cambiarlo"'} aria-label="Tipo de obra">${Object.entries(TIPOS).map(([k,v]) => `<option value="${k}" ${k === t ? 'selected' : ''}>${v.ico} ${v.txt}</option>`).join('')}</select>
+        ${puedeEditarObras() ? `<button type="button" class="ob-ed" data-editar="${esc(a.id)}" title="Cambiar nombre, ID, barrio, dirección o ubicación">✏️ Editar</button>` : ''}
         <button type="button" class="ob-map" data-mapa="${esc(a.id)}" title="${ubicada ? 'Ver en el mapa' : 'Ubicarla en el mapa'}">🗺 ${ubicada ? 'Mapa' : 'Ubicar'}</button>
       </div>`;
     }).join('') + (l.length > max ? `<button type="button" class="ob-mas" id="obMasLista">Ver las ${l.length - max} restantes</button>` : '');
@@ -33831,7 +34264,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     if(vista) vista.style.display = 'none';
     return previa.apply(this, arguments);
   };
-  window.REGISTRO_OBRA = { render, estado:()=>({ tipo, ubic, deLicitacion, ultimaCreada, filtro }), guardar, leerDireccion, ubicarPorDireccion };
+  window.REGISTRO_OBRA = { render, estado:()=>({ tipo, ubic, deLicitacion, ultimaCreada, filtro, editando }), guardar, leerDireccion, ubicarPorDireccion, editarObra, referencias };
 })();
 </script>
 
@@ -34979,6 +35412,15 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
      ============================================================================================ -->
 <style id="estiloDevoluciones">
 .dv-seg{display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 2px;}
+/* Sector Alumbrado / Ilícitos (2026-09-29) */
+.sec-seg{ display:flex; gap:6px; margin:4px 0 2px; }
+.sec-btn{ flex:1 1 0; min-width:0; border:1px solid var(--border); background:var(--vidrio-2); color:var(--text); border-radius:14px; padding:10px 12px; font:700 13.5px/1.2 var(--fuente); cursor:pointer; transition:background .15s, color .15s, box-shadow .15s; }
+.sec-btn[data-sector="alumbrado"].activo{ background:var(--navy); color:#fff; border-color:var(--navy); box-shadow:0 8px 20px -12px rgba(40,40,94,.8); }
+.sec-btn[data-sector="ilicitos"].activo{ background:#b3261e; color:#fff; border-color:#b3261e; box-shadow:0 8px 20px -12px rgba(179,38,30,.7); }
+.sec-tag{ display:inline-block; margin-top:3px; font:800 10.5px var(--fuente); border-radius:999px; padding:2px 8px; white-space:nowrap; }
+.sec-tag.sec-alumbrado{ background:#e8eefb; color:#2b3a78; }
+.sec-tag.sec-ilicitos{ background:#fde7e5; color:#a3231b; }
+select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; }
 .dv-seg-btn{flex:1 1 0; min-width:0; border:1px solid var(--border); background:var(--vidrio-2); color:var(--text); border-radius:14px; padding:11px 12px; font:600 13.5px/1.2 var(--fuente); cursor:pointer; transition:background .15s, box-shadow .15s, color .15s;}
 .dv-seg-btn.activo{background:var(--navy); color:#fff; border-color:var(--navy); box-shadow:0 8px 20px -12px rgba(40,40,94,.8);}
 .dv-buscar{margin-top:8px;}
@@ -35163,6 +35605,16 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
   let quienAuto = '';   // lo que puso la app sola en «quién devuelve» (si la persona cambia, se reemplaza)
   function elegir(o){
     elegido = o;
+    // Sector que se pone solo: el de la persona (nómina) o, si vuelve de una obra, el de lo que salió para ahí.
+    try{
+      if(o.tipo === 'persona'){ if(typeof stockSectorPorPersona === 'function') stockSectorPorPersona(o.nombre); }
+      else {
+        const cuenta = { alumbrado:0, ilicitos:0 };
+        movs().forEach(m => { if(m.tipo === 'salida' && String(m.plazaId||'') === String(o.id)) cuenta[sectorDeMov(m)]++; });
+        const k = cuenta.ilicitos > cuenta.alumbrado ? 'ilicitos' : (cuenta.alumbrado ? 'alumbrado' : null);
+        if(k && k !== sectorElegido()) window.stockPonerSector(k, `lo que salió para esa obra fue de <b>${SECTORES[k].txt}</b>`);
+      }
+    }catch(e){}
     if(o.tipo === 'persona'){
       const q = $('stockDevolQuien'); if(q && (!q.value.trim() || q.value.trim() === quienAuto)){ q.value = o.nombre; quienAuto = o.nombre; }
       $('stockDevolMotivo').value = 'Devuelve lo que tenía en su poder';
@@ -35256,7 +35708,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     if(dudas.length && !confirm(`Según el pañol:\n${dudas.join('\n')}\n\n¿Registrar la devolución igual?`)) return;
     const usuario = (window.__fbUser && window.__fbUser.email) || '';
     const grupo = 'DV' + Date.now().toString(36);
-    const base = { tipo:'entrada', devolucion:true, devolOrigen:elegido.tipo, fecha, usuario, devueltoPor:quien, devolMotivo:$('stockDevolMotivo').value,
+    const base = { tipo:'entrada', devolucion:true, devolOrigen:elegido.tipo, fecha, usuario, sector:(typeof sectorElegido === 'function' ? sectorElegido() : 'alumbrado'), devueltoPor:quien, devolMotivo:$('stockDevolMotivo').value,
                    devolObs:($('stockDevolObs').value||'').trim(), proveedor:'', remito:'', devolGrupo:grupo, devolGrupoN:lineas.length };
     if(elegido.tipo === 'obra'){ base.plazaId = elegido.id; base.obraId = elegido.obraId || ''; base.destino = elegido.nombre; }
     else {
@@ -35287,7 +35739,7 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
       hechos.push({ ...l, id });
       if(l.estado === 'roto'){
         try{
-          const bajaId = await window.fbAddMovimiento({ tipo:'salida', bajaRotura:true, devolucionId:id, devolGrupo:grupo, codigo:l.item.codigo, desc:l.item.desc, un:l.item.un, cantidad:l.cant, fecha, ts:Date.now() + i * 2 + 1, usuario,
+          const bajaId = await window.fbAddMovimiento({ tipo:'salida', bajaRotura:true, devolucionId:id, devolGrupo:grupo, sector:base.sector, codigo:l.item.codigo, desc:l.item.desc, un:l.item.un, cantidad:l.cant, fecha, ts:Date.now() + i * 2 + 1, usuario,
                                                         destino:'Baja — material roto (devolución)', retiradoPor:'', devolObs:mov.devolObs });
           aviso = ' Lo que volvió roto quedó anotado con su baja: no suma al stock.';
           // El enlace devolución → baja es un extra (anular la devolución anula también su baja). Si falla, la baja
