@@ -1449,8 +1449,9 @@
   #navAbajo{
     position:fixed; left:0; right:0; bottom:0; z-index:900;
     display:flex; justify-content:center; align-items:stretch; gap:4px;
-    background:rgba(255,255,255,.96);
-    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    background:rgba(255,255,255,.97);
+    /* sin backdrop-filter: con el fondo casi opaco no se notaba, y sobre el mapa hacía recalcular el
+       desenfoque en cada cuadro al arrastrar (2026-09-29) */
     border-top:1px solid var(--border);
     box-shadow:0 -2px 14px rgba(15,30,51,.07);
     padding:6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
@@ -1849,9 +1850,10 @@
   .mapa-pin::before{
     content:''; position:absolute; z-index:-2;
     left:50%; top:calc(100% + 11px);
-    width:20px; height:7px; border-radius:50%;
-    background:rgba(0,0,0,.22);
-    filter:blur(2px);
+    width:22px; height:8px; border-radius:50%;
+    /* degradé en vez de filter:blur — el blur obligaba al navegador a recalcular cada sombra en cada
+       cuadro del zoom y del arrastre (2026-09-29) */
+    background:radial-gradient(ellipse at center, rgba(0,0,0,.26) 0%, rgba(0,0,0,.12) 45%, rgba(0,0,0,0) 72%);
     transform:translateX(-50%);
   }
   /* El pin elegido: el aro se pone ÁMBAR y el pin crece un poco. Se probó primero con un halo
@@ -3343,6 +3345,8 @@ header{ position:sticky; top:0; z-index:950; }
 body:has(#navBadgeOt[style*="block"]) .btn-menu::after, body:has(#navBadgeObras[style*="block"]) .btn-menu::after{
   content:""; position:absolute; top:6px; right:6px; width:9px; height:9px; border-radius:50%; background:var(--danger); box-shadow:0 0 0 2px #fff; }
 #calcFlotante button{ border-radius:999px !important; box-shadow:0 16px 34px -12px rgba(40,40,94,.7) !important; }
+body[data-vista="mapa"] header, body[data-vista="mapa"] #navAbajo{ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; background:rgba(255,255,255,.97) !important; }
+#mapaObras .leaflet-tooltip.mapa-etiqueta-lic{ box-shadow:none !important; }
 .menu-panel{ -webkit-backdrop-filter:blur(30px); backdrop-filter:blur(30px); background:rgba(255,255,255,.86) !important; border-radius:0 28px 28px 0 !important; width:min(320px,86vw); }
 .menu-item{ border-radius:999px; padding:12px 14px; font-size:14.5px; min-height:46px; }
 .menu-item:hover{ background:rgba(40,40,94,.06); }
@@ -3735,7 +3739,7 @@ html, body{ forced-color-adjust:none; }
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-29 16:31 · 9c76f1</span></div>
+      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-29 19:39 · 372cf3</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -19075,6 +19079,9 @@ function initMapaObras(){
     mapaLeaflet = L.map('mapaObras').setView(MAPA_CENTRO_CORDOBA, 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
+      // Menos trabajo mientras se hace zoom con los dedos: las baldosas nuevas se piden al terminar,
+      // y se guardan algunas de más alrededor para que al arrastrar no aparezcan huecos grises (2026-09-29).
+      updateWhenZooming: false, keepBuffer: 4,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(mapaLeaflet);
     mapaMarkersLayer = L.layerGroup().addTo(mapaLeaflet);
@@ -19093,7 +19100,10 @@ function initMapaObras(){
     mapaLeaflet.on('click', onClickMapaObras);
     // Los nombres de las plazas del pliego aparecen recién de cerca: con las 244 a la vez, a
     // nivel ciudad las etiquetas se taparían unas a otras (2026-09-16).
-    mapaLeaflet.on('zoomend', ()=>{ try{ renderMapaObras(); }catch(e){} });
+    // Al hacer zoom SOLO se revisan las etiquetas del pliego (aparecen de cerca). Antes se redibujaba el mapa
+    // entero —lista, todos los pines y el estado de material de cada plaza— en cada paso de zoom, y por eso
+    // el mapa andaba trabado (2026-09-29).
+    mapaLeaflet.on('zoomend', ()=>{ try{ pintarPinesPliego(); }catch(e){} });
     setTimeout(()=>mapaLeaflet.invalidateSize(), 60);
   }catch(e){
     mostrarErrorConexionMapa();
@@ -19213,7 +19223,15 @@ function ultimoParteDePlaza(nombre){
   return dePlaza.sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||'') || (b.ts||0)-(a.ts||0))[0];
 }
 
+// ---- Dibujo del mapa, liviano (2026-09-29) ----
+// · Con la hoja Mapa oculta no se dibuja nada (se dibuja al abrirla). Antes, cada cambio en la base
+//   (un movimiento del pañol, un tilde de avance…) rearmaba el mapa entero aunque nadie lo estuviera mirando.
+// · Los pines se rearman solo si cambió algo que se VE en ellos (posición, color, número, nombre…).
+// · El globito de cada pin (con el estado de material, que es la cuenta más pesada) se arma recién al tocarlo.
+let mapaFirmaObras = '', mapaFirmaPliego = '';
+const mapaVisible = ()=>{ const v = document.getElementById('viewMapa'); return !!v && v.style.display !== 'none'; };   // sin offsetParent: eso fuerza a recalcular toda la página
 function renderMapaObras(){
+  if(!mapaVisible()){ mapaFirmaObras = ''; mapaFirmaPliego = ''; return; }
   const lista = document.getElementById('mapaListaPlazas');
   const label = document.getElementById('mapaSeleccionLabel');
   const contador = document.getElementById('mapaContador');
@@ -19271,14 +19289,20 @@ function renderMapaObras(){
   }
 
   if(!mapaLeaflet || !mapaMarkersLayer || typeof L === 'undefined') return;
+  pintarPinesObras(obrasVisibles, nums);
+  pintarPinesPliego();
+}
+function pintarPinesObras(obrasVisibles, nums){
+  const datos = obrasVisibles.filter(a => a.lat != null && a.lng != null).map(a => {
+    const pct = calcularAvanceEtapasPct(a);
+    return { a, pct, color: colorPorPctEtapas(pct), n: nums[a.id] || '?' };
+  });
+  const firma = (mapaVerNombres ? 'N' : '') + '|' + (mapaSeleccionId || '') + '|' + datos.map(d => [d.a.id, d.a.lat, d.a.lng, d.color, d.n, d.a.tipoObra || '', d.a.nombre].join('~')).join('^');
+  if(firma === mapaFirmaObras && Object.keys(mapaMarcadores || {}).length === datos.length) return;   // nada cambió en los pines
+  mapaFirmaObras = firma;
   mapaMarkersLayer.clearLayers();
   mapaMarcadores = {};
-  obrasVisibles.forEach(a=>{
-    if(a.lat==null || a.lng==null) return;
-    const pct = calcularAvanceEtapasPct(a);
-    const etapaLabel = etapaActualLabel(a);
-    const color = colorPorPctEtapas(pct);
-    const n = nums[a.id] || '?';
+  datos.forEach(({ a, pct, color, n })=>{
     // Pin con el NÚMERO adentro (mismo que la lista) en vez de un punto pelado: se sabe qué plaza es
     // sin tener que tocarla, que era justo lo que molestaba.
     const icono = L.divIcon({
@@ -19290,6 +19314,16 @@ function renderMapaObras(){
     if(mapaVerNombres){
       marker.bindTooltip(escHtml(a.nombre), { permanent:true, direction:'bottom', className:'mapa-etiqueta', offset:[0,6] });
     }
+    marker.bindPopup(()=> popupObraMapa(a.id, n), { autoPanPadding:[20, 60] });
+    marker.addTo(mapaMarkersLayer);
+    mapaMarcadores[a.id] = marker;
+  });
+}
+// El globito de un pin de obra: se arma al tocarlo, con los datos de ese momento.
+function popupObraMapa(id, n){
+    const a = avanceObras.find(x => x.id === id); if(!a) return '';
+    const pct = calcularAvanceEtapasPct(a);
+    const etapaLabel = etapaActualLabel(a);
     const fechaHtml = a.listaParaEncender
       ? '<span class="badge-lista">Lista para encender</span>'
       : (a.fechaEncendido ? `📅 ${formatFechaCorta(a.fechaEncendido)}` : '');
@@ -19315,19 +19349,22 @@ function renderMapaObras(){
         <button type="button" class="mapa-popup-borrar" onclick="borrarPinMapa('${a.id}')">Quitar pin</button>
       </div>
     </div>`;
-    marker.bindPopup(popupHtml);
-    marker.addTo(mapaMarkersLayer);
-    mapaMarcadores[a.id] = marker;
-  });
+    return popupHtml;
+}
 
-  // ---- Las plazas del pliego (2026-09-16) ----
+// ---- Las plazas del pliego (2026-09-16) ----
+function pintarPinesPliego(){
+  if(!mapaLeaflet || typeof L === 'undefined') return;
   if(mapaLicLayer){
-    mapaLicLayer.clearLayers();
     const lic = plazasLicitacionParaMapa();
     // De lejos se ven los rombos pelados; de cerca (zoom 14+) cada uno muestra su barrio y su ID.
     // Con las 244 prendidas a nivel ciudad, las etiquetas se taparían entre sí.
     const zoomAhora = (typeof mapaLeaflet.getZoom === 'function') ? mapaLeaflet.getZoom() : 12;
     const verNombresLic = mapaVerNombres && zoomAhora >= 13;
+    const firma = mapaVerLicitacion + '|' + (verNombresLic ? 'N' : '') + '|' + (window.__fbUser ? 'S' : '') + '|' + lic.lista.map(x => x[1]).join(',');
+    if(firma === mapaFirmaPliego) return;       // mismo zoom de etiquetas y mismas plazas: no se toca nada
+    mapaFirmaPliego = firma;
+    mapaLicLayer.clearLayers();
     lic.lista.forEach(x=>{
       const z = MAPA_LIC_ZONA[x[5]] || { txt:x[5], color:'#7a8699', corto:x[5] };
       // El rombo se dibuja chico, pero la zona que se puede TOCAR es de 34×34 px y transparente
@@ -36358,9 +36395,12 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
   /* ---------- 1) Botón atrás ---------- */
   let porAtras = false;
   function animar(v){
+    // El mapa entra sin deslizamiento: mover un mapa entero con sus pines mientras se arma era lo más pesado.
+    if(v === 'mapa') return;
     const el = document.getElementById(VISTA_ID[v]); if(!el) return;
-    el.classList.remove('entra'); void el.offsetWidth; el.classList.add('entra');
-    setTimeout(() => el.classList.remove('entra'), 400);
+    // Sin `offsetWidth` (obligaba a recalcular toda la página en el momento): se reinicia en el cuadro siguiente.
+    el.classList.remove('entra');
+    requestAnimationFrame(() => { el.classList.add('entra'); setTimeout(() => el.classList.remove('entra'), 400); });
   }
   const mostrarOrig = window.mostrarVista;
   if(typeof mostrarOrig === 'function'){
