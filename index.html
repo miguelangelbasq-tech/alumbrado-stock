@@ -3739,7 +3739,7 @@ html, body{ forced-color-adjust:none; }
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-29 19:39 · 372cf3</span></div>
+      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-09-30 23:36 · 271c7f</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -5625,7 +5625,7 @@ html, body{ forced-color-adjust:none; }
           <label style="margin-top:0;">Movimientos de esta persona</label>
           <div id="stockPersonaHist" class="hint" style="margin-top:2px;"></div>
         </div>
-        <div class="no-print" style="margin-top:10px;"><button type="button" class="btn-ghost" onclick="imprimir()">🖨 Imprimir lo que tiene</button></div>
+        <div class="no-print" style="margin-top:10px;"><button type="button" class="btn-ghost" onclick="imprimirMaterialPersona()">🖨 Imprimir lo que tiene (para firmar)</button></div>
       </div>
 
       <div class="card no-print" id="cardStockRespaldo" style="margin-top:18px;">
@@ -5690,6 +5690,17 @@ html, body{ forced-color-adjust:none; }
         </div>
         <div class="row2">
           <div>
+            <label for="stockMovFiltroTipo">Tipo</label>
+            <select id="stockMovFiltroTipo">
+              <option value="">Todos los tipos</option>
+              <option value="entrada">➕ Solo entradas</option>
+              <option value="salida">➖ Solo salidas</option>
+              <option value="devolucion">↩ Solo devoluciones</option>
+            </select>
+          </div>
+        </div>
+        <div class="row2">
+          <div>
             <label for="stockMovFiltroSector">Sector</label>
             <select id="stockMovFiltroSector">
               <option value="">Todos los sectores</option>
@@ -5711,19 +5722,20 @@ html, body{ forced-color-adjust:none; }
         </div>
         <div class="hist-actions" style="margin-top:10px;">
           <button type="button" class="btn-ghost" onclick="exportarMovimientosCSV()">⬇ Descargar lo filtrado (Excel/CSV)</button>
-          <button type="button" class="btn-ghost" onclick="imprimirMovimientos()">🖨 Imprimir / Guardar PDF</button>
+          <button type="button" class="btn-ghost" id="stockMovImprimirBtn" onclick="imprimirMovimientos()">🖨 Imprimir lo filtrado</button>
           <button type="button" class="btn-ghost" onclick="limpiarFiltroMovimientos()">Limpiar filtros</button>
         </div>
         <div style="overflow-x:auto;">
         <table class="hist-table">
           <thead>
-            <tr><th>Fecha</th><th>Tipo</th><th>Código</th><th>Producto</th><th>Cantidad</th><th>Detalle</th><th>Acciones</th></tr>
+            <tr><th>Fecha</th><th>Tipo</th><th>Código</th><th>Producto</th><th>Cantidad</th><th>Detalle</th><th>Acciones</th><th class="no-print sel-col"><input type="checkbox" id="stockMovSelTodos" title="Tildar todos los que se ven" aria-label="Tildar todos"></th></tr>
           </thead>
           <tbody id="stockMovBody">
-            <tr><td colspan="7" style="text-align:center; color:var(--text-soft); padding:20px;">Cargando movimientos...</td></tr>
+            <tr><td colspan="8" style="text-align:center; color:var(--text-soft); padding:20px;">Cargando movimientos...</td></tr>
           </tbody>
         </table>
         </div>
+        <div class="sel-barra no-print" id="stockMovSelBarra" style="display:none;"></div>
         <div class="hint" id="stockMovCount" style="margin-top:10px;"></div>
         <div class="hint" style="margin-top:4px;">Estos son solo los movimientos NUEVOS registrados desde esta herramienta, por cualquier persona del equipo (no el historial completo de tu Excel). El stock actual de arriba ya los tiene en cuenta. El botón <b>🖨</b> de cada renglón saca el <b>comprobante de ese movimiento solo</b> (vale de salida o remito de entrada, con lugar para las dos firmas); el <b>🖨 Imprimir / Guardar PDF</b> de arriba saca el listado completo de lo filtrado. El botón <b>⊘</b> <b>anula</b> un movimiento: deja de contar para el stock pero queda guardado en el registro, con el motivo y quién lo anuló — se puede volver a activar con <b>↺</b>.</div>
         </div>
@@ -5739,15 +5751,19 @@ html, body{ forced-color-adjust:none; }
           <input type="checkbox" id="stockSoloFaltantes">
           <label style="margin:0;" for="stockSoloFaltantes">Mostrar solo faltantes / bajo mínimo (o ≤3 si el producto no tiene mínimo)</label>
         </div>
+        <div class="hist-actions no-print" style="margin-top:10px;">
+          <button type="button" class="btn-ghost" id="stockInvImprimirBtn" onclick="imprimirInventario()">🖨 Imprimir lo buscado</button>
+        </div>
 
         <div style="overflow-x:auto; margin-top:10px;">
         <table class="hist-table">
           <thead>
-            <tr><th>Código</th><th>Descripción</th><th>Unidad</th><th>Stock actual</th><th>Estado</th><th>Costo unit.</th><th>Importe</th></tr>
+            <tr><th>Código</th><th>Descripción</th><th>Unidad</th><th>Stock actual</th><th>Estado</th><th>Costo unit.</th><th>Importe</th><th class="no-print sel-col"><input type="checkbox" id="stockInvSelTodos" title="Tildar todos los que se ven" aria-label="Tildar todos"></th></tr>
           </thead>
           <tbody id="stockTablaBody"></tbody>
         </table>
         </div>
+        <div class="sel-barra no-print" id="stockInvSelBarra" style="display:none;"></div>
         <div class="hint" id="stockTablaCount" style="margin-top:10px;"></div>
       </div>
 
@@ -5763,7 +5779,7 @@ html, body{ forced-color-adjust:none; }
         </div>
         <div class="hist-actions no-print" style="margin-top:8px;">
           <button type="button" class="btn-ghost" onclick="exportarComprasCSV('minimo')">⬇ CSV</button>
-          <button type="button" class="btn-ghost" onclick="imprimir()">🖨 Imprimir</button>
+          <button type="button" class="btn-ghost" onclick="imprimirTablaSola('comprasMinBody', 'Lista de compras — para volver al mínimo', ()=> document.getElementById('comprasMinResumen').innerText)">🖨 Imprimir</button>
         </div>
         <div style="margin-top:16px; border-top:1px solid var(--border); padding-top:12px;">
           <div class="row2 no-print">
@@ -5785,7 +5801,7 @@ html, body{ forced-color-adjust:none; }
           </div>
           <div class="hist-actions no-print" style="margin-top:8px;">
             <button type="button" class="btn-ghost" onclick="exportarComprasCSV('plaza')">⬇ CSV</button>
-            <button type="button" class="btn-ghost" onclick="imprimir()">🖨 Imprimir</button>
+            <button type="button" class="btn-ghost" onclick="imprimirTablaSola('comprasPlazaBody', 'Lista de compras — ' + ((document.getElementById('comprasPlazaSel')||{}).selectedOptions||[{}])[0].text, ()=> document.getElementById('comprasPlazaResumen').innerText)">🖨 Imprimir</button>
           </div>
         </div>
       </div>
@@ -12161,12 +12177,23 @@ renderCatalogoTabla();
 
 document.getElementById('stockSoloFaltantes').addEventListener('change', renderStockTabla);
 
-['stockMovBuscar','stockMovFiltroPlaza','stockMovFiltroSector','stockMovDesde','stockMovHasta'].forEach(id=>{
+['stockMovBuscar','stockMovFiltroPlaza','stockMovFiltroSector','stockMovFiltroTipo','stockMovDesde','stockMovHasta'].forEach(id=>{
   const el = document.getElementById(id);
   if(el) el.addEventListener(el.tagName==='SELECT'||el.type==='date' ? 'change' : 'input', renderStockMovimientos);
 });
+// Tildes de los renglones (movimientos e inventario)
+(function(){
+  const mb = document.getElementById('stockMovBody');
+  if(mb) mb.addEventListener('change', e => { const c = e.target.closest('.mov-sel'); if(!c) return; if(c.checked) stockMovTildados.add(c.dataset.id); else stockMovTildados.delete(c.dataset.id); renderStockMovimientos(); });
+  const mt = document.getElementById('stockMovSelTodos');
+  if(mt) mt.addEventListener('change', ()=>{ movimientosFiltrados().forEach(m => { if(mt.checked) stockMovTildados.add(m.id); else stockMovTildados.delete(m.id); }); renderStockMovimientos(); });
+  const ib = document.getElementById('stockTablaBody');
+  if(ib) ib.addEventListener('change', e => { const c = e.target.closest('.inv-sel'); if(!c) return; const k = Number(c.dataset.cod); if(c.checked) stockInvTildados.add(k); else stockInvTildados.delete(k); renderStockTabla(); });
+  const it = document.getElementById('stockInvSelTodos');
+  if(it) it.addEventListener('change', ()=>{ inventarioFiltrado().forEach(i => { if(it.checked) stockInvTildados.add(i.codigo); else stockInvTildados.delete(i.codigo); }); renderStockTabla(); });
+})();
 function limpiarFiltroMovimientos(){
-  ['stockMovBuscar','stockMovFiltroPlaza','stockMovFiltroSector','stockMovDesde','stockMovHasta'].forEach(id=>{
+  ['stockMovBuscar','stockMovFiltroPlaza','stockMovFiltroSector','stockMovFiltroTipo','stockMovDesde','stockMovHasta'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.value = '';
   });
@@ -12176,31 +12203,100 @@ function limpiarFiltroMovimientos(){
 // Imprimir / Guardar PDF (2026-08-22) — no hace falta ninguna librería externa: se arma una hoja
 // limpia con el mismo listado que se está viendo (filtros incluidos) y se manda a la impresora del
 // navegador, donde "Guardar como PDF" es una opción estándar en compu y en celular.
-function imprimirMovimientos(){
-  const filas = movimientosFiltrados().sort((a,b)=> (a.fecha||'').localeCompare(b.fecha||'') || (a.ts||0)-(b.ts||0));
-  const plazaSel = document.getElementById('stockMovFiltroPlaza');
-  const plazaTxt = plazaSel && plazaSel.value ? (plazaSel.options[plazaSel.selectedIndex]||{}).text : 'Todas las plazas / destinos';
-  const desde = (document.getElementById('stockMovDesde')||{}).value || '';
-  const hasta = (document.getElementById('stockMovHasta')||{}).value || '';
+function imprimirMovimientos(soloTildados){
+  let filas = movimientosFiltrados();
+  if(soloTildados){ filas = stockMovimientos.filter(m => stockMovTildados.has(m.id)); if(!filas.length){ alert('No hay movimientos tildados.'); return; } }
+  filas = filas.sort((a,b)=> (a.fecha||'').localeCompare(b.fecha||'') || (a.ts||0)-(b.ts||0));
+  if(!filas.length){ alert('No hay movimientos para imprimir con este filtro.'); return; }
+  const val = id => (document.getElementById(id)||{}).value || '';
+  const txtSel = id => { const e = document.getElementById(id); return e && e.value ? (e.options[e.selectedIndex]||{}).text : ''; };
+  const desde = val('stockMovDesde'), hasta = val('stockMovHasta');
   const periodo = (desde||hasta) ? `${desde?formatFechaCorta(desde):'inicio'} a ${hasta?formatFechaCorta(hasta):'hoy'}` : 'Todo el período';
-  const cuerpo = filas.length ? filas.map(m=>`<tr${m.anulado?' style="opacity:.55;"':''}>
+  // Qué se filtró (para que la hoja diga qué es)
+  const filtros = soloTildados ? [`<b>Renglones elegidos a mano:</b> ${filas.length}`] : [
+    `<b>Tipo:</b> ${escHtml(txtSel('stockMovFiltroTipo').replace(/^\S+\s/, '') || 'Todos')}`,
+    `<b>Plaza / destino:</b> ${escHtml(txtSel('stockMovFiltroPlaza') || 'Todas')}`,
+    `<b>Sector:</b> ${escHtml((txtSel('stockMovFiltroSector') || 'Todos').replace(/^\S+\s/, ''))}`,
+    `<b>Período:</b> ${escHtml(periodo)}`,
+    val('stockMovBuscar').trim() ? `<b>Búsqueda:</b> «${escHtml(val('stockMovBuscar').trim())}»` : ''
+  ].filter(Boolean);
+  const tipoTxt = m => (m.devolucion && m.devolOrigen) ? 'devolucion' : m.tipo;
+  const cuerpo = filas.map(m=>`<tr${m.anulado?' style="opacity:.55; text-decoration:line-through;"':''}>
       <td>${escHtml(formatFechaCorta(m.fecha)||'—')}</td>
       <td>${etiquetaTipoMov(m, false)}</td>
       <td>${SECTORES[sectorDeMov(m)].txt}</td>
       <td>${escHtml(String(m.codigo))}</td>
       <td>${escHtml(m.desc||'')}</td>
-      <td style="text-align:right;">${fmt(m.cantidad,2)} ${escHtml(m.un||'')}</td>
-      <td>${escHtml(m.destino||m.proveedor||'—')}</td>
+      <td style="text-align:right; white-space:nowrap;">${fmt(m.cantidad,2)} ${escHtml(m.un||'')}</td>
+      <td>${escHtml(m.destino || m.proveedor || (m.devolOrigen === 'persona' ? 'Stock de ' + (m.personaNombre||'') : '') || '—')}</td>
       <td>${escHtml(m.retiradoPor||m.devueltoPor||'')}</td>
-      <td>${escHtml(m.usuario||'')}</td>
       <td>${m.anulado?'ANULADO':''}</td>
-    </tr>`).join('') : `<tr><td colspan="10" style="text-align:center; padding:16px;">Sin movimientos para este filtro.</td></tr>`;
-  const secSel = (document.getElementById('stockMovFiltroSector')||{}).value || '';
-  abrirHojaImpresion('Registro de movimientos de material', [
-    `<div><b>Plaza / destino:</b> ${escHtml(plazaTxt)} &nbsp;·&nbsp; <b>Sector:</b> ${secSel ? SECTORES[secSel].txt : 'Todos'} &nbsp;·&nbsp; <b>Período:</b> ${escHtml(periodo)} &nbsp;·&nbsp; <b>Movimientos:</b> ${filas.length}</div>`,
-    `<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Sector</th><th>Cód.</th><th>Producto</th><th>Cantidad</th><th>Destino / proveedor</th><th>Retirado por</th><th>Cargó</th><th></th></tr></thead><tbody>${cuerpo}</tbody></table>`
-  ].join(''));
+    </tr>`).join('');
+  // Totales por material y tipo (sin los anulados): para una plaza, es «cuánto se llevó de cada cosa».
+  const tot = new Map();
+  filas.filter(m => !m.anulado).forEach(m => { const k = m.codigo + '|' + tipoTxt(m); const t = tot.get(k) || { codigo:m.codigo, desc:m.desc, un:m.un, tipo:tipoTxt(m), cant:0 }; t.cant += Number(m.cantidad)||0; tot.set(k, t); });
+  const TIPO_TXT = { entrada:'Entró', salida:'Salió', devolucion:'Volvió' };
+  const totales = [...tot.values()].sort((a,b)=> a.tipo.localeCompare(b.tipo) || String(a.desc).localeCompare(String(b.desc)));
+  const resumen = totales.length ? `<h3 style="font-size:13px; margin:18px 0 0;">Total por material</h3>
+    <table><thead><tr><th>Movimiento</th><th>Cód.</th><th>Material</th><th style="text-align:right;">Cantidad</th></tr></thead><tbody>${totales.map(t => `<tr><td>${TIPO_TXT[t.tipo]||t.tipo}</td><td>${escHtml(String(t.codigo))}</td><td>${escHtml(t.desc||'')}</td><td style="text-align:right; font-weight:700; white-space:nowrap;">${fmt(t.cant,2)} ${escHtml(t.un||'')}</td></tr>`).join('')}</tbody></table>` : '';
+  const titulo = soloTildados ? 'Movimientos elegidos del pañol' : (val('stockMovFiltroTipo') === 'salida' ? 'Salidas de material' : (val('stockMovFiltroTipo') === 'entrada' ? 'Entradas de material' : (val('stockMovFiltroTipo') === 'devolucion' ? 'Devoluciones de material' : 'Registro de movimientos de material')));
+  abrirHojaImpresion(titulo + (!soloTildados && txtSel('stockMovFiltroPlaza') ? ' — ' + txtSel('stockMovFiltroPlaza') : ''), [
+    `<div>${filtros.join(' &nbsp;·&nbsp; ')} &nbsp;·&nbsp; <b>Movimientos:</b> ${filas.length}</div>`,
+    `<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Sector</th><th>Cód.</th><th>Producto</th><th>Cantidad</th><th>Destino / proveedor</th><th>Retiró / devolvió</th><th></th></tr></thead><tbody>${cuerpo}</tbody></table>`,
+    resumen
+  ].join(''), 'REGISTRO DE PAÑOL');
 }
+
+// Inventario: lo buscado (o lo tildado), con totales.
+function imprimirInventario(soloTildados){
+  let rows = inventarioFiltrado();
+  if(soloTildados){ rows = catalogo().map(i=>({...i, actual: stockActual(i.codigo)})).filter(i => stockInvTildados.has(i.codigo)).sort((a,b)=>a.desc.localeCompare(b.desc)); if(!rows.length){ alert('No hay productos tildados.'); return; } }
+  if(!rows.length){ alert('No hay productos para imprimir con esta búsqueda.'); return; }
+  const q = ((document.getElementById('stockBuscar')||{}).value||'').trim();
+  const falt = (document.getElementById('stockSoloFaltantes')||{}).checked;
+  const filtro = soloTildados ? `<b>Productos elegidos a mano:</b> ${rows.length}` : [q ? `<b>Búsqueda:</b> «${escHtml(q)}»` : '<b>Todo el inventario</b>', falt ? '<b>Solo faltantes / bajo mínimo</b>' : ''].filter(Boolean).join(' &nbsp;·&nbsp; ') + ` &nbsp;·&nbsp; <b>Productos:</b> ${rows.length}`;
+  let total = 0;
+  const cuerpo = rows.map(i => {
+    const minimo = stockMinimoDe(i.codigo), estado = stockEstado(i.actual, minimo), imp = i.actual * (i.costo||0); total += imp > 0 ? imp : 0;
+    return `<tr><td>${i.codigo}</td><td>${escHtml(i.desc)}</td><td>${escHtml(i.un)}</td><td style="text-align:right; font-weight:700;">${fmt(i.actual,2)}</td><td style="text-align:right;">${minimo ? fmt(minimo,0) : '—'}</td><td>${estado === 'POCO' && minimo ? 'BAJO MÍNIMO' : estado}</td><td style="text-align:right;">${i.costo ? formatMoney(i.costo) : '—'}</td><td style="text-align:right;">${i.costo ? formatMoney(imp) : '—'}</td></tr>`;
+  }).join('');
+  abrirHojaImpresion(soloTildados ? 'Inventario del pañol — productos elegidos' : (q ? `Inventario del pañol — «${q}»` : 'Inventario del pañol'), [
+    `<div>${filtro}</div>`,
+    `<table><thead><tr><th>Cód.</th><th>Descripción</th><th>Un.</th><th style="text-align:right;">Stock</th><th style="text-align:right;">Mín.</th><th>Estado</th><th style="text-align:right;">Costo unit.</th><th style="text-align:right;">Importe</th></tr></thead><tbody>${cuerpo}</tbody>
+      ${total > 0 ? `<tfoot><tr><td colspan="7" style="text-align:right; font-weight:700;">Total valorizado</td><td style="text-align:right; font-weight:700;">${formatMoney(total)}</td></tr></tfoot>` : ''}</table>`,
+    `<div class="sub" style="margin-top:14px;">Control hecho por: ______________________ &nbsp;&nbsp; Fecha: ____/____/______</div>`
+  ].join(''), 'INVENTARIO');
+}
+
+// Lo que tiene una persona, para que firme que lo recibió.
+function imprimirMaterialPersona(){
+  const nom = (document.getElementById('stockPersonaSel')||{}).value || '';
+  if(!nom){ alert('Elegí primero una persona.'); return; }
+  const filas = (typeof window.cargoDePersona === 'function' ? window.cargoDePersona(nom) : []).filter(r => r.enPoder > 0.0001);
+  const sec = (typeof window.sectorDePersona === 'function' && window.sectorDePersona(nom) === 'ilicitos') ? 'Ilícitos' : 'Alumbrado';
+  const lg = (typeof window.legajoDeNombre === 'function') ? window.legajoDeNombre(nom) : '';
+  const cuerpo = filas.length ? filas.map(r => `<tr><td>${r.codigo}</td><td>${escHtml(r.desc)}</td><td style="text-align:right;">${fmt(r.entregado,2)}</td><td style="text-align:right;">${fmt(r.devuelto,2)}</td><td style="text-align:right;">${fmt(r.usado,2)}</td><td style="text-align:right; font-weight:700;">${fmt(r.enPoder,2)} ${escHtml(r.un)}</td></tr>`).join('')
+    : `<tr><td colspan="6" style="text-align:center; padding:14px;">No tiene material en su poder.</td></tr>`;
+  abrirHojaImpresion(`Material en poder de ${nom}`, [
+    `<div><b>Persona:</b> ${escHtml(nom)}${lg ? ` &nbsp;·&nbsp; <b>Legajo:</b> ${escHtml(lg)}` : ''} &nbsp;·&nbsp; <b>Sector:</b> ${sec} &nbsp;·&nbsp; <b>Materiales:</b> ${filas.length}</div>`,
+    `<table><thead><tr><th>Cód.</th><th>Material</th><th style="text-align:right;">Entregado</th><th style="text-align:right;">Devolvió</th><th style="text-align:right;">Usó en obra</th><th style="text-align:right;">Tiene ahora</th></tr></thead><tbody>${cuerpo}</tbody></table>`,
+    `<div style="margin-top:14px; font-size:11.5px;">Declaro tener en mi poder el material detallado, entregado por el pañol, y me comprometo a devolverlo o a informar su uso en obra.</div>`,
+    `<table style="margin-top:34px; border:none;"><tr><td style="border:none; width:50%;"><div style="border-top:1px solid #183028; padding-top:5px;">${escHtml(nom)} — firma</div></td><td style="border:none; width:50%; padding-left:24px;"><div style="border-top:1px solid #183028; padding-top:5px;">Pañol — aclaración y firma</div></td></tr></table>`
+  ].join(''), 'CONSTANCIA DE MATERIAL');
+}
+window.imprimirMaterialPersona = imprimirMaterialPersona;
+
+// Imprime una tabla sola (su encabezado y sus renglones), sin el resto de la pantalla.
+function imprimirTablaSola(tbodyId, titulo, resumenFn){
+  const tb = document.getElementById(tbodyId); const tabla = tb && tb.closest('table');
+  if(!tabla || !tb.children.length){ alert('No hay nada para imprimir.'); return; }
+  const copia = tabla.cloneNode(true);
+  copia.querySelectorAll('.no-print, button, input, select').forEach(e => e.remove());
+  copia.removeAttribute('style'); copia.removeAttribute('id');
+  let resumen = ''; try{ resumen = resumenFn ? resumenFn() : ''; }catch(e){}
+  abrirHojaImpresion(titulo, (resumen ? `<div>${escHtml(resumen)}</div>` : '') + copia.outerHTML);
+}
+window.imprimirTablaSola = imprimirTablaSola;
 
 // ============================================================
 // Comprobante de UN movimiento — vale de salida / remito de entrada (2026-08-27)
@@ -12407,6 +12503,31 @@ function abrirHojaImpresion(titulo, contenidoHtml, tipoHoja){
   setTimeout(()=>{ try{ w.print(); }catch(e){} }, 300);
 }
 
+// ---- Imprimir lo que se está viendo (2026-09-30) ----
+// Pedido: «imprime toda la página; debería imprimir lo que seleccionás: salidas a Mártires, lo que buscaste en
+// el stock…». Cada listado imprime SOLO lo filtrado, o solo los renglones tildados si hay alguno tildado.
+const stockInvTildados = new Set();     // códigos
+const stockMovTildados = new Set();     // ids de movimiento
+function inventarioFiltrado(){
+  const q = (document.getElementById('stockBuscar').value||'').trim().toLowerCase();
+  const soloFaltantes = document.getElementById('stockSoloFaltantes').checked;
+  return catalogo()
+    .map(i=>({...i, actual: stockActual(i.codigo)}))
+    .filter(i=>{
+      if(q && !(String(i.codigo).includes(q) || i.desc.toLowerCase().includes(q))) return false;
+      if(soloFaltantes && stockEstado(i.actual, stockMinimoDe(i.codigo)) === 'OK') return false;
+      return true;
+    })
+    .sort((a,b)=>a.desc.localeCompare(b.desc));
+}
+function pintarBarraTildes(barraId, set, que, onImprimir, onLimpiar){
+  const b = document.getElementById(barraId); if(!b) return;
+  if(!set.size){ b.style.display = 'none'; b.innerHTML = ''; return; }
+  b.style.display = '';
+  b.innerHTML = `☑ <b>${set.size}</b> ${que} tildado(s) <button type="button" class="btn-ghost" data-a="imp">🖨 Imprimir solo los tildados</button> <button type="button" class="btn-ghost" data-a="limpiar">Destildar todo</button>`;
+  b.querySelector('[data-a="imp"]').onclick = onImprimir;
+  b.querySelector('[data-a="limpiar"]').onclick = onLimpiar;
+}
 function renderStockTabla(){
   const q = (document.getElementById('stockBuscar').value||'').trim().toLowerCase();
   const soloFaltantes = document.getElementById('stockSoloFaltantes').checked;
@@ -12420,8 +12541,11 @@ function renderStockTabla(){
     })
     .sort((a,b)=>a.desc.localeCompare(b.desc));
   document.getElementById('stockTablaCount').textContent = `${rows.length} de ${catalogo().length} productos.`;
+  { const bi = document.getElementById('stockInvImprimirBtn'); if(bi) bi.textContent = (q || soloFaltantes) ? `🖨 Imprimir lo buscado (${rows.length})` : `🖨 Imprimir el inventario (${rows.length})`;
+    const st = document.getElementById('stockInvSelTodos'); if(st) st.checked = rows.length > 0 && rows.every(i => stockInvTildados.has(i.codigo));
+    pintarBarraTildes('stockInvSelBarra', stockInvTildados, 'producto(s)', ()=> imprimirInventario(true), ()=>{ stockInvTildados.clear(); renderStockTabla(); }); }
   if(!rows.length){
-    body.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-soft); padding:20px;">Sin resultados.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-soft); padding:20px;">Sin resultados.</td></tr>`;
     return;
   }
   body.innerHTML = rows.map(i=>{
@@ -12430,7 +12554,7 @@ function renderStockTabla(){
     const rowClass = estado==='SIN STOCK' ? 'stock-row-sin' : (estado==='POCO' ? 'stock-row-poco' : '');
     const badgeClass = estado==='SIN STOCK' ? 'stock-badge-sin' : (estado==='POCO' ? 'stock-badge-poco' : 'stock-badge-ok');
     const importe = i.actual * i.costo;
-    return `<tr class="${rowClass}">
+    return `<tr class="${rowClass}${stockInvTildados.has(i.codigo) ? ' fila-tildada' : ''}">
       <td>${i.codigo}</td>
       <td>${escHtml(i.desc)}</td>
       <td>${escHtml(i.un)}</td>
@@ -12438,6 +12562,7 @@ function renderStockTabla(){
       <td><span class="stock-badge ${badgeClass}">${estado === 'POCO' && minimo ? 'BAJO MÍNIMO' : estado}</span></td>
       <td>${i.costo?formatMoney(i.costo):'—'}</td>
       <td>${i.costo?formatMoney(importe):'—'}</td>
+      <td class="no-print sel-col"><input type="checkbox" class="inv-sel" data-cod="${i.codigo}" ${stockInvTildados.has(i.codigo) ? 'checked' : ''} aria-label="Tildar ${escHtml(i.desc)}"></td>
     </tr>`;
   }).join('');
 }
@@ -12445,7 +12570,7 @@ function renderStockTabla(){
 function renderStockMovimientos(){
   const body = document.getElementById('stockMovBody');
   if(!stockMovimientos.length){
-    body.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-soft); padding:20px;">Todavía no hay movimientos registrados en el stock compartido.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-soft); padding:20px;">Todavía no hay movimientos registrados en el stock compartido.</td></tr>`;
     return;
   }
   const ordenados = movimientosFiltrados().sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||'') || (b.ts||0)-(a.ts||0));
@@ -12453,8 +12578,11 @@ function renderStockMovimientos(){
   if(cont) cont.textContent = `${ordenados.length} de ${stockMovimientos.length} movimiento(s).`;
   { const sc = document.getElementById('stockMovSectorCuenta');
     if(sc){ const vivos = ordenados.filter(m => !m.anulado); const il = vivos.filter(m => sectorDeMov(m) === 'ilicitos').length; sc.innerHTML = `En lo que se ve: 💡 <b>${vivos.length - il}</b> de Alumbrado · 🚨 <b>${il}</b> de Ilícitos`; } }
+  { const bi = document.getElementById('stockMovImprimirBtn'); if(bi) bi.textContent = `🖨 Imprimir lo filtrado (${ordenados.length})`;
+    const st = document.getElementById('stockMovSelTodos'); if(st) st.checked = ordenados.length > 0 && ordenados.every(m => stockMovTildados.has(m.id));
+    pintarBarraTildes('stockMovSelBarra', stockMovTildados, 'movimiento(s)', ()=> imprimirMovimientos(true), ()=>{ stockMovTildados.clear(); renderStockMovimientos(); }); }
   if(!ordenados.length){
-    body.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-soft); padding:20px;">Ningún movimiento coincide con el filtro.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-soft); padding:20px;">Ningún movimiento coincide con el filtro.</td></tr>`;
     return;
   }
   body.innerHTML = ordenados.map(m=>{
@@ -12474,7 +12602,7 @@ function renderStockMovimientos(){
     const btn = btnImp + ' ' + (m.anulado
       ? `<button type="button" class="btn-ghost" onclick="reactivarStockMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px;" title="Volver a contar este movimiento">↺</button>`
       : `<button type="button" class="btn-ghost" onclick="anularStockMovimiento('${m.id}')" style="padding:4px 10px; font-size:12px; color:var(--danger);" title="Anular este movimiento (queda en el registro pero deja de contar)">⊘</button>`);
-    return `<tr${estiloFila}>
+    return `<tr${estiloFila}${stockMovTildados.has(m.id) ? ' class="fila-tildada"' : ''}>
       <td>${fechaFmt}</td>
       <td>${etiquetaTipoMov(m, true)}<br>${etiquetaSector(m)}</td>
       <td>${m.codigo}</td>
@@ -12482,6 +12610,7 @@ function renderStockMovimientos(){
       <td>${fmt(m.cantidad,2)} ${escHtml(m.un)}</td>
       <td>${detalle}${anuladoInfo}</td>
       <td class="no-print" style="white-space:nowrap;">${btn}</td>
+      <td class="no-print sel-col"><input type="checkbox" class="mov-sel" data-id="${escHtml(m.id)}" ${stockMovTildados.has(m.id) ? 'checked' : ''} aria-label="Tildar este movimiento"></td>
     </tr>`;
   }).join('');
 }
@@ -12495,6 +12624,7 @@ function movimientosFiltrados(){
   const q = ((document.getElementById('stockMovBuscar')||{}).value||'').trim().toLowerCase();
   const plaza = ((document.getElementById('stockMovFiltroPlaza')||{}).value||'');
   const sector = ((document.getElementById('stockMovFiltroSector')||{}).value||'');
+  const tipoF = ((document.getElementById('stockMovFiltroTipo')||{}).value||'');
   const desde = ((document.getElementById('stockMovDesde')||{}).value||'');
   const hasta = ((document.getElementById('stockMovHasta')||{}).value||'');
   return stockMovimientos.filter(m=>{
@@ -12503,6 +12633,7 @@ function movimientosFiltrados(){
       if(!texto.includes(q) && !texto.normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(q.normalize('NFD').replace(/[\u0300-\u036f]/g,''))) return false;
     }
     if(sector && sectorDeMov(m) !== sector) return false;
+    if(tipoF){ const t = (m.devolucion && m.devolOrigen) ? 'devolucion' : m.tipo; if(t !== tipoF) return false; }
     if(plaza && String(m.plazaId||'') !== plaza) return false;
     if(desde && (m.fecha||'') < desde) return false;
     if(hasta && (m.fecha||'') > hasta) return false;
@@ -35449,6 +35580,21 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
      ============================================================================================ -->
 <style id="estiloDevoluciones">
 .dv-seg{display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 2px;}
+/* Tildes para imprimir (2026-09-30) */
+.sel-col{ width:34px; text-align:center !important; }
+.sel-col input{ width:18px; height:18px; margin:0; cursor:pointer; accent-color:var(--navy); }
+tr.fila-tildada > td{ background:rgba(40,40,94,.06) !important; }
+.sel-barra{ margin-top:10px; display:flex; flex-wrap:wrap; align-items:center; gap:8px; background:#eef3fb; border:1px solid #c5d4ee; border-radius:12px; padding:8px 12px; font-size:13px; }
+.sel-barra .btn-ghost{ margin:0; padding:5px 12px; font-size:12.5px; }
+@media (max-width:640px){
+  /* en el celular cada renglón es una tarjeta: el tilde va arriba a la derecha */
+  .hist-table tbody tr{ position:relative; }
+  .hist-table tbody tr:has(> td.sel-col){ padding-top:38px !important; }
+  .hist-table td.sel-col{ position:absolute !important; right:12px; top:10px; width:auto !important; padding:0 !important; border:none !important; background:none !important; z-index:1; }
+  .hist-table td.sel-col::before{ display:none !important; content:none !important; }
+  .hist-table td.sel-col input{ width:22px; height:22px; }
+  .hist-table thead .sel-col{ display:none; }
+}
 /* Sector Alumbrado / Ilícitos (2026-09-29) */
 .sec-seg{ display:flex; gap:6px; margin:4px 0 2px; }
 .sec-btn{ flex:1 1 0; min-width:0; border:1px solid var(--border); background:var(--vidrio-2); color:var(--text); border-radius:14px; padding:10px 12px; font:700 13.5px/1.2 var(--fuente); cursor:pointer; transition:background .15s, color .15s, box-shadow .15s; }
