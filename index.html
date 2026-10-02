@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script id="anotarErrores">
+/* (02/10/2026) Anota los errores que pasen en este navegador (no manda nada a ningún lado) para poder verlos
+   tocando «Versión …» al pie del menú: así, si algo no aparece, se sabe por qué. */
+window.__erroresApp = [];
+window.addEventListener('error', function(e){ try{ var l = window.__erroresApp; if(l.length < 30) l.push({ t:Date.now(), m:String(e.message||e), d:(e.filename ? String(e.filename).split('/').pop() + ':' + e.lineno : '') }); }catch(x){} });
+window.addEventListener('unhandledrejection', function(e){ try{ var r = e.reason, m = String((r && (r.message || r.code)) || r || ''); if(/offline|unavailable|network|Failed to fetch/i.test(m)) return; var l = window.__erroresApp; if(l.length < 30) l.push({ t:Date.now(), m:'(promesa) ' + m, d:'' }); }catch(x){} });
+</script>
 <title>Calculadora de Materiales — Alumbrado Público</title>
 <!-- Identidad de la página (2026-09-07). Solo metadatos: nada de esto cambia cómo funciona la herramienta. -->
 <meta name="description" content="Herramienta de EMA Servicios para el alumbrado público de plazas: cómputo de materiales, órdenes de trabajo, planificación, avance de obra, itemizado y stock.">
@@ -3749,7 +3756,7 @@ html, body{ forced-color-adjust:none; }
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-10-02 13:04 · bceb31</span></div>
+      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-10-02 17:39 · edfe20</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -9779,8 +9786,11 @@ let actividades = [
 
 function diaSemanaDeFecha(fechaStr){
   // fechaStr = 'YYYY-MM-DD'; se arma en horario local al mediodía para evitar corrimientos de huso horario
-  const [y,m,d] = fechaStr.split('-').map(Number);
+  // (02/10/2026) órdenes viejas sin fecha o con fecha rara: no rompe, devuelve ''.
+  const [y,m,d] = String(fechaStr||'').split('-').map(Number);
+  if(!y || !m || !d) return '';
   const dt = new Date(y, m-1, d, 12, 0, 0);
+  if(isNaN(dt)) return '';
   const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   return dias[dt.getDay()];
 }
@@ -9972,7 +9982,8 @@ function sumarDias(fechaStr, n){
   return fechaAISO(dt);
 }
 function formatFechaCorta(fechaStr){
-  const [, m, d] = fechaStr.split('-');
+  const [, m, d] = String(fechaStr||'').split('-');
+  if(!m || !d) return String(fechaStr||'s/f');
   return `${d}/${m}`;
 }
 
@@ -19817,14 +19828,37 @@ function poblarParteObraDatalist(){
     }, err => console.error('Error escuchando el historial de cómputos:', err));
 
     // Órdenes de trabajo (2026-08-22).
+    // (02/10/2026) Órdenes viejas o cargadas a mano pueden traer campos con otro formato (sin fecha, personal
+    // como texto, null…). Se acomodan SOLO en memoria para que ninguna hoja se rompa; en la base no se toca nada.
+    function limpiarOtLeida(o){
+      const ob = v => (v && typeof v === 'object' && !Array.isArray(v));
+      if(typeof o.fecha !== 'string') o.fecha = o.fecha == null ? '' : String(o.fecha);
+      if(o.numero != null && typeof o.numero !== 'string') o.numero = String(o.numero);
+      if(o.personal != null){
+        o.personal = (Array.isArray(o.personal) ? o.personal : []).map(p => typeof p === 'string' ? { nombre:p } : p)
+          .filter(p => ob(p)).map(p => (p.nombre == null || typeof p.nombre === 'string') ? p : { ...p, nombre:String(p.nombre) });
+      }
+      if(o.actividades != null && !(Array.isArray(o.actividades) && o.actividades.every(k => typeof k === 'string')))
+        o.actividades = (Array.isArray(o.actividades) ? o.actividades : [o.actividades]).filter(k => typeof k === 'string' && k);
+      if(o.actividadesManuales != null && !Array.isArray(o.actividadesManuales)) o.actividadesManuales = [];
+      if(Array.isArray(o.actividadesManuales)) o.actividadesManuales = o.actividadesManuales.filter(a => ob(a));
+      ['previsto','asignada','campo'].forEach(k => { if(o[k] != null && !ob(o[k])) o[k] = {}; });
+      if(o.cierre != null && !ob(o.cierre)) delete o.cierre;
+      if(ob(o.cierre) && o.cierre.cantidades != null && !ob(o.cierre.cantidades)) o.cierre.cantidades = {};
+      if(ob(o.campo)) ['marcas','horas','novedades','enviados','fotos'].forEach(k => { if(o.campo[k] != null && !ob(o.campo[k])) o.campo[k] = {}; });
+      return o;
+    }
+    window.limpiarOtLeida = limpiarOtLeida;
     fbDb.collection('ordenesTrabajo').onSnapshot(snapshot => {
       (window.__sync = window.__sync || {})['ordenesTrabajo'] = { ts:Date.now(), n:snapshot.size };
-      ordenesTrabajo = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      if(typeof window.renderRegistros === 'function') window.renderRegistros();
+      ordenesTrabajo = snapshot.docs.map(d => limpiarOtLeida({ id: d.id, ...d.data() }));
+      // (02/10/2026) cada redibujo por separado: si uno falla, los demás (tablero, «Mis tareas») igual se actualizan.
+      const seguro = (f, q) => { try{ if(typeof f === 'function') f(); }catch(e){ console.error('Órdenes: falló ' + q, e); } };
+      seguro(window.renderRegistros, 'registros');
       // La planificación semanal muestra las órdenes emitidas en su fecha: se redibuja con cada cambio.
-      if(typeof window.renderPlanGrid === 'function') window.renderPlanGrid();
+      seguro(window.renderPlanGrid, 'planificación');
       // Órdenes con la cuadrilla (2026-10-02): tablero de Órdenes y «Mis tareas».
-      if(typeof window.alCambiarOrdenes === 'function') window.alCambiarOrdenes();
+      seguro(window.alCambiarOrdenes, 'tablero / mis tareas');
     }, err => console.error('Error escuchando órdenes de trabajo:', err));
 
     // Avance de obra (2026-08-15): mismo mecanismo que "movimientos" de Stock, pero cada documento
@@ -22320,7 +22354,7 @@ function poblarParteObraDatalist(){
     lista.forEach(o=>{
       const b = borradorDe(o);
       const tareas = tareasDeOrden(o);
-      const gente = (o.personal||[]).filter(p=>String(p.nombre||'').trim());
+      const gente = (Array.isArray(o.personal) ? o.personal : []).filter(p=>p && String(p.nombre||'').trim());
       const cerrada = o.cierre && Object.keys(o.cierre.cantidades||{}).length;
       let total = 0;
       tareas.forEach(t=>{ total += num(b.cantidades[t.k]) * num(t.def.pts); });
@@ -35652,6 +35686,8 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
     if(panel && v && !panel.querySelector('.menu-version')){
       const d = document.createElement('div'); d.className = 'menu-version';
       d.textContent = 'Versión ' + v.textContent.replace(/^·\s*/, '');
+      d.title = 'Tocá para revisar la app'; d.style.cursor = 'pointer';
+      d.addEventListener('click', ()=>{ if(typeof window.revisarApp === 'function') window.revisarApp(); });
       panel.appendChild(d);
     }
     // PC con mouse: el ícono grande (accesos directos) es «Azul EMA»; en el celular queda «Cristal».
@@ -37159,7 +37195,7 @@ body.calc-rapida #calcFlotante{ display:none !important; }
   const hoy = ()=> fechaAISO(new Date());
   const sumarDia = (iso, n)=>{ const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return fechaAISO(d); };
   const proximoHabil = iso => { let f = sumarDia(iso, 1); if(new Date(f + 'T12:00:00').getDay() === 0) f = sumarDia(f, 1); return f; };
-  const OTS = ()=>{ try{ return ordenesTrabajo || []; }catch(e){ return []; } };
+  const OTS = ()=>{ try{ return (Array.isArray(ordenesTrabajo) ? ordenesTrabajo : []).filter(o => o && typeof o === 'object'); }catch(e){ return []; } };
   const LS = {
     get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
     set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
@@ -37172,7 +37208,10 @@ body.calc-rapida #calcFlotante{ display:none !important; }
   const fmtN = n => Number(n).toLocaleString('es-AR', { maximumFractionDigits:2 });
   const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
   const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const fechaLarga = iso => { const d = new Date(iso + 'T12:00:00'); return `${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`; };
+  const fechaLarga = iso => { const d = new Date(String(iso||'') + 'T12:00:00'); if(isNaN(d)) return String(iso||'sin fecha'); return `${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`; };
+  // Datos viejos o cargados a mano pueden venir raros (null, texto suelto, número): estas ayudas nunca rompen.
+  const lista = v => Array.isArray(v) ? v : [];
+  const obj = v => (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
   const MOTIVOS = [['lluvia','🌧 Lluvia'],['material','📦 Faltó material'],['epec','⚡ Falta EPEC'],['tiempo','⏱ No alcanzó el tiempo'],['otro','Otro']];
   const motivoTxt = m => (MOTIVOS.find(x => x[0] === m) || [m, m])[1].replace(/^\S+\s/, '');
 
@@ -37187,23 +37226,23 @@ body.calc-rapida #calcFlotante{ display:none !important; }
   // ---------- Tareas de una orden ----------
   function labelCat(k){ const a = (typeof ACTIVIDADES_CATALOGO !== 'undefined') ? ACTIVIDADES_CATALOGO.find(x => x.id === k) : null; return a ? a.label : k; }
   function tareasDe(o){
-    const prev = o.previsto || {};
+    const prev = obj(o.previsto);
     return [
-      ...(o.actividades||[]).map(k => ({ k, label:labelCat(k), un:(typeof unidadDeTarea === 'function' ? unidadDeTarea(k) : 'unidad'), prev:num(prev[k]), manual:false })),
-      ...(o.actividadesManuales||[]).filter(a => String(a.actividad||'').trim()).map(a => ({ k:'m:' + a.actividad.trim(), label:a.actividad.trim(), detalle:a.detalle||'', un:'', prev:0, manual:true }))
+      ...lista(o.actividades).filter(k => typeof k === 'string' && k).map(k => ({ k, label:labelCat(k), un:(typeof unidadDeTarea === 'function' ? unidadDeTarea(k) : 'unidad'), prev:num(prev[k]), manual:false })),
+      ...lista(o.actividadesManuales).filter(a => a && String(a.actividad||'').trim()).map(a => ({ k:'m:' + String(a.actividad).trim(), label:String(a.actividad).trim(), detalle:a.detalle||'', un:'', prev:0, manual:true }))
     ];
   }
-  const gente = o => (o.personal||[]).filter(p => String(p.nombre||'').trim());
+  const gente = o => lista(o.personal).map(p => typeof p === 'string' ? { nombre:p } : p).filter(p => p && String(p.nombre||'').trim());
   const estaEn = (o, persona) => !!persona && gente(o).some(p => norm(p.nombre) === norm(persona));
-  function asignadaA(o, k){ return ((o.asignada||{})[k]) || ''; }
+  function asignadaA(o, k){ return String(obj(o.asignada)[k] || ''); }
   function tareasPara(o, persona){ return tareasDe(o).filter(t => { const a = asignadaA(o, t.k); return !a || norm(a) === norm(persona); }); }
-  const campo = o => o.campo || {};
-  const marcaDe = (o, k) => (campo(o).marcas || {})[llave(k)] || null;
-  const enviados = o => Object.values(campo(o).enviados || {});
+  const campo = o => obj(o.campo);
+  const marcaDe = (o, k) => obj(campo(o).marcas)[llave(k)] || null;
+  const enviados = o => Object.values(obj(campo(o).enviados));
   const cerrada = o => o.estado === 'Terminada' || o.estado === 'Anulada';
   function pendientesDe(o){
     // Lo que no se terminó: «No se hizo», sin marcar, o menos de lo previsto. Con el cierre de la oficina, manda el cierre.
-    const c = o.cierre && o.cierre.cerradoTs ? (o.cierre.cantidades || {}) : null;
+    const c = o.cierre && o.cierre.cerradoTs ? obj(o.cierre.cantidades) : null;
     return tareasDe(o).map(t => {
       const m = marcaDe(o, t.k);
       const hecho = c ? num(c[t.k]) : (m && m.hecho ? (num(m.cant) || t.prev || 1) : 0);
@@ -37254,7 +37293,12 @@ body.calc-rapida #calcFlotante{ display:none !important; }
   let abiertaTxt = {};   // textareas con foco no se pisan al redibujar
   function escribiendo(){ const a = document.activeElement; return !!(a && $('mtApp') && $('mtApp').contains(a) && /^(INPUT|TEXTAREA)$/.test(a.tagName)); }
   let dibujoPendiente = false;
+  // (02/10/2026) si algo de los datos viene raro, se avisa en la hoja en vez de dejarla en blanco.
   function renderMisTareas(){
+    try{ return renderMisTareas0(); }
+    catch(e){ console.error('Mis tareas:', e); const app = $('mtApp'); if(app) app.innerHTML = `<div class="card"><div class="mt-vacio"><div class="big">⚠️</div>No se pudieron mostrar tus tareas. Avisale a la oficina.<br><small>${esc(e && e.message || e)}</small></div></div>`; }
+  }
+  function renderMisTareas0(){
     const app = $('mtApp'); if(!app) return;
     dibujoPendiente = false;
     const persona = personaActiva();
@@ -37273,7 +37317,7 @@ body.calc-rapida #calcFlotante{ display:none !important; }
     const mias = OTS().filter(o => estaEn(o, persona) && o.estado !== 'Anulada');
     const h0 = hoy();
     const deHoy = mias.filter(o => o.fecha === h0 && !(o.cierre && o.cierre.cerradoTs && o.estado === 'Terminada'));
-    const atras = mias.filter(o => o.fecha < h0 && !cerrada(o) && !(o.cierre && o.cierre.cerradoTs) && !(campo(o).enviados || {})[llave(persona)]);
+    const atras = mias.filter(o => o.fecha < h0 && !cerrada(o) && !(o.cierre && o.cierre.cerradoTs) && !obj(campo(o).enviados)[llave(persona)]);
     const proximas = mias.filter(o => o.fecha > h0 && !cerrada(o)).sort((a,b) => String(a.fecha).localeCompare(String(b.fecha))).slice(0, 3);
     const cerradasHoy = mias.filter(o => o.fecha === h0 && o.cierre && o.cierre.cerradoTs && o.estado === 'Terminada');
     if(!deHoy.length && !atras.length){
@@ -37319,10 +37363,10 @@ body.calc-rapida #calcFlotante{ display:none !important; }
     const todas = tareasDe(o);
     const marcadas = todas.filter(t => marcaDe(o, t.k)).length;
     const yo = llave(persona);
-    const env = (campo(o).enviados || {})[yo];
-    const misHoras = (campo(o).horas || {})[yo] || {};
-    const nov = (campo(o).novedades || {})[yo] || '';
-    const fotos = Object.entries(campo(o).fotos || {}).filter(([,f]) => norm(f.por) === norm(persona)).map(([id]) => id);
+    const env = obj(campo(o).enviados)[yo];
+    const misHoras = obj(campo(o).horas)[yo] || {};
+    const nov = obj(campo(o).novedades)[yo] || '';
+    const fotos = Object.entries(obj(campo(o).fotos)).filter(([,f]) => f && norm(f.por) === norm(persona)).map(([id]) => id);
     const cerradaYa = !!(o.cierre && o.cierre.cerradoTs);
     let h = `<div class="mt-ot" data-ot="${esc(o.id)}">
       <div class="mt-ot-cab"><div><div class="mt-ot-pl">${esc(o.plazaNombre||'(sin plaza)')}</div><div class="mt-ot-meta">${esc(o.numero||'')}${o.obraId ? ' · ID ' + esc(o.obraId) : ''} · ${esc(o.fecha === hoy() ? 'hoy' : formatFechaCorta(o.fecha))} · ${esc(o.horaInicio||'')}${o.horaFin ? ' a ' + esc(o.horaFin) : ''}</div>
@@ -37437,23 +37481,29 @@ body.calc-rapida #calcFlotante{ display:none !important; }
   function pintarMenuN(){
     const b = $('menuMisTareas'); if(!b) return;
     const p = miPersona(); let n = b.querySelector('.tb-menu-n');
-    const k = p ? OTS().filter(o => o.fecha === hoy() && estaEn(o, p) && !cerrada(o) && !(campo(o).enviados || {})[llave(p)]).length : 0;
+    const k = p ? OTS().filter(o => o.fecha === hoy() && estaEn(o, p) && !cerrada(o) && !obj(campo(o).enviados)[llave(p)]).length : 0;
     if(!k){ if(n) n.remove(); return; }
     if(!n){ n = document.createElement('span'); n.className = 'tb-menu-n'; b.appendChild(n); }
     n.textContent = k;
   }
-  const menuLista = $('menuLista');
-  if(menuLista){
-    new MutationObserver(()=>{
-      if($('menuMisTareas')) return;
-      const ref = menuLista.querySelector('.menu-item[data-vista]'); if(!ref) return;
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'menu-item'; b.id = 'menuMisTareas'; b.dataset.vista = 'mistareas';
-      b.innerHTML = '<span class="menu-ico">👷</span>Mis tareas';
-      ref.insertAdjacentElement('beforebegin', b);
-      if(document.body.dataset.vista === 'mistareas') b.classList.add('activo');
-      pintarMenuN();
-    }).observe(menuLista, { childList:true });
+  // El botón del menú se pone APENAS existe el menú (antes solo se ponía cuando el menú cambiaba, y a los
+  // usuarios a los que no se les agregaba nada después —todos menos el administrador— no les aparecía). 02/10/2026.
+  function ponerBotonMenu(){
+    const menuLista = $('menuLista'); if(!menuLista || $('menuMisTareas')) return;
+    const ref = menuLista.querySelector('.menu-item[data-vista]'); if(!ref) return;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'menu-item'; b.id = 'menuMisTareas'; b.dataset.vista = 'mistareas';
+    b.innerHTML = '<span class="menu-ico">👷</span>Mis tareas';
+    ref.insertAdjacentElement('beforebegin', b);
+    if(document.body.dataset.vista === 'mistareas') b.classList.add('activo');
+    pintarMenuN();
   }
+  window.__ponerBotonMisTareas = ponerBotonMenu;
+  const menuLista = $('menuLista');
+  if(menuLista) new MutationObserver(ponerBotonMenu).observe(menuLista, { childList:true });
+  ponerBotonMenu();
+  document.addEventListener('DOMContentLoaded', ponerBotonMenu);
+  window.addEventListener('load', ponerBotonMenu);
+  setTimeout(ponerBotonMenu, 1500);
 
   // ---------- Cuadrillas guardadas ----------
   let cuadrillas = [];
@@ -37649,7 +37699,7 @@ body.calc-rapida #calcFlotante{ display:none !important; }
       if(pre) o.cierre = { ...(o.cierre || {}), ...pre };
       let r;
       try{ r = orig.apply(this, arguments); } finally { if(pre) o.cierre = cierreAntes; }
-      if(o && (pre || Object.keys(campo(o).marcas || {}).length)){
+      if(o && (pre || Object.keys(obj(campo(o).marcas)).length)){
         const cuerpo = $('cierreCuerpo');
         if(cuerpo){
           cuerpo.insertAdjacentHTML('afterbegin', resumenCampoHtml(o));
@@ -37836,7 +37886,7 @@ body.calc-rapida #calcFlotante{ display:none !important; }
   function horasDe(o, nombre){
     const c = o.cierre && o.cierre.cerradoTs ? o.cierre.horasPersona || {} : null;
     if(c && c[nombre] != null) return num(c[nombre]);
-    const h = (campo(o).horas || {})[llave(nombre)]; return h && num(h.horas) > 0 ? num(h.horas) : null;
+    const h = obj(campo(o).horas)[llave(nombre)]; return h && num(h.horas) > 0 ? num(h.horas) : null;
   }
   function ptsDe(o, nombre){ try{ const p = window.puntosDeOrden && o.cierre && o.cierre.cerradoTs ? window.puntosDeOrden(o) : null; const x = p && p.porPersona.find(z => norm(z.nombre) === norm(nombre)); return x ? x.pts : null; }catch(e){ return null; } }
   const icoE = e => e === 'si' ? '<span style="color:#1d7a38; font-weight:800;">✓</span>' : (e === 'no' ? '<span style="color:#b3261e; font-weight:800;">✗</span>' : '<span style="color:#9a5a00;">•</span>');
@@ -37853,7 +37903,7 @@ body.calc-rapida #calcFlotante{ display:none !important; }
   function resultadoBuscar(){
     const enRango = o => (!bus.desde || String(o.fecha) >= bus.desde) && (!bus.hasta || String(o.fecha) <= bus.hasta) && o.estado !== 'Anulada';
     const q = norm(bus.texto);
-    const coincideTexto = o => !q || norm([o.numero, o.plazaNombre, o.obraId, o.barrio, o.cuadrilla, o.responsable, o.notas, o.materiales, (o.cierre || {}).obs, ...gente(o).map(p => p.nombre), ...tareasDe(o).map(t => t.label), ...Object.values(campo(o).novedades || {}), ...Object.values(campo(o).marcas || {}).map(m => m.nota || '')].join(' ')).includes(q);
+    const coincideTexto = o => !q || norm([o.numero, o.plazaNombre, o.obraId, o.barrio, o.cuadrilla, o.responsable, o.notas, o.materiales, (o.cierre || {}).obs, ...gente(o).map(p => p.nombre), ...tareasDe(o).map(t => t.label), ...Object.values(obj(campo(o).novedades)), ...Object.values(obj(campo(o).marcas)).map(m => m.nota || '')].join(' ')).includes(q);
     let ots = OTS().filter(o => enRango(o) && coincideTexto(o));
     if(bus.modo === 'persona') ots = bus.quien ? ots.filter(o => estaEn(o, bus.quien)) : [];
     if(bus.modo === 'obra') ots = bus.obra ? ots.filter(o => (o.plazaId || ('n:' + norm(o.plazaNombre))) === bus.obra) : [];
@@ -38051,6 +38101,8 @@ body.calc-rapida #calcFlotante{ display:none !important; }
     operario:{ nombre:'Operario (celu)', txt:'Solo ve y marca sus tareas del día', hojas:{ ...todas('oculto'), mistareas:'editar' } },
     mirar:{ nombre:'Solo mirar', txt:'Ve todo, no cambia nada', hojas:{ ...todas('ver'), gastos:'oculto', produccion:'oculto' } }
   };
+  // «Mis tareas» la tienen TODOS los roles (cada uno ve y marca solo lo suyo) — 02/10/2026.
+  Object.values(ROLES).forEach(r => { r.hojas.mistareas = 'editar'; });
   const VISTA_DE_ID = { viewInicio:'inicio', viewRegistro:'registro', viewCalculadora:'calc', viewParteDiario:'parte', viewPlanificacion:'plan', viewAvance:'avance',
     viewMapa:'mapa', viewStock:'stock', viewInforme:'informe', viewGastos:'gastos', viewProduccion:'produccion', viewNormas:'normas', viewTablero:'tablero', viewUsuarios:'usuarios', viewMisTareas:'mistareas' };
   const ID_DE_VISTA = Object.fromEntries(Object.entries(VISTA_DE_ID).map(([a,b]) => [b,a]));
@@ -38066,8 +38118,9 @@ body.calc-rapida #calcFlotante{ display:none !important; }
   const esAdmin = ()=> { const y = yo(); return !!(y && y.rol === 'admin' && y.activo !== false); };
   function permiso(h){
     if(h === 'tablero') return 'editar';
-    // «Mis tareas» solo tiene sentido con el usuario vinculado a una persona de la nómina (o para el administrador, que la puede previsualizar).
-    if(h === 'mistareas'){ const y = yo(); if(!(y && String(y.persona||'').trim()) && !esAdmin()) return 'oculto'; }
+    // «Mis tareas» (02/10/2026, pedido del usuario): le aparece a TODOS, cualquiera sea el rol. Cada uno ve solo SUS tareas
+    // (las de su nombre de la nómina); si todavía no está vinculado, la hoja le dice que le pida a la oficina que lo vincule.
+    if(h === 'mistareas') return window.__modoEmergencia ? 'ver' : 'editar';
     if(h === 'usuarios') return (!cargado || !window.__fbUser) ? 'oculto' : (!hayAdmin() || esAdmin() ? 'editar' : 'oculto');
     if(window.__modoEmergencia) return 'ver';                     // entrada de emergencia (sin conexión): solo mirar
     if(!cargado) return window.__fbUser ? 'ver' : 'editar';       // con sesión, hasta que lleguen los usuarios: solo mirar
@@ -38268,9 +38321,9 @@ body.calc-rapida #calcFlotante{ display:none !important; }
         </div>
         <div class="us-fila" style="margin-top:8px;">
           <label style="margin:0; font-size:12px; flex:0 0 auto;">Es en la nómina</label>
-          <select data-u="persona" title="Con esto la app sabe qué órdenes son suyas («Mis tareas»)"><option value="">— Nadie (no es de cuadrilla) —</option>${opcionesPersona(u.persona)}</select>
+          <select data-u="persona" title="Con esto la app sabe qué órdenes son suyas («Mis tareas»)"><option value="">— Sin vincular (en «Mis tareas» no le sale nada) —</option>${opcionesPersona(u.persona)}</select>
         </div>
-        <div class="us-hojas">${HOJAS.map(([h, n]) => {
+        <div class="us-hojas">${HOJAS.filter(([h]) => h !== 'mistareas').map(([h, n]) => {
           const base = (ROLES[u.rol] || ROLES.mirar).hojas[h];
           const aj = u.ajustes && u.ajustes[h]; const ef = aj || base;
           return `<div class="us-hoja"><span class="n">${esc(n)}${aj && aj !== base ? '<small>cambiado</small>' : ''}</span>
@@ -38312,7 +38365,7 @@ body.calc-rapida #calcFlotante{ display:none !important; }
         <label for="usCorreo">Correo <span style="font-weight:500; color:var(--text-soft);">(opcional — si no tiene, se inventa uno interno)</span></label>
         <input type="email" id="usCorreo" placeholder="Opcional" autocomplete="off" ${esAdmin() ? '' : 'disabled'}>
         <label for="usPersona">Es en la nómina <span style="font-weight:500; color:var(--text-soft);">(para que le aparezcan sus tareas)</span></label>
-        <select id="usPersona" ${esAdmin() ? '' : 'disabled'}><option value="">— Nadie (no es de cuadrilla) —</option>${opcionesPersona('')}</select>
+        <select id="usPersona" ${esAdmin() ? '' : 'disabled'}><option value="">— Sin vincular (en «Mis tareas» no le sale nada) —</option>${opcionesPersona('')}</select>
         <label>Rol</label>
         <div class="us-roles">${Object.entries(ROLES).map(([k,v]) => `<button type="button" class="us-rol${k === rolNuevo ? ' activo' : ''}" data-rol="${k}" ${esAdmin() ? '' : 'disabled'}><b>${esc(v.nombre)}</b><small>${esc(v.txt)}</small></button>`).join('')}</div>
         <button type="button" class="btn-primary" id="usCrear" style="margin-top:14px; width:100%;" ${esAdmin() ? '' : 'disabled'}>Crear usuario</button>
@@ -38661,6 +38714,33 @@ body.calc-rapida #calcFlotante{ display:none !important; }
   function iniciar2(){ repasar2(); new MutationObserver(pedir2).observe(document.body, { childList:true, subtree:true }); }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar2); else iniciar2();
 })();
+</script>
+<script id="revisarAppDiag">
+/* (02/10/2026) «Revisar la app»: tocando «Versión …» al pie del menú aparece qué versión está cargada, qué mejoras
+   están activas, con qué usuario/rol/persona entraste y si hubo errores. Sirve para mandar una captura si algo no sale. */
+window.revisarApp = function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var ver = String(($('appVersion')||{}).textContent || '').replace(/^\s*·?\s*v\s*/, '').trim();
+  var y = null; try{ y = window.PERMISOS && PERMISOS.yo && PERMISOS.yo(); }catch(e){}
+  var rol = ''; try{ rol = y ? ((PERMISOS.ROLES && PERMISOS.ROLES[y.rol] && PERMISOS.ROLES[y.rol].nombre) || y.rol || '') : ''; }catch(e){ rol = y && y.rol || ''; }
+  var tiene = function(c){ try{ return !!c(); }catch(e){ return false; } };
+  var M = [
+    ['Mis tareas (botón en el menú)', function(){ return $('menuMisTareas') && $('viewMisTareas'); }],
+    ['Órdenes en hojas (tablero / llenar / historial / buscar)', function(){ return $('subtabsOrdenes') || typeof window.irSubOrdenes === 'function'; }],
+    ['Calculadoras rápidas + caída de tensión Muni', function(){ return $('subtabsCalc') || window.__caidaMuni; }],
+    ['Pañol: ficha, fotos y por sector', function(){ return window.__panolFicha; }],
+    ['Base de datos conectada', function(){ return window.firebase && firebase.apps && firebase.apps.length; }]
+  ];
+  var lin = ['Versión: ' + (ver || '¿?'), 'Usuario: ' + (y ? (y.nombre || y.usuario || y.email || '') : '(sin entrar)') + (rol ? ' · rol ' + rol : ''),
+    'En la nómina: ' + (y && y.persona ? y.persona : '— sin vincular —'), ''];
+  M.forEach(function(m){ lin.push((tiene(m[1]) ? '✓ ' : '✗ ') + m[0]); });
+  var er = window.__erroresApp || [];
+  lin.push('');
+  lin.push(er.length ? ('⚠ Errores (' + er.length + '):') : 'Sin errores.');
+  er.slice(-6).forEach(function(e){ lin.push('• ' + String(e.m).slice(0, 120) + (e.d ? ' [' + e.d + ']' : '')); });
+  lin.push(''); lin.push('Si algo no aparece, mandale una captura de esto a quien arma la app.');
+  alert(lin.join('\n'));
+};
 </script>
 </body>
 </html>
