@@ -3749,7 +3749,7 @@ html, body{ forced-color-adjust:none; }
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-10-02 03:16 · 64201c</span></div>
+      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-10-02 13:04 · bceb31</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -5637,6 +5637,10 @@ html, body{ forced-color-adjust:none; }
         </div>
         <div class="no-print" style="margin-top:10px;"><button type="button" class="btn-ghost" onclick="imprimirMaterialPersona()">🖨 Imprimir lo que tiene (para firmar)</button></div>
       </div>
+
+      <!-- Fotos de los materiales y consumo por sector (2026-10-02): los dibuja el bloque «panolFichaFotosSector» -->
+      <div class="card no-print" id="cardStockFotos" style="margin-top:18px;"><div id="fotosApp"></div></div>
+      <div class="card" id="cardStockSector" style="margin-top:18px;"><div id="sectorApp"></div></div>
 
       <div class="card no-print" id="cardStockRespaldo" style="margin-top:18px;">
         <h2><span class="dot"></span>Respaldo de TODA la herramienta</h2>
@@ -20715,6 +20719,8 @@ function poblarParteObraDatalist(){
     { id:'productos',   label:'Alta de productos',   cards:['cardStockCatalogo'] },
     { id:'precios',     label:'💲 Precios',           cards:['cardStockPrecios'] },
     { id:'personas',    label:'👷 Por persona',        cards:['cardStockPersonas'] },
+    { id:'fotos',       label:'📷 Fotos',              cards:['cardStockFotos'] },          // 2026-10-02
+    { id:'sector',      label:'📊 Por sector',         cards:['cardStockSector'] },         // 2026-10-02
     { id:'acceso',      label:'Acceso y respaldo',   cards:['stockAuthCard','cardStockRespaldo','cardStockSalud','cardStockAuditoria','cardStockSoloStock'] },
   ];
   let subStock = 'inventario';
@@ -36227,6 +36233,330 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
 </script>
 
 <!-- ============================================================================================
+     PAÑOL: FICHA DEL MATERIAL, SESIÓN DE FOTOS Y CONSUMO POR SECTOR (2026-10-02)
+     ============================================================================================
+     Decidido con el usuario (30/09 y 02/10): ficha con fabricante/marca y modelo, norma (cumple / no cumple /
+     no sé + cuál), medida/sección/potencia, proveedor habitual, hoja de datos (link) y notas; UNA foto por
+     material; «sesión de fotos» para recorrer el pañol con el celu; consumo por sector (Alumbrado / Ilícitos).
+     Dónde vive: en el mismo documento del producto (`catalogoProductos/{codigo}`): `ficha{…}`, `fotoId` (la
+     foto grande, en `adjuntos`, como las fotos de remitos) y `fotoMini` (una miniatura de ~5 KB para las
+     grillas, así no se baja la foto grande de cada material).
+     ============================================================================================ -->
+<style id="estiloPanolFicha">
+.pf-link{ background:none; border:none; padding:0; margin:0; font:inherit; color:inherit; text-align:left; cursor:pointer; min-height:0 !important; }
+.pf-link:hover{ color:var(--navy); text-decoration:underline; }
+.pf-link .pf-ico{ font-size:12px; margin-left:4px; opacity:.75; }
+.pf-mini{ width:30px; height:30px; border-radius:8px; object-fit:cover; vertical-align:middle; margin-right:8px; border:1px solid rgba(40,40,94,.12); }
+.pf-modal{ position:fixed; inset:0; z-index:9600; background:rgba(28,28,69,.32); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); display:flex; align-items:flex-start; justify-content:center; padding:24px 14px; overflow-y:auto; }
+.pf-caja{ width:min(920px, 100%); background:#f6f7fb; border-radius:26px; padding:18px; box-shadow:0 30px 70px -20px rgba(28,28,69,.6); }
+.pf-cab{ display:flex; align-items:flex-start; gap:10px; margin-bottom:12px; }
+.pf-cab h3{ margin:4px 0 0; font:800 24px/1.15 var(--disp); letter-spacing:-.02em; }
+.pf-cab .x{ margin-left:auto; border:none; background:#fff; border-radius:999px; width:40px; height:40px; font-size:20px; cursor:pointer; flex:0 0 40px; }
+.pf-grid{ display:grid; grid-template-columns:300px minmax(0,1fr); gap:16px; align-items:start; }
+.pf-foto{ aspect-ratio:1/1; border-radius:20px; overflow:hidden; background:repeating-linear-gradient(45deg,#f1f3f8,#f1f3f8 10px,#e9ecf4 10px,#e9ecf4 20px); display:grid; place-items:center; border:1px solid rgba(40,40,94,.1); color:var(--text-3); font-weight:700; text-align:center; }
+.pf-foto img{ width:100%; height:100%; object-fit:cover; }
+.pf-tiles{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; margin-bottom:12px; }
+.pf-tile{ background:#fff; border-radius:16px; padding:10px 12px; border:1px solid rgba(40,40,94,.08); }
+.pf-tile .l{ font:700 10.5px var(--mono); letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); }
+.pf-tile .n{ font:800 22px/1.2 var(--mono); }
+.pf-form{ background:#fff; border-radius:18px; padding:14px; border:1px solid rgba(40,40,94,.08); }
+.pf-form .fila{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:4px 12px; }
+.pf-form label{ margin-top:8px; }
+.pf-seg{ display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+.pf-seg button{ min-height:40px; padding:0 14px; border-radius:12px; border:1.5px solid rgba(40,40,94,.15); background:#fff; font:700 13.5px var(--fuente); color:var(--text-soft); cursor:pointer; }
+.pf-seg button.on[data-n="cumple"]{ background:#34c759; border-color:#34c759; color:#fff; }
+.pf-seg button.on[data-n="no"]{ background:#ff3b30; border-color:#ff3b30; color:#fff; }
+.pf-seg button.on[data-n="nose"]{ background:#ff9f0a; border-color:#ff9f0a; color:#fff; }
+.pf-acc{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+.pf-acc .btn-primary, .pf-acc .btn-ghost{ width:auto; margin:0; }
+.pf-msg{ font-size:13px; margin-top:8px; min-height:16px; }
+.pf-chips{ display:flex; gap:6px; flex-wrap:wrap; margin:10px 0; }
+.pf-chips button{ min-height:36px; padding:0 12px; border-radius:999px; border:1px solid rgba(40,40,94,.15); background:#fff; font:600 13px var(--fuente); cursor:pointer; color:var(--text); }
+.pf-chips button.on{ background:var(--navy); color:#fff; border-color:var(--navy); }
+.pf-prog{ height:10px; border-radius:99px; background:rgba(40,40,94,.1); overflow:hidden; flex:1 1 200px; } .pf-prog i{ display:block; height:100%; background:var(--navy); border-radius:99px; }
+.pf-tiles-g{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; }
+.pf-it{ background:#fff; border-radius:16px; overflow:hidden; border:1px solid rgba(40,40,94,.08); cursor:pointer; text-align:left; padding:0; font:inherit; min-height:0 !important; }
+.pf-it .im{ aspect-ratio:4/3; display:grid; place-items:center; background:repeating-linear-gradient(45deg,#f4f6fb,#f4f6fb 8px,#eceff7 8px,#eceff7 16px); color:var(--navy); font-weight:700; font-size:13px; }
+.pf-it .im img{ width:100%; height:100%; object-fit:cover; }
+.pf-it .tx{ padding:8px 10px; font-size:12.5px; font-weight:600; line-height:1.3; } .pf-it .tx small{ display:block; font:500 11px var(--mono); color:var(--text-3); }
+.pf-sesion{ text-align:center; } .pf-sesion .big{ font:800 22px/1.2 var(--disp); margin:6px 0 2px; } .pf-sesion .cod{ font:600 13px var(--mono); color:var(--text-3); }
+.pf-sesion .cam{ display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; min-height:64px; border-radius:20px; background:var(--navy); color:#fff; font:800 18px var(--fuente); margin-top:14px; cursor:pointer; }
+.ps-tiles{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; margin:12px 0; }
+.ps-bar{ display:flex; height:10px; border-radius:99px; overflow:hidden; background:rgba(40,40,94,.08); min-width:110px; } .ps-bar .a{ background:#28285e; } .ps-bar .i{ background:#84c3da; }
+.ps-ley{ display:flex; gap:14px; font-size:12.5px; color:var(--text-soft); margin:4px 0 8px; } .ps-ley i{ display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
+.ps-tabla{ width:100%; border-collapse:collapse; font-size:13.5px; } .ps-tabla th, .ps-tabla td{ padding:8px 6px; border-bottom:1px solid rgba(40,40,94,.08); text-align:left; }
+.ps-tabla th{ font:700 10.5px var(--mono); letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); } .ps-tabla .r{ text-align:right; font-family:var(--mono); white-space:nowrap; }
+@media (max-width:760px){
+  .pf-grid{ grid-template-columns:minmax(0,1fr); } .pf-foto{ max-width:340px; width:100%; margin:0 auto; }
+  .pf-form .fila{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); } .pf-tiles, .ps-tiles{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .pf-modal{ padding:0; } .pf-caja{ border-radius:0; min-height:100%; }
+  .ps-tabla .ps-oc{ display:none; }
+}
+#pfModal input[type=url], #sectorApp input[type=month]{ background:rgba(255,255,255,.78); border:1px solid rgba(40,40,94,.12); border-radius:14px; min-height:46px; font-size:15px; padding:8px 12px; color:var(--text); box-sizing:border-box; }
+#pfModal input[type=url]{ width:100%; }
+@media (max-width:640px){ #pfModal input[type=url], #sectorApp input[type=month]{ font-size:16px; } }
+@media print{ .pf-modal{ display:none !important; } }
+</style>
+<script id="panolFichaFotosSector">
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const esc = s => escHtml(s);
+  const num = v => { const n = Number(v); return isFinite(n) ? n : 0; };
+  const f = (n, d) => Number(n).toLocaleString('es-AR', { maximumFractionDigits: d == null ? 2 : d });
+  const norm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+  const doc = cod => (window.catalogoCambios || []).find(c => String(c.codigo) === String(cod) || String(c.id) === String(cod)) || {};
+  const prod = cod => (typeof catalogoCompleto === 'function' ? catalogoCompleto() : []).find(p => String(p.codigo) === String(cod)) || null;
+  const fichaDe = cod => doc(cod).ficha || {};
+  const miniDe = cod => doc(cod).fotoMini || '';
+  const fotoIdDe = cod => doc(cod).fotoId || '';
+  const movs = ()=> (window.stockMovimientos || []).filter(m => !m.anulado);
+  const hoyISO = ()=> fechaAISO(new Date());
+  const cacheFoto = new Map();
+  async function fotoGrande(id){ if(!id) return ''; if(cacheFoto.has(id)) return cacheFoto.get(id); try{ const d = await window.fbAdjuntoLeer(id); const u = (d && d.dataUrl) || ''; cacheFoto.set(id, u); return u; }catch(e){ return ''; } }
+
+  // ---------- Guardar foto (grande + miniatura) ----------
+  async function guardarFoto(cod, file){
+    const p = prod(cod); if(!p) throw new Error('sin producto');
+    const mini = await comprimirImagen(file, 160, 9000);
+    const id = await subirAdjunto(file, { tipo:'material', codigo:String(cod), titulo:`${cod} · ${p.desc}` });
+    const viejo = fotoIdDe(cod);
+    await window.fbGuardarProductoCatalogo({ codigo:p.codigo, fotoId:id, fotoMini:mini.dataUrl, fotoTs:Date.now() });
+    const d = (window.catalogoCambios || []).find(c => String(c.codigo) === String(cod));
+    if(d){ d.fotoId = id; d.fotoMini = mini.dataUrl; } else (window.catalogoCambios = window.catalogoCambios || []).push({ id:String(cod), codigo:p.codigo, fotoId:id, fotoMini:mini.dataUrl });
+    if(viejo && viejo !== id && typeof window.fbAdjuntoBorrar === 'function'){ try{ await window.fbAdjuntoBorrar(viejo); }catch(e){} }
+    return id;
+  }
+
+  // ---------- FICHA ----------
+  const NORMA = [['cumple','✓ Cumple'], ['no','✗ No cumple'], ['nose','? No sé']];
+  function datosFicha(cod){
+    const p = prod(cod) || { codigo:cod, desc:'', un:'' };
+    const ms = movs().filter(m => String(m.codigo) === String(cod));
+    const mes = hoyISO().slice(0, 7);
+    const salioMes = ms.filter(m => m.tipo === 'salida' && String(m.fecha||'').slice(0, 7) === mes).reduce((a, m) => a + num(m.cantidad), 0);
+    const ents = ms.filter(m => m.tipo === 'entrada' && !m.devolucion).sort((a, b) => String(b.fecha||'').localeCompare(String(a.fecha||'')) || num(b.ts) - num(a.ts));
+    const ult = ents[0];
+    return { p, actual: (typeof stockActual === 'function' ? stockActual(p.codigo) : 0), minimo: (typeof stockMinimoDe === 'function' ? stockMinimoDe(p.codigo) : 0), salioMes, ult, provSug: ult && ult.proveedor ? ult.proveedor : '' };
+  }
+  let fichaCod = null, fichaNorma = '';
+  function abrirFicha(cod){
+    cerrarModal(); fichaCod = cod;
+    const D = datosFicha(cod), F = fichaDe(cod); fichaNorma = F.norma || '';
+    const est = typeof stockEstado === 'function' ? stockEstado(D.actual, D.minimo) : '';
+    const m = document.createElement('div'); m.className = 'pf-modal'; m.id = 'pfModal';
+    m.innerHTML = `<div class="pf-caja" role="dialog" aria-label="Ficha del material">
+      <div class="pf-cab"><div><div class="mono" style="color:var(--text-3); font-weight:700;">${esc(D.p.codigo)} · ${esc(D.p.un || '')} ${est ? `<span class="stock-badge ${est === 'SIN STOCK' ? 'stock-badge-sin' : (est === 'POCO' ? 'stock-badge-poco' : 'stock-badge-ok')}" style="margin-left:6px;">${esc(est === 'POCO' && D.minimo ? 'BAJO MÍNIMO' : est)}</span>` : ''}</div><h3>${esc(D.p.desc)}</h3></div><button type="button" class="x" data-pf="cerrar" aria-label="Cerrar">×</button></div>
+      <div class="pf-grid"><div>
+        <div class="pf-foto" id="pfFoto">${miniDe(cod) ? `<img src="${esc(miniDe(cod))}" alt="foto">` : '📷<br>Sin foto todavía'}</div>
+        <label class="btn-ghost" style="display:flex; justify-content:center; align-items:center; gap:6px; margin-top:10px; cursor:pointer; border-radius:999px; min-height:44px;">📷 ${fotoIdDe(cod) ? 'Cambiar la foto' : 'Sacar / subir foto'}<input type="file" accept="image/*" capture="environment" id="pfFotoIn" style="display:none;"></label>
+        <div class="pf-msg" id="pfFotoMsg"></div>
+      </div><div>
+        <div class="pf-tiles"><div class="pf-tile"><div class="l">Stock</div><div class="n">${f(D.actual)}</div></div><div class="pf-tile"><div class="l">Mínimo</div><div class="n">${D.minimo ? f(D.minimo) : '—'}</div></div><div class="pf-tile"><div class="l">Salió este mes</div><div class="n">${f(D.salioMes)}</div></div></div>
+        <div class="pf-form">
+          <b style="font:800 16px var(--disp);">Ficha técnica</b>
+          <div class="fila">
+            <div><label>Fabricante / marca</label><input type="text" data-pf-f="marca" value="${esc(F.marca||'')}"></div>
+            <div><label>Modelo</label><input type="text" data-pf-f="modelo" value="${esc(F.modelo||'')}"></div>
+            <div><label>Medida / sección / potencia</label><input type="text" data-pf-f="medida" value="${esc(F.medida||'')}" placeholder="Ej: 60 W · 4000 K"></div>
+          </div>
+          <label>¿Cumple la norma del pliego?</label>
+          <div class="pf-seg" id="pfNorma">${NORMA.map(([k, l]) => `<button type="button" data-n="${k}" class="${F.norma === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+          <input type="text" data-pf-f="normaCual" value="${esc(F.normaCual||'')}" placeholder="Cuál (ej: IRAM 2178, ET EPEC…)" style="margin-top:8px;">
+          <div class="fila">
+            <div><label>Proveedor habitual</label><input type="text" data-pf-f="proveedor" value="${esc(F.proveedor || '')}" placeholder="${esc(D.provSug || '')}"></div>
+            <div><label>Último ingreso</label><input type="text" value="${esc(D.ult ? formatFechaCorta(D.ult.fecha) + (D.ult.proveedor ? ' · ' + D.ult.proveedor : '') : '—')}" disabled></div>
+            <div><label>Último precio</label><input type="text" value="${D.p.costo ? esc(formatMoney(D.p.costo)) : '—'}" disabled></div>
+          </div>
+          <label>Hoja de datos (link al PDF o la página del fabricante)</label>
+          <div style="display:flex; gap:8px; align-items:center;"><input type="url" data-pf-f="link" value="${esc(F.link||'')}" placeholder="https://…" style="flex:1 1 auto; margin:0;">${F.link ? `<a class="btn-ghost" href="${esc(F.link)}" target="_blank" rel="noopener" style="width:auto; margin:0; padding:10px 14px; text-decoration:none;">Abrir ›</a>` : ''}</div>
+          <label>Notas</label><textarea data-pf-f="notas" rows="2" placeholder="Ej: viene con fotocélula aparte">${esc(F.notas||'')}</textarea>
+          <div class="pf-acc"><button type="button" class="btn-primary" data-pf="guardar">Guardar ficha</button><button type="button" class="btn-ghost" data-pf="imprimir">🖨 Imprimir ficha</button></div>
+          <div class="pf-msg" id="pfMsg"></div>
+        </div>
+      </div></div></div>`;
+    document.body.appendChild(m);
+    if(fotoIdDe(cod)) fotoGrande(fotoIdDe(cod)).then(u => { const im = document.querySelector('#pfFoto img'); if(u && im && fichaCod === cod) im.src = u; });
+  }
+  window.abrirFichaMaterial = abrirFicha;
+  function cerrarModal(){ const m = $('pfModal'); if(m) m.remove(); fichaCod = null; sesion = null; }
+  async function guardarFicha(){
+    const msg = $('pfMsg'); const p = prod(fichaCod); if(!p) return;
+    const ficha = {}; document.querySelectorAll('#pfModal [data-pf-f]').forEach(i => { ficha[i.dataset.pfF] = i.value.trim(); });
+    ficha.norma = fichaNorma; ficha.actualizado = Date.now(); ficha.por = (window.__fbUser && window.__fbUser.email) || '';
+    if(ficha.link && !/^https?:\/\//i.test(ficha.link)) ficha.link = 'https://' + ficha.link;
+    msg.style.color = 'var(--text-soft)'; msg.textContent = 'Guardando…';
+    try{
+      await window.fbGuardarProductoCatalogo({ codigo:p.codigo, ficha });
+      const d = (window.catalogoCambios || []).find(c => String(c.codigo) === String(p.codigo)); if(d) d.ficha = ficha; else (window.catalogoCambios = window.catalogoCambios || []).push({ id:String(p.codigo), codigo:p.codigo, ficha });
+      msg.style.color = '#1d7a38'; msg.textContent = '✓ Ficha guardada, para todo el equipo.';
+    }catch(e){ msg.style.color = 'var(--danger)'; msg.textContent = e && e.code === 'permission-denied' ? '🔒 Tu usuario no puede cambiar el pañol.' : '⚠ No se pudo guardar (¿hay conexión?).'; }
+  }
+  async function imprimirFicha(){
+    const cod = fichaCod; const D = datosFicha(cod), F = fichaDe(cod);
+    const foto = await fotoGrande(fotoIdDe(cod)) || miniDe(cod);
+    const fila = (a, b) => b ? `<tr><th style="width:34%;">${esc(a)}</th><td>${b}</td></tr>` : '';
+    abrirHojaImpresion(`Ficha del material — ${D.p.codigo} ${D.p.desc}`, `<div style="display:flex; gap:16px; align-items:flex-start;">
+      ${foto ? `<img src="${foto}" style="width:220px; height:220px; object-fit:cover; border-radius:10px; border:1px solid #d5dae8;">` : ''}
+      <table style="flex:1;">${fila('Código', esc(D.p.codigo))}${fila('Unidad', esc(D.p.un||''))}${fila('Stock actual', esc(f(D.actual)))}${fila('Mínimo', D.minimo ? esc(f(D.minimo)) : '')}
+      ${fila('Fabricante / marca', esc(F.marca||''))}${fila('Modelo', esc(F.modelo||''))}${fila('Medida / sección / potencia', esc(F.medida||''))}
+      ${fila('Norma del pliego', F.norma ? esc({ cumple:'Cumple', no:'No cumple', nose:'No sé' }[F.norma]) + (F.normaCual ? ' — ' + esc(F.normaCual) : '') : '')}
+      ${fila('Proveedor habitual', esc(F.proveedor || D.provSug || ''))}${fila('Último ingreso', D.ult ? esc(formatFechaCorta(D.ult.fecha)) : '')}${fila('Último precio', D.p.costo ? esc(formatMoney(D.p.costo)) : '')}
+      ${fila('Hoja de datos', F.link ? esc(F.link) : '')}${fila('Notas', esc(F.notas||''))}</table></div>`, 'FICHA DE MATERIAL');
+  }
+  document.addEventListener('click', e => {
+    const lk = e.target.closest('.pf-link[data-cod]'); if(lk){ e.preventDefault(); abrirFicha(lk.dataset.cod); return; }
+    const m = $('pfModal'); if(!m) return;
+    if(e.target === m){ cerrarModal(); return; }
+    const b = e.target.closest('[data-pf]'); const n = e.target.closest('#pfNorma button[data-n]');
+    if(n){ fichaNorma = fichaNorma === n.dataset.n ? '' : n.dataset.n; document.querySelectorAll('#pfNorma button').forEach(x => x.classList.toggle('on', x.dataset.n === fichaNorma)); return; }
+    if(!b) return;
+    if(b.dataset.pf === 'cerrar') cerrarModal();
+    else if(b.dataset.pf === 'guardar') guardarFicha();
+    else if(b.dataset.pf === 'imprimir') imprimirFicha();
+    else if(b.dataset.pf === 'saltar'){ sesion.i++; pintarSesion(); }
+  });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && $('pfModal')) cerrarModal(); });
+  document.addEventListener('change', async e => {
+    if(e.target.id === 'pfFotoIn' && e.target.files && e.target.files[0]){
+      const msg = $('pfFotoMsg'); const cod = fichaCod; msg.style.color = 'var(--text-soft)'; msg.textContent = 'Subiendo la foto…';
+      try{ await guardarFoto(cod, e.target.files[0]); msg.style.color = '#1d7a38'; msg.textContent = '✓ Foto guardada.'; const u = await fotoGrande(fotoIdDe(cod)); const box = $('pfFoto'); if(box && fichaCod === cod) box.innerHTML = `<img src="${esc(u || miniDe(cod))}" alt="foto">`; refrescar(); }
+      catch(err){ msg.style.color = 'var(--danger)'; msg.textContent = err && err.code === 'permission-denied' ? '🔒 Tu usuario no puede cambiar el pañol.' : '⚠ No se pudo subir (¿hay señal?).'; }
+    }
+    if(e.target.id === 'pfSesionIn' && e.target.files && e.target.files[0] && sesion){
+      const cod = sesion.lista[sesion.i]; const msg = $('pfSesionMsg'); msg.textContent = 'Subiendo…';
+      try{ await guardarFoto(cod, e.target.files[0]); sesion.hechas++; sesion.i++; pintarSesion(); refrescar(); }
+      catch(err){ msg.style.color = 'var(--danger)'; msg.textContent = err && err.code === 'permission-denied' ? '🔒 Tu usuario no puede cambiar el pañol.' : '⚠ No se pudo subir (¿hay señal?). Probá de nuevo.'; }
+    }
+  });
+
+  // En el inventario: el nombre abre la ficha (y si tiene foto, se ve la miniatura)
+  if(typeof window.renderStockTabla === 'function'){
+    const orig = window.renderStockTabla;
+    window.renderStockTabla = function(){
+      const r = orig.apply(this, arguments);
+      try{
+        document.querySelectorAll('#stockTablaBody tr').forEach(tr => {
+          const chk = tr.querySelector('.inv-sel'); const td = tr.cells[1]; if(!chk || !td || td.querySelector('.pf-link')) return;
+          const cod = chk.dataset.cod; const mini = miniDe(cod); const F = fichaDe(cod);
+          td.innerHTML = `<button type="button" class="pf-link" data-cod="${esc(cod)}" title="Ver la ficha del material">${mini ? `<img class="pf-mini" src="${esc(mini)}" alt="">` : ''}${td.innerHTML}<span class="pf-ico">${F.norma === 'no' ? '⚠️' : '📄'}</span></button>`;
+        });
+      }catch(e){}
+      if(visible('cardStockFotos')) pintarFotos();
+      if(visible('cardStockSector')) pintarSector();
+      return r;
+    };
+  }
+  const visible = id => { const c = $(id); return !!(c && c.style.display !== 'none' && c.offsetParent !== null); };
+  function refrescar(){ try{ window.renderStockTabla(); }catch(e){} if(visible('cardStockFotos')) pintarFotos(); }
+
+  // ---------- SESIÓN DE FOTOS ----------
+  const fo = { filtro:'sin', soloStock:false, q:'', ver:40 };
+  let sesion = null;
+  function listaFotos(){
+    const q = norm(fo.q);
+    return (typeof catalogo === 'function' ? catalogo() : []).filter(p => {
+      const tiene = !!miniDe(p.codigo);
+      if(fo.filtro === 'sin' && tiene) return false; if(fo.filtro === 'con' && !tiene) return false;
+      if(fo.soloStock && !((typeof stockActual === 'function' ? stockActual(p.codigo) : 0) > 0)) return false;
+      if(q && !norm(p.codigo + ' ' + p.desc).includes(q)) return false;
+      return true;
+    });
+  }
+  function pintarFotos(){
+    const app = $('fotosApp'); if(!app) return;
+    const todos = (typeof catalogo === 'function' ? catalogo() : []); const con = todos.filter(p => miniDe(p.codigo)).length;
+    const l = listaFotos(); const foco = document.activeElement && document.activeElement.id === 'pfFotosBuscar';
+    app.innerHTML = `<h2><span class="dot"></span>Fotos de los materiales <span class="h2-sub">una por material, para saber si es ése</span></h2>
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;"><b>${con} de ${todos.length} con foto</b><div class="pf-prog"><i style="width:${todos.length ? Math.round(con / todos.length * 100) : 0}%"></i></div>
+        <button type="button" class="btn-primary" id="pfSeguir" style="width:auto; margin:0;">📷 Sesión de fotos</button></div>
+      <div class="hint">Recorré el pañol con el celu: te muestra el próximo material sin foto, sacás y pasa solo al siguiente. Tocá cualquier material para ver su ficha.</div>
+      <div class="pf-chips">${[['sin', 'Sin foto (' + (todos.length - con) + ')'], ['con', 'Con foto (' + con + ')'], ['todos', 'Todos']].map(([k, t]) => `<button type="button" data-fo="${k}" class="${fo.filtro === k ? 'on' : ''}">${t}</button>`).join('')}
+        <button type="button" data-fo="stock" class="${fo.soloStock ? 'on' : ''}">Solo con stock</button></div>
+      <input type="search" id="pfFotosBuscar" placeholder="🔍 Buscar material…" value="${esc(fo.q)}" autocomplete="off" style="margin-bottom:10px;">
+      <div class="pf-tiles-g">${l.slice(0, fo.ver).map(p => `<button type="button" class="pf-it pf-link" data-cod="${esc(p.codigo)}"><div class="im">${miniDe(p.codigo) ? `<img src="${esc(miniDe(p.codigo))}" alt="">` : '📷<br>Sacar foto'}</div><div class="tx"><small>${esc(p.codigo)}</small>${esc(p.desc)}</div></button>`).join('') || '<div class="hint">No hay materiales con ese filtro.</div>'}</div>
+      ${l.length > fo.ver ? `<button type="button" class="btn-ghost" data-fo="mas" style="margin-top:10px;">Ver más (${l.length - fo.ver})</button>` : ''}`;
+    if(foco){ const i = $('pfFotosBuscar'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+  }
+  function abrirSesion(){
+    const lista = listaFotos().filter(p => !miniDe(p.codigo)).map(p => p.codigo);
+    if(!lista.length){ alert('No quedan materiales sin foto con ese filtro. 👌'); return; }
+    cerrarModal(); sesion = { lista, i:0, hechas:0 };
+    const m = document.createElement('div'); m.className = 'pf-modal'; m.id = 'pfModal'; m.innerHTML = '<div class="pf-caja pf-sesion" id="pfSesion"></div>'; document.body.appendChild(m); pintarSesion();
+  }
+  function pintarSesion(){
+    const box = $('pfSesion'); if(!box || !sesion) return;
+    if(sesion.i >= sesion.lista.length){ box.innerHTML = `<div style="font-size:54px;">✅</div><div class="big">¡Listo!</div><div class="hint">Sacaste ${sesion.hechas} foto(s).</div><button type="button" class="btn-primary" data-pf="cerrar" style="margin-top:14px;">Terminar</button>`; return; }
+    const p = prod(sesion.lista[sesion.i]) || {};
+    box.innerHTML = `<div class="pf-cab" style="margin-bottom:0;"><span class="hint" style="margin:0;">${sesion.i + 1} de ${sesion.lista.length} · ${sesion.hechas} sacada(s)</span><button type="button" class="x" data-pf="cerrar" aria-label="Terminar">×</button></div>
+      <div class="pf-prog" style="margin:8px 0 18px;"><i style="width:${Math.round(sesion.i / sesion.lista.length * 100)}%"></i></div>
+      <div class="cod">${esc(p.codigo)} · ${esc(p.un || '')}</div><div class="big">${esc(p.desc || '')}</div>
+      <label class="cam">📷 Sacar foto<input type="file" accept="image/*" capture="environment" id="pfSesionIn" style="display:none;"></label>
+      <button type="button" class="btn-ghost" data-pf="saltar" style="margin-top:10px;">Saltar este ›</button>
+      <div class="pf-msg" id="pfSesionMsg"></div>`;
+  }
+  document.addEventListener('click', e => {
+    if(e.target.id === 'pfSeguir'){ abrirSesion(); return; }
+    const c = e.target.closest('#fotosApp [data-fo]'); if(!c) return;
+    const k = c.dataset.fo; if(k === 'stock') fo.soloStock = !fo.soloStock; else if(k === 'mas') fo.ver += 40; else { fo.filtro = k; fo.ver = 40; }
+    pintarFotos();
+  });
+  document.addEventListener('input', e => { if(e.target.id === 'pfFotosBuscar'){ fo.q = e.target.value; fo.ver = 40; pintarFotos(); } });
+
+  // ---------- CONSUMO POR SECTOR ----------
+  const ps = { mes:'', sector:'dos' };
+  function datosSector(){
+    const mes = ps.mes || hoyISO().slice(0, 7);
+    const map = new Map(); const vales = { alumbrado:new Set(), ilicitos:new Set() };
+    movs().forEach(m => {
+      if(String(m.fecha||'').slice(0, 7) !== mes) return;
+      const esSal = m.tipo === 'salida', esDev = m.tipo === 'entrada' && m.devolucion;
+      if(!esSal && !esDev) return;
+      const s = (typeof window.sectorDeMov === 'function') ? window.sectorDeMov(m) : (m.sector === 'ilicitos' ? 'ilicitos' : 'alumbrado');
+      const k = String(m.codigo); const r = map.get(k) || { codigo:m.codigo, desc:m.desc || (prod(m.codigo) || {}).desc || '', un:m.un || (prod(m.codigo) || {}).un || '', alumbrado:0, ilicitos:0 };
+      r[s] += (esSal ? 1 : -1) * num(m.cantidad); map.set(k, r);
+      if(esSal) vales[s].add(m.valeGrupo || m.id);
+    });
+    const filas = [...map.values()].map(r => ({ ...r, alumbrado: Math.max(0, r.alumbrado), ilicitos: Math.max(0, r.ilicitos) })).map(r => ({ ...r, total: r.alumbrado + r.ilicitos }))
+      .filter(r => r.total > 0 && (ps.sector === 'dos' || r[ps.sector] > 0)).sort((a, b) => (ps.sector === 'dos' ? b.total - a.total : b[ps.sector] - a[ps.sector]));
+    return { mes, filas, vA: vales.alumbrado.size, vI: vales.ilicitos.size };
+  }
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const mesTxt = m => { const [a, b] = m.split('-'); return `${MESES[Number(b) - 1]} ${a}`; };
+  function tablaSector(D, imprimir){
+    const fq = (n, un) => n ? `${f(n)} ${esc(un || '')}` : '—';
+    return `<table class="ps-tabla"><thead><tr><th class="ps-oc">Código</th><th>Material</th><th class="r">Alumbrado</th><th class="r">Ilícitos</th><th class="r">Total</th>${imprimir ? '' : '<th class="ps-oc">Reparto</th>'}</tr></thead><tbody>
+      ${D.filas.map(r => `<tr><td class="ps-oc mono">${esc(r.codigo)}</td><td>${esc(r.desc)}</td><td class="r">${fq(r.alumbrado, r.un)}</td><td class="r">${fq(r.ilicitos, r.un)}</td><td class="r"><b>${fq(r.total, r.un)}</b></td>
+        ${imprimir ? '' : `<td class="ps-oc"><div class="ps-bar"><div class="a" style="width:${r.total ? r.alumbrado / r.total * 100 : 0}%"></div><div class="i" style="width:${r.total ? r.ilicitos / r.total * 100 : 0}%"></div></div></td>`}</tr>`).join('') || `<tr><td colspan="6" class="hint" style="text-align:center; padding:16px;">En ${esc(mesTxt(D.mes))} no salió material${ps.sector === 'dos' ? '' : ' para ese sector'}.</td></tr>`}</tbody></table>`;
+  }
+  function pintarSector(){
+    const app = $('sectorApp'); if(!app) return;
+    const D = datosSector(); const top = D.filas[0];
+    app.innerHTML = `<div class="card-header-row"><h2 style="margin:0;"><span class="dot"></span>Consumo por sector <span class="h2-sub">qué se llevó Alumbrado y qué Ilícitos</span></h2><button type="button" class="btn-ghost" data-ps="imprimir" style="width:auto; margin:0;">🖨 Imprimir</button></div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:12px;"><input type="month" id="psMes" value="${esc(D.mes)}" style="width:auto; margin:0;">
+        <div class="pf-chips" style="margin:0;">${[['dos','Los dos'], ['alumbrado','💡 Alumbrado'], ['ilicitos','🚨 Ilícitos']].map(([k, l]) => `<button type="button" data-ps="${k}" class="${ps.sector === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+      <div class="ps-tiles"><div class="pf-tile"><div class="l">Vales Alumbrado</div><div class="n">${D.vA}</div></div><div class="pf-tile"><div class="l">Vales Ilícitos</div><div class="n">${D.vI}</div></div>
+        <div class="pf-tile"><div class="l">Lo que más salió</div><div style="font-weight:700; margin-top:4px;">${top ? esc(top.desc) : '—'}</div></div></div>
+      <div class="ps-ley"><span><i style="background:#28285e"></i>Alumbrado</span><span><i style="background:#84c3da"></i>Ilícitos</span></div>
+      <div style="overflow-x:auto;">${tablaSector(D, false)}</div>
+      <div class="hint">Salidas del mes menos lo que se devolvió, por sector (el sector se pone al registrar la salida). No cuenta lo anulado.</div>`;
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('#sectorApp [data-ps]'); if(!b) return;
+    if(b.dataset.ps === 'imprimir'){ const D = datosSector(); abrirHojaImpresion(`Consumo por sector — ${mesTxt(D.mes)}${ps.sector === 'dos' ? '' : (ps.sector === 'alumbrado' ? ' · Alumbrado' : ' · Ilícitos')}`, `<div>Vales Alumbrado: <b>${D.vA}</b> · Vales Ilícitos: <b>${D.vI}</b></div><style>td.r, th.r{ text-align:right; }</style>${tablaSector(D, true)}<div class="foot">Salidas del mes menos devoluciones, por sector. No cuenta lo anulado.</div>`, 'CONSUMO POR SECTOR'); return; }
+    ps.sector = b.dataset.ps; pintarSector();
+  });
+  document.addEventListener('change', e => { if(e.target.id === 'psMes'){ ps.mes = e.target.value; pintarSector(); } });
+
+  // Pintar al entrar a cada subpestaña del pañol
+  // (la barra de subpestañas se redibuja al tocarla, así que se mira cuándo se muestra cada tarjeta)
+  [['cardStockFotos', ()=> pintarFotos()], ['cardStockSector', ()=> pintarSector()]].forEach(([id, fn]) => { const c = $(id); if(!c) return;
+    new MutationObserver(()=>{ if(c.style.display !== 'none') fn(); }).observe(c, { attributes:true, attributeFilter:['style'] }); });
+  window.__panolFicha = { abrirFicha, pintarFotos, pintarSector, datosSector, guardarFoto, abrirSesion, listaFotos };
+})();
+</script>
+
+<!-- ============================================================================================
      CALCULADORAS RÁPIDAS (2026-10-02)
      ============================================================================================
      Pedido: «en la calculadora, al entrar, estaría bueno tener sub índices: calculadora de civil para
@@ -36790,6 +37120,22 @@ body.calc-rapida #calcFlotante{ display:none !important; }
 .ot-cuadrillas button b{ display:block; color:var(--text); font-size:13.5px; }
 .ot-cuadrillas button.guardar{ border-style:dashed; color:var(--navy); font-weight:700; }
 .ot-pts{ font-weight:700; color:#8a5a00; white-space:nowrap; } .ot-pts.sin{ color:var(--danger); }
+.ot-hist-filtros{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:10px 0 4px; }
+.ot-hist-filtros input[type=search]{ flex:1 1 240px; margin:0 !important; border-radius:999px !important; }
+.ot-hist-filtros select{ width:auto !important; margin:0 !important; }
+.ot-hist-filtros label{ display:flex; align-items:center; gap:6px; margin:0; font-size:12.5px; }
+.ot-hist-filtros label input{ width:auto !important; margin:0 !important; }
+.ot-tb-card .acc .ot-mover{ width:auto !important; margin:0 !important; min-height:34px !important; padding:0 8px !important; font-size:12.5px !important; border-radius:999px !important; flex:0 0 auto; }
+#otBuscarPanel .cr-tiles{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; }
+#otBuscarPanel .cr-tile{ background:rgba(255,255,255,.75); border:1px solid var(--canto); border-radius:18px; padding:12px 14px; }
+#otBuscarPanel .cr-tile .n{ font:800 24px/1.1 var(--disp); } #otBuscarPanel .cr-tile .u{ font-size:13px; color:var(--text-soft); margin-left:3px; } #otBuscarPanel .cr-tile .l{ font-size:12.5px; color:var(--text-soft); margin-top:3px; }
+#otBuscarPanel .cr-campos{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:4px 12px; } #otBuscarPanel .cr-campos .ancho{ grid-column:1 / -1; }
+#otBuscarPanel .cr-sub{ font:800 11.5px var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); margin:16px 2px 6px; }
+.ot-bus-tabla{ width:100%; border-collapse:collapse; font-size:13.5px; } .ot-bus-tabla th, .ot-bus-tabla td{ padding:8px 6px; border-bottom:1px solid rgba(40,40,94,.08); text-align:left; vertical-align:top; }
+.ot-bus-tabla th{ font:700 11px var(--mono); letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); } .ot-bus-tabla .r{ text-align:right; font-family:var(--mono); }
+#otBuscarRes{ overflow-x:auto; }
+#otBuscarPanel .cr-campos input, #otBuscarPanel .cr-campos select{ width:100% !important; box-sizing:border-box; }
+@media (max-width:640px){ #otBuscarPanel .cr-tiles{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
 .ot-act-quien{ width:auto !important; min-height:30px !important; padding:2px 6px !important; font-size:12px !important; margin:0 0 0 6px !important; max-width:170px; }
 .cierre-campo{ border-radius:16px; padding:12px 14px; background:rgba(255,159,10,.10); border:1px solid rgba(255,159,10,.28); margin-bottom:14px; font-size:13.5px; }
 .cierre-campo b.t{ display:block; font:800 14.5px var(--disp); margin-bottom:6px; }
@@ -37316,66 +37662,103 @@ body.calc-rapida #calcFlotante{ display:none !important; }
     };
   }
 
-  // ---------- Tablero de Órdenes ----------
-  let busqueda = '', verTodasCerradas = false, formAbierto = null;
-  function abrirFormulario(si){
-    formAbierto = !!si;
-    const v = $('viewParteDiario'); if(!v) return;
-    const g = v.querySelector(':scope > .grid'); const cab = $('otFormCab');
-    if(g) g.style.display = formAbierto ? '' : 'none';
-    if(cab) cab.style.display = formAbierto ? '' : 'none';
-    const b = $('otNuevaBtn'); if(b) b.textContent = formAbierto ? 'Cerrar el formulario' : '+ Nueva orden';
+  // ---------- Órdenes en cuatro hojas (2026-10-02) ----------
+  // Pedido: «en órdenes tenemos como tres cosas distintas: deberíamos separarlas como hojas dentro de órdenes —
+  // los cuadros (con facilidad de editar, cerrar o mover a terminada / para revisar), llenar la orden, el
+  // historial, y una más para ver las tareas de cada persona o de cada obra, para filtrar y buscar todo».
+  const SUBS_OT = [['tablero','📋 Tablero'], ['nueva','✏️ Llenar orden'], ['historial','🗂 Historial'], ['buscar','🔎 Por persona / obra']];
+  let busqueda = '', verTodasCerradas = false, subOt = null;
+  function estructura(){
+    const v = $('viewParteDiario'); if(!v) return false;
+    const g = v.querySelector(':scope > .grid'); if(!g) return false;
+    if(!$('subtabsOrdenes')){
+      const bar = document.createElement('div'); bar.className = 'subtabs no-print'; bar.id = 'subtabsOrdenes';
+      v.insertAdjacentElement('afterbegin', bar);
+      bar.addEventListener('click', e => { const b = e.target.closest('.subtab'); if(b) irSubOt(b.dataset.sub); });
+      const tb = document.createElement('div'); tb.id = 'otTablero'; tb.className = 'no-print'; g.insertAdjacentElement('beforebegin', tb);
+      const hist = $('otBody') && $('otBody').closest('.card'); if(hist){ hist.id = 'otHistorialCard'; hist.style.marginTop = '0';
+        const tw = hist.querySelector('.hist-actions'); if(tw) tw.insertAdjacentHTML('afterend', `<div class="ot-hist-filtros no-print" id="otHistFiltros">
+          <input type="search" id="otHistBuscar" placeholder="🔍 OT, plaza, ID, cuadrilla, persona, tarea…" autocomplete="off" data-lpignore="true">
+          <select id="otHistEstado"><option value="">Todos los estados</option>${['Emitida','En curso','Terminada','Anulada'].map(x => `<option>${x}</option>`).join('')}</select>
+          <label>desde <input type="date" id="otHistDesde"></label><label>hasta <input type="date" id="otHistHasta"></label>
+          <span class="hint" id="otHistCuenta" style="margin:0;"></span></div>`); }
+      const bus = document.createElement('div'); bus.id = 'otBuscarPanel'; bus.className = 'card';
+      (hist || g).insertAdjacentElement('afterend', bus);
+      escucharCuadrillas();
+    }
+    return true;
   }
+  function irSubOt(s){
+    if(!estructura()) return;
+    subOt = s;
+    const v = $('viewParteDiario'); const g = v.querySelector(':scope > .grid');
+    // En la cabecera: «Órdenes · Tablero», «Órdenes · Llenar orden»… (solo «Tablero» no decía de qué).
+    $('subtabsOrdenes').innerHTML = SUBS_OT.map(([k, l]) => `<button type="button" class="subtab${k === s ? ' activo' : ''}" data-sub="${k}" data-hdr="Órdenes · ${esc(l.replace(/^\S+\s/, ''))}">${esc(l)}</button>`).join('');
+    $('otTablero').style.display = s === 'tablero' ? '' : 'none';
+    g.style.display = s === 'nueva' ? '' : 'none';
+    if($('otHistorialCard')) $('otHistorialCard').style.display = s === 'historial' ? '' : 'none';
+    $('otBuscarPanel').style.display = s === 'buscar' ? '' : 'none';
+    if(s === 'tablero') pintarTablero();
+    if(s === 'historial') filtrarHistorial();
+    if(s === 'buscar') renderBuscar();
+    if(s === 'nueva') pintarPuntajes();
+  }
+  window.irSubOrdenes = irSubOt;
+  function abrirFormulario(si){ irSubOt(si ? 'nueva' : 'tablero'); }
+
   function grupoDe(o){
     const h0 = hoy();
     if(o.estado === 'Anulada') return 'anulada';
     if(o.cierre && o.cierre.cerradoTs) return 'cerr';
     if(o.estado === 'Terminada') return 'cerr';
-    if(enviados(o).length) return 'revisar';
+    if(o.revisar || enviados(o).length) return 'revisar';
     if(o.fecha < h0) return 'atras';
     if(o.fecha === h0) return 'obra';
     return 'prox';
   }
+  const MOVER = [['obra','🔧 En obra'], ['revisar','🔔 Para revisar'], ['terminada','✅ Terminada'], ['emitida','📅 Sin empezar (emitida)'], ['anulada','🚫 Anulada']];
   function cardHtml(o, g){
     const todas = tareasDe(o); const marc = todas.filter(t => marcaDe(o, t.k)).length;
     const noHechas = todas.filter(t => { const m = marcaDe(o, t.k); return m && !m.hecho; }).length;
     const pend = g === 'cerr' ? pendientesDe(o) : [];
     const dias = g === 'atras' ? Math.round((new Date(hoy() + 'T12:00:00') - new Date(o.fecha + 'T12:00:00')) / 864e5) : 0;
+    const cerradaYa = !!(o.cierre && o.cierre.cerradoTs);
     let acc = '';
     if(g === 'revisar') acc = `<button type="button" class="btn-primary" data-ota="cerrar">Revisar y cerrar</button>`;
-    else if(g === 'atras') acc = `<button type="button" class="btn-ghost" data-ota="cerrar">Cerrar a mano</button>`;
-    else if(g === 'obra' || g === 'prox') acc = `<button type="button" class="btn-ghost" data-ota="editar">✏ Editar</button>`;
+    else if(!cerradaYa) acc = `<button type="button" class="btn-ghost" data-ota="cerrar" title="Cargar lo que se hizo y cerrarla">✅ Cerrar</button>`;
+    if(!cerradaYa) acc += `<button type="button" class="btn-ghost" data-ota="editar">✏ Editar</button>`;
     if(g === 'cerr' && pend.length) acc += `<button type="button" class="btn-ghost" data-ota="repetir">↻ Repetir con lo que faltó</button>`;
     else if(g !== 'revisar') acc += `<button type="button" class="btn-ghost" data-ota="repetir" title="Arma una orden nueva igual, para el día siguiente">↻ Repetir</button>`;
     acc += `<button type="button" class="btn-ghost" data-ota="ver" title="Ver / imprimir la orden">👁</button>`;
+    const mover = `<select class="ot-mover" title="Mover la orden a otra columna"><option value="">Mover a…</option>${MOVER.filter(([k]) => !(k === g || (k === 'terminada' && g === 'cerr'))).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select>`;
     return `<div class="ot-tb-card" data-otid="${esc(o.id)}">
       <div class="pl">${esc(o.plazaNombre||'(sin plaza)')}</div>
       <div class="meta">${esc(String(o.numero||'').replace(/^OT-\d{4}-/, 'OT-'))} · ${esc(o.fecha === hoy() ? 'hoy' : (diaSemanaDeFecha(o.fecha)||'').slice(0,3) + ' ' + formatFechaCorta(o.fecha).slice(0,5))} · ${esc(o.cuadrilla || gente(o).map(p => p.nombre.split(' ')[0]).join(', ') || '—')}</div>
-      ${g !== 'prox' && todas.length ? `<div class="mt-prog" style="margin-top:8px;"><i style="width:${Math.round(marc / todas.length * 100)}%"></i></div><div class="meta" style="margin-top:5px;">${marc} de ${todas.length} marcadas${noHechas ? ` · <b style="color:#b3261e;">${noHechas} no se hizo</b>` : ''}${g === 'revisar' ? ` · enviaron ${enviados(o).length}/${gente(o).length}` : ''}</div>` : (g === 'prox' ? `<div class="meta" style="margin-top:5px;">${todas.length} tarea(s) · ${gente(o).length} persona(s)</div>` : '')}
+      ${g !== 'prox' && todas.length ? `<div class="mt-prog" style="margin-top:8px;"><i style="width:${Math.round(marc / todas.length * 100)}%"></i></div><div class="meta" style="margin-top:5px;">${marc} de ${todas.length} marcadas${noHechas ? ` · <b style="color:#b3261e;">${noHechas} no se hizo</b>` : ''}${g === 'revisar' && enviados(o).length ? ` · enviaron ${enviados(o).length}/${gente(o).length}` : ''}</div>` : (g === 'prox' ? `<div class="meta" style="margin-top:5px;">${todas.length} tarea(s) · ${gente(o).length} persona(s)</div>` : '')}
       ${g === 'atras' ? `<span class="ot-tag er">Hace ${dias} día${dias > 1 ? 's' : ''} sin cerrar</span>` : ''}
-      ${g === 'cerr' && o.estado !== 'Terminada' ? `<span class="ot-tag av">Sigue otro día</span>` : ''}
+      ${g === 'revisar' && o.revisar && !enviados(o).length ? `<span class="ot-tag av">La pasaste a revisar</span>` : ''}
+      ${g === 'cerr' && !cerradaYa ? `<span class="ot-tag av">Terminada sin cargar lo hecho</span>` : ''}
+      ${g === 'cerr' && cerradaYa && o.estado !== 'Terminada' ? `<span class="ot-tag av">Sigue otro día</span>` : ''}
       ${g === 'cerr' && pend.length ? `<span class="ot-tag av" style="margin-left:4px;">Faltó: ${pend.length}</span>` : ''}
-      <div class="acc">${acc}</div></div>`;
+      <div class="acc">${acc}${mover}</div></div>`;
   }
   function renderTablero(){
     const v = $('viewParteDiario'); if(!v || v.style.display === 'none') return;
-    let tb = $('otTablero');
-    if(!tb){
-      tb = document.createElement('div'); tb.id = 'otTablero'; tb.className = 'no-print';
-      const g = v.querySelector(':scope > .grid'); if(!g) return;
-      g.insertAdjacentElement('beforebegin', tb);
-      g.insertAdjacentHTML('beforebegin', `<div class="ot-form-cab no-print" id="otFormCab"><h2>Nueva orden</h2><button type="button" class="btn-ghost" data-ota="cerrarform" style="width:auto; margin:0;">✕ Cerrar</button></div>`);
-      escucharCuadrillas();
-    }
-    if(formAbierto === null) abrirFormulario(!OTS().length);
-    if(document.activeElement && document.activeElement.id === 'otTbBuscar' && $('otTbCols')){ pintarViejas(); pintarCols(); return; }
-    tb.innerHTML = `<div class="ot-tb-cab"><div class="ot-tb-bus"><input type="search" id="otTbBuscar" placeholder="🔍 Buscar plaza, ID, OT, cuadrilla o persona…" value="${esc(busqueda)}" autocomplete="off" data-lpignore="true"></div>
-      <div class="btns"><button type="button" class="btn-primary" id="otNuevaBtn" data-ota="nueva">${formAbierto ? 'Cerrar el formulario' : '+ Nueva orden'}</button></div></div>
-      <div id="otTbViejas"></div><div class="ot-tb-cols" id="otTbCols"></div>`;
-    pintarViejas();
-    pintarCols();
+    if(!estructura()) return;
+    if(subOt === null){ irSubOt(OTS().length ? 'tablero' : 'nueva'); return; }
+    if(subOt === 'tablero') pintarTablero();
+    else if(subOt === 'historial') filtrarHistorial();
+    else if(subOt === 'buscar' && !buscarEscribiendo()) renderBuscar();
     pintarCuadrillas();
     pintarPuntajes();
+  }
+  function pintarTablero(){
+    const tb = $('otTablero'); if(!tb) return;
+    if(document.activeElement && document.activeElement.id === 'otTbBuscar' && $('otTbCols')){ pintarViejas(); pintarCols(); return; }
+    tb.innerHTML = `<div class="ot-tb-cab"><div class="ot-tb-bus"><input type="search" id="otTbBuscar" placeholder="🔍 Buscar plaza, ID, OT, cuadrilla o persona…" value="${esc(busqueda)}" autocomplete="off" data-lpignore="true"></div>
+      <div class="btns"><button type="button" class="btn-primary" id="otNuevaBtn" data-ota="nueva">+ Nueva orden</button></div></div>
+      <div id="otTbViejas"></div><div class="ot-tb-cols" id="otTbCols"></div>`;
+    pintarViejas(); pintarCols();
   }
   function pintarCols(){
     const cols = $('otTbCols'); if(!cols) return;
@@ -37398,6 +37781,147 @@ body.calc-rapida #calcFlotante{ display:none !important; }
       + col('atras', 'atras', '⚠ Atrasadas', G.atras, 'Ninguna atrasada. 👌')
       + col('cerr', 'cerr', '✅ Cerradas', G.cerr, 'Todavía no se cerró ninguna.', 5);
   }
+  // Mover una orden de columna (2026-10-02)
+  async function moverOt(o, dest){
+    if(!window.__fbUser){ alert('Iniciá sesión para poder cambiar una orden.'); return; }
+    let patch = null;
+    if(dest === 'terminada'){
+      if(!(o.cierre && o.cierre.cerradoTs)){
+        if(confirm(`¿Cargar ahora lo que se hizo en ${o.numero || 'la orden'}?\n\nAsí suma los puntos de cada uno y el avance de la plaza.\n\nAceptar = abrir el cierre · Cancelar = otras opciones`)){ window.abrirCierreOt(o.id); return; }
+        if(!confirm(`¿Marcarla TERMINADA sin cargar lo hecho?\n\nNo va a sumar puntos ni avance hasta que la cierres.`)) return;
+      }
+      patch = { estado:'Terminada', revisar:false };
+    }
+    else if(dest === 'revisar') patch = { revisar:true, ...(o.estado === 'Terminada' && !(o.cierre && o.cierre.cerradoTs) ? { estado:'En curso' } : {}) };
+    else if(dest === 'obra') patch = { estado:'En curso', revisar:false };
+    else if(dest === 'emitida') patch = { estado:'Emitida', revisar:false };
+    else if(dest === 'anulada'){ if(!confirm(`¿Anular ${o.numero || 'la orden'}? No se borra: queda en el Historial como anulada y no suma puntos.`)) return; patch = { estado:'Anulada', revisar:false }; }
+    if(!patch) return;
+    try{ await window.fbOtUpdate(o.id, patch); Object.assign(o, patch); pintarCols(); }
+    catch(e){ alert('No se pudo mover la orden (revisá la conexión).'); pintarCols(); }
+  }
+  document.addEventListener('change', e => {
+    const s = e.target.closest && e.target.closest('#otTablero .ot-mover'); if(!s || !s.value) return;
+    const card = s.closest('[data-otid]'); const o = card && OTS().find(x => x.id === card.dataset.otid); const v = s.value; s.value = '';
+    if(o) moverOt(o, v);
+  });
+
+  // ---------- Historial con filtros ----------
+  function filtrarHistorial(){
+    const body = $('otBody'); if(!body) return;
+    const q = norm(($('otHistBuscar') || {}).value || ''), est = ($('otHistEstado') || {}).value || '', d = ($('otHistDesde') || {}).value || '', h = ($('otHistHasta') || {}).value || '';
+    let n = 0, tot = 0;
+    [...body.rows].forEach(tr => {
+      const b = tr.querySelector('button[onclick*="verOrdenTrabajo"]'); if(!b){ return; }
+      const id = (b.getAttribute('onclick').match(/'([^']+)'/) || [])[1]; const o = OTS().find(x => x.id === id); if(!o) return;
+      tot++;
+      const txt = norm([o.numero, o.plazaNombre, o.obraId, o.barrio, o.cuadrilla, o.responsable, o.notas, ...gente(o).map(p => p.nombre), ...tareasDe(o).map(t => t.label)].join(' '));
+      const ok = (!q || txt.includes(q)) && (!est || o.estado === est) && (!d || String(o.fecha) >= d) && (!h || String(o.fecha) <= h);
+      tr.style.display = ok ? '' : 'none'; if(ok) n++;
+    });
+    const c = $('otHistCuenta'); if(c) c.textContent = tot ? (n === tot ? `${tot} orden(es)` : `${n} de ${tot} orden(es)`) : '';
+  }
+  if(typeof window.renderOt === 'function'){ const orig = window.renderOt; window.renderOt = function(){ const r = orig.apply(this, arguments); try{ filtrarHistorial(); }catch(e){} return r; }; }
+  document.addEventListener('input', e => { if(e.target.closest && e.target.closest('#otHistFiltros')) filtrarHistorial(); });
+  document.addEventListener('change', e => { if(e.target.closest && e.target.closest('#otHistFiltros')) filtrarHistorial(); });
+
+  // ---------- Por persona / por obra ----------
+  const bus = { modo:'persona', quien:'', obra:'', desde:'', hasta:'', texto:'' };
+  const buscarEscribiendo = ()=>{ const a = document.activeElement; return !!(a && $('otBuscarPanel') && $('otBuscarPanel').contains(a) && /^(INPUT|SELECT)$/.test(a.tagName)); };
+  function estadoTarea(o, t){
+    if(o.cierre && o.cierre.cerradoTs){ const q = num((o.cierre.cantidades || {})[t.k]); return q > 0 ? { e:'si', q } : { e:'no', q:0 }; }
+    const m = marcaDe(o, t.k); if(!m) return { e:'', q:0 };
+    return m.hecho ? { e:'si', q: num(m.cant) || t.prev || 1, m } : { e:'no', q:0, m };
+  }
+  function horasDe(o, nombre){
+    const c = o.cierre && o.cierre.cerradoTs ? o.cierre.horasPersona || {} : null;
+    if(c && c[nombre] != null) return num(c[nombre]);
+    const h = (campo(o).horas || {})[llave(nombre)]; return h && num(h.horas) > 0 ? num(h.horas) : null;
+  }
+  function ptsDe(o, nombre){ try{ const p = window.puntosDeOrden && o.cierre && o.cierre.cerradoTs ? window.puntosDeOrden(o) : null; const x = p && p.porPersona.find(z => norm(z.nombre) === norm(nombre)); return x ? x.pts : null; }catch(e){ return null; } }
+  const icoE = e => e === 'si' ? '<span style="color:#1d7a38; font-weight:800;">✓</span>' : (e === 'no' ? '<span style="color:#b3261e; font-weight:800;">✗</span>' : '<span style="color:#9a5a00;">•</span>');
+  function personasConocidas(){
+    const s = new Map();
+    (typeof window.nominaEquipo === 'function' ? window.nominaEquipo() : []).forEach(p => { if(String(p.nombre||'').trim()) s.set(norm(p.nombre), p.nombre.trim()); });
+    OTS().forEach(o => gente(o).forEach(p => { if(!s.has(norm(p.nombre))) s.set(norm(p.nombre), p.nombre.trim()); }));
+    return [...s.values()].sort((a,b) => a.localeCompare(b, 'es'));
+  }
+  function obrasConocidas(){
+    const s = new Map(); OTS().forEach(o => { const k = o.plazaId || ('n:' + norm(o.plazaNombre)); if(!s.has(k)) s.set(k, { k, n:o.plazaNombre || '(sin plaza)', id:o.obraId || '' }); });
+    return [...s.values()].sort((a,b) => a.n.localeCompare(b.n, 'es'));
+  }
+  function resultadoBuscar(){
+    const enRango = o => (!bus.desde || String(o.fecha) >= bus.desde) && (!bus.hasta || String(o.fecha) <= bus.hasta) && o.estado !== 'Anulada';
+    const q = norm(bus.texto);
+    const coincideTexto = o => !q || norm([o.numero, o.plazaNombre, o.obraId, o.barrio, o.cuadrilla, o.responsable, o.notas, o.materiales, (o.cierre || {}).obs, ...gente(o).map(p => p.nombre), ...tareasDe(o).map(t => t.label), ...Object.values(campo(o).novedades || {}), ...Object.values(campo(o).marcas || {}).map(m => m.nota || '')].join(' ')).includes(q);
+    let ots = OTS().filter(o => enRango(o) && coincideTexto(o));
+    if(bus.modo === 'persona') ots = bus.quien ? ots.filter(o => estaEn(o, bus.quien)) : [];
+    if(bus.modo === 'obra') ots = bus.obra ? ots.filter(o => (o.plazaId || ('n:' + norm(o.plazaNombre))) === bus.obra) : [];
+    return ots.sort((a,b) => String(b.fecha).localeCompare(String(a.fecha)) || String(b.numero||'').localeCompare(String(a.numero||''), 'es', { numeric:true }));
+  }
+  function htmlResultado(ots, imprimir){
+    if((bus.modo === 'persona' && !bus.quien) || (bus.modo === 'obra' && !bus.obra)) return '<div class="hint" style="margin:0;">Elegí ' + (bus.modo === 'persona' ? 'una persona' : 'una obra') + ' arriba.</div>';
+    if(!ots.length) return '<div class="hint" style="margin:0;">No hay órdenes con eso en el período elegido.</div>';
+    let h = '';
+    const fechaOT = o => esc(formatFechaCorta(o.fecha));
+    if(bus.modo === 'persona'){
+      const yo = bus.quien;
+      const dias = new Set(ots.map(o => o.fecha)).size;
+      const horas = ots.reduce((a, o) => a + (horasDe(o, yo) || 0), 0);
+      const pts = ots.reduce((a, o) => a + (ptsDe(o, yo) || 0), 0);
+      const hechas = ots.reduce((a, o) => a + tareasPara(o, yo).filter(t => estadoTarea(o, t).e === 'si').length, 0);
+      h += `<div class="cr-tiles" style="margin-bottom:12px;"><div class="cr-tile"><div class="n">${ots.length}</div><div class="l">órdenes · ${dias} día(s)</div></div>
+        <div class="cr-tile"><div class="n">${fmtN(horas)}<span class="u">h</span></div><div class="l">horas cargadas</div></div>
+        <div class="cr-tile"><div class="n">${hechas}</div><div class="l">tareas hechas</div></div>
+        <div class="cr-tile"><div class="n">${fmtN(Math.round(pts * 10) / 10)}</div><div class="l">puntos (de las cerradas)</div></div></div>`;
+      h += `<table class="cr-tabla ot-bus-tabla"><thead><tr><th>Fecha</th><th>Orden</th><th>Plaza</th><th>Tareas</th><th class="r">Horas</th><th>Estado</th></tr></thead><tbody>${ots.map(o => `<tr>
+        <td>${fechaOT(o)}</td><td>${esc(o.numero||'')}</td><td>${esc(o.plazaNombre||'')}</td>
+        <td>${tareasPara(o, yo).map(t => { const s = estadoTarea(o, t); return `${icoE(s.e)} ${esc(t.label)}${s.e === 'si' && !t.manual ? ' <b>' + esc(fmtN(s.q)) + '</b>' : ''}${s.m && s.m.motivo && s.e === 'no' ? ' (' + esc(motivoTxt(s.m.motivo)) + ')' : ''}`; }).join('<br>') || '—'}</td>
+        <td class="r">${horasDe(o, yo) != null ? esc(fmtN(horasDe(o, yo))) : '—'}</td><td>${esc(o.estado||'')}</td></tr>`).join('')}</tbody></table>`;
+    } else if(bus.modo === 'obra'){
+      const agg = new Map(); const pend = [];
+      let hh = 0;
+      ots.forEach(o => {
+        gente(o).forEach(p => { hh += horasDe(o, p.nombre.trim()) || 0; });
+        tareasDe(o).forEach(t => { const s = estadoTarea(o, t); const a = agg.get(t.k) || { label:t.label, un:t.manual ? '' : t.un, q:0, n:0, no:0 }; if(s.e === 'si'){ a.q += s.q; a.n++; } else if(s.e === 'no'){ a.no++; pend.push({ o, t, s }); } agg.set(t.k, a); });
+      });
+      h += `<div class="cr-tiles" style="margin-bottom:12px;"><div class="cr-tile"><div class="n">${ots.length}</div><div class="l">órdenes · ${new Set(ots.map(o => o.fecha)).size} día(s)</div></div>
+        <div class="cr-tile"><div class="n">${fmtN(Math.round(hh * 10) / 10)}<span class="u">h</span></div><div class="l">horas-hombre cargadas</div></div></div>`;
+      h += `<div class="cr-sub" style="margin-top:4px;">Qué se hizo</div><table class="cr-tabla ot-bus-tabla"><thead><tr><th>Tarea</th><th class="r">Cantidad</th><th class="r">Órdenes</th><th class="r">No se hizo</th></tr></thead><tbody>${[...agg.values()].map(a => `<tr><td>${esc(a.label)}</td><td class="r">${a.n ? esc(fmtN(a.q)) + ' ' + esc(a.un ? plural(a.un, a.q) : '') : '—'}</td><td class="r">${a.n}</td><td class="r">${a.no || ''}</td></tr>`).join('')}</tbody></table>`;
+      if(pend.length) h += `<div class="cr-sub">Lo que no se hizo</div><ul style="margin:0 0 0 18px; padding:0; font-size:13.5px;">${pend.map(x => `<li>${fechaOT(x.o)} · ${esc(x.t.label)}${x.s.m && x.s.m.motivo ? ' — ' + esc(motivoTxt(x.s.m.motivo)) : ''}${x.s.m && x.s.m.nota ? ' «' + esc(x.s.m.nota) + '»' : ''} (${esc(x.o.numero||'')})</li>`).join('')}</ul>`;
+      h += `<div class="cr-sub">Órdenes</div><table class="cr-tabla ot-bus-tabla"><thead><tr><th>Fecha</th><th>Orden</th><th>Cuadrilla</th><th>Tareas</th><th>Estado</th></tr></thead><tbody>${ots.map(o => `<tr><td>${fechaOT(o)}</td><td>${esc(o.numero||'')}</td><td>${esc(o.cuadrilla || gente(o).map(p => p.nombre.split(' ')[0]).join(', '))}</td><td>${tareasDe(o).map(t => icoE(estadoTarea(o, t).e) + ' ' + esc(t.label)).join('<br>')}</td><td>${esc(o.estado||'')}</td></tr>`).join('')}</tbody></table>`;
+    } else {
+      h += `<div class="hint" style="margin:0 0 8px;">${ots.length} orden(es) con «${esc(bus.texto || 'todo')}».</div><table class="cr-tabla ot-bus-tabla"><thead><tr><th>Fecha</th><th>Orden</th><th>Plaza</th><th>Gente</th><th>Tareas</th><th>Estado</th></tr></thead><tbody>${ots.map(o => `<tr><td>${fechaOT(o)}</td><td>${esc(o.numero||'')}</td><td>${esc(o.plazaNombre||'')}</td><td>${esc(gente(o).map(p => p.nombre).join(', '))}</td><td>${tareasDe(o).map(t => icoE(estadoTarea(o, t).e) + ' ' + esc(t.label)).join('<br>')}</td><td>${esc(o.estado||'')}</td></tr>`).join('')}</tbody></table>`;
+    }
+    return h;
+  }
+  function renderBuscar(){
+    const p = $('otBuscarPanel'); if(!p) return;
+    if(!bus.desde && !bus.hasta){ const h0 = hoy(); bus.desde = h0.slice(0, 8) + '01'; bus.hasta = h0; }
+    const pers = personasConocidas(), obras = obrasConocidas();
+    p.innerHTML = `<div class="card-header-row"><h2 style="margin:0;"><span class="dot"></span>Buscar en las órdenes</h2><button type="button" class="btn-ghost" data-otb="imprimir" style="width:auto; margin:0;">🖨 Imprimir</button></div>
+      <div class="subtabs ot-bus-modo" style="margin:12px 0;">${[['persona','👷 Por persona'], ['obra','🌳 Por obra'], ['todo','🔤 Todo']].map(([k, l]) => `<button type="button" class="subtab${bus.modo === k ? ' activo' : ''}" data-otb-modo="${k}">${l}</button>`).join('')}</div>
+      <div class="cr-campos">
+        ${bus.modo === 'persona' ? `<div class="ancho"><label>Persona</label><select data-otb="quien"><option value="">— Elegí —</option>${pers.map(n => `<option ${norm(n) === norm(bus.quien) ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div>` : ''}
+        ${bus.modo === 'obra' ? `<div class="ancho"><label>Obra / plaza</label><select data-otb="obra"><option value="">— Elegí —</option>${obras.map(o => `<option value="${esc(o.k)}" ${o.k === bus.obra ? 'selected' : ''}>${esc(o.n)}${o.id ? ' · ID ' + esc(o.id) : ''}</option>`).join('')}</select></div>` : ''}
+        <div><label>Desde</label><input type="date" data-otb="desde" value="${esc(bus.desde)}"></div>
+        <div><label>Hasta</label><input type="date" data-otb="hasta" value="${esc(bus.hasta)}"></div>
+        <div class="ancho"><label>Buscar texto <span style="font-weight:500; color:var(--text-3);">(tarea, novedad, OT, material…)</span></label><input type="search" data-otb="texto" value="${esc(bus.texto)}" placeholder="Ej: cable, lluvia, OT-2026-014"></div>
+      </div><div id="otBuscarRes" style="margin-top:14px;"></div>`;
+    pintarBuscarRes();
+  }
+  function pintarBuscarRes(){ const r = $('otBuscarRes'); if(r) r.innerHTML = htmlResultado(resultadoBuscar(), false); }
+  document.addEventListener('click', e => {
+    const m = e.target.closest('[data-otb-modo]'); if(m && m.closest('#otBuscarPanel')){ bus.modo = m.dataset.otbModo; renderBuscar(); return; }
+    const b = e.target.closest('#otBuscarPanel [data-otb="imprimir"]'); if(!b) return;
+    const tit = bus.modo === 'persona' ? `Tareas de ${bus.quien || '—'}` : (bus.modo === 'obra' ? `Órdenes de ${(obrasConocidas().find(o => o.k === bus.obra) || {}).n || '—'}` : 'Órdenes de trabajo');
+    abrirHojaImpresion(tit, `<div class="sub">Del ${esc(formatFechaCorta(bus.desde) || '…')} al ${esc(formatFechaCorta(bus.hasta) || '…')}${bus.texto ? ' · texto: «' + esc(bus.texto) + '»' : ''}</div>
+      <style>.cr-tiles{ display:flex; gap:10px; flex-wrap:wrap; } .cr-tile{ border:1px solid #d5dae8; border-radius:8px; padding:6px 10px; } .cr-tile .n{ font-size:18px; font-weight:800; } .cr-tile .l{ font-size:10.5px; color:#4b5670; } .cr-sub{ font-weight:800; margin:12px 0 4px; } td.r, th.r{ text-align:right; }</style>
+      ${htmlResultado(resultadoBuscar(), true)}`, 'ÓRDENES DE TRABAJO');
+  });
+  document.addEventListener('input', e => { const k = e.target.dataset && e.target.dataset.otb; if(!k || !e.target.closest('#otBuscarPanel') || k === 'imprimir') return; bus[k] = e.target.value; if(e.target.tagName === 'INPUT') pintarBuscarRes(); });
+  document.addEventListener('change', e => { const k = e.target.dataset && e.target.dataset.otb; if(!k || !e.target.closest('#otBuscarPanel') || k === 'imprimir') return; bus[k] = e.target.value; pintarBuscarRes(); });
+  window.__otBuscar = { bus, resultadoBuscar, render: renderBuscar };
   // Órdenes abiertas emitidas antes de este cambio: no tienen la lista de nombres que piden las reglas de la base,
   // así que la cuadrilla no las podría marcar. Se preparan con un toque (no se cambia nada solo).
   const viejas = ()=> OTS().filter(o => !cerrada(o) && !(o.cierre && o.cierre.cerradoTs) && o.fecha >= sumarDia(hoy(), -7) && gente(o).length && !Array.isArray(o.personalNombres));
@@ -37416,8 +37940,7 @@ body.calc-rapida #calcFlotante{ display:none !important; }
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-ota]'); if(!b || !b.closest('#viewParteDiario')) return;
     const a = b.dataset.ota; const card = b.closest('[data-otid]'); const id = card && card.dataset.otid;
-    if(a === 'nueva'){ abrirFormulario(!formAbierto); if(formAbierto) setTimeout(()=> { const f = $('otFecha'); if(f) f.scrollIntoView({ behavior:'smooth', block:'center' }); }, 30); return; }
-    if(a === 'cerrarform'){ abrirFormulario(false); window.scrollTo({ top:0, behavior:'smooth' }); return; }
+    if(a === 'nueva'){ irSubOt('nueva'); setTimeout(()=> { const f = $('otFecha'); if(f) f.scrollIntoView({ behavior:'smooth', block:'center' }); }, 30); return; }
     if(a === 'mas'){ verTodasCerradas = !verTodasCerradas; pintarCols(); return; }
     if(!id) return;
     if(a === 'cerrar') window.abrirCierreOt(id);
