@@ -944,9 +944,9 @@
   .it-items.abierto .it-items-lista{ display:block; }
   .ot-otra-tarea{ margin-top:14px; border-top:1px dashed var(--border); padding-top:10px; }
   .ot-otra-tit{ font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:var(--text-soft); margin-bottom:6px; }
-  .ot-otra-fila{ display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:center; margin-bottom:8px; }
-  .ot-otra-fila input{ margin:0; }
-  @media (max-width:640px){ .ot-otra-fila{ grid-template-columns:1fr auto; } .ot-otra-fila input[data-field="detalle"]{ grid-column:1 / -1; } }
+  .ot-otra-fila{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 96px 86px auto; gap:8px; align-items:center; margin-bottom:8px; }
+  .ot-otra-fila input{ margin:0; min-width:0; }
+  @media (max-width:900px){ .ot-otra-fila{ grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto; } .ot-otra-fila input[data-field="actividad"]{ grid-column:1 / 3; } .ot-otra-fila input[data-field="detalle"]{ grid-column:1 / -1; grid-row:2; } .ot-otra-fila input[data-field="un"]{ grid-row:3; grid-column:1; } .ot-otra-fila input[data-field="pts"]{ grid-row:3; grid-column:2; } }
   textarea{
     width:100%;
     padding:9px 10px;
@@ -985,10 +985,10 @@
        pie de una hoja, separado del contenido que encabeza. */
     header{
       background:#fff !important;
-      color:#183028 !important;
+      color:#0d1424 !important;
       padding:0 0 8px !important;
       box-shadow:none !important;
-      border-bottom:2px solid #183028 !important;
+      border-bottom:2px solid #28285e !important;
       margin-bottom:12px;
       break-after:avoid; page-break-after:avoid;
       -webkit-print-color-adjust:exact; print-color-adjust:exact;
@@ -996,9 +996,9 @@
     .header-inner{gap:12px;}
     .logo-badge{background:#fff !important; box-shadow:none !important; padding:0 !important;}
     .logo-badge svg{width:96px; height:48px;}
-    .header-divider{background:#183028 !important; opacity:.35;}
-    .header-text h1{font-size:17px !important; color:#183028 !important;}
-    .header-text .header-sub{font-size:11px !important; color:#183028 !important;}
+    .header-divider{background:#28285e !important; opacity:.35;}
+    .header-text h1{font-size:17px !important; color:#28285e !important;}
+    .header-text .header-sub{font-size:11px !important; color:#4b5670 !important;}
     .header-text p{display:none !important;} /* la bajada de la app no va en el papel (2026-08-22) */
 
     /* Columna «Referencia» fuera del papel (2026-08-22). Al sacarla, la descripción recupera el
@@ -1794,7 +1794,7 @@
     .inf-doc{ margin-top:0; }
     .inf-sec{ break-inside:auto; }
     .inf-tabla tr{ break-inside:avoid; }
-    .inf-tabla th{ background:#eef5f2 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .inf-tabla th{ background:#eef0f6 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   }
   @media (max-width:640px){
     .subtabs{ flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; border-radius:14px; }
@@ -3558,7 +3558,7 @@ html, body{ forced-color-adjust:none; }
 @media print{
   html, body{ background:#fff !important; } body::before{ display:none !important; }
   .wrap::before{ display:none !important; content:none !important; }
-  header{ background:#fff !important; backdrop-filter:none !important; margin-left:0 !important; box-shadow:none !important; border-bottom:2px solid #183028 !important; border-radius:0 !important; }
+  header{ background:#fff !important; backdrop-filter:none !important; margin-left:0 !important; box-shadow:none !important; border-bottom:2px solid #28285e !important; border-radius:0 !important; }
   .card, .tile{ background:#fff !important; box-shadow:none !important; border:none !important; backdrop-filter:none !important; border-radius:0 !important; }
   .section-title{ background:#eee !important; color:#111 !important; }
   thead th{ background:#eee !important; color:#111 !important; }
@@ -3749,7 +3749,7 @@ html, body{ forced-color-adjust:none; }
     <div class="header-divider"></div>
     <div class="header-text">
       <h1>Alumbrado Público</h1>
-      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-10-01 12:00 · e8ab2b</span></div>
+      <div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-10-02 03:16 · 64201c</span></div>
       <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
     </div>
   </div>
@@ -5281,7 +5281,7 @@ html, body{ forced-color-adjust:none; }
          todo el alto al mapa (2026-09-16). -->
     <div class="mapa-full-cab">
       <b style="color:var(--navy);">Mapa de obras</b>
-      <span class="hint" style="margin:0;">Tocá <b>Esc</b> o el botón para volver.</span>
+      <span class="hint" style="margin:0;">Tocá <b>✕</b> (o <b>Esc</b> en la compu) para volver.</span>
       <button type="button" class="mapa-full-salir" style="margin-left:auto;" onclick="mapaPantallaCompleta(false)">✕ Salir de pantalla completa</button>
     </div>
     <h2><span class="dot"></span>Mapa de obras — todas las plazas de Córdoba</h2>
@@ -5290,7 +5290,7 @@ html, body{ forced-color-adjust:none; }
     <div class="mapa-layout" id="mapaLayout">
       <div>
         <div class="hint" style="margin-top:0; margin-bottom:6px;">📍 Plaza elegida para ubicar: <b id="mapaSeleccionLabel">ninguna — elegí una de la lista</b></div>
-        <input type="text" id="mapaBuscar" placeholder="Buscar plaza por nombre, barrio o ID..." oninput="renderMapaObras()" style="margin-bottom:6px;" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
+        <div class="mapa-filtros-fila"><input type="text" id="mapaBuscar" placeholder="Buscar plaza por nombre, barrio o ID..." oninput="renderMapaObras()" style="margin-bottom:6px;" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other"><button type="button" class="btn-ghost mapa-filtros-btn" id="mapaFiltrosBtn" onclick="document.getElementById('mapaCard').classList.toggle('filtros-on'); this.textContent = document.getElementById('mapaCard').classList.contains('filtros-on') ? '▴ Menos' : '☰ Filtros';">☰ Filtros</button></div>
         <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px; flex-wrap:wrap;">
           <button type="button" class="btn-ghost" style="padding:4px 10px; font-size:12px;" onclick="mapaVerTodas()" title="Ajustar el zoom para que entren todas las plazas ubicadas">🔍 Ver todas</button>
           <button type="button" class="btn-ghost" id="mapaFullBtn" style="padding:4px 10px; font-size:12px;" onclick="mapaPantallaCompleta()" title="Agrandar el mapa a toda la pantalla (Esc para volver)">⛶ Pantalla completa</button>
@@ -5457,7 +5457,7 @@ html, body{ forced-color-adjust:none; }
               <span class="hint" id="stockMasivoMsg" style="margin:0;"></span>
             </div>
           </div>
-          <div id="stockRemitoPanel" style="display:none; margin-top:10px; background:#eef7f3; border:1px solid #bfe0d1; border-radius:8px; padding:8px 10px; font-size:12.5px;">
+          <div id="stockRemitoPanel" style="display:none; margin-top:10px; background:#eef6fa; border:1px solid #c9e3ee; border-radius:8px; padding:8px 10px; font-size:12.5px;">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
               <div id="stockRemitoPanelTxt"></div>
               <button type="button" class="btn-ghost" id="stockRemitoCerrarBtn" style="padding:4px 10px; font-size:12px; white-space:nowrap;">✓ Terminar este remito</button>
@@ -9842,6 +9842,8 @@ function renderActividades(){
   cont.innerHTML = actividades.map((a, idx)=>`<div class="ot-otra-fila act-item" data-act="${a.id}" style="background:none; border:0; padding:0; margin-bottom:8px;">
       <input type="text" data-field="actividad" value="${escHtml(a.actividad)}" placeholder="Tarea (ej.: reparar cerco perimetral)">
       <input type="text" data-field="detalle" value="${escHtml(a.detalle)}" placeholder="Detalle / dónde (opcional)">
+      <input type="text" data-field="un" value="${escHtml(a.un||'')}" placeholder="unidad" list="otUnidadesLista" title="En qué se mide (metro, columna, unidad…)">
+      <input type="number" data-field="pts" value="${a.pts != null && a.pts !== '' ? escHtml(a.pts) : ''}" placeholder="puntos" min="0" step="any" inputmode="decimal" title="Cuántos puntos vale cada unidad">
       <button type="button" class="tramo-remove" data-action="remove" title="Quitar">×</button>
     </div>`).join('');
   actualizarActividadesSummary();
@@ -9849,7 +9851,7 @@ function renderActividades(){
 function actualizarActividadesSummary(){
   const cargadas = actividades.filter(a=>a.actividad.trim()).length;
   const el = document.getElementById('actividadesSummary');
-  if(el) el.innerHTML = cargadas ? `<b>${cargadas}</b> tarea(s) fuera de la lista. En el cierre valen el puntaje genérico de tarea manual.` : '';
+  if(el) el.innerHTML = cargadas ? `<b>${cargadas}</b> tarea(s) nueva(s): al emitir la orden <b>se suman a la lista de tareas</b> (Producción → Tareas y valor) con la unidad y los puntos que les pongas, y la próxima vez ya aparecen para tildar.` : '';
   actualizarResumenTareasOt();
 }
 // Resumen arriba de la lista: cuántas tildadas, qué etapas tocan.
@@ -10152,7 +10154,7 @@ function imprimirPlanificacion(modo, rango, fecha){
       const del = ots.filter(o=> o.fecha === f), pl = plan.filter(e=> e.fecha === f);
       if(!del.length && !pl.length) return;
       const hDia = del.reduce((t,o)=> t + horasDeOrdenPlan(o).horas, 0);
-      html += `<h2 style="font-size:14px; margin:14px 0 2px; text-transform:capitalize;">${H(diaSemanaDeFecha(f))} ${H(formatFechaCorta(f))} <span style="font-weight:400; color:#5b7a70; font-size:11.5px; text-transform:none;">· ${del.length} orden(es) · ${h1(hDia)} h</span></h2>`;
+      html += `<h2 style="font-size:14px; margin:14px 0 2px; text-transform:capitalize;">${H(diaSemanaDeFecha(f))} ${H(formatFechaCorta(f))} <span style="font-weight:400; color:#4b5670; font-size:11.5px; text-transform:none;">· ${del.length} orden(es) · ${h1(hDia)} h</span></h2>`;
       html += `<table><thead><tr><th>Plaza / obra</th><th style="width:60px;">ID</th><th>Tarea principal</th><th style="width:100px;">Horario</th><th style="width:60px; text-align:right;">Personas</th><th style="width:70px; text-align:right;">Horas</th></tr></thead><tbody>`;
       del.forEach(o=>{
         const hh = horasDeOrdenPlan(o); const ts = tareasDeOrdenPlan(o);
@@ -10164,10 +10166,10 @@ function imprimirPlanificacion(modo, rango, fecha){
         let pr = ts[0] ? ts[0].label : '—';
         let prExtra = '';
         if(c.cerradoTs && ts.length){ const conCant = ts.filter(t=> cant[t.k] > 0); if(conCant.length) pr = conCant.map(t=> t.label + ' (' + h1(cant[t.k]) + ' ' + t.un + ')').join(' · '); }
-        else if(ts.length > 1) prExtra = ` <span style="color:#5b7a70;">(+${ts.length-1} más)</span>`;
-        html += `<tr><td><b>${H(o.plazaNombre||'(sin plaza)')}</b>${o.cuadrilla?`<div style="color:#5b7a70; font-size:11px;">${H(o.cuadrilla)}${o.numero?' · '+H(o.numero):''}</div>`:''}</td><td>${H(o.obraId||'—')}</td><td>${H(pr)}${prExtra}</td><td>${H(o.horaInicio||'—')} – ${H(o.horaFin||'—')}</td><td style="text-align:right;">${hh.personas}</td><td style="text-align:right;"><b>${h1(hh.horas)}</b>${hh.reales?'':' <span style="color:#5b7a70;">*</span>'}</td></tr>`;
+        else if(ts.length > 1) prExtra = ` <span style="color:#4b5670;">(+${ts.length-1} más)</span>`;
+        html += `<tr><td><b>${H(o.plazaNombre||'(sin plaza)')}</b>${o.cuadrilla?`<div style="color:#4b5670; font-size:11px;">${H(o.cuadrilla)}${o.numero?' · '+H(o.numero):''}</div>`:''}</td><td>${H(o.obraId||'—')}</td><td>${H(pr)}${prExtra}</td><td>${H(o.horaInicio||'—')} – ${H(o.horaFin||'—')}</td><td style="text-align:right;">${hh.personas}</td><td style="text-align:right;"><b>${h1(hh.horas)}</b>${hh.reales?'':' <span style="color:#4b5670;">*</span>'}</td></tr>`;
       });
-      pl.forEach(e=>{ const cc = ACTIVIDADES_CATALOGO.find(x=>x.id===e.catalogoId); html += `<tr style="color:#5b7a70;"><td>${H(e.obra||'—')}<div style="font-size:11px;">planificado, sin orden</div></td><td>—</td><td>${H(cc ? cc.label : (e.tarea||'—'))}</td><td>—</td><td style="text-align:right;">—</td><td style="text-align:right;">—</td></tr>`; });
+      pl.forEach(e=>{ const cc = ACTIVIDADES_CATALOGO.find(x=>x.id===e.catalogoId); html += `<tr style="color:#4b5670;"><td>${H(e.obra||'—')}<div style="font-size:11px;">planificado, sin orden</div></td><td>—</td><td>${H(cc ? cc.label : (e.tarea||'—'))}</td><td>—</td><td style="text-align:right;">—</td><td style="text-align:right;">—</td></tr>`; });
       html += `</tbody></table>`;
     });
     if(ots.some(o=>!horasDeOrdenPlan(o).reales)) html += `<div class="sub" style="margin-top:6px;">* horas previstas (jornada de la orden × personas): la orden todavía no tiene el cierre con las horas reales.</div>`;
@@ -10183,11 +10185,11 @@ function imprimirPlanificacion(modo, rango, fecha){
       porPlaza.set(key, g);
     });
     const filas = [...porPlaza.values()].sort((x,y)=> y.horas - x.horas);
-    const principal = g => { const arr = [...g.tareas.entries()].sort((a,b)=> b[1]-a[1]); return arr.length ? arr[0][0] + (arr.length > 1 ? ` <span style="color:#5b7a70;">(+${arr.length-1} más)</span>` : '') : '—'; };
+    const principal = g => { const arr = [...g.tareas.entries()].sort((a,b)=> b[1]-a[1]); return arr.length ? arr[0][0] + (arr.length > 1 ? ` <span style="color:#4b5670;">(+${arr.length-1} más)</span>` : '') : '—'; };
     const totH = filas.reduce((t,g)=> t + g.horas, 0), totOt = filas.reduce((t,g)=> t + g.ots, 0);
     html += `<table><thead><tr><th>Plaza / obra</th><th style="width:70px;">ID</th><th>Tarea principal</th><th style="width:60px; text-align:right;">Días</th><th style="width:70px; text-align:right;">Órdenes</th><th style="width:70px; text-align:right;">Personas</th><th style="width:90px; text-align:right;">Horas de trabajo</th></tr></thead><tbody>`;
     filas.forEach(g=>{
-      html += `<tr><td><b>${H(g.nombre)}</b></td><td>${H(g.id||'—')}</td><td>${principal(g)}</td><td style="text-align:right;">${g.dias.size}</td><td style="text-align:right;">${g.ots}</td><td style="text-align:right;">${g.personas}</td><td style="text-align:right;"><b>${h1(g.horas)}</b>${g.reales?'':' <span style="color:#5b7a70;">*</span>'}</td></tr>`;
+      html += `<tr><td><b>${H(g.nombre)}</b></td><td>${H(g.id||'—')}</td><td>${principal(g)}</td><td style="text-align:right;">${g.dias.size}</td><td style="text-align:right;">${g.ots}</td><td style="text-align:right;">${g.personas}</td><td style="text-align:right;"><b>${h1(g.horas)}</b>${g.reales?'':' <span style="color:#4b5670;">*</span>'}</td></tr>`;
     });
     html += `<tr><td colspan="3"><b>TOTAL</b></td><td style="text-align:right;"><b>${diasTot.size}</b></td><td style="text-align:right;"><b>${totOt}</b></td><td></td><td style="text-align:right;"><b>${h1(totH)}</b></td></tr></tbody></table>`;
   } else {
@@ -10198,12 +10200,12 @@ function imprimirPlanificacion(modo, rango, fecha){
     dias.forEach(f=>{
       const del = ots.filter(o=> o.fecha === f), pl = plan.filter(e=> e.fecha === f);
       if(!del.length && !pl.length) return;
-      html += `<h2 style="font-size:14px; margin:16px 0 4px; border-bottom:1px solid #cddbd6; padding-bottom:3px;">${H(diaSemanaDeFecha(f))} ${H(formatFechaCorta(f))}</h2>`;
+      html += `<h2 style="font-size:14px; margin:16px 0 4px; border-bottom:1px solid #d5dae8; padding-bottom:3px;">${H(diaSemanaDeFecha(f))} ${H(formatFechaCorta(f))}</h2>`;
       del.forEach(o=>{
         const hh = horasDeOrdenPlan(o); const c = o.cierre || {}; const cant = c.cantidades || {}; const ht = c.horasTarea || {}; const hp = c.horasPersona || {};
         const gente = (o.personal||[]).filter(x=> x && String(x.nombre||'').trim());
         html += `<div style="margin:8px 0 10px; break-inside:avoid;">
-          <div><b>${H(o.numero||'OT')}</b> — <b>${H(o.plazaNombre||'(sin plaza)')}</b>${o.obraId?` · ID ${H(o.obraId)}`:''}${o.barrio?` · ${H(o.barrio)}`:''} · ${H(o.cuadrilla||'—')}${o.responsable?` · resp. ${H(o.responsable)}`:''} · ${H(o.horaInicio||'—')}–${H(o.horaFin||'—')} · <span style="color:#5b7a70;">${H(o.estado||'Emitida')}${c.cerradoTs ? ' · cierre cargado' : ' · sin cierre'}</span></div>
+          <div><b>${H(o.numero||'OT')}</b> — <b>${H(o.plazaNombre||'(sin plaza)')}</b>${o.obraId?` · ID ${H(o.obraId)}`:''}${o.barrio?` · ${H(o.barrio)}`:''} · ${H(o.cuadrilla||'—')}${o.responsable?` · resp. ${H(o.responsable)}`:''} · ${H(o.horaInicio||'—')}–${H(o.horaFin||'—')} · <span style="color:#4b5670;">${H(o.estado||'Emitida')}${c.cerradoTs ? ' · cierre cargado' : ' · sin cierre'}</span></div>
           <table style="margin-top:4px;"><thead><tr><th>Tarea</th><th style="width:110px; text-align:right;">Previsto</th><th style="width:110px; text-align:right;">Hecho</th><th style="width:130px;">Hora inicio → fin</th></tr></thead><tbody>`;
         tareasDeOrdenPlan(o).forEach(t=>{
           const pv = (o.previsto||{})[t.k], hc = cant[t.k], hr = ht[t.k] || {};
@@ -10212,7 +10214,7 @@ function imprimirPlanificacion(modo, rango, fecha){
         html += `</tbody></table>`;
         if(gente.length){
           html += `<table style="margin-top:4px;"><thead><tr><th>Persona</th><th style="width:140px;">Rol</th><th style="width:110px; text-align:right;">Horas</th></tr></thead><tbody>`;
-          gente.forEach(x=>{ const n = String(x.nombre).trim(); const h = hp[n] != null ? Number(hp[n]) : null; html += `<tr><td>${H(n)}</td><td>${H(x.rol||'—')}</td><td style="text-align:right;">${h != null ? h1(h) : '<span style="color:#5b7a70;">prev. ' + h1(hh.personas ? hh.horas / hh.personas : 0) + '</span>'}</td></tr>`; });
+          gente.forEach(x=>{ const n = String(x.nombre).trim(); const h = hp[n] != null ? Number(hp[n]) : null; html += `<tr><td>${H(n)}</td><td>${H(x.rol||'—')}</td><td style="text-align:right;">${h != null ? h1(h) : '<span style="color:#4b5670;">prev. ' + h1(hh.personas ? hh.horas / hh.personas : 0) + '</span>'}</td></tr>`; });
           html += `<tr><td colspan="2"><b>Total de la orden</b></td><td style="text-align:right;"><b>${h1(hh.horas)} h</b>${hh.reales?'':' (prev.)'}</td></tr></tbody></table>`;
         }
         if(o.materiales) html += `<div style="margin-top:4px;"><b>Materiales:</b> ${H(o.materiales).replace(/\n/g,' · ')}</div>`;
@@ -10220,7 +10222,7 @@ function imprimirPlanificacion(modo, rango, fecha){
         if(c.obs) html += `<div style="margin-top:2px;"><b>Novedades del cierre:</b> ${H(c.obs)}</div>`;
         html += `</div>`;
       });
-      pl.forEach(e=>{ const cc = ACTIVIDADES_CATALOGO.find(x=>x.id===e.catalogoId); html += `<div style="margin:4px 0; color:#5b7a70;">Planificado (sin orden): <b>${H(e.obra||'—')}</b> · ${H(e.cuadrilla||'—')} · ${H(cc ? cc.label : (e.tarea||'—'))}</div>`; });
+      pl.forEach(e=>{ const cc = ACTIVIDADES_CATALOGO.find(x=>x.id===e.catalogoId); html += `<div style="margin:4px 0; color:#4b5670;">Planificado (sin orden): <b>${H(e.obra||'—')}</b> · ${H(e.cuadrilla||'—')} · ${H(cc ? cc.label : (e.tarea||'—'))}</div>`; });
     });
   }
   abrirHojaImpresion(`Planificación ${modo === 'informe' ? 'para informe' : 'detallada'} — ${titulo}`, html);
@@ -12291,7 +12293,7 @@ function imprimirMaterialPersona(){
     `<div><b>Persona:</b> ${escHtml(nom)}${lg ? ` &nbsp;·&nbsp; <b>Legajo:</b> ${escHtml(lg)}` : ''} &nbsp;·&nbsp; <b>Sector:</b> ${sec} &nbsp;·&nbsp; <b>Materiales:</b> ${filas.length}</div>`,
     `<table><thead><tr><th>Cód.</th><th>Material</th><th style="text-align:right;">Entregado</th><th style="text-align:right;">Devolvió</th><th style="text-align:right;">Usó en obra</th><th style="text-align:right;">Tiene ahora</th></tr></thead><tbody>${cuerpo}</tbody></table>`,
     `<div style="margin-top:14px; font-size:11.5px;">Declaro tener en mi poder el material detallado, entregado por el pañol, y me comprometo a devolverlo o a informar su uso en obra.</div>`,
-    `<table style="margin-top:34px; border:none;"><tr><td style="border:none; width:50%;"><div style="border-top:1px solid #183028; padding-top:5px;">${escHtml(nom)} — firma</div></td><td style="border:none; width:50%; padding-left:24px;"><div style="border-top:1px solid #183028; padding-top:5px;">Pañol — aclaración y firma</div></td></tr></table>`
+    `<table style="margin-top:34px; border:none;"><tr><td style="border:none; width:50%;"><div style="border-top:1px solid #28285e; padding-top:5px;">${escHtml(nom)} — firma</div></td><td style="border:none; width:50%; padding-left:24px;"><div style="border-top:1px solid #28285e; padding-top:5px;">Pañol — aclaración y firma</div></td></tr></table>`
   ].join(''), 'CONSTANCIA DE MATERIAL');
 }
 window.imprimirMaterialPersona = imprimirMaterialPersona;
@@ -12367,7 +12369,7 @@ function verComprobanteMovimiento(id){
   const esDevol = !!(m.devolucion && m.devolOrigen);
   const titulo = esDevol ? 'Comprobante de devolución de material' : (esEntrada ? 'Comprobante de entrada de material' : 'Vale de salida de material');
   const nro = numeroComprobante(m);
-  const fila = (rot, val) => val ? `<tr><th style="width:34%; background:#eef5f2;">${escHtml(rot)}</th><td>${escHtml(val)}</td></tr>` : '';
+  const fila = (rot, val) => val ? `<tr><th style="width:34%; background:#eef0f6;">${escHtml(rot)}</th><td>${escHtml(val)}</td></tr>` : '';
   const restante = (typeof stockActual === 'function') ? stockActual(m.codigo) : null;
   // Devolución o vale de salida de varios materiales: todos los renglones del mismo grupo van en este comprobante.
   const esVale = !esEntrada && !esDevol && !!m.valeGrupo;
@@ -12423,8 +12425,8 @@ function verComprobanteMovimiento(id){
 
   const firmas = `<table style="margin-top:26px; border:none;">
       <tr>
-        <td style="border:none; width:50%; padding-top:34px;"><div style="border-top:1px solid #183028; padding-top:5px;">${esEntrada?'Recibió (pañol) — aclaración y firma':'Entregó (pañol) — aclaración y firma'}</div></td>
-        <td style="border:none; width:50%; padding-top:34px; padding-left:24px;"><div style="border-top:1px solid #183028; padding-top:5px;">${esDevol?'Devolvió — aclaración y firma':(esEntrada?'Entregó (proveedor / transporte)':'Recibió el material — aclaración y firma')}</div></td>
+        <td style="border:none; width:50%; padding-top:34px;"><div style="border-top:1px solid #28285e; padding-top:5px;">${esEntrada?'Recibió (pañol) — aclaración y firma':'Entregó (pañol) — aclaración y firma'}</div></td>
+        <td style="border:none; width:50%; padding-top:34px; padding-left:24px;"><div style="border-top:1px solid #28285e; padding-top:5px;">${esDevol?'Devolvió — aclaración y firma':(esEntrada?'Entregó (proveedor / transporte)':'Recibió el material — aclaración y firma')}</div></td>
       </tr></table>`;
 
   const pie = (grupoDev.length <= 1 && restante !== null && isFinite(restante))
@@ -12488,17 +12490,17 @@ function abrirHojaImpresion(titulo, contenidoHtml, tipoHoja){
   w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${escHtml(titulo)}</title>
   <style>
     *{box-sizing:border-box}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:#183028; margin:24px; font-size:12px;}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:#0d1424; margin:24px; font-size:12px;}
     h1{font-size:18px; margin:0 0 2px;}
-    .sub{color:#5b7a70; font-size:11.5px; margin-bottom:14px;}
+    .sub{color:#4b5670; font-size:11.5px; margin-bottom:14px;}
     table{width:100%; border-collapse:collapse; margin-top:10px;}
-    th,td{border:1px solid #cddbd6; padding:5px 7px; text-align:left; vertical-align:top;}
-    th{background:#eef5f2; font-weight:600;}
-    tbody tr:nth-child(even){background:#fafcfb;}
-    .foot{margin-top:18px; color:#5b7a70; font-size:10.5px; border-top:1px solid #cddbd6; padding-top:8px;}
-    .membrete{display:flex; align-items:center; gap:14px; border-bottom:2px solid #183028; padding-bottom:8px; margin-bottom:14px;}
+    th,td{border:1px solid #d5dae8; padding:5px 7px; text-align:left; vertical-align:top;}
+    th{background:#eef0f6; font-weight:600;}
+    tbody tr:nth-child(even){background:#f8f9fc;}
+    .foot{margin-top:18px; color:#4b5670; font-size:10.5px; border-top:1px solid #d5dae8; padding-top:8px;}
+    .membrete{display:flex; align-items:center; gap:14px; border-bottom:2px solid #28285e; padding-bottom:8px; margin-bottom:14px;}
     .membrete .marca{font-size:15px; font-weight:700; line-height:1.15;}
-    .membrete .marca span{display:block; font-size:10.5px; font-weight:600; color:#5b7a70; letter-spacing:.5px;}
+    .membrete .marca span{display:block; font-size:10.5px; font-weight:600; color:#4b5670; letter-spacing:.5px;}
     @media print{ body{margin:12mm;} .membrete{break-after:avoid; page-break-after:avoid;} }
   </style></head><body>
   <div class="membrete">
@@ -15658,8 +15660,8 @@ function cuerpoOrdenTrabajoHtml(o, opts){
   const renglon = (k, un, prev)=>{
     const c = cant[k], t = ht[k] || {};
     const cel = v => v ? `<b>${escHtml(String(v))}</b>` : '________';
-    return `<div style="margin-top:6px; padding:5px 8px; border:1px dashed #9fb3ab; border-radius:6px; font-size:11.5px; color:#2b3f38; display:flex; gap:18px; flex-wrap:wrap;">
-      <span>Cantidad hecha: ${c > 0 ? `<b>${escHtml(fmt(c, Number.isInteger(c)?0:2))}</b>` : '________'} ${escHtml(un||'')}${prev > 0 ? ` <span style="color:#5b7a70;">(previsto ${escHtml(fmt(prev, Number.isInteger(prev)?0:2))})</span>` : ''}</span>
+    return `<div style="margin-top:6px; padding:5px 8px; border:1px dashed #a7aec4; border-radius:6px; font-size:11.5px; color:#1f2a40; display:flex; gap:18px; flex-wrap:wrap;">
+      <span>Cantidad hecha: ${c > 0 ? `<b>${escHtml(fmt(c, Number.isInteger(c)?0:2))}</b>` : '________'} ${escHtml(un||'')}${prev > 0 ? ` <span style="color:#4b5670;">(previsto ${escHtml(fmt(prev, Number.isInteger(prev)?0:2))})</span>` : ''}</span>
       <span>Hora inicio: ${cel(t.ini)}</span><span>Hora fin: ${cel(t.fin)}</span></div>`;
   };
   const bloquesTarea = [];
@@ -15669,7 +15671,7 @@ function cuerpoOrdenTrabajoHtml(o, opts){
     const pasos = String(act.pasos||'').split('\n').map(p=>p.trim()).filter(Boolean)
       .map(p=>`<li style="margin-bottom:2px;">${escHtml(p.replace(/^\d+[a-z]?\)\s*/,''))}</li>`).join('');
     const et = etapasDeTareas([idAct]).map(e=>e.label).join(' · ');
-    bloquesTarea.push(`<div style="margin-top:10px; break-inside:avoid;"><b>${bloquesTarea.length+1}. ${escHtml(act.label)}</b>${et ? ` <span style="font-size:11px; color:#5b7a70;">· etapa: ${escHtml(et)}</span>` : ''}<ol style="margin:4px 0 0 18px; padding:0;">${pasos}</ol>${renglon(idAct, unidadDeTarea(idAct), (o.previsto||{})[idAct])}</div>`);
+    bloquesTarea.push(`<div style="margin-top:10px; break-inside:avoid;"><b>${bloquesTarea.length+1}. ${escHtml(act.label)}</b>${et ? ` <span style="font-size:11px; color:#4b5670;">· etapa: ${escHtml(et)}</span>` : ''}<ol style="margin:4px 0 0 18px; padding:0;">${pasos}</ol>${renglon(idAct, unidadDeTarea(idAct), (o.previsto||{})[idAct])}</div>`);
   });
   (o.actividadesManuales||[]).forEach(a=>{
     const pasos = String(a.pasos||'').split('\n').map(p=>p.trim()).filter(Boolean)
@@ -15677,25 +15679,25 @@ function cuerpoOrdenTrabajoHtml(o, opts){
     bloquesTarea.push(`<div style="margin-top:10px; break-inside:avoid;"><b>${bloquesTarea.length+1}. ${escHtml(a.actividad)}</b>${a.detalle?` — ${escHtml(a.detalle)}`:''}${pasos?`<ol style="margin:4px 0 0 18px; padding:0;">${pasos}</ol>`:''}${renglon('m:'+String(a.actividad||'').trim(), 'unidad', 0)}</div>`);
   });
   if(bloquesTarea.length){
-    html += `<h2 style="font-size:14px; margin:18px 0 0;">Tareas a realizar</h2><div style="font-size:11px; color:#5b7a70; margin-top:2px;">Al terminar cada tarea, anotar en el renglón punteado cuánto se hizo y de qué hora a qué hora.</div>` + bloquesTarea.join('');
+    html += `<h2 style="font-size:14px; margin:18px 0 0;">Tareas a realizar</h2><div style="font-size:11px; color:#4b5670; margin-top:2px;">Al terminar cada tarea, anotar en el renglón punteado cuánto se hizo y de qué hora a qué hora.</div>` + bloquesTarea.join('');
   }
 
   if(o.materiales){
-    html += `<h2 style="font-size:14px; margin:18px 0 4px;">Materiales a retirar del pañol</h2><div style="white-space:pre-wrap; border:1px solid #cddbd6; padding:8px;">${escHtml(o.materiales)}</div>`;
+    html += `<h2 style="font-size:14px; margin:18px 0 4px;">Materiales a retirar del pañol</h2><div style="white-space:pre-wrap; border:1px solid #d5dae8; padding:8px;">${escHtml(o.materiales)}</div>`;
   }
   if(o.notas){
-    html += `<h2 style="font-size:14px; margin:18px 0 4px;">Observaciones</h2><div style="white-space:pre-wrap; border:1px solid #cddbd6; padding:8px;">${escHtml(o.notas)}</div>`;
+    html += `<h2 style="font-size:14px; margin:18px 0 4px;">Observaciones</h2><div style="white-space:pre-wrap; border:1px solid #d5dae8; padding:8px;">${escHtml(o.notas)}</div>`;
   }
 
   // Espacio en blanco para que la cuadrilla complete a mano al terminar la jornada.
   html += `<h2 style="font-size:14px; margin:18px 0 4px;">Novedades de la cuadrilla (completar en obra)</h2>
-    <div style="font-size:11px; color:#5b7a70; margin-bottom:4px;">Qué quedó sin hacer y por qué, materiales que faltaron, imprevistos, algo que se agregó o se sacó del proyecto.</div>
-    <div style="border:1px solid #cddbd6; padding:10px; min-height:70px;">
-      ${cie.obs ? `<div style="white-space:pre-wrap;">${escHtml(cie.obs)}</div>` : '<div style="border-bottom:1px solid #b9c9c3; height:20px; margin-bottom:6px;"></div>'.repeat(3)}
+    <div style="font-size:11px; color:#4b5670; margin-bottom:4px;">Qué quedó sin hacer y por qué, materiales que faltaron, imprevistos, algo que se agregó o se sacó del proyecto.</div>
+    <div style="border:1px solid #d5dae8; padding:10px; min-height:70px;">
+      ${cie.obs ? `<div style="white-space:pre-wrap;">${escHtml(cie.obs)}</div>` : '<div style="border-bottom:1px solid #c3c9da; height:20px; margin-bottom:6px;"></div>'.repeat(3)}
     </div>`;
   html += `<div style="margin-top:28px; display:flex; gap:40px;">
-    <div style="flex:1; border-top:1px solid #183028; padding-top:4px;">Firma responsable</div>
-    <div style="flex:1; border-top:1px solid #183028; padding-top:4px;">Firma recibido en obra</div>
+    <div style="flex:1; border-top:1px solid #28285e; padding-top:4px;">Firma responsable</div>
+    <div style="flex:1; border-top:1px solid #28285e; padding-top:4px;">Firma recibido en obra</div>
   </div>`;
 
   if(enPantalla){
@@ -16032,17 +16034,17 @@ function descargarInformeWord(){
   const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
   <head><meta charset="utf-8"><title>Informe de Avance de Obra — Plazas</title>
   <style>
-    body{font-family:Calibri,Arial,sans-serif; font-size:11pt; color:#183028;}
+    body{font-family:Calibri,Arial,sans-serif; font-size:11pt; color:#0d1424;}
     h1{font-size:17pt; margin:0 0 4pt;} h2{font-size:13pt; margin:14pt 0 4pt;}
-    .sub{color:#5b7a70; font-size:10pt; margin-bottom:10pt;}
+    .sub{color:#4b5670; font-size:10pt; margin-bottom:10pt;}
     table{border-collapse:collapse; width:100%;}
     th,td{border:1px solid #999; padding:4pt 6pt; text-align:left; vertical-align:top; font-size:9.5pt;}
-    th{background:#eef5f2;}
+    th{background:#eef0f6;}
   </style></head><body>
-  <div style="border-bottom:2px solid #183028; padding-bottom:6pt; margin-bottom:10pt;">
+  <div style="border-bottom:2px solid #28285e; padding-bottom:6pt; margin-bottom:10pt;">
     %%LOGO%%
     <div style="font-size:14pt; font-weight:700; margin-top:4pt;">Alumbrado Público</div>
-    <div style="font-size:9pt; font-weight:600; color:#5b7a70; letter-spacing:.5pt;">INFORME DE AVANCE DE OBRA</div>
+    <div style="font-size:9pt; font-weight:600; color:#4b5670; letter-spacing:.5pt;">INFORME DE AVANCE DE OBRA</div>
   </div>
   <h1>Informe de Avance de Obra — Plazas</h1>
   ${cuerpoInformeHtml()}
@@ -19037,6 +19039,7 @@ function mapaPantallaCompleta(v){
   mapaEstaFull = (v === undefined) ? !mapaEstaFull : !!v;
   card.classList.toggle('mapa-full', mapaEstaFull);
   document.body.classList.toggle('mapa-full-on', mapaEstaFull);
+  if(!mapaEstaFull){ card.classList.remove('filtros-on'); const fb = document.getElementById('mapaFiltrosBtn'); if(fb) fb.textContent = '☰ Filtros'; }
   const btn = document.getElementById('mapaFullBtn');
   if(btn) btn.innerHTML = mapaEstaFull ? '✕ Salir de pantalla completa' : '⛶ Pantalla completa';
   try{
@@ -19127,24 +19130,39 @@ let mapaRefControl = null;          // recuadro de referencia de colores
 function pintarReferenciaMapa(){
   const d = document.getElementById('mapaRefCaja');
   if(!d) return;
-  let h = '<b>Referencia</b>'
+  // Plegable (2026-10-02): en el celu tapaba un tercio del mapa. Arranca plegada en pantallas chicas y
+  // abierta en la PC; lo que elija cada uno queda recordado en ese aparato.
+  const ico = h => `<span class="mapa-ref-ico">${h}</span>`;
+  let h = '<button type="button" class="mapa-ref-tog" aria-expanded="' + mapaRefAbierta() + '">ⓘ Referencia<span class="fl">▾</span></button><div class="mapa-ref-cuerpo">'
     + '<div class="mapa-ref-sub">Obras del tablero</div>'
     + MAPA_REFERENCIAS.map(r=>
-        `<div class="mapa-ref-fila"><span class="mapa-ref-dot" style="background:${r.color};"></span>${r.txt}</div>`).join('')
-    + `<div class="mapa-ref-fila"><span class="mapa-ref-dot" style="background:#c7cedd;"></span>Sin ubicar todavía</div>`
+        `<div class="mapa-ref-fila">${ico(`<span class="mapa-ref-dot" style="background:${r.color};"></span>`)}${r.txt}</div>`).join('')
+    + `<div class="mapa-ref-fila">${ico('<span class="mapa-ref-dot" style="background:#c7cedd;"></span>')}Sin ubicar todavía</div>`
     + '<div class="mapa-ref-sub">Forma del pin</div>'
-    + '<div class="mapa-ref-fila"><span class="mapa-ref-forma f-plaza"></span>Plaza</div>'
-    + '<div class="mapa-ref-fila"><span class="mapa-ref-forma f-barrio"></span>Barrio</div>'
-    + '<div class="mapa-ref-fila"><span class="mapa-ref-forma f-otro"></span>Otra obra</div>';
+    + `<div class="mapa-ref-fila">${ico('<span class="mapa-ref-forma f-plaza"></span>')}Plaza</div>`
+    + `<div class="mapa-ref-fila">${ico('<span class="mapa-ref-forma f-barrio"></span>')}Barrio</div>`
+    + `<div class="mapa-ref-fila">${ico('<span class="mapa-ref-forma f-otro"></span>')}Otra obra</div>`;
   if(typeof mapaVerLicitacion !== 'undefined' && mapaVerLicitacion !== 'no'){
     const zonas = mapaVerLicitacion === 'todas' ? ['A','B','C'] : [mapaVerLicitacion];
     h += '<div class="mapa-ref-sub">Plazas del pliego <span>(todavía sin cargar)</span></div>'
       + zonas.map(k=>{ const z = MAPA_LIC_ZONA[k];
-          return `<div class="mapa-ref-fila"><span class="mapa-ref-rombo" style="border-color:${z.color};"></span>${z.txt}</div>`; }).join('')
+          return `<div class="mapa-ref-fila">${ico(`<span class="mapa-ref-rombo" style="border-color:${z.color};"></span>`)}${z.txt}</div>`; }).join('')
       + '<div class="mapa-ref-nota">Tocá un rombo para ver cuál es y registrarla.</div>';
   }
-  d.innerHTML = h;
+  d.innerHTML = h + '</div>';
+  d.classList.toggle('abierta', mapaRefAbierta());
 }
+function mapaRefAbierta(){
+  try{ const v = localStorage.getItem('ema.mapa.ref'); if(v === '1' || v === '0') return v === '1'; }catch(e){}
+  return !(window.matchMedia && matchMedia('(max-width:640px)').matches);
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('#mapaRefCaja .mapa-ref-tog'); if(!t) return;
+  e.stopPropagation();
+  const c = document.getElementById('mapaRefCaja'); const ab = !c.classList.contains('abierta');
+  c.classList.toggle('abierta', ab); t.setAttribute('aria-expanded', ab);
+  try{ localStorage.setItem('ema.mapa.ref', ab ? '1' : '0'); }catch(err){}
+});
 
 const TIPO_OBRA_TXT = { plaza:'Plaza', barrio:'Barrio', otro:'Otra obra' };
 const TIPO_OBRA_ICO = { plaza:'🌳', barrio:'🏘', otro:'📍' };
@@ -19801,6 +19819,8 @@ function poblarParteObraDatalist(){
       if(typeof window.renderRegistros === 'function') window.renderRegistros();
       // La planificación semanal muestra las órdenes emitidas en su fecha: se redibuja con cada cambio.
       if(typeof window.renderPlanGrid === 'function') window.renderPlanGrid();
+      // Órdenes con la cuadrilla (2026-10-02): tablero de Órdenes y «Mis tareas».
+      if(typeof window.alCambiarOrdenes === 'function') window.alCambiarOrdenes();
     }, err => console.error('Error escuchando órdenes de trabajo:', err));
 
     // Avance de obra (2026-08-15): mismo mecanismo que "movimientos" de Stock, pero cada documento
@@ -19929,6 +19949,17 @@ function poblarParteObraDatalist(){
   window.fbOtEliminar = async function(id){
     if(!fbAvailable) throw new Error('Firebase no disponible');
     await fbDb.collection('ordenesTrabajo').doc(id).delete();
+  };
+  // Lo que marca la cuadrilla desde el celu (2026-10-02): solo toca `campo.*` (y el estado a «En curso»).
+  // `patch` viene con rutas con punto ('campo.marcas.zanjeo'), así dos personas marcando a la vez no se pisan.
+  window.fbOtCampo = async function(id, patch){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    await fbDb.collection('ordenesTrabajo').doc(id).update(patch);
+  };
+  // Cuadrillas guardadas (nombre, responsable y gente) para emitir órdenes más rápido.
+  window.fbCuadrillasGuardar = async function(lista){
+    if(!fbAvailable) throw new Error('Firebase no disponible');
+    await fbDb.collection('configEquipo').doc('cuadrillas').set({ lista, actualizado:Date.now(), actualizadoPor:(window.__fbUser && window.__fbUser.email) || '' });
   };
 
   // ---- Planificación semanal (2026-08-27) ----
@@ -21163,9 +21194,14 @@ function poblarParteObraDatalist(){
     const enPantalla = [...cont.querySelectorAll('.ot-act-check')].map(c=>c.value).join('|');
     const esperado = ACTIVIDADES_CATALOGO.map(a=>a.id).join('|');
     if(enPantalla === esperado) return;            // no cambió nada: no se toca
+    // También lo previsto y a quién va cada tarea (2026-10-02): antes se perdían al redibujar.
+    const previstos = {}; cont.querySelectorAll('.ot-act-prev').forEach(i=>{ if(i.value) previstos[i.dataset.id] = i.value; });
+    const quien = {}; cont.querySelectorAll('.ot-act-quien').forEach(q=>{ if(q.value) quien[q.dataset.id] = q.value; });
     cont.innerHTML = '';
     if(typeof poblarOtActividades === 'function') poblarOtActividades();
     cont.querySelectorAll('.ot-act-check').forEach(c=>{ c.checked = marcadas.includes(c.value); const f = c.closest('.ot-tarea'); if(f) f.classList.toggle('on', c.checked); });
+    cont.querySelectorAll('.ot-act-prev').forEach(i=>{ if(previstos[i.dataset.id] != null) i.value = previstos[i.dataset.id]; });
+    if(typeof window.__restaurarQuien === 'function') window.__restaurarQuien(quien);
   }
 
   // ---- El cuadro de alta / edición ----
@@ -21229,6 +21265,38 @@ function poblarParteObraDatalist(){
     const msg = document.getElementById('baremoMsg');
     if(msg){ msg.style.color='var(--amber)';
       msg.textContent='Cambio aplicado acá. Tocá «Guardar» para que lo vea todo el equipo.'; }
+  };
+
+  // ==================================================================
+  // TAREAS NUEVAS ESCRITAS EN UNA ORDEN DE TRABAJO  (2026-10-02)
+  // ==================================================================
+  // El usuario: *"las tareas nuevas, agregar puntajes y que automáticamente, si es una tarea nueva, se
+  // registre a la lista de tareas con su puntaje que le pusimos"*. Al emitir la orden, cada «otra tarea»
+  // se suma a la lista (como tarea propia, con su unidad y sus puntos) y la orden la lleva tildada como
+  // cualquier otra: la próxima vez ya está en la lista. Si ya existe una con el mismo nombre, se usa esa.
+  window.registrarTareasNuevas = async function(lista){
+    const nrm = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+    const res = [], nuevas = [];
+    for(const t of (lista||[])){
+      const label = String(t.label||'').trim(); if(!label) continue;
+      const ya = ACTIVIDADES_CATALOGO.find(c => nrm(c.label) === nrm(label)) || res.find(r => nrm(r.label) === nrm(label));
+      if(ya){ res.push({ label, id: ya.id, nueva:false }); continue; }
+      const id = 'propia_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+      const nt = { id, label, un: String(t.un||'').trim() || 'unidad', pts: num(t.pts, PTS_TAREA_MANUAL), pasos: String(t.pasos||'').trim() };
+      tareasPropias.push(nt); nuevas.push(nt); res.push({ label, id, nueva:true });
+    }
+    if(nuevas.length){
+      sincronizarCatalogoTareas();
+      try{
+        const labels = {}; ACTIVIDADES_CATALOGO.forEach(c => { labels[c.id] = c.label; });
+        await window.fbBaremoGuardar({ baremo, pesos, tareasPropias, labels, valorPunto, ts:Date.now(), usuario:(window.__fbUser||{}).email||'' });
+      }catch(e){
+        tareasPropias = tareasPropias.filter(t => !nuevas.includes(t)); sincronizarCatalogoTareas();
+        throw e;
+      }
+      try{ if(document.getElementById('baremoBody')) renderBaremo(); }catch(e){}
+    }
+    return res;
   };
 
   // ==================================================================
@@ -27808,13 +27876,13 @@ const ITEMIZADO_EPEC = [
         td.c, th.c{ text-align:center; }
         td.v{ height:22px; background:#fff; }
         .ctr-hoja-cab{ display:flex; gap:22px; flex-wrap:wrap; font-size:12px; margin-bottom:10px;
-                       border:1px solid #cddbd6; border-radius:6px; padding:8px 12px; background:#fafcfb; }
-        .ctr-hoja-cab .linea{ display:inline-block; width:180px; border-bottom:1px solid #90a29b; }
+                       border:1px solid #d5dae8; border-radius:6px; padding:8px 12px; background:#f8f9fc; }
+        .ctr-hoja-cab .linea{ display:inline-block; width:180px; border-bottom:1px solid #9aa0b5; }
         .firma{ margin-top:46px; display:flex; justify-content:space-between; }
-        .firma div{ width:40%; border-top:1px solid #183028; padding-top:5px; text-align:center;
-                    color:#5b7a70; font-size:11px; }
-        tfoot th{ background:#eef5f2; }
-        td .det{ margin-top:3px; font-size:10.5px; line-height:1.45; color:#3d554c; text-align:justify; }
+        .firma div{ width:40%; border-top:1px solid #28285e; padding-top:5px; text-align:center;
+                    color:#4b5670; font-size:11px; }
+        tfoot th{ background:#eef0f6; }
+        td .det{ margin-top:3px; font-size:10.5px; line-height:1.45; color:#3a4560; text-align:justify; }
         tr{ page-break-inside:avoid; }
         @media print{ .ctr-hoja-cab{ background:#fff; } }
       </style>
@@ -32582,7 +32650,7 @@ const ITEMIZADO_EPEC = [
   // ==========================================================================================
   function cuerpoPapel(m){
     const tiles = (m.tiles||[]).length
-      ? `<table style="margin-bottom:12px;"><tr>${m.tiles.map(t=>`<td style="text-align:center;"><b style="font-size:17px;">${esc(celTxt(t.n))}</b><br><span style="font-size:10px; color:#5b7a70;">${esc(t.l)}</span></td>`).join('')}</tr></table>` : '';
+      ? `<table style="margin-bottom:12px;"><tr>${m.tiles.map(t=>`<td style="text-align:center;"><b style="font-size:17px;">${esc(celTxt(t.n))}</b><br><span style="font-size:10px; color:#4b5670;">${esc(t.l)}</span></td>`).join('')}</tr></table>` : '';
     const avisos = (m.avisos||[]).map(a=>`<p style="border-left:3px solid #d9a441; padding-left:8px; font-size:10.5px; margin:0 0 6px;">${a}</p>`).join('');
     const secs = (m.secciones||[]).map(s=>{
       if(s.tipo === 'texto'){
@@ -32597,7 +32665,7 @@ const ITEMIZADO_EPEC = [
         const c = (s.cols||[])[i] || {};
         return `<td style="font-weight:700;${c.num?'text-align:right;':''}">${esc(celTxt(v))}</td>`; }).join('')}</tr>`).join('');
       return `<h2 style="font-size:14px; margin:16px 0 4px;">${esc(s.tit)}</h2>` +
-        (s.hint ? `<div style="font-size:10.5px; color:#5b7a70; margin-bottom:5px;">${esc(s.hint)}</div>` : '') +
+        (s.hint ? `<div style="font-size:10.5px; color:#4b5670; margin-bottom:5px;">${esc(s.hint)}</div>` : '') +
         `<table><thead><tr>${th}</tr></thead><tbody>${tb || `<tr><td colspan="${(s.cols||[]).length}" style="text-align:center;">Sin datos.</td></tr>`}</tbody>${tf?`<tfoot>${tf}</tfoot>`:''}</table>`;
     }).join('');
     return `<div class="sub">${esc(m.subtitulo)}</div>${tiles}${avisos}${secs}`;
@@ -33851,7 +33919,38 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 .mapa-pin.tipo-barrio{ border-radius:7px !important; box-shadow:0 0 0 3px #7a4fd6, 0 2px 6px rgba(0,0,0,.4) !important; }
 .mapa-pin.tipo-otro{ border-radius:50% 50% 50% 0 !important; transform:rotate(-45deg); box-shadow:0 0 0 3px #ff9f0a, 0 2px 6px rgba(0,0,0,.4) !important; }
 .mapa-pin.tipo-otro > span{ transform:rotate(45deg); }
-.mapa-ref-forma{ display:inline-block; width:13px; height:13px; margin-right:6px; vertical-align:-2px; background:#9aa6bd; border:2px solid #fff; }
+.mapa-ref-forma{ display:inline-block; width:11px; height:11px; margin:0 3px; flex:none; box-sizing:border-box; background:#9aa6bd; border:2px solid #fff; }
+/* ---- Capas (2026-10-02): el mapa (Leaflet) queda ENCERRADO en su propia capa. Sus botones +/− y sus
+   esquinas tienen z-index 1000 y se ponían encima del menú de las tres rayitas y de la cabecera fija. ---- */
+.leaflet-container{ isolation:isolate; z-index:0; }
+/* ---- Referencia del mapa plegable: en el celu arranca plegada (tapaba un tercio del mapa) ---- */
+.mapa-ref{ padding:0 !important; overflow:hidden; max-width:min(250px, 70vw); }
+.mapa-ref .mapa-ref-tog{ display:flex; align-items:center; gap:6px; width:100%; border:none; background:none; cursor:pointer; padding:7px 10px; min-height:0 !important;
+  font:800 10.5px var(--fuente); letter-spacing:.06em; text-transform:uppercase; color:var(--text-soft); text-align:left; }
+.mapa-ref .mapa-ref-tog .fl{ margin-left:auto; font-size:12px; transition:transform .15s; }
+.mapa-ref.abierta .mapa-ref-tog .fl{ transform:rotate(180deg); }
+.mapa-ref .mapa-ref-cuerpo{ display:none; padding:0 10px 8px; max-height:min(52vh, 360px); overflow-y:auto; }
+.mapa-ref.abierta .mapa-ref-cuerpo{ display:block; }
+.mapa-ref-fila{ min-height:20px; }
+.mapa-ref-ico{ flex:0 0 18px; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; }
+.mapa-ref-ico .mapa-ref-dot{ margin:0; } .mapa-ref-ico .mapa-ref-rombo{ margin:0; }
+/* ---- Mapa a pantalla completa en el celu: arriba solo el buscador y la lista; lo demás detrás de «Filtros» ---- */
+.mapa-filtros-btn{ display:none; }
+@media (max-width:820px){
+  .card.mapa-full .ayuda-btn, .card.mapa-full .mapa-full-cab .hint{ display:none !important; }
+  .card.mapa-full .mapa-filtros-btn{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex:0 0 auto; width:auto !important; margin:0 0 6px !important; min-height:36px !important; padding:0 14px !important; font-size:13px !important; }
+  .card.mapa-full:not(.filtros-on) .mapa-layout > div:first-child > :not(#mapaBuscar):not(.mapa-lista):not(.mapa-filtros-fila){ display:none !important; }
+  .card.mapa-full .mapa-layout > div:first-child{ max-height:none; overflow:visible; }
+  .card.mapa-full.filtros-on .mapa-layout > div:first-child{ max-height:44vh; overflow-y:auto; }
+  .card.mapa-full .mapa-lista{ max-height:11vh; }
+  .card.mapa-full .mapa-filtros-fila{ display:flex; gap:8px; align-items:center; }
+  .card.mapa-full .mapa-filtros-fila #mapaBuscar{ flex:1 1 auto; margin:0 0 6px !important; }
+}
+.mapa-filtros-fila{ display:contents; }
+/* A pantalla completa el fondo es opaco (con el vidrio translúcido se veía la hoja de atrás y quedaba todo gris)
+   y el botón «Pantalla completa» de la barra no se repite: arriba ya está «✕ Salir». */
+.card.mapa-full{ background:#f3f5fa !important; -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+.card.mapa-full #mapaFullBtn{ display:none !important; }
 .mapa-ref-forma.f-plaza{ border-radius:50%; box-shadow:0 0 0 1px #9aa6bd; }
 .mapa-ref-forma.f-barrio{ border-radius:3px; box-shadow:0 0 0 2px #7a4fd6; }
 .mapa-ref-forma.f-otro{ border-radius:50% 50% 50% 0; transform:rotate(-45deg); box-shadow:0 0 0 2px #ff9f0a; }
@@ -35523,14 +35622,14 @@ ${rels}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlforma
 (function(){
   const NOMBRE = { viewInicio:'Inicio', viewCalculadora:'Cálculo de materiales', viewParteDiario:'Órdenes de trabajo',
     viewPlanificacion:'Planificación semanal', viewAvance:'Avance de obra', viewMapa:'Mapa de plazas', viewStock:'Pañol',
-    viewProduccion:'Producción del personal', viewInforme:'Informes', viewGastos:'Gastos de obra', viewNormas:'Normas y planos', viewTablero:'Mi tablero', viewRegistro:'Registrar obra', viewUsuarios:'Usuarios y permisos' };
+    viewProduccion:'Producción del personal', viewInforme:'Informes', viewGastos:'Gastos de obra', viewNormas:'Normas y planos', viewTablero:'Mi tablero', viewMisTareas:'Mis tareas', viewRegistro:'Registrar obra', viewUsuarios:'Usuarios y permisos' };
   const limpiar = t => String(t||'').replace(/^[^0-9A-Za-zÁÉÍÓÚÑáéíóúñ]+/, '').replace(/\s+/g,' ').trim();
   function hojaActual(){
     const vista = Object.keys(NOMBRE).map(id => document.getElementById(id))
       .find(el => el && getComputedStyle(el).display !== 'none');
     if(!vista) return '';
     const sub = vista.querySelector('.subtabs .subtab.activo');
-    return (sub && limpiar(sub.textContent)) || NOMBRE[vista.id];
+    return (sub && (sub.dataset.hdr || limpiar(sub.textContent))) || NOMBRE[vista.id];
   }
   let pendiente = false;
   function pintar(){
@@ -36128,6 +36227,1218 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
 </script>
 
 <!-- ============================================================================================
+     CALCULADORAS RÁPIDAS (2026-10-02)
+     ============================================================================================
+     Pedido: «en la calculadora, al entrar, estaría bueno tener sub índices: calculadora de civil para
+     calcular rápido hormigón, calculadora de cables y otras que puedan servir, para sacar rápido de apuro».
+     Van como subpestañas de «Cálculo de materiales». La primera es el cómputo de la plaza de siempre (no
+     se tocó). Las rápidas no guardan nada: se usan y listo.
+     Fuentes: hormigón H-13 y zanja = las mismas constantes del cómputo (DOSAGE_HORMIGON, ZANJA,
+     FUNDACIONES; planos AP-TC-001 / AP-TC-003 / AP-TC-003-A). Cables: resistencias IEC 60228 llevadas a 70 °C,
+     límite 3 % de AEA 90364 para circuitos terminales (editable). Abrazaderas: grillas del pañol (notas 04/09).
+     Los dosajes H-17, H-21 y pobre son REFERENCIAS TÍPICAS (no del pliego) y se pueden corregir.
+     ============================================================================================ -->
+<style id="estiloCalcRapidas">
+#calcRapidas{ max-width:980px; }
+.cr-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; align-items:start; }
+.cr-campos{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:4px 12px; }
+.cr-campos label{ margin-top:8px; }
+.cr-campos .ancho{ grid-column:1 / -1; }
+.cr-campos input, .cr-campos select{ margin-top:4px; }
+.cr-tiles{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+.cr-tile{ background:rgba(255,255,255,.75); border:1px solid var(--canto); border-radius:18px; padding:12px 14px; }
+.cr-tile .n{ font:800 26px/1.1 var(--disp); letter-spacing:-.02em; }
+.cr-tile .u{ font-size:13px; font-weight:600; color:var(--text-soft); margin-left:3px; }
+.cr-tile .l{ font-size:12.5px; color:var(--text-soft); margin-top:3px; }
+.cr-tile.ok{ background:rgba(52,199,89,.12); } .cr-tile.mal{ background:rgba(255,59,48,.10); } .cr-tile.av{ background:rgba(255,159,10,.12); }
+.cr-tile.ancho{ grid-column:1 / -1; }
+.cr-nota{ font-size:12.5px; color:var(--text-soft); line-height:1.45; margin-top:12px; }
+.cr-nota b{ color:var(--text); }
+.cr-filas{ display:flex; flex-direction:column; gap:8px; }
+.cr-fila{ display:grid; grid-template-columns:minmax(0,1.6fr) repeat(3, minmax(0,.8fr)) 64px 36px; gap:6px; align-items:end; background:rgba(255,255,255,.6); border-radius:14px; padding:8px; }
+.cr-fila label{ margin:0 0 2px; font-size:11.5px; }
+.cr-fila input, .cr-fila select{ margin:0 !important; min-width:0; }
+.cr-fila .x{ min-height:40px; border:none; background:none; font-size:20px; color:var(--text-3); cursor:pointer; }
+.cr-fila.fijo{ grid-template-columns:minmax(0,1fr) 80px 36px; }
+.cr-tabla{ width:100%; border-collapse:collapse; font-size:14px; margin-top:6px; }
+.cr-sub{ font:800 11.5px var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); margin:16px 2px 6px; }
+.cr-circ{ background:rgba(255,255,255,.55); border:1px solid var(--canto); border-radius:18px; padding:10px 12px; margin-top:10px; }
+.cr-circ-cab{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+.cr-cols{ display:flex; flex-direction:column; gap:6px; }
+.cr-col{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) 100px 120px minmax(0,1.1fr) minmax(0,.9fr) 36px; gap:6px; align-items:end; background:#fff; border-radius:12px; padding:6px 8px; }
+.cr-col label{ margin:0 0 2px; font-size:11.5px; } .cr-col input, .cr-col select{ margin:0 !important; min-width:0; }
+.cr-col .x{ min-height:40px; border:none; background:none; font-size:20px; color:var(--text-3); cursor:pointer; }
+.cr-circ-acc{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px; font-size:12.5px; color:var(--text-soft); }
+.cr-circ-acc .btn-auto{ margin:0; }
+.cr-rapido input{ width:64px !important; display:inline-block; margin:0 2px !important; min-height:34px !important; padding:4px 6px !important; font-size:13px !important; }
+table.cr-caida th, table.cr-caida td{ padding:6px 6px; border-bottom:1px solid rgba(40,40,94,.08); white-space:nowrap; }
+table.cr-caida th{ font:700 10.5px var(--mono); letter-spacing:.04em; text-transform:uppercase; color:var(--text-3); text-align:left; }
+table.cr-caida .r{ text-align:right; font-family:var(--mono); }
+@media (max-width:900px){ .cr-col{ position:relative; grid-template-columns:repeat(2, minmax(0,1fr)); } .cr-col .nom{ grid-column:1 / -1; padding-right:40px; } .cr-col .x{ position:absolute; top:6px; right:4px; } }
+.cr-tabla td, .cr-tabla th{ padding:8px 6px; border-bottom:1px solid rgba(40,40,94,.08); text-align:left; }
+.cr-tabla td.r{ text-align:right; font-family:var(--mono); white-space:nowrap; }
+.cr-tabla th{ font:700 11px var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); }
+body.calc-rapida #calcFlotante{ display:none !important; }
+@media (max-width:760px){
+  .cr-grid{ grid-template-columns:minmax(0,1fr); }
+  .cr-fila{ grid-template-columns:repeat(3, minmax(0,1fr)); }
+  .cr-fila .tipo{ grid-column:1 / -1; }
+  .cr-fila .cant{ grid-column:1; } .cr-fila .x{ grid-column:3; justify-self:end; }
+  .cr-fila.fijo{ grid-template-columns:minmax(0,1fr) 72px 36px; } .cr-fila.fijo .tipo{ grid-column:auto; } .cr-fila.fijo .cant, .cr-fila.fijo .x{ grid-column:auto; }
+}
+@media (max-width:420px){ .cr-campos{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); } .cr-tile .n{ font-size:22px; } }
+@media print{ #subtabsCalc{ display:none !important; } }
+</style>
+<script id="calculadorasRapidas">
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const esc = s => escHtml(s);
+  const num = v => { const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) ? n : 0; };
+  const f = (n, d) => Number(n).toLocaleString('es-AR', { minimumFractionDigits: d == null ? 0 : d, maximumFractionDigits: d == null ? 2 : d });
+  const vista = $('viewCalculadora'); if(!vista) return;
+
+  const SUBS = [
+    { id:'computo', label:'🧮 Cómputo de la plaza' },
+    { id:'hormigon', label:'🧱 Hormigón' },
+    { id:'zanja', label:'⛏ Zanja' },
+    { id:'cables', label:'⚡ Cables' },
+    { id:'consumo', label:'💡 Consumo' },
+    { id:'abrazaderas', label:'🔩 Abrazaderas' }
+  ];
+  let sub = 'computo';
+  try{ const g = sessionStorage.getItem('ema.calc.sub'); if(SUBS.some(s => s.id === g)) sub = g; }catch(e){}
+
+  // ---- Estructura ----
+  const barra = document.createElement('div'); barra.className = 'subtabs no-print'; barra.id = 'subtabsCalc';
+  const panel = document.createElement('div'); panel.id = 'calcRapidas'; panel.style.display = 'none';
+  vista.insertAdjacentElement('afterbegin', panel);
+  vista.insertAdjacentElement('afterbegin', barra);
+  // En la cabecera, la primera dice «Cálculo de materiales» (como siempre); las otras, su nombre.
+  function pintarBarra(){ barra.innerHTML = SUBS.map(s => `<button type="button" class="subtab${s.id === sub ? ' activo' : ''}" data-sub="${s.id}"${s.id === 'computo' ? ' data-hdr="Cálculo de materiales"' : ''}>${esc(s.label)}</button>`).join(''); }
+  function aplicar(){
+    const rap = sub !== 'computo';
+    [...vista.children].forEach(el => { if(el === barra || el === panel || el.classList.contains('perm-aviso')) return; if(rap){ if(el.dataset.crOculto == null){ el.dataset.crOculto = el.style.display || ''; el.style.display = 'none'; } } else if(el.dataset.crOculto != null){ el.style.display = el.dataset.crOculto; delete el.dataset.crOculto; } });
+    panel.style.display = rap ? '' : 'none';
+    document.body.classList.toggle('calc-rapida', rap && document.body.dataset.vista !== 'mistareas' && vista.style.display !== 'none');
+    if(rap) pintarPanel();
+  }
+  barra.addEventListener('click', e => { const b = e.target.closest('.subtab'); if(!b) return; sub = b.dataset.sub; try{ sessionStorage.setItem('ema.calc.sub', sub); }catch(err){} pintarBarra(); aplicar(); window.scrollTo({ top:0, behavior:'auto' }); });
+  const prev = window.mostrarVista;
+  window.mostrarVista = function(v){ const r = prev.apply(this, arguments); document.body.classList.toggle('calc-rapida', v === 'calc' && sub !== 'computo'); return r; };
+  window.calcRapidaIr = function(id){ sub = id; pintarBarra(); aplicar(); };
+
+  // ---- Valores guardados mientras se usa (por si se cambia de pestaña) ----
+  const est = {
+    hormigon:{ dosaje:'h13', desperdicio:5, piezas:[{ tipo:'prfv7', cant:1, a:0.6, b:0.6, h:1.2 }], c:null },
+    zanja:{ largo:120, ancho:'0.20', prof:'0.60', tipo:'enterrado', vanos:'', cama:5, cubre:5 },
+    consumo:{ n:15, w:75, horas:12, dias:30, precio:'' },
+    abraz:{ modo:'per', per:'', diam:'' }
+  };
+
+  // ======================= HORMIGÓN =======================
+  const DOSAJES = {
+    h13:{ n:'H-13 del proyecto (1:2,5:4)', cem: (typeof DOSAGE_HORMIGON !== 'undefined' ? DOSAGE_HORMIGON.cemento : 5.2), are:(typeof DOSAGE_HORMIGON !== 'undefined' ? DOSAGE_HORMIGON.arena : 0.55), pie:(typeof DOSAGE_HORMIGON !== 'undefined' ? DOSAGE_HORMIGON.piedra : 0.80), agua:(typeof DOSAGE_HORMIGON !== 'undefined' ? DOSAGE_HORMIGON.agua : 170), fuente:'el mismo del cómputo de fundaciones (AP-TC-003 / planilla del proyecto)' },
+    h17:{ n:'H-17 (1:2:3,5) — referencia', cem:6.4, are:0.52, pie:0.80, agua:180, fuente:'referencia típica (~320 kg de cemento por m³), no es del pliego' },
+    h21:{ n:'H-21 (1:2:3) — referencia', cem:7.0, are:0.50, pie:0.75, agua:175, fuente:'referencia típica (~350 kg de cemento por m³), no es del pliego. Para calzada conviene pedirlo elaborado' },
+    pobre:{ n:'Hormigón pobre / pegotes (1:3:5) — referencia', cem:4.4, are:0.55, pie:0.85, agua:160, fuente:'referencia típica (~220 kg de cemento por m³), no es del pliego' },
+    propio:{ n:'Otro (lo cargo yo)', cem:5.2, are:0.55, pie:0.80, agua:170, fuente:'valores cargados a mano' }
+  };
+  const FUND = (typeof FUNDACIONES !== 'undefined') ? FUNDACIONES : { PRFV:{}, 'Metálica':{} };
+  const TIPOS_PIEZA = [
+    ...Object.keys(FUND.PRFV || {}).map(h => ({ id:'prfv' + h, n:`Base columna PRFV ${h} m`, vol:()=> FUND.PRFV[h].vol, fijo:true })),
+    ...Object.keys(FUND['Metálica'] || {}).map(h => ({ id:'met' + h, n:`Base columna metálica ${h} m`, vol:()=> FUND['Metálica'][h].vol, fijo:true })),
+    { id:'prisma', n:'Pozo / bloque (largo × ancho × alto)', vol:p => num(p.a) * num(p.b) * num(p.h) },
+    { id:'cilindro', n:'Pozo redondo (Ø × alto)', vol:p => Math.PI / 4 * num(p.a) * num(p.a) * num(p.h) },
+    { id:'losa', n:'Losa / contrapiso (largo × ancho × espesor)', vol:p => num(p.a) * num(p.b) * num(p.h) }
+  ];
+  function htmlHormigon(){
+    const e = est.hormigon; const D = e.dosaje === 'propio' && e.c ? { ...DOSAJES.propio, ...e.c } : DOSAJES[e.dosaje];
+    const filas = e.piezas.map((p, i) => {
+      const t = TIPOS_PIEZA.find(x => x.id === p.tipo) || TIPOS_PIEZA[0];
+      const lab = t.id === 'cilindro' ? ['Ø (m)', '', 'alto (m)'] : (t.id === 'losa' ? ['largo (m)', 'ancho (m)', 'espesor (m)'] : ['largo (m)', 'ancho (m)', 'alto (m)']);
+      const campo = (k, l) => t.fijo ? '' : (!l ? '<div class="vacio"></div>' : `<div><label>${l}</label><input type="number" inputmode="decimal" min="0" step="any" data-h="${k}" data-i="${i}" value="${esc(p[k])}"></div>`);
+      return `<div class="cr-fila${t.fijo ? ' fijo' : ''}"><div class="tipo"><label>Qué es</label><select data-h="tipo" data-i="${i}">${TIPOS_PIEZA.map(x => `<option value="${x.id}" ${x.id === t.id ? 'selected' : ''}>${esc(x.n)}</option>`).join('')}</select></div>
+        ${campo('a', lab[0])}${campo('b', lab[1])}${campo('h', lab[2])}
+        <div class="cant"><label>Cant.</label><input type="number" inputmode="numeric" min="0" step="1" data-h="cant" data-i="${i}" value="${esc(p.cant)}"></div>
+        <button type="button" class="x" data-h="quitar" data-i="${i}" title="Quitar">×</button></div>`;
+    }).join('');
+    return `<div class="card"><h2><span class="dot"></span>Hormigón: cuánto material comprar</h2>
+      <div class="cr-filas" id="crHPiezas">${filas}</div>
+      <button type="button" class="btn-auto" data-h="agregar" style="margin-top:10px;">+ Agregar otra pieza</button>
+      <div class="cr-campos" style="margin-top:6px;">
+        <div class="ancho"><label>Dosaje</label><select data-h="dosaje">${Object.entries(DOSAJES).map(([k, d]) => `<option value="${k}" ${k === e.dosaje ? 'selected' : ''}>${esc(d.n)}</option>`).join('')}</select></div>
+        ${e.dosaje === 'propio' ? `<div><label>Bolsas de cemento por m³</label><input type="number" step="any" data-h="c.cem" value="${esc(D.cem)}"></div><div><label>Arena m³ por m³</label><input type="number" step="any" data-h="c.are" value="${esc(D.are)}"></div><div><label>Piedra m³ por m³</label><input type="number" step="any" data-h="c.pie" value="${esc(D.pie)}"></div><div><label>Agua L por m³</label><input type="number" step="any" data-h="c.agua" value="${esc(D.agua)}"></div>` : ''}
+        <div><label>Desperdicio</label><select data-h="desperdicio">${[0, 5, 10, 15].map(x => `<option value="${x}" ${x === Number(e.desperdicio) ? 'selected' : ''}>${x} %</option>`).join('')}</select></div>
+      </div></div>
+      <div class="card" id="crHRes"></div>`;
+  }
+  function calcHormigon(){
+    const e = est.hormigon; const D = e.dosaje === 'propio' && e.c ? { ...DOSAJES.propio, ...e.c } : DOSAJES[e.dosaje];
+    let vol = 0; const det = [];
+    e.piezas.forEach(p => { const t = TIPOS_PIEZA.find(x => x.id === p.tipo); if(!t) return; const v = t.vol(p) * Math.max(0, num(p.cant)); vol += v; if(v > 0) det.push(`${f(num(p.cant), 0)} × ${t.n} = ${f(v, 3)} m³`); });
+    const tot = vol * (1 + num(e.desperdicio) / 100);
+    const bolsas = tot * num(D.cem);
+    const r = $('crHRes'); if(!r) return { tot, bolsas };
+    r.innerHTML = `<h2><span class="dot"></span>Resultado</h2><div class="cr-tiles">
+      <div class="cr-tile ancho"><div class="n">${f(tot, 3)}<span class="u">m³ de hormigón</span></div><div class="l">${det.map(esc).join(' · ') || 'Cargá al menos una pieza'}${num(e.desperdicio) ? ` · +${f(num(e.desperdicio), 0)} % de desperdicio` : ''}</div></div>
+      <div class="cr-tile"><div class="n">${f(Math.ceil(bolsas - 1e-9), 0)}<span class="u">bolsas</span></div><div class="l">Cemento de 50 kg (${f(bolsas, 2)} justas · ${f(bolsas * 50, 0)} kg)</div></div>
+      <div class="cr-tile"><div class="n">${f(tot * num(D.are), 2)}<span class="u">m³</span></div><div class="l">Arena gruesa (≈ ${f(tot * num(D.are) * 1.5, 2)} t)</div></div>
+      <div class="cr-tile"><div class="n">${f(tot * num(D.pie), 2)}<span class="u">m³</span></div><div class="l">Piedra partida 6–20 mm (≈ ${f(tot * num(D.pie) * 1.5, 2)} t)</div></div>
+      <div class="cr-tile"><div class="n">${f(tot * num(D.agua), 0)}<span class="u">L</span></div><div class="l">Agua</div></div>
+      <div class="cr-tile ancho"><div class="n">${f(Math.ceil(tot * 2 - 1e-9) / 2, 1)}<span class="u">m³</span></div><div class="l">Si lo pedís <b>elaborado</b> (redondeado a medio metro)</div></div>
+      </div><div class="cr-nota">Dosaje: <b>${esc(D.n)}</b> — ${esc(D.fuente)}. Por m³: ${f(num(D.cem), 1)} bolsas, ${f(num(D.are), 2)} m³ de arena, ${f(num(D.pie), 2)} m³ de piedra, ${f(num(D.agua), 0)} L de agua.${e.piezas.some(p => /^(prfv|met)/.test(p.tipo)) ? ' Las bases de columna usan el volumen del plano (ya descuenta el molde central).' : ''}</div>`;
+    return { tot, bolsas };
+  }
+
+  // ======================= ZANJA =======================
+  const Z = (typeof ZANJA !== 'undefined') ? ZANJA : { camaFondo:0.15, desperdicioArena:1.10, densidadArena:1500, ladrilloLargo:0.25, ladrilloPaso:0.12, desperdicioLadrillo:1.05, mallaRollo:100, solapeMalla:1.05, pegotesPorVano:3, pegoteLargo:1, pegoteEspesor:0.05, pegoteCada:5 };
+  function htmlZanja(){
+    const e = est.zanja;
+    return `<div class="cr-grid"><div class="card"><h2><span class="dot"></span>Zanja: excavación y materiales</h2><div class="cr-campos">
+      <div><label>Largo (m)</label><input type="number" inputmode="decimal" min="0" step="any" data-z="largo" value="${esc(e.largo)}"></div>
+      <div><label>Ancho</label><select data-z="ancho">${['0.20', '0.40', '0.60'].map(a => `<option value="${a}" ${a === e.ancho ? 'selected' : ''}>${f(num(a), 2)} m${a === '0.20' ? ' (1 cable)' : (a === '0.40' ? ' (2 o 3)' : '')}</option>`).join('')}</select></div>
+      <div><label>Tapada (profundidad del ítem)</label><select data-z="prof"><option value="0.60" ${e.prof === '0.60' ? 'selected' : ''}>0,60 m (vereda / tierra)</option><option value="1.00" ${e.prof === '1.00' ? 'selected' : ''}>1,00 m (calzada)</option></select></div>
+      <div><label>Cómo va el cable</label><select data-z="tipo"><option value="enterrado" ${e.tipo === 'enterrado' ? 'selected' : ''}>Directamente enterrado</option><option value="pead" ${e.tipo === 'pead' ? 'selected' : ''}>En caño PEAD Ø50</option></select></div>
+      <div><label>Arena abajo (cm)</label><input type="number" inputmode="decimal" min="0" step="any" data-z="cama" value="${esc(e.cama)}"></div>
+      <div><label>Arena arriba (cm)</label><input type="number" inputmode="decimal" min="0" step="any" data-z="cubre" value="${esc(e.cubre)}"></div>
+      <div class="ancho"><label>Vanos (tramos entre columnas) <span style="font-weight:500; color:var(--text-3);">— vacío = uno cada 30 m</span></label><input type="number" inputmode="numeric" min="1" step="1" data-z="vanos" value="${esc(e.vanos)}" placeholder="automático"></div>
+      </div></div><div class="card" id="crZRes"></div></div>`;
+  }
+  function calcZanja(){
+    const e = est.zanja; const L = Math.max(0, num(e.largo)), A = num(e.ancho), P = num(e.prof); const pead = e.tipo === 'pead';
+    const excav = L * A * (P + Z.camaFondo);
+    const arena = L * A * (num(e.cama) + num(e.cubre)) / 100 * Z.desperdicioArena;
+    const hileras = Math.ceil(A / Z.ladrilloPaso - 1e-9); const ladrillos = pead ? 0 : Math.ceil(L * hileras / Z.ladrilloLargo * Z.desperdicioLadrillo - 1e-9);
+    const malla = L * Z.solapeMalla; const rollos = Math.ceil(malla / Z.mallaRollo - 1e-9);
+    const vanos = Math.max(1, num(e.vanos) > 0 ? Math.round(num(e.vanos)) : Math.ceil(L / 30 - 1e-9));
+    const ppv = Math.max(Z.pegotesPorVano, Math.ceil((L / vanos) / Z.pegoteCada - 1e-9) + 1);
+    const pegotes = L > 0 ? (pead ? vanos + 1 : vanos * ppv) : 0;
+    const pegVol = pegotes * Z.pegoteLargo * A * Z.pegoteEspesor;
+    const r = $('crZRes'); if(!r) return { excav, arena, ladrillos, pegotes };
+    r.innerHTML = `<h2><span class="dot"></span>Resultado</h2><div class="cr-tiles">
+      <div class="cr-tile"><div class="n">${f(excav, 2)}<span class="u">m³</span></div><div class="l">Excavación (${f(P + Z.camaFondo, 2)} m de hondo: tapada + ${f(Z.camaFondo * 100, 0)} cm de cama, AP-TC-001)</div></div>
+      <div class="cr-tile"><div class="n">${f(arena, 2)}<span class="u">m³</span></div><div class="l">Arena (≈ ${f(arena * Z.densidadArena / 1000, 2)} t, +10 % compactación)</div></div>
+      ${pead ? `<div class="cr-tile"><div class="n">${f(L, 0)}<span class="u">m</span></div><div class="l">Caño PEAD Ø50 PN6 (sin ladrillo)</div></div>` : `<div class="cr-tile"><div class="n">${f(ladrillos, 0)}<span class="u">ladrillos</span></div><div class="l">${hileras} a lo ancho × 4 por metro, +5 % roturas</div></div>`}
+      <div class="cr-tile"><div class="n">${f(malla, 0)}<span class="u">m</span></div><div class="l">Malla de advertencia de 30 cm · ${rollos} rollo(s) de ${Z.mallaRollo} m</div></div>
+      <div class="cr-tile ancho"><div class="n">${f(pegVol, 3)}<span class="u">m³</span></div><div class="l">Hormigón pobre para <b>${pegotes} pegote(s)</b> de 1 m ${pead ? '(solo en las acometidas a columnas)' : `(${vanos} vano(s) × ${ppv}: inicio, medio y final)`}</div></div>
+      </div><div class="cr-nota">Mismas reglas que el cómputo de la plaza (plano AP-TC-001). La tierra que se saca es la de la excavación; para tapar, la misma menos la arena.</div>`;
+    return { excav, arena, ladrillos, pegotes, pegVol };
+  }
+
+  // ======================= CABLES — CAÍDA DE TENSIÓN (método de la Municipalidad) =======================
+  // 2026-10-02. El usuario: «usemos el de la muni para la calculadora, el apartado de caída de tensión».
+  // Replica la planilla «Cálculo de caída de tensión» que entrega la Dirección General de Alumbrado Público
+  // (verificada con la de Plaza Hípica, ID 6461):
+  //   · vano por vano (de una columna a la otra), con la potencia de todo lo que queda aguas abajo;
+  //   · I = P / (√3 · 380 · cos φ) en trifásica  (P / (220 · cos φ) en monofásica);
+  //   · ΔU = √3 · I · L · Z  (2 · I · L · Z en monofásica), con Z en Ω/km del conductor — SIN multiplicar
+  //     por cos φ, igual que la Muni (queda del lado seguro);
+  //   · U% = ΔU / 380 (o / 220) y ΣU% se va sumando desde el tablero, empezando por la alimentación.
+  // Conductores: 2,5 tetrapolar y 25/16 tetrapolar con los R/X/Z de la planilla de la Muni; las demás
+  // secciones con la Z de la planilla vieja de EMA (cable Sintenax).
+  const COND = {
+    '2.5':   { n:'2,5 (Tetrapolar)',   R:9.55,  X:0.0995, Z:9.55,  f:'planilla de la Muni' },
+    '4':     { n:'4 (Tetrapolar)',     R:5.921, X:null,   Z:5.921, f:'planilla vieja (Sintenax)' },
+    '6':     { n:'6 (Tetrapolar)',     R:3.951, X:null,   Z:3.951, f:'planilla vieja (Sintenax)' },
+    '10':    { n:'10 (Tetrapolar)',    R:2.292, X:null,   Z:2.292, f:'planilla vieja (Sintenax)' },
+    '16':    { n:'16 (Tetrapolar)',    R:1.452, X:null,   Z:1.452, f:'planilla vieja (Sintenax)' },
+    '25/16': { n:'25/16 (Tetrapolar)', R:0.933, X:0.078,  Z:0.933, f:'planilla de la Muni' }
+  };
+  const LS_CAIDA = 'ema.caida.v1';
+  function caidaNueva(){ return { plaza:'', barrio:'', obraId:'', tablero:'1', cos:0.95, lim:3, alim:{ largo:10, cond:'25/16', tension:'tri' },
+    circuitos:[ { cols:[ { nombre:'', padre:'', largo:25, w:225, cond:'2.5', tension:'tri' }, { nombre:'', padre:'', largo:30, w:225, cond:'2.5', tension:'tri' }, { nombre:'', padre:'', largo:30, w:225, cond:'2.5', tension:'tri' } ] } ] }; }
+  function caidaHipica(){
+    const C = (largo, w, padre) => ({ nombre:'', padre, largo, w, cond:'2.5', tension:'tri' });
+    return { plaza:'PLAZA HÍPICA', barrio:'B° JARDINES DEL JOCKEY', obraId:'6461', tablero:'1', cos:0.95, lim:3, alim:{ largo:10, cond:'25/16', tension:'tri' },
+      circuitos:[ { cols:[ C(25,225,''), C(35,800,'1'), C(46,225,'2'), C(46,800,'3'), C(37,225,'2'), C(36,225,'5'), C(50,225,'3') ] },
+                  { cols:[ C(122,225,''), C(36,225,'1'), C(41,225,'2'), C(59,225,'3') ] },
+                  { cols:[ C(44,150,''), C(37,150,'1'), C(35,225,'2'), C(35,225,'1') ] } ] };
+  }
+  let caidaEst = null;
+  try{ caidaEst = JSON.parse(localStorage.getItem(LS_CAIDA) || 'null'); }catch(e){}
+  if(!caidaEst || !Array.isArray(caidaEst.circuitos)) caidaEst = caidaNueva();
+  const guardarCaida = ()=>{ try{ localStorage.setItem(LS_CAIDA, JSON.stringify(caidaEst)); }catch(e){} };
+  // padre: '' = sale del tablero (TAP); 'n' = sale de la columna n (1, 2, 3…) del mismo circuito.
+  const nombreCol = (ci, j) => { const c = caidaEst.circuitos[ci].cols[j]; return (c && String(c.nombre||'').trim()) || `T${caidaEst.tablero || 1}C${ci + 1}-${j + 1}`; };
+  const nombreTap = () => `TAP N°${caidaEst.tablero || 1}`;
+  function vanoCalc(P, L, cond, tension, cos){
+    const k = COND[cond] || COND['2.5']; const tri = tension !== 'mono'; const V = tri ? 380 : 220;
+    const I = tri ? P / (Math.sqrt(3) * V * cos) : P / (V * cos);
+    const dU = (tri ? Math.sqrt(3) : 2) * I * (L / 1000) * k.Z;
+    return { I, dU, U: dU / V * 100, V, k };
+  }
+  // Calcula todo: por circuito, el árbol de columnas, la potencia aguas abajo y las caídas acumuladas.
+  function calcularCaida(e){
+    const cos = num(e.cos) || 0.95;
+    const circ = e.circuitos.map((c, ci) => {
+      const n = c.cols.length;
+      const padreIdx = c.cols.map((col, j) => { const p = parseInt(col.padre, 10); return (p >= 1 && p <= n && p - 1 !== j) ? p - 1 : -1; });
+      // potencia aguas abajo (con protección contra ciclos)
+      const abajo = c.cols.map(() => 0);
+      c.cols.forEach((col, j) => { let k = j, pasos = 0; while(k >= 0 && pasos <= n){ abajo[k] += num(col.w); k = padreIdx[k]; pasos++; } });
+      return { c, ci, padreIdx, abajo, total: c.cols.reduce((a, x) => a + num(x.w), 0) };
+    });
+    const Ptot = circ.reduce((a, x) => a + x.total, 0);
+    const al = vanoCalc(Ptot, num(e.alim.largo), e.alim.cond, e.alim.tension, cos);
+    const filas = [{ tipo:'grupo', txt:'ALIMENTACIÓN' }, { tipo:'vano', vano:'ALIMENTACIÓN - ' + nombreTap(), P:Ptot, L:num(e.alim.largo), cos, tension:e.alim.tension, cond:e.alim.cond, ...al, sigma:al.U }];
+    let peor = al.U, malos = 0;
+    circ.forEach(x => {
+      filas.push({ tipo:'grupo', txt:`CIRCUITO N°${x.ci + 1}` });
+      const sigma = x.c.cols.map(() => null);
+      const calc = j => { if(sigma[j] != null) return sigma[j]; sigma[j] = -1; const col = x.c.cols[j];
+        const v = vanoCalc(x.abajo[j], num(col.largo), col.cond, col.tension, cos);
+        const base = x.padreIdx[j] >= 0 ? calc(x.padreIdx[j]) : al.U; sigma[j] = (base < 0 ? al.U : base) + v.U; return sigma[j]; };
+      x.c.cols.forEach((col, j) => calc(j));
+      x.c.cols.forEach((col, j) => {
+        const v = vanoCalc(x.abajo[j], num(col.largo), col.cond, col.tension, cos);
+        const desde = x.padreIdx[j] >= 0 ? nombreCol(x.ci, x.padreIdx[j]) : nombreTap();
+        filas.push({ tipo:'vano', vano:`${desde} - ${nombreCol(x.ci, j)}`, P:x.abajo[j], L:num(col.largo), cos, tension:col.tension, cond:col.cond, ...v, sigma:sigma[j] });
+        if(sigma[j] > peor) peor = sigma[j];
+        if(sigma[j] > (num(e.lim) || 3)) malos++;
+      });
+    });
+    return { filas, Ptot, Itab: al.I, circ, peor, malos, lim: num(e.lim) || 3 };
+  }
+  const f2 = n => f(n, 2), f3 = n => f(n, 3);
+  function tablaCaidaHtml(r, imprimir){
+    const st = imprimir ? '' : ' class="cr-caida"';
+    return `<div style="overflow-x:auto;"><table${st} style="width:100%; border-collapse:collapse; font-size:${imprimir ? '9.5px' : '12.5px'};">
+      <thead><tr><th>Vanos</th><th class="r">ΣPotencia (W)</th><th class="r">Longitud [m]</th><th class="r">cos φ</th><th>Tensión</th><th class="r">I [A]</th><th>Sección conductor (mm²)</th><th class="r">R (Ω/km)</th><th class="r">X (Ω/km)</th><th class="r">Z (Ω/km)</th><th class="r">ΔU [V]</th><th class="r">U [%]</th><th class="r">ΣU [%]</th></tr></thead><tbody>
+      ${r.filas.map(x => x.tipo === 'grupo' ? `<tr class="g"><td colspan="13" style="font-weight:800; background:#eef0f6;">${esc(x.txt)}</td></tr>`
+        : `<tr><td>${esc(x.vano)}</td><td class="r">${f(x.P, 0)}</td><td class="r">${f(x.L, 0)}</td><td class="r">${f2(x.cos)}</td><td>${x.tension === 'mono' ? 'MONOFÁSICA' : 'TRIFÁSICA'}</td><td class="r">${f3(x.I)}</td><td>${esc(x.k.n)}</td>
+          <td class="r">${f2(x.k.R)}</td><td class="r">${x.k.X != null ? f(x.k.X, 4) : '—'}</td><td class="r">${f2(x.k.Z)}</td><td class="r">${f2(x.dU)}</td><td class="r">${f2(x.U)}</td>
+          <td class="r" style="font-weight:800; background:${x.sigma <= r.lim ? '#dff3e4' : '#ffe1df'};">${f2(x.sigma)}</td></tr>`).join('')}
+      </tbody></table></div>`;
+  }
+  function htmlCables(){
+    const e = caidaEst;
+    const optCond = sel => Object.entries(COND).map(([k, c]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${esc(c.n)}</option>`).join('');
+    const optTen = sel => `<option value="tri" ${sel !== 'mono' ? 'selected' : ''}>Trifásica</option><option value="mono" ${sel === 'mono' ? 'selected' : ''}>Monofásica</option>`;
+    const circs = e.circuitos.map((c, ci) => `<div class="cr-circ" data-ci="${ci}"><div class="cr-circ-cab"><b>Circuito N°${ci + 1}</b>
+        <span class="hint" style="margin:0;">${c.cols.length} columna(s)</span>
+        <button type="button" class="btn-ghost" data-cd="quitarCirc" data-ci="${ci}" style="width:auto; margin:0 0 0 auto; padding:4px 10px; font-size:12px;">Quitar circuito</button></div>
+      <div class="cr-cols">${c.cols.map((col, j) => `<div class="cr-col" data-ci="${ci}" data-j="${j}">
+        <div class="nom"><label>Columna</label><input type="text" data-cc="nombre" value="${esc(col.nombre||'')}" placeholder="${esc(`T${e.tablero || 1}C${ci + 1}-${j + 1}`)}"></div>
+        <div><label>Viene de</label><select data-cc="padre"><option value="">${esc(nombreTap())} (tablero)</option>${c.cols.map((o, k) => k === j ? '' : `<option value="${k + 1}" ${String(col.padre) === String(k + 1) ? 'selected' : ''}>${esc(nombreCol(ci, k))}</option>`).join('')}</select></div>
+        <div><label>Largo del vano (m)</label><input type="number" inputmode="decimal" min="0" step="any" data-cc="largo" value="${esc(col.largo)}"></div>
+        <div><label>Potencia (W)</label><input type="number" inputmode="decimal" min="0" step="any" data-cc="w" value="${esc(col.w)}" title="Suma de los artefactos de esa columna (ej. 3 × 75 W = 225)"></div>
+        <div><label>Conductor</label><select data-cc="cond">${optCond(col.cond)}</select></div>
+        <div><label>Tensión</label><select data-cc="tension">${optTen(col.tension)}</select></div>
+        <button type="button" class="x" data-cd="quitarCol" data-ci="${ci}" data-j="${j}" title="Quitar columna">×</button></div>`).join('')}</div>
+      <div class="cr-circ-acc"><button type="button" class="btn-auto" data-cd="agregarCol" data-ci="${ci}">+ Agregar columna</button>
+        <span class="cr-rapido">o <input type="number" min="1" step="1" data-cr="n" value="5" title="cuántas columnas"> columnas en fila, vano <input type="number" min="0" step="any" data-cr="vano" value="30"> m, <input type="number" min="0" step="any" data-cr="w" value="225"> W c/u
+        <button type="button" class="btn-ghost" data-cd="enFila" data-ci="${ci}" style="width:auto; margin:0; padding:4px 10px; font-size:12px;">Agregar</button></span></div></div>`).join('');
+    return `<div class="card"><h2><span class="dot"></span>Caída de tensión — método de la Municipalidad</h2>
+      <div class="cr-campos">
+        <div class="ancho"><label>Plaza</label><input type="text" data-cg="plaza" value="${esc(e.plaza)}" placeholder="Ej: PLAZA HÍPICA" list="crPlazasLista"></div>
+        <div><label>Barrio</label><input type="text" data-cg="barrio" value="${esc(e.barrio)}" placeholder="Ej: B° Jardines del Jockey"></div>
+        <div><label>ID</label><input type="text" data-cg="obraId" value="${esc(e.obraId)}" placeholder="Ej: 6461"></div>
+        <div><label>Tablero N°</label><input type="text" data-cg="tablero" value="${esc(e.tablero)}"></div>
+        <div><label>cos φ de las luminarias</label><input type="number" inputmode="decimal" min="0.5" max="1" step="0.01" data-cg="cos" value="${esc(e.cos)}"></div>
+        <div><label>Límite ΣU (%)</label><input type="number" inputmode="decimal" min="0.5" step="0.5" data-cg="lim" value="${esc(e.lim)}"></div>
+      </div>
+      <div class="cr-sub">Alimentación (de la toma de EPEC al tablero)</div>
+      <div class="cr-campos">
+        <div><label>Largo (m)</label><input type="number" inputmode="decimal" min="0" step="any" data-ca="largo" value="${esc(e.alim.largo)}"></div>
+        <div><label>Conductor</label><select data-ca="cond">${optCond(e.alim.cond)}</select></div>
+      </div>
+      <div class="cr-sub">Circuitos — una fila por columna: de qué columna viene, el largo del vano y la potencia que tiene</div>
+      ${circs}
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+        <button type="button" class="btn-auto" data-cd="agregarCirc">+ Agregar circuito</button>
+        <button type="button" class="btn-ghost" data-cd="traerPlaza" style="width:auto; margin:0;">Datos de la plaza del cómputo</button>
+        <button type="button" class="btn-ghost" data-cd="ejemplo" style="width:auto; margin:0;">Ver ejemplo: Hípica</button>
+        <button type="button" class="btn-ghost" data-cd="limpiar" style="width:auto; margin:0;">Empezar de cero</button>
+      </div></div>
+      <div class="card" id="crCRes"></div>`;
+  }
+  function calcCables(){
+    const r = calcularCaida(caidaEst);
+    const box = $('crCRes'); if(!box) return r;
+    box.innerHTML = `<div class="card-header-row"><h2 style="margin:0;"><span class="dot"></span>Cálculo de caída de tensión</h2><button type="button" class="btn-ghost" data-cd="imprimir" style="width:auto; margin:0;">🖨 Imprimir</button></div>
+      <div class="cr-tiles" style="margin:12px 0;">
+        <div class="cr-tile ${r.malos ? 'mal' : 'ok'}"><div class="n">${f2(r.peor)}<span class="u">%</span></div><div class="l">${r.malos ? `✗ ${r.malos} vano(s) pasan el ${f(r.lim, 1)} %` : `✓ Ningún punto pasa el ${f(r.lim, 1)} %`} (la mayor ΣU)</div></div>
+        <div class="cr-tile"><div class="n">${f3(r.Ptot / 1000)}<span class="u">kW</span></div><div class="l">Potencia del tablero · corriente nominal ${f3(r.Itab)} A</div></div>
+      </div>${tablaCaidaHtml(r, false)}
+      <div class="cr-nota">ΔU = √3 × I × L × Z (trifásica) o 2 × I × L × Z (monofásica), con I = P ÷ (√3 × 380 × cos φ) o P ÷ (220 × cos φ); U% sobre 380 V o 220 V. ΣU suma desde el tablero, empezando por la alimentación — igual que la planilla de la Municipalidad. Z del 2,5 y del 25/16: los de la Muni; las otras secciones, los de la planilla vieja (Sintenax).</div>`;
+    return r;
+  }
+  function imprimirCaida(){
+    const e = caidaEst, r = calcularCaida(e);
+    const resumen = `<table style="width:auto; margin:4px 0 10px;"><tr><th>Tablero N°</th>${e.circuitos.map((c, i) => `<th>Circuito N°${i + 1}</th>`).join('')}<th>Total</th></tr>
+      <tr><td><b>Potencia (W)</b></td>${r.circ.map(x => `<td style="text-align:right;">${f(x.total, 0)}</td>`).join('')}<td style="text-align:right;"><b>${f(r.Ptot, 0)}</b></td></tr></table>`;
+    abrirHojaImpresion(`Cálculo de caída de tensión — ${[e.plaza, e.barrio, e.obraId ? 'ID ' + e.obraId : ''].filter(Boolean).join(' - ') || 'sin plaza'}`,
+      `<style>@page{ size:A4 landscape; } td.r, th.r{ text-align:right; white-space:nowrap; } th{ font-size:9px; }</style>${resumen}${tablaCaidaHtml(r, true)}
+       <div class="foot">Potencia del tablero ${f3(r.Ptot / 1000)} kW · corriente nominal ${f3(r.Itab)} A · mayor ΣU ${f2(r.peor)} % (límite ${f(r.lim, 1)} %). Método: ΔU = √3·I·L·Z, U% sobre 380 V, ΣU acumulada desde la alimentación.</div>`, 'CAÍDA DE TENSIÓN');
+  }
+  // Para las pruebas y para el que quiera usarlo desde otra hoja.
+  function caida(e, sec){ const k = COND[sec] ? sec : '2.5'; return vanoCalc(num(e.p), num(e.largo), k, e.sistema === 'mono' ? 'mono' : 'tri', num(e.cos) || 0.95); }
+  window.__caidaMuni = { calcularCaida, caidaHipica, vanoCalc, COND, get est(){ return caidaEst; }, set est(v){ caidaEst = v; guardarCaida(); } };
+
+  // ======================= CONSUMO =======================
+  function htmlConsumo(){
+    const e = est.consumo;
+    return `<div class="cr-grid"><div class="card"><h2><span class="dot"></span>Consumo de luminarias</h2><div class="cr-campos">
+      <div><label>Cantidad de luminarias</label><input type="number" inputmode="numeric" min="0" step="1" data-k="n" value="${esc(e.n)}"></div>
+      <div><label>Potencia de cada una (W)</label><input type="number" inputmode="decimal" min="0" step="any" data-k="w" value="${esc(e.w)}"></div>
+      <div><label>Horas prendidas por noche</label><input type="number" inputmode="decimal" min="0" max="24" step="0.5" data-k="horas" value="${esc(e.horas)}"></div>
+      <div><label>Días</label><input type="number" inputmode="numeric" min="1" step="1" data-k="dias" value="${esc(e.dias)}"></div>
+      <div class="ancho"><label>Precio del kWh ($, opcional)</label><input type="number" inputmode="decimal" min="0" step="any" data-k="precio" value="${esc(e.precio)}" placeholder="para estimar el costo"></div>
+      </div></div><div class="card" id="crKRes"></div></div>`;
+  }
+  function calcConsumo(){
+    const e = est.consumo; const kw = num(e.n) * num(e.w) / 1000; const kwh = kw * num(e.horas) * num(e.dias);
+    const i1 = kw * 1000 / (220 * 0.95), i3 = kw * 1000 / (Math.sqrt(3) * 380 * 0.95);
+    const r = $('crKRes'); if(!r) return { kw, kwh };
+    r.innerHTML = `<h2><span class="dot"></span>Resultado</h2><div class="cr-tiles">
+      <div class="cr-tile"><div class="n">${f(kw, 2)}<span class="u">kW</span></div><div class="l">Potencia total</div></div>
+      <div class="cr-tile"><div class="n">${f(kwh, 0)}<span class="u">kWh</span></div><div class="l">En ${f(num(e.dias), 0)} día(s)</div></div>
+      ${num(e.precio) > 0 ? `<div class="cr-tile ancho"><div class="n">$ ${f(kwh * num(e.precio), 0)}</div><div class="l">Costo estimado de la energía</div></div>` : ''}
+      <div class="cr-tile"><div class="n">${f(i1, 1)}<span class="u">A</span></div><div class="l">Corriente si va todo en monofásico 220 V</div></div>
+      <div class="cr-tile"><div class="n">${f(i3, 1)}<span class="u">A</span></div><div class="l">Por fase en trifásico 380 V (parejo)</div></div>
+      </div><div class="cr-nota">Con cos φ 0,95 (driver LED). Un día de alumbrado público son unas 11 a 12 horas, según la época del año.</div>`;
+    return { kw, kwh };
+  }
+
+  // ======================= ABRAZADERAS =======================
+  const GRILLAS = {
+    lisa:{ n:'Abrazadera lisa', m:[60,120,140,150,160,180,200,220,230,240,250,260,270,280,300,320,330,350,360,380,400,440,460,500,550] },
+    e1:{ n:'Abrazadera 1 escote', m:[120,140,160,180,200,220,240,250,270,280,300,330,350,400,430,450] },
+    e2:{ n:'Abrazadera 2 escotes', m:[140,160,180,190,200,210,220,230,240,250,260,270,280,300,320,340,350,360,380,400,430,450,550] },
+    semi:{ n:'Semiabrazadera (van de a pares)', m:Array.from({ length:26 }, (_, i) => 100 + i * 20) }
+  };
+  const PANOL = { lisa:{ 220:4004, 240:4005, 260:4006, 300:4007, 340:4008 }, e1:{ 140:4001 }, e2:{ 200:4002 } };
+  function htmlAbraz(){
+    const e = est.abraz;
+    return `<div class="cr-grid"><div class="card"><h2><span class="dot"></span>Abrazaderas: qué medida pedir</h2><div class="cr-campos">
+      <div class="ancho"><label>Qué medís</label><select data-a="modo"><option value="per" ${e.modo === 'per' ? 'selected' : ''}>El contorno del poste con un centímetro (perímetro)</option><option value="diam" ${e.modo === 'diam' ? 'selected' : ''}>El diámetro (ya lo sé)</option></select></div>
+      ${e.modo === 'per' ? `<div class="ancho"><label>Perímetro (cm) en el punto donde va</label><input type="number" inputmode="decimal" min="0" step="any" data-a="per" value="${esc(e.per)}" placeholder="Ej: 72"></div>`
+        : `<div class="ancho"><label>Diámetro (mm)</label><input type="number" inputmode="decimal" min="0" step="any" data-a="diam" value="${esc(e.diam)}" placeholder="Ej: 230"></div>`}
+      </div><div class="cr-nota">Regla del pañol: el número de la abrazadera es el diámetro interior en mm. Se elige la medida <b>igual o la inmediata superior</b> al diámetro del poste en el punto de montaje (diámetro = perímetro ÷ 3,14). El poste es cónico: medí justo donde va.</div></div>
+      <div class="card" id="crARes"></div></div>`;
+  }
+  function calcAbraz(){
+    const e = est.abraz; const d = e.modo === 'per' ? num(e.per) * 10 / 3.14 : num(e.diam);
+    const elegir = m => m.find(x => x >= d - 1e-9);
+    const r = $('crARes'); const res = {};
+    Object.entries(GRILLAS).forEach(([k, g]) => { res[k] = d > 0 ? elegir(g.m) : null; });
+    const sop = d > 0 ? (d <= 200 ? 'hasta 200 mm' : d <= 300 ? '201 a 300 mm' : d <= 400 ? '301 a 400 mm' : d <= 500 ? '401 a 500 mm' : d <= 600 ? '501 a 600 mm' : 'más de 600 mm (consultar)') : '';
+    if(!r) return { d, res };
+    r.innerHTML = `<h2><span class="dot"></span>Resultado</h2>${d > 0 ? `<div class="cr-tiles"><div class="cr-tile ancho"><div class="n">${f(d, 0)}<span class="u">mm</span></div><div class="l">Diámetro del poste en ese punto</div></div></div>
+      <table class="cr-tabla"><thead><tr><th>Tipo</th><th>Pedir</th><th>En el pañol</th></tr></thead><tbody>
+      ${Object.entries(GRILLAS).map(([k, g]) => `<tr><td>${esc(g.n)}</td><td class="r">${res[k] ? 'Ø ' + res[k] + ' mm' : '<span style="color:var(--danger);">no hay tan grande</span>'}</td><td>${res[k] && PANOL[k] && PANOL[k][res[k]] ? '<b>cód. ' + PANOL[k][res[k]] + '</b>' : '—'}</td></tr>`).join('')}
+      <tr><td>Soporte de tablero (por rango)</td><td class="r">${esc(sop)}</td><td>${d <= 600 ? 'cód. 4003 (semiabrazadera)' : '—'}</td></tr>
+      </tbody></table>` : '<div class="hint" style="margin:0;">Cargá el perímetro o el diámetro.</div>'}`;
+    return { d, res };
+  }
+
+  // ---- Dibujar y recalcular ----
+  const DEF = { hormigon:[htmlHormigon, calcHormigon], zanja:[htmlZanja, calcZanja], cables:[htmlCables, calcCables], consumo:[htmlConsumo, calcConsumo], abrazaderas:[htmlAbraz, calcAbraz] };
+  function pintarPanel(){ const d = DEF[sub]; if(!d) return; panel.innerHTML = d[0](); d[1](); }
+  function recalcular(){ const d = DEF[sub]; if(d) d[1](); }
+  panel.addEventListener('input', e => {
+    const t = e.target; const v = t.value;
+    if(t.dataset.h){ const h = est.hormigon, i = Number(t.dataset.i);
+      if(t.dataset.h === 'tipo' || t.dataset.h === 'dosaje' || t.dataset.h === 'desperdicio') return;
+      if(t.dataset.h.startsWith('c.')){ h.c = h.c || { cem:DOSAJES.propio.cem, are:DOSAJES.propio.are, pie:DOSAJES.propio.pie, agua:DOSAJES.propio.agua }; h.c[t.dataset.h.slice(2)] = v; }
+      else if(h.piezas[i]) h.piezas[i][t.dataset.h] = v;
+      recalcular(); return; }
+    if(t.dataset.z){ est.zanja[t.dataset.z] = v; recalcular(); return; }
+    if(t.dataset.cg != null && t.tagName === 'INPUT'){ caidaEst[t.dataset.cg] = v; guardarCaida(); recalcular(); return; }
+    if(t.dataset.ca != null && t.tagName === 'INPUT'){ caidaEst.alim[t.dataset.ca] = v; guardarCaida(); recalcular(); return; }
+    if(t.dataset.cc != null && t.tagName === 'INPUT'){ const fila = t.closest('.cr-col'); const col = caidaEst.circuitos[+fila.dataset.ci].cols[+fila.dataset.j]; col[t.dataset.cc] = v; guardarCaida(); recalcular(); return; }
+    if(t.dataset.k){ est.consumo[t.dataset.k] = v; recalcular(); return; }
+    if(t.dataset.a && t.tagName === 'INPUT'){ est.abraz[t.dataset.a] = v; recalcular(); return; }
+  });
+  panel.addEventListener('change', e => {
+    const t = e.target; const v = t.value;
+    if(t.dataset.h === 'tipo'){ const p = est.hormigon.piezas[Number(t.dataset.i)]; p.tipo = v; if(v === 'cilindro'){ p.a = p.a || 0.4; p.h = p.h || 1; } pintarPanel(); return; }
+    if(t.dataset.h === 'dosaje'){ est.hormigon.dosaje = v; pintarPanel(); return; }
+    if(t.dataset.h === 'desperdicio'){ est.hormigon.desperdicio = num(v); recalcular(); return; }
+    if(t.dataset.z && t.tagName === 'SELECT'){ est.zanja[t.dataset.z] = v; recalcular(); return; }
+    if(t.dataset.ca != null && t.tagName === 'SELECT'){ caidaEst.alim[t.dataset.ca] = v; guardarCaida(); recalcular(); return; }
+    if(t.dataset.cc != null && t.tagName === 'SELECT'){ const fila = t.closest('.cr-col'); caidaEst.circuitos[+fila.dataset.ci].cols[+fila.dataset.j][t.dataset.cc] = v; guardarCaida(); recalcular(); return; }
+    if(t.dataset.cc === 'nombre' || t.dataset.cg === 'tablero'){ pintarPanel(); return; }   // cambian los nombres de «Viene de»
+    if(t.dataset.cg === 'plaza'){ const a = (typeof avanceObras !== 'undefined' ? avanceObras : []).find(o => String(o.nombre||'').trim().toLowerCase() === v.trim().toLowerCase());
+      if(a){ caidaEst.plaza = a.nombre; caidaEst.barrio = a.barrio || caidaEst.barrio; caidaEst.obraId = String(a.obraId || caidaEst.obraId || ''); guardarCaida(); pintarPanel(); } return; }
+    if(t.dataset.a && t.tagName === 'SELECT'){ est.abraz.modo = v; pintarPanel(); return; }
+  });
+  panel.addEventListener('click', e => {
+    const d = e.target.closest('[data-cd]');
+    if(d){
+      const a = d.dataset.cd, ci = +d.dataset.ci, E = caidaEst;
+      if(a === 'imprimir'){ imprimirCaida(); return; }
+      if(a === 'agregarCol'){ const cs = E.circuitos[ci].cols; const ult = cs[cs.length - 1]; cs.push({ nombre:'', padre: cs.length ? String(cs.length) : '', largo: ult ? ult.largo : 30, w: ult ? ult.w : 225, cond: ult ? ult.cond : '2.5', tension:'tri' }); }
+      else if(a === 'quitarCol'){ const cs = E.circuitos[ci].cols; const j = +d.dataset.j;
+        cs.forEach(c => { const p = parseInt(c.padre, 10); if(p === j + 1) c.padre = cs[j].padre; else if(p > j + 1) c.padre = String(p - 1); });
+        cs.splice(j, 1); if(!cs.length) cs.push({ nombre:'', padre:'', largo:30, w:225, cond:'2.5', tension:'tri' }); }
+      else if(a === 'enFila'){ const box = d.closest('.cr-circ'); const n = Math.max(1, Math.min(60, Math.round(num(box.querySelector('[data-cr="n"]').value)))); const vano = num(box.querySelector('[data-cr="vano"]').value); const w = num(box.querySelector('[data-cr="w"]').value);
+        const cs = E.circuitos[ci].cols; for(let k = 0; k < n; k++) cs.push({ nombre:'', padre: cs.length ? String(cs.length) : '', largo:vano, w, cond:'2.5', tension:'tri' }); }
+      else if(a === 'agregarCirc') E.circuitos.push({ cols:[{ nombre:'', padre:'', largo:30, w:225, cond:'2.5', tension:'tri' }] });
+      else if(a === 'quitarCirc'){ if(E.circuitos.length > 1 && confirm(`¿Quitar el circuito N°${ci + 1}?`)) E.circuitos.splice(ci, 1); }
+      else if(a === 'ejemplo'){ if(!confirm('¿Cargar el ejemplo de Plaza Hípica (la planilla de la Muni)? Se reemplaza lo que hay cargado.')) return; caidaEst = caidaHipica(); }
+      else if(a === 'limpiar'){ if(!confirm('¿Borrar todo y empezar de cero?')) return; caidaEst = caidaNueva(); }
+      else if(a === 'traerPlaza'){ const g = id => ((document.getElementById(id) || {}).value || '').trim(); if(g('obraNombre')) E.plaza = g('obraNombre'); if(g('obraBarrio')) E.barrio = g('obraBarrio'); if(g('obraId')) E.obraId = g('obraId'); }
+      guardarCaida(); pintarPanel(); return;
+    }
+    const b = e.target.closest('[data-h="agregar"],[data-h="quitar"]'); if(!b) return;
+    if(b.dataset.h === 'agregar') est.hormigon.piezas.push({ tipo:'prisma', cant:1, a:0.5, b:0.5, h:0.5 });
+    else { est.hormigon.piezas.splice(Number(b.dataset.i), 1); if(!est.hormigon.piezas.length) est.hormigon.piezas.push({ tipo:'prfv7', cant:1 }); }
+    pintarPanel();
+  });
+
+  window.__calcRapidas = { est, caida, calcHormigon, calcZanja, calcCables, calcConsumo, calcAbraz, ir: window.calcRapidaIr };
+  // lista de plazas para el campo «Plaza» de la caída de tensión
+  (function(){ const dl = document.createElement('datalist'); dl.id = 'crPlazasLista'; document.body.appendChild(dl);
+    const pintar = ()=>{ try{ dl.innerHTML = (avanceObras || []).map(o => `<option value="${esc(o.nombre||'')}">${esc([o.obraId ? 'ID ' + o.obraId : '', o.barrio || ''].filter(Boolean).join(' · '))}</option>`).join(''); }catch(e){} };
+    panel.addEventListener('focusin', e => { if(e.target.dataset && e.target.dataset.cg === 'plaza') pintar(); }); })();
+  pintarBarra(); aplicar();
+})();
+</script>
+
+<!-- ============================================================================================
+     ÓRDENES CON LA CUADRILLA (2026-10-02)
+     ============================================================================================
+     Pedido: «yo genero la orden y necesito que el equipo de cuadrillas tenga acceso a tildar lo que
+     hicieron en el día: a cada uno en la app le saldrían sus tareas y desde el celu tildan cuáles se
+     hicieron y cuáles no». Decidido con el usuario (maqueta del 02/10):
+       · Cada uno marca LO SUYO (si una tarea es de toda la cuadrilla, la puede marcar cualquiera de ellos).
+       · Cada empleado entra con SU usuario y contraseña (rol nuevo «Operario», vinculado a su nombre
+         de la nómina) y SOLO ve «Mis tareas» (y su tablero).
+     Qué agrega:
+       1) «Mis tareas» (vista nueva): las órdenes de hoy donde figura la persona, con «Se hizo / No se
+          hizo», cuánto, el motivo, sus horas, novedades y fotos. Se guarda al tocar (y si no hay señal,
+          queda en el celu y se manda cuando vuelve). «Enviar lo de hoy» le avisa a la oficina.
+       2) Órdenes: tablero arriba (Para revisar / En obra / Atrasadas / Próximas / Cerradas) con buscador;
+          «Revisar y cerrar» abre el cierre de siempre YA CARGADO con lo que marcó la cuadrilla;
+          «Repetir con lo que faltó» arma la orden siguiente; cuadrillas guardadas; asignar tarea a persona.
+     Lo que marca la cuadrilla va en `orden.campo` (marcas, horas, novedades, enviados, fotos), aparte del
+     `cierre` que sigue siendo el de la oficina: el cierre no se toca hasta que la oficina confirma.
+     ============================================================================================ -->
+<div class="wrap" id="viewMisTareas" style="display:none"><div id="mtApp"></div></div>
+<style id="estiloOrdenesCampo">
+#viewMisTareas::before{ content:"Mis tareas"; }
+#viewMisTareas{ max-width:680px; margin:0 auto; }
+.menu-item[data-vista="mistareas"] .menu-ico{ font-size:18px !important; }
+.mt-hola{ display:flex; align-items:center; gap:12px; margin:2px 0 14px; }
+.mt-av{ flex:0 0 46px; height:46px; border-radius:50%; display:grid; place-items:center; color:#fff; font:800 16px var(--disp); }
+.mt-hola b{ display:block; font:800 21px/1.15 var(--disp); letter-spacing:-.02em; }
+.mt-hola small{ color:var(--text-soft); font-size:13px; }
+.mt-ot{ background:var(--vidrio); border:1px solid var(--canto); border-radius:22px; padding:14px 16px; box-shadow:var(--sombra-md); margin-bottom:12px; }
+.mt-ot-cab{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+.mt-ot-pl{ font:800 16.5px/1.2 var(--disp); letter-spacing:-.01em; }
+.mt-ot-meta{ font-size:12.5px; color:var(--text-soft); margin-top:2px; }
+.mt-ot-gente{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px; font-size:12.5px; color:var(--text-soft); }
+.mt-avs{ display:flex; } .mt-avs span{ width:28px; height:28px; border-radius:50%; display:grid; place-items:center; color:#fff; font:800 11px var(--fuente); border:2px solid #fff; margin-right:-6px; }
+.mt-prog{ height:7px; border-radius:99px; background:rgba(40,40,94,.1); overflow:hidden; margin-top:10px; }
+.mt-prog i{ display:block; height:100%; background:linear-gradient(90deg,var(--navy),#6f7fc4); border-radius:99px; }
+.mt-prog-txt{ font-size:12.5px; color:var(--text-soft); margin-top:6px; }
+.mt-nota-ot{ margin-top:10px; font-size:13px; background:rgba(132,195,218,.16); border-radius:14px; padding:9px 12px; color:#1f4f63; }
+.mt-tarea{ background:#fff; border-radius:18px; padding:12px 14px; margin:10px 0 0; border:1px solid rgba(40,40,94,.08); box-shadow:0 8px 20px -18px rgba(40,40,94,.6); border-left:5px solid transparent; }
+.mt-tarea.si{ border-left-color:#34c759; } .mt-tarea.no{ border-left-color:#ff3b30; }
+.mt-tarea .t{ font-weight:700; font-size:15px; } .mt-tarea .d{ font-size:12.5px; color:var(--text-soft); margin-top:2px; }
+.mt-dos{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+.mt-dos button{ min-height:46px; border-radius:14px; font:800 14.5px var(--fuente); border:1.5px solid rgba(40,40,94,.15); color:var(--text-soft); background:#fff; cursor:pointer; }
+.mt-dos button.on[data-m="si"]{ background:#34c759; border-color:#34c759; color:#fff; }
+.mt-dos button.on[data-m="no"]{ background:#ff3b30; border-color:#ff3b30; color:#fff; }
+.mt-cant{ display:flex; align-items:center; gap:8px; margin-top:10px; font-size:13px; color:var(--text-soft); }
+.mt-cant input{ flex:0 0 104px !important; width:104px !important; margin:0 !important; text-align:right; font:700 16px var(--mono) !important; }
+.mt-motivos{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.mt-motivos button{ min-height:40px; padding:0 12px; border-radius:99px; font:600 13px var(--fuente); border:1px solid rgba(40,40,94,.15); background:#fff; color:var(--text); cursor:pointer; }
+.mt-motivos button.on{ background:var(--navy); color:#fff; border-color:var(--navy); }
+.mt-tarea textarea, .mt-ot textarea{ margin-top:10px; min-height:46px !important; }
+.mt-bloque{ background:#fff; border-radius:18px; padding:12px 14px; margin-top:10px; border:1px solid rgba(40,40,94,.08); }
+.mt-bloque h4{ margin:0 0 8px; font:800 14.5px var(--disp); }
+.mt-horas{ display:flex; gap:8px; align-items:center; } .mt-horas input{ flex:1 1 0; min-width:0; width:100%; margin:0 !important; text-align:center; padding-left:6px !important; padding-right:6px !important; }
+.mt-fotos{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; } .mt-fotos img{ width:64px; height:64px; object-fit:cover; border-radius:12px; border:1px solid rgba(40,40,94,.12); }
+.mt-acc{ display:flex; gap:8px; margin-top:12px; }
+.mt-acc .btn-primary{ flex:1 1 auto; margin:0; } .mt-acc .btn-ghost{ flex:0 0 auto; margin:0; }
+.mt-estado{ font-size:12.5px; margin-top:8px; min-height:16px; color:var(--text-soft); }
+.mt-estado.ok{ color:#1d7a38; } .mt-estado.off{ color:#9a5a00; } .mt-estado.mal{ color:var(--danger); }
+.mt-enviado{ margin-top:12px; border-radius:16px; padding:12px 14px; background:rgba(52,199,89,.12); color:#1d5e33; font-size:13.5px; }
+.mt-vacio{ text-align:center; padding:30px 16px; color:var(--text-soft); }
+.mt-vacio .big{ font-size:40px; }
+.mt-sec{ font:800 12px var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); margin:18px 2px 8px; }
+.mt-previa{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; padding:10px 12px; border-radius:16px; background:#fff7e6; border:1px solid #ffd79a; color:#7a4a00; font-size:13px; }
+.mt-previa select{ width:auto !important; flex:1 1 200px; margin:0 !important; min-height:40px !important; }
+/* ---- Órdenes: tablero ---- */
+#otTablero{ margin-bottom:18px; }
+.ot-aviso{ display:flex; align-items:center; gap:10px; margin:0 0 12px; padding:11px 14px; border-radius:16px; border:1px solid; font:600 13.5px/1.35 var(--fuente); flex-wrap:wrap; }
+.ot-tb-cab{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+.ot-tb-cab .ot-tb-bus{ flex:1 1 260px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.ot-tb-cab input[type=search]{ flex:1 1 220px; margin:0 !important; border-radius:999px !important; }
+.ot-tb-cab .btns{ display:flex; gap:8px; flex-wrap:wrap; }
+.ot-tb-cab .btns .btn-primary, .ot-tb-cab .btns .btn-ghost{ width:auto; margin:0; }
+.ot-tb-cols{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; align-items:start; }
+.ot-tb-col{ background:rgba(40,40,94,.045); border-radius:22px; padding:10px; min-width:0; }
+.ot-tb-col.revisar{ background:rgba(255,159,10,.10); } .ot-tb-col.atras{ background:rgba(255,59,48,.07); } .ot-tb-col.cerr{ background:rgba(52,199,89,.08); }
+.ot-tb-col h3{ margin:2px 4px 10px; font:800 13.5px var(--disp); display:flex; justify-content:space-between; align-items:center; }
+.ot-tb-col h3 .n{ font:700 12px var(--mono); background:#fff; border-radius:99px; padding:2px 9px; }
+.ot-tb-card{ background:rgba(255,255,255,.85); border:1px solid rgba(255,255,255,.95); border-radius:18px; padding:11px 13px; margin-bottom:8px; box-shadow:0 10px 26px -22px rgba(40,40,94,.6); }
+.ot-tb-card .pl{ font:800 14.5px/1.2 var(--disp); } .ot-tb-card .meta{ font-size:12px; color:var(--text-soft); margin-top:2px; }
+.ot-tb-card .acc{ display:flex; gap:6px; flex-wrap:wrap; margin-top:9px; }
+.ot-tb-card .acc button{ width:auto !important; margin:0 !important; min-height:34px !important; padding:0 11px !important; font-size:12.5px !important; }
+.ot-tb-vacio{ font-size:12.5px; color:var(--text-3); padding:6px 6px 8px; }
+.ot-tb-mas{ display:block; width:100%; text-align:center; font:700 12.5px var(--fuente); color:var(--navy); background:none; border:none; padding:6px; cursor:pointer; }
+.ot-tag{ display:inline-block; font:700 11.5px var(--fuente); padding:3px 9px; border-radius:99px; margin-top:6px; }
+.ot-tag.er{ background:rgba(255,59,48,.13); color:#b3261e; } .ot-tag.av{ background:rgba(255,159,10,.18); color:#8a4b00; } .ot-tag.ok{ background:rgba(52,199,89,.16); color:#1d7a38; } .ot-tag.ce{ background:rgba(132,195,218,.30); color:#1f5f7a; }
+.ot-form-cab{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin:0 0 12px; }
+.ot-form-cab h2{ margin:0; font:800 20px var(--disp); }
+.ot-cuadrillas{ display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 10px; }
+.ot-cuadrillas button{ text-align:left; border-radius:14px; border:1.5px solid rgba(40,40,94,.14); background:#fff; padding:8px 12px; font:600 12.5px/1.3 var(--fuente); color:var(--text-soft); cursor:pointer; min-height:0; }
+.ot-cuadrillas button b{ display:block; color:var(--text); font-size:13.5px; }
+.ot-cuadrillas button.guardar{ border-style:dashed; color:var(--navy); font-weight:700; }
+.ot-pts{ font-weight:700; color:#8a5a00; white-space:nowrap; } .ot-pts.sin{ color:var(--danger); }
+.ot-act-quien{ width:auto !important; min-height:30px !important; padding:2px 6px !important; font-size:12px !important; margin:0 0 0 6px !important; max-width:170px; }
+.cierre-campo{ border-radius:16px; padding:12px 14px; background:rgba(255,159,10,.10); border:1px solid rgba(255,159,10,.28); margin-bottom:14px; font-size:13.5px; }
+.cierre-campo b.t{ display:block; font:800 14.5px var(--disp); margin-bottom:6px; }
+.cierre-campo ul{ margin:6px 0 0 18px; padding:0; } .cierre-campo li{ margin:2px 0; }
+.cierre-campo .fotos{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; } .cierre-campo .fotos img{ width:58px; height:58px; object-fit:cover; border-radius:10px; }
+@media (max-width:1100px){ .ot-tb-cols{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+@media (max-width:640px){
+  .ot-tb-cols{ grid-template-columns:minmax(0,1fr); }
+  #viewMisTareas{ padding-bottom:40px; }
+  .mt-ot{ padding:13px 13px; }
+}
+@media print{ #viewMisTareas, #otTablero, .ot-form-cab, .ot-cuadrillas, .ot-act-quien{ display:none !important; } }
+</style>
+<script id="ordenesCampo">
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const esc = s => escHtml(s);
+  const norm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+  const llave = s => String(s||'').replace(/[~*\/\[\].`]/g,'_').slice(0, 120) || '_';   // nombre seguro para un campo de Firestore
+  const hoy = ()=> fechaAISO(new Date());
+  const sumarDia = (iso, n)=>{ const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return fechaAISO(d); };
+  const proximoHabil = iso => { let f = sumarDia(iso, 1); if(new Date(f + 'T12:00:00').getDay() === 0) f = sumarDia(f, 1); return f; };
+  const OTS = ()=>{ try{ return ordenesTrabajo || []; }catch(e){ return []; } };
+  const LS = {
+    get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+    set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  };
+  const AV = ['#28285e','#3d3f8a','#5f5bd6','#2a8fb8','#1f9d6b','#d9822b','#d6456f','#7a4fd6'];
+  const colorAv = n => { let h = 0; for(const c of String(n)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return AV[h % AV.length]; };
+  const inic = n => String(n||'?').trim().split(/\s+/).slice(0,2).map(p => p[0] || '').join('').toUpperCase() || '?';
+  const plural = (un, n) => { if(!un || n === 1) return un || ''; if(/[aeiouáéíóú]$/i.test(un)) return un + 's'; if(/[ln]$/i.test(un)) return un.replace(/ó(n)$/,'o$1') + 'es'; return un + 'es'; };
+  const num = v => { const n = Number(v); return isFinite(n) ? n : 0; };
+  const fmtN = n => Number(n).toLocaleString('es-AR', { maximumFractionDigits:2 });
+  const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const fechaLarga = iso => { const d = new Date(iso + 'T12:00:00'); return `${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`; };
+  const MOTIVOS = [['lluvia','🌧 Lluvia'],['material','📦 Faltó material'],['epec','⚡ Falta EPEC'],['tiempo','⏱ No alcanzó el tiempo'],['otro','Otro']];
+  const motivoTxt = m => (MOTIVOS.find(x => x[0] === m) || [m, m])[1].replace(/^\S+\s/, '');
+
+  // ---------- Quién soy ----------
+  function miUsuario(){ return (window.PERMISOS && typeof PERMISOS.yo === 'function') ? PERMISOS.yo() : null; }
+  function esAdmin(){ return !!(window.PERMISOS && typeof PERMISOS.esAdmin === 'function' && PERMISOS.esAdmin()); }
+  let verComo = '';   // vista previa del administrador: «ver como» una persona de la nómina (solo mirar)
+  function miPersona(){ const u = miUsuario(); return (u && String(u.persona||'').trim()) || ''; }
+  function personaActiva(){ return miPersona() || (esAdmin() ? verComo : ''); }
+  function soloMirar(){ return !miPersona() || !window.__fbUser; }
+
+  // ---------- Tareas de una orden ----------
+  function labelCat(k){ const a = (typeof ACTIVIDADES_CATALOGO !== 'undefined') ? ACTIVIDADES_CATALOGO.find(x => x.id === k) : null; return a ? a.label : k; }
+  function tareasDe(o){
+    const prev = o.previsto || {};
+    return [
+      ...(o.actividades||[]).map(k => ({ k, label:labelCat(k), un:(typeof unidadDeTarea === 'function' ? unidadDeTarea(k) : 'unidad'), prev:num(prev[k]), manual:false })),
+      ...(o.actividadesManuales||[]).filter(a => String(a.actividad||'').trim()).map(a => ({ k:'m:' + a.actividad.trim(), label:a.actividad.trim(), detalle:a.detalle||'', un:'', prev:0, manual:true }))
+    ];
+  }
+  const gente = o => (o.personal||[]).filter(p => String(p.nombre||'').trim());
+  const estaEn = (o, persona) => !!persona && gente(o).some(p => norm(p.nombre) === norm(persona));
+  function asignadaA(o, k){ return ((o.asignada||{})[k]) || ''; }
+  function tareasPara(o, persona){ return tareasDe(o).filter(t => { const a = asignadaA(o, t.k); return !a || norm(a) === norm(persona); }); }
+  const campo = o => o.campo || {};
+  const marcaDe = (o, k) => (campo(o).marcas || {})[llave(k)] || null;
+  const enviados = o => Object.values(campo(o).enviados || {});
+  const cerrada = o => o.estado === 'Terminada' || o.estado === 'Anulada';
+  function pendientesDe(o){
+    // Lo que no se terminó: «No se hizo», sin marcar, o menos de lo previsto. Con el cierre de la oficina, manda el cierre.
+    const c = o.cierre && o.cierre.cerradoTs ? (o.cierre.cantidades || {}) : null;
+    return tareasDe(o).map(t => {
+      const m = marcaDe(o, t.k);
+      const hecho = c ? num(c[t.k]) : (m && m.hecho ? (num(m.cant) || t.prev || 1) : 0);
+      if(t.prev > 0) return hecho < t.prev ? { ...t, falta: Math.round((t.prev - hecho) * 100) / 100 } : null;
+      if(c) return hecho > 0 ? null : { ...t, falta:0 };
+      return (m && m.hecho) ? null : { ...t, falta:0 };
+    }).filter(Boolean);
+  }
+
+  // ---------- Guardar lo que marca la cuadrilla (con cola por si no hay señal) ----------
+  const COLA = 'ema.campo.cola';
+  let mandando = false;
+  function aplicarLocal(o, patch){
+    Object.keys(patch).forEach(p => {
+      const partes = p.split('.'); let ref = o;
+      for(let i = 0; i < partes.length - 1; i++){ ref[partes[i]] = ref[partes[i]] || {}; ref = ref[partes[i]]; }
+      ref[partes[partes.length - 1]] = patch[p];
+    });
+  }
+  function guardarCampo(o, patch){
+    aplicarLocal(o, patch);
+    const cola = LS.get(COLA, []); cola.push({ id:o.id, patch, ts:Date.now() }); LS.set(COLA, cola);
+    return vaciarCola();
+  }
+  async function vaciarCola(){
+    if(mandando) return; mandando = true;
+    let cola = LS.get(COLA, []);
+    pintarEstado(cola.length ? 'Guardando…' : '', '');
+    while(cola.length){
+      const it = cola[0];
+      if(typeof window.fbOtCampo !== 'function'){ break; }
+      const r = await Promise.race([ window.fbOtCampo(it.id, it.patch).then(()=> 'ok', e => e), new Promise(res => setTimeout(()=> res('lento'), 6000)) ]);
+      if(r === 'ok'){ cola = LS.get(COLA, []); cola.shift(); LS.set(COLA, cola); continue; }
+      if(r === 'lento'){ pintarEstado('📴 Sin señal: quedó guardado en el celu y se manda solo cuando vuelva.', 'off'); mandando = false; setTimeout(vaciarCola, 15000); return; }
+      const code = String((r && r.code) || '');
+      if(/permission/.test(code)){ cola = LS.get(COLA, []); cola.shift(); LS.set(COLA, cola);
+        pintarEstado('🔒 No se pudo guardar: la orden no te deja marcar. Avisale a la oficina (que abra y guarde la orden).', 'mal'); continue; }
+      if(/not-found/.test(code)){ cola = LS.get(COLA, []); cola.shift(); LS.set(COLA, cola); continue; }   // la orden ya no existe
+      pintarEstado('📴 Sin conexión: quedó guardado en el celu y se manda solo cuando vuelva.', 'off'); mandando = false; setTimeout(vaciarCola, 15000); return;
+    }
+    mandando = false;
+    if(!LS.get(COLA, []).length) pintarEstado('✓ Guardado', 'ok');
+  }
+  window.addEventListener('online', ()=> vaciarCola());
+  function pintarEstado(t, c){ document.querySelectorAll('.mt-estado').forEach(e => { e.className = 'mt-estado ' + (c||''); e.textContent = t; }); }
+
+  // ---------- MIS TAREAS ----------
+  let abiertaTxt = {};   // textareas con foco no se pisan al redibujar
+  function escribiendo(){ const a = document.activeElement; return !!(a && $('mtApp') && $('mtApp').contains(a) && /^(INPUT|TEXTAREA)$/.test(a.tagName)); }
+  let dibujoPendiente = false;
+  function renderMisTareas(){
+    const app = $('mtApp'); if(!app) return;
+    dibujoPendiente = false;
+    const persona = personaActiva();
+    let h = '';
+    if(esAdmin() && !miPersona()){
+      const nom = (typeof window.nominaEquipo === 'function' ? window.nominaEquipo() : []).filter(p => p.activo !== false && String(p.nombre||'').trim());
+      h += `<div class="mt-previa">👁 <span>Vista previa: elegí a alguien para ver lo que le aparece en su celu (solo mirar).</span>
+        <select id="mtVerComo"><option value="">— Elegí una persona —</option>${nom.map(p => `<option ${norm(p.nombre) === norm(verComo) ? 'selected' : ''}>${esc(p.nombre)}</option>`).join('')}</select></div>`;
+    }
+    if(!persona){
+      h += `<div class="card"><div class="mt-vacio"><div class="big">👷</div>${!window.__fbUser ? 'Entrá con tu usuario para ver tus tareas.' : (esAdmin() ? 'Elegí una persona arriba para ver sus tareas.' : 'Tu usuario todavía no está vinculado a tu nombre de la nómina. <b>Pedile a la oficina</b> que lo vincule en «Usuarios y permisos».')}</div></div>`;
+      app.innerHTML = h; return;
+    }
+    const nombre = persona.split(' ')[0];
+    h += `<div class="mt-hola"><span class="mt-av" style="background:${colorAv(persona)}">${esc(inic(persona))}</span><div><b>Hola, ${esc(nombre)} 👷</b><small>${esc(fechaLarga(hoy()))} · tus tareas</small></div></div>`;
+    const mias = OTS().filter(o => estaEn(o, persona) && o.estado !== 'Anulada');
+    const h0 = hoy();
+    const deHoy = mias.filter(o => o.fecha === h0 && !(o.cierre && o.cierre.cerradoTs && o.estado === 'Terminada'));
+    const atras = mias.filter(o => o.fecha < h0 && !cerrada(o) && !(o.cierre && o.cierre.cerradoTs) && !(campo(o).enviados || {})[llave(persona)]);
+    const proximas = mias.filter(o => o.fecha > h0 && !cerrada(o)).sort((a,b) => String(a.fecha).localeCompare(String(b.fecha))).slice(0, 3);
+    const cerradasHoy = mias.filter(o => o.fecha === h0 && o.cierre && o.cierre.cerradoTs && o.estado === 'Terminada');
+    if(!deHoy.length && !atras.length){
+      h += `<div class="card"><div class="mt-vacio"><div class="big">☕</div>Hoy no tenés órdenes asignadas.${cerradasHoy.length ? '<br>La de hoy ya la cerró la oficina. ✓' : ''}</div></div>`;
+    }
+    deHoy.forEach(o => { h += otHtml(o, persona); });
+    if(atras.length){ h += `<div class="mt-sec">De días anteriores · sin enviar</div>`; atras.forEach(o => { h += otHtml(o, persona); }); }
+    if(proximas.length){
+      h += `<div class="mt-sec">Lo que viene</div>`;
+      proximas.forEach(o => { h += `<div class="mt-ot" style="opacity:.92;"><div class="mt-ot-pl">${esc(o.plazaNombre||'')}</div><div class="mt-ot-meta">${esc(fechaLarga(o.fecha))} · ${esc(o.numero||'')} · ${esc(o.horaInicio||'')}${o.horaFin ? ' a ' + esc(o.horaFin) : ''}</div>
+        <div class="mt-ot-meta" style="margin-top:6px;">${tareasPara(o, persona).map(t => esc(t.label)).join(' · ')}</div></div>`; });
+    }
+    if(soloMirar()) h = h.replace(/<button(?![^>]*data-libre)/g, '<button disabled').replace(/<textarea/g, '<textarea disabled').replace(/<input(?![^>]*data-libre)/g, '<input disabled');
+    // Se cambia SOLO lo que cambió (no se rehace todo): si no, al tocar un botón justo cuando se guarda
+    // otra cosa, el botón se reemplazaba debajo del dedo y el toque se perdía.
+    const t = document.createElement('div'); t.innerHTML = h; morph(app, t);
+    // fotos: miniaturas
+    app.querySelectorAll('img[data-adj]:not([src])').forEach(async img => { try{ const d = await window.fbAdjuntoLeer(img.dataset.adj); if(d && d.dataUrl) img.src = d.dataUrl; }catch(e){} });
+  }
+  function morph(viejo, nuevo){
+    const a = [...viejo.childNodes], b = [...nuevo.childNodes];
+    for(let i = 0; i < b.length; i++){
+      const x = a[i], y = b[i];
+      if(!x){ viejo.appendChild(y.cloneNode(true)); continue; }
+      if(x.nodeType !== y.nodeType || x.nodeName !== y.nodeName || (x.dataset && y.dataset && (x.dataset.k !== y.dataset.k || x.dataset.ot !== y.dataset.ot))){ viejo.replaceChild(y.cloneNode(true), x); continue; }
+      if(x.nodeType === 3){ if(x.nodeValue !== y.nodeValue) x.nodeValue = y.nodeValue; continue; }
+      if(x.nodeType !== 1) continue;
+      if(x.outerHTML === y.outerHTML) continue;
+      [...x.attributes].forEach(at => { if(!y.hasAttribute(at.name)) x.removeAttribute(at.name); });
+      [...y.attributes].forEach(at => { if(x.getAttribute(at.name) !== at.value) x.setAttribute(at.name, at.value); });
+      if(/^(INPUT|TEXTAREA|SELECT)$/.test(x.tagName)){
+        if(x !== document.activeElement){ if(x.tagName === 'TEXTAREA') x.value = y.textContent; else if(x.type !== 'file') x.value = y.getAttribute('value') || ''; }
+        if(x.tagName === 'SELECT' && x.innerHTML !== y.innerHTML){ x.innerHTML = y.innerHTML; x.value = [...y.options].find(o => o.selected) ? [...y.options].find(o => o.selected).value : ''; }
+        continue;
+      }
+      if(x.tagName === 'IMG') continue;
+      morph(x, y);
+    }
+    for(let i = a.length - 1; i >= b.length; i--) if(a[i].parentNode === viejo) viejo.removeChild(a[i]);
+  }
+  function otHtml(o, persona){
+    const tareas = tareasPara(o, persona);
+    const todas = tareasDe(o);
+    const marcadas = todas.filter(t => marcaDe(o, t.k)).length;
+    const yo = llave(persona);
+    const env = (campo(o).enviados || {})[yo];
+    const misHoras = (campo(o).horas || {})[yo] || {};
+    const nov = (campo(o).novedades || {})[yo] || '';
+    const fotos = Object.entries(campo(o).fotos || {}).filter(([,f]) => norm(f.por) === norm(persona)).map(([id]) => id);
+    const cerradaYa = !!(o.cierre && o.cierre.cerradoTs);
+    let h = `<div class="mt-ot" data-ot="${esc(o.id)}">
+      <div class="mt-ot-cab"><div><div class="mt-ot-pl">${esc(o.plazaNombre||'(sin plaza)')}</div><div class="mt-ot-meta">${esc(o.numero||'')}${o.obraId ? ' · ID ' + esc(o.obraId) : ''} · ${esc(o.fecha === hoy() ? 'hoy' : formatFechaCorta(o.fecha))} · ${esc(o.horaInicio||'')}${o.horaFin ? ' a ' + esc(o.horaFin) : ''}</div>
+        ${o.direccion ? `<div class="mt-ot-meta">📍 ${esc(o.direccion)}${o.barrio ? ' · ' + esc(o.barrio) : ''}</div>` : ''}</div>
+        <span class="ot-tag ${cerradaYa ? 'ok' : (env ? 'ce' : 'av')}" style="margin:0;">${cerradaYa ? 'Cerrada' : (env ? 'Enviada' : 'En obra')}</span></div>
+      <div class="mt-ot-gente"><span class="mt-avs">${gente(o).map(p => `<span style="background:${colorAv(p.nombre)}" title="${esc(p.nombre)}">${esc(inic(p.nombre))}</span>`).join('')}</span><span>${esc(o.cuadrilla||'')}${o.responsable ? ' · resp. ' + esc(o.responsable) : ''}</span></div>
+      <div class="mt-prog"><i style="width:${todas.length ? Math.round(marcadas / todas.length * 100) : 0}%"></i></div><div class="mt-prog-txt">${marcadas} de ${todas.length} tareas marcadas (toda la cuadrilla)</div>
+      ${o.notas ? `<div class="mt-nota-ot">📝 ${esc(o.notas)}</div>` : ''}`;
+    if(!tareas.length) h += `<div class="mt-ot-meta" style="margin-top:10px;">En esta orden no tenés tareas asignadas a vos.</div>`;
+    tareas.forEach(t => {
+      const m = marcaDe(o, t.k);
+      const a = asignadaA(o, t.k);
+      const cl = m ? (m.hecho ? 'si' : 'no') : '';
+      h += `<div class="mt-tarea ${cl}" data-k="${esc(t.k)}"><div class="t">${esc(t.label)}</div>
+        <div class="d">${t.prev > 0 ? 'Previsto: ' + esc(fmtN(t.prev)) + ' ' + esc(plural(t.un, t.prev)) : ''}${t.detalle ? (t.prev > 0 ? ' · ' : '') + esc(t.detalle) : ''}${a ? (t.prev > 0 || t.detalle ? ' · ' : '') + 'para vos' : ''}${m && m.por && norm(m.por) !== norm(persona) ? ` · marcó ${esc(m.por.split(' ')[0])}` : ''}</div>
+        <div class="mt-dos"><button type="button" data-m="si" class="${m && m.hecho ? 'on' : ''}">✓ Se hizo</button><button type="button" data-m="no" class="${m && !m.hecho ? 'on' : ''}">✗ No se hizo</button></div>`;
+      if(m && m.hecho && !t.manual) h += `<div class="mt-cant">¿Cuánto? <input type="number" inputmode="decimal" min="0" step="any" class="mt-cant-in" value="${m.cant != null && m.cant !== '' ? esc(m.cant) : ''}" placeholder="${t.prev > 0 ? esc(t.prev) : '1'}"> ${esc(plural(t.un, 2))}</div>`;
+      if(m && !m.hecho){
+        h += `<div style="font-size:13px; font-weight:700; margin-top:12px;">¿Por qué?</div><div class="mt-motivos">${MOTIVOS.map(([k, l]) => `<button type="button" data-mot="${k}" class="${m.motivo === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+          <textarea class="mt-nota" rows="2" placeholder="Contá un poco (opcional)">${esc(m.nota||'')}</textarea>`;
+      }
+      h += `</div>`;
+    });
+    h += `<div class="mt-bloque"><h4>Mis horas</h4><div class="mt-horas"><input type="time" class="mt-hini" value="${esc(misHoras.ini || o.horaInicio || '')}"><span>→</span><input type="time" class="mt-hfin" value="${esc(misHoras.fin || o.horaFin || '')}"></div>
+      <div class="mt-ot-meta" style="margin-top:6px;">Si te fuiste antes o te quedaste más, cambialo.</div></div>
+      <div class="mt-bloque"><h4>Novedades</h4><textarea class="mt-nov" rows="2" placeholder="Ej: el vecino pidió correr una columna; faltó cable">${esc(nov)}</textarea>
+      ${fotos.length ? `<div class="mt-fotos">${fotos.map(id => `<img data-adj="${esc(id)}" alt="foto">`).join('')}</div>` : ''}</div>
+      <div class="mt-acc"><label class="btn-ghost" style="display:inline-flex; align-items:center; cursor:pointer; border-radius:999px; padding:0 16px; min-height:46px;">📷 Foto<input type="file" accept="image/*" capture="environment" class="mt-foto" style="display:none;"></label>
+        <button type="button" class="btn-primary mt-enviar">${env ? 'Volver a enviar' : 'Enviar lo de hoy'}</button></div>
+      <div class="mt-estado"></div>`;
+    if(env) h += `<div class="mt-enviado">✓ Enviado ${esc(new Date(env.ts).toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' }))}. ${cerradaYa ? 'La oficina ya cerró la orden.' : 'La oficina lo revisa y cierra la orden. Si te olvidaste de algo, corregilo y volvé a enviar.'}</div>`;
+    return h + `</div>`;
+  }
+  function otDe(el){ const c = el.closest('[data-ot]'); return c ? OTS().find(o => o.id === c.dataset.ot) : null; }
+  function marcar(o, k, cambios){
+    const persona = personaActiva(); if(soloMirar()) return;
+    const ant = marcaDe(o, k) || {};
+    const m = { ...ant, k, ...cambios, por:persona, ts:Date.now() };
+    const patch = { ['campo.marcas.' + llave(k)]: m };
+    if(o.estado === 'Emitida') patch.estado = 'En curso';
+    guardarCampo(o, patch); renderMisTareas(); pintarEstado('Guardando…', '');
+  }
+  document.addEventListener('click', async e => {
+    const app = $('mtApp'); if(!app || !app.contains(e.target)) return;
+    const o = otDe(e.target); if(!o) return;
+    const tar = e.target.closest('.mt-tarea');
+    const b = e.target.closest('button[data-m]');
+    if(b && tar){
+      const t = tareasDe(o).find(x => x.k === tar.dataset.k); if(!t) return;
+      if(b.dataset.m === 'si') marcar(o, t.k, { hecho:true, cant: (marcaDe(o, t.k) || {}).cant != null && (marcaDe(o, t.k) || {}).hecho ? marcaDe(o, t.k).cant : (t.manual ? 1 : (t.prev || '')), motivo:'', nota:'' });
+      else marcar(o, t.k, { hecho:false, cant:0 });
+      return;
+    }
+    const mot = e.target.closest('button[data-mot]');
+    if(mot && tar){ marcar(o, tar.dataset.k, { motivo: mot.dataset.mot }); return; }
+    if(e.target.closest('.mt-enviar')){
+      if(soloMirar()) return;
+      const persona = personaActiva();
+      const faltan = tareasPara(o, persona).filter(t => !marcaDe(o, t.k));
+      if(faltan.length && !confirm(`Te quedan ${faltan.length} tarea(s) sin marcar:\n· ${faltan.map(t => t.label).join('\n· ')}\n\n¿Enviar igual?`)) return;
+      const patch = { ['campo.enviados.' + llave(persona)]: { nombre:persona, ts:Date.now() } };
+      if(o.estado === 'Emitida') patch.estado = 'En curso';
+      guardarCampo(o, patch); renderMisTareas();
+      return;
+    }
+  });
+  document.addEventListener('change', async e => {
+    const app = $('mtApp'); if(!app || !app.contains(e.target)) return;
+    if(e.target.id === 'mtVerComo'){ verComo = e.target.value; renderMisTareas(); return; }
+    const o = otDe(e.target); if(!o || soloMirar()) return;
+    const persona = personaActiva(), yo = llave(persona);
+    const tar = e.target.closest('.mt-tarea');
+    if(e.target.classList.contains('mt-cant-in') && tar){ marcar(o, tar.dataset.k, { cant: e.target.value === '' ? '' : num(e.target.value) }); return; }
+    if(e.target.classList.contains('mt-nota') && tar){ marcar(o, tar.dataset.k, { nota: e.target.value.trim() }); return; }
+    if(e.target.classList.contains('mt-hini') || e.target.classList.contains('mt-hfin')){
+      const c = e.target.closest('.mt-ot'); const ini = c.querySelector('.mt-hini').value, fin = c.querySelector('.mt-hfin').value;
+      const p = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(t||''); return m ? Number(m[1]) + Number(m[2]) / 60 : null; };
+      const horas = (p(ini) != null && p(fin) != null && p(fin) > p(ini)) ? Math.round((p(fin) - p(ini)) * 100) / 100 : 0;
+      guardarCampo(o, { ['campo.horas.' + yo]: { nombre:persona, ini, fin, horas } }); return;
+    }
+    if(e.target.classList.contains('mt-nov')){ guardarCampo(o, { ['campo.novedades.' + yo]: e.target.value.trim() }); return; }
+    if(e.target.classList.contains('mt-foto') && e.target.files && e.target.files[0]){
+      pintarEstado('Subiendo la foto…', '');
+      try{
+        const id = await subirAdjunto(e.target.files[0], { plazaId:o.plazaId||'', otId:o.id, tipo:'obra', origen:'cuadrilla', persona, titulo:`${o.numero||''} · ${persona}` });
+        guardarCampo(o, { ['campo.fotos.' + llave(id)]: { por:persona, ts:Date.now() } }); renderMisTareas();
+      }catch(err){ pintarEstado('⚠ No se pudo subir la foto (¿hay señal?). Probá de nuevo más tarde.', 'mal'); }
+    }
+  });
+  document.addEventListener('focusout', ()=> setTimeout(()=>{ if(dibujoPendiente && !escribiendo()) renderMisTareas(); }, 0));
+
+  // ---------- Vista y menú ----------
+  const previa = window.mostrarVista;
+  window.mostrarVista = function(v){
+    const vista = $('viewMisTareas');
+    if(v === 'mistareas'){
+      document.querySelectorAll('.wrap[id^="view"]').forEach(el => { if(el.id !== 'viewMisTareas') el.style.display = 'none'; });
+      const f = $('mainFooter'); if(f) f.style.display = 'none';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#navAbajo .nav-item, #menuLista .menu-item').forEach(b => b.classList.toggle('activo', b.dataset.vista === 'mistareas'));
+      if(vista) vista.style.display = '';
+      document.body.dataset.vista = 'mistareas';
+      renderMisTareas(); vaciarCola();
+      window.scrollTo({ top:0, behavior:'auto' });
+      return;
+    }
+    if(vista) vista.style.display = 'none';
+    const r = previa.apply(this, arguments);
+    if(v === 'parte') setTimeout(renderTablero, 0);
+    return r;
+  };
+  function pintarMenuN(){
+    const b = $('menuMisTareas'); if(!b) return;
+    const p = miPersona(); let n = b.querySelector('.tb-menu-n');
+    const k = p ? OTS().filter(o => o.fecha === hoy() && estaEn(o, p) && !cerrada(o) && !(campo(o).enviados || {})[llave(p)]).length : 0;
+    if(!k){ if(n) n.remove(); return; }
+    if(!n){ n = document.createElement('span'); n.className = 'tb-menu-n'; b.appendChild(n); }
+    n.textContent = k;
+  }
+  const menuLista = $('menuLista');
+  if(menuLista){
+    new MutationObserver(()=>{
+      if($('menuMisTareas')) return;
+      const ref = menuLista.querySelector('.menu-item[data-vista]'); if(!ref) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'menu-item'; b.id = 'menuMisTareas'; b.dataset.vista = 'mistareas';
+      b.innerHTML = '<span class="menu-ico">👷</span>Mis tareas';
+      ref.insertAdjacentElement('beforebegin', b);
+      if(document.body.dataset.vista === 'mistareas') b.classList.add('activo');
+      pintarMenuN();
+    }).observe(menuLista, { childList:true });
+  }
+
+  // ---------- Cuadrillas guardadas ----------
+  let cuadrillas = [];
+  function escucharCuadrillas(){
+    try{
+      if(!(window.firebase && firebase.apps && firebase.apps.length)) return;
+      firebase.firestore().collection('configEquipo').doc('cuadrillas').onSnapshot(d => { cuadrillas = (d.exists && Array.isArray(d.data().lista)) ? d.data().lista : []; pintarCuadrillas(); }, ()=>{});
+    }catch(e){}
+  }
+  function pintarCuadrillas(){
+    let box = $('otCuadrillasGuardadas');
+    const ref = $('otCuadrilla'); if(!ref) return;
+    if(!box){
+      box = document.createElement('div'); box.id = 'otCuadrillasGuardadas'; box.className = 'ot-cuadrillas no-print';
+      const row = ref.closest('.row2'); if(!row) return;
+      row.insertAdjacentHTML('beforebegin', '<label style="margin-bottom:0;">Cuadrillas guardadas <span style="font-weight:500; color:var(--text-soft);">· tocá una y se cargan la gente y el responsable</span></label>');
+      row.insertAdjacentElement('beforebegin', box);
+    }
+    box.innerHTML = cuadrillas.map((c, i) => `<button type="button" data-cua="${i}"><b>${esc(c.nombre)}</b>${esc([c.responsable ? c.responsable.split(' ')[0] + ' (resp.)' : '', ...(c.personal||[]).filter(p => norm(p.nombre) !== norm(c.responsable)).map(p => String(p.nombre).split(' ')[0])].filter(Boolean).join(' · '))}</button>`).join('')
+      + `<button type="button" class="guardar" data-cua="guardar">＋ Guardar la de abajo como cuadrilla</button>`;
+  }
+  document.addEventListener('click', async e => {
+    const b = e.target.closest('#otCuadrillasGuardadas button[data-cua]'); if(!b) return;
+    if(b.dataset.cua === 'guardar'){
+      const nombre = ($('otCuadrilla').value || '').trim();
+      const per = (typeof personal !== 'undefined' ? personal : []).filter(p => String(p.nombre||'').trim()).map(p => ({ nombre:p.nombre.trim(), rol:p.rol }));
+      if(!nombre || !per.length){ alert('Primero completá abajo el nombre de la cuadrilla y la gente, y después guardala.'); return; }
+      const lista = cuadrillas.filter(c => norm(c.nombre) !== norm(nombre)).concat([{ nombre, responsable:($('otResponsable').value || '').trim(), personal:per }]);
+      try{ await window.fbCuadrillasGuardar(lista); cuadrillas = lista; pintarCuadrillas(); }catch(err){ alert('No se pudo guardar la cuadrilla (revisá la conexión).'); }
+      return;
+    }
+    const c = cuadrillas[Number(b.dataset.cua)]; if(!c) return;
+    $('otCuadrilla').value = c.nombre || ''; $('otResponsable').value = c.responsable || '';
+    try{
+      personal = (c.personal||[]).map(p => ({ id: personaIdSeq++, nombre:p.nombre||'', rol:p.rol||ROLES_CUADRILLA[0] }));
+      if(!personal.length) personal = [{ id: personaIdSeq++, nombre:'', rol:ROLES_CUADRILLA[0] }];
+      renderPersonal();
+    }catch(err){ console.warn(err); }
+    pintarQuien();
+  });
+
+  // ---------- Asignar cada tarea a una persona (en el formulario de la orden) ----------
+  let asignadaPendiente = null;
+  function nombresForm(){ try{ return personal.filter(p => String(p.nombre||'').trim()).map(p => p.nombre.trim()); }catch(e){ return []; } }
+  function pintarQuien(){
+    const cont = $('otActividades'); if(!cont) return;
+    const nombres = nombresForm();
+    cont.querySelectorAll('.ot-tarea').forEach(f => {
+      const chk = f.querySelector('.ot-act-check'); const prev = f.querySelector('.ot-tarea-prev'); if(!chk || !prev) return;
+      let s = prev.querySelector('.ot-act-quien');
+      const actual = s ? s.value : (asignadaPendiente && asignadaPendiente[chk.value]) || '';
+      const valor = asignadaPendiente && chk.value in asignadaPendiente ? asignadaPendiente[chk.value] : actual;
+      if(!s){ s = document.createElement('select'); s.className = 'ot-act-quien'; s.dataset.id = chk.value; s.title = 'Quién hace esta tarea: le aparece a esa persona en su celu'; prev.appendChild(s); }
+      const opts = ['', ...nombres]; if(valor && !nombres.some(n => norm(n) === norm(valor))) opts.push(valor);
+      const firma = opts.join('|');
+      if(s.dataset.firma !== firma){ s.innerHTML = opts.map(n => `<option value="${esc(n)}">${n ? '👤 ' + esc(n) : '👥 Toda la cuadrilla'}</option>`).join(''); s.dataset.firma = firma; }
+      s.value = valor || '';
+    });
+    asignadaPendiente = null;
+  }
+  const otAct = $('otActividades'); if(otAct) new MutationObserver(()=>{ pintarQuien(); pintarPuntajes(); }).observe(otAct, { childList:true });
+  window.__restaurarQuien = function(m){ asignadaPendiente = { ...(m || {}) }; pintarQuien(); pintarPuntajes(); };
+  if(typeof window.renderPersonal === 'function'){
+    const orig = window.renderPersonal;
+    window.renderPersonal = function(){ const r = orig.apply(this, arguments); setTimeout(pintarQuien, 0); return r; };
+  }
+  document.addEventListener('change', e => { if(e.target.closest && e.target.closest('#personalContainer')) setTimeout(pintarQuien, 0); });
+
+  // Lo que se guarda con la orden: quién hace cada tarea y la lista de nombres (la usan las reglas de la base).
+  if(typeof window.datosOtDesdeFormulario === 'function'){
+    const orig = window.datosOtDesdeFormulario;
+    window.datosOtDesdeFormulario = function(){
+      const d = orig.apply(this, arguments); if(!d) return d;
+      const asignada = {};
+      document.querySelectorAll('#otActividades .ot-act-quien').forEach(s => { if(s.value && (d.actividades||[]).includes(s.dataset.id)) asignada[s.dataset.id] = s.value; });
+      d.asignada = asignada;
+      d.personalNombres = (d.personal||[]).map(p => norm(p.nombre)).filter(Boolean);
+      return d;
+    };
+  }
+  if(typeof window.editarOrdenTrabajo === 'function'){
+    const orig = window.editarOrdenTrabajo;
+    window.editarOrdenTrabajo = function(id){
+      const o = OTS().find(x => x.id === id); asignadaPendiente = o ? { ...(o.asignada || {}) } : null;
+      abrirFormulario(true);
+      const r = orig.apply(this, arguments); pintarQuien(); return r;
+    };
+  }
+
+  // ---------- Cada tarea con su puntaje, y las nuevas a la lista (2026-10-02) ----------
+  // Pedido: *"las órdenes de trabajo tienen que estar en la lista que está aparte, ya con su puntaje; las
+  // tareas nuevas, con su puntaje, que se registren solas en la lista de tareas"*.
+  (function(){ if($('otUnidadesLista')) return; const dl = document.createElement('datalist'); dl.id = 'otUnidadesLista';
+    dl.innerHTML = ['unidad','metro','columna','base','tablero','artefacto','jabalina','plaza','m²','m³','hora','vínculo','cruce'].map(u => `<option value="${u}">`).join(''); document.body.appendChild(dl); })();
+  function pintarPuntajes(){
+    const b = (typeof window.baremoActual === 'function') ? window.baremoActual() : null; if(!b) return;
+    document.querySelectorAll('#otActividades .ot-tarea').forEach(f => {
+      const chk = f.querySelector('.ot-act-check'); const sub = f.querySelector('.ot-tarea-sub'); if(!chk || !sub) return;
+      const d = b[chk.value];
+      const txt = d && num(d.pts) > 0 ? `⭐ ${fmtN(num(d.pts))} pts por ${d.un || 'unidad'}` : '⭐ sin puntaje';
+      let e = sub.querySelector('.ot-pts');
+      if(!e){ e = document.createElement('span'); e.className = 'ot-pts'; sub.insertAdjacentText('beforeend', ' · '); sub.appendChild(e); }
+      if(e.textContent !== txt){ e.textContent = txt; e.classList.toggle('sin', !(d && num(d.pts) > 0)); }
+    });
+  }
+  if(typeof window.emitirOrdenTrabajo === 'function'){
+    const orig = window.emitirOrdenTrabajo;
+    const envuelta = async function(){
+      const msg = $('otMsg');
+      let nuevas = []; try{ nuevas = actividades.filter(a => String(a.actividad||'').trim()); }catch(e){}
+      let res = null, aviso = '';
+      if(nuevas.length){
+        if(!window.datosOtDesdeFormulario()) return;          // primero que la orden esté completa
+        const sinPts = nuevas.filter(a => !(num(a.pts) > 0));
+        if(sinPts.length){ msg.style.color = 'var(--danger)'; msg.innerHTML = `⚠ Poné cuántos <b>puntos</b> vale ${sinPts.map(a => '«' + esc(a.actividad.trim()) + '»').join(', ')} (por unidad): así queda en la lista de tareas con su puntaje.`; return; }
+        try{ res = await window.registrarTareasNuevas(nuevas.map(a => ({ label:a.actividad.trim(), un:a.un, pts:a.pts, pasos:a.pasos }))); }
+        catch(e){ aviso = ' ⚠ La(s) tarea(s) nueva(s) no se pudieron sumar a la lista (tu usuario no carga en Producción, o no hay conexión): quedaron como tareas sueltas de esta orden.'; }
+        if(res){
+          res.forEach(r => { const c = document.querySelector(`.ot-act-check[value="${CSS.escape(r.id)}"]`); if(c){ c.checked = true; const f = c.closest('.ot-tarea'); if(f) f.classList.add('on'); } });
+          const det = nuevas.filter(a => String(a.detalle||'').trim()).map(a => `${a.actividad.trim()}: ${a.detalle.trim()}`);
+          const notas = $('otNotas'); if(det.length && notas) notas.value = [notas.value.trim(), ...det].filter(Boolean).join('\n');
+          actividades = [{ id: actividadIdSeq++, catalogoId:'', actividad:'', detalle:'', pasos:'' }]; renderActividades();
+        }
+      }
+      const r = await orig.apply(this, arguments);
+      if(res && res.some(x => x.nueva)) msg.insertAdjacentHTML('beforeend', ` <br>⭐ Se sumó a la lista de tareas: ${res.filter(x => x.nueva).map(x => '<b>' + esc(x.label) + '</b>').join(', ')} (Producción → Tareas y valor).`);
+      if(aviso) msg.insertAdjacentHTML('beforeend', aviso);
+      return r;
+    };
+    window.emitirOrdenTrabajo = envuelta;
+    const btn = $('otEmitirBtn'); if(btn){ btn.removeEventListener('click', orig); btn.addEventListener('click', ()=> window.emitirOrdenTrabajo()); }
+  }
+
+  // ---------- Repetir con lo que faltó ----------
+  window.repetirOrden = function(id){
+    const o = OTS().find(x => x.id === id); if(!o) return;
+    if(!window.__fbUser){ alert('Iniciá sesión para armar una orden.'); return; }
+    const pend = pendientesDe(o);
+    window.editarOrdenTrabajo(id);       // carga plaza, cuadrilla, gente, horarios y tareas…
+    salirDeEdicionOt();                  // …pero como orden NUEVA
+    const fecha = proximoHabil(o.fecha && o.fecha >= hoy() ? o.fecha : sumarDia(hoy(), -1));
+    $('otFecha').value = fecha; try{ actualizarDiaSemana(); }catch(e){}
+    const quedan = pend.length ? pend : tareasDe(o);
+    const keys = new Set(quedan.map(t => t.k));
+    document.querySelectorAll('.ot-act-check').forEach(c => { c.checked = keys.has(c.value); const f = c.closest('.ot-tarea'); if(f) f.classList.toggle('on', c.checked); });
+    document.querySelectorAll('.ot-act-prev').forEach(i => { const t = quedan.find(x => x.k === i.dataset.id); i.value = t && t.falta > 0 ? t.falta : (t && t.prev > 0 && !pend.length ? t.prev : ''); });
+    try{
+      const man = quedan.filter(t => t.manual);
+      actividades = man.length ? man.map(t => ({ id: actividadIdSeq++, catalogoId:'', actividad:t.label, detalle:t.detalle||'', pasos:'' })) : [{ id: actividadIdSeq++, catalogoId:'', actividad:'', detalle:'', pasos:'' }];
+      renderActividades();
+    }catch(e){}
+    try{ actualizarResumenTareasOt(); }catch(e){}
+    $('otMateriales').value = '';
+    const card = $('parteResultCard'); if(card) card.innerHTML = '<div class="empty-state"><div class="big">📋</div>Revisá la orden nueva y tocá <b>«Emitir orden de trabajo»</b>.</div>';
+    const msg = $('otMsg'); msg.style.color = 'var(--text-soft)';
+    msg.innerHTML = `Orden nueva armada a partir de <b>${esc(o.numero||'')}</b> para el <b>${esc(formatFechaCorta(fecha))}</b>${pend.length ? ` con lo que faltó (${pend.length} tarea${pend.length > 1 ? 's' : ''})` : ''}. Revisala y tocá «Emitir».`;
+    $('otFecha').scrollIntoView({ behavior:'smooth', block:'center' });
+  };
+
+  // ---------- Revisar y cerrar: el cierre de siempre, ya cargado con lo que marcó la cuadrilla ----------
+  function cierreDesdeCampo(o){
+    const c = campo(o); if(!c.marcas && !c.horas && !c.novedades) return null;
+    const cantidades = {}; tareasDe(o).forEach(t => { const m = marcaDe(o, t.k); if(m && m.hecho){ const v = num(m.cant) || t.prev || 1; if(v > 0) cantidades[t.k] = v; } });
+    const horasPersona = {}; gente(o).forEach(p => { const h = (c.horas || {})[llave(p.nombre.trim())]; if(h && num(h.horas) > 0) horasPersona[p.nombre.trim()] = num(h.horas); });
+    const obs = [
+      ...tareasDe(o).map(t => { const m = marcaDe(o, t.k); return m && !m.hecho ? `${t.label}: no se hizo${m.motivo ? ' (' + motivoTxt(m.motivo) + ')' : ''}${m.nota ? ' — ' + m.nota : ''}` : ''; }),
+      ...Object.entries(c.novedades || {}).filter(([,v]) => String(v||'').trim()).map(([k, v]) => { const p = gente(o).find(x => llave(x.nombre.trim()) === k); return `${p ? p.nombre.split(' ')[0] : k}: ${v}`; })
+    ].filter(Boolean).join('\n');
+    return { cantidades, horasPersona, obs, reparto:{} };
+  }
+  function resumenCampoHtml(o){
+    const c = campo(o); const env = enviados(o);
+    const filas = tareasDe(o).map(t => {
+      const m = marcaDe(o, t.k);
+      if(!m) return `<li><b>${esc(t.label)}</b>: <span style="color:#9a5a00;">sin marcar</span></li>`;
+      if(m.hecho) return `<li>✓ <b>${esc(t.label)}</b>${!t.manual ? ': ' + esc(fmtN(num(m.cant) || t.prev || 1)) + ' ' + esc(plural(t.un, num(m.cant) || t.prev || 1)) + (t.prev > 0 ? ' de ' + esc(fmtN(t.prev)) : '') : ''} <span style="color:var(--text-3);">· ${esc(String(m.por||'').split(' ')[0])}</span></li>`;
+      return `<li style="color:#b3261e;">✗ <b>${esc(t.label)}</b>: no se hizo${m.motivo ? ' — ' + esc(motivoTxt(m.motivo)) : ''}${m.nota ? ' «' + esc(m.nota) + '»' : ''}</li>`;
+    }).join('');
+    const faltanEnviar = gente(o).filter(p => !(c.enviados || {})[llave(p.nombre.trim())]).map(p => p.nombre.split(' ')[0]);
+    const fotos = Object.keys(c.fotos || {});
+    return `<div class="cierre-campo"><b class="t">📱 Lo que marcó la cuadrilla</b>
+      ${env.length ? `Enviaron: <b>${env.map(x => esc(String(x.nombre).split(' ')[0])).join(', ')}</b>${faltanEnviar.length ? ` · todavía no: ${faltanEnviar.map(esc).join(', ')}` : ''}` : 'Todavía nadie tocó «Enviar», pero ya hay marcas.'}
+      <ul>${filas}</ul>
+      ${fotos.length ? `<div class="fotos">${fotos.map(id => `<img data-adj="${esc(id)}" alt="foto">`).join('')}</div>` : ''}
+      <div style="margin-top:8px; color:var(--text-soft); font-size:12.5px;">Abajo ya está cargado con esto (cantidades, horas y novedades). Revisalo y guardá.${pendientesDe(o).length ? ' Después, en el tablero, «Repetir con lo que faltó» arma la orden siguiente.' : ''}</div></div>`;
+  }
+  if(typeof window.abrirCierreOt === 'function'){
+    const orig = window.abrirCierreOt;
+    window.abrirCierreOt = function(id){
+      const o = OTS().find(x => x.id === id);
+      const pre = o && !(o.cierre && o.cierre.cerradoTs) ? cierreDesdeCampo(o) : null;
+      const cierreAntes = o ? o.cierre : undefined;
+      if(pre) o.cierre = { ...(o.cierre || {}), ...pre };
+      let r;
+      try{ r = orig.apply(this, arguments); } finally { if(pre) o.cierre = cierreAntes; }
+      if(o && (pre || Object.keys(campo(o).marcas || {}).length)){
+        const cuerpo = $('cierreCuerpo');
+        if(cuerpo){
+          cuerpo.insertAdjacentHTML('afterbegin', resumenCampoHtml(o));
+          cuerpo.querySelectorAll('.cierre-campo img[data-adj]').forEach(async img => { try{ const d = await window.fbAdjuntoLeer(img.dataset.adj); if(d && d.dataUrl) img.src = d.dataUrl; }catch(e){} });
+          const term = $('cierreTerminada'); if(term && pre) term.checked = !pendientesDe(o).length;
+          try{ cuerpo.dispatchEvent(new Event('input', { bubbles:true })); }catch(e){}
+        }
+      }
+      return r;
+    };
+  }
+
+  // ---------- Tablero de Órdenes ----------
+  let busqueda = '', verTodasCerradas = false, formAbierto = null;
+  function abrirFormulario(si){
+    formAbierto = !!si;
+    const v = $('viewParteDiario'); if(!v) return;
+    const g = v.querySelector(':scope > .grid'); const cab = $('otFormCab');
+    if(g) g.style.display = formAbierto ? '' : 'none';
+    if(cab) cab.style.display = formAbierto ? '' : 'none';
+    const b = $('otNuevaBtn'); if(b) b.textContent = formAbierto ? 'Cerrar el formulario' : '+ Nueva orden';
+  }
+  function grupoDe(o){
+    const h0 = hoy();
+    if(o.estado === 'Anulada') return 'anulada';
+    if(o.cierre && o.cierre.cerradoTs) return 'cerr';
+    if(o.estado === 'Terminada') return 'cerr';
+    if(enviados(o).length) return 'revisar';
+    if(o.fecha < h0) return 'atras';
+    if(o.fecha === h0) return 'obra';
+    return 'prox';
+  }
+  function cardHtml(o, g){
+    const todas = tareasDe(o); const marc = todas.filter(t => marcaDe(o, t.k)).length;
+    const noHechas = todas.filter(t => { const m = marcaDe(o, t.k); return m && !m.hecho; }).length;
+    const pend = g === 'cerr' ? pendientesDe(o) : [];
+    const dias = g === 'atras' ? Math.round((new Date(hoy() + 'T12:00:00') - new Date(o.fecha + 'T12:00:00')) / 864e5) : 0;
+    let acc = '';
+    if(g === 'revisar') acc = `<button type="button" class="btn-primary" data-ota="cerrar">Revisar y cerrar</button>`;
+    else if(g === 'atras') acc = `<button type="button" class="btn-ghost" data-ota="cerrar">Cerrar a mano</button>`;
+    else if(g === 'obra' || g === 'prox') acc = `<button type="button" class="btn-ghost" data-ota="editar">✏ Editar</button>`;
+    if(g === 'cerr' && pend.length) acc += `<button type="button" class="btn-ghost" data-ota="repetir">↻ Repetir con lo que faltó</button>`;
+    else if(g !== 'revisar') acc += `<button type="button" class="btn-ghost" data-ota="repetir" title="Arma una orden nueva igual, para el día siguiente">↻ Repetir</button>`;
+    acc += `<button type="button" class="btn-ghost" data-ota="ver" title="Ver / imprimir la orden">👁</button>`;
+    return `<div class="ot-tb-card" data-otid="${esc(o.id)}">
+      <div class="pl">${esc(o.plazaNombre||'(sin plaza)')}</div>
+      <div class="meta">${esc(String(o.numero||'').replace(/^OT-\d{4}-/, 'OT-'))} · ${esc(o.fecha === hoy() ? 'hoy' : (diaSemanaDeFecha(o.fecha)||'').slice(0,3) + ' ' + formatFechaCorta(o.fecha).slice(0,5))} · ${esc(o.cuadrilla || gente(o).map(p => p.nombre.split(' ')[0]).join(', ') || '—')}</div>
+      ${g !== 'prox' && todas.length ? `<div class="mt-prog" style="margin-top:8px;"><i style="width:${Math.round(marc / todas.length * 100)}%"></i></div><div class="meta" style="margin-top:5px;">${marc} de ${todas.length} marcadas${noHechas ? ` · <b style="color:#b3261e;">${noHechas} no se hizo</b>` : ''}${g === 'revisar' ? ` · enviaron ${enviados(o).length}/${gente(o).length}` : ''}</div>` : (g === 'prox' ? `<div class="meta" style="margin-top:5px;">${todas.length} tarea(s) · ${gente(o).length} persona(s)</div>` : '')}
+      ${g === 'atras' ? `<span class="ot-tag er">Hace ${dias} día${dias > 1 ? 's' : ''} sin cerrar</span>` : ''}
+      ${g === 'cerr' && o.estado !== 'Terminada' ? `<span class="ot-tag av">Sigue otro día</span>` : ''}
+      ${g === 'cerr' && pend.length ? `<span class="ot-tag av" style="margin-left:4px;">Faltó: ${pend.length}</span>` : ''}
+      <div class="acc">${acc}</div></div>`;
+  }
+  function renderTablero(){
+    const v = $('viewParteDiario'); if(!v || v.style.display === 'none') return;
+    let tb = $('otTablero');
+    if(!tb){
+      tb = document.createElement('div'); tb.id = 'otTablero'; tb.className = 'no-print';
+      const g = v.querySelector(':scope > .grid'); if(!g) return;
+      g.insertAdjacentElement('beforebegin', tb);
+      g.insertAdjacentHTML('beforebegin', `<div class="ot-form-cab no-print" id="otFormCab"><h2>Nueva orden</h2><button type="button" class="btn-ghost" data-ota="cerrarform" style="width:auto; margin:0;">✕ Cerrar</button></div>`);
+      escucharCuadrillas();
+    }
+    if(formAbierto === null) abrirFormulario(!OTS().length);
+    if(document.activeElement && document.activeElement.id === 'otTbBuscar' && $('otTbCols')){ pintarViejas(); pintarCols(); return; }
+    tb.innerHTML = `<div class="ot-tb-cab"><div class="ot-tb-bus"><input type="search" id="otTbBuscar" placeholder="🔍 Buscar plaza, ID, OT, cuadrilla o persona…" value="${esc(busqueda)}" autocomplete="off" data-lpignore="true"></div>
+      <div class="btns"><button type="button" class="btn-primary" id="otNuevaBtn" data-ota="nueva">${formAbierto ? 'Cerrar el formulario' : '+ Nueva orden'}</button></div></div>
+      <div id="otTbViejas"></div><div class="ot-tb-cols" id="otTbCols"></div>`;
+    pintarViejas();
+    pintarCols();
+    pintarCuadrillas();
+    pintarPuntajes();
+  }
+  function pintarCols(){
+    const cols = $('otTbCols'); if(!cols) return;
+    const q = norm(busqueda);
+    const lista = OTS().filter(o => !q || norm([o.plazaNombre, o.obraId, o.numero, o.cuadrilla, o.responsable, o.barrio, ...gente(o).map(p => p.nombre)].join(' ')).includes(q));
+    const G = { revisar:[], obra:[], atras:[], prox:[], cerr:[] };
+    lista.forEach(o => { const g = grupoDe(o); if(G[g]) G[g].push(o); });
+    G.revisar.sort((a,b) => String(a.fecha).localeCompare(String(b.fecha)));
+    G.atras.sort((a,b) => String(a.fecha).localeCompare(String(b.fecha)));
+    G.prox.sort((a,b) => String(a.fecha).localeCompare(String(b.fecha)));
+    G.cerr.sort((a,b) => String(b.fecha).localeCompare(String(a.fecha)) || num((b.cierre||{}).cerradoTs) - num((a.cierre||{}).cerradoTs));
+    const col = (k, cls, tit, arr, vacio, tope) => {
+      const ver = tope && !verTodasCerradas ? arr.slice(0, tope) : arr;
+      return `<div class="ot-tb-col ${cls}"><h3>${tit} <span class="n">${arr.length}</span></h3>${ver.map(o => cardHtml(o, k)).join('') || `<div class="ot-tb-vacio">${vacio}</div>`}
+        ${tope && arr.length > tope ? `<button type="button" class="ot-tb-mas" data-ota="mas">${verTodasCerradas ? 'Ver menos' : 'Ver las ' + arr.length + ' ›'}</button>` : ''}</div>`;
+    };
+    cols.innerHTML = col('revisar', 'revisar', '🔔 Para revisar', G.revisar, 'Nada para revisar. Cuando la cuadrilla toque «Enviar», aparece acá.')
+      + `<div class="ot-tb-col"><h3>🔧 En obra hoy <span class="n">${G.obra.length}</span></h3>${G.obra.map(o => cardHtml(o, 'obra')).join('') || '<div class="ot-tb-vacio">Hoy no hay órdenes en obra.</div>'}
+          ${G.prox.length ? `<h3 style="margin-top:12px;">📅 Próximas <span class="n">${G.prox.length}</span></h3>${G.prox.slice(0, 6).map(o => cardHtml(o, 'prox')).join('')}` : ''}</div>`
+      + col('atras', 'atras', '⚠ Atrasadas', G.atras, 'Ninguna atrasada. 👌')
+      + col('cerr', 'cerr', '✅ Cerradas', G.cerr, 'Todavía no se cerró ninguna.', 5);
+  }
+  // Órdenes abiertas emitidas antes de este cambio: no tienen la lista de nombres que piden las reglas de la base,
+  // así que la cuadrilla no las podría marcar. Se preparan con un toque (no se cambia nada solo).
+  const viejas = ()=> OTS().filter(o => !cerrada(o) && !(o.cierre && o.cierre.cerradoTs) && o.fecha >= sumarDia(hoy(), -7) && gente(o).length && !Array.isArray(o.personalNombres));
+  function pintarViejas(){
+    const c = $('otTbViejas'); if(!c) return; const v = viejas();
+    c.innerHTML = v.length ? `<div class="ot-aviso" style="background:#eef6fa; border-color:#c9e3ee; color:#1f4f63;">📱 <span>Hay <b>${v.length}</b> orden(es) abiertas de antes de que existiera «Mis tareas». Para que la cuadrilla las pueda marcar desde el celu, preparalas.</span>
+      <button type="button" class="btn-ghost" data-ota="preparar" style="width:auto; margin:0 0 0 auto; flex:0 0 auto;">Preparar</button></div>` : '';
+  }
+  document.addEventListener('click', async e => {
+    if(!e.target.closest('[data-ota="preparar"]')) return;
+    let n = 0;
+    for(const o of viejas()){ try{ await window.fbOtUpdate(o.id, { personalNombres: gente(o).map(p => norm(p.nombre)) }); n++; }catch(err){ console.warn(err); } }
+    const c = $('otTbViejas'); if(c) c.innerHTML = `<div class="ot-aviso" style="background:#e9f8ee; border-color:#bfe8cb; color:#1d5e33;">✓ <span>Listo: ${n} orden(es) preparadas.</span></div>`;
+  });
+  document.addEventListener('input', e => { if(e.target.id === 'otTbBuscar'){ busqueda = e.target.value; pintarCols(); } });
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-ota]'); if(!b || !b.closest('#viewParteDiario')) return;
+    const a = b.dataset.ota; const card = b.closest('[data-otid]'); const id = card && card.dataset.otid;
+    if(a === 'nueva'){ abrirFormulario(!formAbierto); if(formAbierto) setTimeout(()=> { const f = $('otFecha'); if(f) f.scrollIntoView({ behavior:'smooth', block:'center' }); }, 30); return; }
+    if(a === 'cerrarform'){ abrirFormulario(false); window.scrollTo({ top:0, behavior:'smooth' }); return; }
+    if(a === 'mas'){ verTodasCerradas = !verTodasCerradas; pintarCols(); return; }
+    if(!id) return;
+    if(a === 'cerrar') window.abrirCierreOt(id);
+    else if(a === 'editar') window.editarOrdenTrabajo(id);
+    else if(a === 'repetir'){ abrirFormulario(true); window.repetirOrden(id); }
+    else if(a === 'ver'){ abrirFormulario(true); verOrdenTrabajo(id); }
+  });
+
+  // ---------- Cuando cambian las órdenes ----------
+  window.alCambiarOrdenes = function(){
+    if($('viewMisTareas') && $('viewMisTareas').style.display !== 'none') renderMisTareas();
+    if($('viewParteDiario') && $('viewParteDiario').style.display !== 'none') renderTablero();
+    pintarMenuN();
+  };
+  window.renderMisTareas = renderMisTareas;
+  window.__ordenesCampo = { tareasDe, pendientesDe, cierreDesdeCampo, grupoDe, llave, norm, vaciarCola };
+  setTimeout(vaciarCola, 3000);
+})();
+</script>
+
+<!-- ============================================================================================
      USUARIOS Y PERMISOS (2026-09-28)
      ============================================================================================
      Pedido: «estoy agregando usuarios; la idea es que entren a la app con esos usuarios y que
@@ -36204,18 +37515,21 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
   const HOJAS = [
     ['inicio','Inicio'], ['registro','Registrar obra'], ['calc','Cálculo de materiales'], ['parte','Órdenes de trabajo'],
     ['plan','Planificación semanal'], ['avance','Avance de obra'], ['mapa','Mapa'], ['stock','Pañol / Stock'],
-    ['informe','Informes'], ['gastos','Gastos de obra'], ['produccion','Producción del personal'], ['normas','Normas y planos']
+    ['informe','Informes'], ['gastos','Gastos de obra'], ['produccion','Producción del personal'], ['normas','Normas y planos'],
+    ['mistareas','Mis tareas (cuadrilla)']
   ];
   const todas = p => Object.fromEntries(HOJAS.map(([k]) => [k, p]));
   const ROLES = {
     admin:{ nombre:'Administrador', txt:'Todo, y maneja los usuarios', hojas: todas('editar') },
     oficina:{ nombre:'Oficina', txt:'Carga y cambia todo', hojas: todas('editar') },
     panol:{ nombre:'Pañol', txt:'Carga en el pañol; mira obras y mapa', hojas:{ ...todas('oculto'), inicio:'ver', registro:'ver', avance:'ver', mapa:'ver', stock:'editar', normas:'ver' } },
-    cuadrilla:{ nombre:'Cuadrilla', txt:'Carga órdenes y avance; mira lo demás', hojas:{ ...todas('ver'), parte:'editar', avance:'editar', informe:'oculto', gastos:'oculto', produccion:'oculto' } },
+    cuadrilla:{ nombre:'Cuadrilla', txt:'Carga órdenes y avance; mira lo demás', hojas:{ ...todas('ver'), parte:'editar', avance:'editar', informe:'oculto', gastos:'oculto', produccion:'oculto', mistareas:'editar' } },
+    // Operario (2026-10-02): el de la cuadrilla con su celu. Solo ve y marca SUS tareas del día (y su tablero).
+    operario:{ nombre:'Operario (celu)', txt:'Solo ve y marca sus tareas del día', hojas:{ ...todas('oculto'), mistareas:'editar' } },
     mirar:{ nombre:'Solo mirar', txt:'Ve todo, no cambia nada', hojas:{ ...todas('ver'), gastos:'oculto', produccion:'oculto' } }
   };
   const VISTA_DE_ID = { viewInicio:'inicio', viewRegistro:'registro', viewCalculadora:'calc', viewParteDiario:'parte', viewPlanificacion:'plan', viewAvance:'avance',
-    viewMapa:'mapa', viewStock:'stock', viewInforme:'informe', viewGastos:'gastos', viewProduccion:'produccion', viewNormas:'normas', viewTablero:'tablero', viewUsuarios:'usuarios' };
+    viewMapa:'mapa', viewStock:'stock', viewInforme:'informe', viewGastos:'gastos', viewProduccion:'produccion', viewNormas:'normas', viewTablero:'tablero', viewUsuarios:'usuarios', viewMisTareas:'mistareas' };
   const ID_DE_VISTA = Object.fromEntries(Object.entries(VISTA_DE_ID).map(([a,b]) => [b,a]));
   const nombreHoja = h => (HOJAS.find(x => x[0] === h) || [h, h === 'usuarios' ? 'Usuarios y permisos' : (h === 'tablero' ? 'Mi tablero' : h)])[1];
 
@@ -36229,6 +37543,8 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
   const esAdmin = ()=> { const y = yo(); return !!(y && y.rol === 'admin' && y.activo !== false); };
   function permiso(h){
     if(h === 'tablero') return 'editar';
+    // «Mis tareas» solo tiene sentido con el usuario vinculado a una persona de la nómina (o para el administrador, que la puede previsualizar).
+    if(h === 'mistareas'){ const y = yo(); if(!(y && String(y.persona||'').trim()) && !esAdmin()) return 'oculto'; }
     if(h === 'usuarios') return (!cargado || !window.__fbUser) ? 'oculto' : (!hayAdmin() || esAdmin() ? 'editar' : 'oculto');
     if(window.__modoEmergencia) return 'ver';                     // entrada de emergencia (sin conexión): solo mirar
     if(!cargado) return window.__fbUser ? 'ver' : 'editar';       // con sesión, hasta que lleguen los usuarios: solo mirar
@@ -36315,7 +37631,7 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
     v.insertAdjacentHTML('afterbegin', `<div class="perm-aviso">👁 <span>En <b>${esc(nombreHoja(h))}</b> tu usuario es <b>solo para mirar</b>: podés ver todo, pero no cargar ni cambiar datos.</span></div>`);
   }
   function primeraPermitida(){
-    const orden = ['inicio','registro','calc','parte','plan','avance','mapa','stock','informe','gastos','produccion','normas','tablero'];
+    const orden = ['inicio','registro','calc','parte','plan','avance','mapa','stock','informe','gastos','produccion','normas','mistareas','tablero'];
     return orden.find(h => permiso(h) !== 'oculto') || 'tablero';
   }
   function aplicar(){
@@ -36352,7 +37668,8 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
     fbPlanAdd:['plan'], fbPlanUpdate:['plan'], fbPlanEliminar:['plan'],
     fbGastoAdd:['gastos'], fbGastoUpdate:['gastos'], fbGastoEliminar:['gastos'],
     fbHistCalcAdd:['calc'], fbHistCalcUpdate:['calc'], fbHistCalcEliminar:['calc'], fbHistCalcVaciar:['calc'],
-    fbAdjuntoGuardar:['stock','avance','parte'], fbAdjuntoBorrar:['stock','avance','parte'],
+    fbAdjuntoGuardar:['stock','avance','parte','mistareas'], fbAdjuntoBorrar:['stock','avance','parte'],
+    fbOtCampo:['mistareas','parte'], fbCuadrillasGuardar:['parte'],
     fbBaremoGuardar:['produccion'], fbPersonalGuardar:['produccion','parte'], fbPreciosGuardar:['informe','avance','gastos','produccion']
   };
   const SOLO_ADMIN = new Set(['fbReplaceAllMovimientos','fbClearMovimientos']);   // borran o reemplazan TODO el pañol
@@ -36404,6 +37721,15 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
   const colorAv = n => { let h = 0; for(const c of String(n)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return AV[h % AV.length]; };
   const inic = n => String(n||'?').trim().split(/\s+/).slice(0,2).map(p => p[0] || '').join('').toUpperCase() || '?';
   let abierto = null, rolNuevo = 'cuadrilla', msgNuevo = '';
+  // Persona de la nómina (2026-10-02): para «Mis tareas». Se guarda el nombre tal cual y una clave sin tildes ni mayúsculas
+  // (`personaClave`), que es la que comparan las reglas de la base con `personalNombres` de cada orden.
+  const normP = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+  function nominaActiva(){ return (typeof window.nominaEquipo === 'function' ? window.nominaEquipo() : []).filter(p => p.activo !== false && String(p.nombre||'').trim()); }
+  function opcionesPersona(actual){
+    const nom = nominaActiva().map(p => p.nombre.trim());
+    if(actual && !nom.some(n => normP(n) === normP(actual))) nom.push(actual);
+    return nom.map(n => `<option value="${esc(n)}" ${normP(n) === normP(actual) ? 'selected' : ''}>${esc(n)}</option>`).join('');
+  }
   function htmlUsuario(u){
     const r = ROLES[u.rol] || ROLES.mirar;
     const chip = u.activo === false ? '<span class="us-chip off">Desactivado</span>' : (u.pendiente ? '<span class="us-chip pend">A confirmar</span>' : `<span class="us-chip${u.rol === 'admin' ? ' admin' : ''}">${esc(r.nombre)}</span>`);
@@ -36416,6 +37742,10 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
         <div class="us-fila" style="margin-top:8px;">
           <label style="margin:0; font-size:12px; flex:0 0 auto;">Rol</label>
           <select data-u="rol" ${soyYo && u.rol === 'admin' ? 'disabled title="No te podés sacar a vos mismo de administrador"' : ''}>${Object.entries(ROLES).map(([k,v]) => `<option value="${k}" ${k === u.rol ? 'selected' : ''}>${esc(v.nombre)} — ${esc(v.txt)}</option>`).join('')}</select>
+        </div>
+        <div class="us-fila" style="margin-top:8px;">
+          <label style="margin:0; font-size:12px; flex:0 0 auto;">Es en la nómina</label>
+          <select data-u="persona" title="Con esto la app sabe qué órdenes son suyas («Mis tareas»)"><option value="">— Nadie (no es de cuadrilla) —</option>${opcionesPersona(u.persona)}</select>
         </div>
         <div class="us-hojas">${HOJAS.map(([h, n]) => {
           const base = (ROLES[u.rol] || ROLES.mirar).hojas[h];
@@ -36458,6 +37788,8 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
         <div style="display:flex; gap:6px;"><input type="text" id="usPass" placeholder="Ej: ema2026" autocomplete="off" style="flex:1 1 auto; margin:0;" ${esAdmin() ? '' : 'disabled'}><button type="button" class="btn-ghost" id="usGenerar" ${esAdmin() ? '' : 'disabled'}>🎲</button></div>
         <label for="usCorreo">Correo <span style="font-weight:500; color:var(--text-soft);">(opcional — si no tiene, se inventa uno interno)</span></label>
         <input type="email" id="usCorreo" placeholder="Opcional" autocomplete="off" ${esAdmin() ? '' : 'disabled'}>
+        <label for="usPersona">Es en la nómina <span style="font-weight:500; color:var(--text-soft);">(para que le aparezcan sus tareas)</span></label>
+        <select id="usPersona" ${esAdmin() ? '' : 'disabled'}><option value="">— Nadie (no es de cuadrilla) —</option>${opcionesPersona('')}</select>
         <label>Rol</label>
         <div class="us-roles">${Object.entries(ROLES).map(([k,v]) => `<button type="button" class="us-rol${k === rolNuevo ? ' activo' : ''}" data-rol="${k}" ${esAdmin() ? '' : 'disabled'}><b>${esc(v.nombre)}</b><small>${esc(v.txt)}</small></button>`).join('')}</div>
         <button type="button" class="btn-primary" id="usCrear" style="margin-top:14px; width:100%;" ${esAdmin() ? '' : 'disabled'}>Crear usuario</button>
@@ -36530,6 +37862,13 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
       await guardarUsuario(u, { activo:nuevo }, 'usMsg_' + u.uid); return;
     }
   });
+  // Si el nombre que se escribe está en la nómina, se elige solo (se puede cambiar).
+  document.addEventListener('input', e => {
+    if(e.target.id !== 'usNombre') return; const sel = $('usPersona'); if(!sel || sel.dataset.tocado) return;
+    const n = normP(e.target.value); const p = nominaActiva().find(x => normP(x.nombre) === n);
+    sel.value = p ? p.nombre.trim() : '';
+  });
+  document.addEventListener('change', e => { if(e.target.id === 'usPersona') e.target.dataset.tocado = '1'; });
   document.addEventListener('change', async e => {
     const app = $('usApp'); if(!app || !app.contains(e.target)) return;
     const item = e.target.closest('.us-item'); if(!item) return;
@@ -36537,6 +37876,7 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
     const k = e.target.dataset.u;
     if(k === 'rol'){ await guardarUsuario(u, { rol:e.target.value, pendiente:false }, 'usMsg_' + u.uid); }
     else if(k === 'nombre'){ await guardarUsuario(u, { nombre:e.target.value.trim() }, 'usMsg_' + u.uid); }
+    else if(k === 'persona'){ const pv = e.target.value.trim(); await guardarUsuario(u, { persona:pv, personaClave:normP(pv) }, 'usMsg_' + u.uid); }
     else if(k === 'usuario'){
       const nu = normU(e.target.value); const m = $('usMsg_' + u.uid);
       if(!nu){ e.target.value = u.usuario || ''; return; }
@@ -36551,10 +37891,12 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
     const nombre = ($('usNombre').value || '').trim();
     const usuario = normU($('usUsuario').value || nombre.split(' ')[0]);
     const pass = $('usPass').value || '';
+    const persona = (($('usPersona') || {}).value || '').trim();
     let correo = ($('usCorreo').value || '').trim().toLowerCase();
     if(!nombre){ set('Poné el nombre.', 'mal'); return; }
     if(!usuario){ set('Poné un usuario corto (letras y números).', 'mal'); return; }
     if(pass.length < 6){ set('La contraseña tiene que tener 6 caracteres o más.', 'mal'); return; }
+    if(rolNuevo === 'operario' && !persona){ set('Para un <b>Operario</b> elegí quién es en la nómina: si no, no le aparecen sus tareas.', 'mal'); return; }
     if(Object.values(usuarios).some(x => x.usuario === usuario) || alias[usuario]){ set(`El usuario «${usuario}» ya existe. Elegí otro.`, 'mal'); return; }
     if(!correo) correo = `${usuario}@${(window.PORTADA && PORTADA.DOMINIO_CORTO) || 'ema-alumbrado.app'}`;
     const b = $('usCrear'); b.disabled = true; set('Creando…');
@@ -36565,7 +37907,7 @@ select.per-sector.ilicitos{ background:#fde7e5; color:#a3231b; font-weight:700; 
       const cred = await sec.auth().createUserWithEmailAndPassword(correo, pass);
       const nuevoUid = cred.user.uid;
       try{ await sec.auth().signOut(); }catch(e){}
-      try{ await db().collection('usuarios').doc(nuevoUid).set({ email:correo, usuario, nombre, rol:rolNuevo, pendiente:false, activo:true, creado:Date.now(), creadoPor:(window.__fbUser && window.__fbUser.email) || '' }); }
+      try{ await db().collection('usuarios').doc(nuevoUid).set({ email:correo, usuario, nombre, rol:rolNuevo, persona, personaClave:normP(persona), pendiente:false, activo:true, creado:Date.now(), creadoPor:(window.__fbUser && window.__fbUser.email) || '' }); }
       catch(e2){ set(`⚠ La cuenta de <b>${esc(usuario)}</b> quedó creada, pero no se pudo guardar su rol (${esc(e2.message || e2)}). Cuando entre por primera vez va a aparecer en la lista como «A confirmar»: dale el rol ahí.`, 'mal'); b.disabled = false; return; }
       await guardarAlias(usuario, correo);
       msgNuevo = `✓ Listo: <b>${esc(nombre)}</b> entra con usuario <b>${esc(usuario)}</b> y contraseña <b>${esc(pass)}</b> (${esc(ROLES[rolNuevo].nombre)}). Anotalo y pasáselo.`;
