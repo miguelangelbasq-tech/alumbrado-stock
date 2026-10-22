@@ -1,38 +1,28 @@
-/* Alumbrado Público — EMA Servicios · service worker (2026-09-27)
-   Para que la herramienta se pueda INSTALAR como app en el celular y en la PC.
-   Regla: SIEMPRE primero internet. Solo si no hay señal, abre la última versión guardada.
-   Así nunca queda una versión vieja pegada: cada vez que hay conexión, se usa lo último de GitHub.
-   No toca los datos (Firestore, fotos, mapas y demás servicios de afuera pasan directo, sin guardar). */
-const CACHE = 'alumbrado-app-v1';
-self.addEventListener('install', e => {
-  self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './index.html'])).catch(() => {}));
+// sw.js · App Alumbrado Público EMA — avisos al celular con la app cerrada (v050).
+// Va en la raíz del repositorio de GitHub, al lado de index.html (Add file › Upload › sw.js).
+// Recibe los avisos que manda el Worker «ema-avisos» y los muestra como notificación del celular («Tarea de EMA»).
+// No guarda nada en caché: la app se sigue bajando siempre de GitHub como hasta ahora.
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (er) { d = { title: "Tarea de EMA", body: e.data ? e.data.text() : "" }; }
+  const titulo = d.title || "Tarea de EMA";
+  e.waitUntil(self.registration.showNotification(titulo, {
+    body: d.body || "",
+    icon: d.icon || "ema-icono.png",
+    badge: d.badge || "ema-icono.png",
+    tag: d.tag || "ema-" + Date.now(),
+    renotify: true,
+    vibrate: [200, 100, 200, 100, 300],
+    data: { url: d.url || "./" }
+  }));
 });
-self.addEventListener('activate', e => {
-  e.waitUntil((async () => {
-    const claves = await caches.keys();
-    await Promise.all(claves.filter(k => k !== CACHE).map(k => caches.delete(k)));
-    await self.clients.claim();
-  })());
-});
-self.addEventListener('fetch', e => {
-  const req = e.request;
-  if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;          // Firestore, CDN, mapas: directo
-  e.respondWith((async () => {
-    try {
-      const res = await fetch(req);
-      if (res && res.ok && res.type === 'basic') {
-        const copia = res.clone();
-        caches.open(CACHE).then(c => c.put(req, copia)).catch(() => {});
-      }
-      return res;
-    } catch (err) {
-      const guardada = await caches.match(req, { ignoreSearch: true })
-        || (req.mode === 'navigate' ? (await caches.match('./index.html')) || (await caches.match('./')) : null);
-      if (guardada) return guardada;
-      throw err;
-    }
-  })());
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || "./", self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((l) => {
+    for (const c of l) if (c.url.indexOf(self.registration.scope) === 0 && "focus" in c) { c.postMessage({ tipo: "ema-aviso", url }); return c.focus(); }
+    return self.clients.openWindow ? self.clients.openWindow(url) : null;
+  }));
 });
