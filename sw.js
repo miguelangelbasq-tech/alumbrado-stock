@@ -1,11 +1,14 @@
-// sw.js · App Alumbrado Público EMA — v065: la app abre sin internet + avisos al celular (v050).
+// sw.js · App Alumbrado Público EMA — v068: con señal lenta, la versión nueva igual queda guardada para la próxima vez.
+// (v065: la app abre sin internet · v050: avisos al celular)
 // Va en la raíz del repositorio de GitHub, al lado de index.html (reemplaza al sw.js de la v050).
 //  · La app (index.html) se pide SIEMPRE primero a GitHub: con señal llega la última versión. Si no hay señal (o tarda más
 //    de 6 segundos), se abre la última que quedó guardada en el celular.
+//  · v068: si tardó más de 6 segundos, la descarga sigue por detrás y la versión nueva queda guardada: la próxima vez que se
+//    abre ya es la nueva (antes, con señal lenta, el celular se quedaba para siempre con una versión vieja).
 //  · Las piezas que vienen de afuera (Firebase, el mapa, las letras) quedan guardadas en el celular la primera vez.
 //  · Los pedazos del mapa (calles / satélite) que ya se vieron quedan guardados (hasta 2500).
 //  · NO se guarda nada de la base de datos ni de las fotos: eso lo maneja la app (base local de Firebase y cola de fotos).
-const VERSION = "ema-v065";
+const VERSION = "ema-v065";   // nombre de la caja guardada (se deja igual para no perder la copia sin señal)
 const APP = VERSION + "-app", PIEZAS = "ema-piezas-v1", MAPA = "ema-mapa-v1";
 const MAX_MAPA = 2500;
 const AFUERA = [
@@ -39,9 +42,12 @@ self.addEventListener("fetch", (e) => {
   if (r.mode === "navigate" && u.origin === self.location.origin) {
     e.respondWith((async () => {
       const c = await caches.open(APP);
+      // la descarga sigue aunque tarde: cuando termina, se guarda (e.waitUntil la mantiene viva)
+      const bajada = fetch(r, { cache: "no-store" });
+      e.waitUntil(bajada.then((x) => x && x.ok ? c.put("./", x.clone()) : null).catch(() => { }));
       try {
-        const red = await Promise.race([fetch(r, { cache: "no-store" }), new Promise((_, mal) => setTimeout(() => mal(new Error("lento")), 6000))]);
-        if (red && red.ok) { c.put("./", red.clone()).catch(() => { }); return red; }
+        const red = await Promise.race([bajada, new Promise((_, mal) => setTimeout(() => mal(new Error("lento")), 6000))]);
+        if (red && red.ok) return red;
         throw new Error("mal");
       } catch {
         return (await c.match("./")) || (await c.match(r)) || (await caches.match(r)) || new Response("<h1>Sin conexión</h1><p>Abrí la app una vez con internet para que quede guardada en el celular.</p>", { headers: { "Content-Type": "text/html; charset=utf-8" } });
