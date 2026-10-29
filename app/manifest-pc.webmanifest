@@ -23,5 +23,20 @@
       "type": "image/png",
       "purpose": "any"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Cámara EMA",
+      "short_name": "Cámara",
+      "description": "Abrir directo la cámara de obra",
+      "url": "../?camara=1",
+      "icons": [
+        {
+          "src": "atajo-camara-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
