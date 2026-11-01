@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **01/11/2026**, última versión entregada: **v085**.
+> Estado al **01/11/2026**, última versión entregada: **v086** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 
@@ -287,6 +287,7 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `arranqueRol` | 078 | Arranque por rol sin destellos |
 | `legajoPlegable` | 082 | Secciones del legajo plegables (`ema.lg.pleg`) |
 | `ubicacionVivo` | 083–085 | `__ubicacionVivo` {estado, cfg, enHorario, tic, pintarMapa, arrancar, parar}. Cuadrilla en horario: nativo `BackgroundGeolocation.addWatcher` (notificación fija) o web `watchPosition` + Wake Lock; manda cada `cadaSeg` o si se movió más de 40 m; latido 15 s; `tic()` cada 30 s. Punto en `#btnMenu .uv-menu-dot` (ok verde / busca amarillo / mal rojo) + `#uvMenuLinea` en el menú. Oficina: pines `.uv-pin` (on verde / off gris «sin actualizar desde HH:MM») y `#uvPanel` «👷 Personal en vivo N de M». |
+| `cuadrillaLiviana` + bloque `__col` en las suscripciones | 086 | Entrada rápida de la cuadrilla: `__modoDatos` {estado, liviano, cargarTodo, revisar}. Cuadrilla/operario sin permisos de oficina (según `ema.perfil.<uid>` del último usuario, `ema.ultimoUid`) baja solo SUS órdenes (`where personalNombres array-contains personaClave`); cómputos/etapas/plan 1,5 s después, movimientos 6 s después o al abrir otra hoja. Si el rol confirmado ya no es cuadrilla, pasa a completo. |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -314,6 +315,7 @@ Otros globals útiles:
 - **Calculadora → itemizado → avance → certificación:** el cómputo guarda `form` (se puede editar).
   - `epecPreviaDe(obra)` mapea el cómputo a ítems del Anexo I.
   - El avance total sale del itemizado (lo hecho pesado por K).
+- **Entrada de la cuadrilla (v086):** primero sus órdenes, después lo demás por tandas (ver `cuadrillaLiviana`). En ese modo `ordenesTrabajo` tiene **solo las de esa persona**: no armes nada para la cuadrilla que necesite las órdenes de otros.
 - **Ubicación en vivo:** solo cuadrilla/operario, solo en el horario de `configEquipo/ubicacion`. La oficina la ve en el Mapa. Fuera de horario se escribe `activo:false`.
 - **Revisar versión / actualizar:**
   - fetch `index.html` con `cache:"no-cache"` (ETag);
@@ -457,6 +459,7 @@ Ejemplos:
   - `__mtVistaTodas=true` (Mis tareas desplegado) salvo `mtNuevo:true`;
   - `ema.rs.porObra=0` salvo `rsObra:true`;
   - `__lgPlegTodoAbierto=true` salvo `lgPleg:true`.
+- **Señal lenta simulada (v086):** `window.__stubKbps = 2000` (en `firebase_stub.js`): cada consulta tarda lo que tarda bajar sus datos por un caño compartido. Lo usa `t_v086`.
 - `t_v083` quedó reemplazada por `t_v084` (buscaba el cartel viejo de ubicación).
 - **Cada versión nueva suma su `t_vNNN.js`.** Si cambia un comportamiento probado, actualizá la prueba vieja y decí por qué.
 
@@ -511,6 +514,7 @@ Ejemplos:
 | 083 | Ubicación en vivo del personal (reglas v083) |
 | 084 | Punto verde en el menú en vez del cartel, arranque más rápido, soporte del cargador del APK |
 | 085 | La cajita de ubicación en el menú ya no se desborda; punto más adentro del botón |
+| 086 | Entrada rápida para la cuadrilla: primero sus órdenes (y la cámara), el resto por tandas |
 
 ---
 
