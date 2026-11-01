@@ -531,6 +531,7 @@ Ejemplos:
 - 40 `setInterval` permanentes: consolidar en un planificador que se pause con `document.hidden`.
 - Barrio: faltan planos AP-TC-055 A–G, AP-TC-024, AP-TC-004, AP-TC-021, AP-CC-010, AP-T-014 y el itemizado de barrio.
 - Entrar con huella (WebAuthn), medidor GPS/RTK: ideas charladas, **no hacer todavía**.
+- **Proyectista** (relevamiento con GPS RTK → plano DXF automático → cálculo lumínico tipo DIALux → caídas de tensión y tablero → proyecto completo; después BT/MT/AT/loteos): idea y plan por etapas en `docs/PROYECTISTA.md`. **No programar sin pedido de Ángel**; arrancar por la etapa que él elija.
 
 ---
 
