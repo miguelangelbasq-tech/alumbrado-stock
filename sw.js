@@ -1,4 +1,10 @@
-// sw.js · App Alumbrado Público EMA — v073: la «Cámara EMA» (carpeta camara/) se guarda aparte y no pisa la app.
+// v086: para saber si hay versión nueva pregunta solo el principio del archivo (16 KB, la «versión» de arriba) en vez de
+//   bajar la app entera (1,7 MB) cada vez que se abre: GitHub a veces cambia la etiqueta aunque el archivo sea el mismo y
+//   la descarga de fondo le sacaba señal a Firebase justo al entrar.
+// sw.js · App Alumbrado Público EMA — v075: la app abre AL TOQUE con la copia guardada en el celular y se actualiza por
+//   detrás (antes esperaba a bajar la app entera de GitHub: con señal lenta, 8 a 15 s). La versión nueva se ve al abrir otra vez
+//   o con «✨ Hay una versión nueva · Actualizar». Para preguntar si cambió usa la etiqueta de GitHub (contesta «igual» sin mandarla).
+// v073: la «Cámara EMA» (carpeta camara/) se guarda aparte y no pisa la app.
 // v068: con señal lenta, la versión nueva igual queda guardada para la próxima vez.
 // (v065: la app abre sin internet · v050: avisos al celular)
 // Va en la raíz del repositorio de GitHub, al lado de index.html (reemplaza al sw.js de la v050).
@@ -36,23 +42,65 @@ self.addEventListener("activate", (e) => e.waitUntil((async () => {
 const esMapa = (u) => /(^|\.)tile\.openstreetmap\.org$/.test(u.hostname) || u.hostname === "server.arcgisonline.com";
 const esPieza = (u) => u.hostname === "www.gstatic.com" && u.pathname.startsWith("/firebasejs/") || u.hostname === "cdnjs.cloudflare.com" || u.hostname === "fonts.googleapis.com" || u.hostname === "fonts.gstatic.com" || u.hostname === "unpkg.com" || u.hostname === "cdn.jsdelivr.net";
 async function recortar(nombre, max) { try { const c = await caches.open(nombre), ks = await c.keys(); for (let i = 0; i < ks.length - max; i++) await c.delete(ks[i]); } catch { } }
+
+// v086: versión publicada (meta de arriba del index)
+async function verDe(resp) {
+  try {
+    const rd = resp.body.getReader(), dec = new TextDecoder(); let tx = "";
+    while (tx.length < 20000) { const x = await rd.read(); if (x.done) break; tx += dec.decode(x.value, { stream: true }); const m = tx.match(/<meta name="ema-version" content="([^"]+)"/); if (m) { rd.cancel().catch(() => { }); return m[1]; } }
+    rd.cancel().catch(() => { });
+  } catch { }
+  return "";
+}
+async function revisarLiviano(c, r) {
+  const urlIdx = new URL("index.html", self.registration.scope).href;
+  const g = await fetch(urlIdx + "?v=" + Date.now(), { cache: "no-store", headers: { Range: "bytes=0-16383" } });
+  if (!g || !g.ok) return;
+  if (g.status === 200) {   // el servidor mandó la app entera (no entiende «Range»): se guarda esa misma, sin bajarla de nuevo
+    const v0 = await verDe(g.clone());
+    await c.put("./", g);
+    if (v0) await c.put("./__ver", new Response(v0)); else await c.delete("./__ver");
+    return;
+  }
+  const nueva = await verDe(g);
+  const tengo = await c.match("./__ver").then((x) => (x ? x.text() : "")).catch(() => "");
+  if (nueva && tengo && nueva === tengo) return;   // igual: no baja nada más
+  const x = await fetch(r.url, { cache: "no-store" });   // distinta (o todavía no se sabe): baja la app entera una vez
+  if (x && x.ok) {
+    const vv = await verDe(x.clone());
+    await c.put("./", x);
+    if (vv) await c.put("./__ver", new Response(vv));
+  }
+}
 self.addEventListener("fetch", (e) => {
   const r = e.request; if (r.method !== "GET") return;
   let u; try { u = new URL(r.url); } catch { return; }
   // la app: primero GitHub; sin señal, la guardada
   if (r.mode === "navigate" && u.origin === self.location.origin) {
+    const clave = /\/camara\/(index\.html)?$/.test(u.pathname) ? "camara/" : "./";   // v073: cada página en su lugar
     e.respondWith((async () => {
-      const c = await caches.open(APP);
-      // la descarga sigue aunque tarde: cuando termina, se guarda (e.waitUntil la mantiene viva)
-      const bajada = fetch(r, { cache: "no-store" });
-      const clave = /\/camara\/(index\.html)?$/.test(u.pathname) ? "camara/" : "./";   // v073: cada página en su lugar
-      e.waitUntil(bajada.then((x) => x && x.ok ? c.put(clave, x.clone()) : null).catch(() => { }));
+      const c = await caches.open(APP), guardada = await c.match(clave);
+      if (guardada && clave === "./") {   // v086: abre la guardada y revisa por detrás con 16 KB
+        e.waitUntil(revisarLiviano(c, r).catch(() => { }));
+        return guardada;
+      }
+      // por detrás: preguntarle a GitHub si cambió (no-cache = con la etiqueta; si no cambió no la manda de nuevo)
+      const bajada = fetch(r, { cache: "no-cache" }).then(async (x) => {
+        if (x && x.ok && clave === "./") { const vv = await verDe(x.clone()); vv && c.put("./__ver", new Response(vv)); }
+        if (x && x.ok) {
+          const igual = guardada && guardada.headers.get("etag") && guardada.headers.get("etag") === x.headers.get("etag");
+          if (!igual) await c.put(clave, x.clone());
+        }
+        return x;
+      });
+      e.waitUntil(bajada.catch(() => { }));
+      if (guardada) return guardada;   // v075: al toque
       try {
-        const red = await Promise.race([bajada, new Promise((_, mal) => setTimeout(() => mal(new Error("lento")), 6000))]);
+        const red = await Promise.race([bajada, new Promise((_, mal) => setTimeout(() => mal(new Error("lento")), 20000))]);
         if (red && red.ok) return red;
         throw new Error("mal");
       } catch {
-        return (await c.match(clave)) || (await c.match(r)) || (await caches.match(r)) || new Response("<h1>Sin conexión</h1><p>Abrí la app una vez con internet para que quede guardada en el celular.</p>", { headers: { "Content-Type": "text/html; charset=utf-8" } });
+        return (await c.match(r)) || (await caches.match(r)) || new Response("<h1>Sin conexión</h1><p>Abrí la app una vez con internet para que quede guardada en el celular.</p>", { headers: { "Content-Type": "text/html; charset=utf-8" } });
       }
     })());
     return;
