@@ -46,8 +46,15 @@
 | 4 | **Lumínico:** cargar fotometrías IES/LDT, mapa de iluminancia, zonas oscuras, iluminancia media y uniformidad | Fotometrías y niveles a cumplir |
 | 5 | Baja/media/alta tensión, loteos | Más adelante |
 
+## Decidido con Ángel (01/11/2026)
+- **Quién lo usa:** solo **Oficina y Administrador**. La cuadrilla no lo ve: ni en el menú ni en lo que baja su celular.
+- **Rápido y liviano:** pensado sobre todo **para la computadora**, aunque también tiene que andar en el celular (para relevar en la obra).
+- **Está dentro de la app:** entrada propia en el menú, solo para esos roles. El código se carga aparte, solo cuando se abre, así no pesa en la app.
+- **RTK:** todavía no tiene. Ya tiene uno en mente y lo va a conseguir.
+- **Base de Córdoba (DWG):** la armó Ángel con Claude en otro chat. La va a traer cuando arranquemos.
+- **Cuándo:** primero se cierra la versión en curso (v088, juntando lo de SALEM y lo de Claude Code), se sube, y después se arranca con Proyectista.
+
 ## Preguntas abiertas para Ángel
-- ¿Ya tiene receptor RTK, o hay que elegir uno?
+- ¿Qué receptor RTK tiene en mente (marca y modelo)?
 - La base de Córdoba: ¿en qué formato está (DWG/DXF), cuánto pesa y en qué sistema de coordenadas?
-- ¿Quién lo usa: la oficina o un rol nuevo «proyectista»?
 - ¿Arrancamos por la etapa 1 con el GPS del celular, mientras se consigue el RTK?
