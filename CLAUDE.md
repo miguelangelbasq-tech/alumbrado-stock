@@ -1,0 +1,551 @@
+# CLAUDE.md — App «Alumbrado Público» de EMA Servicios
+
+> Contexto completo para Claude Code. Leelo entero antes de tocar nada.
+> Estado al **01/11/2026**, última versión entregada: **v085**.
+> Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
+> Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
+
+---
+
+## 0. Cómo usar este kit
+
+```
+CLAUDE.md                        ← este archivo
+fuente/085_2026-11-01_app-EMA_ORIGINAL.html   ← CÓDIGO FUENTE LEGIBLE (≈5 MB, ~59.900 líneas). Se edita ESTE.
+fuente/index.html                ← lo publicado (compactado). NO se edita a mano: se genera.
+herramientas/compactar80.js      ← ORIGINAL → index.html (esbuild, target chrome80)
+herramientas/patch_v085.py, ubicacion_vivo.js, BASE_SHA   ← ejemplo del método de parches
+publicar/                        ← lo que va en la raíz del repo de GitHub además del index (sw.js, ema-icono.png, app/, camara/)
+firebase/Reglas_Firestore_v083.txt   ← reglas vigentes de Firestore (texto para pegar en la consola)
+pruebas/                         ← arnés Playwright (h.js, firebase_stub.js, reglas_stub.js) y una prueba por versión (t_v022 … t_v084, t_nav, t_humo, t_cuadrilla, t_cargador…)
+android/AlumbradoApp.zip         ← proyecto Capacitor del APK de Android
+```
+
+- **Fuente de la verdad:** el ORIGINAL de la última versión.
+- `index.html` es un derivado: nunca se edita a mano.
+- Ángel también trabaja con otro asistente (SALEM, en claude.ai) que arma versiones sobre el mismo ORIGINAL. **Si cambiás la app, devolvé siempre el ORIGINAL nuevo además del index.** Si no, la próxima versión de SALEM pisa tus cambios (o al revés).
+
+---
+
+## 1. Qué es y para quién
+
+- **Cliente/usuario:** Ángel, de EMA Servicios (Córdoba, Argentina).
+  - Trabaja en obra y lee mucho desde el celular.
+  - Escribe rápido y con errores de tipeo: interpretá la intención.
+  - Hablale en **español rioplatense, simple y directo** (vos, tenés, fijate). Respuestas cortas: primero la respuesta, después el detalle.
+- **Contrato:** EPEC (empresa provincial de energía) «Servicio de adecuación eléctrica de plazas», **LPE 5589 / SIC 21760**.
+  - 244 plazas en 3 zonas: A Este 127 · B Centro 63 · C Oeste 54.
+  - 35.364 módulos. Ver el dominio técnico en §11.
+- **La app:**
+  - Gestiona obras de alumbrado público: plazas, barrios y otras.
+  - Cómputo de materiales, itemizado/certificación, órdenes de trabajo para las cuadrillas, «Mis tareas» con fotos y GPS, puntos por tarea (premios quincenales).
+  - Pañol: stock, reservas, herramientas, lista de compras.
+  - Gastos y ganancia por obra, mapa de obras, ubicación en vivo del personal, avisos al celular, guías y normas técnicas, informes.
+- **Usuarios:**
+  - Administración y Oficina, que cargan todo.
+  - Pañol.
+  - Cuadrilla/Operario: personal de obra, con celulares Android, muchos viejos y lentos (ej. Moto g24 power).
+  - Solo mirar.
+
+---
+
+## 2. Reglas que NO se rompen
+
+1. **Datos de Firestore:** nunca modificar ni borrar datos de los usuarios sin preguntarle antes a Ángel. Los arreglos de datos van con un botón que el usuario toca, con confirmación. La app no «arregla sola» la base.
+2. **Códigos de producto del pañol** (4 dígitos, el primero es la familia; ver §11.9):
+   - `x001–x499` de cada familia: productos del Excel original (congelados) y altas del equipo. **La app nunca agrega códigos ahí.**
+   - `x500–x999`: reservado a materiales que trae la app (hoy los 23 de barrio, 1501–8501, y la curva H°G° 3/4" 5503).
+   - Un código con movimientos, en cómputos guardados o en reservas **nunca se reutiliza**. Un producto con movimientos no se borra: se da de baja.
+   - **No inventes códigos.**
+3. **No inventar datos técnicos** (medidas, ítems, coeficientes). Lo que no está en los documentos va marcado **«a confirmar»**.
+   - Si el pliego y un plano se contradicen, decilo: el ítem del pliego dice **cuánto se cobra** y el plano constructivo dice **qué se compra y cómo se hace**.
+4. **Hacer solo lo que se pidió.** Nada de cambios «de paso» sin avisar.
+5. **SEGURIDAD — nada de secretos en la app, en el repo, en archivos, en docs ni en el chat:**
+   - Las claves de **Cloudflare R2** viven solo como «Secret» del Worker `ema-fotos` (las cargó Ángel).
+   - El JSON de la **cuenta de servicio de Firebase** vive solo como Secret `FB_SA_JSON` del Worker `ema-avisos`.
+   - La **clave privada VAPID** está en Firestore `secretosServidor/vapid`. Esa colección **no tiene regla**, así que ningún cliente la lee. La pública está en `configEquipo/vapid`.
+   - Si Ángel pega una clave en el chat: no la repitas y recomendale rotarla.
+   - (La `apiKey` web de Firebase que está en el código es pública por diseño. No es un secreto, pero tampoco hace falta copiarla a otros lados.)
+6. **Probar antes de entregar:** la batería completa en PC (1280×860) y celular (390×844). Si algo falla, se arregla o se dice.
+7. **Material de venta / demos** (videos, folletos): marca neutra.
+   - Sin «EMA», «EPEC», «licitación», «Municipalidad», nombres reales de plazas (ej. «Hípica»).
+   - Sin precios ni montos.
+8. No mostrarle a Ángel rutas internas del sistema ni jerga de herramientas. Hablale de «tu carpeta», «la app», «GitHub».
+
+---
+
+## 3. Arquitectura y despliegue
+
+| Pieza | Dónde | Notas |
+|---|---|---|
+| App web | **GitHub Pages**: `https://miguelangelbasq-tech.github.io/alumbrado-stock/` — repo `miguelangelbasq-tech/alumbrado-stock`, rama `main`, raíz | Una sola página `index.html` (≈4,3 MB compactada). Ángel sube a mano: *Add file › Upload files › Commit* (ojo con «index.html.html»). Tarda 1–2 min. |
+| Junto al index, en la raíz | `sw.js`, `ema-icono.png`, carpeta `app/` (`manifest.webmanifest`, `manifest-pc.webmanifest` (la app pide `?v=4`), íconos `icono-512-v3.png`, `icono-maskable-512-v3.png`, `atajo-camara-96.png`), carpeta `camara/` (página + manifest + íconos de «Cámara EMA», que abre `../index.html?camara=1`) | Solo se resuben si cambian. Casi siempre se sube **solo `index.html`**. |
+| Base de datos | **Firebase Firestore**, proyecto `alumbrado-stock` (plan gratis Spark) | Login con Firebase Auth (email/contraseña). Usuario corto «angel» → correo vía `configEquipo/alias` (o `usuario@ema-alumbrado.app`). SDK **compat 12.17.1** desde gstatic. Persistencia local activada. |
+| Fotos | **Cloudflare R2**, bucket `s3fotos`, a través del Worker **`ema-fotos`** (`https://ema-fotos.mdiaz-60f.workers.dev`) | `PUT/GET /f/fotos/AAAA/MM/<obra>/<id>.jpg` con el token de Firebase (RS256, aud/iss `alumbrado-stock`; GET acepta `?t=`), `/salud`. No permite borrar (405). En Firestore queda la ficha (`adjuntos.r2`) y la miniatura (`fotosObra`). Sin señal o con el Worker caído, la foto va a Firestore como antes. |
+| Avisos con la app cerrada | Worker **`ema-avisos`** (`https://ema-avisos.mdiaz-60f.workers.dev`), Cron `* * * * *` | La app deja avisos en `avisosPush` (enviado:false). El Worker entra a Firestore por REST con la cuenta de servicio, manda Web Push (RFC 8291 + VAPID) a `pushSubs` y marca enviado. El `sw.js` muestra la notificación. Rutas `/salud`, `/vapid`, `/probar`. |
+| Mapa | Leaflet **1.9.4** (cdnjs) | Teselas OSM; capa satélite Esri World Imagery. |
+| PDF en el aparato | html2canvas 1.4.1 inlined como `<script type="text/plain" data-lib="html2canvas">` + escritor PDF propio | Se activa al armar el primer PDF. |
+| **App Android (APK)** | Proyecto **Capacitor 8.6.0** `AlumbradoApp` (appId `ar.com.emaservicios.alumbrado`, «EMA Alumbrado», versionCode 2 / versionName 1.1) | Plugins: `@capacitor-community/background-geolocation` 1.3.1 (ubicación con el celular bloqueado) y `keep-awake` 8.0.1. Se instala pasando el APK, sin tienda. Ver §3.1. |
+| PC de la oficina | La misma web instalada como PWA de Chrome | No usan el APK. |
+
+### 3.1 APK de Android con «cargador local» (desde v084)
+- **No usa `server.url`.** El proxy de Capacitor bajaba los 4 MB cada vez, sin caché: era lento y en el Moto quedaba pantalla negra.
+- `www/index.html` es un **cargador**:
+  - **Primera vez:** baja la app de GitHub Pages mostrando el avance. Fuentes en orden: Pages → `CapacitorHttp` nativo → raw.githubusercontent. La guarda en Cache API (`ema-app-v1`, clave `/__app/index.html`) y la abre con `document.open/write/close`.
+  - **Siguientes veces:** abre la copia al instante, aun sin señal.
+  - Reescribe las URLs de Firebase compat y Leaflet a `lib/…` (vienen dentro del APK).
+  - Si una copia no arrancó 2 veces seguidas (`ema.cargador.intentos`), la descarta.
+  - Sin señal la primera vez: mensaje + «Reintentar». Nunca negro.
+- La app ve el cargador en `window.__cargador = {url, nativo, version(), listo(), guardar(html), actualizar(), borrar}`. Con el cargador:
+  - **no se registra sw.js**;
+  - la revisión de versión pide `__cargador.url + "index.html"` y, si hay nueva, `__cargador.guardar(tx)`;
+  - «Actualizar» llama a `__cargador.actualizar()`;
+  - se oculta el bloque de Web Push (no anda en el WebView);
+  - al arrancar bien, `__cargador.listo()`.
+- `MainActivity.java`: «atrás» en la primera pantalla hace `moveTaskToBack(true)` (no cierra), así al volver aparece al instante.
+- **Compilar:** no se puede en la nube (maven bloqueado). Ángel corre `COMPILAR.bat` en su PC:
+  - baja un JDK 21 portable a `jdk21\`, porque Android Studio trae Java 25 y Gradle falla con «class file major version 69»;
+  - corre `gradlew assembleDebug` y deja `EMA-Alumbrado.apk`.
+- **Cuándo hace falta APK nuevo:** solo si cambian cosas nativas:
+  - ícono, nombre o splash;
+  - permisos nuevos;
+  - plugins o funciones nativas (ej. push FCM);
+  - el cargador mismo;
+  - la URL de la app.
+- **Todo lo demás** (pantallas, textos, carteles, lógica, incluso el texto de la notificación de ubicación, que se pasa en `addWatcher` desde el index) se actualiza subiendo `index.html`: la app avisa «Hay una versión nueva».
+
+---
+
+## 4. Código fuente y cómo se arma una versión
+
+- **Archivo único** HTML con ~100 `<script>` y ~80 `<style>` en línea. Todo JS «vanilla», sin framework ni bundler. Funciones globales (`window.*`) y módulos IIFE.
+- **ORIGINAL** = legible (con sangría). **index.html** = `node compactar80.js ORIGINAL index.html`:
+  - esbuild minifica cada `<script>`/`<style>` de primer nivel, con target **chrome80** (celulares viejos);
+  - no toca `<script src>` ni `type="text/plain"`.
+  - Ajustá en `compactar80.js` la ruta de `require('esbuild')` a tu entorno (`npm i esbuild`).
+- **Sello de versión** en `#appVersion`:
+  - formato `· v AAAA-MM-DD HH:MM · hash6<`;
+  - hora de Argentina (UTC−3); hash6 = primeros 6 del SHA-256 del ORIGINAL.
+  - El menú lo muestra como «Versión …». La revisión de versión compara este texto.
+- **Dónde va lo nuevo:**
+  - los módulos nuevos se insertan **antes de `<script id="revisarAppDiag">`** (último script);
+  - CSS en `<style id="xxxCss">` y JS en `<script id="xxx">`.
+- **Método de SALEM** (recomendado si querés mantener compatibilidad):
+  - un `patch_vNNN.py` que verifica el SHA-256 del ORIGINAL de entrada;
+  - aplica reemplazos exactos `R(a, b, n=1)` que tienen que aparecer exactamente n veces (si no, corta);
+  - inserta módulos y genera el ORIGINAL nuevo.
+  - Hoy los parches son **acumulativos desde el ORIGINAL 082** (`BASE_SHA` = `b35d215e3cd2e46423aecd1d234062cd622247b4c3b9a1ee25a5b581d781d8ce`): `patch_v085.py` = 083 + 084 + 085.
+  - Vos podés editar el ORIGINAL 085 directamente. Lo importante es entregar el ORIGINAL nuevo.
+- **Cada versión en su carpeta nueva.** Nombres de entrega:
+  - `NNN_AAAA-MM-DD_app-EMA_ORIGINAL.html` (respaldo, **no se sube**);
+  - `index.html` (va a GitHub).
+- **Compatibilidad Chrome 80+:**
+  - nada de `:has()` en JS (`closest(':has')` tiraba error < 105);
+  - nada de `inset:` sin fallback;
+  - `||=` y `??=` los baja esbuild;
+  - revisá APIs nuevas.
+
+---
+
+## 5. Mapa de la app (pantallas)
+
+La navegación es **solo por el menú lateral** (botón de tres rayitas `#btnMenu` → `#menuLateral .menu-panel`, `abrirMenuLateral()` / `cerrarMenuLateral()`). Cambio de hoja: `mostrarVista(clave)`.
+
+| Clave `mostrarVista` | Contenedor | Qué es |
+|---|---|---|
+| `inicio` | `#viewInicio` | Inicio de la oficina (tarjetas, accesos). Para la cuadrilla: `#inicioCuadrilla` (body `inicio-crew`): tus tareas, material para retirar, avisos, puntos, cálculos rápidos, accesos. |
+| `tablero` | `#viewTablero` | «Mi tablero» (por persona). |
+| `mistareas` | `#viewMisTareas` (`#mtApp`) | Mis tareas de la cuadrilla: pestañas 🟢 Hoy · ⏳ Pendientes · ✅ Terminadas, lista «Tarea 1, 2…», orden abierta con fotos/medidas/marcas, «Enviar», 📍 Cómo llegar, ⭐ Tus puntos (`#mpCard`). |
+| `calc` | `#viewCalculadora` | Cálculo de materiales: selector 🌳 Plaza / 🏘 Barrio; subíndices 🧮 Calculadora · 🗂 Historial · 📦 Material por obra; «Cálculos rápidos» (hormigón, zanja, cables, consumo, abrazaderas, caída de tensión). |
+| `registro` | `#viewRegistro` | Registrar obra (`avanceObras`): nombre (único), ID, barrio, dirección, tipo plaza/barrio/otra, ubicación en el mapa, fecha de carpeta EPEC. |
+| `obras` | `#viewObras` (`#obrasApp`) | Obras (legajos): plazas/barrios/otras; legajo con secciones plegables (fotos, planos, columnas, órdenes, material, gastos, historial). |
+| `parte` | `#viewParteDiario` | Órdenes de trabajo (OT-AAAA-NNN): tablero, llenar, historial, buscar; cierre por la oficina. |
+| `plan` | `#viewPlanificacion` | Planificación semanal (`planSemanal`); «Hacer la orden de trabajo». |
+| `avance` | `#viewAvance` | Avance de obra (avance total desde el itemizado; «📋 Avance por ítem»; etapas), Itemizado 2026 (Todas/Plazas/Barrios/Otras). |
+| `mapa` | `#viewMapa` | Mapa de plazas/obras (Leaflet): pines por avance, pliego, ＋ Punto, capas, panel del legajo (`#mpPanel`), **personal en vivo** (`.uv-pin`, `#uvPanel`). |
+| `stock` | `#viewStock` | Pañol: Catálogo pañol (inventario), Reservas (+ «✕ Sin stock», «⏳ Por aprobar»), Herramientas (🧰 / 📜 Historial), Movimientos/entregas, Registrar movimiento, Alta de productos, Precios, Por persona, Fotos, Por sector, Calculadora ↔ pañol, Lista de compras, Acceso y respaldo. |
+| `informe` | `#viewInforme` | Centro de informes (PDF/Word/Excel): avance, Gantt, informe mensual con fotos, lista de materiales a usar, etc. |
+| `gastos` | `#viewGastos` | Gastos de obra: 🏗 Por obra · 📈 Ganancia · ⛽ Combustible · 🏷 Precios · 🏢 Generales y por mes. |
+| `produccion` | `#viewProduccion` | Producción: puntos por persona, baremo («Cuánto vale cada tarea»), 📅 Por quincena, 📊 Total, Personal del equipo + vehículos, 🔄 Reiniciar puntos (admin). |
+| `normas` | `#viewNormas` | Normas y tipos constructivos (48 planos tipo). |
+| `guias` | `#viewGuias` | Guías «cómo se hace»: Procesos, Materiales (fichas técnicas), 🗂 Láminas (23, SVG gzip+base64, diferidas). |
+| `usuarios` | `#viewUsuarios` | Usuarios y permisos (solo admin): roles, ajustes por hoja, persona/nómina, presencia (punto verde/rojo), «🔧 Arreglar vínculos», **📍 Ubicación en vivo del personal** (`#uvAdmin`). |
+| — | `#emaCam`, `#ecElegir` | Cámara propia de la app (marca en vivo) y hoja «¿De qué obra?». Menú «📷 Cámara» debajo de Mi tablero. `?camara=1` abre directo. |
+
+---
+
+## 6. Roles y permisos
+
+Los roles están en `window.PERMISOS` (script `usuariosPermisos`) y en las reglas de Firestore (`permisosDeRol`). Cada hoja está en uno de tres niveles: `oculto` | `ver` | `editar`. Los **ajustes por usuario** (`usuarios.ajustes.<hoja>`) mandan sobre el rol.
+
+| Hoja (clave de permiso) | admin / oficina | panol | cuadrilla / operario | mirar (o desconocido) |
+|---|---|---|---|---|
+| inicio | editar | ver | ver | ver |
+| registro | editar | ver | oculto | ver |
+| calc | editar | oculto | ver (solo «Cálculos rápidos») | ver |
+| parte (órdenes) | editar | oculto | oculto | ver |
+| plan | editar | oculto | ver | ver |
+| avance | editar | ver | oculto | ver |
+| mapa | editar | ver | ver | ver |
+| stock (pañol) | editar | editar | ver (solo «Catálogo pañol») | ver |
+| informe | editar | oculto | oculto | ver |
+| gastos | editar | oculto | oculto | oculto |
+| produccion | editar | oculto | oculto | oculto |
+| normas | editar | ver | ver | ver |
+
+- La cuadrilla **marca SUS tareas** desde Mis tareas. La base la deja tocar solo `campo` y `estado` (Emitida/En curso) de las órdenes donde figura: su `personaClave` tiene que estar en `ot.personalNombres`. También sube fotos de esas órdenes.
+- **Arranque por rol (v078):**
+  - la portada publica la ficha (`window.__usuarioDoc`) y el aparato la recuerda (`localStorage ema.perfil.<uid>`);
+  - permisos la «siembra» al instante;
+  - con rol desconocido, velo «Preparando tu pantalla…» (todo oculto salvo inicio/tablero/mistareas, tope 9 s);
+  - el evento `permisos-listos` acomoda todo.
+  - La cuadrilla nunca debe ver ni un instante lo de la oficina.
+- Usuario nuevo: se crea solo como `rol:'mirar'`, `pendiente:true`. El admin lo confirma.
+- Para que a alguien le lleguen órdenes: usuario activo y confirmado, rol cuadrilla/operario, «Persona» vinculada a su nombre de la nómina (`persona`, `personaClave` = nombre normalizado) y ese nombre en la orden.
+
+---
+
+## 7. Datos (Firestore)
+
+### 7.1 Colecciones
+
+| Colección | Qué guarda | Campos importantes |
+|---|---|---|
+| `usuarios/{uid}` | Ficha de cada usuario | `email, usuario, nombre, rol, pendiente, activo, ajustes{hoja:nivel}, persona, personaClave, creado` |
+| `presencia/{uid}` | Latido «estoy en la app» (cada 2 min) | lo lee solo admin |
+| `avanceObras/{id}` | **Registro único de cada obra** (plaza/barrio/otra) | `nombre/plazaNombre, obraId, barrio, direccion, tipo, lat, lng, mapaIcono, mapaColor, carpetaEpec, secciones, grupos, valorItems[] (ítem, cant, K, hechas…), etapas, etapasAuto, etapasNoAuto, puntos[] (nombres de columnas «T1 · C1 · Col 1»), fotosBorradas, planGantt, situación/fechas` |
+| `historialCalculos` | Cómputos de la calculadora | `form` (datos del formulario, para editar), listado por secciones, `modo` plaza/barrio, obra |
+| `historialEtapas` | Historial de etapas tildadas | |
+| `ordenesTrabajo/{id}` | Órdenes de trabajo `OT-AAAA-NNN` | `plazaId, plazaNombre, fecha, hora, cuadrilla, responsable, personal[], personalNombres[] (claves normalizadas, para las reglas), tareas/actividades, asignada{tarea:persona}, reparto{tarea:[{nombre,cant}]}, excedentes, vehiculos[{id,nombre,patente}], vehiculoId, estado (Emitida · En curso · Terminada · Anulada), campo{marcas, marcasP, fotos{<id>:{…, mini (72px), borrada}}, medidas, envios}, cierre{hecho, hechoPersona, horas, puntos (fijados al cerrar), …}, creadoPor` |
+| `planSemanal` | Plan de la semana | |
+| `movimientos` | Movimientos del pañol | entradas `E-0001…` (remito, proveedor, precioUnit en $ sin IVA + `precioOriginal, moneda, ivaPct, cotizacion`), salidas/vales `S-0001…` (`valeGrupo`, obra, quién), devoluciones (`devolGrupo`); **se anulan, no se borran**; cambio de fecha con `fechaAnterior`, `fechaHist` |
+| `catalogoProductos/{codigo}` | Cambios sobre el catálogo base (productos fijos del Excel + altas del equipo) | `codigo, desc, un, costo, minimo, activo (false = de baja), editadoPor, editadoTs` |
+| `reservas` | Reservas de material `R-0001…` | `estado`: `solicitada` (por aprobar, no aparta) · `pendiente` · `alistando` · `lista` · `entregada` (con/sin faltantes) · `rechazada` · `anulada`; `items[]` con `cant, entregado, nohay, cambio{…estado pendiente/aceptado/rechazado/retirado}, cambiadoDe, sinStock{descartado}`; `creadoPor, paraQuien, desdeCalculo, aprobadaPor, historial[]` |
+| `herramientas` / `herramientasMov` | Herramientas H-001… (libre/asignada/reparación/baja), ingreso con remito; movimientos (entrega, devolución, remito con foto, alta…) | |
+| `adjuntos` | Fichas de fotos/archivos | `r2: "fotos/AAAA/MM/<obra>/<id>.jpg"` si está en la nube (sin imagen); si no, la imagen; `otId` |
+| `fotosObra` | Fichas livianas de fotos de obra con miniatura (140 px) | `plazaId, categoria, num (nombre «Col 4»), otId, lat, lng, gpsPrec, sello, por, ts` |
+| `planosObra` / `planosImg` / `planosNotas` | Planos de obra (ficha, imagen en pedazos, notas/dibujo) | |
+| `mapaPuntos` | Puntos agregados al mapa (16 íconos, foto) | |
+| `gastosObra` | Gastos por obra y generales | `plazaId` vacío + `general:true` para generales; combustible `vehiculoId, litros, km, reparto:"auto"` |
+| `cierresQuincena/{AAAA-MM-1\|2}` | Foto fija de la quincena cerrada | personas, puntos, valor del punto, ajustes saldados, historial |
+| `tableros` | «Mi tablero» | |
+| `auditoria` | Registro de lo hecho (solo create) | |
+| `pushSubs/{sha256(endpoint)}` | Celulares anotados para push | `uid, clave, email…` |
+| `avisosPush` | Avisos para el Worker | `enviado:false`, destinatario (`clave`/`email`/`uid`), tipo, tag |
+| `ubicacionVivo/{uid}` | **Ubicación en vivo** (un doc por persona, se pisa) | `uid, email, persona, clave, lat, lng, acc (m), vel (km/h), ts, posTs, fuente (web/app), activo, hasta, finTs, finMotivo` |
+| `secretosServidor` | Clave privada VAPID | **sin regla: nadie la lee desde la app** |
+
+**`configEquipo/<doc>`:**
+- `alias` (usuario corto → correo; lectura pública);
+- `presencia`, `salud`;
+- `baremo` (puntos por tarea, pesos por rol);
+- `personal` (nómina + `vehiculos[]`);
+- `cuadrillas`, `guias`;
+- `precios` (incluye `gastosRef`);
+- `vapid` (pública);
+- `reinicios` (`saldoDesde` def. 2026-10-29, `saldoObras`, `puntosDesde`, `puntosSinObras[]`, `puntosSinDias[]`);
+- `ubicacion` (`activo, desde, hasta, dias[0-6], cadaSeg`; por defecto 07:00–15:00 L–V, 60 s).
+
+### 7.2 Reglas (Reglas_Firestore_v083, vigentes y publicadas)
+- Están en `firebase/`. Se publican pegándolas en Firebase › Firestore › Reglas. Ángel lo hace a mano.
+- **Lección clave (v070):** Firestore corta en **10 lecturas de documentos / 1.000 expresiones por pedido** y responde «permission-denied» aunque la persona tenga permiso.
+  - Leé el usuario **una sola vez** por regla (`let d = yo()`).
+  - Armá solo el mapa del rol de la persona (`permisosDeRol(rol)` con ternarios).
+  - No repitas `get()`.
+- Funciones: `confirmado()`, `esAdmin()`, `adminUOficina()`, `edita([hojas])`, `lee([hojas])`, `equipo()`, `renombraObra()`, `soyDeLaOrden(ot)`, `marcaCampo()`, `fotoDeMiOrden()`.
+- Si un cambio necesita colección o permiso nuevo: **entregá las reglas nuevas completas** (archivo `Reglas_Firestore_vNNN.txt`) y decile a Ángel que las publique. La app tiene que avisar «falta publicar las reglas» si no están.
+
+### 7.3 Límites de Firestore que ya mordieron
+- **1 MB por documento:** las órdenes llenas de miniaturas trababan todo. Por eso miniatura de 72 px en la orden, nada si pesa más de 760 KB, y «🧹 Liberar espacio».
+- **Tormentas de reintentos** con permission-denied: cada intento negado cuenta como lectura. Esperar 60 s a 5 min.
+
+---
+
+## 8. Módulos (script id → qué hace → API global)
+
+Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
+
+| script id | Versión | Qué hace / API |
+|---|---|---|
+| `usuariosPermisos` | base/078 | `PERMISOS` (`yo()`, `lista()`, `listo()`, `sembrado()`, `liberar()`, `ROLES`), `permiso(hoja)`, evento `permisos-listos` |
+| `ordenesCampo` | base | Mis tareas (cuadrilla): `mt()`, cola `mtCampoGuardar` (sin señal), `window.__campoCola`. **Se redibuja comparando nodo por nodo: no insertes nada por afuera del DOM, va en las plantillas.** |
+| `moduloReservas` | base | Reservas (`z()` arma la lista; chips `[data-rsf]`) |
+| `obrasLegajo` | base | Legajos (`abrirLegajo(id)`, `legajoPoner`, `legajoTipoFiltro`) |
+| `calcBarrio`, `calcRevision`, `calcObraRegistrada`, `calcEditar`, `calcLimpiar`, `computoTabs`, `calcPanol` | 012–058 | Calculadora (`calcular`, `epecPreviaDe(obra)` vista previa del itemizado, `calcularBalancePlaza`, `__calcEditar`, `__computoTabs`) |
+| `avanceItems`, `avanceTipos`, `itemizadoTipos`, `itzCeros`, `saldoObra` | 039–072 | Avance por itemizado (`calcularAvanceEtapasPct`), Itemizado 2026, «Quedan N de T» (`saldoObra(plazaId)`, `totalesDeObra`) |
+| `puntosPro`, `quincenas`, `reparto` | 041–079 | Puntos (`puntosDeOrden(ot)` = `ye`; `nombreCanonico`), quincenas (`renderQuincenas`), reparto entre varios (`__reparto`) |
+| `misTareasPro`, `equipo`, `cuadrillaFotos`, `fotosPermiso`, `cuadrillaApp` | 049–080 | Pestañas Hoy/Pendientes/Terminadas (`__mtVista`), fotos compartidas hasta 4, ✓ de quién envió, diagnóstico de permisos (`__diagOrden`), Inicio crew (`__cuadrilla.esCrew()`) |
+| `camaraApp`, `camaraPro`, `selloFotos`, `compartirFotos`, `fotosNube`, `fotosSinSenal`, `galeriaPro`, `fotosGestion` | 030–073 | Cámara con marca en vivo (`camaraApp`), sello (logo, obra · qué, fecha, GPS, quién; 1024 px), subida a R2, cola IndexedDB `ema-fotos-cola`, visor/galería (`emaGaleria`, `verAdjunto`), ZIP con EXIF GPS |
+| `mapaPro`, `mapaLegajo`, `mapaPanel` | 040–062 | Pines por avance, ＋ Punto, capas, panel del legajo |
+| `avisosApp`, `pushAvisos`, `avisosVistos` | 031–051 | Campanita (`__emaAvisos`), push (`__pushAvisos.dejarAviso`), tonito (`__emaSonido`) |
+| `herramientasPanol`, `herrRemito`, `herrPost`, `herrIngreso`, `agrupar` | 010–081 | Herramientas, remitos RH-…, ingreso RI-…, agrupar iguales (`__hrGrupos`), buscador por palabras (`__buscaPalabras`) |
+| `sinStock`, `reservasFaltantes`, `reservaCambio`, `reservasImprimir` | 038–061 | Reservas con faltantes, «⇄ Ofrecer otro», imprimir |
+| `gastosPro`, `vehiculos` | 042–043 | Ganancia, combustible, precios, generales (`GASTOS`, `__gastosPro`, `__vehiculos`) |
+| `sinSenal` | 065 | App sin internet: parchea set/update/add/commit, franja `#offAviso` |
+| `rendimiento` | 075 | Láminas diferidas (`__cargarDiferidos`), aviso «Sitio para computadoras» |
+| `hojaPdf` | 077 | Toda impresión → hoja A4 `#hojaOv` con Imprimir / Compartir PDF / Bajar PDF (`hojaEMA`); atrapa `window.open("")` y `window.print()` |
+| `arranqueRol` | 078 | Arranque por rol sin destellos |
+| `legajoPlegable` | 082 | Secciones del legajo plegables (`ema.lg.pleg`) |
+| `ubicacionVivo` | 083–085 | `__ubicacionVivo` {estado, cfg, enHorario, tic, pintarMapa, arrancar, parar}. Cuadrilla en horario: nativo `BackgroundGeolocation.addWatcher` (notificación fija) o web `watchPosition` + Wake Lock; manda cada `cadaSeg` o si se movió más de 40 m; latido 15 s; `tic()` cada 30 s. Punto en `#btnMenu .uv-menu-dot` (ok verde / busca amarillo / mal rojo) + `#uvMenuLinea` en el menú. Oficina: pines `.uv-pin` (on verde / off gris «sin actualizar desde HH:MM») y `#uvPanel` «👷 Personal en vivo N de M». |
+| `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
+| `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
+
+Otros globals útiles:
+- `__sync` (estado de carga de colecciones), `fmt(n, dec)` (formato es-AR con caché `var __fmtNum`), `norm()`;
+- `abrirHojaImpresion`, `familiaDeCodigo`, `stockActual`;
+- `fbOtAdd/fbOtUpdate`, `fbReservaActualizar`, `fbAddMovimiento`, `fbGuardarProductoCatalogo`.
+
+---
+
+## 9. Flujos clave
+
+- **Orden de trabajo:**
+  1. La oficina elige obra, cuadrilla/personal, vehículo (sale solo por quién tiene a cargo) y tareas del catálogo (baremo) o a mano. Cada tarea muestra «Quedan N de T» (cálculo − hecho − asignado), con opciones «¿Quién?» (toda la cuadrilla / una persona / ✂ repartir).
+  2. Emitir → aviso a cada persona (campanita + push).
+  3. La cuadrilla en Mis tareas: fotos por unidad/toma (hasta 4 por columna, caja o toma; la de uno vale para todos), medidas, «Se hizo», **Enviar**.
+  4. La oficina **cierra**: carga lo hecho (`cierre.hecho`, `hechoPersona`, horas) → puntos fijados en `cierre.puntos`, avanza el itemizado de la obra, push «⭐ Puntos aprobados».
+  - **Puntos:** tarea asignada → esa persona; repartida → por lo hecho; el resto por peso de rol × horas (Oficial 1 · Medio oficial 0,8 · Ayudante 0,6 · Capataz 1 · Chofer 0,4 · Sereno 0,2). Quincenas: 1–15 y 16–fin de mes.
+- **Fotos:** cámara de la app (`#emaCam`, un toque = guardada) → sello → `fotosNube` (R2) o Firestore → `adjuntos` + `fotosObra` + `campo.fotos` de la orden (mini 72 px).
+  - Sin señal: cola local y reintento.
+  - Rechazo por permiso: queda en el celu con el motivo exacto, reintenta, y la oficina tiene «Preparar» / «🔧 Arreglar vínculos».
+- **Pañol:** entradas/salidas con comprobante; stock = base + movimientos.
+  - Reservas apartan stock (salvo `solicitada`).
+  - Lista de compras = bajo mínimo + todo material que alguna vez se cargó y hoy está en 0 («⛔ se acabó», sugerido = última entrada).
+- **Calculadora → itemizado → avance → certificación:** el cómputo guarda `form` (se puede editar).
+  - `epecPreviaDe(obra)` mapea el cómputo a ítems del Anexo I.
+  - El avance total sale del itemizado (lo hecho pesado por K).
+- **Ubicación en vivo:** solo cuadrilla/operario, solo en el horario de `configEquipo/ubicacion`. La oficina la ve en el Mapa. Fuera de horario se escribe `activo:false`.
+- **Revisar versión / actualizar:**
+  - fetch `index.html` con `cache:"no-cache"` (ETag);
+  - aviso «✨ Hay una versión nueva · Actualizar»;
+  - en web, sw.js cache-first con revalidación (`ema-v065-app`); en el APK, el cargador.
+
+---
+
+## 10. Diseño (tema «Cristal», ver detalles en el código: `<style id="temaCristal">`)
+
+- **Colores** (siempre por variable):
+  - `--navy #28285E` (acciones, activos), `--navy-2 #3D3F8A`, `--teal #84C3DA` (solo detalles, **nunca botones**), `--bg #ECEFF7`;
+  - texto `#0D1424` / `--text-soft #4B5670` / `--text-3 #7C879D`;
+  - `--verde #34C759`, `--amber #FF9F0A`, `--danger #FF3B30`.
+- **Letras:** Inter (texto 14,5/15 px), Inter Display (títulos 700–800), JetBrains Mono (números, códigos, encabezados de tabla, `tabular-nums`).
+- **Formato** es-AR: `01/10/2026`, `1.050,00`, `$ 1.050,00`, `120 m`, `9 Un.`.
+- **Piezas:** tarjetas de vidrio (blanco 70 %, borde 24 px), `.btn-primary` píldora azul (mín. 44 px), `.btn-ghost`, `.subtabs/.subtab`, `.chip`, tablas sin rayado, avisos `#avisoApp` (no `alert()`).
+- **Celular** (≤640 px):
+  - una columna, todo tocable de 44 px o más;
+  - tablas → `.tabla-tarjetas`;
+  - acordeón en la calculadora, barra flotante abajo;
+  - **nunca scroll horizontal**.
+- **Impresión:** blanco, logo como `<img class="logo-impreso">` (no fondo CSS), sin menú/botones/versión, A4, firmas al pie.
+- Sin modo oscuro (`color-scheme: only light`).
+- Textos en rioplatense de obra: «Sacar foto», «Hacer vale de salida». Nombres de plaza en MAYÚSCULAS como el pliego, con `ID 4026`.
+- Un cambio de diseño no cambia ids, clases ni JS.
+
+---
+
+## 11. Dominio técnico (alumbrado público, contrato de plazas)
+
+### 11.1 Contrato LPE 5589
+- **Módulo base** (Art. 05) = PAT completa (AP-TC-005/006) de una columna metálica de 7 m con capuchón y 1 brazo de 0,425 m con LED.
+  - Valor: **$281.998,71 sin IVA** ($341.218,44 con IVA). Precio de cada ítem = **K × módulo**.
+- Anexo I con 92 ítems en K (Nota Aclaratoria N° 1, 31/08/2026):
+  - ítems 1–82 iguales al itemizado de la Municipalidad («ITEMIZADO PLAZAS 17/06/2026»);
+  - 83.1–89 son provisiones por eventualidad.
+- Plazo 4 meses, certificación mensual.
+- Mínimo exigido: 8 cuadrillas de 2, 4 hidroelevadores de más de 10 m, 1 camión grúa, 3 camionetas.
+- Penalidades: punto = 1 % de la facturación mensual; rehacer trabajo mal hecho = multa de 3× su valor.
+
+### 11.2 Ítems principales (numeración 2026)
+- **Columnas** (compuestos: relevamiento, excavación, fundación, izaje, acometida subterránea, luminaria, reparación, poda):
+  - metálica 1/2/3 brazos = **1/2/3**, 10 m / 4 brazos = **4** (K 3,89 · 4,00 · 4,17 · 4,56);
+  - PRFV = **5/6/7/8** (K 3,19 · 3,37 · 3,55 · 4,02).
+  - La metálica incluye torta y PAT con medición. **En PRFV la PAT se cobra aparte** (74 tomacable, 75 dispersor, 77 caño H°G°, 81 medición + provisiones 87/88).
+  - Las de 10 m van siempre a 4/8. Los vínculos de 10 m se descuentan antes de repartir los de 7 m (v066).
+- **Resto:**
+  - 9/10 tablero aéreo/a nivel; 11/12 acometida aérea/subterránea; 13 apoyo PRFV; 14 tablero de transición;
+  - 15–20 zanjeo (0,60/1,00 × natural/baldosa/hormigón); 21–24 cruce (tunelera/tierra/hormigón/asfalto);
+  - 25–40 cable por calibre (solo metros de zanja); 41 reacondicionamiento columna; 42 acometida subterránea nueva en columna metálica existente (K 1,77); 43 aplomado; 44 luminaria sobre existente;
+  - 45–49 retiros; 50–67 protecciones; 62 BPN 4 / **63 BPN 6**; 64 fotocontrol; 68 fusible 2–10 A; 73 apoya escalera;
+  - 75 dispersor; 78/79 empalmes; 80 aislación; 81 medición PAT; 82 poda.
+- **Provisiones:** 83.1 col. metálica 7 m K 2,64 · 83.2 10 m K 4,37 · 84.1 PRFV 7 m K 2,75 · 84.2 10 m K 4,56 · 85.1 LED 75 W K 0,81 · 85.2 LED 180 W K 1,27 · 86 cable 3×1,5 K 0,02/m · 87 cable V/A 10 mm² 0,02/m · 88 jabalina K 0,09 · 89 tablero aéreo K 16,06.
+- **Plazas ya ejecutadas:** manda lo certificado (`window.CERTIF_MUNI`).
+- Referencia de nombres de materiales: pliego **LP 21478** (Zona V Oeste), ítem 15.xx. Ej.: 15.35 BPN, 15.38/39/40 morsetos 1995/6, /4, /3, 15.67 dispersor Ø14,6×1500 IRAM 2309, 15.59 rack MN 482 L. **No son los K de plazas.**
+
+### 11.3 Reglas de la calculadora (acordadas con Ángel)
+- **PAT:**
+  - PRFV: jabalinas = circuitos + tableros (1 al final de cada circuito + 1 por tablero). Metálica: columnas + tableros.
+  - Cada jabalina: 1 tomacable + 1 medición (81) + puntera TIF 10.
+  - Cable 1×10 V/A: 10 m por tablero + 7 m por circuito (PRFV) o 4 m por columna (metálica).
+  - Cada tablero cuenta solo sus circuitos.
+- **BPN (desde v067): todas de 6 mm²** (2009, ítem 63). Neutro celeste 2008 y tierra verde 2010 también de 6.
+  - Las punteras TIF siguen el **calibre del cable**, no la bornera.
+  - Caja PRFV (TC-PRFV-01/02): 3 grises, 2 celestes, 2 verdes (3 en la columna con jabalina), 2 portafusibles, 1 separador, puente peine; 1 m de Cu 4×4 (1010) por columna + 6 punteras TIF 4.
+  - Metálica: 1 portafusible y 1 bornera fase+neutro por luminaria.
+- **Fusibles:** 2 A por artefacto, cilíndrico 10×38 (3017; el 3014 de 8,5×31,5 **no entra** en la tabaquera 10×38 3053). Simple 2 + vacío · doble 2+2 · triple 4+2 · cuádruple 4+4 (4 A = 3073).
+- **Fundación** H-13 (1:2,5:4; 5,2 bolsas, 0,55 arena, 0,80 piedra, 170 L agua por m³):
+  - PRFV 7 m: 0,60×0,60×1,20 → 0,4057 m³; 10 m: 0,80×0,80×1,30 → 0,8035 m³;
+  - molde PVC = Ø base + 50 (247 / 403 mm; comercial Ø250 / Ø400, si no Ø450);
+  - telgopor a 350 mm del fondo, desagüe PVC Ø25,4, arena hasta −50 mm y sello de 50 mm.
+- **Columnas PRFV:**
+  - 7 m: AP-C-033-A, Ø base 197. 10 m: AP-C-033-B, Ø base 353.
+  - Cajas borneras a 3,50 m del piso. Entre cajas **solo cable 4×4 XLPE, sin caño**.
+- **Cable de subida 3×1,5:** 7 m por artefacto + max(0, brazo − 0,400).
+- **Ganancia del troncal** = subidas × altura. Subidas = 2 × columnas − circuitos (en el cableado por circuitos, por punto).
+- **Vínculos:** brazo 400 mm (AP-C-008, ítems LP 10.15/16/17, cuádruple 10.20). 0,425 = capuchón triple (criterio de obra).
+- **Zanja** (AP-TC-001):
+  - tapada 0,60 + 0,15 → excavar 0,75 m; anchos 200/400/600 (1/2/3 conductores);
+  - arena 5+5 cm, malla a 30 cm;
+  - ladrillo solo si va enterrado directo (no en PEAD Ø50); pegotes 1,00×0,20×0,05.
+- **Cruce de calzada** (AP-TC-002): ancho 0,50, tapada 1,00 (vereda 0,50), **2 caños PVC Ø110** (1 de reserva), hormigón pobre 0,15, cámaras 40×40, reposición H-21 0,20.
+  - Contradice el ítem 5.01 (1 Ø160): **a confirmar con Inspección**.
+- **Base de tablero a nivel** (AP-TC-007): tipo A 0,900×0,400 / B 0,635×0,400, alto 0,60, caño de ingreso PVC Ø90 y salida PEAD Ø50 por circuito, 4 anclajes 1/2".
+- **Acometida** (AP-T-019): poste a 2,50 m del cordón, vano máx. 10 m.
+  - Cables: preensamblado 3×1×25/50 · piloto Al 4×1×25 · Cu 4×16 autoportante · Cu 4×16 XLPE/LSZH (vigente).
+  - Morsetos: 1995/3 (PKD-16) 25–95 · 1995/6 (PKD-14 bimetálico) bajada 4–16 · 1995/4 solo derivación aérea (no en plaza subterránea).
+  - Terminal de ojal por conductor al NH.
+- **Prensacables** (Ø IRAM 2178-1): 1×10 → 1/2"; 3×1,5 y 4×2,5 → 3/4"; 4×6 → 7/8"; 4×10 → 1"; Cu 4×16 → 1 1/4".
+- **Tablero de plaza:** comprado armado. Tablero en poste a 5 m o más (solo en poste).
+- **Barrio** (red aérea): calculadora propia (luminarias en poste, apoyos, preensamblado, tablero aéreo, transición AP-TC-024, PAT de red cada 200 m). Sin itemizado de barrio todavía.
+- **Preguntas abiertas** (no decidir solo):
+  - Chamical (metálica) certificó 3 dispersores;
+  - ítem 74 tomacable no aparece en lo certificado;
+  - 75/81 en metálicas;
+  - ítems 30 y 64;
+  - provisiones;
+  - interruptores 50/56/59;
+  - apoya escalera con tablero a nivel;
+  - cómo cargar columnas existentes;
+  - TN-C vs TN-S según proyecto.
+
+### 11.4 Proceso constructivo (plaza PRFV)
+Replanteo → fundaciones (fraguado 72 h) → zanja y tendido → galpón (armar vínculos y probar artefactos) → izaje, tablerito, aplomado y sellado → PAT → poste y tablero → acometida → prueba de encendido → cierre (conforme a obra, planillas de PAT, certificado de instalación apta).
+
+### 11.5 Etapas del avance (pesos)
+Pozo 10 · zanjeo 10 · tirada de cable 10 · fundaciones 10 · izaje 10 · vínculos 10 · poste PRFV 10 · tablero 10 · sellos 10 · limpieza y pintura 5 · inspección municipal 3 · desmonte 2. Se tildan solas desde el itemizado.
+
+### 11.6 Baremo
+- Puntos = HH × D (1 punto = 1 hora-hombre efectiva, D 1,00–1,80).
+- Tareas en `configEquipo/baremo`. Tareas nuevas de la v072 (puntos «a confirmar»): excavación de pozos 2,5, hormigonado 2,5, pozo del apoyo PRFV del tablero 2.
+
+### 11.7 Mapa
+Colores de los pines por avance: gris sin empezar · rojo menos del 30 % · amarillo 30–59 % · azul 60–99 % · verde 100 %.
+
+### 11.8 Comprobantes
+Salida «Vale» S-0001… · entrada E-0001… · remito de herramienta RH-… · ingreso RI-… · reserva R-0001… · OT-AAAA-NNN. Se anulan, no se borran. El número no se reutiliza.
+
+### 11.9 Códigos por familia
+1xxx cables · 2xxx borneras/terminales · 3xxx protección y comando · 4xxx herrajes/morsetería · 5xxx caños · 6xxx columnas/vínculos/postes/luminarias · 7xxx PAT · 8xxx obra civil · 9xxx varios.
+
+Ejemplos:
+- 6006 columna metálica 7 m · 6005 de 10 m · 6010 luminaria (Un.) · 6021 vínculo capuchón 3 artefactos 400 mm;
+- 7015 jabalina (Un.) · 7010 cable 1×10 (m) · 1016 preensamblado (m) · 1010 Cu 4×4;
+- 2007 BPN 4 (ya no se usa, no se borra) · 2009 BPN 6 · 2008 celeste · 2010 verde · 2027 peine BPN 6 · 2031 TIF 4;
+- 3017 fusible 10×38 2 A · 3073 fusible 10×38 4 A · 3053 portafusible tabaquera.
+
+---
+
+## 12. Pruebas
+
+- **Herramientas:** Playwright + Chromium, sin internet, con Firebase falso (`firebase_stub.js`, guarda en localStorage, rechaza docs de más de 1 MiB, simula sin red con `__stubSinRed`) y reglas simuladas (`reglas_stub.js`, réplica de las reglas reales).
+- **Arnés `h.js`:**
+  - `abrir({sesion:'admin'|'pedro'|'juan'|…, cel, dpr, datos: baseDatos(), espera, reglas, https, leaflet, demora:{col:ms}, mtNuevo, rsObra, lgPleg})`, `otraPagina()`, `prueba(nombre)`;
+  - la app a probar sale de `process.env.APP` (y `APPDIR` para sw.js/app/camara);
+  - **las rutas están fijas del entorno anterior** (`/home/claude/...`, `/opt/pw-browsers/chromium`, Leaflet local en `/home/claude/v40/lib/...`): ajustalas o instalá `playwright` y `leaflet` con npm.
+- **Correr:** `APP=ruta/index.html node t_v084.js` (PC) y `… node t_v084.js cel` (celular 390×844). Cada prueba imprime `RESULTADO vNNN: X/Y OK`.
+- **Batería completa** = todas las `t_*.js` en PC y en celular. Corré en tandas (Chromium se pone lento con todo junto). Algunas son sensibles a tiempos si la máquina está cargada (`t_v026`, `t_v037`, `t_v073`, `t_v076`); si fallan, repetí solas antes de concluir.
+- **Modos de compatibilidad** que el arnés pone en las pruebas viejas:
+  - `__mtVistaTodas=true` (Mis tareas desplegado) salvo `mtNuevo:true`;
+  - `ema.rs.porObra=0` salvo `rsObra:true`;
+  - `__lgPlegTodoAbierto=true` salvo `lgPleg:true`.
+- `t_v083` quedó reemplazada por `t_v084` (buscaba el cartel viejo de ubicación).
+- **Cada versión nueva suma su `t_vNNN.js`.** Si cambia un comportamiento probado, actualizá la prueba vieja y decí por qué.
+
+---
+
+## 13. Lecciones y trampas conocidas
+
+- **`const`/`let` con TDZ:** si una función se llama antes de la línea de su variable de módulo, rompe. Para cachés globales usá `var` (pasó con `__fmtNum` en v084).
+- **html2canvas dibuja el `<noscript>`:** sacalo (y `template`) del clon antes de armar el PDF.
+- **SVG dentro del mapa:** la regla global `max-width:100%` los aplastaba a 0. Los colores van como valores reales, no `var()`, dentro de SVG.
+- **Mis tareas** (`ordenesCampo`) se redibuja nodo por nodo: chips, notas y «por» van dentro de las plantillas (`__equipoChips`, etc.).
+- **Menú lateral:** el panel es flex-column. Los bloques agregados necesitan `flex:none` o se aplastan y el texto se desborda (pasó en v085).
+- **Celulares viejos:** Chrome 80. El «Sitio para computadoras» de Motorola tiene aviso propio.
+- **Fotos con la cámara del teléfono:** Android puede cerrar la app y la foto se pierde. Preferí la cámara de la app.
+- **Shell:** nunca `pkill -f "texto"` con un texto que esté en el propio comando (mata la consola).
+- No hay emulador de Firestore disponible: las reglas se prueban con `reglas_stub.js`. Si cambiás reglas, cambiá también el stub.
+- Desde la nube no se llega a `*.workers.dev`: las pruebas reales de Workers las hace Ángel.
+
+---
+
+## 14. Checklist de entrega (cada versión)
+
+1. Cambio hecho sobre el ORIGINAL de la última versión → ORIGINAL nuevo `NNN_AAAA-MM-DD_app-EMA_ORIGINAL.html` + `index.html` compactado (sello de versión actualizado).
+2. Prueba nueva `t_vNNN.js` + batería completa en PC y celular, todo OK (o explicar lo que falla).
+3. SHA-256 de los dos archivos.
+4. Si hay reglas nuevas: `Reglas_Firestore_vNNN.txt` completas, y la app avisa si faltan.
+5. Decirle a Ángel en 1–2 líneas qué cambió y **qué tiene que hacer él**:
+   - subir `index.html` a GitHub (y `sw.js`/carpetas solo si cambiaron);
+   - publicar reglas;
+   - armar APK nuevo solo si cambió algo nativo.
+6. Devolver el ORIGINAL (respaldo, no se sube) junto con el index.
+7. Anotar la versión en el historial (SALEM lleva `Version_077_app.md` en el proyecto de claude.ai; si trabajás acá, dejá un `CHANGELOG.md` con pedido, cambios, pruebas y huellas).
+
+---
+
+## 15. Historial resumido de versiones (para entender por qué está cada cosa)
+
+| Versión | Qué agregó |
+|---|---|
+| 005–011 | Guías, tipos constructivos, planos de obra, mapa liviano, herramientas, fichas técnicas |
+| 012–018 | Calculadora de barrio, Gantt, códigos protegidos, precios $/U$S/IVA, receta de barrios, torta/vínculos |
+| 019–021 | Láminas tipo plano, caja PRFV TC-PRFV-01/02 |
+| 022–027 | Planos en las OT, presencia, nombre de obra único, reservas por aprobar, fechas vivas, imprimir en el celu, fotos por columna con nombre, login sin trabarse, revisión general |
+| 028–031 | Una foto por unidad, fotos por tarea y medidas, sello + fotos sin señal + informe mensual, avisos |
+| 032–037 | Cámara propia, compartir con ubicación, revisión de la calculadora, fotos a R2 |
+| 038–048 | ZIP con GPS, faltantes en reservas, avance por tipo, mapa pro, quincenas, gastos pro, vehículos, legajos por tipo, avance por itemizado, puntos exactos, menú plegable |
+| 049–055 | Personal de obra (cuadrilla/operario), push con la app cerrada, avisos vistos, sin stock, catálogo para la cuadrilla, itemizado por tipo, chequeo calculadora ↔ pañol |
+| 056–064 | Cómputo con subíndices y semáforo, editar cómputo, cámara con nombres y GPS, imprimir reservas, remitos de herramientas, ofrecer otro material, legajo en el mapa, lista de materiales, ingreso de herramientas |
+| 065–070 | Sin internet, columnas de 10 m, BPN 6, órdenes llenas (1 MB), permisos de fotos, reglas livianas |
+| 071–076 | Carpeta EPEC, saldo de obra + reinicio de puntos, galería pro + Cámara EMA aparte, hoja de la cámara, celulares lentos (sw.js cache-first, Chrome 80), cuadrilla como equipo |
+| 077–082 | Imprimir/PDF en la app, arranque por rol, repartir tareas, Mis tareas Hoy/Pendientes/Terminadas, reservas por obra + herramientas agrupadas, lista de compras + legajo plegable |
+| 083 | Ubicación en vivo del personal (reglas v083) |
+| 084 | Punto verde en el menú en vez del cartel, arranque más rápido, soporte del cargador del APK |
+| 085 | La cajita de ubicación en el menú ya no se desborda; punto más adentro del botón |
+
+---
+
+## 16. Pendientes conocidos (preguntar a Ángel antes de encarar)
+
+- Confirmar en celulares reales el APK 1.1 (Moto g24 power: pantalla negra/velocidad). Si el login falla en el APK, revisar si la API key de Firebase tiene restricción por dominio (`https://localhost`).
+- Push nativo (FCM) dentro del APK: hoy los avisos con la app cerrada no llegan al APK. Necesita APK nuevo.
+- Lista de compras cortada en el celular (tabla `#cardStockCompras` con min-width 620 px).
+- Calculadora ↔ pañol: equivalencias (un material = un código del pañol con nombre del itemizado), unidades/presentaciones, unir duplicados. Ángel dijo «lo vemos», **no hacer sin pedido**.
+- Paquetes de tableros en el pañol (esperando el Excel de las planillas).
+- 40 `setInterval` permanentes: consolidar en un planificador que se pause con `document.hidden`.
+- Barrio: faltan planos AP-TC-055 A–G, AP-TC-024, AP-TC-004, AP-TC-021, AP-CC-010, AP-T-014 y el itemizado de barrio.
+- Entrar con huella (WebAuthn), medidor GPS/RTK: ideas charladas, **no hacer todavía**.
+
+---
+
+## 17. Glosario rápido
+
+- **PRFV:** poliéster reforzado con fibra de vidrio (columnas/postes).
+- **PAT:** puesta a tierra.
+- **BPN:** bornera de paso (fase gris, neutro celeste, tierra verde).
+- **TIF/TIFF:** puntera.
+- **Vínculo/capuchón:** acople de brazos en la punta de la columna.
+- **Tablerito:** caja bornera de columna.
+- **K:** coeficiente del ítem (× módulo = precio).
+- **Itemizado:** lista de ítems con cantidades de una obra.
+- **Certificar:** cobrar lo hecho del mes.
+- **Cómputo:** cálculo de materiales.
+- **Legajo:** carpeta digital de la obra.
+- **OT:** orden de trabajo.
+- **Cuadrilla:** equipo de obra.
+- **Pañol:** depósito de materiales.
+- **Vale:** comprobante de salida.
+- **Remito:** comprobante de entrada.
+- **Inspección:** inspector de EPEC/Municipalidad.
+- **DGAP:** Dirección de Alumbrado Público (Municipalidad).
+- **Ganancia (de cable):** metros extra por subidas a las columnas.
+- **Plaza ejecutada:** las 36 ya hechas con itemizado viejo; manda lo certificado.
