@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="ema-version" content="2026-11-01 16:37 · 9e77d2">
+<meta name="ema-version" content="2026-11-01 19:32 · a0a82d">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script id="anotarErrores">window.__autorApp="App Alumbrado Público — © 2026 Miguel Ángel Díaz. Todos los derechos reservados.",window.__erroresApp=[],window.addEventListener("error",function(e){try{var r=window.__erroresApp;r.length<30&&r.push({t:Date.now(),m:String(e.message||e),d:e.filename?String(e.filename).split("/").pop()+":"+e.lineno:""})}catch{}}),window.addEventListener("unhandledrejection",function(e){try{var r=e.reason,n=String(r&&(r.message||r.code)||r||"");if(/offline|unavailable|network|Failed to fetch/i.test(n))return;var o=window.__erroresApp;o.length<30&&o.push({t:Date.now(),m:"(promesa) "+n,d:""})}catch{}});</script>
 <title>Calculadora de Materiales — Alumbrado Público</title>
@@ -78,7 +78,7 @@
 <div class="header-divider"></div>
 <div class="header-text">
 <h1>Alumbrado Público</h1>
-<div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-11-01 16:37 · 9e77d2</span></div>
+<div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-11-01 19:32 · a0a82d</span></div>
 <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
 </div>
 </div>
@@ -6457,6 +6457,448 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
 <button type="button" class="btn" id="uvGuardar" style="margin-top:8px;">Guardar horario</button> <span id="uvMsg" class="hint"></span>`))}window.__ubicacionVivo={estado:()=>Object.assign({},a,{lock:!!a.lock,nativo:{envios:c.envios,fallas:c.fallas,ultimoErr:c.ultimoErr,conHttp:!!x()}}),cfg:()=>Object.assign({},d),enHorario:T,tic:h,pintarMapa:b,arrancar:z,parar:A,lista:()=>S},document.addEventListener("permisos-listos",()=>setTimeout(()=>{h(),b(),N()},50)),setInterval(()=>{h(),document.body&&document.body.dataset.vista==="mapa"&&b()},3e4);const Z=window.abrirMenuLateral;typeof Z=="function"&&(window.abrirMenuLateral=function(){const e=Z.apply(this,arguments);return setTimeout(v,60),e});const K=window.mostrarVista;typeof K=="function"&&(window.mostrarVista=function(e){const t=K.apply(this,arguments);return setTimeout(()=>{e==="mapa"&&b(),e==="usuarios"&&N(),v()},400),t}),setTimeout(h,2500);const Q=()=>{try{window.__cargador&&window.__cargador.listo()}catch{}};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",Q):Q()})();</script>
 <script id="arranqueRapido">(function(){const i=()=>{const n=document.getElementById("viewStock");return!!n&&n.style.display!=="none"&&getComputedStyle(n).display!=="none"},e={};["renderStockTabla","renderCatalogoTabla"].forEach(n=>{const t=window[n];if(typeof t!="function")return;const c=function(){if(!i()&&!window.__renderSiempre){e[n]=!0;return}return e[n]=!1,t.apply(this,arguments)};window[n]=c});const o=()=>Object.keys(e).forEach(n=>{if(e[n]){e[n]=!1;try{window[n]()}catch(t){console.warn("pañol",t)}}});window.__correrPendientesStock=o;const r=window.mostrarVista;typeof r=="function"&&(window.mostrarVista=function(n){const t=r.apply(this,arguments);return n==="stock"&&o(),t})})();</script>
 <script id="cuadrillaLiviana">(function(){"use strict";const i=["inicio","mistareas","mapa","normas","guias"],t=window.mostrarVista;typeof t=="function"&&(window.mostrarVista=function(n){try{const o=window.__modoDatos;o&&o.liviano()&&i.indexOf(String(n))<0&&o.cargarTodo()}catch{}return t.apply(this,arguments)}),document.addEventListener("permisos-listos",()=>{try{window.__modoDatos&&window.__modoDatos.revisar()}catch{}})})();</script>
+<script id="proyectistaMenu">(function(){"use strict";const o=t=>document.getElementById(t),i=()=>{try{const t=window.PERMISOS&&PERMISOS.yo&&PERMISOS.yo();return!!t&&t.activo!==!1&&!t.pendiente&&(t.rol==="admin"||t.rol==="oficina")}catch{return!1}};function c(){if(window.__proyectista)return window.__proyectista;const t=o("proyectistaCod");if(!t)return null;const e=document.createElement("script");return e.textContent=t.textContent,e.dataset.cargado="proyectistaCod",document.body.appendChild(e),window.__proyectista||null}window.__abrirProyectista=function(t){if(!i())return!1;const e=c();return e&&e.abrir(t),!!e};const r=o("menuLista");function a(){if(!r)return;const t=o("menuProyectista");if(!i()){t&&t.remove();return}if(t)return;const e=o("menuCamara")||r.querySelector('.menu-item[data-vista="normas"]')||[].slice.call(r.querySelectorAll(".menu-item[data-vista]")).pop();if(!e)return;const n=document.createElement("button");n.type="button",n.className="menu-item",n.id="menuProyectista",n.innerHTML='<span class="menu-ico">📐</span>Proyectista',e.insertAdjacentElement("afterend",n)}r&&new MutationObserver(a).observe(r,{childList:!0}),document.addEventListener("permisos-listos",a),document.addEventListener("click",t=>{if(t.target.closest&&t.target.closest("#menuProyectista")){t.preventDefault(),t.stopPropagation();try{cerrarMenuLateral()}catch{}window.__abrirProyectista()}},!0)})();</script>
+<script type="text/plain" id="proyectistaCod">
+(function () {
+  "use strict";
+  // v089 · PROYECTISTA — etapa 1: relevamiento en obra (pedido de Ángel, 01/11/2026). Solo Administración y Oficina.
+  //  · Se crea un proyecto (opcionalmente atado a una obra) y se van marcando puntos con el GPS: columna nueva, existente,
+  //    tablero, acometida, cámara, cruce, otro. Mientras se camina se ve la distancia al último punto.
+  //  · Con el GPS del celular la precisión es de metros; con un receptor RTK que le pase la posición al celular, de centímetros
+  //    (la app lee la misma ubicación: muestra la precisión que informa el aparato).
+  //  · También se pueden agregar puntos tocando el mapa (para proyectar desde la compu).
+  //  · Plano automático (en metros, con cotas entre puntos), imprimible; DXF para AutoCAD en Gauss-Krüger POSGAR 2007
+  //    (faja 4 por defecto, la de Córdoba; a confirmar con la base de Ángel) o en metros locales; planilla para Excel.
+  //  · Datos: colección «proyectos» (un documento por proyecto, con la lista de puntos). Reglas: Reglas_Firestore_v089.
+  //  · Distancias sobre el elipsoide (Vincenty, WGS84); coordenadas planas por Transverse Mercator (Gauss-Krüger argentino:
+  //    origen en el polo sur, falso este = faja·1.000.000 + 500.000).
+  if (window.__proyectista) return;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => (typeof escHtml === "function" ? escHtml(String(s == null ? "" : s)) : String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]));
+  const num = (n, d) => Number(n).toLocaleString("es-AR", { minimumFractionDigits: d, maximumFractionDigits: d });
+  const db = () => firebase.firestore();
+  const COL = "proyectos";
+  const TIPOS = [
+    { k: "colN", t: "Columna nueva", p: "C", c: "#2563eb" },
+    { k: "colE", t: "Columna existente", p: "E", c: "#7c879d" },
+    { k: "tab", t: "Tablero", p: "T", c: "#d97706" },
+    { k: "aco", t: "Acometida / poste", p: "A", c: "#7c3aed" },
+    { k: "cam", t: "Cámara / caja", p: "K", c: "#0d9488" },
+    { k: "cru", t: "Cruce de calle", p: "X", c: "#dc2626" },
+    { k: "otro", t: "Otro", p: "P", c: "#28285e" }
+  ];
+  const tipo = (k) => TIPOS.find((x) => x.k === k) || TIPOS[TIPOS.length - 1];
+
+  // ======================================================================= geodesia
+  const A_ = 6378137, F_ = 1 / 298.257223563, B_ = A_ * (1 - F_), E2 = F_ * (2 - F_), EP2 = E2 / (1 - E2), RAD = Math.PI / 180;
+  function distancia(la1, lo1, la2, lo2) {   // Vincenty (elipsoide WGS84), en metros
+    if (la1 === la2 && lo1 === lo2) return 0;
+    const L = (lo2 - lo1) * RAD, U1 = Math.atan((1 - F_) * Math.tan(la1 * RAD)), U2 = Math.atan((1 - F_) * Math.tan(la2 * RAD));
+    const sU1 = Math.sin(U1), cU1 = Math.cos(U1), sU2 = Math.sin(U2), cU2 = Math.cos(U2);
+    let l = L, lp, it = 0, sS, cS, S, sA, c2A, c2Sm;
+    do {
+      const sl = Math.sin(l), cl = Math.cos(l);
+      sS = Math.sqrt((cU2 * sl) * (cU2 * sl) + (cU1 * sU2 - sU1 * cU2 * cl) * (cU1 * sU2 - sU1 * cU2 * cl));
+      if (sS === 0) return 0;
+      cS = sU1 * sU2 + cU1 * cU2 * cl; S = Math.atan2(sS, cS);
+      sA = cU1 * cU2 * sl / sS; c2A = 1 - sA * sA;
+      c2Sm = c2A ? cS - 2 * sU1 * sU2 / c2A : 0;
+      const C = F_ / 16 * c2A * (4 + F_ * (4 - 3 * c2A));
+      lp = l; l = L + (1 - C) * F_ * sA * (S + C * sS * (c2Sm + C * cS * (-1 + 2 * c2Sm * c2Sm)));
+    } while (Math.abs(l - lp) > 1e-12 && ++it < 200);
+    const u2 = c2A * (A_ * A_ - B_ * B_) / (B_ * B_);
+    const AA = 1 + u2 / 16384 * (4096 + u2 * (-768 + u2 * (320 - 175 * u2))), BB = u2 / 1024 * (256 + u2 * (-128 + u2 * (74 - 47 * u2)));
+    const dS = BB * sS * (c2Sm + BB / 4 * (cS * (-1 + 2 * c2Sm * c2Sm) - BB / 6 * c2Sm * (-3 + 4 * sS * sS) * (-3 + 4 * c2Sm * c2Sm)));
+    return B_ * AA * (S - dS);
+  }
+  // Transverse Mercator (serie de Krüger, precisión de milímetros dentro de la faja). Gauss-Krüger argentino.
+  const nK = F_ / (2 - F_), AK = A_ / (1 + nK) * (1 + nK * nK / 4 + Math.pow(nK, 4) / 64);
+  const alfa = [nK / 2 - 2 * nK * nK / 3 + 5 * Math.pow(nK, 3) / 16 + 41 * Math.pow(nK, 4) / 180, 13 * nK * nK / 48 - 3 * Math.pow(nK, 3) / 5 + 557 * Math.pow(nK, 4) / 1440, 61 * Math.pow(nK, 3) / 240 - 103 * Math.pow(nK, 4) / 140, 49561 * Math.pow(nK, 4) / 161280];
+  const fajaDe = (lon) => Math.max(1, Math.min(7, Math.round((lon + 72) / 3) + 1));
+  function gk(lat, lon, faja) {
+    faja = faja || fajaDe(lon);
+    const lon0 = -72 + 3 * (faja - 1), phi = lat * RAD, lam = (lon - lon0) * RAD;
+    const e = Math.sqrt(E2), t = Math.sinh(Math.atanh(Math.sin(phi)) - e * Math.atanh(e * Math.sin(phi)));
+    const xi0 = Math.atan2(t, Math.cos(lam)), eta0 = Math.atanh(Math.sin(lam) / Math.sqrt(1 + t * t));
+    let xi = xi0, eta = eta0;
+    for (let j = 1; j <= 4; j++) { xi += alfa[j - 1] * Math.sin(2 * j * xi0) * Math.cosh(2 * j * eta0); eta += alfa[j - 1] * Math.cos(2 * j * xi0) * Math.sinh(2 * j * eta0); }
+    const yPolo = AK * Math.PI / 2;   // origen de las Y en el polo sur
+    return { x: faja * 1e6 + 5e5 + AK * eta, y: AK * xi + yPolo, faja };
+  }
+
+  // ======================================================================= estado
+  const st = { proys: {}, unsub: null, id: "", pest: "mapa", gps: null, gpsErr: "", watch: null, tipo: "colN", corte: false, modo: "toque", toque: false, prom: null, map: null, capa: null, faja: 0, msg: "", msgMal: false, cargado: false, reglas: true };
+  const P = () => st.proys[st.id] || null;
+  const puntos = () => ((P() && P().puntos) || []);
+  const yo = () => { try { return PERMISOS.yo() || {}; } catch (e) { return {}; } };
+  const quien = () => yo().nombre || yo().usuario || String((window.__fbUser || {}).email || "");
+  function tramos(ps) {   // segmentos consecutivos (salvo donde arranca un tramo nuevo)
+    const out = [];
+    for (let i = 1; i < ps.length; i++) if (!ps[i].corte) out.push({ a: ps[i - 1], b: ps[i], d: distancia(ps[i - 1].lat, ps[i - 1].lng, ps[i].lat, ps[i].lng) });
+    return out;
+  }
+  const largo = (ps) => tramos(ps).reduce((s, x) => s + x.d, 0);
+  const fajaProy = () => (P() && P().faja) || st.faja || (puntos()[0] ? fajaDe(puntos()[0].lng) : 4);
+
+  // ======================================================================= base de datos
+  function avisar(t, mal) { st.msg = t || ""; st.msgMal = !!mal; const m = $("pyMsg"); if (m) { m.textContent = st.msg; m.className = "py-msg" + (mal ? " mal" : ""); m.hidden = !st.msg; } }
+  const errTxt = (e) => ((e && e.code) === "permission-denied" ? "Falta publicar en Firebase las reglas nuevas (Reglas_Firestore_v089, colección «proyectos»)." : "No se pudo guardar (¿hay señal?). Se reintenta solo cuando vuelva.");
+  function escuchar() {
+    if (st.unsub) return;
+    try {
+      st.unsub = db().collection(COL).onSnapshot((s) => {
+        const o = {}; s.forEach((d) => { o[d.id] = Object.assign({ id: d.id }, d.data()); });
+        st.proys = o; st.cargado = true; st.reglas = true; pintar();
+      }, (e) => { st.cargado = true; st.reglas = !((e && e.code) === "permission-denied"); avisar(errTxt(e), true); pintar(); });
+    } catch (e) { avisar("No se pudo conectar con la base.", true); }
+  }
+  function guardarPuntos(ps) {
+    const p = P(); if (!p) return;
+    p.puntos = ps; pintar();
+    db().collection(COL).doc(p.id).update({ puntos: ps, ts: Date.now(), por: quien() }).then(() => avisar(""), (e) => avisar(errTxt(e), true));
+  }
+  async function crear(nombre, obra) {
+    const o = (typeof avanceObras !== "undefined" ? avanceObras : []).find((x) => String(x.id) === String(obra));
+    const d = { nombre, obraId: o ? String(o.id) : "", obraNombre: o ? (o.nombre || "") : "", puntos: [], creado: Date.now(), ts: Date.now(), por: quien(), faja: 0, etapa: 1 };
+    try { const r = await db().collection(COL).add(d); st.proys[r.id] = Object.assign({ id: r.id }, d); st.id = r.id; st.pest = "mapa"; avisar(""); pintar(); }
+    catch (e) { avisar(errTxt(e), true); }
+  }
+
+  // ======================================================================= GPS
+  function gpsPrender() {
+    if (st.watch != null || !navigator.geolocation) { if (!navigator.geolocation) st.gpsErr = "Este aparato no tiene ubicación."; return; }
+    st.watch = navigator.geolocation.watchPosition((p) => {
+      st.gps = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy, alt: p.coords.altitude, ts: p.timestamp || Date.now() }; st.gpsErr = "";
+      if (st.prom) st.prom.l.push(st.gps);
+      pintarGps();
+    }, (e) => { st.gpsErr = e && e.code === 1 ? "Sin permiso de ubicación: activalo para esta página / la app." : "Buscando señal de GPS…"; pintarGps(); }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+  }
+  function gpsApagar() { if (st.watch != null) { try { navigator.geolocation.clearWatch(st.watch); } catch (e) { } } st.watch = null; }
+  function calidad(acc) {
+    if (acc == null) return { t: "sin datos", c: "" };
+    if (acc <= 0.05) return { t: "RTK fijo (centímetros)", c: "ok" };
+    if (acc <= 0.5) return { t: "muy buena", c: "ok" };
+    if (acc <= 5) return { t: "GPS común (metros)", c: "med" };
+    return { t: "floja", c: "mal" };
+  }
+  function nombreNuevo(ps, tk) { const t = tipo(tk); let n = 1; ps.forEach((p) => { const m = String(p.n || "").match(new RegExp("^" + t.p + "(\\d+)$")); if (m) n = Math.max(n, +m[1] + 1); }); return t.p + n; }
+  function agregar(lat, lng, acc, fuente) {
+    const ps = puntos().slice();
+    ps.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), n: nombreNuevo(ps, st.tipo), tipo: st.tipo, lat: +lat.toFixed(9), lng: +lng.toFixed(9), acc: acc == null ? null : Math.round(acc * 1000) / 1000, fuente, corte: ps.length ? !!st.corte : false, ts: Date.now(), por: quien(), nota: "" });
+    st.corte = false;
+    guardarPuntos(ps);
+  }
+  function marcar() {
+    if (!P()) return;
+    if (!st.gps) { avisar(st.gpsErr || "Todavía no hay ubicación del GPS.", true); return; }
+    if (st.modo === "toque") { agregar(st.gps.lat, st.gps.lng, st.gps.acc, "gps"); return; }
+    st.prom = { l: [st.gps], fin: Date.now() + 5000 }; pintarGps();
+    setTimeout(() => {
+      const l = (st.prom && st.prom.l) || []; st.prom = null;
+      if (!l.length) return;
+      let sw = 0, la = 0, lo = 0, ac = 0;
+      l.forEach((g) => { const w = 1 / Math.max(1e-4, (g.acc || 1) * (g.acc || 1)); sw += w; la += g.lat * w; lo += g.lng * w; ac += g.acc || 0; });
+      agregar(la / sw, lo / sw, ac / l.length / Math.sqrt(l.length), "gps (promedio de " + l.length + ")");
+    }, 5000);
+  }
+
+  // ======================================================================= salidas: DXF, planilla, plano
+  function local(ps, faja) {   // metros desde el primer punto (este, norte) en Gauss-Krüger
+    if (!ps.length) return [];
+    const g0 = gk(ps[0].lat, ps[0].lng, faja);
+    return ps.map((p) => { const g = gk(p.lat, p.lng, faja); return { p, x: g.x - g0.x, y: g.y - g0.y, gx: g.x, gy: g.y }; });
+  }
+  function dxf(p, sistema) {
+    const ps = p.puntos || [], faja = fajaProy(), L = local(ps, faja), ab = sistema === "local";
+    const XY = (q) => (ab ? [q.x, q.y] : [q.gx, q.gy]);
+    const out = [];
+    const g = (c, v) => out.push(String(c), String(v));
+    const capas = TIPOS.map((t) => "PUNTOS_" + t.p).concat(["NOMBRES", "TRAMOS", "COTAS"]);
+    const colores = { C: 5, E: 8, T: 30, A: 6, K: 4, X: 1, P: 7, NOMBRES: 7, TRAMOS: 3, COTAS: 2 };
+    g(0, "SECTION"); g(2, "HEADER"); g(9, "$ACADVER"); g(1, "AC1009"); g(9, "$INSBASE"); g(10, 0); g(20, 0); g(30, 0); g(0, "ENDSEC");
+    g(0, "SECTION"); g(2, "TABLES"); g(0, "TABLE"); g(2, "LAYER"); g(70, capas.length);
+    capas.forEach((c) => { g(0, "LAYER"); g(2, c); g(70, 0); g(62, colores[c.replace("PUNTOS_", "")] || 7); g(6, "CONTINUOUS"); });
+    g(0, "ENDTAB"); g(0, "ENDSEC");
+    g(0, "SECTION"); g(2, "ENTITIES");
+    const f = (v) => v.toFixed(4);
+    L.forEach((q) => {
+      const t = tipo(q.p.tipo), c = XY(q), capa = "PUNTOS_" + t.p;
+      g(0, "POINT"); g(8, capa); g(10, f(c[0])); g(20, f(c[1])); g(30, 0);
+      g(0, "CIRCLE"); g(8, capa); g(10, f(c[0])); g(20, f(c[1])); g(30, 0); g(40, 0.25);
+      g(0, "TEXT"); g(8, "NOMBRES"); g(10, f(c[0] + 0.4)); g(20, f(c[1] + 0.4)); g(30, 0); g(40, 0.5); g(1, q.p.n + (q.p.nota ? " " + q.p.nota : ""));
+    });
+    for (let i = 1; i < L.length; i++) {
+      if (L[i].p.corte) continue;
+      const a = XY(L[i - 1]), b = XY(L[i]), d = distancia(L[i - 1].p.lat, L[i - 1].p.lng, L[i].p.lat, L[i].p.lng);
+      g(0, "LINE"); g(8, "TRAMOS"); g(10, f(a[0])); g(20, f(a[1])); g(30, 0); g(11, f(b[0])); g(21, f(b[1])); g(31, 0);
+      let ang = Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI; if (ang > 90) ang -= 180; if (ang < -90) ang += 180;
+      g(0, "TEXT"); g(8, "COTAS"); g(10, f((a[0] + b[0]) / 2)); g(20, f((a[1] + b[1]) / 2 + 0.3)); g(30, 0); g(40, 0.4); g(50, ang.toFixed(2)); g(1, d.toFixed(2) + " m");
+    }
+    g(0, "ENDSEC"); g(0, "EOF");
+    return out.join("\r\n") + "\r\n";
+  }
+  function planilla(p) {
+    const ps = p.puntos || [], faja = fajaProy(), L = local(ps, faja);
+    const filas = [["N°", "Nombre", "Tipo", "Latitud", "Longitud", "X (GK faja " + faja + ")", "Y (GK faja " + faja + ")", "Precisión (m)", "Fuente", "Dist. al anterior (m)", "Acumulada (m)", "Nota", "Fecha"]];
+    let acu = 0;
+    L.forEach((q, i) => {
+      let d = "";
+      if (i && !q.p.corte) { const dd = distancia(L[i - 1].p.lat, L[i - 1].p.lng, q.p.lat, q.p.lng); acu += dd; d = dd.toFixed(3); }
+      filas.push([i + 1, q.p.n, tipo(q.p.tipo).t, q.p.lat.toFixed(8), q.p.lng.toFixed(8), q.gx.toFixed(3), q.gy.toFixed(3), q.p.acc == null ? "" : q.p.acc, q.p.fuente || "", d, i ? acu.toFixed(3) : "0.000", q.p.nota || "", new Date(q.p.ts || Date.now()).toLocaleString("es-AR")]);
+    });
+    return "﻿" + filas.map((f) => f.map((v) => { const s = String(v).replace(/^(-?\d+)\.(\d+)$/, "$1,$2"); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(";")).join("\r\n");
+  }
+  function bajar(nombre, texto, tipoMime) {
+    const blob = new Blob([texto], { type: tipoMime });
+    try {
+      if (window.__cargador && navigator.canShare && window.File) { const fl = new File([blob], nombre, { type: tipoMime }); if (navigator.canShare({ files: [fl] })) { navigator.share({ files: [fl], title: nombre }).catch(() => { }); return; } }
+    } catch (e) { }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nombre; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+  const archivo = (p, ext) => String(p.nombre || "proyecto").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w-]+/g, "_").slice(0, 40) + "." + ext;
+  function planoSvg(ps, W, H, conGrilla) {
+    const L = local(ps, fajaProy());
+    if (!L.length) return '<svg viewBox="0 0 ' + W + " " + H + '" class="py-svg"><text x="' + W / 2 + '" y="' + H / 2 + '" text-anchor="middle" fill="#7c879d" font-size="14">Todavía no hay puntos</text></svg>';
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    L.forEach((q) => { x0 = Math.min(x0, q.x); x1 = Math.max(x1, q.x); y0 = Math.min(y0, q.y); y1 = Math.max(y1, q.y); });
+    const m = 46, ancho = Math.max(x1 - x0, 4), alto = Math.max(y1 - y0, 4), k = Math.min((W - 2 * m) / ancho, (H - 2 * m) / alto);
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, X = (x) => W / 2 + (x - cx) * k, Y = (y) => H / 2 - (y - cy) * k;
+    const o = ['<svg viewBox="0 0 ' + W + " " + H + '" class="py-svg" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Arial,sans-serif">', '<rect width="' + W + '" height="' + H + '" fill="#fff"/>'];
+    const pasos = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000], paso = pasos.find((s) => s * k >= 60) || 1000;
+    if (conGrilla) {
+      for (let gx = Math.floor((cx - W / 2 / k) / paso) * paso; X(gx) < W; gx += paso) o.push('<line x1="' + X(gx).toFixed(1) + '" y1="0" x2="' + X(gx).toFixed(1) + '" y2="' + H + '" stroke="#eef1f6"/>');
+      for (let gy = Math.floor((cy - H / 2 / k) / paso) * paso; Y(gy) > 0; gy += paso) o.push('<line x1="0" y1="' + Y(gy).toFixed(1) + '" x2="' + W + '" y2="' + Y(gy).toFixed(1) + '" stroke="#eef1f6"/>');
+    }
+    for (let i = 1; i < L.length; i++) {
+      if (L[i].p.corte) continue;
+      const a = L[i - 1], b = L[i], d = distancia(a.p.lat, a.p.lng, b.p.lat, b.p.lng);
+      o.push('<line x1="' + X(a.x).toFixed(1) + '" y1="' + Y(a.y).toFixed(1) + '" x2="' + X(b.x).toFixed(1) + '" y2="' + Y(b.y).toFixed(1) + '" stroke="#28285e" stroke-width="1.6"/>');
+      let ang = Math.atan2(Y(b.y) - Y(a.y), X(b.x) - X(a.x)) * 180 / Math.PI; if (ang > 90) ang -= 180; if (ang < -90) ang += 180;
+      const mx = (X(a.x) + X(b.x)) / 2, my = (Y(a.y) + Y(b.y)) / 2;
+      o.push('<text x="' + mx.toFixed(1) + '" y="' + (my - 5).toFixed(1) + '" font-size="11" font-weight="700" fill="#b45309" text-anchor="middle" transform="rotate(' + ang.toFixed(1) + " " + mx.toFixed(1) + " " + my.toFixed(1) + ')">' + num(d, 2) + " m</text>");
+    }
+    L.forEach((q) => {
+      const t = tipo(q.p.tipo);
+      o.push('<circle cx="' + X(q.x).toFixed(1) + '" cy="' + Y(q.y).toFixed(1) + '" r="6" fill="' + t.c + '" stroke="#fff" stroke-width="2"/>');
+      o.push('<text x="' + (X(q.x) + 9).toFixed(1) + '" y="' + (Y(q.y) - 8).toFixed(1) + '" font-size="12" font-weight="800" fill="#0d1424">' + esc(q.p.n) + "</text>");
+    });
+    const esc_m = paso, lx = 16, ly = H - 18;   // escala gráfica y norte
+    o.push('<line x1="' + lx + '" y1="' + ly + '" x2="' + (lx + esc_m * k).toFixed(1) + '" y2="' + ly + '" stroke="#0d1424" stroke-width="3"/><text x="' + lx + '" y="' + (ly - 6) + '" font-size="11" fill="#0d1424">' + esc_m + " m</text>");
+    o.push('<g transform="translate(' + (W - 26) + ',30)"><path d="M0,-16 L7,8 L0,3 L-7,8 Z" fill="#0d1424"/><text y="22" font-size="11" text-anchor="middle" font-weight="800">N</text></g>');
+    o.push("</svg>");
+    return o.join("");
+  }
+  function imprimir() {
+    const p = P(); if (!p) return;
+    const ps = p.puntos || [], faja = fajaProy(), L = local(ps, faja);
+    const filas = L.map((q, i) => "<tr><td>" + (i + 1) + "</td><td><b>" + esc(q.p.n) + "</b></td><td>" + esc(tipo(q.p.tipo).t) + "</td><td>" + q.gx.toFixed(2) + "</td><td>" + q.gy.toFixed(2) + "</td><td>" + (q.p.acc == null ? "—" : "±" + num(q.p.acc, 2)) + "</td><td>" + (i && !q.p.corte ? num(distancia(L[i - 1].p.lat, L[i - 1].p.lng, q.p.lat, q.p.lng), 2) : "—") + "</td></tr>").join("");
+    const hoy = new Date().toLocaleDateString("es-AR");
+    const doc = '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>' + esc(p.nombre) + '</title><style>@page{size:A4 landscape;margin:10mm}body{font:12px Inter,Arial,sans-serif;color:#0d1424;margin:0}h1{font-size:18px;margin:0 0 2px}.sub{color:#4b5670;margin-bottom:8px}.py-svg{width:100%;height:auto;border:1px solid #c9cfdc}table{border-collapse:collapse;width:100%;margin-top:8px;font-size:11px}td,th{border:1px solid #d5dae8;padding:3px 6px;text-align:left}th{background:#eef1f6}.caj{display:flex;justify-content:space-between;border:1.5px solid #28285e;padding:6px 10px;margin-top:8px;font-size:11px}.nota{color:#b45309;font-size:11px;margin-top:4px}</style></head><body>' +
+      "<h1>" + esc(p.nombre) + "</h1><div class=\"sub\">" + (p.obraNombre ? "Obra: " + esc(p.obraNombre) + " · " : "") + ps.length + " puntos · " + num(largo(ps), 2) + " m de recorrido · coordenadas Gauss-Krüger POSGAR 2007 faja " + faja + "</div>" +
+      planoSvg(ps, 1000, 520, true) +
+      '<div class="nota">Plano preliminar generado del relevamiento. Precisión según el GPS usado (ver columna ±). Sistema de coordenadas a confirmar con la base de Córdoba.</div>' +
+      "<table><thead><tr><th>N°</th><th>Punto</th><th>Tipo</th><th>X (m)</th><th>Y (m)</th><th>Precisión</th><th>Dist. al anterior (m)</th></tr></thead><tbody>" + filas + "</tbody></table>" +
+      '<div class="caj"><span><b>EMA Servicios</b> · Proyectista · Relevamiento</span><span>Fecha: ' + hoy + "</span><span>Relevó: " + esc(p.por || "") + "</span></div></body></html>";
+    if (window.hojaEMA && typeof hojaEMA.abrir === "function") hojaEMA.abrir("Plano · " + (p.nombre || ""), doc);
+    else bajar(archivo(p, "html"), doc, "text/html");
+  }
+
+  // ======================================================================= mapa (Leaflet)
+  function mapaArmar() {
+    const el = $("pyMapa"); if (!el) return;
+    if (typeof L === "undefined" || !L.map) { el.innerHTML = '<div class="py-vacio">El mapa no cargó (¿sin internet?). El plano y la lista funcionan igual.</div>'; return; }
+    if (st.map && st.map.getContainer() !== el) { try { st.map.remove(); } catch (e) { } st.map = null; }
+    if (!st.map) {
+      st.map = L.map(el, { zoomControl: true, maxZoom: 21 });
+      const calle = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 21, maxNativeZoom: 19, attribution: "© OpenStreetMap" });
+      const sat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 21, maxNativeZoom: 19, attribution: "Esri" });
+      sat.addTo(st.map); L.control.layers({ "Satélite": sat, "Calles": calle }, {}, { position: "topright" }).addTo(st.map);
+      st.capa = L.layerGroup().addTo(st.map);
+      st.map.on("click", (e) => { if (st.toque) agregar(e.latlng.lat, e.latlng.lng, null, "mapa"); });
+      st.map.setView([-31.4201, -64.1888], 13);
+      st.vista = false;
+    }
+    setTimeout(() => { try { st.map.invalidateSize(); } catch (e) { } }, 60);
+    mapaPintar();
+  }
+  function mapaPintar() {
+    if (!st.map || !st.capa) return;
+    st.capa.clearLayers();
+    const ps = puntos();
+    tramos(ps).forEach((s) => {
+      L.polyline([[s.a.lat, s.a.lng], [s.b.lat, s.b.lng]], { color: "#ffd166", weight: 3 }).addTo(st.capa)
+        .bindTooltip(num(s.d, 2) + " m", { permanent: true, direction: "center", className: "py-cota" });
+    });
+    ps.forEach((p) => {
+      const t = tipo(p.tipo);
+      L.circleMarker([p.lat, p.lng], { radius: 7, color: "#fff", weight: 2, fillColor: t.c, fillOpacity: 1 }).addTo(st.capa)
+        .bindTooltip(esc(p.n), { permanent: true, direction: "right", offset: [8, 0], className: "py-nom" });
+    });
+    if (st.gps) L.circleMarker([st.gps.lat, st.gps.lng], { radius: 6, color: "#1d4ed8", weight: 3, fillColor: "#60a5fa", fillOpacity: 0.9 }).addTo(st.capa);
+    if (!st.vista && (ps.length || st.gps)) {
+      st.vista = true;
+      if (ps.length > 1) st.map.fitBounds(L.latLngBounds(ps.map((p) => [p.lat, p.lng])).pad(0.25), { maxZoom: 20 });
+      else { const c = ps[0] || st.gps; st.map.setView([c.lat, c.lng], 19); }
+    }
+  }
+
+  // ======================================================================= pantalla
+  const CSS = "#pyOv{position:fixed;top:0;left:0;right:0;bottom:0;z-index:10010;background:#eceff7;display:flex;flex-direction:column;font-family:Inter,'Segoe UI',Roboto,Arial,sans-serif;color:#0d1424}" +
+    "#pyOv .py-cab{display:flex;align-items:center;gap:10px;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));background:#28285e;color:#fff;flex:none}" +
+    "#pyOv .py-cab b{font-size:17px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#pyOv .py-cab small{display:block;font-weight:500;opacity:.75;font-size:12px}" +
+    "#pyOv .py-x,#pyOv .py-volver{background:rgba(255,255,255,.14);border:0;color:#fff;border-radius:12px;min-width:44px;min-height:44px;font-size:18px;cursor:pointer}" +
+    "#pyOv .py-cuerpo{flex:1;min-height:0;overflow:auto;padding:12px}" +
+    "#pyOv .py-card{background:rgba(255,255,255,.85);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 6px 20px -12px #1c1c4566}" +
+    "#pyOv h3{margin:0 0 8px;font-size:15px}#pyOv .py-hint{font-size:12.5px;color:#4b5670}" +
+    "#pyOv .py-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid #28285e;background:#fff;color:#28285e;font:700 14px Inter,Arial,sans-serif;cursor:pointer;margin:3px 4px 3px 0}" +
+    "#pyOv .py-btn.pri{background:#28285e;color:#fff}#pyOv .py-btn.on{background:#d97706;border-color:#d97706;color:#fff}#pyOv .py-btn.gr{width:100%;min-height:56px;font-size:17px}" +
+    "#pyOv input,#pyOv select{min-height:42px;border:1.5px solid #d5dae8;border-radius:10px;padding:0 10px;font:14px Inter,Arial,sans-serif;background:#fff;box-sizing:border-box;max-width:100%}" +
+    "#pyOv .py-fila{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}" +
+    "#pyOv .py-lista button{display:flex;width:100%;text-align:left;justify-content:space-between;gap:8px;align-items:center;border:0;border-bottom:1px solid #e6e9f2;background:none;padding:12px 4px;font:14px Inter,Arial,sans-serif;cursor:pointer;color:#0d1424}" +
+    "#pyOv .py-lista small{color:#4b5670}" +
+    "#pyOv .py-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:0 12px;grid-template-areas:'gps' 'vista' 'salida' 'acc'}#pyOv .py-a-gps{grid-area:gps}#pyOv .py-a-vista{grid-area:vista;min-width:0}#pyOv .py-a-salida{grid-area:salida}#pyOv .py-a-acc{grid-area:acc}" +
+    "@media(min-width:900px){#pyOv .py-grid{grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);grid-template-areas:'vista gps' 'vista salida' 'acc salida';align-items:start}}" +
+    "#pyOv .py-tabs{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}#pyOv .py-tabs button{min-height:40px;border-radius:999px;border:1.5px solid #d5dae8;background:#fff;padding:0 14px;font:700 13.5px Inter,Arial,sans-serif;cursor:pointer;color:#4b5670}#pyOv .py-tabs button.act{background:#28285e;border-color:#28285e;color:#fff}" +
+    "#pyMapa{height:58vh;min-height:300px;border-radius:14px;overflow:hidden;background:#dde2ee}" +
+    "#pyOv .py-svg{width:100%;height:auto;display:block;border-radius:12px;border:1px solid #d5dae8;background:#fff}" +
+    "#pyOv .py-gps{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin-bottom:4px}#pyOv .py-gps i{width:12px;height:12px;border-radius:50%;background:#9aa1b1;flex:none}#pyOv .py-gps i.ok{background:#16a34a}#pyOv .py-gps i.med{background:#f59e0b}#pyOv .py-gps i.mal{background:#dc2626}" +
+    "#pyOv .py-dist{font:800 30px 'JetBrains Mono',monospace;color:#28285e;font-variant-numeric:tabular-nums;margin:4px 0}" +
+    "#pyOv .py-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}#pyOv .py-chips button{min-height:40px;border-radius:999px;border:2px solid #d5dae8;background:#fff;padding:0 12px;font:700 13px Inter,Arial,sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;color:#0d1424}#pyOv .py-chips button i{width:10px;height:10px;border-radius:50%}#pyOv .py-chips button.act{border-color:#28285e;background:#28285e10}" +
+    "#pyOv .py-msg{margin:0 12px;padding:10px 12px;border-radius:12px;background:#e8f5e9;font-size:13.5px}#pyOv .py-msg.mal{background:#fdecea;color:#8a1c12}" +
+    "#pyOv .py-tabla{width:100%;border-collapse:collapse;font-size:13px}#pyOv .py-tabla td,#pyOv .py-tabla th{padding:6px 4px;border-bottom:1px solid #e6e9f2;text-align:left;vertical-align:middle}#pyOv .py-tabla th{font:700 11px 'JetBrains Mono',monospace;color:#4b5670;text-transform:uppercase}#pyOv .py-tabla input{min-height:36px;width:100%}#pyOv .py-tabla select{min-height:36px;width:100%}#pyOv .py-tabla .mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;white-space:nowrap}" +
+    "#pyOv .py-tabla button{min-width:36px;min-height:36px;border-radius:10px;border:1px solid #d5dae8;background:#fff;cursor:pointer}" +
+    "@media(max-width:640px){#pyOv .py-tabla thead{display:none}#pyOv .py-tabla tr{display:grid;grid-template-columns:1fr 1fr;gap:4px;border-bottom:1px solid #d5dae8;padding:6px 0}#pyOv .py-tabla td{border:0;padding:2px}}" +
+    "#pyOv .py-vacio{padding:24px;text-align:center;color:#4b5670}.py-cota{background:#fff8e1!important;border:1px solid #f59e0b!important;color:#7c2d12!important;font:700 11px Inter,Arial,sans-serif!important;padding:1px 5px!important;box-shadow:none!important}.py-cota:before{display:none}.py-nom{background:#28285e!important;color:#fff!important;border:0!important;font:800 11px Inter,Arial,sans-serif!important;padding:1px 6px!important;box-shadow:none!important}.py-nom:before{display:none}";
+  function asegurarCss() { if ($("proyectistaCss")) return; const s = document.createElement("style"); s.id = "proyectistaCss"; s.textContent = CSS; document.head.appendChild(s); }
+  function obrasOpts() {
+    const l = (typeof avanceObras !== "undefined" ? avanceObras : []).filter((o) => o && o.nombre).sort((a, b) => String(a.nombre).localeCompare(String(b.nombre), "es"));
+    return '<option value="">— Sin obra (proyecto suelto) —</option>' + l.map((o) => '<option value="' + esc(o.id) + '">' + esc(o.nombre) + (o.obraId ? " · ID " + esc(o.obraId) : "") + "</option>").join("");
+  }
+  function htmlLista() {
+    const l = Object.values(st.proys).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    return '<div class="py-card"><h3>＋ Proyecto nuevo</h3><div class="py-hint">Un proyecto por obra o por zona. Después marcás los puntos en el lugar (o tocando el mapa).</div>' +
+      '<div class="py-fila"><input id="pyNombre" placeholder="Nombre (ej. PLAZA SAN MARTÍN · relevamiento)" style="flex:1 1 260px"><select id="pyObra" style="flex:1 1 220px">' + obrasOpts() + '</select><button type="button" class="py-btn pri" data-py="crear">Crear</button></div></div>' +
+      '<div class="py-card"><h3>📁 Proyectos</h3>' + (!st.cargado ? '<div class="py-vacio">Cargando…</div>' : !l.length ? '<div class="py-vacio">Todavía no hay proyectos.</div>' :
+        '<div class="py-lista">' + l.map((p) => '<button type="button" data-py="abrir" data-id="' + esc(p.id) + '"><span><b>' + esc(p.nombre) + "</b><br><small>" + (p.obraNombre ? esc(p.obraNombre) + " · " : "") + ((p.puntos || []).length) + " puntos · " + num(largo(p.puntos || []), 1) + " m</small></span><small>" + new Date(p.ts || p.creado || Date.now()).toLocaleDateString("es-AR") + " ›</small></button>").join("") + "</div>") + "</div>";
+  }
+  function htmlGps() {
+    const g = st.gps, q = calidad(g && g.acc), ps = puntos(), ult = ps[ps.length - 1];
+    const d = g && ult ? distancia(ult.lat, ult.lng, g.lat, g.lng) : null;
+    return '<div class="py-gps"><i class="' + q.c + '"></i>' + (g ? "GPS ±" + num(g.acc, g.acc < 1 ? 2 : 1) + " m · " + q.t : esc(st.gpsErr || "Buscando GPS…")) + "</div>" +
+      '<div class="py-hint">' + (ult ? "Distancia a " + esc(ult.n) + " (último punto):" : "Marcá el primer punto.") + "</div>" +
+      '<div class="py-dist" id="pyDist">' + (d == null ? "—" : num(d, d < 10 ? 2 : 1) + " m") + "</div>" +
+      (st.prom ? '<div class="py-hint"><b>Promediando… quedate quieto en el punto (5 s)</b></div>' : "");
+  }
+  function htmlLado() {
+    const ps = puntos();
+    return '<div class="py-card py-a-gps"><div id="pyGps">' + htmlGps() + "</div>" +
+      '<div class="py-chips">' + TIPOS.map((t) => '<button type="button" data-py="tipo" data-k="' + t.k + '" class="' + (st.tipo === t.k ? "act" : "") + '"><i style="background:' + t.c + '"></i>' + esc(t.t) + "</button>").join("") + "</div>" +
+      '<button type="button" class="py-btn pri gr" data-py="marcar"' + (st.prom ? " disabled" : "") + ">📍 Marcar punto acá</button>" +
+      '<div class="py-fila"><label class="py-hint"><input type="checkbox" id="pyCorte" ' + (st.corte ? "checked" : "") + ' style="min-height:auto"> Empezar tramo nuevo (no unir con el anterior)</label></div>' +
+      '<div class="py-fila"><select id="pyModo"><option value="toque"' + (st.modo === "toque" ? " selected" : "") + '>Marcar al toque</option><option value="prom"' + (st.modo === "prom" ? " selected" : "") + '>Promediar 5 segundos (GPS del celular)</option></select>' +
+      '<button type="button" class="py-btn ' + (st.toque ? "on" : "") + '" data-py="toque">🗺 ' + (st.toque ? "Tocando el mapa agrega puntos" : "Agregar tocando el mapa") + "</button></div>" +
+      '<div class="py-hint">' + ps.length + " puntos · " + num(largo(ps), 2) + " m de recorrido</div></div>" +
+      '<div class="py-card py-a-salida"><h3>⬇ Sacar el plano</h3>' +
+      '<div class="py-fila"><select id="pyFaja">' + [3, 4, 5].map((f) => '<option value="' + f + '"' + (fajaProy() === f ? " selected" : "") + ">Gauss-Krüger POSGAR 2007 · faja " + f + (f === 4 ? " (Córdoba)" : "") + "</option>").join("") + "</select></div>" +
+      '<button type="button" class="py-btn pri" data-py="dxf">AutoCAD (DXF)</button><button type="button" class="py-btn" data-py="dxfLocal">DXF en metros locales</button><button type="button" class="py-btn" data-py="csv">Planilla (Excel)</button><button type="button" class="py-btn" data-py="imprimir">🖨 Plano / PDF</button>' +
+      '<div class="py-hint">El DXF lo abre AutoCAD. Sistema de coordenadas: a confirmar con la base de Córdoba.</div></div>';
+  }
+  function htmlPuntos() {
+    const ps = puntos(), L = local(ps, fajaProy());
+    if (!ps.length) return '<div class="py-vacio">Todavía no hay puntos.</div>';
+    return '<table class="py-tabla"><thead><tr><th>N°</th><th>Punto</th><th>Tipo</th><th>X / Y (GK)</th><th>±</th><th>Al anterior</th><th></th></tr></thead><tbody>' +
+      L.map((q, i) => {
+        const p = q.p, d = i && !p.corte ? distancia(ps[i - 1].lat, ps[i - 1].lng, p.lat, p.lng) : null;
+        return '<tr data-i="' + i + '"><td class="mono">' + (i + 1) + '</td><td><input data-pyc="n" value="' + esc(p.n) + '" aria-label="Nombre"><input data-pyc="nota" value="' + esc(p.nota || "") + '" placeholder="nota" aria-label="Nota" style="margin-top:4px"></td>' +
+          '<td><select data-pyc="tipo">' + TIPOS.map((t) => '<option value="' + t.k + '"' + (t.k === p.tipo ? " selected" : "") + ">" + esc(t.t) + "</option>").join("") + "</select></td>" +
+          '<td class="mono">' + q.gx.toFixed(2) + "<br>" + q.gy.toFixed(2) + '</td><td class="mono">' + (p.acc == null ? "mapa" : num(p.acc, 2)) + '</td><td class="mono">' + (d == null ? (i ? "tramo nuevo" : "—") : num(d, 2) + " m") + "</td>" +
+          '<td style="white-space:nowrap"><button type="button" data-py="sube" title="Subir">↑</button><button type="button" data-py="baja" title="Bajar">↓</button><button type="button" data-py="borrar" title="Borrar">🗑</button></td></tr>';
+      }).join("") + "</tbody></table>";
+  }
+  function htmlProy() {
+    const p = P();
+    const tabs = [["mapa", "🗺 Mapa"], ["plano", "📐 Plano"], ["puntos", "📋 Puntos (" + puntos().length + ")"]];
+    return '<div class="py-grid"><div class="py-a-vista"><div class="py-tabs">' + tabs.map((t) => '<button type="button" data-py="pest" data-p="' + t[0] + '" class="' + (st.pest === t[0] ? "act" : "") + '">' + t[1] + "</button>").join("") + "</div>" +
+      '<div class="py-card" style="padding:8px">' + (st.pest === "mapa" ? '<div id="pyMapa"></div>' : st.pest === "plano" ? '<div id="pyPlano">' + planoSvg(puntos(), 900, 560, true) + "</div>" : '<div id="pyPuntos">' + htmlPuntos() + "</div>") + "</div></div>" +
+      htmlLado() +
+      '<div class="py-fila py-a-acc"><button type="button" class="py-btn" data-py="renombrar">✏ Cambiar nombre</button><button type="button" class="py-btn" data-py="borrarProy">🗑 Borrar proyecto</button></div></div>';
+  }
+  function pintarGps() {
+    const g = $("pyGps"); if (g) g.innerHTML = htmlGps();
+    const b = document.querySelector('#pyOv [data-py="marcar"]'); if (b) b.disabled = !!st.prom;
+    if (st.pest === "mapa") mapaPintar();
+  }
+  function pintar() {
+    const ov = $("pyOv"); if (!ov) return;
+    const p = P();
+    if (st.id && !p && st.cargado) st.id = "";
+    const cab = ov.querySelector(".py-cab");
+    cab.innerHTML = (st.id ? '<button type="button" class="py-volver" data-py="volver" aria-label="Volver">‹</button>' : "") + "<b>📐 " + (p ? esc(p.nombre) + "<small>" + (p.obraNombre ? esc(p.obraNombre) + " · " : "") + "Proyectista · relevamiento</small>" : "Proyectista<small>Relevamiento en obra → plano</small>") + '</b><button type="button" class="py-x" data-py="cerrar" aria-label="Cerrar">✕</button>';
+    const c = $("pyCuerpo");
+    const foco = document.activeElement && c.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName);
+    if (foco && st.id) { pintarGps(); return; }   // no pisar lo que se está escribiendo
+    if (st.map && st.pest !== "mapa") { try { st.map.remove(); } catch (e) { } st.map = null; }
+    c.innerHTML = st.id ? htmlProy() : htmlLista();
+    avisar(st.msg, st.msgMal);
+    if (st.id) { gpsPrender(); if (st.pest === "mapa") mapaArmar(); } else gpsApagar();
+  }
+  function abrir(id) {
+    asegurarCss();
+    let ov = $("pyOv");
+    if (!ov) {
+      ov = document.createElement("div"); ov.id = "pyOv"; ov.className = "no-print"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-label", "Proyectista");
+      ov.innerHTML = '<div class="py-cab"></div><div class="py-msg" id="pyMsg" hidden></div><div class="py-cuerpo" id="pyCuerpo"></div>';
+      document.body.appendChild(ov);
+      ov.addEventListener("click", alClic);
+      ov.addEventListener("change", alCambio);
+    }
+    if (id) st.id = id;
+    escuchar(); pintar();
+  }
+  function cerrar() {
+    gpsApagar(); if (st.unsub) { try { st.unsub(); } catch (e) { } st.unsub = null; }
+    if (st.map) { try { st.map.remove(); } catch (e) { } st.map = null; }
+    const ov = $("pyOv"); if (ov) ov.remove();
+  }
+  function moverPunto(i, d) { const ps = puntos().slice(), j = i + d; if (j < 0 || j >= ps.length) return; const t = ps[i]; ps[i] = ps[j]; ps[j] = t; if (ps[0]) ps[0] = Object.assign({}, ps[0], { corte: false }); guardarPuntos(ps); }
+  async function alClic(e) {
+    const b = e.target.closest("[data-py]"); if (!b) return;
+    const a = b.dataset.py, p = P();
+    if (a === "cerrar") return cerrar();
+    if (a === "volver") { st.id = ""; st.toque = false; return pintar(); }
+    if (a === "crear") { const n = ($("pyNombre").value || "").trim(); if (!n) { avisar("Poné un nombre al proyecto.", true); return; } return crear(n, $("pyObra").value); }
+    if (a === "abrir") { st.id = b.dataset.id; st.pest = "mapa"; st.vista = false; return pintar(); }
+    if (a === "pest") { st.pest = b.dataset.p; return pintar(); }
+    if (a === "tipo") { st.tipo = b.dataset.k; document.querySelectorAll('#pyOv [data-py="tipo"]').forEach((x) => x.classList.toggle("act", x.dataset.k === st.tipo)); return; }
+    if (a === "marcar") return marcar();
+    if (a === "toque") { st.toque = !st.toque; if (st.toque && st.pest !== "mapa") st.pest = "mapa"; pintar(); const m = $("pyMapa"); if (st.toque && m && m.scrollIntoView) m.scrollIntoView({ block: "center" }); return; }   // en el celular el mapa queda arriba: se lo trae a la vista
+    if (!p) return;
+    if (a === "dxf" || a === "dxfLocal") return bajar(archivo(p, "dxf"), dxf(p, a === "dxf" ? "gk" : "local"), "application/dxf");
+    if (a === "csv") return bajar(archivo(p, "csv"), planilla(p), "text/csv;charset=utf-8");
+    if (a === "imprimir") return imprimir();
+    if (a === "renombrar") { const n = prompt("Nombre del proyecto", p.nombre || ""); if (n && n.trim()) { p.nombre = n.trim(); pintar(); db().collection(COL).doc(p.id).update({ nombre: p.nombre, ts: Date.now() }).catch((er) => avisar(errTxt(er), true)); } return; }
+    if (a === "borrarProy") { if (!confirm("¿Borrar el proyecto «" + p.nombre + "» con sus " + (p.puntos || []).length + " puntos? No se puede deshacer.")) return; const id = p.id; st.id = ""; delete st.proys[id]; pintar(); db().collection(COL).doc(id).delete().catch((er) => avisar(errTxt(er), true)); return; }
+    const tr = b.closest("tr[data-i]"); if (!tr) return;
+    const i = +tr.dataset.i;
+    if (a === "sube") return moverPunto(i, -1);
+    if (a === "baja") return moverPunto(i, 1);
+    if (a === "borrar") { const ps = puntos().slice(); if (!confirm("¿Borrar el punto " + ps[i].n + "?")) return; ps.splice(i, 1); if (ps[0]) ps[0] = Object.assign({}, ps[0], { corte: false }); return guardarPuntos(ps); }
+  }
+  function alCambio(e) {
+    const t = e.target;
+    if (t.id === "pyCorte") { st.corte = t.checked; return; }
+    if (t.id === "pyModo") { st.modo = t.value; return; }
+    if (t.id === "pyFaja") { const p = P(); st.faja = +t.value; if (p) { p.faja = st.faja; db().collection(COL).doc(p.id).update({ faja: st.faja }).catch(() => { }); } return pintar(); }
+    const c = t.dataset && t.dataset.pyc, tr = t.closest && t.closest("tr[data-i]");
+    if (!c || !tr) return;
+    const ps = puntos().slice(), i = +tr.dataset.i; if (!ps[i]) return;
+    ps[i] = Object.assign({}, ps[i]); ps[i][c] = c === "n" ? (t.value.trim() || ps[i].n) : t.value;
+    t.blur(); guardarPuntos(ps);
+  }
+  window.__proyectista = { abrir, cerrar, estado: () => ({ id: st.id, pest: st.pest, gps: st.gps, proyectos: Object.keys(st.proys).length, reglas: st.reglas }), _geo: { distancia, gk, fajaDe }, _dxf: (id, s) => dxf(st.proys[id], s || "gk"), _csv: (id) => planilla(st.proys[id]) };
+})();
+</script>
 <script id="revisarAppDiag">window.revisarApp=function(){var a=function(n){return document.getElementById(n)},i=String((a("appVersion")||{}).textContent||"").replace(/^\s*·?\s*v\s*/,"").trim(),e=null;try{e=window.PERMISOS&&PERMISOS.yo&&PERMISOS.yo()}catch{}var o="";try{o=e&&(PERMISOS.ROLES&&PERMISOS.ROLES[e.rol]&&PERMISOS.ROLES[e.rol].nombre||e.rol)||""}catch{o=e&&e.rol||""}var s=function(n){try{return!!n()}catch{return!1}},u=[["Mis tareas (botón en el menú)",function(){return a("menuMisTareas")&&a("viewMisTareas")}],["Órdenes en hojas (tablero / llenar / historial / buscar)",function(){return a("subtabsOrdenes")||typeof window.irSubOrdenes=="function"}],["Calculadoras rápidas + caída de tensión Muni",function(){return a("subtabsCalc")||window.__caidaMuni}],["Pañol: ficha, fotos y por sector",function(){return window.__panolFicha}],["Pañol: control de stock negativo",function(){return window.__stockNegativo&&typeof window.resolverFaltante=="function"}],["Pañol: reservas de material",function(){return typeof window.abrirNuevaReserva=="function"&&document.getElementById("cardStockReservas")}],["Base de datos conectada",function(){return window.firebase&&firebase.apps&&firebase.apps.length}]],r=["Versión: "+(i||"¿?"),"Autor: Miguel Ángel Díaz · © 2026","Usuario: "+(e?e.nombre||e.usuario||e.email||"":"(sin entrar)")+(o?" · rol "+o:""),"En la nómina: "+(e&&e.persona?e.persona:"— sin vincular —"),""];u.forEach(function(n){r.push((s(n[1])?"✓ ":"✗ ")+n[0])});var t=window.__erroresApp||[];r.push(""),r.push(t.length?"⚠ Errores ("+t.length+"):":"Sin errores."),t.slice(-6).forEach(function(n){r.push("• "+String(n.m).slice(0,120)+(n.d?" ["+n.d+"]":""))}),r.push(""),r.push("Si algo no aparece, mandale una captura de esto a quien arma la app."),alert(r.join(`
 `))};</script>
 </body>

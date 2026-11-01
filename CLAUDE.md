@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **01/11/2026**, última versión entregada: **v088** (ver `CHANGELOG.md`).
+> Estado al **01/11/2026**, última versión entregada: **v089** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 
@@ -235,6 +235,7 @@ Los roles están en `window.PERMISOS` (script `usuariosPermisos`) y en las regla
 | `pushSubs/{sha256(endpoint)}` | Celulares anotados para push | `uid, clave, email…` |
 | `avisosPush` | Avisos para el Worker | `enviado:false`, destinatario (`clave`/`email`/`uid`), tipo, tag |
 | `ubicacionVivo/{uid}` | **Ubicación en vivo** (un doc por persona, se pisa) | `uid, email, persona, clave, lat, lng, acc (m), vel (km/h), ts, posTs, fuente (web/app), activo, hasta, finTs, finMotivo` |
+| `proyectos/{id}` | **Proyectista** (v089): relevamientos | `nombre, obraId, obraNombre, faja, etapa, por, creado, ts, puntos[] {id, n, tipo (colN/colE/tab/aco/cam/cru/otro), lat, lng, acc, fuente (gps/mapa), corte, nota, ts, por}`. Solo admin/oficina |
 | `secretosServidor` | Clave privada VAPID | **sin regla: nadie la lee desde la app** |
 
 **`configEquipo/<doc>`:**
@@ -248,7 +249,7 @@ Los roles están en `window.PERMISOS` (script `usuariosPermisos`) y en las regla
 - `reinicios` (`saldoDesde` def. 2026-10-29, `saldoObras`, `puntosDesde`, `puntosSinObras[]`, `puntosSinDias[]`);
 - `ubicacion` (`activo, desde, hasta, dias[0-6], cadaSeg`; por defecto 07:00–15:00 L–V, 60 s).
 
-### 7.2 Reglas (Reglas_Firestore_v083, vigentes y publicadas)
+### 7.2 Reglas (Reglas_Firestore_v089 = v083 + `proyectos`; Ángel tiene que publicarlas)
 - Están en `firebase/`. Se publican pegándolas en Firebase › Firestore › Reglas. Ángel lo hace a mano.
 - **Lección clave (v070):** Firestore corta en **10 lecturas de documentos / 1.000 expresiones por pedido** y responde «permission-denied» aunque la persona tenga permiso.
   - Leé el usuario **una sola vez** por regla (`let d = yo()`).
@@ -291,6 +292,7 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `ubicacionVivo` | 083–085 | `__ubicacionVivo` {estado, cfg, enHorario, tic, pintarMapa, arrancar, parar}. Cuadrilla en horario: nativo `BackgroundGeolocation.addWatcher` (notificación fija) o web `watchPosition` + Wake Lock; manda cada `cadaSeg` o si se movió más de 40 m; latido 15 s; `tic()` cada 30 s. Punto en `#btnMenu .uv-menu-dot` (ok verde / busca amarillo / mal rojo) + `#uvMenuLinea` en el menú. Oficina: pines `.uv-pin` (on verde / off gris «sin actualizar desde HH:MM») y `#uvPanel` «👷 Personal en vivo N de M». |
 | `ubicacionVivo` (v087) | 087 | En la app de Android la ubicación sale por **CapacitorHttp → Firestore REST** (`guardarUbic` → `setNativo`, token por `getIdTokenResult` en pantalla o renovado con `securetoken` + refreshToken en segundo plano); si falla, por el SDK como antes. Fuera de horario corta también desde el callback del GPS. `__ubicacionVivo.estado().nativo` {envios, fallas, ultimoErr}. |
 | `cuadrillaLiviana` + bloque `__col` en las suscripciones | 086 | Entrada rápida de la cuadrilla: `__modoDatos` {estado, liviano, cargarTodo, revisar}. Cuadrilla/operario sin permisos de oficina (según `ema.perfil.<uid>` del último usuario, `ema.ultimoUid`) baja solo SUS órdenes (`where personalNombres array-contains personaClave`); cómputos/etapas/plan 1,5 s después, movimientos 6 s después o al abrir otra hoja. Si el rol confirmado ya no es cuadrilla, pasa a completo. |
+| `proyectistaMenu` + `proyectistaCod` (text/plain, dormido) | 089 | Proyectista etapa 1. Menú `#menuProyectista` solo admin/oficina; `__abrirProyectista(id)` carga el código y abre `#pyOv`. `__proyectista` {abrir, cerrar, estado, _geo {distancia (Vincenty), gk (Gauss-Krüger POSGAR 07, serie de Krüger), fajaDe}, _dxf, _csv}. **El código text/plain no lo transpila compactar80: escribilo compatible con Chrome 80.** Ver `docs/PROYECTISTA.md`. |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -519,6 +521,7 @@ Ejemplos:
 | 085 | La cajita de ubicación en el menú ya no se desborda; punto más adentro del botón |
 | 086 | Entrada rápida para la cuadrilla: primero sus órdenes (y la cámara), el resto por tandas |
 | 087 | La ubicación llega con el celular bloqueado (envío nativo + APK 1.2 con useLegacyBridge) |
+| 089 | Proyectista etapa 1: relevamiento en obra con GPS → plano, DXF Gauss-Krüger, planilla (solo oficina; reglas v089) |
 | 088 | Junta la v086 de SALEM (abre al toque con la ficha, revisión de versión de 16 KB con `ema-version`) + 086/087 de Claude Code |
 
 ---

@@ -2,6 +2,51 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v089 — 01/11/2026 · Proyectista, etapa 1: relevamiento en obra
+
+**Pedido de Ángel:** arrancar con Proyectista: marcar puntos en la obra con GPS, ver las distancias, que el plano se arme solo y sacarlo para AutoCAD. Solo para la oficina y el administrador.
+
+**Cambios**
+- Entrada **«📐 Proyectista»** en el menú, solo para Administración y Oficina.
+  - El código va «dormido» y se carga recién al abrirlo. La cuadrilla no lo ejecuta ni baja los datos de proyectos.
+  - La app pesa 40 KB más.
+- **Proyectos:** se crean atados a una obra o sueltos. Quedan en la base, colección `proyectos`, y los ve toda la oficina.
+- **Marcar puntos con el GPS**, al toque o promediando 5 s, o **tocando el mapa**.
+  - Tipos: columna nueva, columna existente, tablero, acometida/poste, cámara/caja, cruce de calle, otro.
+  - Nombre automático (C1, T1…), nota, «tramo nuevo», ordenar y borrar.
+- **Mientras se camina:**
+  - precisión del GPS con semáforo («RTK fijo» si es ±5 cm o menos);
+  - **distancia en vivo** al último punto.
+- **Mapa** con satélite o calles y cotas, y **plano en metros** con cotas, escala y norte.
+  - **Plano / PDF** en A4, con tabla de coordenadas, en la hoja de impresión de la app.
+- **Archivos para bajar:**
+  - **AutoCAD (DXF R12)** en **Gauss-Krüger POSGAR 2007**: faja 4 por defecto, 3 o 5 a elegir. Sistema **a confirmar** con la base de Córdoba.
+  - **DXF en metros locales.**
+  - **Planilla CSV** para Excel.
+- **Precisión de los cálculos:**
+  - Distancias sobre el elipsoide WGS84 (Vincenty).
+  - Gauss-Krüger por serie de Krüger: igual a PROJ al 0,1 mm.
+- **Reglas nuevas:** `Reglas_Firestore_v089` (= v083 + `proyectos`, solo Administración y Oficina). Si no están publicadas, Proyectista avisa «Falta publicar en Firebase las reglas nuevas».
+
+**Qué hay que hacer**
+1. Publicar `Reglas_Firestore_v089.txt` en Firebase › Firestore › Reglas.
+2. Subir `index.html` a GitHub.
+3. No hace falta APK nuevo.
+
+**Pruebas**
+- `t_v089`: 22/22 en PC y 23/23 en celular.
+  - Menú solo para la oficina; la cuadrilla ni lo carga.
+  - GPS, distancia en vivo, mapa, tramos, plano, DXF controlado contra PROJ, planilla, PDF, que quede guardado, y el aviso de reglas sin publicar.
+- Batería completa: 75 pruebas en PC y en celular, OK.
+  - `t_v083` quedó reemplazada por `t_v084`.
+
+**Huella SHA-256**
+- `089_2026-11-01_app-EMA_ORIGINAL.html` (60.550 líneas): `90b558825d01c5abe2267d209cd8fac07497e7b996f4530ee47b719530ecb405`
+- `index.html`: `0fcdc8491dd07f40f0814b467c7210bf2e59d1fa1f2ceb24585b20c36d8473fc`
+- `Reglas_Firestore_v089.txt`: `ef14feef8ed79812e5309d1344a16e5c4b1dc226a1f77a5627fc01b26528539d`
+- Sello de versión (en las dos marcas): `2026-11-01 19:32 · a0a82d`
+- Se genera con `patch_v089.py` (+ `proyectista_menu.js` y `proyectista.js`) sobre el ORIGINAL de la 088.
+
 ## v088 — 01/11/2026 · Junta todo (la armó SALEM, la controló Claude Code)
 - Es la v086 de SALEM, más la entrada rápida de la cuadrilla y la ubicación con el celular bloqueado de Claude Code.
 - Lo que sumó SALEM:

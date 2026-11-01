@@ -1,6 +1,7 @@
 # Proyectista — idea de Ángel (01/11/2026)
 
-> Módulo nuevo de la app (más adelante puede ser una app aparte). **Todavía no se programa nada:** este archivo guarda la idea y el plan por etapas que charlamos. Cada etapa se encara recién cuando Ángel la pida.
+> Módulo nuevo de la app (más adelante puede ser una app aparte). Este archivo guarda la idea y el plan por etapas. Cada etapa se encara recién cuando Ángel la pida.
+> **Estado:** etapa 1 hecha en la **v089** (01/11/2026).
 
 ## La idea completa
 1. **Relevar en la obra con GPS de precisión de centímetros (RTK).**
@@ -34,7 +35,7 @@
   - Las protecciones propuestas siguen reglas de la AEA. Las tiene que revisar y firmar un matriculado: la app **recomienda**, no certifica.
   - Los criterios que no estén en documentos van marcados **«a confirmar»**.
 - **Ventaja:** se engancha con lo que la app ya tiene: la calculadora de materiales (cómputo), el itemizado, el mapa y los legajos de obra.
-- **Cuidado con el peso de la app:** la app ya pesa 4,4 MB y la cuadrilla necesita que abra rápido. Proyectista conviene armarlo **como página aparte** (por ejemplo, `proyectista.html` en el mismo GitHub, con la misma base de Firebase). Así no pesa para la cuadrilla y se puede separar fácil cuando crezca.
+- **Cuidado con el peso de la app:** la cuadrilla necesita que abra rápido. Se resolvió dentro de la app: el código va «dormido» (`<script type="text/plain" id="proyectistaCod">`, unos 40 KB) y solo se ejecuta al abrir Proyectista. La cuadrilla no lo ejecuta ni baja la colección `proyectos`.
 
 ## Plan por etapas (propuesto)
 | Etapa | Qué | Necesita |
@@ -54,7 +55,45 @@
 - **Base de Córdoba (DWG):** la armó Ángel con Claude en otro chat. La va a traer cuando arranquemos.
 - **Cuándo:** primero se cierra la versión en curso (v088, juntando lo de SALEM y lo de Claude Code), se sube, y después se arranca con Proyectista.
 
+## Etapa 1 — hecha en la v089
+- «📐 Proyectista» en el menú, solo para Administración y Oficina. Colección `proyectos` (reglas `Reglas_Firestore_v089`).
+- **Proyectos:** se crean atados a una obra o sueltos.
+- **Puntos:**
+  - se marcan con el GPS («al toque» o promediando 5 s) o tocando el mapa;
+  - tipos: columna nueva, columna existente, tablero, acometida/poste, cámara/caja, cruce de calle, otro;
+  - nombre automático (C1, T1…), nota, tramo nuevo, ordenar y borrar.
+- **GPS:** muestra la precisión con un semáforo («RTK fijo» si es ±5 cm o menos) y la distancia en vivo al último punto.
+- **Mapa:** satélite y calles, con cotas. **Plano en metros:** cotas, escala, norte e impresión A4 / PDF con tabla de coordenadas.
+- **Archivos para bajar:**
+  - **DXF** (AutoCAD R12) en **Gauss-Krüger POSGAR 2007**: faja 3, 4 o 5, la 4 por defecto. También en metros locales. Capas por tipo, nombres, tramos y cotas.
+  - **Planilla CSV** para Excel.
+- **Precisión de los cálculos:**
+  - Distancias sobre el elipsoide (Vincenty).
+  - Gauss-Krüger por serie de Krüger: igual a PROJ al 0,1 mm, controlado en la prueba `t_v089`.
+
+## Ideas de otras apps (investigación del 01/11/2026)
+Referencias que pasó Ángel: Li.PAD, GridGIS (Merytronic), DIRED-CAD, ArcGIS Field Maps (Streetlight Management), Bentley OpenUtilities Designer y Ampère Mobile. Se sumaron Emlid Flow, SW Maps, DIALux evo y Relux.
+- **Etapa 1 · relevamiento**
+  - Ficha por tipo de punto, con campos propios y **foto** (Li.PAD, Field Maps). *Fácil.*
+  - Tope de precisión para dejar marcar (ej. 5 m con el GPS del celular, 5 cm con RTK) y desviación al promediar (Field Maps). *Fácil.*
+  - **Medir entre dos puntos cualesquiera** (no solo con el anterior). *Fácil.*
+  - **Replanteo «llevame al punto»**: distancia y rumbo en vivo hasta un punto del proyecto (Emlid Flow). *Mediano.*
+  - **Grabar el recorrido caminando**, por ejemplo para la traza de la zanja. *Mediano.*
+  - **RTK, en dos pasos:**
+    - por «ubicación simulada» de Android con una app puente: no lleva código, pero hay que probarlo, porque en algunos celulares la precisión salta;
+    - después, Bluetooth + NTRIP dentro del APK (SW Maps). Es *grande* y lleva APK nuevo.
+- **Etapa 2 · plano**
+  - Exportar también **KML / GeoJSON / SHP**. *Fácil.*
+  - Importar el **catastro en DXF** de fondo (DIRED-CAD). *Mediano.*
+- **Etapa 3 · eléctrico**
+  - **Caída de tensión en % por nodo y al final de cada circuito**, con tabla por tablero y circuito (DIRED-CAD). *Mediano.*
+  - **«Unidades compatibles»**: cada punto suma su material y su ítem del itemizado, reusando la calculadora (Bentley). *Grande.*
+- **Etapa 4 · lumínico**
+  - **Fotometrías IES/LDT**, iluminancia media y Uo en una grilla, con semáforo contra la clase pedida (DIALux, Relux). *Grande.*
+  - Optimizador de separación y altura, y curvas isolux sobre el mapa (Relux). *Grande.*
+- Sin confirmar: GridGIS Map Creator (no se encontró la app); el cómputo de materiales en DIRED-CAD.
+
 ## Preguntas abiertas para Ángel
 - ¿Qué receptor RTK tiene en mente (marca y modelo)?
 - La base de Córdoba: ¿en qué formato está (DWG/DXF), cuánto pesa y en qué sistema de coordenadas?
-- ¿Arrancamos por la etapa 1 con el GPS del celular, mientras se consigue el RTK?
+- ¿Qué sigue después de la etapa 1? Opciones: foto por punto, medir entre dos puntos, «llevame al punto», o la etapa 2 con la base de Córdoba.
