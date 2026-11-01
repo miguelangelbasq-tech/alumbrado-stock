@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **01/11/2026**, última versión entregada: **v087** (ver `CHANGELOG.md`).
+> Estado al **01/11/2026**, última versión entregada: **v088** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 
@@ -127,7 +127,8 @@ android/AlumbradoApp.zip         ← proyecto Capacitor del APK de Android
 - **Sello de versión** en `#appVersion`:
   - formato `· v AAAA-MM-DD HH:MM · hash6<`;
   - hora de Argentina (UTC−3); hash6 = primeros 6 del SHA-256 del ORIGINAL.
-  - El menú lo muestra como «Versión …». La revisión de versión compara este texto.
+  - El menú lo muestra como «Versión …».
+  - **Desde v088 la revisión de versión lee primero `<meta name="ema-version" content="AAAA-MM-DD HH:MM · hash6">` (arriba de todo, pide solo 16 KB). Al sellar una versión, actualizá los DOS con el mismo valor:** si no, a nadie le aparece «Hay una versión nueva».
 - **Dónde va lo nuevo:**
   - los módulos nuevos se insertan **antes de `<script id="revisarAppDiag">`** (último script);
   - CSS en `<style id="xxxCss">` y JS en `<script id="xxx">`.
@@ -518,6 +519,7 @@ Ejemplos:
 | 085 | La cajita de ubicación en el menú ya no se desborda; punto más adentro del botón |
 | 086 | Entrada rápida para la cuadrilla: primero sus órdenes (y la cámara), el resto por tandas |
 | 087 | La ubicación llega con el celular bloqueado (envío nativo + APK 1.2 con useLegacyBridge) |
+| 088 | Junta la v086 de SALEM (abre al toque con la ficha, revisión de versión de 16 KB con `ema-version`) + 086/087 de Claude Code |
 
 ---
 

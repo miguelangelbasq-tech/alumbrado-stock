@@ -2,6 +2,25 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v088 — 01/11/2026 · Junta todo (la armó SALEM, la controló Claude Code)
+- Es la v086 de SALEM, más la entrada rápida de la cuadrilla y la ubicación con el celular bloqueado de Claude Code.
+- Lo que sumó SALEM:
+  - la app abre al toque con la ficha guardada;
+  - para ver si hay versión nueva baja solo los primeros 16 KB del archivo, con la etiqueta `<meta name="ema-version">`;
+  - las letras y el estilo del mapa se cargan sin frenar el arranque.
+- **Control de Claude Code:**
+  - el `index.html` sale exacto del ORIGINAL 088;
+  - están los cambios de la 086 y la 087 de Claude Code;
+  - el `sw.js` es el mismo que ya está publicado.
+- **Pruebas:** batería completa en PC y en celular, OK.
+  - `t_v075` y `t_cargador` se actualizaron. Simulaban una versión nueva cambiando solo el sello del menú; ahora cambian también la etiqueta de arriba, y `t_v075` revisa el pedido de 16 KB en vez del pedido viejo.
+  - `t_v083` quedó reemplazada por `t_v084`.
+- **Huella SHA-256**
+  - `088_2026-11-01_app-EMA_ORIGINAL.html`: `2e5be79d175d3e8f760217706020a0475ce7c0c1c9de40baa62fd3ef7b91cc11`
+  - `index.html`: `5ccb3b231985fab55c4834f17158360c39d3a972a76c564eeb6c02adcb5730c3`
+  - Sello de versión: `· v 2026-11-01 16:37 · 9e77d2`
+- **Ojo para las próximas versiones:** hay que cambiar el sello del menú (`#appVersion`) **y** la etiqueta `<meta name="ema-version">` con el mismo valor. Si solo cambia el sello, a nadie le aparece «Hay una versión nueva».
+
 ## v087 — 01/11/2026 · La ubicación llega con el celular bloqueado (+ APK 1.2)
 
 **Pedido de Ángel:** «Solo me llega la ubicación cuando están adentro de la app.»
