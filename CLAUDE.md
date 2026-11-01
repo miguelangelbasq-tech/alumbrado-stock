@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **01/11/2026**, última versión entregada: **v086** (ver `CHANGELOG.md`).
+> Estado al **01/11/2026**, última versión entregada: **v087** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 
@@ -85,7 +85,7 @@ android/AlumbradoApp.zip         ← proyecto Capacitor del APK de Android
 | Avisos con la app cerrada | Worker **`ema-avisos`** (`https://ema-avisos.mdiaz-60f.workers.dev`), Cron `* * * * *` | La app deja avisos en `avisosPush` (enviado:false). El Worker entra a Firestore por REST con la cuenta de servicio, manda Web Push (RFC 8291 + VAPID) a `pushSubs` y marca enviado. El `sw.js` muestra la notificación. Rutas `/salud`, `/vapid`, `/probar`. |
 | Mapa | Leaflet **1.9.4** (cdnjs) | Teselas OSM; capa satélite Esri World Imagery. |
 | PDF en el aparato | html2canvas 1.4.1 inlined como `<script type="text/plain" data-lib="html2canvas">` + escritor PDF propio | Se activa al armar el primer PDF. |
-| **App Android (APK)** | Proyecto **Capacitor 8.6.0** `AlumbradoApp` (appId `ar.com.emaservicios.alumbrado`, «EMA Alumbrado», versionCode 2 / versionName 1.1) | Plugins: `@capacitor-community/background-geolocation` 1.3.1 (ubicación con el celular bloqueado) y `keep-awake` 8.0.1. Se instala pasando el APK, sin tienda. Ver §3.1. |
+| **App Android (APK)** | Proyecto **Capacitor 8.6.0** `AlumbradoApp` (appId `ar.com.emaservicios.alumbrado`, «EMA Alumbrado», versionCode 3 / versionName 1.2 desde v087, con `android.useLegacyBridge: true`) | Plugins: `@capacitor-community/background-geolocation` 1.3.1 (ubicación con el celular bloqueado) y `keep-awake` 8.0.1. Se instala pasando el APK, sin tienda. Ver §3.1. |
 | PC de la oficina | La misma web instalada como PWA de Chrome | No usan el APK. |
 
 ### 3.1 APK de Android con «cargador local» (desde v084)
@@ -102,6 +102,7 @@ android/AlumbradoApp.zip         ← proyecto Capacitor del APK de Android
   - «Actualizar» llama a `__cargador.actualizar()`;
   - se oculta el bloque de Web Push (no anda en el WebView);
   - al arrancar bien, `__cargador.listo()`.
+- **Ubicación en segundo plano (v087 / APK 1.2):** a los ~5 min en segundo plano Android frena lo que sale del WebView y, sin `android.useLegacyBridge: true`, deja de pasarle las ubicaciones al JS (lo dice el README del plugin). Por eso la ubicación va por CapacitorHttp y el APK lleva esa opción. Además: batería «Sin restricciones» en cada celular.
 - `MainActivity.java`: «atrás» en la primera pantalla hace `moveTaskToBack(true)` (no cierra), así al volver aparece al instante.
 - **Compilar:** no se puede en la nube (maven bloqueado). Ángel corre `COMPILAR.bat` en su PC:
   - baja un JDK 21 portable a `jdk21\`, porque Android Studio trae Java 25 y Gradle falla con «class file major version 69»;
@@ -287,6 +288,7 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `arranqueRol` | 078 | Arranque por rol sin destellos |
 | `legajoPlegable` | 082 | Secciones del legajo plegables (`ema.lg.pleg`) |
 | `ubicacionVivo` | 083–085 | `__ubicacionVivo` {estado, cfg, enHorario, tic, pintarMapa, arrancar, parar}. Cuadrilla en horario: nativo `BackgroundGeolocation.addWatcher` (notificación fija) o web `watchPosition` + Wake Lock; manda cada `cadaSeg` o si se movió más de 40 m; latido 15 s; `tic()` cada 30 s. Punto en `#btnMenu .uv-menu-dot` (ok verde / busca amarillo / mal rojo) + `#uvMenuLinea` en el menú. Oficina: pines `.uv-pin` (on verde / off gris «sin actualizar desde HH:MM») y `#uvPanel` «👷 Personal en vivo N de M». |
+| `ubicacionVivo` (v087) | 087 | En la app de Android la ubicación sale por **CapacitorHttp → Firestore REST** (`guardarUbic` → `setNativo`, token por `getIdTokenResult` en pantalla o renovado con `securetoken` + refreshToken en segundo plano); si falla, por el SDK como antes. Fuera de horario corta también desde el callback del GPS. `__ubicacionVivo.estado().nativo` {envios, fallas, ultimoErr}. |
 | `cuadrillaLiviana` + bloque `__col` en las suscripciones | 086 | Entrada rápida de la cuadrilla: `__modoDatos` {estado, liviano, cargarTodo, revisar}. Cuadrilla/operario sin permisos de oficina (según `ema.perfil.<uid>` del último usuario, `ema.ultimoUid`) baja solo SUS órdenes (`where personalNombres array-contains personaClave`); cómputos/etapas/plan 1,5 s después, movimientos 6 s después o al abrir otra hoja. Si el rol confirmado ya no es cuadrilla, pasa a completo. |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
@@ -515,6 +517,7 @@ Ejemplos:
 | 084 | Punto verde en el menú en vez del cartel, arranque más rápido, soporte del cargador del APK |
 | 085 | La cajita de ubicación en el menú ya no se desborda; punto más adentro del botón |
 | 086 | Entrada rápida para la cuadrilla: primero sus órdenes (y la cámara), el resto por tandas |
+| 087 | La ubicación llega con el celular bloqueado (envío nativo + APK 1.2 con useLegacyBridge) |
 
 ---
 
