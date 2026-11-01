@@ -2,6 +2,43 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v087 — 01/11/2026 · La ubicación llega con el celular bloqueado (+ APK 1.2)
+
+**Pedido de Ángel:** «Solo me llega la ubicación cuando están adentro de la app.»
+
+**Causa**
+- La documentación del plugin de ubicación del APK describe dos problemas, y el APK tenía los dos.
+- Después de unos 5 minutos en segundo plano, Android frena lo que la app manda por el navegador interno, que es por donde va Firebase.
+- Sin la opción `useLegacyBridge`, Android además deja de pasarle las ubicaciones a la app.
+- Por eso la ubicación llegaba recién cuando la persona volvía a abrir la app.
+
+**Cambios**
+- En la app de Android, la ubicación se manda por el lado de Android: CapacitorHttp a Firestore por REST, con el token del usuario. Las reglas de la base son las mismas.
+- El token vale una hora. Si la app está en segundo plano, se renueva también por el lado de Android.
+- Si el envío por Android falla, la ubicación se manda como antes, así no se pierde.
+- Si el horario termina con la app en segundo plano, el celular deja de mandar y marca «terminó».
+- **APK 1.2** (`AlumbradoApp_v1.2.zip`): agrega `android.useLegacyBridge = true` en `capacitor.config.json` y pasa a versionCode 3 / versionName 1.2. El LEEME.txt explica los ajustes de batería.
+- En el navegador (sin APK) sigue igual: solo puede mandar con la app abierta en pantalla. Es un límite de Android.
+- No cambian las reglas de Firebase ni los datos de usuarios.
+
+**Qué hay que hacer**
+1. Subir `index.html` a GitHub.
+2. Armar el APK 1.2 con COMPILAR.bat e instalarlo encima en cada celular de la cuadrilla.
+3. En cada celular: Ajustes › Apps › EMA Alumbrado › Batería › «Sin restricciones».
+
+**Pruebas**
+- `t_v087`: 10/10 OK en PC y en celular, con el APK simulado: envío por Android, token vencido con el celular bloqueado, falla del envío y fin del horario.
+- Batería completa: 74 pruebas en PC y en celular, OK.
+  - `t_v083` quedó reemplazada por `t_v084`.
+- Lo único que no se puede probar acá es el celular bloqueado de verdad. Hay que probarlo con un celular real.
+
+**Huella SHA-256**
+- `087_2026-11-01_app-EMA_ORIGINAL.html` (60.042 líneas): `fff9e6d56d57d3546f5502ef4e514851cd1cbcc944852e7d12562906c6582b63`
+- `index.html`: `50bb5503bcaa1a53762ab71d8a7d4da66eec8f893e32c79c9613422bcc8cdc39`
+- `AlumbradoApp_v1.2.zip`: `d937d4494a7676004a12ed57dea3aab6d3b3f27e75210f398fcc57736afa302f`
+- Sello de versión: `· v 2026-11-01 15:18 · 162a3a`
+- Se genera con `patch_v087.py` sobre el ORIGINAL de la 086.
+
 ## v086 — 01/11/2026 · Entrada rápida para la cuadrilla
 
 **Pedido de Ángel:** «Sus órdenes y la cámara son la prioridad de rapidez para la cuadrilla.»
