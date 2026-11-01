@@ -2,6 +2,32 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v090 — 01/11/2026 · Proyectista con el mismo diseño que la app + skill del proyecto
+
+**Pedido de Ángel:** armar la skill propia del proyecto y que todo quede con el mismo diseño «Cristal».
+
+**Cambios**
+- Proyectista usa ahora las piezas del tema de la app: `.card`. `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`/`.subtab`, `.hint` y las variables de color y letra. Antes tenía estilos propios parecidos.
+- Funciones y datos, igual que en la v089.
+- **Skill `ema-app-alumbrado`** (en `.claude/skills/` y como archivo `.skill` para claude.ai): la forma de trabajar y el diseño «Cristal», con los valores reales del tema.
+
+**Qué hay que hacer**
+1. Subir `index.html` a GitHub.
+2. Si todavía no lo hiciste, publicar las reglas de la v089.
+3. Instalar la skill en claude.ai: Configuración › Skills.
+4. No hace falta APK nuevo.
+
+**Pruebas**
+- `t_v090`: 6/6 en PC y 7/7 en celular (que use las piezas de la app).
+- `t_v089`: 22/22 y 23/23.
+- Batería completa OK. `t_v083` quedó reemplazada por `t_v084`.
+
+**Huella SHA-256**
+- `090_2026-11-01_app-EMA_ORIGINAL.html` (60,548 líneas): `c7ff8ef320cb3a7ac54ae1ed76b13cb00351e2815b3313873812f7b82e3cd853`
+- `index.html`: `35f77f0855d4f9a5b0aa59f87eaab4c41dd97d3b32326172569d7aea0cf88e67`
+- Sello de versión (en las dos marcas): `2026-11-01 20:22 · b767d3`
+- Se genera con `patch_v090.py` sobre el ORIGINAL de la 089.
+
 ## v089 — 01/11/2026 · Proyectista, etapa 1: relevamiento en obra
 
 **Pedido de Ángel:** arrancar con Proyectista: marcar puntos en la obra con GPS, ver las distancias, que el plano se arme solo y sacarlo para AutoCAD. Solo para la oficina y el administrador.

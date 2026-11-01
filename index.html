@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="ema-version" content="2026-11-01 19:32 · a0a82d">
+<meta name="ema-version" content="2026-11-01 20:22 · b767d3">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script id="anotarErrores">window.__autorApp="App Alumbrado Público — © 2026 Miguel Ángel Díaz. Todos los derechos reservados.",window.__erroresApp=[],window.addEventListener("error",function(e){try{var r=window.__erroresApp;r.length<30&&r.push({t:Date.now(),m:String(e.message||e),d:e.filename?String(e.filename).split("/").pop()+":"+e.lineno:""})}catch{}}),window.addEventListener("unhandledrejection",function(e){try{var r=e.reason,n=String(r&&(r.message||r.code)||r||"");if(/offline|unavailable|network|Failed to fetch/i.test(n))return;var o=window.__erroresApp;o.length<30&&o.push({t:Date.now(),m:"(promesa) "+n,d:""})}catch{}});</script>
 <title>Calculadora de Materiales — Alumbrado Público</title>
@@ -78,7 +78,7 @@
 <div class="header-divider"></div>
 <div class="header-text">
 <h1>Alumbrado Público</h1>
-<div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-11-01 19:32 · a0a82d</span></div>
+<div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-11-01 20:22 · b767d3</span></div>
 <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
 </div>
 </div>
@@ -6744,32 +6744,30 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
   }
 
   // ======================================================================= pantalla
-  const CSS = "#pyOv{position:fixed;top:0;left:0;right:0;bottom:0;z-index:10010;background:#eceff7;display:flex;flex-direction:column;font-family:Inter,'Segoe UI',Roboto,Arial,sans-serif;color:#0d1424}" +
-    "#pyOv .py-cab{display:flex;align-items:center;gap:10px;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));background:#28285e;color:#fff;flex:none}" +
-    "#pyOv .py-cab b{font-size:17px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#pyOv .py-cab small{display:block;font-weight:500;opacity:.75;font-size:12px}" +
+  // v090: con las piezas del tema «Cristal» de la app (.card, .btn-primary, .btn-ghost, .chip, .subtabs, .hint y las variables): acá solo lo propio.
+  const CSS = "#pyOv{position:fixed;top:0;left:0;right:0;bottom:0;z-index:10010;background:var(--bg,#eceff7);display:flex;flex-direction:column;font-family:var(--fuente);color:var(--text)}" +
+    "#pyOv .py-cab{display:flex;align-items:center;gap:10px;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--navy);color:#fff;flex:none}" +
+    "#pyOv .py-cab b{font:800 17px var(--disp);letter-spacing:-.01em;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#pyOv .py-cab small{display:block;font:500 12px var(--fuente);opacity:.75}" +
     "#pyOv .py-x,#pyOv .py-volver{background:rgba(255,255,255,.14);border:0;color:#fff;border-radius:12px;min-width:44px;min-height:44px;font-size:18px;cursor:pointer}" +
-    "#pyOv .py-cuerpo{flex:1;min-height:0;overflow:auto;padding:12px}" +
-    "#pyOv .py-card{background:rgba(255,255,255,.85);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 6px 20px -12px #1c1c4566}" +
-    "#pyOv h3{margin:0 0 8px;font-size:15px}#pyOv .py-hint{font-size:12.5px;color:#4b5670}" +
-    "#pyOv .py-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid #28285e;background:#fff;color:#28285e;font:700 14px Inter,Arial,sans-serif;cursor:pointer;margin:3px 4px 3px 0}" +
-    "#pyOv .py-btn.pri{background:#28285e;color:#fff}#pyOv .py-btn.on{background:#d97706;border-color:#d97706;color:#fff}#pyOv .py-btn.gr{width:100%;min-height:56px;font-size:17px}" +
-    "#pyOv input,#pyOv select{min-height:42px;border:1.5px solid #d5dae8;border-radius:10px;padding:0 10px;font:14px Inter,Arial,sans-serif;background:#fff;box-sizing:border-box;max-width:100%}" +
-    "#pyOv .py-fila{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}" +
-    "#pyOv .py-lista button{display:flex;width:100%;text-align:left;justify-content:space-between;gap:8px;align-items:center;border:0;border-bottom:1px solid #e6e9f2;background:none;padding:12px 4px;font:14px Inter,Arial,sans-serif;cursor:pointer;color:#0d1424}" +
-    "#pyOv .py-lista small{color:#4b5670}" +
-    "#pyOv .py-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:0 12px;grid-template-areas:'gps' 'vista' 'salida' 'acc'}#pyOv .py-a-gps{grid-area:gps}#pyOv .py-a-vista{grid-area:vista;min-width:0}#pyOv .py-a-salida{grid-area:salida}#pyOv .py-a-acc{grid-area:acc}" +
+    "#pyOv .py-cuerpo{flex:1;min-height:0;overflow:auto;padding:14px}" +
+    "#pyOv .card{margin:0 0 14px}#pyOv .card+.card{margin-top:0}#pyOv .card h2{margin-bottom:8px}" +
+    "#pyOv .btn-primary,#pyOv .btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;margin:3px 4px 3px 0;font-size:14px;min-height:44px;padding:0 18px}#pyOv .py-gr{width:100%;min-height:58px;font-size:17px;margin:4px 0}" +
+    "#pyOv .py-fila{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}#pyOv .py-fila input[type=text],#pyOv .py-fila select{flex:1 1 220px;min-width:0}" +
+    "#pyOv .py-lista button{display:flex;width:100%;text-align:left;justify-content:space-between;gap:8px;align-items:center;border:0;border-bottom:1px solid var(--line);background:none;padding:12px 4px;font:14px var(--fuente);cursor:pointer;color:var(--text);min-height:56px}" +
+    "#pyOv .py-lista small{color:var(--text-soft)}" +
+    "#pyOv .py-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:0 14px;grid-template-areas:'gps' 'vista' 'salida' 'acc'}#pyOv .py-a-gps{grid-area:gps}#pyOv .py-a-vista{grid-area:vista;min-width:0}#pyOv .py-a-salida{grid-area:salida}#pyOv .py-a-acc{grid-area:acc}" +
     "@media(min-width:900px){#pyOv .py-grid{grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);grid-template-areas:'vista gps' 'vista salida' 'acc salida';align-items:start}}" +
-    "#pyOv .py-tabs{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}#pyOv .py-tabs button{min-height:40px;border-radius:999px;border:1.5px solid #d5dae8;background:#fff;padding:0 14px;font:700 13.5px Inter,Arial,sans-serif;cursor:pointer;color:#4b5670}#pyOv .py-tabs button.act{background:#28285e;border-color:#28285e;color:#fff}" +
-    "#pyMapa{height:58vh;min-height:300px;border-radius:14px;overflow:hidden;background:#dde2ee}" +
-    "#pyOv .py-svg{width:100%;height:auto;display:block;border-radius:12px;border:1px solid #d5dae8;background:#fff}" +
-    "#pyOv .py-gps{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin-bottom:4px}#pyOv .py-gps i{width:12px;height:12px;border-radius:50%;background:#9aa1b1;flex:none}#pyOv .py-gps i.ok{background:#16a34a}#pyOv .py-gps i.med{background:#f59e0b}#pyOv .py-gps i.mal{background:#dc2626}" +
-    "#pyOv .py-dist{font:800 30px 'JetBrains Mono',monospace;color:#28285e;font-variant-numeric:tabular-nums;margin:4px 0}" +
-    "#pyOv .py-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}#pyOv .py-chips button{min-height:40px;border-radius:999px;border:2px solid #d5dae8;background:#fff;padding:0 12px;font:700 13px Inter,Arial,sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;color:#0d1424}#pyOv .py-chips button i{width:10px;height:10px;border-radius:50%}#pyOv .py-chips button.act{border-color:#28285e;background:#28285e10}" +
-    "#pyOv .py-msg{margin:0 12px;padding:10px 12px;border-radius:12px;background:#e8f5e9;font-size:13.5px}#pyOv .py-msg.mal{background:#fdecea;color:#8a1c12}" +
-    "#pyOv .py-tabla{width:100%;border-collapse:collapse;font-size:13px}#pyOv .py-tabla td,#pyOv .py-tabla th{padding:6px 4px;border-bottom:1px solid #e6e9f2;text-align:left;vertical-align:middle}#pyOv .py-tabla th{font:700 11px 'JetBrains Mono',monospace;color:#4b5670;text-transform:uppercase}#pyOv .py-tabla input{min-height:36px;width:100%}#pyOv .py-tabla select{min-height:36px;width:100%}#pyOv .py-tabla .mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;white-space:nowrap}" +
-    "#pyOv .py-tabla button{min-width:36px;min-height:36px;border-radius:10px;border:1px solid #d5dae8;background:#fff;cursor:pointer}" +
-    "@media(max-width:640px){#pyOv .py-tabla thead{display:none}#pyOv .py-tabla tr{display:grid;grid-template-columns:1fr 1fr;gap:4px;border-bottom:1px solid #d5dae8;padding:6px 0}#pyOv .py-tabla td{border:0;padding:2px}}" +
-    "#pyOv .py-vacio{padding:24px;text-align:center;color:#4b5670}.py-cota{background:#fff8e1!important;border:1px solid #f59e0b!important;color:#7c2d12!important;font:700 11px Inter,Arial,sans-serif!important;padding:1px 5px!important;box-shadow:none!important}.py-cota:before{display:none}.py-nom{background:#28285e!important;color:#fff!important;border:0!important;font:800 11px Inter,Arial,sans-serif!important;padding:1px 6px!important;box-shadow:none!important}.py-nom:before{display:none}";
+    "#pyOv .subtabs{display:flex;margin-bottom:10px;width:max-content;max-width:100%}#pyOv .subtab{cursor:pointer;font:600 14px var(--fuente)}" +
+    "#pyMapa{height:58vh;min-height:300px;border-radius:18px;overflow:hidden;background:#dde2ee}" +
+    "#pyOv .py-svg{width:100%;height:auto;display:block;border-radius:16px;border:1px solid var(--line);background:#fff}" +
+    "#pyOv .py-gps{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin-bottom:4px}#pyOv .py-gps i{width:12px;height:12px;border-radius:50%;background:var(--text-3);flex:none}#pyOv .py-gps i.ok{background:var(--verde)}#pyOv .py-gps i.med{background:var(--amber)}#pyOv .py-gps i.mal{background:var(--danger)}" +
+    "#pyOv .py-dist{font:800 34px var(--mono);color:var(--navy);font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin:2px 0 6px}" +
+    "#pyOv .py-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}#pyOv .py-chips .chip{min-height:42px;padding:0 13px;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font:600 13.5px var(--fuente)}#pyOv .py-chips .chip i{width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 2px #fff}" +
+    "#pyOv .py-msg{margin:10px 14px 0;padding:10px 14px;border-radius:16px;background:#34c7591f;border:1px solid #34c75947;font-size:13.5px}#pyOv .py-msg.mal{background:#ff3b301a;border-color:#ff3b3047;color:#8a1c12}" +
+    "#pyOv .py-tabla{width:100%;border-collapse:collapse;font-size:13px}#pyOv .py-tabla td,#pyOv .py-tabla th{padding:6px 4px;text-align:left;vertical-align:middle}#pyOv .py-tabla input,#pyOv .py-tabla select{min-height:40px!important;width:100%}#pyOv .py-tabla .mono{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}" +
+    "#pyOv .py-tabla button{min-width:40px;min-height:40px;border-radius:12px;border:1px solid var(--border);background:#ffffffb8;cursor:pointer}" +
+    "@media(max-width:640px){#pyOv .py-cuerpo{padding:12px}#pyOv .py-tabla thead{display:none}#pyOv .py-tabla tr{display:grid;grid-template-columns:1fr 1fr;gap:4px;border-bottom:1px solid var(--line);padding:6px 0}#pyOv .py-tabla td{border:0!important;padding:2px}}" +
+    "#pyOv .py-vacio{padding:24px;text-align:center;color:var(--text-soft)}.py-cota{background:#fff8e1!important;border:1px solid #f59e0b!important;color:#7c2d12!important;font:700 11px Inter,Arial,sans-serif!important;padding:1px 5px!important;box-shadow:none!important}.py-cota:before{display:none}.py-nom{background:#28285e!important;color:#fff!important;border:0!important;font:800 11px Inter,Arial,sans-serif!important;padding:1px 6px!important;box-shadow:none!important}.py-nom:before{display:none}";
   function asegurarCss() { if ($("proyectistaCss")) return; const s = document.createElement("style"); s.id = "proyectistaCss"; s.textContent = CSS; document.head.appendChild(s); }
   function obrasOpts() {
     const l = (typeof avanceObras !== "undefined" ? avanceObras : []).filter((o) => o && o.nombre).sort((a, b) => String(a.nombre).localeCompare(String(b.nombre), "es"));
@@ -6777,32 +6775,32 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
   }
   function htmlLista() {
     const l = Object.values(st.proys).sort((a, b) => (b.ts || 0) - (a.ts || 0));
-    return '<div class="py-card"><h3>＋ Proyecto nuevo</h3><div class="py-hint">Un proyecto por obra o por zona. Después marcás los puntos en el lugar (o tocando el mapa).</div>' +
-      '<div class="py-fila"><input id="pyNombre" placeholder="Nombre (ej. PLAZA SAN MARTÍN · relevamiento)" style="flex:1 1 260px"><select id="pyObra" style="flex:1 1 220px">' + obrasOpts() + '</select><button type="button" class="py-btn pri" data-py="crear">Crear</button></div></div>' +
-      '<div class="py-card"><h3>📁 Proyectos</h3>' + (!st.cargado ? '<div class="py-vacio">Cargando…</div>' : !l.length ? '<div class="py-vacio">Todavía no hay proyectos.</div>' :
+    return '<div class="card"><h2>＋ Proyecto nuevo</h2><div class="hint">Un proyecto por obra o por zona. Después marcás los puntos en el lugar (o tocando el mapa).</div>' +
+      '<div class="py-fila"><input id="pyNombre" placeholder="Nombre (ej. PLAZA SAN MARTÍN · relevamiento)" style="flex:1 1 260px"><select id="pyObra" style="flex:1 1 220px">' + obrasOpts() + '</select><button type="button" class="btn-primary" data-py="crear">Crear</button></div></div>' +
+      '<div class="card"><h2>📁 Proyectos</h2>' + (!st.cargado ? '<div class="py-vacio">Cargando…</div>' : !l.length ? '<div class="py-vacio">Todavía no hay proyectos.</div>' :
         '<div class="py-lista">' + l.map((p) => '<button type="button" data-py="abrir" data-id="' + esc(p.id) + '"><span><b>' + esc(p.nombre) + "</b><br><small>" + (p.obraNombre ? esc(p.obraNombre) + " · " : "") + ((p.puntos || []).length) + " puntos · " + num(largo(p.puntos || []), 1) + " m</small></span><small>" + new Date(p.ts || p.creado || Date.now()).toLocaleDateString("es-AR") + " ›</small></button>").join("") + "</div>") + "</div>";
   }
   function htmlGps() {
     const g = st.gps, q = calidad(g && g.acc), ps = puntos(), ult = ps[ps.length - 1];
     const d = g && ult ? distancia(ult.lat, ult.lng, g.lat, g.lng) : null;
     return '<div class="py-gps"><i class="' + q.c + '"></i>' + (g ? "GPS ±" + num(g.acc, g.acc < 1 ? 2 : 1) + " m · " + q.t : esc(st.gpsErr || "Buscando GPS…")) + "</div>" +
-      '<div class="py-hint">' + (ult ? "Distancia a " + esc(ult.n) + " (último punto):" : "Marcá el primer punto.") + "</div>" +
+      '<div class="hint">' + (ult ? "Distancia a " + esc(ult.n) + " (último punto):" : "Marcá el primer punto.") + "</div>" +
       '<div class="py-dist" id="pyDist">' + (d == null ? "—" : num(d, d < 10 ? 2 : 1) + " m") + "</div>" +
-      (st.prom ? '<div class="py-hint"><b>Promediando… quedate quieto en el punto (5 s)</b></div>' : "");
+      (st.prom ? '<div class="hint"><b>Promediando… quedate quieto en el punto (5 s)</b></div>' : "");
   }
   function htmlLado() {
     const ps = puntos();
-    return '<div class="py-card py-a-gps"><div id="pyGps">' + htmlGps() + "</div>" +
-      '<div class="py-chips">' + TIPOS.map((t) => '<button type="button" data-py="tipo" data-k="' + t.k + '" class="' + (st.tipo === t.k ? "act" : "") + '"><i style="background:' + t.c + '"></i>' + esc(t.t) + "</button>").join("") + "</div>" +
-      '<button type="button" class="py-btn pri gr" data-py="marcar"' + (st.prom ? " disabled" : "") + ">📍 Marcar punto acá</button>" +
-      '<div class="py-fila"><label class="py-hint"><input type="checkbox" id="pyCorte" ' + (st.corte ? "checked" : "") + ' style="min-height:auto"> Empezar tramo nuevo (no unir con el anterior)</label></div>' +
+    return '<div class="card py-a-gps"><div id="pyGps">' + htmlGps() + "</div>" +
+      '<div class="py-chips">' + TIPOS.map((t) => '<button type="button" data-py="tipo" data-k="' + t.k + '" class="chip' + (st.tipo === t.k ? " activo" : "") + '"><i style="background:' + t.c + '"></i>' + esc(t.t) + "</button>").join("") + "</div>" +
+      '<button type="button" class="btn-primary py-gr" data-py="marcar"' + (st.prom ? " disabled" : "") + ">📍 Marcar punto acá</button>" +
+      '<div class="py-fila"><label class="hint"><input type="checkbox" id="pyCorte" ' + (st.corte ? "checked" : "") + ' style="min-height:auto"> Empezar tramo nuevo (no unir con el anterior)</label></div>' +
       '<div class="py-fila"><select id="pyModo"><option value="toque"' + (st.modo === "toque" ? " selected" : "") + '>Marcar al toque</option><option value="prom"' + (st.modo === "prom" ? " selected" : "") + '>Promediar 5 segundos (GPS del celular)</option></select>' +
-      '<button type="button" class="py-btn ' + (st.toque ? "on" : "") + '" data-py="toque">🗺 ' + (st.toque ? "Tocando el mapa agrega puntos" : "Agregar tocando el mapa") + "</button></div>" +
-      '<div class="py-hint">' + ps.length + " puntos · " + num(largo(ps), 2) + " m de recorrido</div></div>" +
-      '<div class="py-card py-a-salida"><h3>⬇ Sacar el plano</h3>' +
+      '<button type="button" class="' + (st.toque ? "btn-primary" : "btn-ghost") + '" data-py="toque">🗺 ' + (st.toque ? "Tocando el mapa agrega puntos" : "Agregar tocando el mapa") + "</button></div>" +
+      '<div class="hint">' + ps.length + " puntos · " + num(largo(ps), 2) + " m de recorrido</div></div>" +
+      '<div class="card py-a-salida"><h2>⬇ Sacar el plano</h2>' +
       '<div class="py-fila"><select id="pyFaja">' + [3, 4, 5].map((f) => '<option value="' + f + '"' + (fajaProy() === f ? " selected" : "") + ">Gauss-Krüger POSGAR 2007 · faja " + f + (f === 4 ? " (Córdoba)" : "") + "</option>").join("") + "</select></div>" +
-      '<button type="button" class="py-btn pri" data-py="dxf">AutoCAD (DXF)</button><button type="button" class="py-btn" data-py="dxfLocal">DXF en metros locales</button><button type="button" class="py-btn" data-py="csv">Planilla (Excel)</button><button type="button" class="py-btn" data-py="imprimir">🖨 Plano / PDF</button>' +
-      '<div class="py-hint">El DXF lo abre AutoCAD. Sistema de coordenadas: a confirmar con la base de Córdoba.</div></div>';
+      '<button type="button" class="btn-primary" data-py="dxf">AutoCAD (DXF)</button><button type="button" class="btn-ghost" data-py="dxfLocal">DXF en metros locales</button><button type="button" class="btn-ghost" data-py="csv">Planilla (Excel)</button><button type="button" class="btn-ghost" data-py="imprimir">🖨 Plano / PDF</button>' +
+      '<div class="hint">El DXF lo abre AutoCAD. Sistema de coordenadas: a confirmar con la base de Córdoba.</div></div>';
   }
   function htmlPuntos() {
     const ps = puntos(), L = local(ps, fajaProy());
@@ -6819,10 +6817,10 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
   function htmlProy() {
     const p = P();
     const tabs = [["mapa", "🗺 Mapa"], ["plano", "📐 Plano"], ["puntos", "📋 Puntos (" + puntos().length + ")"]];
-    return '<div class="py-grid"><div class="py-a-vista"><div class="py-tabs">' + tabs.map((t) => '<button type="button" data-py="pest" data-p="' + t[0] + '" class="' + (st.pest === t[0] ? "act" : "") + '">' + t[1] + "</button>").join("") + "</div>" +
-      '<div class="py-card" style="padding:8px">' + (st.pest === "mapa" ? '<div id="pyMapa"></div>' : st.pest === "plano" ? '<div id="pyPlano">' + planoSvg(puntos(), 900, 560, true) + "</div>" : '<div id="pyPuntos">' + htmlPuntos() + "</div>") + "</div></div>" +
+    return '<div class="py-grid"><div class="py-a-vista"><div class="subtabs">' + tabs.map((t) => '<button type="button" data-py="pest" data-p="' + t[0] + '" class="subtab' + (st.pest === t[0] ? " activo" : "") + '">' + t[1] + "</button>").join("") + "</div>" +
+      '<div class="card" style="padding:8px">' + (st.pest === "mapa" ? '<div id="pyMapa"></div>' : st.pest === "plano" ? '<div id="pyPlano">' + planoSvg(puntos(), 900, 560, true) + "</div>" : '<div id="pyPuntos">' + htmlPuntos() + "</div>") + "</div></div>" +
       htmlLado() +
-      '<div class="py-fila py-a-acc"><button type="button" class="py-btn" data-py="renombrar">✏ Cambiar nombre</button><button type="button" class="py-btn" data-py="borrarProy">🗑 Borrar proyecto</button></div></div>';
+      '<div class="py-fila py-a-acc"><button type="button" class="btn-ghost" data-py="renombrar">✏ Cambiar nombre</button><button type="button" class="btn-ghost" data-py="borrarProy">🗑 Borrar proyecto</button></div></div>';
   }
   function pintarGps() {
     const g = $("pyGps"); if (g) g.innerHTML = htmlGps();
@@ -6870,7 +6868,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     if (a === "crear") { const n = ($("pyNombre").value || "").trim(); if (!n) { avisar("Poné un nombre al proyecto.", true); return; } return crear(n, $("pyObra").value); }
     if (a === "abrir") { st.id = b.dataset.id; st.pest = "mapa"; st.vista = false; return pintar(); }
     if (a === "pest") { st.pest = b.dataset.p; return pintar(); }
-    if (a === "tipo") { st.tipo = b.dataset.k; document.querySelectorAll('#pyOv [data-py="tipo"]').forEach((x) => x.classList.toggle("act", x.dataset.k === st.tipo)); return; }
+    if (a === "tipo") { st.tipo = b.dataset.k; document.querySelectorAll('#pyOv [data-py="tipo"]').forEach((x) => x.classList.toggle("activo", x.dataset.k === st.tipo)); return; }
     if (a === "marcar") return marcar();
     if (a === "toque") { st.toque = !st.toque; if (st.toque && st.pest !== "mapa") st.pest = "mapa"; pintar(); const m = $("pyMapa"); if (st.toque && m && m.scrollIntoView) m.scrollIntoView({ block: "center" }); return; }   // en el celular el mapa queda arriba: se lo trae a la vista
     if (!p) return;
