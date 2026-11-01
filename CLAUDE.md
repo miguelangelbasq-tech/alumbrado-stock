@@ -521,8 +521,8 @@ Ejemplos:
 | 085 | La cajita de ubicación en el menú ya no se desborda; punto más adentro del botón |
 | 086 | Entrada rápida para la cuadrilla: primero sus órdenes (y la cámara), el resto por tandas |
 | 087 | La ubicación llega con el celular bloqueado (envío nativo + APK 1.2 con useLegacyBridge) |
-| 089 | Proyectista etapa 1: relevamiento en obra con GPS → plano, DXF Gauss-Krüger, planilla (solo oficina; reglas v089) |
 | 088 | Junta la v086 de SALEM (abre al toque con la ficha, revisión de versión de 16 KB con `ema-version`) + 086/087 de Claude Code |
+| 089 | Proyectista etapa 1: relevamiento en obra con GPS → plano, DXF Gauss-Krüger, planilla (solo oficina; reglas v089) |
 
 ---
 
