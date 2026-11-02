@@ -34,7 +34,7 @@ Autor: Miguel Ángel Díaz © 2026
   - El borde de 46 puntos, el plano impreso con catastro, y que sin señal avisa y el resto sigue andando.
 - `t_v095b` (visor, 40 fotos, pantalla de 1919 px): 6/6 en PC y 5/5 en celular. Con la v094 reproduce el error (visor corrido 736 px).
 - `t_v092` se actualizó: el DXF ahora trae los vértices del catastro, así que cuenta solo los del borde.
-- Batería completa: en curso (se anota al terminar).
+- Batería completa (83 pruebas, PC y celular): todo OK. `t_v083` quedó reemplazada por `t_v084`.
 
 **Huella SHA-256**
 - `095_2026-11-02_app-EMA_ORIGINAL.html` (62.041 líneas): `a24acb13986cd4e59e61271033cf0dbd895aa6e084d0344979dc47c5659518fa`
