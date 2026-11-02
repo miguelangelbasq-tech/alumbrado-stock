@@ -133,7 +133,7 @@ function datos() {
   await p.evaluate(() => window.hojaEMA && hojaEMA.cerrar());
   // ---- DXF con borde y datos eléctricos
   r = await p.evaluate(() => window.__proyectista._dxf('pz1', 'gk'));
-  c(/\r\nPOLYLINE\r\n8\r\nBORDE\r\n/.test(r) && (r.match(/\r\nVERTEX\r\n/g) || []).length === 4 && /\r\nELECTRICO\r\n/.test(r) && /T1\/1 [RST] 1xLUMINARIA PRUEBA ISYM 2/.test(r), 'DXF: borde de la plaza como polilínea y en cada columna tablero/circuito/fase/luminaria');
+  c(/\r\nPOLYLINE\r\n8\r\nBORDE\r\n/.test(r) && (r.match(/\r\nVERTEX\r\n8\r\nBORDE\r\n/g) || []).length === 4 && /\r\nELECTRICO\r\n/.test(r) && /T1\/1 [RST] 1xLUMINARIA PRUEBA ISYM 2/.test(r), 'DXF: borde de la plaza como polilínea y en cada columna tablero/circuito/fase/luminaria');
 
   // ---- .ies también
   fs.writeFileSync(arch.replace('.ldt', '.ies'), ies(F.c0, Array.from({ length: 37 }, (_, i) => i * 5), Array.from({ length: 37 }, (_, i) => i * 5), 10000, true));

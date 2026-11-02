@@ -130,7 +130,7 @@ Referencias que pasó Ángel: Li.PAD, GridGIS (Merytronic), DIRED-CAD, ArcGIS Fi
 | 2 | Ver la distancia exacta al caminar | ✅ al último punto · ❌ entre dos puntos cualesquiera |
 | 3 | Plano automático con distancias | ✅ simple · ❌ lámina como sus modelos |
 | 4 | Sacarlo para AutoCAD | ✅ DXF Gauss-Krüger faja 4 |
-| 5 | Base de Córdoba de fondo | ❌ (datos recibidos y revisados) |
+| 5 | Base de Córdoba de fondo | ✅ v095 (catastro v6: mapa, plano, PDF, DXF y borde de la plaza automático) |
 | 6 | Cálculo lumínico tipo DIALux: radio que alcanza cada luminaria, zonas oscuras | ✅ v092 (.ldt/.ies, punto por punto, mapa de zonas oscuras, radio útil, Cumple/No cumple) · ❌ isolíneas y reflexiones |
 | 7 | Caídas de tensión según cable y distancias | ✅ v092 (fasores con neutro, por tramo y fase, semáforo) |
 | 8 | Tablero con protecciones recomendadas | ✅ v092 térmicas por circuito y general · diferencial, contactor, fotocontrol, DPS: a confirmar |

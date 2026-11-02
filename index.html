@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="ema-version" content="2026-11-02 08:42 · 9ffb87">
+<meta name="ema-version" content="2026-11-02 13:12 · ff8f9a">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script id="anotarErrores">window.__autorApp="App Alumbrado Público — © 2026 Miguel Ángel Díaz. Todos los derechos reservados.",window.__erroresApp=[],window.addEventListener("error",function(e){try{var r=window.__erroresApp;r.length<30&&r.push({t:Date.now(),m:String(e.message||e),d:e.filename?String(e.filename).split("/").pop()+":"+e.lineno:""})}catch{}}),window.addEventListener("unhandledrejection",function(e){try{var r=e.reason,n=String(r&&(r.message||r.code)||r||"");if(/offline|unavailable|network|Failed to fetch/i.test(n))return;var o=window.__erroresApp;o.length<30&&o.push({t:Date.now(),m:"(promesa) "+n,d:""})}catch{}});</script>
 <title>Calculadora de Materiales — Alumbrado Público</title>
@@ -78,7 +78,7 @@
 <div class="header-divider"></div>
 <div class="header-text">
 <h1>Alumbrado Público</h1>
-<div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-11-02 08:42 · 9ffb87</span></div>
+<div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-11-02 13:12 · ff8f9a</span></div>
 <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
 </div>
 </div>
@@ -6526,6 +6526,19 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     const yPolo = AK * Math.PI / 2;   // origen de las Y en el polo sur
     return { x: faja * 1e6 + 5e5 + AK * eta, y: AK * xi + yPolo, faja };
   }
+  // v095: de Gauss-Krüger a latitud/longitud (serie de Krüger inversa; vuelve al mm, controlada con PROJ)
+  const betaK = [nK / 2 - 2 * nK * nK / 3 + 37 * Math.pow(nK, 3) / 96 - Math.pow(nK, 4) / 360, nK * nK / 48 + Math.pow(nK, 3) / 15 - 437 * Math.pow(nK, 4) / 1440, 17 * Math.pow(nK, 3) / 480 - 37 * Math.pow(nK, 4) / 840, 4397 * Math.pow(nK, 4) / 161280];
+  const deltaK = [2 * nK - 2 * nK * nK / 3 - 2 * Math.pow(nK, 3) + 116 * Math.pow(nK, 4) / 45, 7 * nK * nK / 3 - 8 * Math.pow(nK, 3) / 5 - 227 * Math.pow(nK, 4) / 45, 56 * Math.pow(nK, 3) / 15 - 136 * Math.pow(nK, 4) / 35, 4279 * Math.pow(nK, 4) / 630];
+  function gkInv(x, y, faja) {
+    faja = faja || 4;
+    const lon0 = -72 + 3 * (faja - 1), xi = (y - AK * Math.PI / 2) / AK, eta = (x - (faja * 1e6 + 5e5)) / AK;
+    let xp = xi, ep = eta;
+    for (let j = 1; j <= 4; j++) { xp -= betaK[j - 1] * Math.sin(2 * j * xi) * Math.cosh(2 * j * eta); ep -= betaK[j - 1] * Math.cos(2 * j * xi) * Math.sinh(2 * j * eta); }
+    const chi = Math.asin(Math.sin(xp) / Math.cosh(ep));
+    let phi = chi;
+    for (let j = 1; j <= 4; j++) phi += deltaK[j - 1] * Math.sin(2 * j * chi);
+    return { lat: phi / RAD, lng: lon0 + Math.atan2(Math.sinh(ep), Math.cos(xp)) / RAD };
+  }
 
   // ======================================================================= v092 · cálculos (eléctrico y lumínico)
   // Funciones puras (sin pantalla): se prueban solas con números de control (pruebas t_v092 y la cuenta aparte en Python).
@@ -7019,6 +7032,105 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     } catch (e) { return ""; }
   }
 
+  // ======================================================================= v095 · catastro de Córdoba de fondo
+  // Archivos en GitHub, junto a la app: catastro/v6/indice.json, b_<bx>_<by>.json (bloques de 4 km con pedacitos de 250 m) y
+  // plazas.json. Coordenadas Gauss-Krüger POSGAR 2007 faja 4 en centímetros (el DXF de Ángel venía en POSGAR 94: se le sumó
+  // +0,162 m al este y +0,610 m al norte, lo que da PROJ en toda la ciudad). Clases: m manzana · p parcela · b baldío · e eje de
+  // calle · a avenida/autopista · v plaza · l límite de barrio · f vías del tren. Textos t: [clase, x, y, giro°, texto]
+  // con clase c calle · v plaza · b barrio · m manzana · a ancho de calle · p parcela.
+  const CAT = { indice: null, pide: null, bloques: {}, cargando: {}, plazas: null, error: "" };
+  const CAT_TAM = 250, CAT_BLOQUE = 4000, CAT_FAJA = 4;
+  function catBase() {
+    try { if (window.__cargador && window.__cargador.url) return String(window.__cargador.url).replace(/[^/]*$/, "") + "catastro/v6/"; } catch (e) { }
+    return new URL("catastro/v6/", location.href).href;
+  }
+  function catJson(nombre) {
+    return fetch(catBase() + nombre).then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
+  }
+  function catIndice() {
+    if (CAT.indice) return Promise.resolve(CAT.indice);
+    if (!CAT.pide) CAT.pide = catJson("indice.json").then((d) => { CAT.indice = d; CAT.error = ""; return d; }, (e) => { CAT.pide = null; CAT.error = "No se pudo bajar el catastro (¿sin señal?)."; throw e; });
+    return CAT.pide;
+  }
+  // bloques que tocan un rectángulo (GK, metros)
+  function catClavesBloques(x0, y0, x1, y1) {
+    const out = [];
+    for (let i = Math.floor(x0 / CAT_BLOQUE); i <= Math.floor(x1 / CAT_BLOQUE); i++) for (let j = Math.floor(y0 / CAT_BLOQUE); j <= Math.floor(y1 / CAT_BLOQUE); j++) out.push(i + "_" + j);
+    return out;
+  }
+  function catAsegurar(x0, y0, x1, y1) {
+    return catIndice().then((ind) => {
+      const hay = {}; (ind.bloques || []).forEach((k) => { hay[k] = 1; });
+      const faltan = catClavesBloques(x0, y0, x1, y1).filter((k) => hay[k] && !CAT.bloques[k]);
+      return Promise.all(faltan.map((k) => {
+        if (!CAT.cargando[k]) CAT.cargando[k] = catJson("b_" + k + ".json").then((d) => { CAT.bloques[k] = d; delete CAT.cargando[k]; }, (e) => { delete CAT.cargando[k]; CAT.error = "No se pudo bajar una parte del catastro."; });
+        return CAT.cargando[k];
+      }));
+    });
+  }
+  // pedacitos (ya bajados) que tocan un rectángulo: [{x0, y0, d}]
+  function catPedazos(x0, y0, x1, y1, tope) {
+    const out = [], i0 = Math.floor(x0 / CAT_TAM), i1 = Math.floor(x1 / CAT_TAM), j0 = Math.floor(y0 / CAT_TAM), j1 = Math.floor(y1 / CAT_TAM);
+    if ((i1 - i0 + 1) * (j1 - j0 + 1) > (tope || 900)) return null;   // demasiado lejos: no se dibuja
+    for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
+      const b = CAT.bloques[Math.floor(i * CAT_TAM / CAT_BLOQUE) + "_" + Math.floor(j * CAT_TAM / CAT_BLOQUE)];
+      const d = b && b[i + "_" + j];
+      if (d) out.push({ k: i + "_" + j, x0: i * CAT_TAM, y0: j * CAT_TAM, d });
+    }
+    return out;
+  }
+  function catPlazas() {
+    if (CAT.plazas) return Promise.resolve(CAT.plazas);
+    return catJson("plazas.json").then((d) => { CAT.plazas = d.plazas || []; return CAT.plazas; });
+  }
+  // la plaza que contiene un punto (GK, metros); si no hay, la más cercana a menos de 60 m
+  function catPlazaEn(lista, x, y) {
+    let mejor = null, dm = 60;
+    lista.forEach((p) => {
+      const pol = []; for (let k = 0; k + 1 < p.c.length; k += 2) pol.push({ x: p.c[k] / 100, y: p.c[k + 1] / 100 });
+      if (pol.length < 3) return;
+      if (enPoligono(x, y, pol)) { if (dm > -1) { mejor = { p, pol }; dm = -1; } return; }
+      if (dm < 0) return;
+      for (let k = 0; k < pol.length; k++) {
+        const a = pol[k], b = pol[(k + 1) % pol.length], dx = b.x - a.x, dy = b.y - a.y, L2 = dx * dx + dy * dy;
+        const t = L2 ? Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / L2)) : 0, d = Math.hypot(x - a.x - t * dx, y - a.y - t * dy);
+        if (d < dm) { dm = d; mejor = { p, pol }; }
+      }
+    });
+    return mejor;
+  }
+  // dibujo del catastro en el plano (SVG): líneas por clase y nombres de calles/plazas/barrios
+  const CAT_SVG = { m: ["#9aa3b5", 0.9, ""], p: ["#d5dae8", 0.5, ""], b: ["#e5d39c", 0.6, "3 2"], e: ["#e0b84a", 0.7, "6 4"], a: ["#d9a441", 1.3, "8 4"], v: ["#7fd6a0", 1.2, ""], l: ["#c7b3e6", 1, "8 5"], f: ["#9aa3b5", 1, "2 3"] };
+  function catSvg(x0, y0, x1, y1, X, Y, k) {
+    if (!CAT.indice) return "";
+    const ps = catPedazos(x0, y0, x1, y1, 1600); if (!ps || !ps.length) return "";
+    const d = {}, txt = [];
+    ps.forEach((q) => {
+      Object.keys(CAT_SVG).forEach((cl) => {
+        const ls = q.d[cl]; if (!ls) return;
+        if (cl === "p" && k < 1.2) return;   // parcelas solo si se ven (más de 1,2 px por metro)
+        let s = d[cl] || "";
+        ls.forEach((l) => { for (let n = 0; n + 1 < l.length; n += 2) s += (n ? "L" : "M") + X(q.x0 + l[n] / 100).toFixed(1) + " " + Y(q.y0 + l[n + 1] / 100).toFixed(1); });
+        d[cl] = s;
+      });
+      (q.d.t || []).forEach((t) => {
+        const tx = q.x0 + t[1] / 100, ty = q.y0 + t[2] / 100;
+        if (tx < x0 || tx > x1 || ty < y0 || ty > y1) return;
+        if (t[0] === "c" || t[0] === "v" || t[0] === "b" || (t[0] === "m" && k > 2.5) || (t[0] === "a" && k > 4)) txt.push(t.concat([tx, ty]));
+      });
+    });
+    const o = ['<g class="py-cat">'];
+    Object.keys(d).forEach((cl) => { if (d[cl]) o.push('<path d="' + d[cl] + '" fill="none" stroke="' + CAT_SVG[cl][0] + '" stroke-width="' + CAT_SVG[cl][1] + '"' + (CAT_SVG[cl][2] ? ' stroke-dasharray="' + CAT_SVG[cl][2] + '"' : "") + "/>"); });
+    const col = { c: "#7c879d", v: "#2f8f57", b: "#8b6fbf", m: "#a3abbd", a: "#b8892e" }, tam = { c: 9, v: 9, b: 10, m: 7, a: 7 };
+    txt.slice(0, 600).forEach((t) => {
+      let g = -(t[3] || 0); if (g > 90) g -= 180; if (g < -90) g += 180;
+      const xx = X(t[5]).toFixed(1), yy = Y(t[6]).toFixed(1);
+      o.push('<text x="' + xx + '" y="' + yy + '" font-size="' + tam[t[0]] + '" fill="' + col[t[0]] + '"' + (t[0] === "b" ? ' font-weight="700"' : "") + ' transform="rotate(' + g + " " + xx + " " + yy + ')">' + esc(t[4]) + "</text>");
+    });
+    o.push("</g>");
+    return o.join("");
+  }
+
   // ======================================================================= estado
   const st = { proys: {}, unsub: null, id: "", pest: "mapa", gps: null, gpsErr: "", watch: null, tipo: "colN", corte: false, modo: "toque", toque: false, prom: null, map: null, capa: null, faja: 0, msg: "", msgMal: false, cargado: false, reglas: true };
   const P = () => st.proys[st.id] || null;
@@ -7051,10 +7163,10 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
       }, (e) => { st.cargado = true; st.reglas = !((e && e.code) === "permission-denied"); avisar(errTxt(e), true); pintar(); });
     } catch (e) { avisar("No se pudo conectar con la base.", true); }
   }
-  function guardarPuntos(ps) {
+  function guardarPuntos(ps, okMsg) {
     const p = P(); if (!p) return;
     p.puntos = ps; pintar();
-    db().collection(COL).doc(p.id).update({ puntos: ps, ts: Date.now(), por: quien() }).then(() => avisar(""), (e) => avisar(errTxt(e), true));
+    db().collection(COL).doc(p.id).update({ puntos: ps, ts: Date.now(), por: quien() }).then(() => avisar(okMsg || "", okMsg && okMsg.indexOf("Ojo") >= 0), (e) => avisar(errTxt(e), true));
   }
   async function crear(nombre, obra) {
     const o = (typeof avanceObras !== "undefined" ? avanceObras : []).find((x) => String(x.id) === String(obra));
@@ -7112,8 +7224,8 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     const XY = (q) => (ab ? [q.x, q.y] : [q.gx, q.gy]);
     const out = [];
     const g = (c, v) => out.push(String(c), String(v));
-    const capas = TIPOS.map((t) => "PUNTOS_" + t.p).concat(["NOMBRES", "TRAMOS", "COTAS", "BORDE", "ELECTRICO"]);
-    const colores = { C: 5, E: 8, T: 30, A: 6, K: 4, X: 1, P: 7, B: 4, NOMBRES: 7, TRAMOS: 3, COTAS: 2, BORDE: 4, ELECTRICO: 1 };
+    const capas = TIPOS.map((t) => "PUNTOS_" + t.p).concat(["NOMBRES", "TRAMOS", "COTAS", "BORDE", "ELECTRICO", "CAT_MANZANA", "CAT_PARCELA", "CAT_BALDIO", "CAT_EJE", "CAT_AVENIDA", "CAT_PLAZA", "CAT_BARRIO", "CAT_FFCC", "CAT_TEXTO"]);
+    const colores = { C: 5, E: 8, T: 30, A: 6, K: 4, X: 1, P: 7, B: 4, NOMBRES: 7, TRAMOS: 3, COTAS: 2, BORDE: 4, ELECTRICO: 1, CAT_MANZANA: 8, CAT_PARCELA: 9, CAT_BALDIO: 9, CAT_EJE: 40, CAT_AVENIDA: 30, CAT_PLAZA: 3, CAT_BARRIO: 6, CAT_FFCC: 8, CAT_TEXTO: 8 };
     g(0, "SECTION"); g(2, "HEADER"); g(9, "$ACADVER"); g(1, "AC1009"); g(9, "$INSBASE"); g(10, 0); g(20, 0); g(30, 0); g(0, "ENDSEC");
     g(0, "SECTION"); g(2, "TABLES"); g(0, "TABLE"); g(2, "LAYER"); g(70, capas.length);
     capas.forEach((c) => { g(0, "LAYER"); g(2, c); g(70, 0); g(62, colores[c.replace("PUNTOS_", "")] || 7); g(6, "CONTINUOUS"); });
@@ -7133,6 +7245,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
       let ang = Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI; if (ang > 90) ang -= 180; if (ang < -90) ang += 180;
       g(0, "TEXT"); g(8, "COTAS"); g(10, f((a[0] + b[0]) / 2)); g(20, f((a[1] + b[1]) / 2 + 0.3)); g(30, 0); g(40, 0.4); g(50, ang.toFixed(2)); g(1, d.toFixed(2) + " m");
     }
+    { const g0x = L.length ? L[0].gx - L[0].x : 0, g0y = L.length ? L[0].gy - L[0].y : 0; catDxf(g, f, (x, y) => (ab ? [x - g0x, y - g0y] : [x, y]), ps); }   // v095: catastro de la zona
     // v092: borde de la plaza (polilínea cerrada) y, en cada columna, tablero / circuito / fases / luminaria
     const bor = L.filter((q) => q.p.tipo === "borde");
     if (bor.length >= 3) {
@@ -7183,6 +7296,10 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
       for (let gx = Math.floor((cx - W / 2 / k) / paso) * paso; X(gx) < W; gx += paso) o.push('<line x1="' + X(gx).toFixed(1) + '" y1="0" x2="' + X(gx).toFixed(1) + '" y2="' + H + '" stroke="#eef1f6"/>');
       for (let gy = Math.floor((cy - H / 2 / k) / paso) * paso; Y(gy) > 0; gy += paso) o.push('<line x1="0" y1="' + Y(gy).toFixed(1) + '" x2="' + W + '" y2="' + Y(gy).toFixed(1) + '" stroke="#eef1f6"/>');
     }
+    if (catVer && fajaProy() === CAT_FAJA && L.length) {   // v095: catastro de fondo (si ya está bajado)
+      const g0x = L[0].gx - L[0].x, g0y = L[0].gy - L[0].y;
+      o.push(catSvg(g0x + cx - W / 2 / k, g0y + cy - H / 2 / k, g0x + cx + W / 2 / k, g0y + cy + H / 2 / k, (v) => X(v - g0x), (v) => Y(v - g0y), k));
+    }
     // v092: mapa de luz debajo (calculado en un plano local alineado al norte verdadero: se lo lleva a Gauss-Krüger con una afín)
     if (luzR && luzR.r && luzR.img && ps.length) {
       const r = luzR.r, g0 = gk(ps[0].lat, ps[0].lng, fajaProy());
@@ -7204,6 +7321,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     }
     L.forEach((q) => {
       const t = tipo(q.p.tipo);
+      if (q.p.tipo === "borde") { o.push('<circle cx="' + X(q.x).toFixed(1) + '" cy="' + Y(q.y).toFixed(1) + '" r="2.5" fill="' + t.c + '"/>'); return; }   // v095
       o.push('<circle cx="' + X(q.x).toFixed(1) + '" cy="' + Y(q.y).toFixed(1) + '" r="6" fill="' + t.c + '" stroke="#fff" stroke-width="2"/>');
       o.push('<text x="' + (X(q.x) + 9).toFixed(1) + '" y="' + (Y(q.y) - 8).toFixed(1) + '" font-size="12" font-weight="800" fill="#0d1424">' + esc(q.p.n) + "</text>");
     });
@@ -7239,11 +7357,12 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
       const sat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 21, maxNativeZoom: 19, attribution: "Esri" });
       sat.addTo(st.map); L.control.layers({ "Satélite": sat, "Calles": calle }, {}, { position: "topright" }).addTo(st.map);
       st.capa = L.layerGroup().addTo(st.map);
+      catPrepararMapa();   // v095: catastro de fondo
       st.map.on("click", (e) => { if (st.toque) agregar(e.latlng.lat, e.latlng.lng, null, "mapa"); });
       st.map.setView([-31.4201, -64.1888], 13);
       st.vista = false;
     }
-    setTimeout(() => { try { st.map.invalidateSize(); } catch (e) { } }, 60);
+    setTimeout(() => { try { st.map.invalidateSize(); catMapa(); } catch (e) { } }, 60);
     mapaPintar();
   }
   function mapaPintar() {
@@ -7256,6 +7375,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     });
     ps.forEach((p) => {
       const t = tipo(p.tipo);
+      if (p.tipo === "borde") { L.circleMarker([p.lat, p.lng], { radius: 3.5, color: "#fff", weight: 1, fillColor: t.c, fillOpacity: 1 }).addTo(st.capa).bindTooltip(esc(p.n), { direction: "top" }); return; }   // v095: el borde, sin cartel fijo
       L.circleMarker([p.lat, p.lng], { radius: 7, color: "#fff", weight: 2, fillColor: t.c, fillOpacity: 1 }).addTo(st.capa)
         .bindTooltip(esc(p.n), { permanent: true, direction: "right", offset: [8, 0], className: "py-nom" });
     });
@@ -7318,7 +7438,10 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     "#pyOv .py-arch{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;background:#ffffffb8;border:1px dashed var(--navy);color:var(--navy);font-weight:600;cursor:pointer;margin:4px 0 8px}#pyOv .py-arch input{position:absolute;opacity:0;width:1px;height:1px}" +
     "#pyOv .py-sep{height:1px;background:var(--line);margin:12px 0}#pyOv .py-h3{font:700 14.5px var(--disp);margin:12px 0 6px;color:var(--text)}#pyOv .py-res td:last-child{text-align:right}" +
     "@media(max-width:640px){#pyOv .py-scroll{overflow:visible}#pyOv .py-tabla td[data-l]:not([data-l=''])::before{content:attr(data-l);display:block;font:600 11px var(--fuente);color:var(--text-3);margin-bottom:2px}#pyOv .py-tcols td,#pyOv .py-tcirc td{min-width:0}#pyOv .py-tcols td:first-child,#pyOv .py-tcirc td:first-child,#pyOv .py-tlum td:first-child{grid-column:1/-1}#pyOv .py-res tr{grid-template-columns:1fr auto!important}#pyOv .py-campos{grid-template-columns:1fr}}";
-  function asegurarCss() { if ($("proyectistaCss")) return; const s = document.createElement("style"); s.id = "proyectistaCss"; s.textContent = CSS + CSS92; document.head.appendChild(s); }
+  const CSS95 = ".py-cat-t{pointer-events:none}.py-cat-t span{position:absolute;left:0;top:0;white-space:nowrap;font:600 11px Inter,Arial,sans-serif;color:#fff;text-shadow:0 0 3px #000,0 0 2px #000;transform-origin:0 0}" +
+    ".py-cat-t.c span{font-size:11.5px;color:#fff7d6}.py-cat-t.v span{color:#bbf7d0;font-weight:700}.py-cat-t.b span{color:#e9d5ff;font-weight:800;letter-spacing:.04em;text-transform:uppercase}.py-cat-t.m span{font-size:10px;color:#e5e7eb}.py-cat-t.a span{font-size:9.5px;color:#fde68a}.py-cat-t.p span{font-size:9px;color:#f1f5f9;font-weight:500}" +
+    ".py-cat-est{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:800;background:#ffffffe6;color:var(--navy,#28285e);border-radius:999px;padding:6px 14px;font:600 12.5px var(--fuente,Inter,sans-serif);box-shadow:0 6px 18px -10px #28285e99;pointer-events:none;white-space:nowrap}";
+  function asegurarCss() { if ($("proyectistaCss")) return; const s = document.createElement("style"); s.id = "proyectistaCss"; s.textContent = CSS + CSS92 + CSS95; document.head.appendChild(s); }
   function obrasOpts() {
     const l = (typeof avanceObras !== "undefined" ? avanceObras : []).filter((o) => o && o.nombre).sort((a, b) => String(a.nombre).localeCompare(String(b.nombre), "es"));
     return '<option value="">— Sin obra (proyecto suelto) —</option>' + l.map((o) => '<option value="' + esc(o.id) + '">' + esc(o.nombre) + (o.obraId ? " · ID " + esc(o.obraId) : "") + "</option>").join("");
@@ -7346,11 +7469,12 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
       '<div class="py-fila"><label class="hint"><input type="checkbox" id="pyCorte" ' + (st.corte ? "checked" : "") + ' style="min-height:auto"> Empezar tramo nuevo (no unir con el anterior)</label></div>' +
       '<div class="py-fila"><select id="pyModo"><option value="toque"' + (st.modo === "toque" ? " selected" : "") + '>Marcar al toque</option><option value="prom"' + (st.modo === "prom" ? " selected" : "") + '>Promediar 5 segundos (GPS del celular)</option></select>' +
       '<button type="button" class="' + (st.toque ? "btn-primary" : "btn-ghost") + '" data-py="toque">🗺 ' + (st.toque ? "Tocando el mapa agrega puntos" : "Agregar tocando el mapa") + "</button></div>" +
+      '<button type="button" class="btn-ghost" data-py="bordeCat">🌳 Traer el borde de la plaza (catastro)</button>' +
       '<div class="hint">' + ps.length + " puntos · " + num(largo(ps), 2) + " m de recorrido</div></div>" +
       '<div class="card py-a-salida"><h2>⬇ Sacar el plano</h2>' +
       '<div class="py-fila"><select id="pyFaja">' + [3, 4, 5].map((f) => '<option value="' + f + '"' + (fajaProy() === f ? " selected" : "") + ">Gauss-Krüger POSGAR 2007 · faja " + f + (f === 4 ? " (Córdoba)" : "") + "</option>").join("") + "</select></div>" +
       '<button type="button" class="btn-primary" data-py="dxf">AutoCAD (DXF)</button><button type="button" class="btn-ghost" data-py="dxfLocal">DXF en metros locales</button><button type="button" class="btn-ghost" data-py="csv">Planilla (Excel)</button><button type="button" class="btn-ghost" data-py="imprimir">🖨 Plano / PDF</button><button type="button" class="btn-ghost" data-py="memoria">📄 Memoria de cálculo</button>' +
-      '<div class="hint">El DXF lo abre AutoCAD. Sistema de coordenadas: a confirmar con la base de Córdoba.</div></div>';
+      '<div class="hint">El DXF lo abre AutoCAD. Lleva el catastro de la zona (base de Córdoba v6, pasada de POSGAR 94 a 2007) en capas CAT_….</div></div>';
   }
   function htmlPuntos() {
     const ps = puntos(), L = local(ps, fajaProy());
@@ -7368,7 +7492,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     const p = P();
     const tabs = [["mapa", "🗺 Mapa"], ["plano", "📐 Plano"], ["puntos", "📋 Puntos (" + puntos().length + ")"], ["cols", "🏮 Columnas"], ["elec", "⚡ Eléctrico"], ["luz", "💡 Luz"]];
     const ancho = st.pest === "cols" || st.pest === "elec" || st.pest === "luz";   // v092: los cálculos usan todo el ancho
-    const cuerpo = st.pest === "mapa" ? '<div class="card" style="padding:8px"><div id="pyMapa"></div>' + (luzVigente() && st.luzRes.r ? '<div class="py-fila"><button type="button" class="chip' + (st.verLuz ? " activo" : "") + '" data-py="luzMapa">💡 Mapa de luz y radio útil</button></div>' + (st.verLuz ? leyendaLuz(st.luzRes.cfg) : "") : "") + "</div>"
+    const cuerpo = st.pest === "mapa" ? '<div class="card" style="padding:8px"><div id="pyMapa"></div><div class="py-fila"><button type="button" class="chip' + (catVer ? " activo" : "") + '" data-py="catVer">🗺 Catastro</button>' + (luzVigente() && st.luzRes.r ? '<button type="button" class="chip' + (st.verLuz ? " activo" : "") + '" data-py="luzMapa">💡 Mapa de luz y radio útil</button>' : "") + "</div>" + (luzVigente() && st.luzRes.r && st.verLuz ? leyendaLuz(st.luzRes.cfg) : "") + "</div>"
       : st.pest === "plano" ? '<div class="card" style="padding:8px"><div id="pyPlano">' + planoSvg(puntos(), 900, 560, true, st.verLuz && luzVigente() ? st.luzRes : null) + "</div></div>"
       : st.pest === "puntos" ? '<div class="card" style="padding:8px"><div id="pyPuntos">' + htmlPuntos() + "</div></div>"
       : st.pest === "cols" ? '<div class="card"><h2>🏮 Columnas <span class="h2-sub">qué lleva cada una y de dónde le llega el cable</span></h2><div id="pyCols">' + htmlColumnas() + "</div></div>"
@@ -7695,6 +7819,119 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     guardarProy({ lums: lumsP().concat([l]) }); avisar("✓ Luminaria guardada.");
   }
 
+  // ======================================================================= v095 · catastro en el mapa, el plano, el DXF y el borde
+  const CAT_MAPA = {   // sobre el satélite: líneas claras
+    l: { color: "#d8b4fe", weight: 1.6, opacity: 0.85, dashArray: "8 6" }, m: { color: "#ffffff", weight: 1.4, opacity: 0.9 },
+    b: { color: "#ffe08a", weight: 0.8, opacity: 0.75, dashArray: "3 3" }, p: { color: "#ffffff", weight: 0.6, opacity: 0.55 },
+    e: { color: "#ffd166", weight: 1, opacity: 0.8, dashArray: "6 4" }, a: { color: "#ffb347", weight: 2, opacity: 0.85 },
+    f: { color: "#e5e7eb", weight: 1.5, opacity: 0.8, dashArray: "2 4" }, v: { color: "#5ee38a", weight: 1.8, opacity: 0.95 }
+  };
+  const CAT_NIVEL = { v: 0, b: 0, c: 1, m: 2, a: 2, p: 3 };   // desde qué acercamiento se ve cada texto
+  let catVer = true; try { catVer = localStorage.getItem("ema.py.cat") !== "0"; } catch (e) { }
+  function catEstado(t) { const e = $("pyCatEst"); if (e) { e.textContent = t || ""; e.hidden = !t; } }
+  function catCapaPedazo(q, nz) {
+    const g = L.layerGroup();
+    ["l", "m", "b", "p", "e", "a", "f", "v"].forEach((cl) => {
+      const ls = q.d[cl]; if (!ls || (cl === "p" && nz < 1) || (cl === "b" && nz < 1)) return;
+      const lls = ls.map((l) => { const o = []; for (let n = 0; n + 1 < l.length; n += 2) { const p = gkInv(q.x0 + l[n] / 100, q.y0 + l[n + 1] / 100, CAT_FAJA); o.push([p.lat, p.lng]); } return o; });
+      L.polyline(lls, Object.assign({ renderer: st.catRend, interactive: false, pane: "pyCat" }, CAT_MAPA[cl])).addTo(g);
+    });
+    (q.d.t || []).forEach((t) => {
+      if (!(CAT_NIVEL[t[0]] <= nz)) return;
+      const p = gkInv(q.x0 + t[1] / 100, q.y0 + t[2] / 100, CAT_FAJA);
+      let gg = -(t[3] || 0); if (gg > 90) gg -= 180; if (gg < -90) gg += 180;
+      L.marker([p.lat, p.lng], { pane: "pyCatTxt", interactive: false, keyboard: false, icon: L.divIcon({ className: "py-cat-t " + t[0], iconSize: [0, 0], html: '<span style="transform:translate(-50%,-50%) rotate(' + gg + 'deg)">' + esc(t[4]) + "</span>" }) }).addTo(g);
+    });
+    return g;
+  }
+  function catMapa() {
+    if (!st.map || !st.catCapa) return;
+    const z = st.map.getZoom();
+    if (!catVer || z < 16) { st.catCapa.clearLayers(); st.catDib = {}; catEstado(catVer ? "Acercá el mapa para ver el catastro" : ""); return; }
+    const b = st.map.getBounds(), c = [[b.getSouth(), b.getWest()], [b.getNorth(), b.getEast()], [b.getSouth(), b.getEast()], [b.getNorth(), b.getWest()]].map((q) => gk(q[0], q[1], CAT_FAJA));
+    const x0 = Math.min.apply(null, c.map((q) => q.x)) - 30, x1 = Math.max.apply(null, c.map((q) => q.x)) + 30, y0 = Math.min.apply(null, c.map((q) => q.y)) - 30, y1 = Math.max.apply(null, c.map((q) => q.y)) + 30;
+    const nz = z >= 19 ? 3 : z >= 18 ? 2 : z >= 17 ? 1 : 0;
+    if (!CAT.indice || catClavesBloques(x0, y0, x1, y1).some((k) => CAT.indice.bloques.indexOf(k) >= 0 && !CAT.bloques[k])) catEstado("Cargando el catastro…");
+    catAsegurar(x0, y0, x1, y1).then(() => {
+      if (!st.map || st.map.getZoom() !== z) return;
+      const ps = catPedazos(x0, y0, x1, y1, 400); if (!ps) return;
+      if (st.catZ !== nz) { st.catCapa.clearLayers(); st.catDib = {}; st.catZ = nz; }
+      const ver = {};
+      ps.forEach((q) => { ver[q.k] = 1; if (!st.catDib[q.k]) st.catDib[q.k] = catCapaPedazo(q, nz).addTo(st.catCapa); });
+      Object.keys(st.catDib).forEach((k) => { if (!ver[k]) { st.catCapa.removeLayer(st.catDib[k]); delete st.catDib[k]; } });
+      catEstado(ps.length ? "" : "Sin catastro en esta zona");
+    }, () => catEstado(CAT.error || "No se pudo bajar el catastro (¿sin señal?)."));
+  }
+  function catPrepararMapa() {   // se llama al armar el mapa
+    if (!st.map.getPane("pyCat")) { st.map.createPane("pyCat").style.zIndex = 350; st.map.createPane("pyCatTxt").style.zIndex = 360; st.map.getPane("pyCatTxt").style.pointerEvents = "none"; }
+    st.catRend = L.canvas({ pane: "pyCat", padding: 0.3 });
+    st.catCapa = L.layerGroup().addTo(st.map); st.catDib = {}; st.catZ = -1;
+    st.map.on("moveend", catMapa);
+    const est = document.createElement("div"); est.id = "pyCatEst"; est.className = "py-cat-est"; est.hidden = true; st.map.getContainer().appendChild(est);
+  }
+  // rectángulo (GK faja 4) alrededor de los puntos del proyecto
+  function catCaja(margen, lista) {
+    const ps = lista || puntos(); if (!ps.length) return null;
+    const g = ps.map((p) => gk(p.lat, p.lng, CAT_FAJA));
+    return [Math.min.apply(null, g.map((q) => q.x)) - margen, Math.min.apply(null, g.map((q) => q.y)) - margen, Math.max.apply(null, g.map((q) => q.x)) + margen, Math.max.apply(null, g.map((q) => q.y)) + margen];
+  }
+  // antes del plano impreso, la memoria o el DXF: bajar el catastro de la zona (si no hay señal, sigue sin él a los 8 s)
+  function catListo(fn) {
+    const c = catCaja(150);
+    if (!catVer || !c || fajaProy() !== CAT_FAJA) return fn();
+    let hecho = false; const listo = () => { if (!hecho) { hecho = true; fn(); } };
+    setTimeout(listo, 8000);
+    catAsegurar(c[0], c[1], c[2], c[3]).then(listo, listo);
+  }
+  function catParaPlano() {   // al abrir el plano: baja lo que falte y vuelve a dibujar
+    const c = catCaja(150); if (!catVer || !c || fajaProy() !== CAT_FAJA) return;
+    const f = c.map((v) => Math.round(v)).join(",");
+    if (st.catPlano === f) return; st.catPlano = f;
+    catAsegurar(c[0], c[1], c[2], c[3]).then(() => { if (st.pest === "plano") pintar(); }, () => { });
+  }
+  // DXF: capas CAT_* con lo del catastro alrededor de los puntos
+  function catDxf(g, f, XY0, lista) {
+    const c = catCaja(80, lista); if (!catVer || !c || fajaProy() !== CAT_FAJA || !CAT.indice) return;
+    const ps = catPedazos(c[0], c[1], c[2], c[3], 1600); if (!ps) return;
+    const capa = { m: "CAT_MANZANA", p: "CAT_PARCELA", b: "CAT_BALDIO", e: "CAT_EJE", a: "CAT_AVENIDA", v: "CAT_PLAZA", l: "CAT_BARRIO", f: "CAT_FFCC" };
+    ps.forEach((q) => {
+      Object.keys(capa).forEach((cl) => (q.d[cl] || []).forEach((l) => {
+        g(0, "POLYLINE"); g(8, capa[cl]); g(66, 1); g(70, 0); g(10, 0); g(20, 0); g(30, 0);
+        for (let n = 0; n + 1 < l.length; n += 2) { const xy = XY0(q.x0 + l[n] / 100, q.y0 + l[n + 1] / 100); g(0, "VERTEX"); g(8, capa[cl]); g(10, f(xy[0])); g(20, f(xy[1])); g(30, 0); }
+        g(0, "SEQEND"); g(8, capa[cl]);
+      }));
+      (q.d.t || []).forEach((t) => {
+        if (t[0] === "p") return;
+        const xy = XY0(q.x0 + t[1] / 100, q.y0 + t[2] / 100);
+        g(0, "TEXT"); g(8, "CAT_TEXTO"); g(10, f(xy[0])); g(20, f(xy[1])); g(30, 0); g(40, t[0] === "b" ? 3 : 1.5); g(50, (t[3] || 0).toFixed(1)); g(1, String(t[4]).replace(/[\r\n]+/g, " "));
+      });
+    });
+  }
+  async function bordeCatastro() {
+    const ps = puntos(), base = ps.filter((p) => p.tipo !== "borde");
+    let ref = null;
+    if (base.length) ref = { lat: base.reduce((s, p) => s + p.lat, 0) / base.length, lng: base.reduce((s, p) => s + p.lng, 0) / base.length };
+    else if (st.gps) ref = st.gps;
+    else if (st.map) { const c = st.map.getCenter(); ref = { lat: c.lat, lng: c.lng }; }
+    if (!ref) { avisar("Marcá un punto en la plaza (o mové el mapa hasta ella) y probá de nuevo.", true); return; }
+    const g0 = gk(ref.lat, ref.lng, CAT_FAJA);
+    avisar("Buscando la plaza en el catastro…");
+    let lista;
+    try { lista = await catPlazas(); } catch (e) { avisar("No se pudo bajar el catastro (¿sin señal?).", true); return; }
+    const r = catPlazaEn(lista, g0.x, g0.y);
+    if (!r) { avisar("No encontré una plaza del catastro en ese lugar (busca dentro de la plaza o a menos de 60 m).", true); return; }
+    const nb = ps.length - base.length;
+    if (nb && !confirm("Ya hay " + nb + " puntos de borde. ¿Los cambio por el borde de " + (r.p.n ? "«" + r.p.n + "»" : "la plaza") + " del catastro?")) { avisar(""); return; }
+    const ahora = Date.now(), nuevos = r.pol.slice(0, 200).map((q, k) => {
+      const ll = gkInv(q.x, q.y, CAT_FAJA);
+      return { id: ahora.toString(36) + k.toString(36) + Math.random().toString(36).slice(2, 5), n: "B" + (k + 1), tipo: "borde", lat: +ll.lat.toFixed(9), lng: +ll.lng.toFixed(9), acc: null, fuente: "catastro", corte: k === 0, ts: ahora, por: quien(), nota: k === 0 && r.p.n ? r.p.n : "" };
+    });
+    st.vista = false;
+    const msg = "✓ Borde de " + (r.p.n ? "«" + r.p.n + "»" : "la plaza") + " traído del catastro (" + nuevos.length + " puntos)" + (r.p.e === "x" ? ". Ojo: el catastro la marca como edificada (no sería plaza)." : r.p.e === "a" ? ". El catastro tiene ese contorno como aproximado." : ".");
+    avisar(msg, r.p.e === "x");
+    guardarPuntos(base.concat(nuevos), msg);
+  }
+
   function pintarGps() {
     const g = $("pyGps"); if (g) g.innerHTML = htmlGps();
     const b = document.querySelector('#pyOv [data-py="marcar"]'); if (b) b.disabled = !!st.prom;
@@ -7714,6 +7951,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     avisar(st.msg, st.msgMal);
     if (st.id) { gpsPrender(); if (st.pest === "mapa") mapaArmar(); } else gpsApagar();
     if (st.id && st.pest === "luz" && !luzVigente() && !st.calcLuz) calcularLuz();   // v092
+    if (st.id && st.pest === "plano") catParaPlano();   // v095
   }
   function abrir(id) {
     asegurarCss();
@@ -7741,15 +7979,17 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     if (a === "volver") { st.id = ""; st.toque = false; return pintar(); }
     if (a === "crear") { const n = ($("pyNombre").value || "").trim(); if (!n) { avisar("Poné un nombre al proyecto.", true); return; } return crear(n, $("pyObra").value); }
     if (a === "abrir") { st.id = b.dataset.id; st.pest = "mapa"; st.vista = false; return pintar(); }
+    if (a === "catVer") { catVer = !catVer; try { localStorage.setItem("ema.py.cat", catVer ? "1" : "0"); } catch (e) { } st.catPlano = ""; b.classList.toggle("activo", catVer); if (st.pest === "mapa") return catMapa(); return pintar(); }
     if (a === "pest") { st.pest = b.dataset.p; if (st.pest === "mapa") st.vista = false; return pintar(); }
     if (a === "tipo") { st.tipo = b.dataset.k; document.querySelectorAll('#pyOv [data-py="tipo"]').forEach((x) => x.classList.toggle("activo", x.dataset.k === st.tipo)); return; }
     if (a === "marcar") return marcar();
     if (a === "toque") { st.toque = !st.toque; if (st.toque && st.pest !== "mapa") st.pest = "mapa"; pintar(); const m = $("pyMapa"); if (st.toque && m && m.scrollIntoView) m.scrollIntoView({ block: "center" }); return; }   // en el celular el mapa queda arriba: se lo trae a la vista
     if (!p) return;
-    if (a === "dxf" || a === "dxfLocal") return bajar(archivo(p, "dxf"), dxf(p, a === "dxf" ? "gk" : "local"), "application/dxf");
+    if (a === "dxf" || a === "dxfLocal") { avisar("Preparando el DXF…"); return catListo(() => { avisar(""); bajar(archivo(p, "dxf"), dxf(p, a === "dxf" ? "gk" : "local"), "application/dxf"); }); }
     if (a === "csv") return bajar(archivo(p, "csv"), planilla(p), "text/csv;charset=utf-8");
-    if (a === "imprimir") return imprimir();
-    if (a === "memoria") return memoria();
+    if (a === "imprimir") return catListo(imprimir);
+    if (a === "memoria") return catListo(memoria);
+    if (a === "bordeCat") return bordeCatastro();
     if (a === "verLuz") { st.verLuz = true; st.pest = "mapa"; st.vista = false; return pintar(); }
     if (a === "luzMapa") { st.verLuz = !st.verLuz; if (st.verLuz && !luzVigente()) return calcularLuz(); return pintar(); }
     if (a === "aplicar") return aplicarMasivo();
@@ -7784,6 +8024,8 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     t.blur(); guardarPuntos(ps);
   }
   window.__proyectista = { abrir, cerrar, estado: () => ({ id: st.id, pest: st.pest, gps: st.gps, proyectos: Object.keys(st.proys).length, reglas: st.reglas, luz: luzVigente() && st.luzRes && st.luzRes.r ? { em: st.luzRes.r.em, emin: st.luzRes.r.emin, ok: st.luzRes.r.ok } : null, calcLuz: !!st.calcLuz }), _geo: { distancia, gk, fajaDe },
+    _mapa: () => st.map,
+    _cat: { CAT, gkInv, catBase, catAsegurar, catPedazos, catPlazas, catPlazaEn, ver: () => catVer },
     _calc: { red: (id) => red(st.proys[id].puntos || [], st.proys[id].lums || [], st.proys[id].circ || {}, cfgDe(st.proys[id])), parseLDT, parseIES, luz, radios, intens, cfgDe }, _dxf: (id, s) => dxf(st.proys[id], s || "gk"), _csv: (id) => planilla(st.proys[id]) };
 })();
 </script>
