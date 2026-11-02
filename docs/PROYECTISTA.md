@@ -93,6 +93,36 @@ Referencias que pasó Ángel: Li.PAD, GridGIS (Merytronic), DIRED-CAD, ArcGIS Fi
   - Optimizador de separación y altura, y curvas isolux sobre el mapa (Relux). *Grande.*
 - Sin confirmar: GridGIS Map Creator (no se encontró la app); el cómputo de materiales en DIRED-CAD.
 
+## Modelos de Ángel (Proyectos_AP, vistos el 02/11/2026) — lo que Proyectista tiene que terminar armando
+Ángel ya armó estos planos con programas Python (ezdxf), sobre el catastro como XREF y en POSGAR faja 4.
+- **Planimetría A1, escala 1:400** (Cavia AP-CAVIA-01 y José María Paz AP-JMP-FAS-01):
+  - columnas con código **T{tablero}C{circuito}-{nn}** y las **fases** de cada tabaquera (R-S, S-T…);
+  - tendido por circuito con colores (1 azul, 2 verde, 3 rojo) y la **sección del cable** por tramo (4×4, 4×6 mm²);
+  - **distancia** de cada tramo, tableros TMPC, puesta a tierra y lo existente (LAT 132 kV, preensamblado, sendas);
+  - croquis de ubicación satelital, referencias con los planos tipo (AP-C-033, AP-C-008, AP-T-018…) y notas.
+- **Tablas que van en la lámina:**
+  - **tabla de columnas**: tipo (doble, triple, cruz × W), fases por tabaquera y luminarias por fase;
+  - **balance de fases** (W por fase R/S/T, por circuito y por tablero);
+  - **cuadro resumen**: columnas por tipo, luminarias por potencia, tableros y metros de cable por sección.
+- **Cajetín:** logos de EPEC, Municipalidad, Gobierno de Córdoba y EMA; proyectó, revisó, dibujó, fecha, escala, plano N° y revisión.
+- **Unifilar del TMPC, A3** (AP-CAVIA-02), con márgenes IRAM 4504 y rótulo IRAM 4508:
+  - acometida y seccionador NH, medidor, ITM general, barra;
+  - por circuito: ITM + diferencial + contactor; circuito de comando con fotocontrol;
+  - **tabla de circuitos de salida**: cable, largo y potencia; simbología IEC 60617.
+- **Distribución de fases / conforme a obra, A4** (VICOR TAP 1).
+- **Detalle constructivo A4** (TC-PRFV-02): conexionado de la caja de la columna, con identificadores de cables.
+
+**Qué implica para Proyectista**
+- **Etapa 3** necesita más datos que los puntos:
+  - a qué **tablero y circuito** pertenece cada columna;
+  - **tipo de columna**: altura 7 o 10 m; simple, doble, triple o cruz;
+  - **luminarias**: W y lm;
+  - **sección del cable** por circuito.
+- **Fácil y valioso:** que la app **reparta las fases sola** para que el balance quede parejo, y arme la tabla de columnas, el balance y el cuadro resumen.
+- **La lámina A1** sale como DXF con la base de catastro de la zona. Se pueden reusar las capas y los símbolos de los programas de Ángel (`build_plano.py`, `build_jmp.py`).
+- **El unifilar** sale de los circuitos (potencia, largo, sección) con las protecciones que se definan.
+- **Las protecciones** las recomienda la app con criterios **a confirmar** con Ángel. La app recomienda; no certifica.
+
 ## Preguntas abiertas para Ángel
 - ¿Qué receptor RTK tiene en mente (marca y modelo)?
 - La base de Córdoba: ¿en qué formato está (DWG/DXF), cuánto pesa y en qué sistema de coordenadas?
