@@ -131,10 +131,10 @@ Referencias que pasó Ángel: Li.PAD, GridGIS (Merytronic), DIRED-CAD, ArcGIS Fi
 | 3 | Plano automático con distancias | ✅ simple · ❌ lámina como sus modelos |
 | 4 | Sacarlo para AutoCAD | ✅ DXF Gauss-Krüger faja 4 |
 | 5 | Base de Córdoba de fondo | ❌ (datos recibidos y revisados) |
-| 6 | Cálculo lumínico tipo DIALux: radio que alcanza cada luminaria, zonas oscuras | ❌ |
-| 7 | Caídas de tensión según cable y distancias | ❌ |
-| 8 | Tablero con protecciones recomendadas | ❌ |
-| 9 | Proyecto completo (fases, tablas, unifilar, cómputo) | ❌ |
+| 6 | Cálculo lumínico tipo DIALux: radio que alcanza cada luminaria, zonas oscuras | ✅ v092 (.ldt/.ies, punto por punto, mapa de zonas oscuras, radio útil, Cumple/No cumple) · ❌ isolíneas y reflexiones |
+| 7 | Caídas de tensión según cable y distancias | ✅ v092 (fasores con neutro, por tramo y fase, semáforo) |
+| 8 | Tablero con protecciones recomendadas | ✅ v092 térmicas por circuito y general · diferencial, contactor, fotocontrol, DPS: a confirmar |
+| 9 | Proyecto completo (fases, tablas, unifilar, cómputo) | ✅ v092 reparto de fases, tablas, unifilar simple, cuadro resumen, memoria de cálculo · ❌ lámina A1 como los modelos |
 | 10 | BT / MT / AT / loteos | más adelante |
 
 ## Cálculo lumínico — cómo se aplica (investigación del 02/11/2026)
@@ -204,6 +204,16 @@ Referencias que pasó Ángel: Li.PAD, GridGIS (Merytronic), DIRED-CAD, ArcGIS Fi
 3. **Lumínico**: lector de .ldt, mapa de zonas oscuras, radio útil y «Cumple / No cumple».
 4. Lámina A1 en DXF, unifilar y memoria de cálculo.
 5. Foto por punto, medir entre dos puntos, «llevame al punto» y grabar el recorrido.
+
+## Etapa 2 — hecha en la v092 (01/11/2026)
+- Ver `CHANGELOG.md` (v092). Decisiones tomadas:
+  - **Resistencias:** IEC 60228. Por defecto cobre **flexible clase 5**, que reproduce el catálogo Prysmian a 70 °C (4 mm² 5,92 · 6 mm² 3,95 · 10 mm² 2,29 Ω/km). Se puede elegir clase 2. La reactancia 0,08 Ω/km es típica (a confirmar).
+  - **Largo del cable:** distancia × (1 + reserva 5 %) + subida a la caja de 3,50 m en cada punta de columna; o los metros reales cargados a mano.
+  - **Caída hasta la luminaria:** suma 2 × R(1,5 mm²) × 7 m × I por el cable de subida.
+  - **Térmica recomendada:** la estándar siguiente a 1,25 × I, mínimo 10 A (a confirmar por el arranque de los drivers).
+  - **Fotometría guardada** como tabla pareja C cada 5° × γ cada 2,5° en cd/klm de la luminaria (≈ 20 KB por luminaria).
+  - **Luminaria «mira hacia»:** por defecto, al centro de la plaza; con 2 o más artefactos se reparten parejos. C90 = hacia adelante.
+- **Pendiente:** isolíneas, capa de luz en el DXF, lámina A1 como los modelos, catastro de fondo, inclinación de la luminaria.
 
 ## Preguntas abiertas para Ángel
 - ¿Qué nivel de iluminación (lux) exige Inspección (EPEC / DGAP) para las plazas? ¿Lo dice el pliego?

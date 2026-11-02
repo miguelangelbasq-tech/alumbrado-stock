@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **01/11/2026**, última versión entregada: **v091** (ver `CHANGELOG.md`).
+> Estado al **01/11/2026**, última versión entregada: **v092** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -235,8 +235,8 @@ Los roles están en `window.PERMISOS` (script `usuariosPermisos`) y en las regla
 | `auditoria` | Registro de lo hecho (solo create) | |
 | `pushSubs/{sha256(endpoint)}` | Celulares anotados para push | `uid, clave, email…` |
 | `avisosPush` | Avisos para el Worker | `enviado:false`, destinatario (`clave`/`email`/`uid`), tipo, tag |
-| `ubicacionVivo/{uid}` | **Ubicación en vivo** (un doc por persona, se pisa) | `uid, email, persona, clave, lat, lng, acc (m), vel (km/h), ts, posTs, fuente (web/app), activo, hasta, finTs, finMotivo` + v091: `fondo` (salió con el celu bloqueado), `fondoTs`, `via` (android/navegador/app por Firebase). El Mapa muestra el porqué de «sin actualizar» |
-| `proyectos/{id}` | **Proyectista** (v089): relevamientos | `nombre, obraId, obraNombre, faja, etapa, por, creado, ts, puntos[] {id, n, tipo (colN/colE/tab/aco/cam/cru/otro), lat, lng, acc, fuente (gps/mapa), corte, nota, ts, por}`. Solo admin/oficina |
+| `ubicacionVivo/{uid}` | **Ubicación en vivo** (un doc por persona, se pisa) | `uid, email, persona, clave, lat, lng, acc (m), vel (km/h), ts, posTs, fuente (web/app), activo, hasta, finTs, finMotivo` + v091: `fondo` (salió con el celu bloqueado), `fondoTs`, `via` (android/navegador/app por Firebase). El Mapa muestra el porqué de «sin actualizar». v092: `enviosFondo, cortesHoy, ultCorteDesde, ultCorteHasta, ultCorteTipo` («se cortó» / «no mandó» / «app cerrada»), `pruebaTs, pruebaOk, pruebaEnvios`. El celular lleva la cuenta del día en `localStorage ema.uv.diag` |
+| `proyectos/{id}` | **Proyectista** (v089): relevamientos | `nombre, obraId, obraNombre, faja, etapa, por, creado, ts, lums[] {id, nombre, W, lm, cos, fot{formato, i[73][73] cd/klm}, archivo} (v092), circ{"tab|n": {mat, sec, tipo 3F/1F, fase}} (v092), calc{vll, cond, lim, temp, reserva, subida, subLum, x, minIn, fm, clase, emReq, eminReq, umbral, brazo, alt{}} (v092), puntos[] {id, n, tipo (colN/colE/tab/aco/cam/cru/otro/borde), lat, lng, acc, fuente (gps/mapa), corte, nota, ts, por, el{tab, circ, de, col P7/P10/M7/M10/EX, art, lum, fase auto/R/S/T, m, mira} (v092)}`. Solo admin/oficina |
 | `secretosServidor` | Clave privada VAPID | **sin regla: nadie la lee desde la app** |
 
 **`configEquipo/<doc>`:**
@@ -293,7 +293,7 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `ubicacionVivo` | 083–085 | `__ubicacionVivo` {estado, cfg, enHorario, tic, pintarMapa, arrancar, parar}. Cuadrilla en horario: nativo `BackgroundGeolocation.addWatcher` (notificación fija) o web `watchPosition` + Wake Lock; manda cada `cadaSeg` o si se movió más de 40 m; latido 15 s; `tic()` cada 30 s. Punto en `#btnMenu .uv-menu-dot` (ok verde / busca amarillo / mal rojo) + `#uvMenuLinea` en el menú. Oficina: pines `.uv-pin` (on verde / off gris «sin actualizar desde HH:MM») y `#uvPanel` «👷 Personal en vivo N de M». |
 | `ubicacionVivo` (v087) | 087 | En la app de Android la ubicación sale por **CapacitorHttp → Firestore REST** (`guardarUbic` → `setNativo`, token por `getIdTokenResult` en pantalla o renovado con `securetoken` + refreshToken en segundo plano); si falla, por el SDK como antes. Fuera de horario corta también desde el callback del GPS. `__ubicacionVivo.estado().nativo` {envios, fallas, ultimoErr}. |
 | `cuadrillaLiviana` + bloque `__col` en las suscripciones | 086 | Entrada rápida de la cuadrilla: `__modoDatos` {estado, liviano, cargarTodo, revisar}. Cuadrilla/operario sin permisos de oficina (según `ema.perfil.<uid>` del último usuario, `ema.ultimoUid`) baja solo SUS órdenes (`where personalNombres array-contains personaClave`); cómputos/etapas/plan 1,5 s después, movimientos 6 s después o al abrir otra hoja. Si el rol confirmado ya no es cuadrilla, pasa a completo. |
-| `proyectistaMenu` + `proyectistaCod` (text/plain, dormido) | 089 | Proyectista etapa 1. Menú `#menuProyectista` solo admin/oficina; `__abrirProyectista(id)` carga el código y abre `#pyOv`. `__proyectista` {abrir, cerrar, estado, _geo {distancia (Vincenty), gk (Gauss-Krüger POSGAR 07, serie de Krüger), fajaDe}, _dxf, _csv}. **El código text/plain no lo transpila compactar80: escribilo compatible con Chrome 80.** Ver `docs/PROYECTISTA.md`. |
+| `proyectistaMenu` + `proyectistaCod` (text/plain, dormido) | 089 | Proyectista etapa 1. Menú `#menuProyectista` solo admin/oficina; `__abrirProyectista(id)` carga el código y abre `#pyOv`. `__proyectista` {abrir, cerrar, estado, _geo {distancia (Vincenty), gk (Gauss-Krüger POSGAR 07, serie de Krüger), fajaDe}, _dxf, _csv, _calc (v092: red, parseLDT, parseIES, luz, radios, intens, cfgDe)}. v092: pestañas Columnas / Eléctrico / Luz y memoria de cálculo; el motor de cálculo está entre los comentarios «geodesia» y «estado» y se prueba en Node con `pruebas/num` (control en Python). **El código text/plain no lo transpila compactar80: escribilo compatible con Chrome 80.** Ver `docs/PROYECTISTA.md`. |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -526,6 +526,7 @@ Ejemplos:
 | 089 | Proyectista etapa 1: relevamiento en obra con GPS → plano, DXF Gauss-Krüger, planilla (solo oficina; reglas v089) |
 | 090 | Proyectista con las piezas del diseño «Cristal» de la app + skill del proyecto `ema-app-alumbrado` |
 | 091 | Proyectista con la barra de vidrio de la app + diagnóstico de la ubicación (por qué quedó «sin actualizar») |
+| 092 | Proyectista con cálculos: Columnas, Eléctrico (caída por fasores, fases, protecciones), Luz (.ldt/.ies, punto por punto, zonas oscuras, radio útil), memoria de cálculo · Ubicación: el celular detecta cortes con la pantalla apagada, «Probar con el celu bloqueado», la oficina ve los cortes |
 
 ---
 

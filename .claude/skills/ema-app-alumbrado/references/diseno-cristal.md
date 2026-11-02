@@ -117,6 +117,8 @@ Ejemplos que ya existen: la cámara, la hoja de impresión y Proyectista.
   - cámara `#0d9488`;
   - cruce `#dc2626`;
   - otro `#28285e`.
+  - borde de la plaza `#0891b2` (línea punteada).
+  - mapa de luz: rojo `#ff3b30` debajo del mínimo · naranja `#ff9f0a` debajo del promedio · verde `#34c759` bien · amarillo `#ffd60a` de más.
 
   Si aparece un tipo nuevo, mantené estos colores y sumale uno distinto.
 

@@ -2,6 +2,52 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v092 — 01/11/2026 · Proyectista con cálculos (eléctrico y luz) + control de la ubicación con el celular bloqueado
+
+**Pedido de Ángel:** «Investigá y hacé la mejor versión, que funcione súper bien, probalo varias veces, que no haya errores, y resolvé el tema de la ubicación (también con varias pruebas)».
+
+**Cambios — Proyectista (solo oficina)**
+- Punto nuevo **«Borde de la plaza»**: marca el contorno para el cálculo de luz. No se une con los tramos de cable.
+- Pestaña **🏮 Columnas**: en cada columna, tipo (PRFV / metálica 7 o 10 m, existente), artefactos, luminaria, rumbo («mira hacia»), tablero, circuito, de dónde viene el cable, fase (auto o fija) y metros reales. «Poner a todas» para cargar rápido.
+- Pestaña **⚡ Eléctrico**:
+  - caída de tensión por tramo y por fase, con fasores e incluyendo el neutro, hasta la luminaria;
+  - cobre flexible (clase 5, da los valores del catálogo Prysmian) o rígido (clase 2); temperatura, reserva de recorrido y subidas editables;
+  - reparto automático de fases (R/S/T) para bajar la peor caída y el desbalance;
+  - semáforo contra la caída máxima (3 % por defecto, **a confirmar**);
+  - térmica recomendada por circuito y general; diferencial, contactor y fotocontrol **a confirmar**;
+  - cuadro resumen: columnas, luminarias, cable por sección, zanja, fusibles (regla de la calculadora) y jabalinas.
+- Pestaña **💡 Luz**:
+  - luminarias del proyecto con su archivo **.ldt (EULUMDAT)** o **.ies (LM-63)**: lee nombre, potencia y flujo solos; sin archivo usa un reparto genérico marcado como aproximado;
+  - cálculo punto por punto (E = I·cos³γ/h², factor de mantenimiento 0,8 editable) sobre el borde marcado;
+  - promedio, mínimo, uniformidad y «Cumple / No cumple» contra clases P de EN 13201 (el nivel que pide la Inspección: **a confirmar**);
+  - **mapa de zonas oscuras** sobre el satélite y en el plano; **radio útil** de cada columna (36 rumbos).
+- **📄 Memoria de cálculo** A4: plano con la luz, columnas, circuitos, unifilar, iluminación, resumen y la lista de lo «a confirmar».
+- El DXF suma el borde (polilínea) y, en cada columna, tablero/circuito/fase/luminaria.
+- Datos nuevos en `proyectos/{id}`: `lums[]`, `circ{}`, `calc{}` y `el{}` en cada punto. Las reglas no cambian.
+
+**Cambios — Ubicación en vivo**
+- El celular de la cuadrilla se da cuenta solo si **se cortó con la pantalla apagada** (más de 3 min sin mandar) o si **Android cerró la app**. Le muestra qué pasó y los pasos, con el botón **«Abrir ajustes de la app»** (Batería › Sin restricciones).
+- **«Probar con el celu bloqueado»** desde el renglón de la ubicación en el menú: bloquear 3 minutos y volver; dice si anduvo.
+- La oficina ve en el **Mapa**, por persona: cuántas veces se le cortó hoy, la última (celu bloqueado o app cerrada) y el resultado de la prueba.
+- Al volver a la app manda la ubicación al toque también en la app de Android.
+- Campos nuevos en `ubicacionVivo/{uid}`: `enviosFondo, cortesHoy, ultCorteDesde, ultCorteHasta, ultCorteTipo, pruebaTs, pruebaOk, pruebaEnvios`.
+- No cambian las reglas de Firebase. No hace falta APK nuevo.
+
+**Qué hay que hacer**
+1. Subir `index.html` a GitHub.
+2. En cada celular de la cuadrilla: menú › renglón de la ubicación › «Probar con el celu bloqueado».
+
+**Pruebas**
+- Control numérico aparte en Python (`num/control.py`): 9.601/9.601. Fotometrías con las 5 simetrías EULUMDAT y 5 de IES (error < 1 %), iluminancia contra la fórmula (< 0,2 %), promedio independiente de la grilla, radio útil, 40 circuitos al azar con caída de tensión (diferencia < 1e-7 %), resistencias = catálogo Prysmian.
+- `t_v092` (Proyectista): 35/35 en PC y 38/38 en celular. `t_v092u` (ubicación): 19/19 en PC y en celular.
+- Batería completa: en curso (se anota al terminar).
+
+**Huella SHA-256**
+- `092_2026-11-01_app-EMA_ORIGINAL.html` (61.569 líneas): `3f4b515ea3a3f785dc0e364281f9e9a8bfe33b8c53eae723b1208354a5baede9`
+- `index.html`: `dce2e175a7644f29e6186906208a6e1f26ff55b1f8078f5b774837fc4591d02b`
+- Sello de versión (en las dos marcas): `2026-11-01 23:20 · 7547cd`
+- Se genera con `patch_v092.py` sobre el ORIGINAL de la 091.
+
 ## v091 — 01/11/2026 · Proyectista con la barra de vidrio + por qué no se actualiza la ubicación
 
 **Pedido de Ángel:**

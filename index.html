@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="ema-version" content="2026-11-01 21:03 · a4a1bd">
+<meta name="ema-version" content="2026-11-01 23:20 · 7547cd">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script id="anotarErrores">window.__autorApp="App Alumbrado Público — © 2026 Miguel Ángel Díaz. Todos los derechos reservados.",window.__erroresApp=[],window.addEventListener("error",function(e){try{var r=window.__erroresApp;r.length<30&&r.push({t:Date.now(),m:String(e.message||e),d:e.filename?String(e.filename).split("/").pop()+":"+e.lineno:""})}catch{}}),window.addEventListener("unhandledrejection",function(e){try{var r=e.reason,n=String(r&&(r.message||r.code)||r||"");if(/offline|unavailable|network|Failed to fetch/i.test(n))return;var o=window.__erroresApp;o.length<30&&o.push({t:Date.now(),m:"(promesa) "+n,d:""})}catch{}});</script>
 <title>Calculadora de Materiales — Alumbrado Público</title>
@@ -78,7 +78,7 @@
 <div class="header-divider"></div>
 <div class="header-text">
 <h1>Alumbrado Público</h1>
-<div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-11-01 21:03 · a4a1bd</span></div>
+<div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-11-01 23:20 · 7547cd</span></div>
 <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
 </div>
 </div>
@@ -6447,14 +6447,14 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
 <style id="legajoPlegCss">.cm-ag{display:inline-block;margin-top:2px;font-size:11px;font-weight:700;color:#8c1d18;background:#fde7e5;border-radius:999px;padding:1px 8px}.card.lg-sec.lg-pleg{position:relative}.card.lg-sec.lg-pleg>h3{cursor:pointer;user-select:none;padding-right:70px;margin-bottom:10px}.card.lg-sec.lg-pleg>h3:after{content:"▾";position:absolute;right:14px;top:12px;font-size:18px;color:#5b6478}.card.lg-sec.lg-pleg.lg-cerrada>h3{margin-bottom:0}.card.lg-sec.lg-pleg.lg-cerrada>h3:after{content:"▸"}.card.lg-sec.lg-pleg[data-lg-cnt]:not([data-lg-cnt=""]):before{content:attr(data-lg-cnt);position:absolute;right:40px;top:12px;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#1c1c45;color:#fff;font:800 12.5px/24px inherit;text-align:center}.card.lg-sec.lg-pleg.lg-cerrada>:not(h3){display:none!important}</style>
 <script id="legajoPlegable">(function(){const s="ema.lg.pleg";let r={};try{r=JSON.parse(localStorage.getItem(s)||"{}")||{}}catch{r={}}const c=()=>{try{localStorage.setItem(s,JSON.stringify(r))}catch{}},i=t=>{const e=t.querySelector(":scope > h3");return e?e.textContent.replace(/\s*\(\d+\)\s*$/,"").replace(/\s+/g," ").trim():""},u=["📊 Avance","Avance"];function d(t){return t.querySelectorAll(".lg-fila, [data-lgfoto], .pln-ot, [data-ptver], #ptLista tr, .lg-foto, .lg-plano").length}function g(t){if(!t.querySelector(":scope > h3"))return;const e=i(t);if(!e)return;t.classList.add("lg-pleg");const a=d(t),o=a?String(a):"";t.dataset.lgCnt!==o&&(t.dataset.lgCnt=o);const f=window.__lgPlegTodoAbierto===!0?!0:e in r?!!r[e]:u.some(p=>e.startsWith(p));t.classList.toggle("lg-cerrada",!f)}function n(){document.querySelectorAll(".card.lg-sec").forEach(g)}document.addEventListener("click",t=>{const e=t.target.closest&&t.target.closest(".card.lg-sec.lg-pleg > h3");if(!e||t.target.closest("button, a, input, select, label"))return;const a=e.parentElement,o=i(a);if(r[o]=a.classList.contains("lg-cerrada"),c(),g(a),!a.classList.contains("lg-cerrada"))try{a.scrollIntoView({behavior:"smooth",block:"nearest"})}catch{}});let l=!1;new MutationObserver(()=>{l||(l=!0,requestAnimationFrame(()=>{l=!1;try{n()}catch{}}))}).observe(document.documentElement,{childList:!0,subtree:!0}),setInterval(()=>{try{n()}catch{}},2e3),window.__lgPleg={aplicar:n,estado:()=>r,abrir(t){r[t]=!0,c(),n()},cerrar(t){r[t]=!1,c(),n()}}})();</script>
 <style id="ubicacionVivoCss">#btnMenu{position:relative}#btnMenu .uv-menu-dot{position:absolute;left:5px;bottom:5px;width:12px;height:12px;box-sizing:border-box;border-radius:50%;border:2px solid #fff;background:#f0b74a;pointer-events:none}#btnMenu .uv-menu-dot[data-uv=ok]{background:#1fbf5a;animation:uvLatido 2s infinite}#btnMenu .uv-menu-dot[data-uv=mal]{background:#d93025}@keyframes uvLatido{0%{box-shadow:0 0 #1fbf5ab3}70%{box-shadow:0 0 0 7px #1fbf5a00}to{box-shadow:0 0 #1fbf5a00}}#uvMenuLinea{flex:none;box-sizing:border-box;height:auto;line-height:1.35;display:flex;align-items:flex-start;gap:10px;width:calc(100% - 16px);margin:6px 8px 8px;padding:10px 12px;border:1px solid rgba(31,191,90,.35);border-radius:14px;background:#1fbf5a14;font:inherit;text-align:left;color:inherit;cursor:default}#uvMenuLinea .uv-dot{flex:none;width:10px;height:10px;margin-top:4px;border-radius:50%;background:#1fbf5a}#uvMenuLinea[data-uv=busca]{border-color:#f0b74a80;background:#f0b74a1a}#uvMenuLinea[data-uv=busca] .uv-dot{background:#f0b74a}#uvMenuLinea[data-uv=mal]{border-color:#d9302566;background:#d9302514;cursor:pointer}#uvMenuLinea[data-uv=mal] .uv-dot{background:#d93025}#uvMenuLinea b{display:block;font-size:13px}#uvMenuLinea small{display:block;font-size:11.5px;opacity:.75;margin-top:2px;font-weight:500}.uv-pin-w{background:none;border:0}.uv-pin{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 3px 10px #00000059;background:#1f9d55;color:#fff;font:800 12px/1 Inter,system-ui,sans-serif}.uv-pin.off,.uv-pin.fin{background:#9aa1b1}.uv-pin.on:after{content:"";position:absolute;top:-3px;right:-3px;bottom:-3px;left:-3px;border-radius:50%;border:3px solid rgba(31,157,85,.45);animation:uvOnda 2s infinite}.uv-pin{position:relative}@keyframes uvOnda{0%{transform:scale(1);opacity:1}to{transform:scale(1.7);opacity:0}}.uv-tip{font-size:12px}#uvPanel{margin:0 0 10px;padding:10px;border-radius:14px;background:#1f9d5512;border:1px solid rgba(31,157,85,.25)}#uvPanel .uv-cab{font-weight:800;font-size:13px;margin-bottom:6px;display:flex;justify-content:space-between}#uvPanel .uv-cab span{font-weight:600;color:var(--text-soft,#5b6478)}#uvPanel .uv-fila{display:grid;grid-template-columns:12px 1fr;column-gap:8px;width:100%;text-align:left;background:#fff;border:1px solid var(--border,#e4e8f0);border-radius:10px;padding:6px 10px;margin-top:5px;cursor:pointer;font:inherit}#uvPanel .uv-fila .uv-dot{grid-row:span 2;align-self:center;width:10px;height:10px;border-radius:50%;background:#1f9d55}#uvPanel .uv-fila.off .uv-dot,#uvPanel .uv-fila.fin .uv-dot{background:#9aa1b1}#uvPanel .uv-fila small{color:var(--text-soft,#5b6478);font-size:11.5px}#uvPanel .uv-vacio{font-size:12px;color:var(--text-soft,#5b6478)}#uvAdmin{margin-top:18px}#uvAdmin .uv-dias{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 8px}#uvAdmin .uv-dias label,#uvAdmin .uv-sw{display:flex;align-items:center;gap:6px;font-weight:600}#uvAdmin .uv-dias input,#uvAdmin .uv-sw input{width:auto;margin:0}@media print{#btnMenu .uv-menu-dot{display:none!important}}</style>
-<script id="ubicacionVivo">(function(){"use strict";const q="ubicacionVivo",_={activo:!0,desde:"07:00",hasta:"15:00",dias:[1,2,3,4,5],cadaSeg:60};let d=Object.assign({},_),y=!1,N="";const m=e=>typeof escHtml=="function"?escHtml(e):String(e??"").replace(/[&<>"']/g,t=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[t]),C=()=>firebase.firestore(),I=()=>!!(window.firebase&&firebase.apps&&firebase.apps.length),U=()=>{try{return window.PERMISOS&&PERMISOS.yo&&PERMISOS.yo()||null}catch{return null}},w=()=>window.__fbUser&&window.__fbUser.uid||"",D=()=>{try{return!!(window.__cuadrilla&&window.__cuadrilla.esCrew())}catch{return!1}},k=()=>{const e=U();try{return!!e&&(["admin","oficina"].includes(e.rol)||!!(PERMISOS.esAdmin&&PERMISOS.esAdmin()))}catch{return!1}},H=()=>{try{return!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())}catch{return!1}},T=()=>{try{return H()?Capacitor.Plugins&&Capacitor.Plugins.BackgroundGeolocation||(Capacitor.registerPlugin?Capacitor.registerPlugin("BackgroundGeolocation"):null):null}catch{return null}},O=e=>String(e.getHours()).padStart(2,"0")+":"+String(e.getMinutes()).padStart(2,"0"),S=e=>e?O(new Date(e)):"",B=e=>new Date(e).toDateString()===new Date().toDateString(),Y=e=>String(e||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").trim(),ee=e=>String(e||"?").trim().split(/\s+/).slice(0,2).map(t=>t[0]||"").join("").toUpperCase()||"?",$=e=>{e=e||new Date;const t=d;return!!t.activo&&(t.dias||[]).includes(e.getDay())&&O(e)>=(t.desde||"00:00")&&O(e)<(t.hasta||"23:59")},te=(e,t)=>{const r=Math.PI/180,l=(t.lat-e.lat)*r,i=(t.lng-e.lng)*r,n=Math.sin(l/2)**2+Math.cos(e.lat*r)*Math.cos(t.lat*r)*Math.sin(i/2)**2;return 2*6371e3*Math.asin(Math.sqrt(n))},ae=()=>Math.max(3*6e4,3*(d.cadaSeg||60)*1e3);let F=null;function ne(){if(!(F||!I()||!window.__fbUser))try{F=C().collection("configEquipo").doc("ubicacion").onSnapshot(e=>{const t=e.exists?e.data():{},o=JSON.stringify(t||{});y&&o===N||(N=o,d=Object.assign({},_,t||{}),Array.isArray(d.dias)||(d.dias=_.dias.slice()),y=!0,h(),x(),k()&&b())},()=>{y=!0,h()})}catch{}}const a={activo:!1,modo:"",watchId:null,bgId:null,ultimo:null,enviado:null,envTs:0,err:"",lock:null,latido:null},P=()=>{try{return H()&&Capacitor.Plugins&&Capacitor.Plugins.CapacitorHttp||null}catch{return null}},R=()=>{try{return firebase.app().options||{}}catch{return{}}},c={tok:"",exp:0,rt:"",envios:0,fallas:0,ultimoErr:""},oe=e=>{try{return typeof e=="string"?JSON.parse(e):e||{}}catch{return{}}};async function ie(e,t){const o=window.firebase&&firebase.auth&&firebase.auth().currentUser||null;if(o&&o.refreshToken&&(c.rt=o.refreshToken),!t&&c.tok&&Date.now()<c.exp-12e4)return c.tok;if(o&&!document.hidden&&typeof o.getIdTokenResult=="function")try{const i=await o.getIdTokenResult(!!t);return c.tok=i.token,c.exp=Date.parse(i.expirationTime)||Date.now()+50*6e4,c.tok}catch{}if(!c.rt)throw new Error("sin token");const r=await e.request({method:"POST",url:"https://securetoken.googleapis.com/v1/token?key="+encodeURIComponent(R().apiKey||""),headers:{"Content-Type":"application/x-www-form-urlencoded"},data:{grant_type:"refresh_token",refresh_token:c.rt}}),l=oe(r&&r.data);if(!r||r.status!==200||!l.id_token)throw new Error("token "+(r&&r.status));return c.tok=l.id_token,c.exp=Date.now()+(+l.expires_in||3600)*1e3,c.rt=l.refresh_token||c.rt,c.tok}const re=e=>e==null?{nullValue:null}:typeof e=="boolean"?{booleanValue:e}:typeof e=="number"?Number.isInteger(e)?{integerValue:String(e)}:{doubleValue:e}:{stringValue:String(e)};async function se(e){const t=P();if(!t)throw new Error("sin http nativo");const o=R(),r=o.projectId||"alumbrado-stock",l=`https://firestore.googleapis.com/v1/projects/${encodeURIComponent(r)}/databases/(default)/documents/${q}/${encodeURIComponent(w())}?`+Object.keys(e).map(n=>"updateMask.fieldPaths="+encodeURIComponent(n)).join("&"),i={};Object.keys(e).forEach(n=>{i[n]=re(e[n])});for(let n=0;n<2;n++){const u=await ie(t,n>0),s=await t.request({method:"PATCH",url:l,headers:{Authorization:"Bearer "+u,"Content-Type":"application/json"},data:{fields:i}});if(s&&s.status>=200&&s.status<300){c.envios++;return}if(s&&(s.status===401||s.status===403)&&n===0){c.tok="";continue}const f=new Error("firestore "+(s&&s.status));throw f.code=s&&s.status===403?"permission-denied":"http",f}}async function V(e){if(a.modo==="app"&&P())try{await se(Object.assign({},e,{via:"android"}));return}catch(t){c.fallas++,c.ultimoErr=String(t&&t.message||t)}await C().collection(q).doc(w()).set(Object.assign({},e,{via:a.modo==="app"?"app por Firebase":"navegador"}),{merge:!0})}async function j(e,t){if(!e||!w()||!I())return;const o=Date.now(),r=(d.cadaSeg||60)*1e3,l=a.enviado?te(a.enviado,e):1/0;if(!t&&o-a.envTs<r&&l<40)return;a.envTs=o,a.enviado=e;const i=U()||{};try{await V({uid:w(),email:String((window.__fbUser||{}).email||"").toLowerCase(),persona:i.persona||i.nombre||"",clave:i.personaClave||Y(i.persona||i.nombre),lat:e.lat,lng:e.lng,acc:e.acc==null?null:Math.round(e.acc),vel:e.vel==null?null:Math.round(e.vel*3.6),ts:o,posTs:e.t||o,fuente:a.modo,activo:!0,hasta:d.hasta||"",fondo:!!document.hidden,...document.hidden?{fondoTs:o}:{}}),a.err=""}catch(n){a.err=(n&&n.code)==="permission-denied"?"Falta publicar las reglas nuevas de Firebase (ubicacionVivo).":"No se pudo mandar la ubicación (¿hay señal?)."}v()}function G(e,t,o,r,l){if(!(!isFinite(e)||!isFinite(t))){if(y&&!$()){A("fuera de horario");return}a.ultimo={lat:e,lng:t,acc:o,vel:r,t:l||Date.now()},a.err="",j(a.ultimo,!1)}}async function z(){try{if(!("wakeLock"in navigator)||document.hidden||a.lock)return;a.lock=await navigator.wakeLock.request("screen"),a.lock.addEventListener&&a.lock.addEventListener("release",()=>{a.lock=null})}catch{a.lock=null}}async function J(){if(a.activo)return;a.activo=!0,a.err="";const e=T();if(e){a.modo="app";try{a.bgId=await e.addWatcher({backgroundTitle:"Ubicación de la jornada",backgroundMessage:`Compartiendo tu ubicación con la oficina hasta las ${d.hasta||""}.`,requestPermissions:!0,stale:!1,distanceFilter:0},(t,o)=>{if(o){a.err=o.code==="NOT_AUTHORIZED"?"El celular no dio permiso de ubicación. Tocá acá para abrir los ajustes.":"Sin señal de GPS.",a.errCode=o.code,v();return}t&&G(t.latitude,t.longitude,t.accuracy,t.speed,t.time)})}catch{a.err="No se pudo prender la ubicación."}}else if(navigator.geolocation){a.modo="web";try{a.watchId=navigator.geolocation.watchPosition(t=>G(t.coords.latitude,t.coords.longitude,t.coords.accuracy,t.coords.speed,t.timestamp),t=>{a.err=t&&t.code===1?"El navegador no dio permiso de ubicación. Activalo para esta página.":"Sin señal de GPS.",v()},{enableHighAccuracy:!0,maximumAge:15e3,timeout:3e4})}catch{a.err="Este celular no permite la ubicación."}z()}else a.err="Este celular no permite la ubicación.";a.latido=setInterval(()=>{a.activo&&a.ultimo&&j(Object.assign({},a.ultimo),Date.now()-a.envTs>=(d.cadaSeg||60)*1e3)},15e3),v()}async function A(e){if(a.activo){a.activo=!1;try{const t=T();t&&a.bgId!=null&&await t.removeWatcher({id:a.bgId})}catch{}try{a.watchId!=null&&navigator.geolocation.clearWatch(a.watchId)}catch{}try{a.lock&&a.lock.release()}catch{}if(clearInterval(a.latido),a.bgId=a.watchId=a.lock=a.latido=null,a.err="",a.errCode="",w()&&I())try{await V({activo:!1,finTs:Date.now(),finMotivo:e||""})}catch{}v()}}function h(){if(!window.__fbUser||(ne(),!y))return;const e=D()&&$();e&&!a.activo?J():!e&&a.activo&&A(D()?"fuera de horario":"no es personal de obra")}document.addEventListener("visibilitychange",()=>{!document.hidden&&a.activo&&a.modo==="web"&&(z(),a.ultimo&&j(a.ultimo,!0))});function v(){const e=document.getElementById("uvChip");e&&e.remove();const t=D()&&(a.activo||a.err),o=a.activo&&!a.err&&a.envTs,r=t?o?"ok":a.err?"mal":"busca":"",l=t?a.err?a.err:o?`Ubicación activa · hasta las ${d.hasta||""}`:"Buscando tu ubicación…":"",i=t?(a.modo==="web"?"En el navegador se manda solo con la app abierta en pantalla.":"Se manda sola en el horario de trabajo, aunque bloquees el celular.")+(a.envTs?` Último envío: ${S(a.envTs)}.`:""):"",n=document.getElementById("btnMenu");if(n){let p=n.querySelector(".uv-menu-dot");t?(p||(p=document.createElement("span"),p.className="uv-menu-dot",p.setAttribute("aria-hidden","true"),n.appendChild(p)),p.dataset.uv=r,n.title=l):p&&p.remove()}const u=document.querySelector("#menuLateral .menu-panel")||document.getElementById("menuLateral");let s=document.getElementById("uvMenuLinea");if(!t||!u){s&&s.remove();return}s||(s=document.createElement("button"),s.type="button",s.id="uvMenuLinea",s.addEventListener("click",()=>{if(a.errCode==="NOT_AUTHORIZED")try{T()&&T().openSettings()}catch{}}));const f=document.getElementById("menuLista");s.parentNode!==u&&(f&&f.parentNode===u?u.insertBefore(s,f):u.insertBefore(s,u.firstChild)),s.dataset.uv=r,s.innerHTML=`<span class="uv-dot"></span><span><b>${m(l)}</b><small>${m(i)}</small></span>`}let E={},W=null,M=null,g={};function ce(){if(!(W||!I()||!k()))try{W=C().collection(q).onSnapshot(e=>{const t={};e.forEach(o=>{t[o.id]=Object.assign({id:o.id},o.data())}),JSON.stringify(t)!==JSON.stringify(E)&&(E=t,b())},()=>{})}catch{}}const Z=()=>{try{return typeof mapaLeaflet<"u"&&mapaLeaflet&&typeof L<"u"?mapaLeaflet:null}catch{return null}};function le(e){const t=Date.now();if(!e||!isFinite(e.lat)||!isFinite(e.lng)||!e.ts||!B(e.ts))return null;if(e.activo===!1)return{clase:"fin",txt:`terminó ${S(e.finTs||e.ts)}`};if(t-e.ts<=ae())return{clase:"on",txt:`${S(e.ts)}${e.acc?` · ±${e.acc} m`:""}`};const o=e.fuente==="web"?"usa el navegador: solo manda con la app abierta en pantalla (con la app de Android sigue aunque bloquee el celu)":e.fuente==="app"&&!(e.fondoTs&&B(e.fondoTs))?"hoy nunca mandó con el celu bloqueado: revisá que tenga la app de Android 1.2 y la batería en «Sin restricciones»":e.fondoTs?`con el celu bloqueado mandó hasta las ${S(e.fondoTs)}: puede que Android haya cerrado la app (batería) o que la hayan cerrado`:"";return{clase:"off",txt:`sin actualizar desde ${S(e.ts)}`,porque:o}}function b(){ce();const e=Z(),t=Object.values(E).map(i=>({u:i,e:le(i)})).filter(i=>i.e).sort((i,n)=>(i.e.clase==="on"?0:1)-(n.e.clase==="on"?0:1)||String(i.u.persona).localeCompare(String(n.u.persona)));if(e&&k()){M||(M=L.layerGroup().addTo(e));const i={};t.forEach(({u:n,e:u})=>{i[n.id]=1;const s=`<div class="uv-pin ${u.clase}"><b>${m(ee(n.persona))}</b></div>`,f=`<b>${m(n.persona||n.email)}</b> · ${m(u.txt)}`;let p=g[n.id];p?(p.setLatLng([n.lat,n.lng]),p.setIcon(L.divIcon({className:"uv-pin-w",html:s,iconSize:[34,34],iconAnchor:[17,17]})),p.setTooltipContent(f)):(p=g[n.id]=L.marker([n.lat,n.lng],{icon:L.divIcon({className:"uv-pin-w",html:s,iconSize:[34,34],iconAnchor:[17,17]}),zIndexOffset:1e3}).addTo(M),p.bindTooltip(f,{direction:"top",offset:[0,-16],className:"uv-tip"}))}),Object.keys(g).forEach(n=>{i[n]||(M.removeLayer(g[n]),delete g[n])})}const o=document.getElementById("mapaListaPlazas");let r=document.getElementById("uvPanel");if(!k()||!o){r&&r.remove();return}r||(r=document.createElement("div"),r.id="uvPanel",o.parentNode.insertBefore(r,o),r.addEventListener("click",i=>{const n=i.target.closest("[data-uvid]"),u=n&&E[n.dataset.uvid],s=Z();u&&s&&(s.setView([u.lat,u.lng],Math.max(s.getZoom(),16)),g[u.id]&&g[u.id].openTooltip())}));const l=t.filter(i=>i.e.clase==="on").length;r.innerHTML=`<div class="uv-cab">👷 Personal en vivo <span>${l} de ${t.length}</span></div>`+(t.length?t.map(({u:i,e:n})=>`<button type="button" class="uv-fila ${n.clase}" data-uvid="${m(i.id)}"><span class="uv-dot"></span><b>${m(i.persona||i.email)}</b><small>${i.fuente==="web"?"🌐 navegador":"📱 app"} · ${m(n.txt)}</small>${n.porque?`<small class="uv-porque">${m(n.porque)}</small>`:""}</button>`).join(""):`<div class="uv-vacio">${$()?"Todavía nadie mandó su ubicación hoy.":`Fuera del horario (${m(d.desde)} a ${m(d.hasta)}): no se manda ubicación.`}</div>`)}const de=[[1,"Lu"],[2,"Ma"],[3,"Mi"],[4,"Ju"],[5,"Vi"],[6,"Sá"],[0,"Do"]];function x(){const e=document.getElementById("viewUsuarios");let t=document.getElementById("uvAdmin");if(!e||!k()){t&&t.remove();return}!t&&e.style.display==="none"||(t||(t=document.createElement("div"),t.id="uvAdmin",t.className="card",e.appendChild(t),t.addEventListener("click",async o=>{if(!o.target.closest("#uvGuardar"))return;const r=[...t.querySelectorAll("[data-uvdia]")].filter(n=>n.checked).map(n=>+n.dataset.uvdia),l={activo:t.querySelector("#uvActivo").checked,desde:t.querySelector("#uvDesde").value||"07:00",hasta:t.querySelector("#uvHasta").value||"15:00",dias:r,cadaSeg:+t.querySelector("#uvCada").value||60,por:String((window.__fbUser||{}).email||""),ts:Date.now()},i=t.querySelector("#uvMsg");if(l.hasta<=l.desde){i.textContent="La hora de fin tiene que ser después de la de inicio.";return}try{await C().collection("configEquipo").doc("ubicacion").set(l),i.textContent="✓ Guardado. Los celulares lo toman solos en un minuto."}catch(n){i.textContent=(n&&n.code)==="permission-denied"?"Falta publicar las reglas nuevas de Firebase (configEquipo/ubicacion).":"No se pudo guardar (¿hay señal?)."}})),!t.contains(document.activeElement)&&(t.innerHTML=`<h2><span class="dot"></span>📍 Ubicación en vivo del personal</h2>
+<script id="ubicacionVivo">(function(){"use strict";const F="ubicacionVivo",U={activo:!0,desde:"07:00",hasta:"15:00",dias:[1,2,3,4,5],cadaSeg:60};let u=Object.assign({},U),S=!1,W="";const p=e=>typeof escHtml=="function"?escHtml(e):String(e??"").replace(/[&<>"']/g,a=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[a]),j=()=>firebase.firestore(),O=()=>!!(window.firebase&&firebase.apps&&firebase.apps.length),Z=()=>{try{return window.PERMISOS&&PERMISOS.yo&&PERMISOS.yo()||null}catch{return null}},g=()=>window.__fbUser&&window.__fbUser.uid||"",A=()=>{try{return!!(window.__cuadrilla&&window.__cuadrilla.esCrew())}catch{return!1}},D=()=>{const e=Z();try{return!!e&&(["admin","oficina"].includes(e.rol)||!!(PERMISOS.esAdmin&&PERMISOS.esAdmin()))}catch{return!1}},Q=()=>{try{return!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())}catch{return!1}},y=()=>{try{return Q()?Capacitor.Plugins&&Capacitor.Plugins.BackgroundGeolocation||(Capacitor.registerPlugin?Capacitor.registerPlugin("BackgroundGeolocation"):null):null}catch{return null}},B=e=>String(e.getHours()).padStart(2,"0")+":"+String(e.getMinutes()).padStart(2,"0"),m=e=>e?B(new Date(e)):"",x=e=>new Date(e).toDateString()===new Date().toDateString(),ve=e=>String(e||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").trim(),fe=e=>String(e||"?").trim().split(/\s+/).slice(0,2).map(a=>a[0]||"").join("").toUpperCase()||"?",w=e=>{e=e||new Date;const a=u;return!!a.activo&&(a.dias||[]).includes(e.getDay())&&B(e)>=(a.desde||"00:00")&&B(e)<(a.hasta||"23:59")},he=(e,a)=>{const r=Math.PI/180,c=(a.lat-e.lat)*r,i=(a.lng-e.lng)*r,n=Math.sin(c/2)**2+Math.cos(e.lat*r)*Math.cos(a.lat*r)*Math.sin(i/2)**2;return 2*6371e3*Math.asin(Math.sqrt(n))},_=()=>Math.max(3*6e4,3*(u.cadaSeg||60)*1e3),v={desde:0,envios:0,ultEnv:0,base:0},Y="ema.uv.diag",z=()=>new Date().toDateString();let M=null;function f(){if(M&&M.dia===z()&&M.uid===g())return M;let e=null;try{e=JSON.parse(localStorage.getItem(Y)||"null")}catch{e=null}return(!e||e.dia!==z()||e.uid!==g())&&(e={dia:z(),uid:g(),enviosFondo:0,cortes:0,ult:null,ultEnvio:0,avisoTs:0,prueba:null,ultPrueba:null}),M=e}function k(){try{localStorage.setItem(Y,JSON.stringify(f()))}catch{}}function ge(e){const a=f(),t={enviosFondo:a.enviosFondo+(e?1:0),cortesHoy:a.cortes};return a.ult&&(t.ultCorteDesde=a.ult.desde,t.ultCorteHasta=a.ult.hasta,t.ultCorteTipo=a.ult.tipo),a.ultPrueba&&(t.pruebaTs=a.ultPrueba.ts,t.pruebaOk=!!a.ultPrueba.ok,t.pruebaEnvios=a.ultPrueba.envios),t}function X(e,a,t){const r=f();return r.cortes++,r.ult={desde:e,hasta:a,tipo:t},k(),r.ult}let ee=null;function ye(){if(!(ee||!O()||!window.__fbUser))try{ee=j().collection("configEquipo").doc("ubicacion").onSnapshot(e=>{const a=e.exists?e.data():{},t=JSON.stringify(a||{});S&&t===W||(W=t,u=Object.assign({},U,a||{}),Array.isArray(u.dias)||(u.dias=U.dias.slice()),S=!0,C(),K(),D()&&q())},()=>{S=!0,C()})}catch{}}const o={activo:!1,modo:"",watchId:null,bgId:null,ultimo:null,enviado:null,envTs:0,err:"",lock:null,latido:null},R=()=>{try{return Q()&&Capacitor.Plugins&&Capacitor.Plugins.CapacitorHttp||null}catch{return null}},ae=()=>{try{return firebase.app().options||{}}catch{return{}}},l={tok:"",exp:0,rt:"",envios:0,fallas:0,ultimoErr:""},we=e=>{try{return typeof e=="string"?JSON.parse(e):e||{}}catch{return{}}};async function $e(e,a){const t=window.firebase&&firebase.auth&&firebase.auth().currentUser||null;if(t&&t.refreshToken&&(l.rt=t.refreshToken),!a&&l.tok&&Date.now()<l.exp-12e4)return l.tok;if(t&&!document.hidden&&typeof t.getIdTokenResult=="function")try{const i=await t.getIdTokenResult(!!a);return l.tok=i.token,l.exp=Date.parse(i.expirationTime)||Date.now()+50*6e4,l.tok}catch{}if(!l.rt)throw new Error("sin token");const r=await e.request({method:"POST",url:"https://securetoken.googleapis.com/v1/token?key="+encodeURIComponent(ae().apiKey||""),headers:{"Content-Type":"application/x-www-form-urlencoded"},data:{grant_type:"refresh_token",refresh_token:l.rt}}),c=we(r&&r.data);if(!r||r.status!==200||!c.id_token)throw new Error("token "+(r&&r.status));return l.tok=c.id_token,l.exp=Date.now()+(+c.expires_in||3600)*1e3,l.rt=c.refresh_token||l.rt,l.tok}const Ee=e=>e==null?{nullValue:null}:typeof e=="boolean"?{booleanValue:e}:typeof e=="number"?Number.isInteger(e)?{integerValue:String(e)}:{doubleValue:e}:{stringValue:String(e)};async function Se(e){const a=R();if(!a)throw new Error("sin http nativo");const t=ae(),r=t.projectId||"alumbrado-stock",c=`https://firestore.googleapis.com/v1/projects/${encodeURIComponent(r)}/databases/(default)/documents/${F}/${encodeURIComponent(g())}?`+Object.keys(e).map(n=>"updateMask.fieldPaths="+encodeURIComponent(n)).join("&"),i={};Object.keys(e).forEach(n=>{i[n]=Ee(e[n])});for(let n=0;n<2;n++){const d=await $e(a,n>0),s=await a.request({method:"PATCH",url:c,headers:{Authorization:"Bearer "+d,"Content-Type":"application/json"},data:{fields:i}});if(s&&s.status>=200&&s.status<300){l.envios++;return}if(s&&(s.status===401||s.status===403)&&n===0){l.tok="";continue}const h=new Error("firestore "+(s&&s.status));throw h.code=s&&s.status===403?"permission-denied":"http",h}}async function te(e){if(o.modo==="app"&&R())try{await Se(Object.assign({},e,{via:"android"}));return}catch(a){l.fallas++,l.ultimoErr=String(a&&a.message||a)}await j().collection(F).doc(g()).set(Object.assign({},e,{via:o.modo==="app"?"app por Firebase":"navegador"}),{merge:!0})}async function H(e,a){if(!e||!g()||!O())return;const t=Date.now(),r=(u.cadaSeg||60)*1e3,c=o.enviado?he(o.enviado,e):1/0;if(!a&&t-o.envTs<r&&c<40)return;o.envTs=t,o.enviado=e;const i=Z()||{};try{await te({uid:g(),email:String((window.__fbUser||{}).email||"").toLowerCase(),persona:i.persona||i.nombre||"",clave:i.personaClave||ve(i.persona||i.nombre),lat:e.lat,lng:e.lng,acc:e.acc==null?null:Math.round(e.acc),vel:e.vel==null?null:Math.round(e.vel*3.6),ts:t,posTs:e.t||t,fuente:o.modo,activo:!0,hasta:u.hasta||"",fondo:!!document.hidden,...document.hidden?{fondoTs:t}:{},...ge(document.hidden)}),o.err="";{const n=f();n.ultEnvio=t,document.hidden&&(n.enviosFondo++,v.envios++,v.ultEnv=t),k()}}catch(n){o.err=(n&&n.code)==="permission-denied"?"Falta publicar las reglas nuevas de Firebase (ubicacionVivo).":"No se pudo mandar la ubicación (¿hay señal?)."}$()}function oe(e,a,t,r,c){if(!(!isFinite(e)||!isFinite(a))){if(S&&!w()){V("fuera de horario");return}o.ultimo={lat:e,lng:a,acc:t,vel:r,t:c||Date.now()},o.err="",H(o.ultimo,!1)}}async function ne(){try{if(!("wakeLock"in navigator)||document.hidden||o.lock)return;o.lock=await navigator.wakeLock.request("screen"),o.lock.addEventListener&&o.lock.addEventListener("release",()=>{o.lock=null})}catch{o.lock=null}}async function re(){if(o.activo)return;o.activo=!0,o.err="";try{const a=f(),t=Date.now();if(a.ultEnvio&&t-a.ultEnvio>_()&&w(new Date(a.ultEnvio))){const r=X(a.ultEnvio,t,"app cerrada");a.prueba?se(0,t-a.prueba.desde,"cerrada"):setTimeout(()=>ie(r),1500)}}catch{}const e=y();if(e){o.modo="app";try{o.bgId=await e.addWatcher({backgroundTitle:"Ubicación de la jornada",backgroundMessage:`Compartiendo tu ubicación con la oficina hasta las ${u.hasta||""}.`,requestPermissions:!0,stale:!1,distanceFilter:0},(a,t)=>{if(t){o.err=t.code==="NOT_AUTHORIZED"?"El celular no dio permiso de ubicación. Tocá acá para abrir los ajustes.":"Sin señal de GPS.",o.errCode=t.code,$();return}a&&oe(a.latitude,a.longitude,a.accuracy,a.speed,a.time)})}catch{o.err="No se pudo prender la ubicación."}}else if(navigator.geolocation){o.modo="web";try{o.watchId=navigator.geolocation.watchPosition(a=>oe(a.coords.latitude,a.coords.longitude,a.coords.accuracy,a.coords.speed,a.timestamp),a=>{o.err=a&&a.code===1?"El navegador no dio permiso de ubicación. Activalo para esta página.":"Sin señal de GPS.",$()},{enableHighAccuracy:!0,maximumAge:15e3,timeout:3e4})}catch{o.err="Este celular no permite la ubicación."}ne()}else o.err="Este celular no permite la ubicación.";o.latido=setInterval(()=>{o.activo&&o.ultimo&&H(Object.assign({},o.ultimo),Date.now()-o.envTs>=(u.cadaSeg||60)*1e3)},15e3),$()}async function V(e){if(o.activo){o.activo=!1;try{const a=y();a&&o.bgId!=null&&await a.removeWatcher({id:o.bgId})}catch{}try{o.watchId!=null&&navigator.geolocation.clearWatch(o.watchId)}catch{}try{o.lock&&o.lock.release()}catch{}if(clearInterval(o.latido),o.bgId=o.watchId=o.lock=o.latido=null,o.err="",o.errCode="",g()&&O())try{await te({activo:!1,finTs:Date.now(),finMotivo:e||""})}catch{}$()}}function C(){if(!window.__fbUser||(ye(),!S))return;const e=A()&&w();e&&!o.activo?re():!e&&o.activo&&V(A()?"fuera de horario":"no es personal de obra")}document.addEventListener("visibilitychange",()=>{if(document.hidden){v.desde=Date.now(),v.envios=0,v.ultEnv=0,v.base=o.envTs||0;return}if(!o.activo){v.desde=0;return}o.modo==="web"&&ne(),ke(),o.ultimo&&H(o.ultimo,!0)});function ke(){const e=v.desde;if(v.desde=0,!e)return;const a=Date.now(),t=a-e,r=f();if(r.prueba&&r.prueba.desde<=e+1e3)return se(v.envios,t,"");if(!S||!w()||!w(new Date(e)))return;const c=Math.max(v.ultEnv,v.base,e-_());if(a-c<=_())return;const i=X(Math.max(c,e),a,v.envios?"se cortó":"no mandó");ie(i)}function T(e,a){let t=document.getElementById("uvHoja");t&&t.remove(),t=document.createElement("div"),t.id="uvHoja",t.setAttribute("role","dialog"),t.setAttribute("aria-modal","true"),t.innerHTML=`<div class="uv-h-caja">${e}<div class="uv-h-bot">${a.map((c,i)=>`<button type="button" class="${c.p?"btn-primary":"btn-ghost"}" data-uvb="${i}">${p(c.t)}</button>`).join("")}</div></div>`,t.addEventListener("click",c=>{const i=c.target.closest("[data-uvb]");if(!i&&c.target!==t)return;const n=i?a[+i.dataset.uvb].f:null;t.remove(),n&&n()}),document.body.appendChild(t);const r=t.querySelector(".btn-primary");r&&r.focus()}const Ce=()=>{try{y()&&y().openSettings()}catch{}};function G(){return o.modo!=="app"?"<p>Estás usando la app en el <b>navegador</b>: con el celular bloqueado no puede mandar la ubicación. Para que mande siempre, instalá la <b>app de Android</b> (pedila a la oficina).</p>":'<ol class="uv-h-pasos"><li>Tocá <b>«Abrir ajustes de la app»</b>.</li><li>Entrá a <b>«Batería»</b> (o «Uso de batería») y elegí <b>«Sin restricciones»</b>.</li><li>Si el celu tiene <b>«Ahorro de batería»</b> prendido, apagalo en horario de trabajo.</li><li>Volvé a la app. <b>No la cierres deslizándola</b> de las apps abiertas: bloqueá el celu nomás.</li></ol>'}const J=()=>o.modo==="app"&&y()?[{t:"Abrir ajustes de la app",p:1,f:Ce}]:[];function ie(e){if(!e||!A())return;const a=f(),t=Date.now();if(a.avisoTs&&t-a.avisoTs<2*36e5)return;a.avisoTs=t,k();const r=e.tipo==="app cerrada"?`la app estuvo <b>cerrada</b> de las ${m(e.desde)} a las ${m(e.hasta)}`:`con el celu bloqueado la oficina <b>no te vio</b> de las ${m(e.desde)} a las ${m(e.hasta)}`;T(`<h3>📍 Se cortó tu ubicación</h3><p>Hoy ${r}. Pasa cuando el celular «ahorra batería» y frena la app.</p>${G()}`,J().concat([{t:"Probar ahora",f:P},{t:"Cerrar"}]))}function P(){const e=Math.max(3,Math.ceil(2*(u.cadaSeg||60)/60));T(`<h3>🧪 Probar con el celu bloqueado</h3><ol class="uv-h-pasos"><li>Tocá <b>«Empezar»</b>.</li><li><b>Bloqueá el celu</b> y dejalo así <b>${e} minutos</b> (podés caminar).</li><li>Desbloquealo y volvé a la app: te digo si anduvo.</li></ol>`,[{t:"Empezar",p:1,f:()=>{const a=f();a.prueba={desde:Date.now(),min:e},k()}},{t:"Cancelar"}])}function se(e,a,t){const r=f(),c=(u.cadaSeg||60)*1e3,i=(r.prueba&&r.prueba.min||3)*6e4*.66;r.prueba=null;const n=Math.round(a/6e4);if(!t&&a<i)return k(),T(`<h3>🧪 Fue muy corto</h3><p>Estuvo bloqueado ${n<1?"menos de un minuto":n+" min"}. Dejalo bloqueado al menos 3 minutos y volvé a la app.</p>`,[{t:"Probar de nuevo",p:1,f:P},{t:"Cerrar"}]);const d=Math.max(1,Math.floor(a/c)-1),s=!t&&e>=d;if(r.ultPrueba={ts:Date.now(),ok:s,envios:e,min:n},k(),o.ultimo&&H(o.ultimo,!0),s)return T(`<h3>✅ ¡Anduvo!</h3><p>Con el celu bloqueado mandó tu ubicación <b>${e} ${e===1?"vez":"veces"}</b> en ${n} min. Queda así todo el día.</p>`,[{t:"Listo",p:1}]);T(`<h3>❌ No anduvo</h3><p>${t==="cerrada"?"El celular <b>cerró la app</b> mientras estaba bloqueado.":`Con el celu bloqueado mandó <b>${e}</b> ${e===1?"vez":"veces"} en ${n} min (tenía que mandar unas ${d}).`}</p>${G()}`,J().concat([{t:"Probar de nuevo",f:P},{t:"Cerrar"}]))}function ce(){const e=f(),a=o.activo&&!o.err&&o.envTs,t=[];t.push(a?`✓ Mandando tu ubicación · último envío ${m(o.envTs)}`:o.err?p(o.err):o.activo?"Buscando tu ubicación…":"Fuera del horario de trabajo: no se manda."),o.modo==="app"&&t.push(`Hoy con el celu bloqueado mandó <b>${e.enviosFondo}</b> ${e.enviosFondo===1?"vez":"veces"}.`),e.cortes&&t.push(`⚠ Hoy se cortó <b>${e.cortes}</b> ${e.cortes===1?"vez":"veces"} (la última de ${m(e.ult.desde)} a ${m(e.ult.hasta)}).`),e.ultPrueba&&t.push(`Prueba con el celu bloqueado: ${e.ultPrueba.ok?"✅ anduvo":"❌ no anduvo"} (${m(e.ultPrueba.ts)}).`),T(`<h3>📍 Tu ubicación</h3>${t.map(r=>`<p>${r}</p>`).join("")}${e.cortes&&!(e.ultPrueba&&e.ultPrueba.ok&&e.ultPrueba.ts>e.ult.hasta)?G():""}`,(o.activo?[{t:"Probar con el celu bloqueado",p:1,f:P}]:[]).concat(J().map(r=>Object.assign({},r,{p:0})),[{t:"Cerrar"}]))}function $(){const e=document.getElementById("uvChip");e&&e.remove();const a=A()&&(o.activo||o.err),t=o.activo&&!o.err&&o.envTs,r=a?t?"ok":o.err?"mal":"busca":"",c=a?o.err?o.err:t?`Ubicación activa · hasta las ${u.hasta||""}`:"Buscando tu ubicación…":"",i=a?(o.modo==="web"?"En el navegador se manda solo con la app abierta en pantalla.":"Se manda sola en el horario de trabajo, aunque bloquees el celular.")+(o.envTs?` Último envío: ${m(o.envTs)}.`:"")+(f().cortes?` ⚠ Hoy se cortó ${f().cortes} ${f().cortes===1?"vez":"veces"}.`:"")+" Tocá para ver o probar.":"",n=document.getElementById("btnMenu");if(n){let b=n.querySelector(".uv-menu-dot");a?(b||(b=document.createElement("span"),b.className="uv-menu-dot",b.setAttribute("aria-hidden","true"),n.appendChild(b)),b.dataset.uv=r,n.title=c):b&&b.remove()}const d=document.querySelector("#menuLateral .menu-panel")||document.getElementById("menuLateral");let s=document.getElementById("uvMenuLinea");if(!a||!d){s&&s.remove();return}s||(s=document.createElement("button"),s.type="button",s.id="uvMenuLinea",s.addEventListener("click",()=>{if(o.errCode==="NOT_AUTHORIZED"){try{y()&&y().openSettings()}catch{}return}try{window.cerrarMenuLateral&&cerrarMenuLateral()}catch{}ce()}));const h=document.getElementById("menuLista");s.parentNode!==d&&(h&&h.parentNode===d?d.insertBefore(s,h):d.insertBefore(s,d.firstChild)),s.dataset.uv=r,s.innerHTML=`<span class="uv-dot"></span><span><b>${p(c)}</b><small>${p(i)}</small></span>`}let I={},le=null,N=null,E={};function Te(){if(!(le||!O()||!D()))try{le=j().collection(F).onSnapshot(e=>{const a={};e.forEach(t=>{a[t.id]=Object.assign({id:t.id},t.data())}),JSON.stringify(a)!==JSON.stringify(I)&&(I=a,q())},()=>{})}catch{}}const ue=()=>{try{return typeof mapaLeaflet<"u"&&mapaLeaflet&&typeof L<"u"?mapaLeaflet:null}catch{return null}};function de(e){const a=[];return e.cortesHoy>0&&e.ultCorteDesde&&x(e.ultCorteDesde)&&a.push(`⚠ hoy se le cortó ${e.cortesHoy} ${e.cortesHoy===1?"vez":"veces"} (última ${m(e.ultCorteDesde)}–${m(e.ultCorteHasta)}${e.ultCorteTipo==="app cerrada"?", app cerrada":", celu bloqueado"})`),e.pruebaTs&&x(e.pruebaTs)&&a.push(`prueba con el celu bloqueado: ${e.pruebaOk?"✓ anduvo":"✗ no anduvo"} (${m(e.pruebaTs)})`),a.join(" · ")}function qe(e){const a=Date.now();if(!e||!isFinite(e.lat)||!isFinite(e.lng)||!e.ts||!x(e.ts))return null;if(e.activo===!1)return{clase:"fin",txt:`terminó ${m(e.finTs||e.ts)}`};if(a-e.ts<=_())return{clase:"on",txt:`${m(e.ts)}${e.acc?` · ±${e.acc} m`:""}`,extra:de(e)};const t=e.fuente==="web"?"usa el navegador: solo manda con la app abierta en pantalla (con la app de Android sigue aunque bloquee el celu)":e.fuente==="app"&&!(e.fondoTs&&x(e.fondoTs))?"hoy nunca mandó con el celu bloqueado: revisá que tenga la app de Android 1.2 y la batería en «Sin restricciones»":e.fondoTs?`con el celu bloqueado mandó hasta las ${m(e.fondoTs)}: puede que Android haya cerrado la app (batería) o que la hayan cerrado`:"";return{clase:"off",txt:`sin actualizar desde ${m(e.ts)}`,porque:t,extra:de(e)}}function q(){Te();const e=ue(),a=Object.values(I).map(i=>({u:i,e:qe(i)})).filter(i=>i.e).sort((i,n)=>(i.e.clase==="on"?0:1)-(n.e.clase==="on"?0:1)||String(i.u.persona).localeCompare(String(n.u.persona)));if(e&&D()){N||(N=L.layerGroup().addTo(e));const i={};a.forEach(({u:n,e:d})=>{i[n.id]=1;const s=`<div class="uv-pin ${d.clase}"><b>${p(fe(n.persona))}</b></div>`,h=`<b>${p(n.persona||n.email)}</b> · ${p(d.txt)}`;let b=E[n.id];b?(b.setLatLng([n.lat,n.lng]),b.setIcon(L.divIcon({className:"uv-pin-w",html:s,iconSize:[34,34],iconAnchor:[17,17]})),b.setTooltipContent(h)):(b=E[n.id]=L.marker([n.lat,n.lng],{icon:L.divIcon({className:"uv-pin-w",html:s,iconSize:[34,34],iconAnchor:[17,17]}),zIndexOffset:1e3}).addTo(N),b.bindTooltip(h,{direction:"top",offset:[0,-16],className:"uv-tip"}))}),Object.keys(E).forEach(n=>{i[n]||(N.removeLayer(E[n]),delete E[n])})}const t=document.getElementById("mapaListaPlazas");let r=document.getElementById("uvPanel");if(!D()||!t){r&&r.remove();return}r||(r=document.createElement("div"),r.id="uvPanel",t.parentNode.insertBefore(r,t),r.addEventListener("click",i=>{const n=i.target.closest("[data-uvid]"),d=n&&I[n.dataset.uvid],s=ue();d&&s&&(s.setView([d.lat,d.lng],Math.max(s.getZoom(),16)),E[d.id]&&E[d.id].openTooltip())}));const c=a.filter(i=>i.e.clase==="on").length;r.innerHTML=`<div class="uv-cab">👷 Personal en vivo <span>${c} de ${a.length}</span></div>`+(a.length?a.map(({u:i,e:n})=>`<button type="button" class="uv-fila ${n.clase}" data-uvid="${p(i.id)}"><span class="uv-dot"></span><b>${p(i.persona||i.email)}</b><small>${i.fuente==="web"?"🌐 navegador":"📱 app"} · ${p(n.txt)}</small>${n.porque?`<small class="uv-porque">${p(n.porque)}</small>`:""}${n.extra?`<small class="uv-porque">${p(n.extra)}</small>`:""}</button>`).join(""):`<div class="uv-vacio">${w()?"Todavía nadie mandó su ubicación hoy.":`Fuera del horario (${p(u.desde)} a ${p(u.hasta)}): no se manda ubicación.`}</div>`)}const De=[[1,"Lu"],[2,"Ma"],[3,"Mi"],[4,"Ju"],[5,"Vi"],[6,"Sá"],[0,"Do"]];function K(){const e=document.getElementById("viewUsuarios");let a=document.getElementById("uvAdmin");if(!e||!D()){a&&a.remove();return}!a&&e.style.display==="none"||(a||(a=document.createElement("div"),a.id="uvAdmin",a.className="card",e.appendChild(a),a.addEventListener("click",async t=>{if(!t.target.closest("#uvGuardar"))return;const r=[...a.querySelectorAll("[data-uvdia]")].filter(n=>n.checked).map(n=>+n.dataset.uvdia),c={activo:a.querySelector("#uvActivo").checked,desde:a.querySelector("#uvDesde").value||"07:00",hasta:a.querySelector("#uvHasta").value||"15:00",dias:r,cadaSeg:+a.querySelector("#uvCada").value||60,por:String((window.__fbUser||{}).email||""),ts:Date.now()},i=a.querySelector("#uvMsg");if(c.hasta<=c.desde){i.textContent="La hora de fin tiene que ser después de la de inicio.";return}try{await j().collection("configEquipo").doc("ubicacion").set(c),i.textContent="✓ Guardado. Los celulares lo toman solos en un minuto."}catch(n){i.textContent=(n&&n.code)==="permission-denied"?"Falta publicar las reglas nuevas de Firebase (configEquipo/ubicacion).":"No se pudo guardar (¿hay señal?)."}})),!a.contains(document.activeElement)&&(a.innerHTML=`<h2><span class="dot"></span>📍 Ubicación en vivo del personal</h2>
 <div class="hint" style="margin-top:0;">En este horario, el celular de cada persona de la cuadrilla manda su ubicación sola (con la app de Android, aunque bloquee el celu; en el navegador, mientras tenga la app abierta). La oficina la ve en el <b>Mapa</b>. Fuera de horario no se manda nada.</div>
-<label class="uv-sw"><input type="checkbox" id="uvActivo" ${d.activo?"checked":""}> Activada</label>
-<div class="row2"><div><label for="uvDesde">Desde</label><input type="time" id="uvDesde" value="${m(d.desde)}"></div><div><label for="uvHasta">Hasta</label><input type="time" id="uvHasta" value="${m(d.hasta)}"></div></div>
-<label>Días</label><div class="uv-dias">${de.map(([o,r])=>`<label><input type="checkbox" data-uvdia="${o}" ${(d.dias||[]).includes(o)?"checked":""}> ${r}</label>`).join("")}</div>
-<label for="uvCada">Cada cuánto manda</label><select id="uvCada">${[[30,"30 segundos"],[60,"1 minuto"],[120,"2 minutos"],[300,"5 minutos"]].map(([o,r])=>`<option value="${o}" ${+d.cadaSeg===o?"selected":""}>${r}</option>`).join("")}</select>
+<label class="uv-sw"><input type="checkbox" id="uvActivo" ${u.activo?"checked":""}> Activada</label>
+<div class="row2"><div><label for="uvDesde">Desde</label><input type="time" id="uvDesde" value="${p(u.desde)}"></div><div><label for="uvHasta">Hasta</label><input type="time" id="uvHasta" value="${p(u.hasta)}"></div></div>
+<label>Días</label><div class="uv-dias">${De.map(([t,r])=>`<label><input type="checkbox" data-uvdia="${t}" ${(u.dias||[]).includes(t)?"checked":""}> ${r}</label>`).join("")}</div>
+<label for="uvCada">Cada cuánto manda</label><select id="uvCada">${[[30,"30 segundos"],[60,"1 minuto"],[120,"2 minutos"],[300,"5 minutos"]].map(([t,r])=>`<option value="${t}" ${+u.cadaSeg===t?"selected":""}>${r}</option>`).join("")}</select>
 <div class="hint">Más seguido = el mapa más al día, pero gasta un poco más de batería y de datos.</div>
-<button type="button" class="btn" id="uvGuardar" style="margin-top:8px;">Guardar horario</button> <span id="uvMsg" class="hint"></span>`))}window.__ubicacionVivo={estado:()=>Object.assign({},a,{lock:!!a.lock,nativo:{envios:c.envios,fallas:c.fallas,ultimoErr:c.ultimoErr,conHttp:!!P()}}),cfg:()=>Object.assign({},d),enHorario:$,tic:h,pintarMapa:b,arrancar:J,parar:A,lista:()=>E},document.addEventListener("permisos-listos",()=>setTimeout(()=>{h(),b(),x()},50)),setInterval(()=>{h(),document.body&&document.body.dataset.vista==="mapa"&&b()},3e4);const K=window.abrirMenuLateral;typeof K=="function"&&(window.abrirMenuLateral=function(){const e=K.apply(this,arguments);return setTimeout(v,60),e});const Q=window.mostrarVista;typeof Q=="function"&&(window.mostrarVista=function(e){const t=Q.apply(this,arguments);return setTimeout(()=>{e==="mapa"&&b(),e==="usuarios"&&x(),v()},400),t}),setTimeout(h,2500);const X=()=>{try{window.__cargador&&window.__cargador.listo()}catch{}};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",X):X()})();</script>
+<button type="button" class="btn" id="uvGuardar" style="margin-top:8px;">Guardar horario</button> <span id="uvMsg" class="hint"></span>`))}window.__ubicacionVivo={diag:()=>Object.assign({},f(),{fondo:Object.assign({},v)}),hojaEstado:ce,empezarPrueba:P,estado:()=>Object.assign({},o,{lock:!!o.lock,nativo:{envios:l.envios,fallas:l.fallas,ultimoErr:l.ultimoErr,conHttp:!!R()}}),cfg:()=>Object.assign({},u),enHorario:w,tic:C,pintarMapa:q,arrancar:re,parar:V,lista:()=>I},document.addEventListener("permisos-listos",()=>setTimeout(()=>{C(),q(),K()},50)),setInterval(()=>{C(),document.body&&document.body.dataset.vista==="mapa"&&q()},3e4);const pe=window.abrirMenuLateral;typeof pe=="function"&&(window.abrirMenuLateral=function(){const e=pe.apply(this,arguments);return setTimeout($,60),e});const me=window.mostrarVista;typeof me=="function"&&(window.mostrarVista=function(e){const a=me.apply(this,arguments);return setTimeout(()=>{e==="mapa"&&q(),e==="usuarios"&&K(),$()},400),a}),setTimeout(C,2500);const be=()=>{try{window.__cargador&&window.__cargador.listo()}catch{}};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",be):be()})();</script>
 <script id="arranqueRapido">(function(){const i=()=>{const n=document.getElementById("viewStock");return!!n&&n.style.display!=="none"&&getComputedStyle(n).display!=="none"},e={};["renderStockTabla","renderCatalogoTabla"].forEach(n=>{const t=window[n];if(typeof t!="function")return;const c=function(){if(!i()&&!window.__renderSiempre){e[n]=!0;return}return e[n]=!1,t.apply(this,arguments)};window[n]=c});const o=()=>Object.keys(e).forEach(n=>{if(e[n]){e[n]=!1;try{window[n]()}catch(t){console.warn("pañol",t)}}});window.__correrPendientesStock=o;const r=window.mostrarVista;typeof r=="function"&&(window.mostrarVista=function(n){const t=r.apply(this,arguments);return n==="stock"&&o(),t})})();</script>
 <script id="cuadrillaLiviana">(function(){"use strict";const i=["inicio","mistareas","mapa","normas","guias"],t=window.mostrarVista;typeof t=="function"&&(window.mostrarVista=function(n){try{const o=window.__modoDatos;o&&o.liviano()&&i.indexOf(String(n))<0&&o.cargarTodo()}catch{}return t.apply(this,arguments)}),document.addEventListener("permisos-listos",()=>{try{window.__modoDatos&&window.__modoDatos.revisar()}catch{}})})();</script>
 <script id="proyectistaMenu">(function(){"use strict";const o=t=>document.getElementById(t),i=()=>{try{const t=window.PERMISOS&&PERMISOS.yo&&PERMISOS.yo();return!!t&&t.activo!==!1&&!t.pendiente&&(t.rol==="admin"||t.rol==="oficina")}catch{return!1}};function c(){if(window.__proyectista)return window.__proyectista;const t=o("proyectistaCod");if(!t)return null;const e=document.createElement("script");return e.textContent=t.textContent,e.dataset.cargado="proyectistaCod",document.body.appendChild(e),window.__proyectista||null}window.__abrirProyectista=function(t){if(!i())return!1;const e=c();return e&&e.abrir(t),!!e};const r=o("menuLista");function a(){if(!r)return;const t=o("menuProyectista");if(!i()){t&&t.remove();return}if(t)return;const e=o("menuCamara")||r.querySelector('.menu-item[data-vista="normas"]')||[].slice.call(r.querySelectorAll(".menu-item[data-vista]")).pop();if(!e)return;const n=document.createElement("button");n.type="button",n.className="menu-item",n.id="menuProyectista",n.innerHTML='<span class="menu-ico">📐</span>Proyectista',e.insertAdjacentElement("afterend",n)}r&&new MutationObserver(a).observe(r,{childList:!0}),document.addEventListener("permisos-listos",a),document.addEventListener("click",t=>{if(t.target.closest&&t.target.closest("#menuProyectista")){t.preventDefault(),t.stopPropagation();try{cerrarMenuLateral()}catch{}window.__abrirProyectista()}},!0)})();</script>
@@ -6485,7 +6485,8 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     { k: "aco", t: "Acometida / poste", p: "A", c: "#7c3aed" },
     { k: "cam", t: "Cámara / caja", p: "K", c: "#0d9488" },
     { k: "cru", t: "Cruce de calle", p: "X", c: "#dc2626" },
-    { k: "otro", t: "Otro", p: "P", c: "#28285e" }
+    { k: "otro", t: "Otro", p: "P", c: "#28285e" },
+    { k: "borde", t: "Borde de la plaza", p: "B", c: "#0891b2" }   // v092: contorno para el cálculo de luz (no se une con los tramos)
   ];
   const tipo = (k) => TIPOS.find((x) => x.k === k) || TIPOS[TIPOS.length - 1];
 
@@ -6526,15 +6527,513 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     return { x: faja * 1e6 + 5e5 + AK * eta, y: AK * xi + yPolo, faja };
   }
 
+  // ======================================================================= v092 · cálculos (eléctrico y lumínico)
+  // Funciones puras (sin pantalla): se prueban solas con números de control (pruebas t_v092 y la cuenta aparte en Python).
+  // Todo lo que no sale de un documento va marcado «a confirmar» en la pantalla y en la memoria.
+  const RAIZ3 = Math.sqrt(3);
+  // Resistencia máxima a 20 °C en Ω/km (IEC 60228 = IRAM NM 280): cobre clase 2 (rígido o cableado) y clase 5 (flexible; da
+  // los valores del catálogo Prysmian a 70 °C: 4 mm² 5,92 · 6 mm² 3,95 · 10 mm² 2,29). La reactancia es un valor típico de cable
+  // multipolar de baja tensión (a confirmar con la hoja del fabricante).
+  const R20 = {
+    Cu: { 1.5: 12.1, 2.5: 7.41, 4: 4.61, 6: 3.08, 10: 1.83, 16: 1.15, 25: 0.727, 35: 0.524, 50: 0.387, 70: 0.268, 95: 0.193 },
+    Cu5: { 1.5: 13.3, 2.5: 7.98, 4: 4.95, 6: 3.3, 10: 1.91, 16: 1.21, 25: 0.78, 35: 0.554, 50: 0.386, 70: 0.272, 95: 0.206 },
+    Al: { 16: 1.91, 25: 1.2, 35: 0.868, 50: 0.641, 70: 0.443, 95: 0.32 }
+  };
+  const ALFA = { Cu: 0.00393, Al: 0.00403 };
+  const IN_STD = [6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100, 125];
+  const COLS = [
+    { k: "P7", t: "PRFV 7 m", prfv: true }, { k: "P10", t: "PRFV 10 m", prfv: true },
+    { k: "M7", t: "Metálica 7 m", prfv: false }, { k: "M10", t: "Metálica 10 m", prfv: false },
+    { k: "EX", t: "Existente / otra", prfv: false }
+  ];
+  const colTipo = (k) => COLS.find((x) => x.k === k) || COLS[0];
+  // Niveles de iluminación de referencia: EN 13201-2, clases P (zonas peatonales). El que pide la Inspección: a confirmar.
+  const CLASES = { P1: [15, 3], P2: [10, 2], P3: [7.5, 1.5], P4: [5, 1], P5: [3, 0.6], P6: [2, 0.4] };
+  const CFG0 = { vll: 380, cond: 5, lim: 3, temp: 70, reserva: 5, subida: 3.5, subLum: 7, x: 0.08, minIn: 10, fm: 0.8, clase: "P3", emReq: 7.5, eminReq: 1.5, umbral: 0, brazo: 0.4, alt: { P7: 7, P10: 10, M7: 7, M10: 10, EX: 7 } };
+  function cfgDe(p) {
+    const c = (p && p.calc) || {};
+    const o = Object.assign({}, CFG0, c);
+    o.alt = Object.assign({}, CFG0.alt, c.alt || {});
+    if (o.clase !== "otro" && CLASES[o.clase]) { o.emReq = CLASES[o.clase][0]; o.eminReq = CLASES[o.clase][1]; }
+    return o;
+  }
+  const esColumna = (p) => !!p && (p.tipo === "colN" || p.tipo === "colE");
+  // números complejos [re, im]
+  const cx = (re, im) => [re, im || 0];
+  const cAdd = (a, b) => [a[0] + b[0], a[1] + b[1]];
+  const cMul = (a, b) => [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]];
+  const cAbs = (a) => Math.hypot(a[0], a[1]);
+  const polar = (m, deg) => [m * Math.cos(deg * RAD), m * Math.sin(deg * RAD)];
+  const ANG = { R: 0, S: -120, T: 120 };
+  const FASES = ["R", "S", "T"];
+  function rKm(mat, sec, temp, cond) {   // Ω/km a la temperatura del conductor
+    const r = (mat !== "Al" && +cond === 5 ? R20.Cu5 : R20[mat] || R20.Cu)[sec];
+    if (!r) return null;
+    return r * (1 + (ALFA[mat] || ALFA.Cu) * ((temp == null ? 70 : temp) - 20));
+  }
+  function inRecomendada(ib, minimo) {
+    const req = Math.max(ib * 1.25, minimo || 0);
+    for (let i = 0; i < IN_STD.length; i++) if (IN_STD[i] >= req - 1e-9) return IN_STD[i];
+    return null;
+  }
+  // Fusibles por columna (regla acordada, CLAUDE §11.3): PRFV en la caja: simple 2 A + vacío · doble 2+2 · triple 4+2 ·
+  // cuádruple 4+4. Metálica: 1 fusible de 2 A por luminaria.
+  function fusibles(col, art) {
+    art = Math.max(0, art | 0);
+    if (!art) return { txt: "—", f2: 0, f4: 0 };
+    if (colTipo(col).prfv) {
+      if (art === 1) return { txt: "2 A + vacío", f2: 1, f4: 0 };
+      if (art === 2) return { txt: "2 A + 2 A", f2: 2, f4: 0 };
+      if (art === 3) return { txt: "4 A + 2 A", f2: 1, f4: 1 };
+      if (art === 4) return { txt: "4 A + 4 A", f2: 0, f4: 2 };
+      return { txt: "a confirmar (" + art + " artefactos)", f2: 0, f4: 0 };
+    }
+    if (col === "EX") return { txt: "a confirmar (columna existente)", f2: 0, f4: 0 };
+    return { txt: art + " × 2 A", f2: art, f4: 0 };
+  }
+  const tensionTxt = (vll) => (+vll === 380 ? "3 × 380 / 220 V" : "3 × " + vll + " / " + Math.round(vll / RAIZ3) + " V");
+
+  // ---------------------------------------------------------------- red eléctrica: árbol por circuito, fases y caída de tensión
+  // Cada columna tiene: tablero, circuito, «viene de» (otra columna del mismo circuito o el tablero; vacío = la anterior de la
+  // lista), artefactos, luminaria y fase (auto o R/S/T fija). El cable de cada tramo = distancia × (1 + reserva) + subidas a
+  // las cajas (o los metros reales si se cargaron). Caída de tensión con fasores: cada carga es fase-neutro y la corriente del
+  // neutro es la suma (fasorial) de las tres fases: así se ve el efecto del desbalance.
+  function elDe(p, ps, lums) {
+    const e = Object.assign({}, p.el || {});
+    if (!e.tab || !ps.some((q) => q.id === e.tab && q.tipo === "tab")) {   // tablero más cercano
+      let mejor = null, dm = Infinity;
+      ps.forEach((q) => { if (q.tipo === "tab") { const d = distancia(p.lat, p.lng, q.lat, q.lng); if (d < dm) { dm = d; mejor = q.id; } } });
+      e.tab = mejor || "";
+    }
+    e.circ = Math.max(1, parseInt(e.circ, 10) || 1);
+    e.col = COLS.some((c) => c.k === e.col) ? e.col : p.tipo === "colE" ? "EX" : "P7";
+    e.art = e.art == null || e.art === "" ? 1 : Math.max(0, Math.min(8, parseInt(e.art, 10) || 0));
+    if (!e.lum || !(lums || []).some((l) => l.id === e.lum)) e.lum = (lums && lums[0] && lums[0].id) || "";
+    e.fase = /^[RST]+$/.test(e.fase || "") ? e.fase : "auto";
+    e.m = +e.m > 0 ? +e.m : 0;
+    e.de = e.de || "";
+    return e;
+  }
+  function red(ps, lums, circCfg, cfg) {
+    cfg = cfg || CFG0; circCfg = circCfg || {}; lums = lums || [];
+    const U = cfg.vll / RAIZ3;
+    const porId = {}; ps.forEach((p) => { porId[p.id] = p; });
+    const lumDe = (id) => lums.find((l) => l.id === id) || null;
+    const res = { circuitos: [], cols: {}, avisos: [], U, general: null };
+    const grupos = {};
+    ps.forEach((p, i) => {
+      if (!esColumna(p)) return;
+      const e = elDe(p, ps, lums);
+      res.cols[p.id] = { e, fases: "", dv: null, metros: 0, padre: "", lum: lumDe(e.lum), fus: fusibles(e.col, e.art) };
+      if (!e.tab) return;
+      const k = e.tab + "|" + e.circ;
+      (grupos[k] = grupos[k] || { tab: e.tab, n: e.circ, ids: [] }).ids.push(p.id);
+    });
+    if (Object.keys(res.cols).length && !ps.some((p) => p.tipo === "tab")) res.avisos.push("Marcá el tablero (un punto tipo «Tablero») para calcular los circuitos.");
+    Object.keys(grupos).sort((a, b) => { const A = grupos[a], B = grupos[b]; return ps.indexOf(porId[A.tab]) - ps.indexOf(porId[B.tab]) || A.n - B.n; }).forEach((k) => {
+      res.circuitos.push(circuito(grupos[k], k));
+    });
+    // tablero general: suma fasorial de las cabeceras de sus circuitos
+    const tabs = {};
+    res.circuitos.forEach((c) => {
+      const t = tabs[c.tab] = tabs[c.tab] || { tab: c.tab, nombre: c.tabNombre, I: { R: cx(0), S: cx(0), T: cx(0) }, P: 0, inMax: 0, n: 0 };
+      FASES.forEach((f) => { t.I[f] = cAdd(t.I[f], c.Ic[f]); });
+      t.P += c.P; t.inMax = Math.max(t.inMax, c.prot.In || 0); t.n++;
+    });
+    res.tableros = Object.keys(tabs).map((k) => {
+      const t = tabs[k], Ib = Math.max(cAbs(t.I.R), cAbs(t.I.S), cAbs(t.I.T));
+      const In = inRecomendada(Math.max(Ib, t.inMax / 1.25), cfg.minIn);
+      return { tab: t.tab, nombre: t.nombre, P: t.P, Ia: { R: cAbs(t.I.R), S: cAbs(t.I.S), T: cAbs(t.I.T) }, IN: cAbs(cAdd(cAdd(t.I.R, t.I.S), t.I.T)), Ib, In, circuitos: t.n };
+    });
+    return res;
+
+    function circuito(g, clave) {
+      const cc = Object.assign({ mat: "Cu", sec: 4, tipo: "3F", fase: "R" }, circCfg[clave] || {});
+      cc.sec = +cc.sec || 4; if (!(R20[cc.mat] || {})[cc.sec]) { cc.mat = "Cu"; cc.sec = 4; }
+      const tab = porId[g.tab], ids = g.ids, set = {};
+      ids.forEach((id) => { set[id] = 1; });
+      const avisos = [];
+      // padre de cada columna
+      const padre = {};
+      ids.forEach((id, i) => {
+        const e = res.cols[id].e;
+        padre[id] = e.de && e.de !== id && (e.de === g.tab || set[e.de]) ? e.de : i ? ids[i - 1] : g.tab;
+      });
+      ids.forEach((id) => {   // recorridos en círculo: se cortan y van al tablero
+        let x = id, n = 0;
+        while (x !== g.tab && n <= ids.length) { x = padre[x]; n++; }
+        if (x !== g.tab) { avisos.push("«" + porId[id].n + "» tenía un recorrido en círculo: se conectó al tablero."); padre[id] = g.tab; }
+      });
+      const hijos = {}; hijos[g.tab] = [];
+      ids.forEach((id) => { hijos[id] = []; });
+      ids.forEach((id) => { hijos[padre[id]].push(id); });
+      const orden = [];   // recorrido desde el tablero
+      (function dfs(x) { hijos[x].forEach((h) => { orden.push(h); dfs(h); }); })(g.tab);
+      const rk = rKm(cc.mat, cc.sec, cfg.temp, cfg.cond), Zk = [rk / 1000, (cfg.x || 0) / 1000];   // Ω por metro
+      const r15 = rKm("Cu", 1.5, cfg.temp, cfg.cond) / 1000;
+      // largo de cada tramo
+      const largo = {};
+      let cable = 0;
+      orden.forEach((id) => {
+        const p = porId[id], q = porId[padre[id]], e = res.cols[id].e;
+        let m;
+        if (e.m > 0) m = e.m;
+        else m = distancia(q.lat, q.lng, p.lat, p.lng) * (1 + (cfg.reserva || 0) / 100) + (cfg.subida || 0) + (esColumna(q) ? cfg.subida || 0 : 0);
+        largo[id] = m; cable += m;
+        res.cols[id].metros = m; res.cols[id].padre = padre[id];
+      });
+      // artefactos (cargas fase-neutro)
+      const arts = [];
+      let P = 0;
+      orden.forEach((id) => {
+        const c = res.cols[id], e = c.e, l = c.lum;
+        if (e.art && !l) avisos.push("«" + porId[id].n + "» no tiene luminaria cargada: cuenta sin carga.");
+        const W = l ? +l.W || 0 : 0, cos = l ? Math.min(1, Math.max(0.3, +l.cos || 0.95)) : 1;
+        for (let k = 0; k < e.art; k++) {
+          const fija = e.fase !== "auto" ? e.fase[k % e.fase.length] : "";
+          arts.push({ id, k, W, cos, I: W / (U * cos), fija });
+          P += W;
+        }
+      });
+      const tri = cc.tipo !== "1F";
+      // fase inicial: R, S, T rotando a lo largo del circuito (las fijas quedan como están)
+      let rot = 0;
+      arts.forEach((a) => { a.f = tri ? (a.fija || FASES[rot++ % 3]) : (cc.fase || "R"); });
+      function evaluar() {
+        const Ifase = {}; ids.forEach((id) => { Ifase[id] = { R: cx(0), S: cx(0), T: cx(0) }; });
+        arts.forEach((a) => { Ifase[a.id][a.f] = cAdd(Ifase[a.id][a.f], polar(a.I, ANG[a.f] - Math.acos(a.cos) / RAD)); });
+        for (let i = orden.length - 1; i >= 0; i--) {   // corrientes que pasan por cada tramo (lo de abajo + lo propio)
+          const id = orden[i], pa = padre[id];
+          if (pa !== g.tab) FASES.forEach((f) => { Ifase[pa][f] = cAdd(Ifase[pa][f], Ifase[id][f]); });
+        }
+        const caida = {}; caida[g.tab] = { R: cx(0), S: cx(0), T: cx(0) };
+        orden.forEach((id) => {
+          const pa = padre[id], I = Ifase[id], Zb = [Zk[0] * largo[id], Zk[1] * largo[id]];
+          const IN = cAdd(cAdd(I.R, I.S), I.T), d = {};
+          FASES.forEach((f) => {
+            const ret = tri ? IN : I[f];   // monofásico: vuelve por el neutro la misma corriente
+            d[f] = cAdd(caida[pa][f], cMul(Zb, cAdd(I[f], ret)));
+          });
+          caida[id] = d;
+        });
+        let peor = 0;
+        const dvCol = {};
+        arts.forEach((a) => {
+          const V0 = polar(U, ANG[a.f]), dV = caida[a.id][a.f];
+          const sub = 2 * r15 * (cfg.subLum || 0) * a.I;   // cable de subida 3×1,5 hasta la luminaria
+          const pct = (U - cAbs([V0[0] - dV[0], V0[1] - dV[1]]) + sub) / U * 100;
+          a.pct = pct;
+          dvCol[a.id] = Math.max(dvCol[a.id] == null ? -Infinity : dvCol[a.id], pct);
+          if (pct > peor) peor = pct;
+        });
+        const cab = { R: cx(0), S: cx(0), T: cx(0) };
+        hijos[g.tab].forEach((h) => FASES.forEach((f) => { cab[f] = cAdd(cab[f], Ifase[h][f]); }));
+        const m = [cAbs(cab.R), cAbs(cab.S), cAbs(cab.T)];
+        return { peor, dvCol, cab, desb: Math.max.apply(null, m) - Math.min.apply(null, m) };
+      }
+      let ev = evaluar();
+      if (tri) {   // mejora: prueba cambiar de fase cada artefacto automático mientras baje la peor caída (o el desbalance)
+        const mejor = (a, b) => a.peor < b.peor - 1e-9 || (Math.abs(a.peor - b.peor) <= 1e-9 && a.desb < b.desb - 1e-9);
+        for (let vuelta = 0; vuelta < 30; vuelta++) {
+          let cambio = false;
+          arts.forEach((a) => {
+            if (a.fija) return;
+            const f0 = a.f;
+            FASES.forEach((f) => {
+              if (f === a.f) return;
+              const ant0 = a.f; a.f = f;
+              const e2 = evaluar();
+              if (mejor(e2, ev)) { ev = e2; cambio = true; } else a.f = ant0;
+            });
+            if (a.f !== f0) cambio = true;
+          });
+          if (!cambio) break;
+        }
+        ev = evaluar();
+      }
+      ids.forEach((id) => {
+        const c = res.cols[id];
+        c.fases = arts.filter((a) => a.id === id).map((a) => a.f).join("");
+        c.dv = ev.dvCol[id] == null ? null : ev.dvCol[id];
+      });
+      const Ia = { R: cAbs(ev.cab.R), S: cAbs(ev.cab.S), T: cAbs(ev.cab.T) };
+      const Ib = Math.max(Ia.R, Ia.S, Ia.T), In = inRecomendada(Ib, cfg.minIn);
+      const nPorFase = { R: 0, S: 0, T: 0 }; arts.forEach((a) => { nPorFase[a.f]++; });
+      return {
+        clave, tab: g.tab, tabNombre: tab ? tab.n : "", n: g.n, cfg: cc, ids: orden, cols: ids.length, art: arts.length, P, cable, subidaLum: arts.length * (cfg.subLum || 0),
+        Ic: ev.cab, Ia, IN: cAbs(cAdd(cAdd(ev.cab.R, ev.cab.S), ev.cab.T)), nPorFase, dvMax: ev.peor, cumple: ev.peor <= cfg.lim + 1e-9,
+        prot: { In, polos: tri ? "4P" : "2P", txt: In ? "Térmica curva C " + In + " A " + (tri ? "tetrapolar" : "bipolar") : "a confirmar (corriente alta)" },
+        avisos, arts: arts.map((a) => ({ id: a.id, f: a.f, I: a.I, pct: a.pct }))
+      };
+    }
+  }
+
+  // ---------------------------------------------------------------- fotometría: archivos EULUMDAT (.ldt) e IES LM-63 (.ies)
+  // Se guarda una tabla pareja (C cada 5°, γ cada 2,5°) en cd por cada 1.000 lm de flujo de la luminaria: así, si se cambia
+  // el flujo, la luz se escala sola. γ = 0 es para abajo (nadir).
+  const FC = 5, FG = 2.5, NC = 360 / FC + 1, NG = 180 / FG + 1;
+  const nros = (s) => String(s || "").replace(/,/g, ".").split(/[\s;]+/).filter((x) => x !== "").map(Number);
+  function interp1(xs, ys, x) {   // lineal, xs creciente; afuera del rango: el borde
+    const n = xs.length;
+    if (n === 1 || x <= xs[0]) return ys[0];
+    if (x >= xs[n - 1]) return ys[n - 1];
+    let lo = 0, hi = n - 1;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (xs[m] <= x) lo = m; else hi = m; }
+    const t = (x - xs[lo]) / (xs[hi] - xs[lo] || 1);
+    return ys[lo] + (ys[hi] - ys[lo]) * t;
+  }
+  // tabla con simetría → función I(C, γ) sobre toda la esfera
+  function tablaFn(cs, gs, val, sim) {
+    // planos ordenados; «envuelto» = planos de 270° a 90° pasando por 0 (EULUMDAT con simetría C90-C270)
+    let pl = cs.map((c, i) => ({ c: ((c % 360) + 360) % 360, v: val[i] }));
+    const envuelto = sim === "c90a";
+    const des = (c) => (envuelto && c >= 270 - 1e-9 ? c - 360 : c);
+    pl.forEach((p) => { p.u = des(p.c); });
+    pl.sort((a, b) => a.u - b.u);
+    if (sim === "full" && pl.length > 1) pl = pl.concat([{ c: pl[0].c + 360, u: pl[0].u + 360, v: pl[0].v }]);
+    const us = pl.map((p) => p.u), gmax = gs[gs.length - 1], gmin = gs[0];
+    function mapa(C) {
+      C = ((C % 360) + 360) % 360;
+      if (sim === "rot") return 0;
+      if (sim === "c0") return C <= 180 ? C : 360 - C;
+      if (sim === "quad") { if (C > 180) C = 360 - C; if (C > 90) C = 180 - C; return C; }
+      if (sim === "c90b") return C >= 90 && C <= 270 ? C : (540 - C) % 360;
+      if (sim === "c90a") { const c = C <= 90 || C >= 270 ? C : (540 - C) % 360; return des(c); }
+      if (sim === "full") return C < us[0] ? C + 360 : C;
+      return C;
+    }
+    return function (C, g) {
+      if (g > gmax + 1e-9 || g < gmin - 1e-9) return 0;
+      const u = mapa(C);
+      if (pl.length === 1) return interp1(gs, pl[0].v, g);
+      const n = us.length;
+      if (u <= us[0]) return interp1(gs, pl[0].v, g);
+      if (u >= us[n - 1]) return interp1(gs, pl[n - 1].v, g);
+      let lo = 0, hi = n - 1;
+      while (hi - lo > 1) { const m = (lo + hi) >> 1; if (us[m] <= u) lo = m; else hi = m; }
+      const t = (u - us[lo]) / (us[hi] - us[lo] || 1);
+      return interp1(gs, pl[lo].v, g) * (1 - t) + interp1(gs, pl[hi].v, g) * t;
+    };
+  }
+  function flujoDe(fn) {   // integra I(C,γ) sobre la esfera (lm): Σ I·senγ·dγ·dC
+    let s = 0;
+    const dC = 2 * RAD, dg = 0.5 * RAD;
+    for (let c = 0; c < 360; c += 2) for (let g = 0.25; g < 180; g += 0.5) s += fn(c + 1, g) * Math.sin(g * RAD);
+    return s * dC * dg;
+  }
+  function tablaPareja(fn, factor) {   // → {i: [[…γ] por cada C]} en cd/klm, redondeado a 0,1
+    const i = [];
+    for (let a = 0; a < NC; a++) {
+      const fila = [];
+      for (let b = 0; b < NG; b++) fila.push(Math.round(fn(a * FC, b * FG) * factor * 10) / 10);
+      i.push(fila);
+    }
+    return i;
+  }
+  function parseLDT(txt) {
+    const L = String(txt || "").replace(/\r/g, "").split("\n");
+    if (L.length < 40) throw new Error("El archivo .ldt está incompleto.");
+    const n = (k) => { const v = parseFloat(String(L[k] || "").replace(",", ".")); return isFinite(v) ? v : 0; };
+    const isym = n(2) | 0, Mc = n(3) | 0, Ng = n(5) | 0, LORL = n(22), CF = n(23) || 1, sets = Math.max(1, n(25) | 0);
+    if (!(Mc > 0 && Ng > 1) || isym < 0 || isym > 4) throw new Error("El archivo no parece EULUMDAT (.ldt).");
+    let flujoL = 0, W = 0;
+    for (let s = 0; s < sets; s++) { flujoL += Math.abs(n(26 + 2 * sets + s)); W += Math.abs(n(26 + 5 * sets + s)); }
+    const resto = nros(L.slice(26 + 6 * sets + 10).join(" "));
+    const C = resto.slice(0, Mc), G = resto.slice(Mc, Mc + Ng);
+    let mc1 = 1, mc2 = Mc;
+    if (isym === 1) mc2 = 1; else if (isym === 2) mc2 = Mc / 2 + 1; else if (isym === 3) { mc1 = 3 * Mc / 4 + 1; mc2 = mc1 + Mc / 2; } else if (isym === 4) mc2 = Mc / 4 + 1;
+    const np = Math.round(mc2 - mc1 + 1), datos = resto.slice(Mc + Ng);
+    if (datos.length < np * Ng) throw new Error("Faltan intensidades en el .ldt (" + datos.length + " de " + np * Ng + ").");
+    const cs = [], val = [];
+    for (let k = 0; k < np; k++) { cs.push(C[(Math.round(mc1) - 1 + k) % Mc]); val.push(datos.slice(k * Ng, (k + 1) * Ng)); }
+    const sim = ["full", "rot", "c0", "c90a", "quad"][isym];
+    const fn = tablaFn(cs, G, val, sim);   // cd/klm de lámpara
+    const flujoInt = flujoDe(fn) / 1000;   // lm de luminaria por cada lm de lámpara (= LOR)
+    // a cd por 1.000 lm de luminaria: × 100/LORL (si el archivo lo trae); si no, con el flujo integrado
+    const fac = LORL > 0 ? CF * 100 / LORL : CF / (flujoInt || 1);
+    const lm = flujoL > 0 && LORL > 0 ? flujoL * LORL / 100 : 0;
+    return { formato: "LDT", nombre: String(L[8] || L[0] || "").trim(), fabricante: String(L[0] || "").trim(), W: Math.round(W * 10) / 10, lm: Math.round(lm), i: tablaPareja(fn, fac), control: { lorl: LORL, lorInt: Math.round(flujoInt * 1000) / 10, flujoLamp: flujoL } };
+  }
+  function parseIES(txt) {
+    const s = String(txt || "").replace(/\r/g, "");
+    const L = s.split("\n");
+    let k = L.findIndex((x) => /^\s*TILT\s*=/i.test(x));
+    if (k < 0) throw new Error("El archivo no parece IES (falta TILT=).");
+    const nombre = ((s.match(/\[LUMINAIRE\]\s*(.*)/i) || [])[1] || (s.match(/\[LUMCAT\]\s*(.*)/i) || [])[1] || "").trim();
+    const fab = ((s.match(/\[MANUFAC\]\s*(.*)/i) || [])[1] || "").trim();
+    let t = nros(L.slice(k + 1).join(" "));
+    if (/INCLUDE/i.test(L[k])) { const nt = t[1] | 0; t = t.slice(2 + 2 * nt); }
+    const nL = t[0], lmL = t[1], mult = t[2] || 1, nV = t[3] | 0, nH = t[4] | 0, tipoF = t[5] | 0, bf = t[10] || 1, bpf = t[11] || 1, W = t[12] || 0;
+    if (tipoF !== 1) throw new Error("Solo se aceptan fotometrías tipo C (las de alumbrado).");
+    if (!(nV > 1 && nH > 0)) throw new Error("El .ies no trae ángulos.");
+    const V = t.slice(13, 13 + nV), H = t.slice(13 + nV, 13 + nV + nH), d = t.slice(13 + nV + nH);
+    if (d.length < nV * nH) throw new Error("Faltan intensidades en el .ies.");
+    const val = []; for (let h = 0; h < nH; h++) val.push(d.slice(h * nV, (h + 1) * nV).map((v) => v * mult * bf * bpf));
+    const h0 = H[0], h1 = H[nH - 1];
+    const sim = nH === 1 ? "rot" : h1 <= 90 + 1e-6 ? "quad" : Math.abs(h0 - 90) < 1e-6 && Math.abs(h1 - 270) < 1e-6 ? "c90b" : h1 <= 180 + 1e-6 ? "c0" : "full";
+    const Hs = sim === "full" && Math.abs(h1 - 360) < 1e-6 ? H.slice(0, -1) : H, vs = sim === "full" && Math.abs(h1 - 360) < 1e-6 ? val.slice(0, -1) : val;
+    const fn = tablaFn(Hs, V, vs, sim);   // candelas absolutas
+    const lm = flujoDe(fn);
+    return { formato: "IES", nombre, fabricante: fab, W: Math.round(W * 10) / 10, lm: Math.round(lm), i: tablaPareja(fn, 1000 / (lm || 1)), control: { flujoLamp: lmL > 0 ? nL * lmL : 0 } };
+  }
+  function fotoGenerica() {   // reparto «coseno» (difusor): solo para ver; no vale como cálculo
+    return { formato: "genérica", i: tablaPareja((c, g) => (g < 90 ? Math.cos(g * RAD) : 0), 1000 / Math.PI) };
+  }
+  function intens(i, C, g) {   // cd/klm, interpolado en la tabla pareja
+    if (g >= 180) g = 179.999; if (g < 0) g = 0;
+    C = ((C % 360) + 360) % 360;
+    const a = C / FC, b = g / FG, a0 = Math.floor(a), b0 = Math.floor(b), ta = a - a0, tb = b - b0;
+    const r0 = i[a0], r1 = i[Math.min(NC - 1, a0 + 1)];
+    const v00 = r0[b0], v01 = r0[Math.min(NG - 1, b0 + 1)], v10 = r1[b0], v11 = r1[Math.min(NG - 1, b0 + 1)];
+    return (v00 * (1 - tb) + v01 * tb) * (1 - ta) + (v10 * (1 - tb) + v11 * tb) * ta;
+  }
+
+  // ---------------------------------------------------------------- iluminancia horizontal en el piso, punto por punto
+  // E = I(C,γ) · cos³γ / h²  (h = altura de montaje). Se suma la de todas las luminarias × factor de mantenimiento.
+  // Coordenadas locales en metros (este, norte) desde el primer punto, con los radios del elipsoide en ese lugar.
+  function plano0(lat0, lng0) {
+    const s = Math.sin(lat0 * RAD), w = Math.sqrt(1 - E2 * s * s), M = A_ * (1 - E2) / (w * w * w), N = A_ / w;
+    const kx = N * Math.cos(lat0 * RAD) * RAD, ky = M * RAD;
+    return { aXY: (lat, lng) => ({ x: (lng - lng0) * kx, y: (lat - lat0) * ky }), aLL: (x, y) => ({ lat: lat0 + y / ky, lng: lng0 + x / kx }) };
+  }
+  function enPoligono(x, y, pol) {
+    let d = false;
+    for (let i = 0, j = pol.length - 1; i < pol.length; j = i++) {
+      const a = pol[i], b = pol[j];
+      if ((a.y > y) !== (b.y > y) && x < (b.x - a.x) * (y - a.y) / (b.y - a.y) + a.x) d = !d;
+    }
+    return d;
+  }
+  function envolvente(pts) {   // cápsula convexa (Andrew)
+    const p = pts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+    if (p.length < 3) return p;
+    const cr = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+    const lo = [], hi = [];
+    p.forEach((q) => { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); });
+    for (let i = p.length - 1; i >= 0; i--) { const q = p[i]; while (hi.length >= 2 && cr(hi[hi.length - 2], hi[hi.length - 1], q) <= 0) hi.pop(); hi.push(q); }
+    return lo.slice(0, -1).concat(hi.slice(0, -1));
+  }
+  const areaPol = (pol) => { let s = 0; for (let i = 0, j = pol.length - 1; i < pol.length; j = i++) s += (pol[j].x + pol[i].x) * (pol[j].y - pol[i].y); return Math.abs(s / 2); };
+  // artefactos (luminarias) con su posición, altura, rumbo y fotometría
+  function artefactos(ps, lums, cfg, pl, centro) {
+    const out = [];
+    ps.forEach((p) => {
+      if (!esColumna(p)) return;
+      const e = elDe(p, ps, lums), l = lums.find((x) => x.id === e.lum);
+      if (!l || !e.art) return;
+      const c = pl.aXY(p.lat, p.lng);
+      let mira = p.el && p.el.mira !== "" && p.el.mira != null && isFinite(+p.el.mira) ? +p.el.mira : null;
+      if (mira == null) mira = centro && Math.hypot(centro.x - c.x, centro.y - c.y) > 0.5 ? Math.atan2(centro.x - c.x, centro.y - c.y) / RAD : 0;   // por defecto: mirando al centro de la plaza
+      const h = +cfg.alt[e.col] || 7, fot = l.fot || fotoGenerica();
+      for (let k = 0; k < e.art; k++) {
+        const az = mira + k * 360 / e.art, br = +cfg.brazo || 0;   // salida del brazo (vínculo de 400 mm)
+        out.push({ id: p.id, x: c.x + br * Math.sin(az * RAD), y: c.y + br * Math.cos(az * RAD), h, az, i: fot.i, lm: +l.lm || 0, generica: !l.fot });
+      }
+    });
+    return out;
+  }
+  function eEn(arts, x, y, fm) {
+    let E = 0;
+    for (let k = 0; k < arts.length; k++) {
+      const a = arts[k], dx = x - a.x, dy = y - a.y, r = Math.hypot(dx, dy), g = Math.atan2(r, a.h) / RAD;
+      // C0 apunta 90° a la izquierda de donde mira la luminaria (C90 = hacia adelante); C crece en sentido antihorario visto de arriba
+      const th = Math.atan2(dx, dy) / RAD, C = r < 1e-6 ? 0 : (a.az + 90 - th);
+      const I = intens(a.i, C, g) * a.lm / 1000, cg = a.h / Math.sqrt(r * r + a.h * a.h);
+      E += I * cg * cg * cg / (a.h * a.h);
+    }
+    return E * fm;
+  }
+  function luz(ps, lums, cfg, opc) {
+    opc = opc || {};
+    const cols = ps.filter(esColumna);
+    if (!cols.length) return { error: "Todavía no hay columnas." };
+    const pl = plano0(ps[0].lat, ps[0].lng);
+    const borde = ps.filter((p) => p.tipo === "borde").map((p) => pl.aXY(p.lat, p.lng));
+    let zona = borde.length >= 3 ? borde : envolvente(cols.map((p) => pl.aXY(p.lat, p.lng)));
+    const zonaTipo = borde.length >= 3 ? "borde" : zona.length >= 3 ? "envolvente" : "círculo";
+    let centro = null;
+    if (zona.length >= 3) { centro = { x: 0, y: 0 }; zona.forEach((q) => { centro.x += q.x / zona.length; centro.y += q.y / zona.length; }); }
+    const arts = artefactos(ps, lums, cfg, pl, centro);
+    if (!arts.length) return { error: "Cargá la luminaria de las columnas (pestaña Columnas) para calcular la luz." };
+    if (zona.length < 3) {   // 1 o 2 columnas sin borde: un círculo de 2 alturas alrededor
+      const R0 = 2 * Math.max.apply(null, arts.map((a) => a.h)); centro = centro || { x: arts[0].x, y: arts[0].y };
+      zona = []; for (let k = 0; k < 24; k++) zona.push({ x: centro.x + R0 * Math.sin(k * 15 * RAD), y: centro.y + R0 * Math.cos(k * 15 * RAD) });
+    }
+    const hmax = Math.max.apply(null, arts.map((a) => a.h)), marg = Math.max(5, 1.5 * hmax);
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    zona.concat(arts).forEach((q) => { x0 = Math.min(x0, q.x); x1 = Math.max(x1, q.x); y0 = Math.min(y0, q.y); y1 = Math.max(y1, q.y); });
+    x0 -= marg; x1 += marg; y0 -= marg; y1 += marg;
+    const tope = opc.tope || 40000, pasos = [0.5, 1, 1.5, 2, 3, 4, 5, 8, 10];
+    const paso = opc.paso || pasos.find((s) => (x1 - x0) * (y1 - y0) / (s * s) <= tope) || 10;
+    const nx = Math.max(2, Math.ceil((x1 - x0) / paso)), ny = Math.max(2, Math.ceil((y1 - y0) / paso));
+    const E = new Float32Array(nx * ny), dentro = new Uint8Array(nx * ny);
+    let suma = 0, n = 0, emin = Infinity, emax = 0;
+    const fm = +cfg.fm || 0.8;
+    for (let j = 0; j < ny; j++) {
+      const y = y1 - (j + 0.5) * paso;   // fila 0 = norte (arriba en la imagen)
+      for (let i = 0; i < nx; i++) {
+        const x = x0 + (i + 0.5) * paso, e = eEn(arts, x, y, fm), k = j * nx + i;
+        E[k] = e;
+        if (enPoligono(x, y, zona)) { dentro[k] = 1; suma += e; n++; if (e < emin) emin = e; if (e > emax) emax = e; }
+      }
+    }
+    const em = n ? suma / n : 0;
+    if (!n) emin = 0;
+    const ok = em >= cfg.emReq - 1e-9 && emin >= cfg.eminReq - 1e-9;
+    return { pl, zona, zonaTipo, area: areaPol(zona), arts, x0, y1, paso, nx, ny, E, dentro, em, emin, emax, uo: em ? emin / em : 0, ok, puntos: n, generica: arts.some((a) => a.generica) };
+  }
+  // radio útil: hasta dónde llega cada columna con al menos «umbral» lux (36 direcciones, cada 0,25 m, hasta 80 m)
+  function radios(r, cfg) {
+    const thr = +cfg.umbral > 0 ? +cfg.umbral : cfg.eminReq, fm = +cfg.fm || 0.8, out = {};
+    const porCol = {}; r.arts.forEach((a) => { (porCol[a.id] = porCol[a.id] || []).push(a); });
+    Object.keys(porCol).forEach((id) => {
+      const as = porCol[id], cxm = as.reduce((s, a) => s + a.x, 0) / as.length, cym = as.reduce((s, a) => s + a.y, 0) / as.length;
+      const rs = [];
+      for (let k = 0; k < 36; k++) {
+        const th = k * 10 * RAD, sx = Math.sin(th), sy = Math.cos(th);
+        let ult = 0;
+        for (let d = 0; d <= 80; d += 0.25) if (eEn(as, cxm + d * sx, cym + d * sy, fm) >= thr) ult = d;
+        rs.push(ult);
+      }
+      out[id] = { x: cxm, y: cym, rs, min: Math.min.apply(null, rs), max: Math.max.apply(null, rs), med: rs.reduce((s, v) => s + v, 0) / rs.length, thr };
+    });
+    return out;
+  }
+  // colores del mapa de luz según lo pedido: rojo no llega al mínimo · naranja falta para el promedio · verde bien · amarillo de más
+  function colorLux(e, cfg) {
+    if (e < cfg.eminReq) return [255, 59, 48];
+    if (e < cfg.emReq) return [255, 159, 10];
+    if (e < 3 * cfg.emReq) return [52, 199, 89];
+    return [255, 214, 10];
+  }
+  function imagenLuz(r, cfg) {
+    try {
+      const cv = document.createElement("canvas"); cv.width = r.nx; cv.height = r.ny;
+      const g = cv.getContext("2d"), im = g.createImageData(r.nx, r.ny);
+      for (let k = 0; k < r.nx * r.ny; k++) {
+        const c = colorLux(r.E[k], cfg), a = r.dentro[k] ? 150 : 60;
+        im.data[4 * k] = c[0]; im.data[4 * k + 1] = c[1]; im.data[4 * k + 2] = c[2]; im.data[4 * k + 3] = r.E[k] < 0.05 ? (r.dentro[k] ? 150 : 0) : a;
+      }
+      g.putImageData(im, 0, 0);
+      return cv.toDataURL("image/png");
+    } catch (e) { return ""; }
+  }
+
   // ======================================================================= estado
   const st = { proys: {}, unsub: null, id: "", pest: "mapa", gps: null, gpsErr: "", watch: null, tipo: "colN", corte: false, modo: "toque", toque: false, prom: null, map: null, capa: null, faja: 0, msg: "", msgMal: false, cargado: false, reglas: true };
   const P = () => st.proys[st.id] || null;
   const puntos = () => ((P() && P().puntos) || []);
   const yo = () => { try { return PERMISOS.yo() || {}; } catch (e) { return {}; } };
   const quien = () => yo().nombre || yo().usuario || String((window.__fbUser || {}).email || "");
+  // v092: el punto anterior con el que se une (los de «Borde de la plaza» no se unen; «tramo nuevo» corta)
+  function ant(ps, i) {
+    if (!ps[i] || ps[i].tipo === "borde" || ps[i].corte) return -1;
+    for (let j = i - 1; j >= 0; j--) if (ps[j].tipo !== "borde") return j;
+    return -1;
+  }
   function tramos(ps) {   // segmentos consecutivos (salvo donde arranca un tramo nuevo)
     const out = [];
-    for (let i = 1; i < ps.length; i++) if (!ps[i].corte) out.push({ a: ps[i - 1], b: ps[i], d: distancia(ps[i - 1].lat, ps[i - 1].lng, ps[i].lat, ps[i].lng) });
+    for (let i = 1; i < ps.length; i++) { const j = ant(ps, i); if (j >= 0) out.push({ a: ps[j], b: ps[i], d: distancia(ps[j].lat, ps[j].lng, ps[i].lat, ps[i].lng) }); }
     return out;
   }
   const largo = (ps) => tramos(ps).reduce((s, x) => s + x.d, 0);
@@ -6613,8 +7112,8 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     const XY = (q) => (ab ? [q.x, q.y] : [q.gx, q.gy]);
     const out = [];
     const g = (c, v) => out.push(String(c), String(v));
-    const capas = TIPOS.map((t) => "PUNTOS_" + t.p).concat(["NOMBRES", "TRAMOS", "COTAS"]);
-    const colores = { C: 5, E: 8, T: 30, A: 6, K: 4, X: 1, P: 7, NOMBRES: 7, TRAMOS: 3, COTAS: 2 };
+    const capas = TIPOS.map((t) => "PUNTOS_" + t.p).concat(["NOMBRES", "TRAMOS", "COTAS", "BORDE", "ELECTRICO"]);
+    const colores = { C: 5, E: 8, T: 30, A: 6, K: 4, X: 1, P: 7, B: 4, NOMBRES: 7, TRAMOS: 3, COTAS: 2, BORDE: 4, ELECTRICO: 1 };
     g(0, "SECTION"); g(2, "HEADER"); g(9, "$ACADVER"); g(1, "AC1009"); g(9, "$INSBASE"); g(10, 0); g(20, 0); g(30, 0); g(0, "ENDSEC");
     g(0, "SECTION"); g(2, "TABLES"); g(0, "TABLE"); g(2, "LAYER"); g(70, capas.length);
     capas.forEach((c) => { g(0, "LAYER"); g(2, c); g(70, 0); g(62, colores[c.replace("PUNTOS_", "")] || 7); g(6, "CONTINUOUS"); });
@@ -6628,12 +7127,26 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
       g(0, "TEXT"); g(8, "NOMBRES"); g(10, f(c[0] + 0.4)); g(20, f(c[1] + 0.4)); g(30, 0); g(40, 0.5); g(1, q.p.n + (q.p.nota ? " " + q.p.nota : ""));
     });
     for (let i = 1; i < L.length; i++) {
-      if (L[i].p.corte) continue;
-      const a = XY(L[i - 1]), b = XY(L[i]), d = distancia(L[i - 1].p.lat, L[i - 1].p.lng, L[i].p.lat, L[i].p.lng);
+      const j = ant(ps, i); if (j < 0) continue;
+      const a = XY(L[j]), b = XY(L[i]), d = distancia(L[j].p.lat, L[j].p.lng, L[i].p.lat, L[i].p.lng);
       g(0, "LINE"); g(8, "TRAMOS"); g(10, f(a[0])); g(20, f(a[1])); g(30, 0); g(11, f(b[0])); g(21, f(b[1])); g(31, 0);
       let ang = Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI; if (ang > 90) ang -= 180; if (ang < -90) ang += 180;
       g(0, "TEXT"); g(8, "COTAS"); g(10, f((a[0] + b[0]) / 2)); g(20, f((a[1] + b[1]) / 2 + 0.3)); g(30, 0); g(40, 0.4); g(50, ang.toFixed(2)); g(1, d.toFixed(2) + " m");
     }
+    // v092: borde de la plaza (polilínea cerrada) y, en cada columna, tablero / circuito / fases / luminaria
+    const bor = L.filter((q) => q.p.tipo === "borde");
+    if (bor.length >= 3) {
+      g(0, "POLYLINE"); g(8, "BORDE"); g(66, 1); g(70, 1); g(10, 0); g(20, 0); g(30, 0);
+      bor.forEach((q) => { const c = XY(q); g(0, "VERTEX"); g(8, "BORDE"); g(10, f(c[0])); g(20, f(c[1])); g(30, 0); });
+      g(0, "SEQEND"); g(8, "BORDE");
+    }
+    let rr = null; try { rr = red(ps, p.lums || [], p.circ || {}, cfgDe(p)); } catch (e) { }
+    if (rr) L.forEach((q) => {
+      const k = rr.cols[q.p.id]; if (!k) return;
+      const tb = ps.find((x) => x.id === k.e.tab), c = XY(q);
+      const txt = (tb ? tb.n + "/" + k.e.circ : "sin tablero") + (k.fases ? " " + k.fases : "") + (k.lum ? " " + k.e.art + "x" + k.lum.nombre : "");
+      g(0, "TEXT"); g(8, "ELECTRICO"); g(10, f(c[0] + 0.4)); g(20, f(c[1] - 0.6)); g(30, 0); g(40, 0.35); g(1, txt);
+    });
     g(0, "ENDSEC"); g(0, "EOF");
     return out.join("\r\n") + "\r\n";
   }
@@ -6643,7 +7156,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     let acu = 0;
     L.forEach((q, i) => {
       let d = "";
-      if (i && !q.p.corte) { const dd = distancia(L[i - 1].p.lat, L[i - 1].p.lng, q.p.lat, q.p.lng); acu += dd; d = dd.toFixed(3); }
+      const j = ant(ps, i); if (j >= 0) { const dd = distancia(L[j].p.lat, L[j].p.lng, q.p.lat, q.p.lng); acu += dd; d = dd.toFixed(3); }
       filas.push([i + 1, q.p.n, tipo(q.p.tipo).t, q.p.lat.toFixed(8), q.p.lng.toFixed(8), q.gx.toFixed(3), q.gy.toFixed(3), q.p.acc == null ? "" : q.p.acc, q.p.fuente || "", d, i ? acu.toFixed(3) : "0.000", q.p.nota || "", new Date(q.p.ts || Date.now()).toLocaleString("es-AR")]);
     });
     return "﻿" + filas.map((f) => f.map((v) => { const s = String(v).replace(/^(-?\d+)\.(\d+)$/, "$1,$2"); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(";")).join("\r\n");
@@ -6657,7 +7170,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
   }
   const archivo = (p, ext) => String(p.nombre || "proyecto").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w-]+/g, "_").slice(0, 40) + "." + ext;
-  function planoSvg(ps, W, H, conGrilla) {
+  function planoSvg(ps, W, H, conGrilla, luzR) {
     const L = local(ps, fajaProy());
     if (!L.length) return '<svg viewBox="0 0 ' + W + " " + H + '" class="py-svg"><text x="' + W / 2 + '" y="' + H / 2 + '" text-anchor="middle" fill="#7c879d" font-size="14">Todavía no hay puntos</text></svg>';
     let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
@@ -6670,9 +7183,20 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
       for (let gx = Math.floor((cx - W / 2 / k) / paso) * paso; X(gx) < W; gx += paso) o.push('<line x1="' + X(gx).toFixed(1) + '" y1="0" x2="' + X(gx).toFixed(1) + '" y2="' + H + '" stroke="#eef1f6"/>');
       for (let gy = Math.floor((cy - H / 2 / k) / paso) * paso; Y(gy) > 0; gy += paso) o.push('<line x1="0" y1="' + Y(gy).toFixed(1) + '" x2="' + W + '" y2="' + Y(gy).toFixed(1) + '" stroke="#eef1f6"/>');
     }
+    // v092: mapa de luz debajo (calculado en un plano local alineado al norte verdadero: se lo lleva a Gauss-Krüger con una afín)
+    if (luzR && luzR.r && luzR.img && ps.length) {
+      const r = luzR.r, g0 = gk(ps[0].lat, ps[0].lng, fajaProy());
+      const aG = (tx, ty) => { const ll = r.pl.aLL(tx, ty), q = gk(ll.lat, ll.lng, fajaProy()); return [q.x - g0.x, q.y - g0.y]; };
+      const e0 = aG(0, 0), ex = aG(10, 0), ey = aG(0, 10);
+      const pp = (ex[0] - e0[0]) / 10, rr2 = (ex[1] - e0[1]) / 10, qq = (ey[0] - e0[0]) / 10, ss = (ey[1] - e0[1]) / 10;
+      const a = k * pp, b = -k * rr2, c = -k * qq, d = k * ss, e = W / 2 + k * (e0[0] - cx), f = H / 2 - k * (e0[1] - cy);
+      o.push('<g transform="matrix(' + [a, b, c, d, e, f].map((v) => v.toFixed(5)).join(" ") + ')"><image href="' + luzR.img + '" x="' + r.x0.toFixed(3) + '" y="' + (-r.y1).toFixed(3) + '" width="' + (r.nx * r.paso).toFixed(3) + '" height="' + (r.ny * r.paso).toFixed(3) + '" preserveAspectRatio="none" opacity="0.85"/></g>');
+    }
+    const bor = L.filter((q) => q.p.tipo === "borde");
+    if (bor.length >= 3) o.push('<polygon points="' + bor.map((q) => X(q.x).toFixed(1) + "," + Y(q.y).toFixed(1)).join(" ") + '" fill="none" stroke="#0891b2" stroke-width="1.6" stroke-dasharray="6 4"/>');
     for (let i = 1; i < L.length; i++) {
-      if (L[i].p.corte) continue;
-      const a = L[i - 1], b = L[i], d = distancia(a.p.lat, a.p.lng, b.p.lat, b.p.lng);
+      const j = ant(ps, i); if (j < 0) continue;
+      const a = L[j], b = L[i], d = distancia(a.p.lat, a.p.lng, b.p.lat, b.p.lng);
       o.push('<line x1="' + X(a.x).toFixed(1) + '" y1="' + Y(a.y).toFixed(1) + '" x2="' + X(b.x).toFixed(1) + '" y2="' + Y(b.y).toFixed(1) + '" stroke="#28285e" stroke-width="1.6"/>');
       let ang = Math.atan2(Y(b.y) - Y(a.y), X(b.x) - X(a.x)) * 180 / Math.PI; if (ang > 90) ang -= 180; if (ang < -90) ang += 180;
       const mx = (X(a.x) + X(b.x)) / 2, my = (Y(a.y) + Y(b.y)) / 2;
@@ -6692,7 +7216,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
   function imprimir() {
     const p = P(); if (!p) return;
     const ps = p.puntos || [], faja = fajaProy(), L = local(ps, faja);
-    const filas = L.map((q, i) => "<tr><td>" + (i + 1) + "</td><td><b>" + esc(q.p.n) + "</b></td><td>" + esc(tipo(q.p.tipo).t) + "</td><td>" + q.gx.toFixed(2) + "</td><td>" + q.gy.toFixed(2) + "</td><td>" + (q.p.acc == null ? "—" : "±" + num(q.p.acc, 2)) + "</td><td>" + (i && !q.p.corte ? num(distancia(L[i - 1].p.lat, L[i - 1].p.lng, q.p.lat, q.p.lng), 2) : "—") + "</td></tr>").join("");
+    const filas = L.map((q, i) => "<tr><td>" + (i + 1) + "</td><td><b>" + esc(q.p.n) + "</b></td><td>" + esc(tipo(q.p.tipo).t) + "</td><td>" + q.gx.toFixed(2) + "</td><td>" + q.gy.toFixed(2) + "</td><td>" + (q.p.acc == null ? "—" : "±" + num(q.p.acc, 2)) + "</td><td>" + (ant(ps, i) >= 0 ? num(distancia(L[ant(ps, i)].p.lat, L[ant(ps, i)].p.lng, q.p.lat, q.p.lng), 2) : "—") + "</td></tr>").join("");
     const hoy = new Date().toLocaleDateString("es-AR");
     const doc = '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>' + esc(p.nombre) + '</title><style>@page{size:A4 landscape;margin:10mm}body{font:12px Inter,Arial,sans-serif;color:#0d1424;margin:0}h1{font-size:18px;margin:0 0 2px}.sub{color:#4b5670;margin-bottom:8px}.py-svg{width:100%;height:auto;border:1px solid #c9cfdc}table{border-collapse:collapse;width:100%;margin-top:8px;font-size:11px}td,th{border:1px solid #d5dae8;padding:3px 6px;text-align:left}th{background:#eef1f6}.caj{display:flex;justify-content:space-between;border:1.5px solid #28285e;padding:6px 10px;margin-top:8px;font-size:11px}.nota{color:#b45309;font-size:11px;margin-top:4px}</style></head><body>' +
       "<h1>" + esc(p.nombre) + "</h1><div class=\"sub\">" + (p.obraNombre ? "Obra: " + esc(p.obraNombre) + " · " : "") + ps.length + " puntos · " + num(largo(ps), 2) + " m de recorrido · coordenadas Gauss-Krüger POSGAR 2007 faja " + faja + "</div>" +
@@ -6735,6 +7259,17 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
       L.circleMarker([p.lat, p.lng], { radius: 7, color: "#fff", weight: 2, fillColor: t.c, fillOpacity: 1 }).addTo(st.capa)
         .bindTooltip(esc(p.n), { permanent: true, direction: "right", offset: [8, 0], className: "py-nom" });
     });
+    const bor = ps.filter((p) => p.tipo === "borde");   // v092: borde de la plaza
+    if (bor.length >= 3) L.polygon(bor.map((p) => [p.lat, p.lng]), { color: "#0891b2", weight: 2, dashArray: "6 4", fill: false, interactive: false }).addTo(st.capa);
+    if (st.verLuz && luzVigente() && st.luzRes.r) {   // v092: mapa de luz y radio útil
+      const r = st.luzRes.r, a = r.pl.aLL(r.x0, r.y1 - r.ny * r.paso), b = r.pl.aLL(r.x0 + r.nx * r.paso, r.y1);
+      if (st.luzRes.img) L.imageOverlay(st.luzRes.img, [[a.lat, a.lng], [b.lat, b.lng]], { opacity: 0.8, interactive: false }).addTo(st.capa);
+      Object.keys(st.luzRes.rad || {}).forEach((id) => {
+        const x = st.luzRes.rad[id], pq = ps.find((q) => q.id === id);
+        const pol = x.rs.map((d, k2) => { const ll = r.pl.aLL(x.x + d * Math.sin(k2 * 10 * RAD), x.y + d * Math.cos(k2 * 10 * RAD)); return [ll.lat, ll.lng]; });
+        L.polygon(pol, { color: "#28285e", weight: 1.2, dashArray: "3 3", fill: false }).addTo(st.capa).bindTooltip((pq ? esc(pq.n) + " · " : "") + "radio útil " + num(x.min, 1) + "–" + num(x.max, 1) + " m", { sticky: true });
+      });
+    }
     if (st.gps) L.circleMarker([st.gps.lat, st.gps.lng], { radius: 6, color: "#1d4ed8", weight: 3, fillColor: "#60a5fa", fillOpacity: 0.9 }).addTo(st.capa);
     if (!st.vista && (ps.length || st.gps)) {
       st.vista = true;
@@ -6769,7 +7304,21 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     "#pyOv .py-tabla button{min-width:40px;min-height:40px;border-radius:12px;border:1px solid var(--border);background:#ffffffb8;cursor:pointer}" +
     "@media(max-width:640px){#pyOv .py-cuerpo{padding:12px}#pyOv .py-tabla thead{display:none}#pyOv .py-tabla tr{display:grid;grid-template-columns:1fr 1fr;gap:4px;border-bottom:1px solid var(--line);padding:6px 0}#pyOv .py-tabla td{border:0!important;padding:2px}}" +
     "#pyOv .py-vacio{padding:24px;text-align:center;color:var(--text-soft)}.py-cota{background:#fff8e1!important;border:1px solid #f59e0b!important;color:#7c2d12!important;font:700 11px Inter,Arial,sans-serif!important;padding:1px 5px!important;box-shadow:none!important}.py-cota:before{display:none}.py-nom{background:#28285e!important;color:#fff!important;border:0!important;font:800 11px Inter,Arial,sans-serif!important;padding:1px 6px!important;box-shadow:none!important}.py-nom:before{display:none}";
-  function asegurarCss() { if ($("proyectistaCss")) return; const s = document.createElement("style"); s.id = "proyectistaCss"; s.textContent = CSS; document.head.appendChild(s); }
+  // v092: piezas de las pestañas de cálculo (con las variables del tema)
+  const CSS92 = "#pyOv .py-grid.py-ancho{grid-template-columns:minmax(0,1fr)!important;grid-template-areas:'vista' 'gps' 'salida' 'acc'!important}" +
+    "#pyOv .py-campos{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px 14px;margin:6px 0 10px}#pyOv .py-campo{display:flex;flex-direction:column;gap:4px;font:600 13px var(--fuente);color:var(--text-soft)}#pyOv .py-campo small{font-weight:500;color:var(--text-3);font-size:11.5px}#pyOv .py-campo input,#pyOv .py-campo select{width:100%}" +
+    "#pyOv .py-masivo{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 10px;padding:10px 12px;border-radius:16px;background:var(--bg-soft)}#pyOv .py-masivo b{font-size:13px;color:var(--text-soft)}#pyOv .py-masivo select{flex:1 1 150px;min-width:0}" +
+    "#pyOv .py-scroll{overflow-x:auto}#pyOv .py-tcols td,#pyOv .py-tcirc td{min-width:90px}#pyOv .py-tcols td:first-child,#pyOv .py-tcirc td:first-child{min-width:70px}#pyOv .py-tabla td small{color:var(--text-3)}" +
+    "#pyOv .py-sem{display:inline-block;padding:2px 9px;border-radius:999px;font-weight:700;font-family:var(--mono)}#pyOv .py-sem.ok{background:#34c75926;color:#1a7f37}#pyOv .py-sem.med{background:#ff9f0a2e;color:#8a4b00}#pyOv .py-sem.mal{background:#ff3b3026;color:#b3261e}" +
+    "#pyOv .py-aviso-l{color:#8a4b00;font-size:13px;line-height:1.45}#pyOv .py-aviso-l:empty{display:none}#pyOv .py-falta{color:#b3261e}" +
+    "#pyOv .py-gen{margin-top:10px;padding:10px 12px;border-radius:16px;background:var(--bg-soft);font-size:13.5px;line-height:1.5}" +
+    "#pyOv .py-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px}#pyOv .py-tile{padding:12px 14px;border-radius:18px;background:#ffffffb3;border:1px solid var(--canto)}#pyOv .py-tile .num{font:800 24px var(--disp);color:var(--navy)}#pyOv .py-tile .lbl{font-size:12.5px;color:var(--text-soft)}#pyOv .py-tile.ok .num{color:#1a7f37}#pyOv .py-tile.mal .num{color:#b3261e}" +
+    "#pyOv .py-veredicto{padding:10px 14px;border-radius:16px;font-weight:700;margin-bottom:8px}#pyOv .py-veredicto.ok{background:#34c7591f;color:#1a7f37}#pyOv .py-veredicto.mal{background:#ff3b301a;color:#b3261e}" +
+    "#pyOv .py-ley{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--text-soft);margin:8px 0}#pyOv .py-ley i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:5px;vertical-align:-1px}" +
+    "#pyOv .py-arch{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;background:#ffffffb8;border:1px dashed var(--navy);color:var(--navy);font-weight:600;cursor:pointer;margin:4px 0 8px}#pyOv .py-arch input{position:absolute;opacity:0;width:1px;height:1px}" +
+    "#pyOv .py-sep{height:1px;background:var(--line);margin:12px 0}#pyOv .py-h3{font:700 14.5px var(--disp);margin:12px 0 6px;color:var(--text)}#pyOv .py-res td:last-child{text-align:right}" +
+    "@media(max-width:640px){#pyOv .py-scroll{overflow:visible}#pyOv .py-tabla td[data-l]:not([data-l=''])::before{content:attr(data-l);display:block;font:600 11px var(--fuente);color:var(--text-3);margin-bottom:2px}#pyOv .py-tcols td,#pyOv .py-tcirc td{min-width:0}#pyOv .py-tcols td:first-child,#pyOv .py-tcirc td:first-child,#pyOv .py-tlum td:first-child{grid-column:1/-1}#pyOv .py-res tr{grid-template-columns:1fr auto!important}#pyOv .py-campos{grid-template-columns:1fr}}";
+  function asegurarCss() { if ($("proyectistaCss")) return; const s = document.createElement("style"); s.id = "proyectistaCss"; s.textContent = CSS + CSS92; document.head.appendChild(s); }
   function obrasOpts() {
     const l = (typeof avanceObras !== "undefined" ? avanceObras : []).filter((o) => o && o.nombre).sort((a, b) => String(a.nombre).localeCompare(String(b.nombre), "es"));
     return '<option value="">— Sin obra (proyecto suelto) —</option>' + l.map((o) => '<option value="' + esc(o.id) + '">' + esc(o.nombre) + (o.obraId ? " · ID " + esc(o.obraId) : "") + "</option>").join("");
@@ -6777,7 +7326,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
   function htmlLista() {
     const l = Object.values(st.proys).sort((a, b) => (b.ts || 0) - (a.ts || 0));
     return '<div class="card"><h2>＋ Proyecto nuevo</h2><div class="hint">Un proyecto por obra o por zona. Después marcás los puntos en el lugar (o tocando el mapa).</div>' +
-      '<div class="py-fila"><input id="pyNombre" placeholder="Nombre (ej. PLAZA SAN MARTÍN · relevamiento)" style="flex:1 1 260px"><select id="pyObra" style="flex:1 1 220px">' + obrasOpts() + '</select><button type="button" class="btn-primary" data-py="crear">Crear</button></div></div>' +
+      '<div class="py-fila"><input type="text" id="pyNombre" placeholder="Nombre (ej. PLAZA SAN MARTÍN · relevamiento)" style="flex:1 1 260px"><select id="pyObra" style="flex:1 1 220px">' + obrasOpts() + '</select><button type="button" class="btn-primary" data-py="crear">Crear</button></div></div>' +
       '<div class="card"><h2>📁 Proyectos</h2>' + (!st.cargado ? '<div class="py-vacio">Cargando…</div>' : !l.length ? '<div class="py-vacio">Todavía no hay proyectos.</div>' :
         '<div class="py-lista">' + l.map((p) => '<button type="button" data-py="abrir" data-id="' + esc(p.id) + '"><span><b>' + esc(p.nombre) + "</b><br><small>" + (p.obraNombre ? esc(p.obraNombre) + " · " : "") + ((p.puntos || []).length) + " puntos · " + num(largo(p.puntos || []), 1) + " m</small></span><small>" + new Date(p.ts || p.creado || Date.now()).toLocaleDateString("es-AR") + " ›</small></button>").join("") + "</div>") + "</div>";
   }
@@ -6800,7 +7349,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
       '<div class="hint">' + ps.length + " puntos · " + num(largo(ps), 2) + " m de recorrido</div></div>" +
       '<div class="card py-a-salida"><h2>⬇ Sacar el plano</h2>' +
       '<div class="py-fila"><select id="pyFaja">' + [3, 4, 5].map((f) => '<option value="' + f + '"' + (fajaProy() === f ? " selected" : "") + ">Gauss-Krüger POSGAR 2007 · faja " + f + (f === 4 ? " (Córdoba)" : "") + "</option>").join("") + "</select></div>" +
-      '<button type="button" class="btn-primary" data-py="dxf">AutoCAD (DXF)</button><button type="button" class="btn-ghost" data-py="dxfLocal">DXF en metros locales</button><button type="button" class="btn-ghost" data-py="csv">Planilla (Excel)</button><button type="button" class="btn-ghost" data-py="imprimir">🖨 Plano / PDF</button>' +
+      '<button type="button" class="btn-primary" data-py="dxf">AutoCAD (DXF)</button><button type="button" class="btn-ghost" data-py="dxfLocal">DXF en metros locales</button><button type="button" class="btn-ghost" data-py="csv">Planilla (Excel)</button><button type="button" class="btn-ghost" data-py="imprimir">🖨 Plano / PDF</button><button type="button" class="btn-ghost" data-py="memoria">📄 Memoria de cálculo</button>' +
       '<div class="hint">El DXF lo abre AutoCAD. Sistema de coordenadas: a confirmar con la base de Córdoba.</div></div>';
   }
   function htmlPuntos() {
@@ -6808,21 +7357,344 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     if (!ps.length) return '<div class="py-vacio">Todavía no hay puntos.</div>';
     return '<table class="py-tabla"><thead><tr><th>N°</th><th>Punto</th><th>Tipo</th><th>X / Y (GK)</th><th>±</th><th>Al anterior</th><th></th></tr></thead><tbody>' +
       L.map((q, i) => {
-        const p = q.p, d = i && !p.corte ? distancia(ps[i - 1].lat, ps[i - 1].lng, p.lat, p.lng) : null;
-        return '<tr data-i="' + i + '"><td class="mono">' + (i + 1) + '</td><td><input data-pyc="n" value="' + esc(p.n) + '" aria-label="Nombre"><input data-pyc="nota" value="' + esc(p.nota || "") + '" placeholder="nota" aria-label="Nota" style="margin-top:4px"></td>' +
+        const p = q.p, j = ant(ps, i), d = j >= 0 ? distancia(ps[j].lat, ps[j].lng, p.lat, p.lng) : null;
+        return '<tr data-i="' + i + '"><td class="mono">' + (i + 1) + '</td><td><input type="text" data-pyc="n" value="' + esc(p.n) + '" aria-label="Nombre"><input type="text" data-pyc="nota" value="' + esc(p.nota || "") + '" placeholder="nota" aria-label="Nota" style="margin-top:4px"></td>' +
           '<td><select data-pyc="tipo">' + TIPOS.map((t) => '<option value="' + t.k + '"' + (t.k === p.tipo ? " selected" : "") + ">" + esc(t.t) + "</option>").join("") + "</select></td>" +
-          '<td class="mono">' + q.gx.toFixed(2) + "<br>" + q.gy.toFixed(2) + '</td><td class="mono">' + (p.acc == null ? "mapa" : num(p.acc, 2)) + '</td><td class="mono">' + (d == null ? (i ? "tramo nuevo" : "—") : num(d, 2) + " m") + "</td>" +
+          '<td class="mono">' + q.gx.toFixed(2) + "<br>" + q.gy.toFixed(2) + '</td><td class="mono">' + (p.acc == null ? "mapa" : num(p.acc, 2)) + '</td><td class="mono">' + (d == null ? (p.tipo === "borde" ? "borde" : i ? "tramo nuevo" : "—") : num(d, 2) + " m") + "</td>" +
           '<td style="white-space:nowrap"><button type="button" data-py="sube" title="Subir">↑</button><button type="button" data-py="baja" title="Bajar">↓</button><button type="button" data-py="borrar" title="Borrar">🗑</button></td></tr>';
       }).join("") + "</tbody></table>";
   }
   function htmlProy() {
     const p = P();
-    const tabs = [["mapa", "🗺 Mapa"], ["plano", "📐 Plano"], ["puntos", "📋 Puntos (" + puntos().length + ")"]];
-    return '<div class="py-grid"><div class="py-a-vista"><div class="subtabs">' + tabs.map((t) => '<button type="button" data-py="pest" data-p="' + t[0] + '" class="subtab' + (st.pest === t[0] ? " activo" : "") + '">' + t[1] + "</button>").join("") + "</div>" +
-      '<div class="card" style="padding:8px">' + (st.pest === "mapa" ? '<div id="pyMapa"></div>' : st.pest === "plano" ? '<div id="pyPlano">' + planoSvg(puntos(), 900, 560, true) + "</div>" : '<div id="pyPuntos">' + htmlPuntos() + "</div>") + "</div></div>" +
+    const tabs = [["mapa", "🗺 Mapa"], ["plano", "📐 Plano"], ["puntos", "📋 Puntos (" + puntos().length + ")"], ["cols", "🏮 Columnas"], ["elec", "⚡ Eléctrico"], ["luz", "💡 Luz"]];
+    const ancho = st.pest === "cols" || st.pest === "elec" || st.pest === "luz";   // v092: los cálculos usan todo el ancho
+    const cuerpo = st.pest === "mapa" ? '<div class="card" style="padding:8px"><div id="pyMapa"></div>' + (luzVigente() && st.luzRes.r ? '<div class="py-fila"><button type="button" class="chip' + (st.verLuz ? " activo" : "") + '" data-py="luzMapa">💡 Mapa de luz y radio útil</button></div>' + (st.verLuz ? leyendaLuz(st.luzRes.cfg) : "") : "") + "</div>"
+      : st.pest === "plano" ? '<div class="card" style="padding:8px"><div id="pyPlano">' + planoSvg(puntos(), 900, 560, true, st.verLuz && luzVigente() ? st.luzRes : null) + "</div></div>"
+      : st.pest === "puntos" ? '<div class="card" style="padding:8px"><div id="pyPuntos">' + htmlPuntos() + "</div></div>"
+      : st.pest === "cols" ? '<div class="card"><h2>🏮 Columnas <span class="h2-sub">qué lleva cada una y de dónde le llega el cable</span></h2><div id="pyCols">' + htmlColumnas() + "</div></div>"
+      : st.pest === "elec" ? '<div id="pyElec">' + htmlElectrico() + "</div>"
+      : '<div id="pyLuz">' + htmlLuz() + "</div>";
+    return '<div class="py-grid' + (ancho ? " py-ancho" : "") + '"><div class="py-a-vista"><div class="subtabs">' + tabs.map((t) => '<button type="button" data-py="pest" data-p="' + t[0] + '" class="subtab' + (st.pest === t[0] ? " activo" : "") + '">' + t[1] + "</button>").join("") + "</div>" +
+      cuerpo + "</div>" +
       htmlLado() +
       '<div class="py-fila py-a-acc"><button type="button" class="btn-ghost" data-py="renombrar">✏ Cambiar nombre</button><button type="button" class="btn-ghost" data-py="borrarProy">🗑 Borrar proyecto</button></div></div>';
   }
+  // ======================================================================= v092 · pantallas de cálculo
+  const lumsP = () => ((P() && P().lums) || []);
+  const cfgP = () => cfgDe(P());
+  const redP = () => red(puntos(), lumsP(), (P() && P().circ) || {}, cfgP());
+  const nro = (v) => { const s = String(v == null ? "" : v).trim(); if (!s) return NaN; return parseFloat(s.indexOf(",") >= 0 ? s.replace(/\./g, "").replace(",", ".") : s); };
+  const pctTxt = (v) => (v == null || !isFinite(v) ? "—" : num(v, 2) + " %");
+  function semaforo(v, lim) { if (v == null || !isFinite(v)) return ""; return v <= lim * 0.8 ? "ok" : v <= lim ? "med" : "mal"; }
+  function guardarProy(campos) {
+    const p = P(); if (!p) return;
+    Object.assign(p, campos); pintar();
+    db().collection(COL).doc(p.id).update(Object.assign({}, campos, { ts: Date.now(), por: quien() })).then(() => avisar(""), (e) => avisar(errTxt(e), true));
+  }
+  function guardarCalc(k, v) { const c = Object.assign({}, (P() && P().calc) || {}); c[k] = v; guardarProy({ calc: c }); }
+  // en el celular las tablas pasan a tarjetas: cada celda lleva su título (data-l)
+  const etiquetar = (fila, tit) => { let i = 0; return fila.replace(/<td(?=[ >])/g, () => '<td data-l="' + esc(tit[i++] || "") + '"'); };
+  const opt = (v, t, sel) => '<option value="' + esc(v) + '"' + (String(v) === String(sel) ? " selected" : "") + ">" + esc(t) + "</option>";
+  const campoNum = (k, etiqueta, v, ayuda, paso) => '<label class="py-campo"><span>' + etiqueta + '</span><input type="text" inputmode="decimal" data-pyk="' + k + '" value="' + esc(String(v).replace(".", ",")) + '"' + (paso ? ' data-paso="' + paso + '"' : "") + ">" + (ayuda ? "<small>" + ayuda + "</small>" : "") + "</label>";
+
+  // ---------------------------------------------------------------- 🏮 Columnas: lo que lleva cada columna
+  function htmlColumnas() {
+    const ps = puntos(), cols = ps.filter(esColumna), tabs = ps.filter((p) => p.tipo === "tab"), lums = lumsP();
+    if (!cols.length) return '<div class="py-vacio">Todavía no hay columnas. Marcá puntos tipo «Columna nueva» o «Columna existente».</div>';
+    const rr = redP();
+    const cab = '<div class="py-aviso-l">' + (!tabs.length ? "⚠ Falta marcar el <b>tablero</b> (punto tipo Tablero): sin él no se calculan los circuitos.<br>" : "") +
+      (!lums.length ? '⚠ Falta cargar la <b>luminaria</b> (pestaña 💡 Luz › Luminarias): sin ella no hay carga ni cálculo de luz.' : "") + "</div>";
+    const masivo = '<div class="py-masivo"><b>Poner a todas las columnas:</b>' +
+      '<select id="pyMasCol"><option value="">tipo…</option>' + COLS.map((c) => opt(c.k, c.t)).join("") + "</select>" +
+      '<select id="pyMasArt"><option value="">artefactos…</option>' + [1, 2, 3, 4].map((n) => opt(n, n + (n === 1 ? " artefacto" : " artefactos"))).join("") + "</select>" +
+      (lums.length ? '<select id="pyMasLum"><option value="">luminaria…</option>' + lums.map((l) => opt(l.id, l.nombre)).join("") + "</select>" : "") +
+      (tabs.length > 1 ? '<select id="pyMasTab"><option value="">tablero…</option><option value="cerca">el más cercano</option>' + tabs.map((t) => opt(t.id, t.n)).join("") + "</select>" : "") +
+      '<button type="button" class="btn-ghost" data-py="aplicar">Aplicar</button></div>';
+    const filas = cols.map((p) => {
+      const c = rr.cols[p.id], e = c.e, mismo = cols.filter((q) => q.id !== p.id && rr.cols[q.id].e.tab === e.tab && rr.cols[q.id].e.circ === e.circ);
+      const sel = (k, opciones) => '<select data-pye="' + k + '" aria-label="' + k + '">' + opciones + "</select>";
+      return '<tr data-id="' + esc(p.id) + '"><td><b>' + esc(p.n) + "</b>" + (p.tipo === "colE" ? "<br><small>existente</small>" : "") + "</td>" +
+        "<td>" + sel("col", COLS.map((x) => opt(x.k, x.t, e.col)).join("")) + "</td>" +
+        "<td>" + sel("art", [0, 1, 2, 3, 4].map((n) => opt(n, n === 0 ? "sin luz" : n + " art.", e.art)).join("")) + "</td>" +
+        "<td>" + (lums.length ? sel("lum", lums.map((l) => opt(l.id, l.nombre, e.lum)).join("")) : '<small class="py-falta">sin luminaria</small>') + "</td>" +
+        '<td><input type="text" data-pye="mira" inputmode="decimal" placeholder="al centro" value="' + esc(p.el && p.el.mira != null ? String(p.el.mira) : "") + '" aria-label="Mira hacia (grados)"></td>' +
+        "<td>" + (tabs.length ? sel("tab", tabs.map((t) => opt(t.id, t.n, e.tab)).join("")) : '<small class="py-falta">sin tablero</small>') + "</td>" +
+        "<td>" + sel("circ", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => opt(n, "Circ. " + n, e.circ)).join("")) + "</td>" +
+        "<td>" + sel("de", opt("", "la anterior") + (e.tab ? opt(e.tab, "el tablero") : "") + mismo.map((q) => opt(q.id, q.n)).join(""), e.de) + "</td>" +
+        "<td>" + sel("fase", opt("auto", "auto" + (c.fases ? " (" + c.fases + ")" : "")) + ["R", "S", "T"].map((f) => opt(f, f)).join(""), e.fase) + "</td>" +
+        '<td><input type="text" data-pye="m" inputmode="decimal" placeholder="' + (c.metros ? num(c.metros, 1) : "auto") + '" value="' + (e.m ? esc(String(e.m).replace(".", ",")) : "") + '" aria-label="Metros de cable"></td></tr>';
+    }).map((f) => etiquetar(f, ["", "Columna", "Artefactos", "Luminaria", "Mira hacia (°)", "Tablero", "Circuito", "Viene de", "Fase", "Metros de cable"])).join("");
+    return cab + masivo + '<div class="py-scroll"><table class="py-tabla py-tcols"><thead><tr><th>Punto</th><th>Columna</th><th>Artefactos</th><th>Luminaria</th><th>Mira hacia (°)</th><th>Tablero</th><th>Circuito</th><th>Viene de</th><th>Fase</th><th>Metros de cable</th></tr></thead><tbody>' + filas + "</tbody></table></div>" +
+      '<div class="hint">«Mira hacia»: rumbo de la luminaria en grados (0 = norte, 90 = este); vacío = mirando al centro de la plaza. Con 2 o más artefactos se reparten parejos alrededor. «Viene de»: de dónde le llega el cable (vacío = de la columna anterior del mismo circuito). «Metros de cable»: vacío = se calcula con la distancia + reserva + subidas.</div>';
+  }
+
+  // ---------------------------------------------------------------- ⚡ Eléctrico: circuitos, caída de tensión y protecciones
+  function htmlElectrico() {
+    const c = cfgP(), rr = redP();
+    const datos = '<div class="card"><h2>⚙ Datos de la red</h2><div class="py-campos">' +
+      '<label class="py-campo"><span>Tensión</span><select data-pyk="vll">' + opt(380, "3 × 380 / 220 V", c.vll) + "</select></label>" +
+      '<label class="py-campo"><span>Conductor de cobre</span><select data-pyk="cond">' + opt(5, "flexible (clase 5)", c.cond) + opt(2, "rígido o cableado (clase 2)", c.cond) + "</select><small>según la hoja del cable (a confirmar)</small></label>" +
+      campoNum("lim", "Caída máxima admitida (%)", c.lim, "a confirmar con la Inspección") +
+      campoNum("temp", "Temperatura del cable (°C)", c.temp, "70 °C: cable cargado en uso normal") +
+      campoNum("reserva", "Reserva de recorrido (%)", c.reserva, "la zanja no va en línea recta (a confirmar)") +
+      campoNum("subida", "Subida a la caja de la columna (m)", c.subida, "caja bornera a 3,50 m del piso (PRFV)") +
+      campoNum("subLum", "Cable de subida 3×1,5 por artefacto (m)", c.subLum, "regla de la calculadora: 7 m") +
+      campoNum("x", "Reactancia del cable (Ω/km)", c.x, "valor típico; a confirmar con el fabricante") +
+      campoNum("minIn", "Térmica mínima por circuito (A)", c.minIn, "por el arranque de los drivers LED (a confirmar)") +
+      "</div></div>";
+    if (!rr.circuitos.length) return datos + '<div class="card"><div class="py-vacio">' + esc(rr.avisos[0] || "Cargá tablero y circuito a las columnas (pestaña 🏮 Columnas).") + "</div></div>";
+    const circ = rr.circuitos.map((k) => {
+      const cc = k.cfg, s = semaforo(k.dvMax, c.lim);
+      const secs = Object.keys(R20[cc.mat]).map(Number).sort((a, b) => a - b);
+      return etiquetar('<tr data-clave="' + esc(k.clave) + '"><td><b>' + esc(k.tabNombre) + " · " + k.n + "</b><br><small>" + k.cols + " col. · " + k.art + " art.</small></td>" +
+        '<td><select data-pyci="tipo">' + opt("3F", "3F + N", cc.tipo) + opt("1F", "1F + N", cc.tipo) + "</select>" + (cc.tipo === "1F" ? '<select data-pyci="fase">' + ["R", "S", "T"].map((f) => opt(f, "fase " + f, cc.fase)).join("") + "</select>" : "") + "</td>" +
+        '<td><select data-pyci="mat">' + opt("Cu", "Cobre", cc.mat) + opt("Al", "Aluminio", cc.mat) + '</select><select data-pyci="sec">' + secs.map((x) => opt(x, (cc.tipo === "1F" ? "2" : "4") + " × " + String(x).replace(".", ",") + " mm²", cc.sec)).join("") + "</select></td>" +
+        '<td class="mono">' + num(k.P, 0) + " W</td>" +
+        '<td class="mono">R ' + num(k.Ia.R, 2) + "<br>S " + num(k.Ia.S, 2) + "<br>T " + num(k.Ia.T, 2) + "<br><small>N " + num(k.IN, 2) + " A</small></td>" +
+        '<td class="mono">' + num(k.cable, 1) + " m<br><small>+ " + num(k.subidaLum, 0) + " m de 3×1,5</small></td>" +
+        '<td class="mono"><span class="py-sem ' + s + '">' + pctTxt(k.dvMax) + "</span></td>" +
+        "<td>" + esc(k.prot.txt) + "<br><small>fusible por artefacto en la caja</small></td></tr>", ["", "Tipo", "Cable", "Potencia", "Corriente (A)", "Largo", "Caída máx.", "Protección"]) +
+        (k.avisos.length ? '<tr><td colspan="8" class="py-aviso-l">' + k.avisos.map(esc).join("<br>") + "</td></tr>" : "");
+    }).join("");
+    const gen = rr.tableros.map((t) => '<div class="py-gen"><b>Tablero ' + esc(t.nombre) + "</b> · " + t.circuitos + " circuitos · " + num(t.P, 0) + " W · corriente R " + num(t.Ia.R, 2) + " · S " + num(t.Ia.S, 2) + " · T " + num(t.Ia.T, 2) + " A (neutro " + num(t.IN, 2) + " A)<br>Interruptor general recomendado: <b>" + (t.In ? "térmica " + t.In + " A tetrapolar" : "a confirmar") + "</b> · diferencial, contactor y fotocontrol: a confirmar con la Inspección y el proyecto.</div>").join("");
+    const peor = Math.max.apply(null, rr.circuitos.map((k) => k.dvMax || 0));
+    return datos +
+      '<div class="card"><h2>🔌 Circuitos <span class="h2-sub">la peor caída: <span class="py-sem ' + semaforo(peor, c.lim) + '">' + pctTxt(peor) + "</span> (máximo " + num(c.lim, 1) + " %)</span></h2>" +
+      '<div class="py-scroll"><table class="py-tabla py-tcirc"><thead><tr><th>Circuito</th><th>Tipo</th><th>Cable</th><th>Potencia</th><th>Corriente (A)</th><th>Largo</th><th>Caída máx.</th><th>Protección recomendada</th></tr></thead><tbody>' + circ + "</tbody></table></div>" +
+      '<div class="hint">Fases «auto»: la app reparte cada artefacto en R, S o T para que la caída y el desbalance sean lo más bajos posible. Caída calculada con fasores (incluye el neutro) hasta la luminaria. Verde ≤ 80 % del máximo · ámbar cerca · rojo se pasa: subí la sección o partí el circuito.</div>' + gen + "</div>" +
+      htmlResumen(rr);
+  }
+  function resumenDe(rr) {
+    const ps = puntos(), cols = ps.filter(esColumna), lums = lumsP();
+    const porTipo = {}, porLum = {}, cable = {};
+    let f2 = 0, f4 = 0, jab = 0;
+    cols.forEach((p) => { const c = rr.cols[p.id]; porTipo[c.e.col] = (porTipo[c.e.col] || 0) + 1; if (c.e.art && c.lum) porLum[c.lum.id] = (porLum[c.lum.id] || 0) + c.e.art; f2 += c.fus.f2; f4 += c.fus.f4; });
+    rr.circuitos.forEach((k) => {
+      const kk = (k.cfg.tipo === "1F" ? "2" : "4") + " × " + String(k.cfg.sec).replace(".", ",") + " mm² " + (k.cfg.mat === "Al" ? "Al" : "Cu");
+      cable[kk] = (cable[kk] || 0) + k.cable;
+      cable["3 × 1,5 mm² Cu (subidas)"] = (cable["3 × 1,5 mm² Cu (subidas)"] || 0) + k.subidaLum;
+      const metal = k.ids.every((id) => !colTipo(rr.cols[id].e.col).prfv);
+      jab += metal ? k.ids.length : 1;   // regla de la calculadora: PRFV 1 al final de cada circuito; metálica 1 por columna
+    });
+    jab += ps.filter((p) => p.tipo === "tab").length;
+    return { porTipo, porLum, cable, f2, f4, jab, zanja: largo(ps), lums };
+  }
+  function htmlResumen(rr) {
+    const r = resumenDe(rr);
+    const fila = (a, b) => "<tr><td>" + a + '</td><td class="mono">' + b + "</td></tr>";
+    return '<div class="card"><h2>📦 Cuadro resumen <span class="h2-sub">para el cómputo (revisalo con la calculadora)</span></h2><table class="py-tabla py-res"><tbody>' +
+      Object.keys(r.porTipo).map((k) => fila("Columnas " + colTipo(k).t, r.porTipo[k] + " Un.")).join("") +
+      Object.keys(r.porLum).map((k) => { const l = r.lums.find((x) => x.id === k); return fila("Luminarias " + esc(l ? l.nombre : "?"), r.porLum[k] + " Un."); }).join("") +
+      Object.keys(r.cable).map((k) => fila("Cable " + k, num(r.cable[k], 1) + " m")).join("") +
+      fila("Zanja (largo de los tramos marcados)", num(r.zanja, 1) + " m") +
+      (r.f2 ? fila("Fusibles 10×38 de 2 A", r.f2 + " Un.") : "") + (r.f4 ? fila("Fusibles 10×38 de 4 A", r.f4 + " Un.") : "") +
+      fila("Jabalinas (PRFV: 1 por circuito; metálica: 1 por columna; + 1 por tablero)", r.jab + " Un.") +
+      "</tbody></table></div>";
+  }
+
+  // ---------------------------------------------------------------- 💡 Luz: luminarias, nivel pedido, cálculo y radio útil
+  function firmaLuz() {
+    const ps = puntos().map((p) => [p.id, p.tipo, p.lat, p.lng, esColumna(p) ? JSON.stringify(p.el || {}) : ""]);
+    return JSON.stringify([ps, lumsP().map((l) => [l.id, l.lm, l.fot ? l.fot.i.length : 0, l.fid || ""]), P() && P().calc]);
+  }
+  const luzVigente = () => !!(st.luzRes && st.luzRes.firma === firmaLuz() && st.luzRes.id === st.id);
+  function calcularLuz(luego) {
+    if (st.calcLuz) return;
+    st.calcLuz = true;
+    const ps = puntos(), lums = lumsP(), c = cfgP(), firma = firmaLuz(), id = st.id;
+    setTimeout(() => {
+      let res;
+      try {
+        const r = luz(ps, lums, c);
+        res = r.error ? { error: r.error } : { r, rad: radios(r, c), img: imagenLuz(r, c), cfg: c };
+      } catch (e) { res = { error: "No se pudo calcular: " + (e && e.message || e) }; }
+      res.firma = firma; res.id = id; st.luzRes = res; st.calcLuz = false;
+      if (luego) luego(); else pintar();
+    }, 30);
+  }
+  function htmlLums() {
+    const l = lumsP(), n = st.lumNueva || {};
+    return '<div class="card"><h2>💡 Luminarias del proyecto</h2>' +
+      (l.length ? '<table class="py-tabla py-tlum"><thead><tr><th>Nombre</th><th>Potencia (W)</th><th>Flujo (lm)</th><th>cos φ</th><th>Fotometría</th><th></th></tr></thead><tbody>' +
+        l.map((x) => etiquetar('<tr data-lid="' + esc(x.id) + '"><td><input type="text" data-pyl="nombre" value="' + esc(x.nombre) + '" aria-label="Nombre"></td><td><input type="text" data-pyl="W" inputmode="decimal" value="' + esc(String(x.W).replace(".", ",")) + '" aria-label="Potencia"></td><td><input type="text" data-pyl="lm" inputmode="decimal" value="' + esc(String(x.lm || "")) + '" aria-label="Flujo"></td><td><input type="text" data-pyl="cos" inputmode="decimal" value="' + esc(String(x.cos).replace(".", ",")) + '" aria-label="cos fi"></td><td>' +
+          (x.fot ? "✓ " + esc(x.fot.formato) + (x.archivo ? "<br><small>" + esc(x.archivo) + "</small>" : "") : '<small class="py-falta">genérica (aprox.)</small>') + '</td><td><button type="button" data-py="lumBorrar" title="Borrar">🗑</button></td></tr>', ["Nombre", "Potencia (W)", "Flujo (lm)", "cos φ", "Fotometría", ""])).join("") + "</tbody></table>" : '<div class="hint">Todavía no hay luminarias. Cargá la que se va a usar (con su archivo .ldt o .ies, que lo da el fabricante).</div>') +
+      '<div class="py-sep"></div><h3 class="py-h3">＋ Luminaria nueva</h3>' +
+      '<label class="py-arch"><input type="file" id="pyLumArch" accept=".ldt,.LDT,.ies,.IES"><span>📄 Elegir archivo .ldt / .ies</span></label>' +
+      (n.fot ? '<div class="hint">✓ Archivo leído: <b>' + esc(n.archivo || "") + "</b>" + (n.aviso ? '<br><span class="py-falta">' + esc(n.aviso) + "</span>" : "") + "</div>" : "") +
+      '<div class="py-campos"><label class="py-campo"><span>Nombre</span><input type="text" id="pyLumNom" value="' + esc(n.nombre || "") + '" placeholder="ej. LED 75 W vial"></label>' +
+      '<label class="py-campo"><span>Potencia (W)</span><input type="text" id="pyLumW" inputmode="decimal" value="' + esc(n.W ? String(n.W).replace(".", ",") : "") + '"></label>' +
+      '<label class="py-campo"><span>Flujo de la luminaria (lm)</span><input type="text" id="pyLumLm" inputmode="decimal" value="' + esc(n.lm ? String(n.lm) : "") + '"><small>de la hoja de la luminaria</small></label>' +
+      '<label class="py-campo"><span>cos φ</span><input type="text" id="pyLumCos" inputmode="decimal" value="' + esc(String(n.cos || "0,95").replace(".", ",")) + '"><small>de la hoja del driver; 0,95 si no lo tenés (a confirmar)</small></label></div>' +
+      '<button type="button" class="btn-primary" data-py="lumGuardar">Guardar luminaria</button>' +
+      '<div class="hint">Sin archivo la app usa un reparto genérico (difusor): sirve para ver, no para presentar. El cálculo que vale es con el archivo del fabricante.</div></div>';
+  }
+  function htmlLuz() {
+    const c = cfgP();
+    const nivel = '<div class="card"><h2>🎯 Nivel pedido</h2><div class="py-campos">' +
+      '<label class="py-campo"><span>Clase de alumbrado</span><select data-pyk="clase">' + Object.keys(CLASES).map((k) => opt(k, k + " · " + num(CLASES[k][0], 1) + " lx promedio / " + num(CLASES[k][1], 1) + " lx mínimo", c.clase)).join("") + opt("otro", "Otro valor (lo cargo yo)", c.clase) + "</select><small>EN 13201 (zonas peatonales). El que pide la Inspección: a confirmar.</small></label>" +
+      (c.clase === "otro" ? campoNum("emReq", "Promedio pedido (lx)", c.emReq) + campoNum("eminReq", "Mínimo pedido (lx)", c.eminReq) : "") +
+      campoNum("fm", "Factor de mantenimiento", c.fm, "0,8 habitual para LED (a confirmar)") +
+      campoNum("umbral", "Radio útil: hasta cuántos lux", c.umbral || c.eminReq, "por defecto, el mínimo pedido") +
+      campoNum("brazo", "Salida del brazo (m)", c.brazo, "vínculo de 400 mm") +
+      COLS.map((x) => campoNum("alt." + x.k, "Altura de montaje " + x.t + " (m)", c.alt[x.k], "a confirmar (altura libre)")).join("") +
+      "</div></div>";
+    let res;
+    const R = st.luzRes;
+    if (st.calcLuz) res = '<div class="py-vacio">Calculando la luz…</div>';
+    else if (!luzVigente()) res = '<div class="py-vacio">Calculando la luz…</div>';
+    else if (R.error) res = '<div class="py-vacio">' + esc(R.error) + "</div>";
+    else {
+      const r = R.r, cc = R.cfg, ok = r.ok;
+      const tile = (v, t, cl) => '<div class="tile py-tile ' + (cl || "") + '"><div class="num">' + v + '</div><div class="lbl">' + t + "</div></div>";
+      const cols = puntos().filter((p) => R.rad[p.id]);
+      res = '<div class="py-tiles">' + tile(num(r.em, 1) + " lx", "promedio (pide " + num(cc.emReq, 1) + ")", r.em >= cc.emReq ? "ok" : "mal") + tile(num(r.emin, 1) + " lx", "mínimo (pide " + num(cc.eminReq, 1) + ")", r.emin >= cc.eminReq ? "ok" : "mal") +
+        tile(num(r.uo, 2), "uniformidad mín/prom") + tile(num(r.emax, 1) + " lx", "máximo") + "</div>" +
+        '<div class="py-veredicto ' + (ok ? "ok" : "mal") + '">' + (ok ? "✓ Cumple " : "✗ No cumple ") + (cc.clase === "otro" ? "lo pedido" : "la clase " + esc(cc.clase)) + (r.generica ? " · ⚠ con fotometría genérica: cargá el archivo de la luminaria" : "") + "</div>" +
+        '<div class="hint">Zona de cálculo: ' + (r.zonaTipo === "borde" ? "el borde de la plaza marcado" : r.zonaTipo === "envolvente" ? "el contorno de las columnas (marcá puntos «Borde de la plaza» para que sea exacta)" : "un círculo alrededor de las columnas") + " · " + num(r.area, 0) + " m² · grilla cada " + num(r.paso, 1) + " m (" + r.puntos + " puntos) · factor de mantenimiento " + num(cc.fm, 2) + ".</div>" +
+        '<div class="py-fila"><button type="button" class="btn-primary" data-py="verLuz">🗺 Ver el mapa de luz</button><button type="button" class="btn-ghost" data-py="memoria">📄 Memoria de cálculo</button></div>' +
+        leyendaLuz(cc) +
+        '<h3 class="py-h3">◯ Radio útil por columna <span class="hint">(hasta dónde da ' + num(R.rad[cols[0] && cols[0].id] ? R.rad[cols[0].id].thr : cc.eminReq, 1) + " lx o más)</span></h3>" +
+        '<table class="py-tabla py-trad"><thead><tr><th>Columna</th><th>Mínimo</th><th>Promedio</th><th>Máximo</th></tr></thead><tbody>' +
+        cols.map((p) => { const x = R.rad[p.id]; return etiquetar("<tr><td><b>" + esc(p.n) + '</b></td><td class="mono">' + num(x.min, 1) + ' m</td><td class="mono">' + num(x.med, 1) + ' m</td><td class="mono">' + num(x.max, 1) + " m</td></tr>", ["", "Mínimo", "Promedio", "Máximo"]); }).join("") + "</tbody></table>";
+    }
+    return htmlLums() + nivel + '<div class="card"><h2>📊 Resultado</h2>' + res + "</div>";
+  }
+  function leyendaLuz(c) {
+    const it = (col, t) => '<span><i style="background:' + col + '"></i>' + t + "</span>";
+    return '<div class="py-ley">' + it("#ff3b30", "menos de " + num(c.eminReq, 1) + " lx (oscuro)") + it("#ff9f0a", "de " + num(c.eminReq, 1) + " a " + num(c.emReq, 1) + " lx") + it("#34c759", "bien") + it("#ffd60a", "más de " + num(3 * c.emReq, 1) + " lx") + "</div>";
+  }
+
+  // ---------------------------------------------------------------- 📄 Memoria de cálculo (hoja A4)
+  function memoria() {
+    const p = P(); if (!p) return;
+    const seguir = () => {
+      const c = cfgP(), rr = redP(), R = luzVigente() ? st.luzRes : null, res = resumenDe(rr), ps = puntos(), hoy = new Date().toLocaleDateString("es-AR");
+      const t = (cab, filas) => "<table><thead><tr>" + cab.map((x) => "<th>" + x + "</th>").join("") + "</tr></thead><tbody>" + filas.join("") + "</tbody></table>";
+      const td = (a) => "<tr>" + a.map((x) => "<td>" + x + "</td>").join("") + "</tr>";
+      const cols = ps.filter(esColumna);
+      const lums = lumsP();
+      const aConf = ["Nivel de iluminación pedido por la Inspección (se usó " + (c.clase === "otro" ? num(c.emReq, 1) + " / " + num(c.eminReq, 1) + " lx" : "clase " + c.clase + " de EN 13201") + ").", "Caída de tensión máxima admitida (se usó " + num(c.lim, 1) + " %).", "Alturas de montaje, factor de mantenimiento (" + num(c.fm, 2) + ") y reactancia del cable (" + num(c.x, 2) + " Ω/km).", "Diferencial, contactor, fotocontrol y valor de puesta a tierra.", "Capacidad de corriente del cable (In ≤ Iz): verificar con la hoja del fabricante."];
+      if (R && R.r && R.r.generica) aConf.unshift("Hay luminarias sin archivo de fotometría: el cálculo de luz es aproximado.");
+      const html = '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Memoria · ' + esc(p.nombre) + '</title><style>@page{size:A4;margin:12mm}body{font:11px Inter,Arial,sans-serif;color:#0d1424;margin:0}h1{font-size:17px;margin:0 0 2px}h2{font-size:13px;margin:14px 0 4px;color:#28285e;border-bottom:1px solid #d5dae8;padding-bottom:2px}.sub{color:#4b5670}table{border-collapse:collapse;width:100%;margin:4px 0}th,td{border:1px solid #d5dae8;padding:3px 5px;text-align:left;vertical-align:top}th{background:#eef1f6;font-size:10px}.n{font-family:"JetBrains Mono",monospace;white-space:nowrap}.ok{color:#15803d;font-weight:700}.mal{color:#b91c1c;font-weight:700}.py-svg{width:100%;height:auto;border:1px solid #c9cfdc}.nota{color:#4b5670;font-size:10px}.caj{display:flex;justify-content:space-between;border-top:2px solid #28285e;margin-top:14px;padding-top:6px;font-size:10px}img.logo-impreso{height:34px;float:right}ul{margin:2px 0 0 16px;padding:0}</style></head><body>' +
+        "<h1>Memoria de cálculo · " + esc(p.nombre) + '</h1><div class="sub">' + (p.obraNombre ? "Obra: " + esc(p.obraNombre) + " · " : "") + cols.length + " columnas · " + rr.circuitos.length + " circuitos · tensión " + tensionTxt(c.vll) + " · " + hoy + "</div>" +
+        "<h2>1. Plano</h2>" + planoSvg(ps, 1000, 600, true, R && !R.error ? R : null) + (R && !R.error ? leyendaImp(c) : "") +
+        "<h2>2. Columnas</h2>" + t(["Punto", "Columna", "Luminaria", "Tablero / circuito", "Fase", "Cable (m)", "Caída", "Fusibles"], cols.map((q) => { const k = rr.cols[q.id]; return td(["<b>" + esc(q.n) + "</b>", esc(colTipo(k.e.col).t), k.e.art + " × " + esc(k.lum ? k.lum.nombre : "—"), (k.e.tab ? esc((ps.find((x) => x.id === k.e.tab) || {}).n || "") + " / " + k.e.circ : "—"), k.fases || "—", '<span class="n">' + (k.metros ? num(k.metros, 1) : "—") + "</span>", '<span class="n">' + pctTxt(k.dv) + "</span>", esc(k.fus.txt)]); })) +
+        "<h2>3. Circuitos, caída de tensión y protecciones</h2>" + t(["Circuito", "Cable", "Potencia", "Corriente R / S / T / N (A)", "Largo", "Caída máx.", "Protección"], rr.circuitos.map((k) => td([esc(k.tabNombre) + " · " + k.n, (k.cfg.tipo === "1F" ? "2" : "4") + " × " + String(k.cfg.sec).replace(".", ",") + " mm² " + k.cfg.mat, '<span class="n">' + num(k.P, 0) + " W</span>", '<span class="n">' + [k.Ia.R, k.Ia.S, k.Ia.T, k.IN].map((v) => num(v, 2)).join(" / ") + "</span>", '<span class="n">' + num(k.cable, 1) + " m</span>", '<span class="n ' + (k.cumple ? "ok" : "mal") + '">' + pctTxt(k.dvMax) + "</span>", esc(k.prot.txt)]))) +
+        rr.tableros.map((tb) => "<div>Tablero <b>" + esc(tb.nombre) + "</b>: " + num(tb.P, 0) + " W · " + [tb.Ia.R, tb.Ia.S, tb.Ia.T].map((v) => num(v, 2)).join(" / ") + " A · interruptor general recomendado: <b>" + (tb.In ? "térmica " + tb.In + " A tetrapolar" : "a confirmar") + "</b>.</div>").join("") +
+        unifilar(rr) +
+        '<div class="nota">Método: cargas fase-neutro de potencia constante (I = P / (U·cos φ)), suma fasorial por tramo y caída por fase incluyendo el neutro (Z·(I fase + I neutro)). Resistencias IEC 60228 (cobre clase ' + c.cond + ") a " + num(c.temp, 0) + " °C. Largo de cada tramo = distancia × (1 + " + num(c.reserva, 0) + " %) + subidas a las cajas de " + num(c.subida, 2) + " m; caída hasta la luminaria con " + num(c.subLum, 0) + " m de 3×1,5. Térmica recomendada: la estándar siguiente a 1,25 × I de proyecto (mínimo " + num(c.minIn, 0) + " A).</div>" +
+        "<h2>4. Iluminación</h2>" + (R && R.error ? "<div>" + esc(R.error) + "</div>" : !R ? "<div>Sin calcular.</div>" :
+          t(["Luminaria", "Potencia", "Flujo", "Fotometría"], lums.map((l) => td([esc(l.nombre), num(l.W, 1) + " W", num(l.lm || 0, 0) + " lm", l.fot ? esc(l.fot.formato + (l.archivo ? " · " + l.archivo : "")) : "genérica (aprox.)"]))) +
+          t(["", "Promedio", "Mínimo", "Uniformidad", "Máximo", "Resultado"], [td(["Calculado", '<span class="n">' + num(R.r.em, 2) + " lx</span>", '<span class="n">' + num(R.r.emin, 2) + " lx</span>", '<span class="n">' + num(R.r.uo, 2) + "</span>", '<span class="n">' + num(R.r.emax, 1) + " lx</span>", '<span class="' + (R.r.ok ? "ok" : "mal") + '">' + (R.r.ok ? "Cumple" : "No cumple") + "</span>"]), td(["Pedido", num(c.emReq, 1) + " lx", num(c.eminReq, 1) + " lx", "—", "—", c.clase === "otro" ? "valor cargado" : "clase " + c.clase])]) +
+          t(["Columna", "Radio útil mín.", "Promedio", "Máx."], ps.filter((q) => R.rad[q.id]).map((q) => { const x = R.rad[q.id]; return td(["<b>" + esc(q.n) + "</b>", num(x.min, 1) + " m", num(x.med, 1) + " m", num(x.max, 1) + " m"]); })) +
+          '<div class="nota">Método punto por punto: E = I(C,γ)·cos³γ / h², suma de todas las luminarias, × factor de mantenimiento ' + num(c.fm, 2) + ". Grilla cada " + num(R.r.paso, 1) + " m sobre " + num(R.r.area, 0) + " m² (" + (R.r.zonaTipo === "borde" ? "borde de la plaza" : "contorno de las columnas") + "). Radio útil: distancia hasta donde cada columna sola da " + num(R.rad[Object.keys(R.rad)[0]].thr, 1) + " lx o más.</div>") +
+        "<h2>5. Cuadro resumen</h2>" + t(["Ítem", "Cantidad"], Object.keys(res.porTipo).map((k) => td(["Columnas " + colTipo(k).t, res.porTipo[k] + " Un."])).concat(Object.keys(res.cable).map((k) => td(["Cable " + k, num(res.cable[k], 1) + " m"])), [td(["Zanja (tramos marcados)", num(res.zanja, 1) + " m"]), td(["Fusibles 10×38 2 A / 4 A", res.f2 + " / " + res.f4 + " Un."]), td(["Jabalinas", res.jab + " Un."])])) +
+        "<h2>6. A confirmar</h2><ul>" + aConf.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul>" +
+        '<div class="caj"><span><b>EMA Servicios</b> · Proyectista · memoria de cálculo preliminar</span><span>Fecha: ' + hoy + "</span><span>Hizo: " + esc(quien()) + "</span></div></body></html>";
+      if (window.hojaEMA && typeof hojaEMA.abrir === "function") hojaEMA.abrir("Memoria · " + (p.nombre || ""), html);
+      else bajar(archivo(p, "html"), html, "text/html");
+    };
+    if (!luzVigente() && puntos().some(esColumna) && lumsP().length) calcularLuz(seguir); else seguir();
+  }
+  function leyendaImp(c) {
+    const it = (col, t) => '<span style="margin-right:12px"><span style="display:inline-block;width:10px;height:10px;background:' + col + ';margin-right:4px"></span>' + t + "</span>";
+    return '<div class="nota">' + it("#ff3b30", "menos de " + num(c.eminReq, 1) + " lx") + it("#ff9f0a", num(c.eminReq, 1) + " a " + num(c.emReq, 1) + " lx") + it("#34c759", "bien") + it("#ffd60a", "más de " + num(3 * c.emReq, 1) + " lx") + "</div>";
+  }
+  function unifilar(rr) {   // esquema unifilar simple por tablero
+    return rr.tableros.map((tb) => {
+      const cs = rr.circuitos.filter((k) => k.tab === tb.tab), H = 70 + cs.length * 46, o = [];
+      o.push('<svg viewBox="0 0 700 ' + H + '" class="py-svg" xmlns="http://www.w3.org/2000/svg" font-family="Inter,Arial,sans-serif" font-size="11"><rect width="700" height="' + H + '" fill="#fff"/>');
+      o.push('<text x="12" y="20" font-weight="800" fill="#28285e">Unifilar · tablero ' + esc(tb.nombre) + '</text><text x="12" y="36" fill="#4b5670">Acometida ' + tensionTxt(Math.round(rr.U * RAIZ3)) + "</text>");
+      o.push('<rect x="140" y="26" width="70" height="20" fill="none" stroke="#28285e"/><text x="175" y="40" text-anchor="middle">' + (tb.In ? tb.In + " A 4P" : "a conf.") + '</text><line x1="210" y1="36" x2="240" y2="36" stroke="#28285e" stroke-width="2"/><line x1="240" y1="30" x2="240" y2="' + (H - 16) + '" stroke="#28285e" stroke-width="3"/>');
+      cs.forEach((k, i) => {
+        const y = 66 + i * 46;
+        o.push('<line x1="240" y1="' + y + '" x2="270" y2="' + y + '" stroke="#28285e" stroke-width="2"/><rect x="270" y="' + (y - 10) + '" width="74" height="20" fill="none" stroke="#28285e"/><text x="307" y="' + (y + 4) + '" text-anchor="middle">' + (k.prot.In ? "C" + k.prot.In + " " + k.prot.polos : "a conf.") + "</text>");
+        o.push('<line x1="344" y1="' + y + '" x2="420" y2="' + y + '" stroke="#28285e" stroke-width="2"/><text x="350" y="' + (y - 4) + '" font-size="10" fill="#4b5670">contactor (a conf.)</text>');
+        o.push('<text x="426" y="' + (y - 2) + '" font-weight="700">Circ. ' + k.n + " · " + (k.cfg.tipo === "1F" ? "2" : "4") + "×" + String(k.cfg.sec).replace(".", ",") + " " + k.cfg.mat + " · " + num(k.cable, 0) + ' m</text><text x="426" y="' + (y + 12) + '" fill="#4b5670">' + k.cols + " col. · " + k.art + " art. · " + num(k.P, 0) + " W · caída " + pctTxt(k.dvMax) + "</text>");
+      });
+      o.push("</svg>");
+      return o.join("");
+    }).join("");
+  }
+
+  // ---------------------------------------------------------------- cambios en los campos de cálculo
+  function cambioCalc(t) {
+    const k = t.dataset.pyk;
+    let v = t.tagName === "SELECT" ? t.value : nro(t.value);
+    if (k === "vll" || k === "cond") v = +v;
+    if (t.tagName !== "SELECT" && !(isFinite(v) && v >= 0)) { avisar("Poné un número (ej. 3 o 3,5).", true); t.blur(); return pintar(); }
+    t.blur();
+    if (k.indexOf("alt.") === 0) { const c = Object.assign({}, (P() && P().calc) || {}); c.alt = Object.assign({}, c.alt || {}); c.alt[k.slice(4)] = v; return guardarProy({ calc: c }); }
+    guardarCalc(k, v);
+  }
+  function cambioCol(t) {
+    const tr = t.closest("tr[data-id]"); if (!tr) return;
+    const k = t.dataset.pye, ps = puntos().slice(), i = ps.findIndex((q) => q.id === tr.dataset.id); if (i < 0) return;
+    let v = t.value;
+    if (k === "art" || k === "circ") v = parseInt(v, 10) || 0;
+    if (k === "m" || k === "mira") { v = String(v).trim() === "" ? "" : nro(v); if (v !== "" && !isFinite(v)) { avisar("Poné un número.", true); t.blur(); return pintar(); } if (k === "mira" && v !== "") v = ((v % 360) + 360) % 360; }
+    const el = Object.assign({}, ps[i].el || {}); el[k] = v;
+    if (k === "tab") el.de = "";   // cambió de tablero: el recorrido arranca de nuevo
+    ps[i] = Object.assign({}, ps[i], { el });
+    t.blur(); guardarPuntos(ps);
+  }
+  function aplicarMasivo() {
+    const col = ($("pyMasCol") || {}).value, art = ($("pyMasArt") || {}).value, lum = ($("pyMasLum") || {}).value, tab = ($("pyMasTab") || {}).value;
+    if (!col && !art && !lum && !tab) { avisar("Elegí qué poner (tipo, artefactos, luminaria o tablero).", true); return; }
+    const ps = puntos().map((p) => {
+      if (!esColumna(p)) return p;
+      const el = Object.assign({}, p.el || {});
+      if (col) el.col = col; if (art) el.art = +art; if (lum) el.lum = lum;
+      if (tab === "cerca") { el.tab = ""; el.de = ""; } else if (tab) { el.tab = tab; el.de = ""; }
+      return Object.assign({}, p, { el });
+    });
+    guardarPuntos(ps); avisar("✓ Aplicado a " + ps.filter(esColumna).length + " columnas.");
+  }
+  function cambioCirc(t) {
+    const tr = t.closest("tr[data-clave]"); if (!tr) return;
+    const clave = tr.dataset.clave, circ = Object.assign({}, (P() && P().circ) || {}), c = Object.assign({ mat: "Cu", sec: 4, tipo: "3F", fase: "R" }, circ[clave] || {});
+    c[t.dataset.pyci] = t.dataset.pyci === "sec" ? +t.value : t.value;
+    if (t.dataset.pyci === "mat" && !(R20[c.mat] || {})[c.sec]) c.sec = +Object.keys(R20[c.mat])[0];
+    circ[clave] = c; t.blur(); guardarProy({ circ });
+  }
+  function cambioLum(t) {
+    const tr = t.closest("tr[data-lid]"); if (!tr) return;
+    const k = t.dataset.pyl, ls = lumsP().map((l) => Object.assign({}, l)), l = ls.find((x) => x.id === tr.dataset.lid); if (!l) return;
+    if (k === "nombre") { if (!t.value.trim()) return pintar(); l.nombre = t.value.trim(); }
+    else { const v = nro(t.value); if (!(isFinite(v) && v > 0) || (k === "cos" && v > 1)) { avisar(k === "cos" ? "El cos φ va entre 0 y 1 (ej. 0,95)." : "Poné un número mayor que cero.", true); t.blur(); return pintar(); } l[k] = v; }
+    t.blur(); guardarProy({ lums: ls });
+  }
+  function lumArchivo(inp) {
+    const f = inp.files && inp.files[0]; if (!f) return;
+    if (f.size > 2e6) { avisar("El archivo es muy grande para una fotometría (más de 2 MB).", true); return; }
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        const txt = String(rd.result || ""), ies = /\.ies$/i.test(f.name) || /TILT\s*=/i.test(txt);
+        const r = ies ? parseIES(txt) : parseLDT(txt);
+        let aviso = "";
+        if (r.control && r.control.lorl > 0 && r.control.lorInt && Math.abs(r.control.lorInt - r.control.lorl) / r.control.lorl > 0.1) aviso = "Ojo: el rendimiento que declara el archivo (" + num(r.control.lorl, 1) + " %) no coincide con el que da la tabla (" + num(r.control.lorInt, 1) + " %). Revisá el flujo con la hoja de la luminaria.";
+        st.lumNueva = { fot: { formato: r.formato, i: r.i }, archivo: f.name, nombre: r.nombre || f.name.replace(/\.[^.]+$/, ""), W: r.W || "", lm: r.lm || "", cos: (st.lumNueva && st.lumNueva.cos) || 0.95, aviso };
+        avisar("✓ Leí la fotometría de «" + f.name + "».");
+      } catch (e) { st.lumNueva = null; avisar("No pude leer el archivo: " + (e && e.message || e), true); }
+      pintar();
+    };
+    rd.onerror = () => avisar("No se pudo abrir el archivo.", true);
+    rd.readAsText(f, "ISO-8859-1");
+  }
+  function lumGuardar() {
+    const n = st.lumNueva || {}, nombre = ($("pyLumNom").value || "").trim(), W = nro($("pyLumW").value), lm = nro($("pyLumLm").value), cos = nro($("pyLumCos").value);
+    if (!nombre) { avisar("Poné el nombre de la luminaria.", true); return; }
+    if (!(W > 0)) { avisar("Poné la potencia en W (ej. 75).", true); return; }
+    if (!(cos > 0 && cos <= 1)) { avisar("El cos φ va entre 0 y 1 (ej. 0,95).", true); return; }
+    if (!(lm > 0)) { avisar("Poné el flujo en lúmenes (está en la hoja de la luminaria).", true); return; }
+    const l = { id: "L" + Date.now().toString(36), nombre, W, lm, cos };
+    if (n.fot) { l.fot = n.fot; l.archivo = n.archivo || ""; l.fid = Date.now().toString(36); }
+    if (JSON.stringify(l).length > 120000) { avisar("La fotometría quedó muy pesada para guardar.", true); return; }
+    st.lumNueva = null;
+    guardarProy({ lums: lumsP().concat([l]) }); avisar("✓ Luminaria guardada.");
+  }
+
   function pintarGps() {
     const g = $("pyGps"); if (g) g.innerHTML = htmlGps();
     const b = document.querySelector('#pyOv [data-py="marcar"]'); if (b) b.disabled = !!st.prom;
@@ -6841,6 +7713,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     c.innerHTML = st.id ? htmlProy() : htmlLista();
     avisar(st.msg, st.msgMal);
     if (st.id) { gpsPrender(); if (st.pest === "mapa") mapaArmar(); } else gpsApagar();
+    if (st.id && st.pest === "luz" && !luzVigente() && !st.calcLuz) calcularLuz();   // v092
   }
   function abrir(id) {
     asegurarCss();
@@ -6868,7 +7741,7 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     if (a === "volver") { st.id = ""; st.toque = false; return pintar(); }
     if (a === "crear") { const n = ($("pyNombre").value || "").trim(); if (!n) { avisar("Poné un nombre al proyecto.", true); return; } return crear(n, $("pyObra").value); }
     if (a === "abrir") { st.id = b.dataset.id; st.pest = "mapa"; st.vista = false; return pintar(); }
-    if (a === "pest") { st.pest = b.dataset.p; return pintar(); }
+    if (a === "pest") { st.pest = b.dataset.p; if (st.pest === "mapa") st.vista = false; return pintar(); }
     if (a === "tipo") { st.tipo = b.dataset.k; document.querySelectorAll('#pyOv [data-py="tipo"]').forEach((x) => x.classList.toggle("activo", x.dataset.k === st.tipo)); return; }
     if (a === "marcar") return marcar();
     if (a === "toque") { st.toque = !st.toque; if (st.toque && st.pest !== "mapa") st.pest = "mapa"; pintar(); const m = $("pyMapa"); if (st.toque && m && m.scrollIntoView) m.scrollIntoView({ block: "center" }); return; }   // en el celular el mapa queda arriba: se lo trae a la vista
@@ -6876,6 +7749,16 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     if (a === "dxf" || a === "dxfLocal") return bajar(archivo(p, "dxf"), dxf(p, a === "dxf" ? "gk" : "local"), "application/dxf");
     if (a === "csv") return bajar(archivo(p, "csv"), planilla(p), "text/csv;charset=utf-8");
     if (a === "imprimir") return imprimir();
+    if (a === "memoria") return memoria();
+    if (a === "verLuz") { st.verLuz = true; st.pest = "mapa"; st.vista = false; return pintar(); }
+    if (a === "luzMapa") { st.verLuz = !st.verLuz; if (st.verLuz && !luzVigente()) return calcularLuz(); return pintar(); }
+    if (a === "aplicar") return aplicarMasivo();
+    if (a === "lumGuardar") return lumGuardar();
+    if (a === "lumBorrar") {
+      const id = b.closest("tr[data-lid]").dataset.lid, l = lumsP().find((x) => x.id === id), usos = puntos().filter((q) => q.el && q.el.lum === id).length;
+      if (!l || !confirm("¿Borrar la luminaria «" + l.nombre + "»?" + (usos ? " La usan " + usos + " columnas: pasan a la primera de la lista." : ""))) return;
+      return guardarProy({ lums: lumsP().filter((x) => x.id !== id) });
+    }
     if (a === "renombrar") { const n = prompt("Nombre del proyecto", p.nombre || ""); if (n && n.trim()) { p.nombre = n.trim(); pintar(); db().collection(COL).doc(p.id).update({ nombre: p.nombre, ts: Date.now() }).catch((er) => avisar(errTxt(er), true)); } return; }
     if (a === "borrarProy") { if (!confirm("¿Borrar el proyecto «" + p.nombre + "» con sus " + (p.puntos || []).length + " puntos? No se puede deshacer.")) return; const id = p.id; st.id = ""; delete st.proys[id]; pintar(); db().collection(COL).doc(id).delete().catch((er) => avisar(errTxt(er), true)); return; }
     const tr = b.closest("tr[data-i]"); if (!tr) return;
@@ -6889,16 +7772,22 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
     if (t.id === "pyCorte") { st.corte = t.checked; return; }
     if (t.id === "pyModo") { st.modo = t.value; return; }
     if (t.id === "pyFaja") { const p = P(); st.faja = +t.value; if (p) { p.faja = st.faja; db().collection(COL).doc(p.id).update({ faja: st.faja }).catch(() => { }); } return pintar(); }
+    if (t.id === "pyLumArch") return lumArchivo(t);
+    if (t.dataset && t.dataset.pyk) return cambioCalc(t);
+    if (t.dataset && t.dataset.pye) return cambioCol(t);
+    if (t.dataset && t.dataset.pyci) return cambioCirc(t);
+    if (t.dataset && t.dataset.pyl) return cambioLum(t);
     const c = t.dataset && t.dataset.pyc, tr = t.closest && t.closest("tr[data-i]");
     if (!c || !tr) return;
     const ps = puntos().slice(), i = +tr.dataset.i; if (!ps[i]) return;
     ps[i] = Object.assign({}, ps[i]); ps[i][c] = c === "n" ? (t.value.trim() || ps[i].n) : t.value;
     t.blur(); guardarPuntos(ps);
   }
-  window.__proyectista = { abrir, cerrar, estado: () => ({ id: st.id, pest: st.pest, gps: st.gps, proyectos: Object.keys(st.proys).length, reglas: st.reglas }), _geo: { distancia, gk, fajaDe }, _dxf: (id, s) => dxf(st.proys[id], s || "gk"), _csv: (id) => planilla(st.proys[id]) };
+  window.__proyectista = { abrir, cerrar, estado: () => ({ id: st.id, pest: st.pest, gps: st.gps, proyectos: Object.keys(st.proys).length, reglas: st.reglas, luz: luzVigente() && st.luzRes && st.luzRes.r ? { em: st.luzRes.r.em, emin: st.luzRes.r.emin, ok: st.luzRes.r.ok } : null, calcLuz: !!st.calcLuz }), _geo: { distancia, gk, fajaDe },
+    _calc: { red: (id) => red(st.proys[id].puntos || [], st.proys[id].lums || [], st.proys[id].circ || {}, cfgDe(st.proys[id])), parseLDT, parseIES, luz, radios, intens, cfgDe }, _dxf: (id, s) => dxf(st.proys[id], s || "gk"), _csv: (id) => planilla(st.proys[id]) };
 })();
 </script>
-<style id="uvDiagCss">#uvPanel .uv-fila .uv-porque{display:block;width:100%;margin-top:3px;color:#8a4b00;font-size:11.5px;line-height:1.35;white-space:normal;font-weight:500}</style>
+<style id="uvDiagCss">#uvHoja{position:fixed;top:0;left:0;right:0;bottom:0;z-index:10070;background:#1c1c4561;display:flex;align-items:flex-end;justify-content:center}#uvHoja .uv-h-caja{width:100%;max-width:520px;box-sizing:border-box;background:#fff;border-radius:26px 26px 0 0;padding:20px 20px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -20px 50px -30px #28285e;max-height:88vh;overflow:auto;font-size:15px;line-height:1.45;color:var(--text,#0d1424)}#uvHoja h3{margin:0 0 8px;font:800 18px var(--disp,Inter,sans-serif);color:var(--navy,#28285e)}#uvHoja p{margin:6px 0}#uvHoja .uv-h-pasos{margin:8px 0;padding-left:22px}#uvHoja .uv-h-pasos li{margin:5px 0}#uvHoja .uv-h-bot{display:flex;flex-direction:column;gap:8px;margin-top:14px}#uvHoja .uv-h-bot button{width:100%;min-height:48px;font-size:15.5px;cursor:pointer}@media (min-width:641px){#uvHoja{align-items:center}#uvHoja .uv-h-caja{border-radius:26px}}#uvPanel .uv-fila .uv-porque{display:block;width:100%;margin-top:3px;color:#8a4b00;font-size:11.5px;line-height:1.35;white-space:normal;font-weight:500}</style>
 <script id="revisarAppDiag">window.revisarApp=function(){var a=function(n){return document.getElementById(n)},i=String((a("appVersion")||{}).textContent||"").replace(/^\s*·?\s*v\s*/,"").trim(),e=null;try{e=window.PERMISOS&&PERMISOS.yo&&PERMISOS.yo()}catch{}var o="";try{o=e&&(PERMISOS.ROLES&&PERMISOS.ROLES[e.rol]&&PERMISOS.ROLES[e.rol].nombre||e.rol)||""}catch{o=e&&e.rol||""}var s=function(n){try{return!!n()}catch{return!1}},u=[["Mis tareas (botón en el menú)",function(){return a("menuMisTareas")&&a("viewMisTareas")}],["Órdenes en hojas (tablero / llenar / historial / buscar)",function(){return a("subtabsOrdenes")||typeof window.irSubOrdenes=="function"}],["Calculadoras rápidas + caída de tensión Muni",function(){return a("subtabsCalc")||window.__caidaMuni}],["Pañol: ficha, fotos y por sector",function(){return window.__panolFicha}],["Pañol: control de stock negativo",function(){return window.__stockNegativo&&typeof window.resolverFaltante=="function"}],["Pañol: reservas de material",function(){return typeof window.abrirNuevaReserva=="function"&&document.getElementById("cardStockReservas")}],["Base de datos conectada",function(){return window.firebase&&firebase.apps&&firebase.apps.length}]],r=["Versión: "+(i||"¿?"),"Autor: Miguel Ángel Díaz · © 2026","Usuario: "+(e?e.nombre||e.usuario||e.email||"":"(sin entrar)")+(o?" · rol "+o:""),"En la nómina: "+(e&&e.persona?e.persona:"— sin vincular —"),""];u.forEach(function(n){r.push((s(n[1])?"✓ ":"✗ ")+n[0])});var t=window.__erroresApp||[];r.push(""),r.push(t.length?"⚠ Errores ("+t.length+"):":"Sin errores."),t.slice(-6).forEach(function(n){r.push("• "+String(n.m).slice(0,120)+(n.d?" ["+n.d+"]":""))}),r.push(""),r.push("Si algo no aparece, mandale una captura de esto a quien arma la app."),alert(r.join(`
 `))};</script>
 </body>
