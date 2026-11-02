@@ -2,6 +2,29 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v094 — 02/11/2026 · «👥 Elegir quiénes»: una tarea la hacen varias personas juntas
+
+**Pedido de Ángel:** «Van 4 a la plaza: dos paran la columna y dos arman el tablero. No tengo dos tableros sino dos personas que trabajan en un tablero, y el ✂ Repartir no lo contempla. Que cada tarea pueda elegir quiénes la hacen y dividir las tareas entre ellos».
+
+**Cambios**
+- En la orden, en «¿Quién?» de cada tarea: **«👥 Elegir quiénes (la hacen juntos)»**. Se tocan las personas que la hacen (por ejemplo, Juan y Pedro en el tablero).
+- **Mis tareas:** esa tarea le aparece solo a ellos, con «👥 con Pedro». Los demás no la ven. Es una sola tarea para el grupo: cualquiera la marca.
+- **Puntos:** los de esa tarea se reparten **solo entre ellos**, con la regla de siempre (peso del rol × horas trabajadas). Al cerrar quedan fijados.
+- **«📋 Quién hace qué»** debajo de las tareas de la orden: cada persona con sus tareas, para ver de un vistazo cómo quedó la división.
+- La hoja impresa dice «👥 La hacen juntos: …»; el Inicio de la cuadrilla, «a vos: … (con Juan)»; el cierre, quiénes la hicieron.
+- Si se elige una sola persona, queda como «asignada» de siempre.
+- Arreglo: tocar adentro de la cajita de «✂ Repartir» (fuera de los números) destildaba la tarea. Ya no.
+- Datos: `ot.equipoTarea = { tarea: [nombres] }`. No cambian las reglas de Firebase. No hace falta APK nuevo.
+
+**Pruebas**
+- `t_v094`: 21/21 en PC y 22/22 en celular. Arma la orden con 4 personas (columna Juan + Pedro, BPN Mario + Luis), edita, imprime, mira lo que ve cada uno en Mis tareas e Inicio, cierra y controla que los puntos de cada tarea quedan solo en su grupo, sin perder ni duplicar.
+- Batería completa: en curso (se anota al terminar).
+
+**Huella SHA-256**
+- `094_2026-11-02_app-EMA_ORIGINAL.html` (61.794 líneas): `5b762553cbd5be39fa2c8b9f77b612d69910947a622af99eb33424991866aca5`
+- `index.html`: `4e40879a056a6a7276a71656f88146005c11b043eab86ec20079ba0c79a5080f`
+- Se genera con `patch_v094.py` sobre el ORIGINAL de la 093.
+
 ## v093 — 02/11/2026 · La pantalla no se mete debajo del reloj ni de los botones de Android
 
 **Pedido de Ángel** (captura del celular): «la parte de arriba y abajo me gusta que esté cristal, pero la pantalla no tendría que superponerse».

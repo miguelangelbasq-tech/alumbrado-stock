@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **01/11/2026**, última versión entregada: **v093** (ver `CHANGELOG.md`).
+> Estado al **01/11/2026**, última versión entregada: **v094** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -219,7 +219,7 @@ Los roles están en `window.PERMISOS` (script `usuariosPermisos`) y en las regla
 | `avanceObras/{id}` | **Registro único de cada obra** (plaza/barrio/otra) | `nombre/plazaNombre, obraId, barrio, direccion, tipo, lat, lng, mapaIcono, mapaColor, carpetaEpec, secciones, grupos, valorItems[] (ítem, cant, K, hechas…), etapas, etapasAuto, etapasNoAuto, puntos[] (nombres de columnas «T1 · C1 · Col 1»), fotosBorradas, planGantt, situación/fechas` |
 | `historialCalculos` | Cómputos de la calculadora | `form` (datos del formulario, para editar), listado por secciones, `modo` plaza/barrio, obra |
 | `historialEtapas` | Historial de etapas tildadas | |
-| `ordenesTrabajo/{id}` | Órdenes de trabajo `OT-AAAA-NNN` | `plazaId, plazaNombre, fecha, hora, cuadrilla, responsable, personal[], personalNombres[] (claves normalizadas, para las reglas), tareas/actividades, asignada{tarea:persona}, reparto{tarea:[{nombre,cant}]}, excedentes, vehiculos[{id,nombre,patente}], vehiculoId, estado (Emitida · En curso · Terminada · Anulada), campo{marcas, marcasP, fotos{<id>:{…, mini (72px), borrada}}, medidas, envios}, cierre{hecho, hechoPersona, horas, puntos (fijados al cerrar), …}, creadoPor` |
+| `ordenesTrabajo/{id}` | Órdenes de trabajo `OT-AAAA-NNN` | `plazaId, plazaNombre, fecha, hora, cuadrilla, responsable, personal[], personalNombres[] (claves normalizadas, para las reglas), tareas/actividades, asignada{tarea:persona}, reparto{tarea:[{nombre,cant}]}, equipoTarea{tarea:[nombres]} (v094: la hacen juntos), excedentes, vehiculos[{id,nombre,patente}], vehiculoId, estado (Emitida · En curso · Terminada · Anulada), campo{marcas, marcasP, fotos{<id>:{…, mini (72px), borrada}}, medidas, envios}, cierre{hecho, hechoPersona, horas, puntos (fijados al cerrar), …}, creadoPor` |
 | `planSemanal` | Plan de la semana | |
 | `movimientos` | Movimientos del pañol | entradas `E-0001…` (remito, proveedor, precioUnit en $ sin IVA + `precioOriginal, moneda, ivaPct, cotizacion`), salidas/vales `S-0001…` (`valeGrupo`, obra, quién), devoluciones (`devolGrupo`); **se anulan, no se borran**; cambio de fecha con `fechaAnterior`, `fechaHist` |
 | `catalogoProductos/{codigo}` | Cambios sobre el catálogo base (productos fijos del Excel + altas del equipo) | `codigo, desc, un, costo, minimo, activo (false = de baja), editadoPor, editadoTs` |
@@ -311,7 +311,7 @@ Otros globals útiles:
   2. Emitir → aviso a cada persona (campanita + push).
   3. La cuadrilla en Mis tareas: fotos por unidad/toma (hasta 4 por columna, caja o toma; la de uno vale para todos), medidas, «Se hizo», **Enviar**.
   4. La oficina **cierra**: carga lo hecho (`cierre.hecho`, `hechoPersona`, horas) → puntos fijados en `cierre.puntos`, avanza el itemizado de la obra, push «⭐ Puntos aprobados».
-  - **Puntos:** tarea asignada → esa persona; repartida → por lo hecho; el resto por peso de rol × horas (Oficial 1 · Medio oficial 0,8 · Ayudante 0,6 · Capataz 1 · Chofer 0,4 · Sereno 0,2). Quincenas: 1–15 y 16–fin de mes.
+  - **Puntos:** tarea asignada → esa persona; repartida → por lo hecho; de un grupo («👥 Elegir quiénes», v094) → solo entre ellos por rol × horas; el resto por peso de rol × horas (Oficial 1 · Medio oficial 0,8 · Ayudante 0,6 · Capataz 1 · Chofer 0,4 · Sereno 0,2). Quincenas: 1–15 y 16–fin de mes.
 - **Fotos:** cámara de la app (`#emaCam`, un toque = guardada) → sello → `fotosNube` (R2) o Firestore → `adjuntos` + `fotosObra` + `campo.fotos` de la orden (mini 72 px).
   - Sin señal: cola local y reintento.
   - Rechazo por permiso: queda en el celu con el motivo exacto, reintenta, y la oficina tiene «Preparar» / «🔧 Arreglar vínculos».
@@ -529,6 +529,7 @@ Ejemplos:
 | 091 | Proyectista con la barra de vidrio de la app + diagnóstico de la ubicación (por qué quedó «sin actualizar») |
 | 092 | Proyectista con cálculos: Columnas, Eléctrico (caída por fasores, fases, protecciones), Luz (.ldt/.ies, punto por punto, zonas oscuras, radio útil), memoria de cálculo · Ubicación: el celular detecta cortes con la pantalla apagada, «Probar con el celu bloqueado», la oficina ve los cortes |
 | 093 | La pantalla respeta los bordes del celular en el APK (reloj arriba, botones de Android abajo): `viewport-fit=cover` + `env(safe-area-inset-*)`; íconos del reloj oscuros |
+| 094 | «👥 Elegir quiénes»: una tarea la hacen varias personas juntas (`ot.equipoTarea`), puntos solo entre ellas; «📋 Quién hace qué» en la orden |
 
 ---
 
