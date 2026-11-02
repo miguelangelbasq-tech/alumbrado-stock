@@ -15,3 +15,8 @@ Estas pruebas se suman al arnés del kit (`h.js`, `firebase_stub.js`, `reglas_st
   - anote cada pedido en `window.__stubResets` (`{email, lang: a.languageCode}`);
   - rechace con `auth/invalid-email` un correo mal escrito, con `auth/network-request-failed` si `__stubSinRed`, y con `auth/user-not-found` si no hay cuenta.
 - `t_v099.js`: Proyectista. Tocar, mover (arrastrando, tocando el mapa), cambiar tipo, nota, borrar y deshacer puntos en el mapa; quiebres de los tramos (＋ y cuadraditos) con su largo en la cota, la planilla, el DXF (polilínea) y el cable del cálculo eléctrico; dibujar el camino caminando (GPS de mentira, cuarto de círculo); plano que se mueve, se acerca (＋, rueda, dos dedos) y donde se tocan y arrastran los puntos. Usa `leaflet: true`.
+
+# Pruebas de la v100
+
+- `t_v100.js`: Avance de obra sin etapas EPEC, valorización, balance ni fotos; rubros con % y colores, columnas a la vista, +, total del ítem, agregar y sacar ítems, inspección; legajo con «🧾 Material: calculado vs. entregado» (tarjetas, filtro, orden, devolver lo que sobró).
+- Se actualizaron `t_v045.js` (ya no hay tabla de valorización ni lista de etapas a mano: se controla la fila del ítem y que la inspección se tilde aparte) y `t_v047.js` (las filas ahora van agrupadas por rubro: se toma la primera fila de la lista).

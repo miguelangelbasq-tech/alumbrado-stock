@@ -2,6 +2,45 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v100 — 02/11/2026 · Avance de obra limpio y gráfico · material calculado vs. entregado en el legajo
+
+**Pedido de Ángel:** «Sacar del avance de obra las etapas (criterio EPEC), la valorización de la licitación, el material entregado vs. calculado (que vaya a Obras y legajos, con colores, bien a la vista) y las fotos de la plaza (ya están en el legajo). Que el avance de obra sea solo la obra y su avance ítem por ítem: bien gráfico, lindo de ver, fácil e interactivo para cambiar cuántas se hicieron».
+
+**Cambios**
+- **Avance de obra, ítem por ítem:**
+  - arriba, el avance total y los ítems completos;
+  - tarjetas por rubro con su % y barra: columnas, tablero y acometida, zanja y cruces, cable y empalmes, puesta a tierra, otros, provisiones;
+  - colores como los pines del mapa: gris sin empezar · rojo < 30 % · amarillo 30–59 % · azul 60–99 % · verde completo;
+  - cada ítem con su color, «7 de 8», barra, − / + / ✓ Todas;
+  - las columnas (hasta 40) se ven y se tocan una por una sin desplegar, con su nombre (T1 · C1…);
+  - los metros se escriben a la vista, con +1 / +10 / +50;
+  - con «⋯» se cambia el total del ítem o se lo saca (pregunta antes);
+  - «＋ Agregar un ítem del pliego» (antes estaba en la valorización).
+- **Lo que se sacó del Avance de obra:**
+  - la lista de etapas (criterio EPEC): las etapas se siguen tildando solas desde el itemizado, así que el gauge, el tablero y el mapa no cambian, y la inspección municipal se tilda en «Datos para el informe»;
+  - la valorización de la licitación;
+  - el material entregado vs. calculado, que pasó al legajo;
+  - las fotos de la plaza, que ya están en el legajo.
+  - Los materiales del cómputo y lo instalado quedan plegados abajo («🧰 Materiales…»).
+- **Legajo, «🧾 Material: calculado vs. entregado»:**
+  - % de lo calculado que ya salió del pañol;
+  - tarjetas de colores que filtran: falta, de más, coinciden, sin entregar, sin calcular;
+  - cada material con su barra, ordenados primero lo que salió de más y lo que falta;
+  - lo que sobró se devuelve al pañol o se pasa a otra obra, como antes;
+  - planilla e impresión.
+- No cambian los datos ni las reglas de Firebase. No hace falta APK nuevo.
+
+**Pruebas**
+- `t_v100`: 20/20 en PC y 22/22 en celular.
+- Se actualizaron `t_v045` (ya no hay tabla de valorización ni lista de etapas) y `t_v047` (filas agrupadas por rubro). Las dos dan OK.
+- Batería completa en PC y celular: OK.
+  - `t_cargador` y `t_v028` (cel) fallaron con la máquina cargada; solas dan 16/16 y 22/22.
+  - `t_v083` es vieja.
+
+**Huella SHA-256**
+- `100_2026-11-02_app-EMA_ORIGINAL.html` (62.924 líneas): `21b35f4f4351f77458d9b8822c19da2c44797e50e4ce9b857333251e2ae8fcc8`
+- `index.html`: `b3fce885250189ce7459b76b06aaaaaec656a4a86707041e01b5b7f684bcd7c1`
+
 ## v099 — 02/11/2026 · Proyectista: editar puntos y tramos, plano que se mueve
 
 **Pedido de Ángel:** «En Proyectos no se puede mover el plano; solo se ve el catastro de la parte que selecciono. No puedo eliminar ni mover los puntos. Los tramos salen rectos: poder darles la forma del camino (caminando o en la compu). Y los puntos: editarlos, borrar, cambiar, mover, en la compu y en obra. Fijate qué más mejorar».

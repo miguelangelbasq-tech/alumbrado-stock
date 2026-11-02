@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **02/11/2026**, última versión entregada: **v099** (ver `CHANGELOG.md`).
+> Estado al **02/11/2026**, última versión entregada: **v100** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -165,7 +165,7 @@ La navegación es **solo por el menú lateral** (botón de tres rayitas `#btnMen
 | `obras` | `#viewObras` (`#obrasApp`) | Obras (legajos): plazas/barrios/otras; legajo con secciones plegables (fotos, planos, columnas, órdenes, material, gastos, historial). |
 | `parte` | `#viewParteDiario` | Órdenes de trabajo (OT-AAAA-NNN): tablero, llenar, historial, buscar; cierre por la oficina. |
 | `plan` | `#viewPlanificacion` | Planificación semanal (`planSemanal`); «Hacer la orden de trabajo». |
-| `avance` | `#viewAvance` | Avance de obra (avance total desde el itemizado; «📋 Avance por ítem»; etapas), Itemizado 2026 (Todas/Plazas/Barrios/Otras). |
+| `avance` | `#viewAvance` | Avance de obra: desde v100 solo la obra y su avance ítem por ítem (rubros con %, colores, columnas a la vista, metros, total, agregar/sacar ítems); las etapas se tildan solas pero ya no se muestran (la inspección se tilda en «Datos para el informe»); sin valorización, sin balance de material (pasó al legajo) ni fotos (están en el legajo); los materiales del cómputo quedan plegados abajo. Itemizado 2026 (Todas/Plazas/Barrios/Otras). |
 | `mapa` | `#viewMapa` | Mapa de plazas/obras (Leaflet): pines por avance, pliego, ＋ Punto, capas, panel del legajo (`#mpPanel`), **personal en vivo** (`.uv-pin`, `#uvPanel`). |
 | `stock` | `#viewStock` | Pañol: Catálogo pañol (inventario), Reservas (+ «✕ Sin stock», «⏳ Por aprobar»), Herramientas (🧰 / 📜 Historial), Movimientos/entregas, Registrar movimiento, Alta de productos, Precios, Por persona, Fotos, Por sector, Calculadora ↔ pañol, Lista de compras, Acceso y respaldo. |
 | `informe` | `#viewInforme` | Centro de informes (PDF/Word/Excel): avance, Gantt, informe mensual con fotos, lista de materiales a usar, etc. |
@@ -296,6 +296,8 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `cuadrillaLiviana` + bloque `__col` en las suscripciones | 086 | Entrada rápida de la cuadrilla: `__modoDatos` {estado, liviano, cargarTodo, revisar}. Cuadrilla/operario sin permisos de oficina (según `ema.perfil.<uid>` del último usuario, `ema.ultimoUid`) baja solo SUS órdenes (`where personalNombres array-contains personaClave`); cómputos/etapas/plan 1,5 s después, movimientos 6 s después o al abrir otra hoja. Si el rol confirmado ya no es cuadrilla, pasa a completo. |
 | `proyectistaMenu` + `proyectistaCod` (text/plain, dormido) | 089 | Proyectista etapa 1. Menú `#menuProyectista` solo admin/oficina; `__abrirProyectista(id)` carga el código y abre `#pyOv`. `__proyectista` {abrir, cerrar, estado, _geo {distancia (Vincenty), gk (Gauss-Krüger POSGAR 07, serie de Krüger), fajaDe}, _dxf, _csv, _calc (v092: red, parseLDT, parseIES, luz, radios, intens, cfgDe), _cat (v095: catastro), _mapa}. v095: catastro de fondo (`gkInv` = Gauss-Krüger inverso) y «🌳 Traer el borde de la plaza». v092: pestañas Columnas / Eléctrico / Luz y memoria de cálculo; el motor de cálculo está entre los comentarios «geodesia» y «estado» y se prueba en Node con `pruebas/num` (control en Python). **El código text/plain no lo transpila compactar80: escribilo compatible con Chrome 80.** Ver `docs/PROYECTISTA.md`. **v099:** puntos como `L.marker` (divIcon `.py-pin`, arrastrable el elegido), cuadro `#pySel` (`htmlSel`/`accionSel`), quiebres `.py-vmas`/`.py-vq`, `largoTramo`/`caminoLL`/`mitadCamino`, recorrido caminando (`st.reco`, Douglas-Peucker), plano interactivo (`st.pv` vista en GK absoluto, `planoEventos`: arrastrar, rueda, dos dedos; `data-pyp/pyt/pyv/pym`), `st.hist` para ↶ Deshacer, el mapa se reusa entre redibujos (no se rearma) y va con `keyboard:false`. |
 | `recuperarClave` | 098 | «¿Olvidaste tu contraseña o tu usuario?» en la portada: usuario o correo → `configEquipo/alias` → `sendPasswordResetEmail` (`languageCode="es"`). Sin correo real (`@ema-alumbrado.app`) no manda y deriva a la oficina. `__recuperarClave` {ver, mandar} |
+| `avanceItems` (v100) + `avanceProCss` | 100 | El «📋 Avance de la obra, ítem por ítem»: `html(o)` nuevo con rubros (`FAM`: col/tab/zan/cab/pat/otro/prov), niveles de color `p0`–`p4` (gris/rojo/amarillo/azul/verde como los pines del mapa), acciones `data-avi` nuevas `irFam`, `agregar`, `quitar` y el total `.avi-total` |
+| `legajoMaterial` | 100 | Sección `#lgBalSec` «🧾 Material: calculado vs. entregado» en el legajo, debajo de «📦 Material entregado» (`calcularBalancePlaza`); tarjetas que filtran, barra por material, sobrante con `confirmarSobrante` (pone `avanceActivoId` y `balanceFilasActivas` de esa obra), planilla e impresión. `__legajoMaterial` |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -537,6 +539,7 @@ Ejemplos:
 | 097 | Varios equipos en una misma tarea con su cantidad (`ot.equipos`, `campo.marcasE`, `cierre.hechoEquipo`); puntos por equipo según lo hecho |
 | 098 | «Quedan N de T» de la orden lee también el Avance de obra (itemizado, lo mayor entre las dos cosas); «¿Olvidaste tu contraseña o tu usuario?» en la entrada (`recuperarClave`) |
 | 099 | Proyectista: tocar / mover / borrar puntos en el mapa y el plano, forma de los tramos (`punto.via`), dibujar el camino caminando, plano que se mueve y se acerca, ↶ Deshacer |
+| 100 | Avance de obra limpio y gráfico (ítem por ítem por rubro, con colores); «🧾 Material: calculado vs. entregado» en el legajo (`legajoMaterial`) |
 
 ---
 
