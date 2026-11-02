@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **01/11/2026**, última versión entregada: **v092** (ver `CHANGELOG.md`).
+> Estado al **01/11/2026**, última versión entregada: **v093** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -477,6 +477,7 @@ Ejemplos:
 - **html2canvas dibuja el `<noscript>`:** sacalo (y `template`) del clon antes de armar el PDF.
 - **SVG dentro del mapa:** la regla global `max-width:100%` los aplastaba a 0. Los colores van como valores reales, no `var()`, dentro de SVG.
 - **Mis tareas** (`ordenesCampo`) se redibuja nodo por nodo: chips, notas y «por» van dentro de las plantillas (`__equipoChips`, etc.).
+- **Bordes del celular (v093):** el APK es «de borde a borde». La página tiene que llevar `viewport-fit=cover` y todo lo fijo arriba o abajo usar `env(safe-area-inset-top/bottom)`. Si no, queda debajo del reloj o de los botones de Android.
 - **Menú lateral:** el panel es flex-column. Los bloques agregados necesitan `flex:none` o se aplastan y el texto se desborda (pasó en v085).
 - **Celulares viejos:** Chrome 80. El «Sitio para computadoras» de Motorola tiene aviso propio.
 - **Fotos con la cámara del teléfono:** Android puede cerrar la app y la foto se pierde. Preferí la cámara de la app.
@@ -527,6 +528,7 @@ Ejemplos:
 | 090 | Proyectista con las piezas del diseño «Cristal» de la app + skill del proyecto `ema-app-alumbrado` |
 | 091 | Proyectista con la barra de vidrio de la app + diagnóstico de la ubicación (por qué quedó «sin actualizar») |
 | 092 | Proyectista con cálculos: Columnas, Eléctrico (caída por fasores, fases, protecciones), Luz (.ldt/.ies, punto por punto, zonas oscuras, radio útil), memoria de cálculo · Ubicación: el celular detecta cortes con la pantalla apagada, «Probar con el celu bloqueado», la oficina ve los cortes |
+| 093 | La pantalla respeta los bordes del celular en el APK (reloj arriba, botones de Android abajo): `viewport-fit=cover` + `env(safe-area-inset-*)`; íconos del reloj oscuros |
 
 ---
 

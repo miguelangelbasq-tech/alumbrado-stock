@@ -3,8 +3,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="ema-version" content="2026-11-01 23:20 · 7547cd">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="ema-version" content="2026-11-02 06:57 · 01d5ce">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script id="anotarErrores">window.__autorApp="App Alumbrado Público — © 2026 Miguel Ángel Díaz. Todos los derechos reservados.",window.__erroresApp=[],window.addEventListener("error",function(e){try{var r=window.__erroresApp;r.length<30&&r.push({t:Date.now(),m:String(e.message||e),d:e.filename?String(e.filename).split("/").pop()+":"+e.lineno:""})}catch{}}),window.addEventListener("unhandledrejection",function(e){try{var r=e.reason,n=String(r&&(r.message||r.code)||r||"");if(/offline|unavailable|network|Failed to fetch/i.test(n))return;var o=window.__erroresApp;o.length<30&&o.push({t:Date.now(),m:"(promesa) "+n,d:""})}catch{}});</script>
 <title>Calculadora de Materiales — Alumbrado Público</title>
 <meta name="description" content="Herramienta de EMA Servicios para el alumbrado público de plazas: cómputo de materiales, órdenes de trabajo, planificación, avance de obra, itemizado y stock.">
@@ -78,7 +78,7 @@
 <div class="header-divider"></div>
 <div class="header-text">
 <h1>Alumbrado Público</h1>
-<div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-11-01 23:20 · 7547cd</span></div>
+<div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-11-02 06:57 · 01d5ce</span></div>
 <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
 </div>
 </div>
@@ -7788,6 +7788,8 @@ ${o.resto>0?`<div class="rp-pie">👥 ${i(u(o.resto))} ${i(q(v,o.resto))} eran p
 })();
 </script>
 <style id="uvDiagCss">#uvHoja{position:fixed;top:0;left:0;right:0;bottom:0;z-index:10070;background:#1c1c4561;display:flex;align-items:flex-end;justify-content:center}#uvHoja .uv-h-caja{width:100%;max-width:520px;box-sizing:border-box;background:#fff;border-radius:26px 26px 0 0;padding:20px 20px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -20px 50px -30px #28285e;max-height:88vh;overflow:auto;font-size:15px;line-height:1.45;color:var(--text,#0d1424)}#uvHoja h3{margin:0 0 8px;font:800 18px var(--disp,Inter,sans-serif);color:var(--navy,#28285e)}#uvHoja p{margin:6px 0}#uvHoja .uv-h-pasos{margin:8px 0;padding-left:22px}#uvHoja .uv-h-pasos li{margin:5px 0}#uvHoja .uv-h-bot{display:flex;flex-direction:column;gap:8px;margin-top:14px}#uvHoja .uv-h-bot button{width:100%;min-height:48px;font-size:15.5px;cursor:pointer}@media (min-width:641px){#uvHoja{align-items:center}#uvHoja .uv-h-caja{border-radius:26px}}#uvPanel .uv-fila .uv-porque{display:block;width:100%;margin-top:3px;color:#8a4b00;font-size:11.5px;line-height:1.35;white-space:normal;font-weight:500}</style>
+<style id="bordesCelCss">body>header{padding-top:calc(10px + env(safe-area-inset-top,0px))!important}body:after{content:"";display:block;height:env(safe-area-inset-bottom,0px)}#menuLateral .menu-panel{padding-top:env(safe-area-inset-top,0px)!important;padding-bottom:env(safe-area-inset-bottom,0px)!important;box-sizing:border-box}</style>
+<script id="bordesCel">(function(){try{const t=window.Capacitor,i=t&&t.isNativePlatform&&t.isNativePlatform()&&t.Plugins&&t.Plugins.SystemBars;i&&i.setStyle&&i.setStyle({style:"LIGHT"}).catch(function(){})}catch{}})();</script>
 <script id="revisarAppDiag">window.revisarApp=function(){var a=function(n){return document.getElementById(n)},i=String((a("appVersion")||{}).textContent||"").replace(/^\s*·?\s*v\s*/,"").trim(),e=null;try{e=window.PERMISOS&&PERMISOS.yo&&PERMISOS.yo()}catch{}var o="";try{o=e&&(PERMISOS.ROLES&&PERMISOS.ROLES[e.rol]&&PERMISOS.ROLES[e.rol].nombre||e.rol)||""}catch{o=e&&e.rol||""}var s=function(n){try{return!!n()}catch{return!1}},u=[["Mis tareas (botón en el menú)",function(){return a("menuMisTareas")&&a("viewMisTareas")}],["Órdenes en hojas (tablero / llenar / historial / buscar)",function(){return a("subtabsOrdenes")||typeof window.irSubOrdenes=="function"}],["Calculadoras rápidas + caída de tensión Muni",function(){return a("subtabsCalc")||window.__caidaMuni}],["Pañol: ficha, fotos y por sector",function(){return window.__panolFicha}],["Pañol: control de stock negativo",function(){return window.__stockNegativo&&typeof window.resolverFaltante=="function"}],["Pañol: reservas de material",function(){return typeof window.abrirNuevaReserva=="function"&&document.getElementById("cardStockReservas")}],["Base de datos conectada",function(){return window.firebase&&firebase.apps&&firebase.apps.length}]],r=["Versión: "+(i||"¿?"),"Autor: Miguel Ángel Díaz · © 2026","Usuario: "+(e?e.nombre||e.usuario||e.email||"":"(sin entrar)")+(o?" · rol "+o:""),"En la nómina: "+(e&&e.persona?e.persona:"— sin vincular —"),""];u.forEach(function(n){r.push((s(n[1])?"✓ ":"✗ ")+n[0])});var t=window.__erroresApp||[];r.push(""),r.push(t.length?"⚠ Errores ("+t.length+"):":"Sin errores."),t.slice(-6).forEach(function(n){r.push("• "+String(n.m).slice(0,120)+(n.d?" ["+n.d+"]":""))}),r.push(""),r.push("Si algo no aparece, mandale una captura de esto a quien arma la app."),alert(r.join(`
 `))};</script>
 </body>
