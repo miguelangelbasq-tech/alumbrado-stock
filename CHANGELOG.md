@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v095 — 02/11/2026 · Catastro de Córdoba de fondo en Proyectista
+## v095 — 02/11/2026 · Catastro de Córdoba de fondo en Proyectista + visor de fotos que quedaba corrido
 
 **Pedido de Ángel:** «En la app, en el plano, ya tendría que ver el catastro de fondo». Mandó el catastro v6, más preciso, armado con el otro chat: un DXF por cuadrante y las plazas en GeoJSON.
 
@@ -17,6 +17,10 @@ Autor: Miguel Ángel Díaz © 2026
 - Los puntos de borde se dibujan como puntitos sin cartel, para no tapar el plano.
 - **Coordenadas:** el DXF venía en POSGAR 94; se pasó a POSGAR 2007 (+0,162 m E, +0,610 m N, PROJ), que es lo que usan la app y el GPS. La conversión de Gauss-Krüger a latitud/longitud se controló con PROJ: diferencia menor a 0,001 mm.
 - **Datos:** carpeta `catastro/v6` en GitHub junto a la app: 54 bloques de 4 km, las plazas y un índice. Son 56 archivos, 55 MB (15 MB comprimidos). Se baja solo el bloque que se mira, y el `sw.js` lo guarda para verlo sin señal. Ver `docs/CATASTRO.md`.
+- **Visor de fotos** (captura de Ángel en la compu: foto partida en dos, sin la ✕):
+  - Al tocar una miniatura del final de la tira, o al pasar rápido con la flecha del teclado o «›», el visor entero quedaba corrido de costado.
+  - Causa: al centrar la miniatura, el navegador también desplazaba el visor.
+  - Ahora la tira se centra sin mover el visor, el visor vuelve solo a su lugar si algo lo corre, y los pases van de a uno.
 - No cambian las reglas de Firebase. No hace falta APK nuevo.
 
 **Qué hay que hacer**
@@ -28,12 +32,13 @@ Autor: Miguel Ángel Díaz © 2026
   - Plaza de las Américas: baja 1 bloque de 54 y muestra nombres de calles y de la plaza.
   - El chip, el «acercá el mapa», el plano con catastro y el DXF en capas `CAT_…`.
   - El borde de 46 puntos, el plano impreso con catastro, y que sin señal avisa y el resto sigue andando.
+- `t_v095b` (visor, 40 fotos, pantalla de 1919 px): 6/6 en PC y 5/5 en celular. Con la v094 reproduce el error (visor corrido 736 px).
 - `t_v092` se actualizó: el DXF ahora trae los vértices del catastro, así que cuenta solo los del borde.
 - Batería completa: en curso (se anota al terminar).
 
 **Huella SHA-256**
-- `095_2026-11-02_app-EMA_ORIGINAL.html` (62.036 líneas): `495c8756d63079311a1d2e94d64ae7d38335c1e873c2ae9e3b907b58947d9474`
-- `index.html`: `86bc4599f0681d91fd935ec49254e6e50f20e7a8b0455d1d65078b1353b514e8`
+- `095_2026-11-02_app-EMA_ORIGINAL.html` (62.041 líneas): `a24acb13986cd4e59e61271033cf0dbd895aa6e084d0344979dc47c5659518fa`
+- `index.html`: `22f67f2b9985a17ab73a571de36da1a0caa7c96103fb3e846fd03b4dd28d4348`
 - `catastro.zip`: `6bbf59fb725e8b797da8141371e10d3a239c5e66e616f51f359cd48fd9bf3a1f`
 - Se genera con `patch_v095.py` sobre el ORIGINAL de la 094.
 
