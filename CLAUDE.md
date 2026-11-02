@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **01/11/2026**, última versión entregada: **v095** (ver `CHANGELOG.md`).
+> Estado al **01/11/2026**, última versión entregada: **v096** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -532,6 +532,7 @@ Ejemplos:
 | 093 | La pantalla respeta los bordes del celular en el APK (reloj arriba, botones de Android abajo): `viewport-fit=cover` + `env(safe-area-inset-*)`; íconos del reloj oscuros |
 | 094 | «👥 Elegir quiénes»: una tarea la hacen varias personas juntas (`ot.equipoTarea`), puntos solo entre ellas; «📋 Quién hace qué» en la orden |
 | 095 | Catastro de Córdoba v6 de fondo en Proyectista (mapa, plano, PDF, DXF) + «Traer el borde de la plaza»; carpeta `catastro/v6` en GitHub |
+| 096 | «📸 Avance» de cada orden en el tablero, en vivo (marcas, quién, medidas, fotos al visor, checklist, envíos); `__avanceOrden` |
 
 ---
 

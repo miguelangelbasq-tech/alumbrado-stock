@@ -2,6 +2,40 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v096 — 02/11/2026 · «📸 Avance» de cada orden, en vivo
+
+**Pedido de Ángel:** «En el tablero se ve el avance; estaría bueno poder entrar y ver las fotos y todo de esa obra según va avanzando».
+
+**Cambios**
+- **Tablero de órdenes:** cada tarjeta tiene **«📸 Avance»**. También se abre tocando el nombre de la plaza.
+- **Hoja del avance (se actualiza sola mientras la cuadrilla carga):**
+  - Arriba:
+    - barra de avance («N de T tareas marcadas») y cantidad de fotos;
+    - el personal;
+    - checklist de seguridad (quién y a qué hora);
+    - quién ya envió y a qué hora;
+    - horas de cada uno y novedades.
+  - **Tarea por tarea:**
+    - quién la hace (toda la cuadrilla, una persona, el grupo de «👥 Elegir quiénes» o el reparto);
+    - el previsto;
+    - «✓ Se hizo · cuánto», «✗ No se hizo · por qué» o «⏳ Sin marcar», con quién marcó y a qué hora;
+    - lo de cada uno si está repartida;
+    - las medidas cargadas;
+    - las fotos con miniatura.
+  - **Otras fotos de la orden**, como la de seguridad.
+  - Tocando una foto se abre el visor con todas las fotos de la orden.
+  - Botones: **«📸 Ver las N fotos»**, **«📁 Legajo de la obra»**, **«🖨 Ver / imprimir»** y **«✅ Revisar y cerrar»**.
+- Solo mira la orden: no cambia nada en la base. No cambian las reglas de Firebase. No hace falta APK nuevo.
+
+**Pruebas**
+- `t_v096`: 17/17 en PC y 18/18 en celular. Contenido, fotos al visor, que se actualiza sola cuando la cuadrilla marca y sube una foto, los botones, Escape, que no cambia la orden y que en el celular no hay scroll de costado.
+- Batería completa: en curso (se anota al terminar).
+
+**Huella SHA-256**
+- `096_2026-11-02_app-EMA_ORIGINAL.html` (62.202 líneas): `0f3d042891b6ff08845cebaa476367ef68f927e4d3803dd0a6e57d1458aa1373`
+- `index.html`: `852efb048b32ff3e6f03aacc364e662ca2695316fcd539572fb2313736dac1f2`
+- Se genera con `patch_v096.py` sobre el ORIGINAL de la 095.
+
 ## v095 — 02/11/2026 · Catastro de Córdoba de fondo en Proyectista + visor de fotos que quedaba corrido
 
 **Pedido de Ángel:** «En la app, en el plano, ya tendría que ver el catastro de fondo». Mandó el catastro v6, más preciso, armado con el otro chat: un DXF por cuadrante y las plazas en GeoJSON.
