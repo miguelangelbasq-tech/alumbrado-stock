@@ -18,7 +18,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas**
 - `t_v093`: 8/8 en PC y en celular (bordes simulados: reloj 32 px, botones 48 px).
-- Batería completa: en curso (se anota al terminar).
+- Batería completa (80 pruebas, PC y celular): todo OK. `t_v083` quedó reemplazada por `t_v084`.
 
 **Huella SHA-256**
 - `093_2026-11-02_app-EMA_ORIGINAL.html` (61.584 líneas): `69dd1cd74120c3e2864f37dbdd2a00b594cd0c9298f297e8801ee2024dda071b`
