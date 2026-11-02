@@ -27,7 +27,7 @@ Autor: Miguel Ángel Díaz © 2026
   - Lo que ve y marca cada uno (Juan, Pedro y Mario) y el Inicio.
   - El avance, el cierre por equipo y los puntos (12/22 · 6/22 · 4/22, sin perder ni duplicar).
 - `t_v094`, `t_v079` y `t_v096` siguen dando OK.
-- Batería completa: en curso (se anota al terminar).
+- Batería completa en PC y celular: 168 de 170 OK. Las 2 que fallan son de `t_v083`, que quedó vieja (la reemplaza `t_v084`).
 
 **Huella SHA-256**
 - `097_2026-11-02_app-EMA_ORIGINAL.html` (62.341 líneas): `1680fddb0883acc0cd96c46eaad080c545974ebfaf240c1f5f82c1459e4cfe53`
