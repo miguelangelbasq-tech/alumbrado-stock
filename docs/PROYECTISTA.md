@@ -123,7 +123,92 @@ Referencias que pasó Ángel: Li.PAD, GridGIS (Merytronic), DIRED-CAD, ArcGIS Fi
 - **El unifilar** sale de los circuitos (potencia, largo, sección) con las protecciones que se definan.
 - **Las protecciones** las recomienda la app con criterios **a confirmar** con Ángel. La app recomienda; no certifica.
 
+## Funciones pedidas y estado (02/11/2026)
+| # | Pedido de Ángel | Estado |
+|---|---|---|
+| 1 | Marcar puntos en la obra con GPS de centímetros (RTK) | ✅ (con RTK cuando lo tenga) |
+| 2 | Ver la distancia exacta al caminar | ✅ al último punto · ❌ entre dos puntos cualesquiera |
+| 3 | Plano automático con distancias | ✅ simple · ❌ lámina como sus modelos |
+| 4 | Sacarlo para AutoCAD | ✅ DXF Gauss-Krüger faja 4 |
+| 5 | Base de Córdoba de fondo | ❌ (datos recibidos y revisados) |
+| 6 | Cálculo lumínico tipo DIALux: radio que alcanza cada luminaria, zonas oscuras | ❌ |
+| 7 | Caídas de tensión según cable y distancias | ❌ |
+| 8 | Tablero con protecciones recomendadas | ❌ |
+| 9 | Proyecto completo (fases, tablas, unifilar, cómputo) | ❌ |
+| 10 | BT / MT / AT / loteos | más adelante |
+
+## Cálculo lumínico — cómo se aplica (investigación del 02/11/2026)
+- **Fotometrías:** archivos **.ldt (EULUMDAT)** o **.ies (LM-63)** de cada modelo de luminaria.
+  - Se escribe un lector propio en JS, compatible con Chrome 80. La librería que lee los dos formatos es AGPL, así que no conviene.
+  - Interpolación bilineal I(C, γ) y despliegue de la simetría del archivo.
+  - **Hay que pedirle el .ldt al proveedor de cada modelo que se compra**: Strand lo da a pedido, Philips lo publica. Los lúmenes salen del archivo, no del folleto.
+- **Método punto por punto:**
+  - Luminaria en `(x + s·cosψ, y + s·sinψ, h)`, con s = saliente del brazo, ψ = rumbo y h = altura; τ = inclinación.
+  - `E = I(C,γ)·cos θ / d²`; sin inclinación, `E = I·cos³γ / h²`.
+  - Se suman todas las luminarias (1 a 4 por columna) y se multiplica por el factor de mantenimiento (0,8 por defecto, editable).
+  - Grilla de 0,5 a 1 m sobre la plaza, calculada en segundo plano para no trabar la app.
+- **Indicadores:** Em, Emin, Uo = Emin/Em, con semáforo «Cumple / No cumple» contra la clase elegida.
+  - Clases P de EN 13201-2 para plazas: P1 15 lx / Emin 3 · P2 10 / 2 · P3 7,5 / 1,5 · P4 5 / 1 · P5 3 / 0,6 · P6 2 / 0,4.
+  - P1–P3 sacadas de memoria; todo **a confirmar**.
+  - Calles: IRAM-AADL J 2022-2 (tabla paga) o clases M de EN 13201.
+  - **No se encontró norma argentina ni pliego público con niveles para plazas.** Preguntar qué exige Inspección (EPEC / DGAP).
+- **«Radio útil»:** distancia desde el pie de la luminaria hasta donde su iluminancia propia cae bajo un umbral (por defecto, el Emin de la clase elegida).
+  - Se calcula en 36 rumbos, porque las luminarias viales no iluminan en círculo.
+  - Se muestra como curva isolux y como «radio equivalente».
+- **En el mapa:**
+  - capa de colores georreferenciada (rojo = debajo de lo exigido) y curvas isolux;
+  - en el plano y en el DXF, una capa ISOLUX.
+- **Validación:** 2 o 3 casos reales comparados contra DIALux evo con la misma grilla. Se espera menos de ~5 % de diferencia en Em (sin confirmar).
+- **Limitaciones:** no calcula reflexiones ni sombras de árboles (es la mayor fuente de error en plazas con arboleda), ni pendiente del terreno; en la primera etapa tampoco TI ni luminancia.
+
+## Cálculo eléctrico — cómo se aplica (investigación del 02/11/2026)
+- **Modelo:** tablero → circuitos → columnas en orden, con derivaciones. Cada columna tiene luminarias (W y cosφ, 0,95 por defecto), su fase y la sección del cable del tramo. Las distancias ya están.
+- **Caída de tensión por tramos con fasores:**
+  - corriente de cada fase aguas abajo de cada tramo, y neutro `I_N = |I_R + a²·I_S + a·I_T|`;
+  - ΔU% por nodo y por fase, destacando el peor nodo;
+  - límite configurable, 3 % por defecto, **a confirmar** (AEA 95703 o pliego de EPEC).
+- **Tabla de cables Cu IRAM 2178 (Ω/km):**
+  - 4 mm²: 5,92 a 70 °C · 6,3 a 90 °C;
+  - 6 mm²: 3,95 a 70 °C;
+  - 10 mm²: 2,29 a 70 °C;
+  - X ≈ 0,08–0,10 en tetrapolar;
+  - fuente: catálogo Prysmian Sintenax/Retenax. El resto, calculado o **a confirmar**.
+- **Reparto de fases automático:** de mayor a menor carga, cada luminaria a la fase menos cargada, y después intercambios para bajar la peor caída y la corriente del neutro. Botón «Repartir» y edición a mano.
+- **Protecciones, recomendadas (no certificadas):**
+  - Ib ≤ In ≤ Iz;
+  - ITM por circuito C10–C16, según el arranque de los drivers (la cantidad de drivers por ITM es un dato de la ficha del driver);
+  - diferencial (300 mA en TT; clase superinmunizada, a confirmar);
+  - contactor según la tabla del fabricante para LED;
+  - fotocontrol sobre la bobina;
+  - NH del lado de EPEC; DPS a confirmar.
+- **Cortocircuito y lazo:** necesita la impedancia de la red de EPEC y el esquema TT o TN-S. Dato del matriculado.
+  - Según una fuente secundaria, la Municipalidad de Córdoba usa TT con menos de 9 columnas y TN-S en el resto.
+- **Puesta a tierra:** valor exigido por EPEC **a confirmar**. CABA pide ≤ 4–5 Ω. Se mide con telurímetro (ítem 81).
+- **Salidas:**
+  - tabla por tramo (origen, destino, L, P, I, sección, ΔU parcial y acumulada, Iz, protección);
+  - unifilar del TMPC como el AP-CAVIA-02;
+  - memoria de cálculo imprimible.
+- **Lo que tiene que confirmar el matriculado o Ángel:**
+  - % de caída admitido;
+  - valor máximo de puesta a tierra;
+  - esquema TT o TN-S;
+  - diferencial;
+  - contactor y DPS;
+  - cosφ y arranque del driver real;
+  - R y X de los tetrapolares;
+  - impedancia de la red.
+
+## Orden propuesto (02/11/2026)
+1. Catastro de fondo + **tablero, circuito, tipo de columna y luminarias en cada punto** + reparto de fases + tabla de columnas, balance y cuadro resumen.
+2. **Caída de tensión** por tramo y por fase, con semáforo, y recomendación de protecciones.
+3. **Lumínico**: lector de .ldt, mapa de zonas oscuras, radio útil y «Cumple / No cumple».
+4. Lámina A1 en DXF, unifilar y memoria de cálculo.
+5. Foto por punto, medir entre dos puntos, «llevame al punto» y grabar el recorrido.
+
 ## Preguntas abiertas para Ángel
+- ¿Qué nivel de iluminación (lux) exige Inspección (EPEC / DGAP) para las plazas? ¿Lo dice el pliego?
+- ¿Podés conseguir los archivos .ldt o .ies de las luminarias que compran (75 W, 200 W…)?
+- ¿Qué % de caída de tensión y qué valor de puesta a tierra exigen? ¿TT o TN-S?
 - ¿Qué receptor RTK tiene en mente (marca y modelo)?
 - La base de Córdoba: ¿en qué formato está (DWG/DXF), cuánto pesa y en qué sistema de coordenadas?
 - ¿Qué sigue después de la etapa 1? Opciones: foto por punto, medir entre dos puntos, «llevame al punto», o la etapa 2 con la base de Córdoba.
