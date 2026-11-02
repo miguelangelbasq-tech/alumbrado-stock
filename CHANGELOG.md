@@ -2,6 +2,36 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v091 — 01/11/2026 · Proyectista con la barra de vidrio + por qué no se actualiza la ubicación
+
+**Pedido de Ángel:**
+- «No se actualiza la ubicación»: en el Mapa aparecía «sin actualizar desde 19:24».
+- «La parte de arriba cristalizada, que se parezca al estilo de la app; usá la skill».
+
+**Cambios**
+- **Proyectista:** la barra de arriba ahora es igual al encabezado de la app: vidrio blanco translúcido con desenfoque, título en azul y botones redondos blancos de 44 px. El fondo lleva las mismas manchas celestes.
+- **Ubicación en vivo:** cada envío guarda tres datos nuevos:
+  - `fondo`: si salió con el celular bloqueado;
+  - `fondoTs`: la última vez que salió así;
+  - `via`: por dónde salió (`android`, `navegador`, o `app por Firebase` si falló lo de Android).
+- **En el Mapa**, a quien está «sin actualizar» la oficina le ve el porqué:
+  - usa el navegador (solo manda con la app abierta);
+  - hoy nunca mandó con el celular bloqueado (revisar la app de Android 1.2 y la batería «Sin restricciones»);
+  - o hasta qué hora mandó con el celular bloqueado.
+- Cada persona muestra si usa 📱 la app o 🌐 el navegador.
+- No cambian las reglas de Firebase. No hace falta APK nuevo.
+
+**Pruebas**
+- `t_v091`: 9/9 en PC y en celular.
+- Batería completa OK.
+  - `t_v073` falló una vez por tiempos; sola da 45/45.
+  - `t_v083` quedó reemplazada por `t_v084`.
+
+**Huella SHA-256**
+- `091_2026-11-01_app-EMA_ORIGINAL.html` (60.556 líneas): `992cf9d10ec411498010550141ea2fd0170044966a28ea765abdbd85dbcad636`
+- `index.html`: `32be24a329c5434369dc80e5612c7d5a212b5a7742e6697bfacfa560b976050b`
+- Sello de versión (en las dos marcas): `2026-11-01 21:03 · a4a1bd`
+
 ## v090 — 01/11/2026 · Proyectista con el mismo diseño que la app + skill del proyecto
 
 **Pedido de Ángel:** armar la skill propia del proyecto y que todo quede con el mismo diseño «Cristal».
