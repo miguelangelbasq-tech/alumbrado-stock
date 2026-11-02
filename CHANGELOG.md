@@ -13,16 +13,17 @@ Autor: Miguel Ángel Díaz © 2026
 - **«📋 Quién hace qué»** debajo de las tareas de la orden: cada persona con sus tareas, para ver de un vistazo cómo quedó la división.
 - La hoja impresa dice «👥 La hacen juntos: …»; el Inicio de la cuadrilla, «a vos: … (con Juan)»; el cierre, quiénes la hicieron.
 - Si se elige una sola persona, queda como «asignada» de siempre.
+- La cajita de «✂ Repartir» sigue mostrando solo personas (no la opción nueva).
 - Arreglo: tocar adentro de la cajita de «✂ Repartir» (fuera de los números) destildaba la tarea. Ya no.
 - Datos: `ot.equipoTarea = { tarea: [nombres] }`. No cambian las reglas de Firebase. No hace falta APK nuevo.
 
 **Pruebas**
-- `t_v094`: 21/21 en PC y 22/22 en celular. Arma la orden con 4 personas (columna Juan + Pedro, BPN Mario + Luis), edita, imprime, mira lo que ve cada uno en Mis tareas e Inicio, cierra y controla que los puntos de cada tarea quedan solo en su grupo, sin perder ni duplicar.
+- `t_v094`: 22/22 en PC y 23/23 en celular. Arma la orden con 4 personas (columna Juan + Pedro, BPN Mario + Luis), edita, imprime, mira lo que ve cada uno en Mis tareas e Inicio, cierra y controla que los puntos de cada tarea quedan solo en su grupo, sin perder ni duplicar.
 - Batería completa: en curso (se anota al terminar).
 
 **Huella SHA-256**
-- `094_2026-11-02_app-EMA_ORIGINAL.html` (61.794 líneas): `5b762553cbd5be39fa2c8b9f77b612d69910947a622af99eb33424991866aca5`
-- `index.html`: `4e40879a056a6a7276a71656f88146005c11b043eab86ec20079ba0c79a5080f`
+- `094_2026-11-02_app-EMA_ORIGINAL.html` (61.794 líneas): `ee3c9d2fb518d64121ed7111e59caf2d03b93ac14edc11164840cf0429f6ce6a`
+- `index.html`: `6872fb34f97253d22d16dbcb7f837138a9fe862a6b8bf25fb21d7c9ad5e194e1`
 - Se genera con `patch_v094.py` sobre el ORIGINAL de la 093.
 
 ## v093 — 02/11/2026 · La pantalla no se mete debajo del reloj ni de los botones de Android

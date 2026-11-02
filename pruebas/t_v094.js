@@ -35,6 +35,8 @@ function datos() {
   await p.click('#otActividades [data-eqk="bpn"][data-eqn="Pedro Gómez"]'); await p.waitForTimeout(200); await p.click('#otActividades [data-eqk="bpn"][data-eqn="Pedro Gómez"]'); await p.waitForTimeout(200);
   await p.selectOption('.ot-act-quien[data-id="zanjeo"]', '__reparto__'); await p.waitForTimeout(300);
   await p.evaluate(() => { const cj = document.querySelector('#otAct_zanjeo').closest('.ot-tarea').querySelector('.rp-tit'); cj.click(); }); await p.waitForTimeout(200);
+  r = await p.evaluate(() => [...document.querySelector('#otAct_zanjeo').closest('.ot-tarea').querySelectorAll('.rp-cant')].map((i) => i.dataset.n));
+  c(r.length === 4 && !r.includes('__equipo__'), 'la cajita de «✂ Repartir» sigue con una fila por persona (4), sin la opción nueva: ' + JSON.stringify(r));
   await p.selectOption('.ot-act-quien[data-id="zanjeo"]', ''); await p.waitForTimeout(300);
   r = await p.evaluate(() => ['montaje_prfv', 'bpn', 'zanjeo'].map((k) => document.querySelector('#otAct_' + k).checked));
   c(r.every(Boolean), 'tocar a las personas (o adentro de la cajita de «Repartir») no destilda la tarea: ' + JSON.stringify(r));
