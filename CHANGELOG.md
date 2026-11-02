@@ -2,6 +2,38 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v097 — 02/11/2026 · Varios equipos en una misma tarea, cada uno con su cantidad
+
+**Pedido de Ángel:** «Falta repartir quiénes lo hacen juntos y quiénes solos. En una tarea, como la BPN, separar los equipos que la van a hacer: un equipo de dos o tres arma unas y otro arma otras».
+
+**Cambios**
+- **«👥 Elegir quiénes»** ahora admite varios equipos:
+  - con **«＋ Otro equipo»** se arma el 2, el 3…, cada uno con su gente y **cuánto le toca**;
+  - un equipo sin cantidad se lleva lo que queda, repartido parejo;
+  - cada persona va en un solo equipo: tocarla en otro la pasa de equipo;
+  - avisa si se repartió de más o si falta.
+  - Ejemplo: BPN 24 → Juan + Pedro 12 · Mario + Luis 8 · Ana sola 4.
+- **Mis tareas:** cada uno ve lo de su equipo («12 columnas · 👥 con Pedro · de 24 en total · otros: Mario y Luis 8 · Ana 4») y marca lo de su equipo. Quien no está en ningún equipo no la ve.
+- **Cierre:** «👥 Cuánto hizo cada equipo». Viene de lo que marcaron; la oficina lo corrige, y el total se arma solo.
+- **Puntos:** los de la tarea se reparten entre los equipos por lo que hizo cada uno y, adentro de cada equipo, por peso del rol × horas.
+- La hoja impresa, el Inicio de la cuadrilla, «📋 Quién hace qué» y «📸 Avance» muestran los equipos y lo de cada uno.
+- Con un solo equipo funciona como en la v094.
+- Datos: `ot.equipos = { tarea: [{ nombres, cant }] }` · `campo.marcasE.<tarea>.<n° de equipo>` · `cierre.hechoEquipo`.
+- No cambian las reglas de Firebase (la cuadrilla solo escribe dentro de `campo`). No hace falta APK nuevo.
+
+**Pruebas**
+- `t_v097`: 23/23 en PC y 24/24 en celular.
+  - Armar 3 equipos, cantidades y avisos, cambiar a alguien de equipo, guardar, editar, imprimir.
+  - Lo que ve y marca cada uno (Juan, Pedro y Mario) y el Inicio.
+  - El avance, el cierre por equipo y los puntos (12/22 · 6/22 · 4/22, sin perder ni duplicar).
+- `t_v094`, `t_v079` y `t_v096` siguen dando OK.
+- Batería completa: en curso (se anota al terminar).
+
+**Huella SHA-256**
+- `097_2026-11-02_app-EMA_ORIGINAL.html` (62.341 líneas): `1680fddb0883acc0cd96c46eaad080c545974ebfaf240c1f5f82c1459e4cfe53`
+- `index.html`: `00d80e3f27477ae7906343a4abcf1c999c8c2b8b7086b0993cc12f8124dedb87`
+- Se genera con `patch_v097.py` sobre el ORIGINAL de la 096.
+
 ## v096 — 02/11/2026 · «📸 Avance» de cada orden, en vivo
 
 **Pedido de Ángel:** «En el tablero se ve el avance; estaría bueno poder entrar y ver las fotos y todo de esa obra según va avanzando».
@@ -29,7 +61,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas**
 - `t_v096`: 17/17 en PC y 18/18 en celular. Contenido, fotos al visor, que se actualiza sola cuando la cuadrilla marca y sube una foto, los botones, Escape, que no cambia la orden y que en el celular no hay scroll de costado.
-- Batería completa: en curso (se anota al terminar).
+- Batería completa: corrida junto con la de la v097 (que incluye todo lo de la v096).
 
 **Huella SHA-256**
 - `096_2026-11-02_app-EMA_ORIGINAL.html` (62.202 líneas): `0f3d042891b6ff08845cebaa476367ef68f927e4d3803dd0a6e57d1458aa1373`

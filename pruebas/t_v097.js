@@ -1,0 +1,110 @@
+// Pruebas v097: varios equipos en una misma tarea, cada uno con su cantidad (BPN 24: Juan + Pedro 12 · Mario + Luis 8 ·
+// Ana sola, lo que queda = 4). Cada uno ve y marca lo de su equipo; el cierre carga cuánto hizo cada equipo y los puntos se
+// reparten por equipo según lo hecho y, adentro, por rol × horas.
+const { abrir, otraPagina, prueba, baseDatos, DOM } = require('./h');
+const cel = process.argv[2] === 'cel';
+function datos() {
+  const d = baseDatos();
+  d.cuentas['mario@' + DOM] = { pass: 'clave123', uid: 'uMario' };
+  d.db.usuarios.uMario = { email: 'mario@' + DOM, usuario: 'mario', nombre: 'Mario Ruiz', rol: 'cuadrilla', persona: 'Mario Ruiz', personaClave: 'mario ruiz', activo: true };
+  return d;
+}
+(async () => {
+  const c = prueba('v097' + (cel ? ' cel' : ''));
+  const A = await abrir({ sesion: 'admin', cel, datos: datos(), espera: 3500, reglas: true, https: true }), p = A.page;
+  const nueva = async () => { const b = p.locator('text=+ Nueva orden'); if (await b.count() && await b.first().isVisible()) { await b.first().click(); await p.waitForTimeout(500); } };
+  await p.evaluate(() => mostrarVista('parte')); await p.waitForTimeout(600); await nueva();
+  await p.selectOption('#otPlaza', 'p1'); await p.fill('#otCuadrilla', 'Cuadrilla 1'); await p.fill('#otResponsable', 'Juan Pérez');
+  await p.evaluate(() => { otFecha.value = fechaAISO(new Date()); personal.length = 0; const R = ROLES_CUADRILLA; personal.push({ id: 901, nombre: 'Juan Pérez', rol: R[0] }, { id: 902, nombre: 'Pedro Gómez', rol: R[1] || R[0] }, { id: 903, nombre: 'Mario Ruiz', rol: R[1] || R[0] }, { id: 904, nombre: 'Luis Díaz', rol: R[2] || R[0] }, { id: 905, nombre: 'Ana Sosa', rol: R[0] }); renderPersonal(); }); await p.waitForTimeout(900);
+  await p.check('#otAct_bpn'); await p.fill('.ot-act-prev[data-id="bpn"]', '24');
+  await p.check('#otAct_zanjeo'); await p.fill('.ot-act-prev[data-id="zanjeo"]', '20'); await p.waitForTimeout(400);
+  await p.selectOption('.ot-act-quien[data-id="bpn"]', '__equipo__'); await p.waitForTimeout(400);
+  const caja = () => p.evaluate(() => { const cj = document.querySelector('#otAct_bpn').closest('.ot-tarea').querySelector('.eq-caja'); return cj ? { eqs: [...cj.querySelectorAll('.eq-eq')].map((e) => [...e.querySelectorAll('.chip.activo')].map((b) => b.dataset.eqn.split(' ')[0]).join('+')), cants: [...cj.querySelectorAll('.eq-cant')].map((i) => i.value || ('(' + i.placeholder + ')')), pie: cj.querySelector('.eq-pie').innerText.replace(/\s+/g, ' '), mal: cj.querySelector('.eq-pie').classList.contains('mal') } : null; });
+  const chip = (n, i) => p.click(`#otActividades .eq-caja [data-eqk="bpn"][data-eqn="${n}"][data-eqi="${i}"]`);
+  await chip('Juan Pérez', 0); await chip('Pedro Gómez', 0); await p.waitForTimeout(200);
+  let r = await caja();
+  c(r && r.eqs.join() === 'Juan+Pedro' && r.cants.length === 0 && /La hacen 2/.test(r.pie), 'un equipo: como antes («La hacen 2: Juan, Pedro»): ' + JSON.stringify(r));
+  await p.click('#otActividades .eq-caja [data-eqmas]'); await p.waitForTimeout(200);
+  await chip('Mario Ruiz', 1); await chip('Luis Díaz', 1);
+  await p.click('#otActividades .eq-caja [data-eqmas]'); await p.waitForTimeout(200);
+  await chip('Ana Sosa', 2); await p.waitForTimeout(200);
+  r = await caja();
+  c(r && r.eqs.join() === 'Juan+Pedro,Mario+Luis,Ana' && r.cants.length === 3, '«＋ Otro equipo» arma el 2 y el 3, cada uno con su gente: ' + JSON.stringify(r && r.eqs));
+  await p.fill('#otActividades .eq-cant[data-eqg="0"]', '12'); await p.fill('#otActividades .eq-cant[data-eqg="1"]', '8'); await p.waitForTimeout(300);
+  r = await caja();
+  c(r && r.cants.join() === '12,8,(4)' && /Equipo 1: Juan \+ Pedro → 12 · Equipo 2: Mario \+ Luis → 8 · Equipo 3: Ana → 4 · ✓ 24 de 24/.test(r.pie) && !r.mal, 'con 12 y 8, al equipo 3 (sin cantidad) le queda 4: «✓ 24 de 24»: ' + r.pie);
+  await p.fill('#otActividades .eq-cant[data-eqg="1"]', '20'); await p.waitForTimeout(300);
+  r = await caja();
+  c(r && /repartiste 8 de más/.test(r.pie) && r.mal, 'si se pasa, lo avisa: ' + r.pie);
+  await p.fill('#otActividades .eq-cant[data-eqg="1"]', '8'); await p.waitForTimeout(200);
+  await chip('Pedro Gómez', 1); await p.waitForTimeout(200);
+  r = await caja();
+  c(r && r.eqs.join() === 'Juan,Pedro+Mario+Luis,Ana', 'una persona está en un solo equipo: tocar a Pedro en el equipo 2 lo saca del 1: ' + JSON.stringify(r.eqs));
+  await chip('Pedro Gómez', 0); await p.waitForTimeout(200);
+  r = await caja(); c(r && r.eqs.join() === 'Juan+Pedro,Mario+Luis,Ana', 'y vuelve al 1');
+  r = await p.evaluate(() => [...document.querySelectorAll('#eqResumen .eq-r-fila')].map((f) => f.innerText.replace(/\s+/g, ' ')));
+  c(/Juan Pérez.*bornera BPN \(con Pedro, 12\)/.test(r[0]) && /Ana Sosa.*bornera BPN \(4\)/.test(r[4]) && /Mario Ruiz.*\(con Luis, 8\)/.test(r[2]), '«📋 Quién hace qué» con el equipo y la cantidad de cada uno: ' + JSON.stringify(r.map((x) => x.slice(0, 60))));
+  await p.screenshot({ path: __dirname + '/v097_orden' + (cel ? '_cel' : '') + '.png' });
+  if (cel) { const w = await p.evaluate(() => ({ sw: document.documentElement.scrollWidth, w: document.documentElement.clientWidth })); c(w.sw <= w.w + 1, 'celular: sin scroll de costado'); }
+  const antes = await p.evaluate(() => ordenesTrabajo.map((o) => o.id));
+  await p.click('#otEmitirBtn'); await p.waitForTimeout(1500);
+  const ot = await p.evaluate((a) => ordenesTrabajo.find((o) => !a.includes(o.id)), antes);
+  c(ot && JSON.stringify(ot.equipos.bpn) === JSON.stringify([{ nombres: ['Juan Pérez', 'Pedro Gómez'], cant: 12 }, { nombres: ['Mario Ruiz', 'Luis Díaz'], cant: 8 }, { nombres: ['Ana Sosa'], cant: 4 }]) && !(ot.asignada || {}).bpn && !(ot.equipoTarea || {}).bpn, 'la orden guarda los 3 equipos con su cantidad: ' + JSON.stringify(ot && ot.equipos));
+  await p.evaluate((id) => editarOrdenTrabajo(id), ot.id); await p.waitForTimeout(900);
+  r = await caja();
+  c(r && r.eqs.join() === 'Juan+Pedro,Mario+Luis,Ana' && r.cants.join() === '12,8,4', 'al editar vuelven los equipos y las cantidades');
+  await p.evaluate(() => salirDeEdicionOt()); await p.waitForTimeout(300);
+  await p.evaluate((id) => imprimirOrdenTrabajo(id), ot.id); await p.waitForTimeout(1500);
+  r = await p.evaluate(() => document.querySelector('#hojaOv iframe').contentDocument.body.innerText.replace(/\s+/g, ' '));
+  c(/Por equipos: Equipo 1: Juan Pérez \+ Pedro Gómez 12 · Equipo 2: Mario Ruiz \+ Luis Díaz 8 · Equipo 3: Ana Sosa 4/.test(r), 'la orden impresa dice los equipos y cuánto le toca a cada uno');
+  await p.evaluate(() => window.hojaEMA.cerrar());
+  await p.evaluate((id) => fbOtUpdate(id, { 'campo.seguridad': { epp: true, baliza: true, herram: true, corte: 'no', por: 'Juan Pérez', ts: Date.now() } }), ot.id); await p.waitForTimeout(600);
+  // ---- Mis tareas
+  const tarea = (pg) => pg.evaluate((id) => { const t = document.querySelector(`.mt-ot[data-ot="${id}"] .mt-tarea[data-k="bpn"]`); return t ? { txt: t.innerText.replace(/\s+/g, ' '), on: !!t.querySelector('[data-m="si"].on') } : null; }, ot.id);
+  const marcar = async (pg, cant) => { await pg.evaluate((id) => document.querySelector(`.mt-ot[data-ot="${id}"] .mt-tarea[data-k="bpn"] [data-m="si"]`).click(), ot.id); await pg.waitForTimeout(900); await pg.fill(`.mt-ot[data-ot="${ot.id}"] .mt-tarea[data-k="bpn"] .mt-cant-in`, String(cant)); await pg.press(`.mt-ot[data-ot="${ot.id}"] .mt-tarea[data-k="bpn"] .mt-cant-in`, 'Tab'); await pg.waitForTimeout(1300); };
+  const J = await otraPagina(A, { sesion: 'juan', cel, espera: 4500, reglas: true, https: true }), pj = J.page;
+  await pj.evaluate(() => mostrarVista('mistareas')); await pj.waitForTimeout(1500);
+  r = await tarea(pj);
+  c(r && /Previsto: 12 columnas · 👥 con Pedro · de 24 en total · otros: Mario y Luis 8 · Ana 4/.test(r.txt), 'Juan ve lo de su equipo: «12 columnas · con Pedro · de 24 en total · otros: Mario y Luis 8 · Ana 4»: ' + (r && r.txt.slice(0, 140)));
+  await marcar(pj, 12);
+  r = await p.evaluate((id) => { const o = ordenesTrabajo.find((x) => x.id === id); return { e: ((o.campo.marcasE || {}).bpn || {}), m: (o.campo.marcas || {}).bpn }; }, ot.id);
+  c(r.e[0] && r.e[0].hecho && Number(r.e[0].cant) === 12 && r.m && r.m.agregada && Number(r.m.cant) === 12, 'Juan marca 12: queda la marca del equipo 1 y la sumada de la tarea (12)');
+  const P = await otraPagina(A, { sesion: 'pedro', cel, espera: 4500, reglas: true, https: true }), pp = P.page;
+  await pp.evaluate(() => mostrarVista('mistareas')); await pp.waitForTimeout(1500);
+  r = await tarea(pp);
+  c(r && /con Juan/.test(r.txt) && r.on, 'Pedro (mismo equipo) la ve hecha por Juan: es una sola marca para el equipo');
+  const M = await otraPagina(A, { sesion: 'mario', cel, espera: 4500, reglas: true, https: true }), pm = M.page;
+  await pm.evaluate(() => mostrarVista('mistareas')); await pm.waitForTimeout(1500);
+  r = await tarea(pm);
+  c(r && /Previsto: 8 columnas · 👥 con Luis/.test(r.txt) && /otros: Juan y Pedro 12 · Ana 4/.test(r.txt) && !r.on, 'Mario ve lo de su equipo (8, con Luis) y sin la marca del otro equipo');
+  await marcar(pm, 6);
+  r = await p.evaluate((id) => (ordenesTrabajo.find((x) => x.id === id).campo.marcas || {}).bpn, ot.id);
+  c(r && Number(r.cant) === 18 && /Juan/.test(r.por) && /Mario/.test(r.por), 'con lo de Mario (6) la marca sumada pasa a 18');
+  await pp.evaluate(() => mostrarVista('inicio')); await pp.waitForTimeout(800);
+  r = await pp.evaluate(() => ((document.getElementById('inicioCuadrilla') || {}).innerText || '').replace(/\s+/g, ' '));
+  c(/Conexionado de bornera BPN \(con Juan, 12\)/.test(r), 'en el Inicio de Pedro: «… bornera BPN (con Juan, 12)»');
+  // ---- avance
+  await p.evaluate((id) => window.__avanceOrden.abrir(id), ot.id); await p.waitForTimeout(700);
+  r = await p.evaluate(() => (document.getElementById('avOt') || {}).innerText.replace(/\s+/g, ' '));
+  c(/Equipo 1: Juan \+ Pedro 12 · Equipo 2: Mario \+ Luis 8 · Equipo 3: Ana 4/.test(r) && /Equipo 1 \(Juan\+Pedro\) ✓ 12/.test(r) && /Equipo 2 \(Mario\+Luis\) ✓ 6/.test(r), '«📸 Avance» muestra los equipos y lo que marcó cada uno');
+  await p.evaluate(() => window.__avanceOrden.cerrar());
+  // ---- cierre y puntos
+  await p.evaluate((id) => abrirCierreOt(id), ot.id); await p.waitForTimeout(900);
+  r = await p.evaluate(() => ({ tot: document.querySelector('#cierreCuerpo .cierre-qty[data-k="bpn"]').value, eq: [...document.querySelectorAll('#cierreCuerpo .cierre-qe[data-k="bpn"]')].map((i) => i.value), txt: ((document.querySelector('#cierreCuerpo .eq-cierre') || {}).innerText || '').replace(/\s+/g, ' ') }));
+  c(Number(r.tot) === 18 && r.eq.join() === '12,6,' && /Cuánto hizo cada equipo/.test(r.txt) && /le tocaban 4 · sin marcar/.test(r.txt), 'el cierre trae 18 y «cuánto hizo cada equipo»: 12 · 6 · 0 (Ana no marcó): ' + JSON.stringify(r.eq));
+  await p.fill('#cierreCuerpo .cierre-qe[data-k="bpn"][data-g="2"]', '4'); await p.waitForTimeout(200);
+  r = await p.evaluate(() => document.querySelector('#cierreCuerpo .cierre-qty[data-k="bpn"]').value);
+  c(Number(r) === 22, 'la oficina carga lo de Ana (4) y el total pasa solo a 22');
+  await p.fill('#cierreCuerpo .cierre-qty[data-k="zanjeo"]', '20');
+  await p.evaluate(() => { const x = document.querySelector('input[name="coCierreResp"][value="no"]'); x && (x.checked = true); window.guardarCierreOt(); }); await p.waitForTimeout(2500);
+  r = await p.evaluate((id) => { const o = ordenesTrabajo.find((x) => x.id === id); return { he: o.cierre && o.cierre.hechoEquipo, pts: window.puntosDeOrden(o, true) }; }, ot.id);
+  c(r.he && r.he.bpn && r.he.bpn[0] === 12 && r.he.bpn[1] === 6 && r.he.bpn[2] === 4, 'guardado: cuánto hizo cada equipo (12 · 6 · 4)');
+  const ren = r.pts.renglones.find((x) => x.k === 'bpn'), zan = r.pts.renglones.find((x) => x.k === 'zanjeo'), per = (n) => r.pts.porPersona.find((x) => x.nombre.indexOf(n) === 0);
+  const eq1 = per('Juan').asignado + per('Pedro').asignado, eq2 = per('Mario').asignado + per('Luis').asignado, eq3 = per('Ana').asignado;
+  c(Math.abs(eq1 - ren.pts * 12 / 22) < 0.01 && Math.abs(eq2 - ren.pts * 6 / 22) < 0.01 && Math.abs(eq3 - ren.pts * 4 / 22) < 0.01, `puntos de la BPN (${ren.pts.toFixed(2)}) por equipo según lo hecho: ${eq1.toFixed(2)} · ${eq2.toFixed(2)} · ${eq3.toFixed(2)} (12/22 · 6/22 · 4/22)`);
+  const tot = r.pts.porPersona.reduce((s, x) => s + x.pts, 0);
+  c(Math.abs(tot - (ren.pts + zan.pts)) < 0.01, 'no se pierde ni se duplica nada (el zanjeo de todos se reparte entre todos): ' + tot.toFixed(2));
+  const errs = A.errores.concat(J.errores, P.errores, M.errores).filter((e) => !/Missing or insufficient permissions|permission-denied|error occurred when fetching the script|ERR_|Failed to fetch|aborted/i.test(e));
+  c(!errs.length, 'sin errores de JS ' + JSON.stringify(errs.slice(0, 3)));
+  await A.browser.close(); process.exit(c.fin() ? 1 : 0);
+})().catch((e) => { console.error(e); process.exit(2); });
