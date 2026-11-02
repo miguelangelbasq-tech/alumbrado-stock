@@ -222,3 +222,11 @@ Referencias que pasó Ángel: Li.PAD, GridGIS (Merytronic), DIRED-CAD, ArcGIS Fi
 - ¿Qué receptor RTK tiene en mente (marca y modelo)?
 - La base de Córdoba: ¿en qué formato está (DWG/DXF), cuánto pesa y en qué sistema de coordenadas?
 - ¿Qué sigue después de la etapa 1? Opciones: foto por punto, medir entre dos puntos, «llevame al punto», o la etapa 2 con la base de Córdoba.
+
+## Editar el relevamiento (v099)
+- **Mapa:** tocá un punto y se abre su cuadro: tipo, nombre, nota, mover (arrastrándolo, tocando el mapa o con el GPS), empezar o unir tramo, borrar. Tocá un tramo (la línea) y aparecen los «＋» para agregarle quiebres; los cuadraditos se arrastran. «↺ Dejarlo recto» los saca.
+- **En obra:** con «🚶 Dibujar el camino caminando», el tramo hasta el próximo punto que marques sigue tu recorrido, curvas incluidas (sin el temblequeo del GPS).
+- **Plano:** se arrastra, se acerca con ＋ / −, con la rueda o con dos dedos, y «⤢» vuelve a mostrar todo. El catastro aparece de lo que estás mirando. Los puntos y los quiebres también se tocan y se mueven ahí.
+- **↶ Deshacer:** vuelve atrás lo último que se movió, borró o cambió.
+- Los largos de las cotas, la planilla, el DXF (polilínea) y el cable del cálculo eléctrico van por el camino dibujado.
+- Datos: `punto.via = [{la, lo}]`, los quiebres desde el punto anterior hasta ese punto.

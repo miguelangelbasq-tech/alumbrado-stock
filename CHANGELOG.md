@@ -2,6 +2,78 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v099 — 02/11/2026 · Proyectista: editar puntos y tramos, plano que se mueve
+
+**Pedido de Ángel:** «En Proyectos no se puede mover el plano; solo se ve el catastro de la parte que selecciono. No puedo eliminar ni mover los puntos. Los tramos salen rectos: poder darles la forma del camino (caminando o en la compu). Y los puntos: editarlos, borrar, cambiar, mover, en la compu y en obra. Fijate qué más mejorar».
+
+**Cambios**
+- **Puntos en el mapa:** se tocan y se abre un cuadro con:
+  - el tipo (si el nombre era automático, se renombra: C3 → T2), el nombre y la nota;
+  - **mover**: arrastrándolo, con «🎯 Moverlo tocando el mapa» o con «📍 Traerlo a donde estoy» (GPS);
+  - «✂ Empezar tramo nuevo acá» / «🔗 Unirlo con el anterior»;
+  - «🗑 Borrar», que pregunta antes.
+- **Forma de los tramos:** se toca la línea y aparecen «＋» a la mitad de cada pedazo. Tocado o arrastrado, el «＋» agrega un quiebre; los cuadraditos se arrastran; también se puede sacar un quiebre o «↺ Dejarlo recto».
+- **«🚶 Dibujar el camino caminando»:** mientras se camina se ve el recorrido y la distancia «por donde caminaste». Al marcar el próximo punto, el tramo sigue la curva caminada, sin el temblequeo del GPS (simplificado a 0,5 m).
+- **El largo va por el camino** en las cotas, la planilla, el plano impreso, el DXF (polilínea en la capa TRAMOS) y el cable del cálculo eléctrico.
+- **Plano:**
+  - se arrastra para moverlo y se acerca con ＋ / −, la rueda del mouse o dos dedos; «⤢» vuelve a ver todo;
+  - el catastro se baja y se dibuja de la parte que se está mirando (hasta 4 km de ancho; más lejos dice «Acercá para ver el catastro»);
+  - los puntos y los quiebres también se tocan y se arrastran en el plano.
+- **«↶ Deshacer»** (hasta 30 pasos) después de mover, borrar o cambiar.
+- **Arreglos que salieron al revisar:**
+  - el mapa ya no se rearma ni vuelve a encuadrar todo cada vez que se agrega o mueve un punto;
+  - el GPS ya no redibuja los puntos cada segundo: antes los toques se podían perder;
+  - al tocar el mapa con la pantalla scrolleada, el mapa tomaba el teclado y corría la pantalla, y el toque caía al lado.
+- En 📋 Puntos, cada fila tiene «🗺» para ir a ese punto en el mapa. Al reordenar o borrar, los tramos que cambian quedan rectos.
+- Datos: `punto.via = [{la, lo}]` (quiebres desde el punto anterior) y `punto.movido`. No cambian las reglas de Firebase. No hace falta APK nuevo.
+
+**Pruebas**
+- `t_v099`: 26/26 en PC y 27/27 en celular. Cubre mapa (tocar, arrastrar, tocar el mapa, tipo, nota, borrar, deshacer), quiebres, largos, DXF, planilla, cálculo eléctrico, camino caminando y plano (＋, arrastrar, rueda, dos dedos, ⤢, tocar y arrastrar puntos).
+- Las de Proyectista anteriores siguen OK: `t_v089`, `t_v090`, `t_v091`, `t_v092`, `t_v095`.
+- El código de Proyectista sale igual con esbuild para Chrome 80 que para lo último (no usa nada nuevo).
+- Batería completa en PC y celular: 174 de 176 OK. Las 2 que fallan son de `t_v083`, que quedó vieja (la reemplaza `t_v084`).
+
+**Huella SHA-256**
+- `099_2026-11-02_app-EMA_ORIGINAL.html` (62.789 líneas): `b8bf217ac9b85626643e9979c6a4c5f5fef96eec3ad5c5c02cb4a7c9be5697ca`
+- `index.html`: `66ed669a5faf7469cb9ea462a0f18a3bdf3650b3127614ca3b8e34e717ad5e44`
+- Se genera con `patch_v099.py` sobre el ORIGINAL de la 098 (que sale de `patch_v098.py` sobre la 097).
+
+## v098 — 02/11/2026 · Órdenes ↔ avance de obra · «¿Olvidaste tu contraseña?»
+
+**Pedidos de Ángel:**
+- «Las órdenes tienen que convivir con el avance de obra: si en el avance pongo que se hicieron 7 columnas de 8, la orden me tiene que decir que queda una. Y viceversa».
+- «Que puedan recuperar su contraseña o usuario con el correo ellos mismos».
+
+**Cambios**
+- **«Quedan N de T» de la orden:**
+  - lo hecho de cada tarea es lo mayor entre lo cerrado en órdenes y lo cargado en el **Avance de obra**, en los ítems propios de la tarea;
+  - no se suman, porque el cierre de una orden ya avanza el itemizado;
+  - dice «hecho 7 (según el Avance de obra)»;
+  - sin cálculo de materiales, el total sale del itemizado.
+  - Vale para las tareas que tienen ítem propio: columnas, zanjeo, cable, tablero, poste, PAT, retiros, poda, etc.
+  - Excavación, hormigonado, BPN, sellado y vínculos (van adentro del ítem de la columna completa) siguen contando por las órdenes.
+  - Idea para más adelante (Ángel): darle a cada tarea un ítem propio aunque tenga otro nombre.
+- Al revés (orden cerrada → avance) ya andaba.
+- **Entrada:**
+  - «¿Olvidaste tu contraseña o tu usuario?»: con el usuario o el correo, Firebase manda en castellano el enlace para elegir una contraseña nueva;
+  - en pantalla se ve el correo tapado (an\*\*\*\*@gmail.com) y el aviso de que lo busquen en Spam;
+  - si escribió el correo, le muestra su usuario;
+  - si el usuario no tiene correo de verdad (el inventado `usuario@ema-alumbrado.app`), le dice que lo pida a la oficina.
+  - No escribe nada en la base: usa `configEquipo/alias`, que ya era público para entrar.
+- Ángel decidió dejar el cartel de ubicación de Android como está, con el APK 1.2.
+- No cambian las reglas de Firebase. No hace falta APK nuevo.
+
+**Pruebas**
+- `t_v098`: 9/9 en PC y 10/10 en celular.
+- `t_v098b`: 11/11 en PC y 12/12 en celular. El correo de verdad no se puede probar desde acá: probalo con un usuario con Gmail.
+- Batería completa en PC y celular: OK.
+  - `t_v028` y `t_v086` fallaron con la máquina cargada; solas dan 22/22 y 19/19.
+  - `t_v083` es vieja, la reemplazó `t_v084`.
+
+**Huella SHA-256**
+- `098_2026-11-02_app-EMA_ORIGINAL.html` (62.465 líneas): `16db63b89a754acb161365b45149770ad9330778326582e00a559249dd39509a`
+- `index.html`: `7ffe954030bccc93b924120a6f67f2e362d83447e4b7234dd745826fd1f2325c`
+
 ## v097 — 02/11/2026 · Varios equipos en una misma tarea, cada uno con su cantidad
 
 **Pedido de Ángel:** «Falta repartir quiénes lo hacen juntos y quiénes solos. En una tarea, como la BPN, separar los equipos que la van a hacer: un equipo de dos o tres arma unas y otro arma otras».
