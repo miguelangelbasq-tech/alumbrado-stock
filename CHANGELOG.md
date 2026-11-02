@@ -19,7 +19,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas**
 - `t_v094`: 22/22 en PC y 23/23 en celular. Arma la orden con 4 personas (columna Juan + Pedro, BPN Mario + Luis), edita, imprime, mira lo que ve cada uno en Mis tareas e Inicio, cierra y controla que los puntos de cada tarea quedan solo en su grupo, sin perder ni duplicar.
-- Batería completa: en curso (se anota al terminar).
+- Batería completa (81 pruebas, PC y celular): todo OK. `t_v083` quedó reemplazada por `t_v084`.
 
 **Huella SHA-256**
 - `094_2026-11-02_app-EMA_ORIGINAL.html` (61.794 líneas): `ee3c9d2fb518d64121ed7111e59caf2d03b93ac14edc11164840cf0429f6ce6a`
