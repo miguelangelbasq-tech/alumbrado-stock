@@ -30,3 +30,7 @@ Estas pruebas se suman al arnés del kit (`h.js`, `firebase_stub.js`, `reglas_st
 - `t_v102d.js`: órdenes y puntos: reinicio, reparto, «Quedan», orden cerrada que sigue otro día, anuladas, revertir avance.
 - `t_v102e.js`: «Finalizada» única, obras ocultas en la plata, ganancia sin IVA, material por código, notas, cable del itemizado con la subida.
 - `t_v055.js` se actualizó (v102): «📏 ¿Cuántos m trae cada Un.?» reemplaza a «Poner unidad».
+- `t_v103.js`: cables en m y alambre en kg, 7004–7007 de baja, mismo material con otro código, ganancia 3,5 + 0,5 m, reserva 5 % fuera del ítem, provisiones fuera del %, puntos desde el 01/11/2026 (`pisoReal:true`).
+- `t_v104.js`: «📌 Seguimiento» (lo dado, lo hecho, lo que falta; darla a otro) y «↩ Sigue en obra».
+- `t_v055.js` y `t_v056.js` se actualizaron (v103): fijan en sus datos las unidades de antes (la base ahora tiene cables en m y alambre en kg).
+- **Arnés (v103):** `h.js` tiene que poner `window.__puntosPisoFijo = "2000-01-01"` en las pruebas viejas (salvo `pisoReal:true`), porque desde la v103 los puntos cuentan desde el 01/11/2026.
