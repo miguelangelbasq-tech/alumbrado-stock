@@ -2,6 +2,27 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v105 — 04/11/2026 · «📅 Tareas de hoy» en Seguimiento
+
+**Pedido de Ángel:** «Falta las de hoy… o sea, la opción tareas de hoy».
+
+**Cambios** (solo el módulo `seguimientoTareas`)
+- Cuadro **📅 Tareas de hoy**: todas las tareas de las órdenes de hoy, hechas o no.
+- «Pendientes» ahora incluye lo de hoy que está en obra.
+  - A esas tareas no se les ofrece «Darla hoy» ni «Darla a otro» (todavía están en obra): solo «Cargar lo hecho».
+- La fecha «hasta» sigue a hoy si la app quedó abierta de un día para otro.
+- «sin personal cargado» en vez de «(—)».
+
+**Pruebas**
+- `t_v105`: 10/10 en PC y celular.
+- `t_v104`: 10/10.
+- Las 50 pruebas de órdenes en PC: OK.
+
+**Huella SHA-256**
+- `105_2026-11-03_app-EMA_ORIGINAL.html`: `98bd71537d5d31dee7a1910784af87c9fd3bc9b134b2567976124305458c7d58`
+- `index.html`: `58855e9852649cb5092f686b4fe67fbb65c2e4278eb2163ef38c9cfb810692a4`
+- Versión: `2026-11-03 11:31 · 7e44cc`
+
 ## v104 — 03/11/2026 · «📌 Seguimiento» de tareas y «↩ Sigue en obra» (incluye la v103)
 
 **Pedido de Ángel:**

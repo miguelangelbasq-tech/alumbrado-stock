@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **03/11/2026**, última versión entregada: **v104** (ver `CHANGELOG.md`).
+> Estado al **03/11/2026**, última versión entregada: **v105** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -553,6 +553,7 @@ Ejemplos:
 | 102 | Revisión completa (auditoría v101): columnas sin vínculo y 2 tableros en la orden, pasar el cálculo a la obra registrada, «Finalizada» única, obras ocultas en la plata, ganancia sin IVA, números de comprobante guardados, unidades del pañol (`porUnidad`), sustitutos, órdenes cerradas que siguen otro día, revertir avance al anular (`obraComputo`, `colasYNumeros`, `panolArreglos`, `ordenesArreglos`, `window.__obraFin`) |
 | 103 | Respuestas de Ángel: mismo material con otro código, 7004–7007 de baja, cables en m y alambre en kg (con alambre por aislador), ganancia 3,5 + 0,5 m y 5 % de reserva, provisiones fuera del %, puntos desde el 01/11/2026 (`__puntosPiso`) |
 | 104 | «📌 Seguimiento» de tareas en Órdenes (por persona y obra, darla hoy o a otro) y «↩ Sigue en obra» para lo que mandaron por error |
+| 105 | «📅 Tareas de hoy» en Seguimiento; lo de hoy en obra cuenta como pendiente |
 | 101 | Alternativas del pañol debajo de lo que falta en «📦 Material de esta obra» (🟢 casi igual / 🟡 sirve con diferencias, con la norma) y «Pedir esta en su lugar»; «Calculadora ↔ pañol» con la misma comparación (`alternativas`) |
 
 ---
