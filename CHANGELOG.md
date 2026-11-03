@@ -24,6 +24,15 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas**
 - `t_v104`: 10/10 en PC y celular.
+- Batería completa en PC y celular: todo OK.
+  - `t_v083` es vieja.
+  - `t_v028` en celular falló una vez y repetida sola pasó (la conocida).
+  - Las pruebas de órdenes se repitieron con la versión final.
+
+**Huella SHA-256 (v104, incluye la v103)**
+- `104_2026-11-03_app-EMA_ORIGINAL.html` (63.612 líneas): `9c1aca0df9ca1a50f39f790082ff1581e944990b60e1f09ab055f9635090fb16`
+- `index.html`: `079fcac5863e205c5fb9bf357f3cbb8e62daf4cb60ea87f40ec23ba2f0693e6d`
+- Versión: `2026-11-03 09:57 · c0af51`
 
 ## v103 — 03/11/2026 · Respuestas de Ángel: mismo material, bajas, unidades, alambre, ganancia, provisiones, puntos
 
