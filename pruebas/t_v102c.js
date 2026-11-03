@@ -6,6 +6,7 @@ const cel = process.argv[2] === 'cel';
 (async () => {
   const c = prueba('v102c' + (cel ? ' cel' : ''));
   const d = baseDatos(), ahora = Date.now(), e = (id, cod, q, x) => Object.assign({ tipo: 'entrada', codigo: cod, cantidad: q, fecha: d.hoy, ts: ahora + id }, x || {});
+  d.db.catalogoProductos = { '1009': { codigo: 1009, un: 'Un.' } };   // v103: la base ahora tiene los cables en m; la prueba sigue con el 1009 en Un. (rollos)
   d.db.avanceObras.p1.secciones = [{ titulo: 'Materiales', items: [
     { desc: 'Cable Cu 4×2,5 mm² XLPE + vaina PVC (IRAM 2178-1)', cod: 1009, cantNecesaria: 100, un: 'm' },
     { desc: 'Cable Cu 3×1,5 mm² XLPE + vaina PVC (IRAM 2178-1) — columna a luminaria', cod: 6001, cantNecesaria: 90, un: 'm' },

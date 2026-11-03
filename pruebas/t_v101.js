@@ -11,6 +11,7 @@ function datos() {
     { desc: 'Prensacable 1/2" RE, con tuerca y arandela (Ø 5–8 mm)', cod: 5020, cantNecesaria: 4, un: 'Un.' },
     { desc: 'FUSIBLE CILINDRICO 10 X 38 2 AMP', cod: 3017, cantNecesaria: 20, un: 'Un.' }] }];
   const e = (id, c, q) => ({ tipo: 'entrada', codigo: c, cantidad: q, fecha: d.hoy, ts: ahora + id });
+  d.db.catalogoProductos = { '1019': { codigo: 1019, un: 'Un.' }, '1025': { codigo: 1025, un: 'Un.' }, '1020': { codigo: 1020, un: 'Un.' } };   // v103: la base ahora tiene los cables en m; la prueba sigue con los rollos de antes
   d.db.movimientos = { m1: e(1, 1019, 3), m2: e(2, 1025, 2), m3: e(3, 1020, 5), m4: e(4, 2009, 10), m5: e(5, 2003, 50), m6: e(6, 5019, 8), m7: e(7, 3016, 30), m8: e(8, 3018, 40) };
   return d;
 }
