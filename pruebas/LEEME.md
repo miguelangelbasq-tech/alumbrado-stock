@@ -24,3 +24,9 @@ Estas pruebas se suman al arnés del kit (`h.js`, `firebase_stub.js`, `reglas_st
 # Pruebas de la v101
 
 - `t_v101.js`: alternativas del pañol en «📦 Material de esta obra» (Calculadora › Material por obra). El cable 3×1,5 (6001) que no hay muestra en verde el 1019 y el 1025 (con «lo daba la Municipalidad», «no dice la norma», «rollos») y en amarillo el 3×2,5. La BPN que no alcanza muestra el 2003 «no dice el color». No ofrece prensacable 1 1/2" por 1/2" ni fusible 1 A o Neozed por 2 A. «Pedir esta en su lugar» pregunta los m por rollo, cambia el pedido y lo anota. «Calculadora ↔ pañol» usa la misma comparación.
+- `t_v102a.js`: columnas sin vínculo (4 → 4 en la orden), segundo tablero, «Pasar este cálculo a la obra», etapa y «qué falta» desde los ítems, colores, la inspección pregunta antes.
+- `t_v102b.js`: números de comprobante guardados y marcas sin señal escritas directo.
+- `t_v102c.js`: pañol: unidades (`porUnidad`), sustitutos, reservas sin «No hay», lista de compras, anular la pareja, prensacables.
+- `t_v102d.js`: órdenes y puntos: reinicio, reparto, «Quedan», orden cerrada que sigue otro día, anuladas, revertir avance.
+- `t_v102e.js`: «Finalizada» única, obras ocultas en la plata, ganancia sin IVA, material por código, notas, cable del itemizado con la subida.
+- `t_v055.js` se actualizó (v102): «📏 ¿Cuántos m trae cada Un.?» reemplaza a «Poner unidad».

@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **02/11/2026**, última versión entregada: **v101** (ver `CHANGELOG.md`).
+> Estado al **03/11/2026**, última versión entregada: **v102** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -222,8 +222,8 @@ Los roles están en `window.PERMISOS` (script `usuariosPermisos`) y en las regla
 | `historialEtapas` | Historial de etapas tildadas | |
 | `ordenesTrabajo/{id}` | Órdenes de trabajo `OT-AAAA-NNN` | `plazaId, plazaNombre, fecha, hora, cuadrilla, responsable, personal[], personalNombres[] (claves normalizadas, para las reglas), tareas/actividades, asignada{tarea:persona}, reparto{tarea:[{nombre,cant}]}, equipoTarea{tarea:[nombres]} (v094: la hacen juntos), equipos{tarea:[{nombres,cant}]} (v097: varios equipos), excedentes, vehiculos[{id,nombre,patente}], vehiculoId, estado (Emitida · En curso · Terminada · Anulada), campo{marcas, marcasP, fotos{<id>:{…, mini (72px), borrada}}, medidas, envios}, cierre{hecho, hechoPersona, horas, puntos (fijados al cerrar), …}, creadoPor` |
 | `planSemanal` | Plan de la semana | |
-| `movimientos` | Movimientos del pañol | entradas `E-0001…` (remito, proveedor, precioUnit en $ sin IVA + `precioOriginal, moneda, ivaPct, cotizacion`), salidas/vales `S-0001…` (`valeGrupo`, obra, quién), devoluciones (`devolGrupo`); **se anulan, no se borran**; cambio de fecha con `fechaAnterior`, `fechaHist` |
-| `catalogoProductos/{codigo}` | Cambios sobre el catálogo base (productos fijos del Excel + altas del equipo) | `codigo, desc, un, costo, minimo, activo (false = de baja), editadoPor, editadoTs` |
+| `movimientos` | Movimientos del pañol | entradas `E-0001…` (remito, proveedor, precioUnit en $ sin IVA + `precioOriginal, moneda, ivaPct, cotizacion`), salidas/vales `S-0001…` (`valeGrupo`, obra, quién), devoluciones (`devolGrupo`); `numero` guardado desde v102 (los viejos sin `numero` se numeran como antes); **se anulan, no se borran**; cambio de fecha con `fechaAnterior`, `fechaHist` |
+| `catalogoProductos/{codigo}` | Cambios sobre el catálogo base (productos fijos del Excel + altas del equipo) | `codigo, desc, un, costo, minimo, activo (false = de baja), porUnidad {m: 100} (v102: cuánto trae cada Un., p. ej. 100 m por rollo), editadoPor, editadoTs` |
 | `reservas` | Reservas de material `R-0001…` | `estado`: `solicitada` (por aprobar, no aparta) · `pendiente` · `alistando` · `lista` · `entregada` (con/sin faltantes) · `rechazada` · `anulada`; `items[]` con `cant, entregado, nohay, cambio{…estado pendiente/aceptado/rechazado/retirado}, cambiadoDe, sinStock{descartado}`; `creadoPor, paraQuien, desdeCalculo, aprobadaPor, historial[]` |
 | `herramientas` / `herramientasMov` | Herramientas H-001… (libre/asignada/reparación/baja), ingreso con remito; movimientos (entrega, devolución, remito con foto, alta…) | |
 | `adjuntos` | Fichas de fotos/archivos | `r2: "fotos/AAAA/MM/<obra>/<id>.jpg"` si está en la nube (sin imagen); si no, la imagen; `otId` |
@@ -299,6 +299,10 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `avanceItems` (v100) + `avanceProCss` | 100 | El «📋 Avance de la obra, ítem por ítem»: `html(o)` nuevo con rubros (`FAM`: col/tab/zan/cab/pat/otro/prov), niveles de color `p0`–`p4` (gris/rojo/amarillo/azul/verde como los pines del mapa), acciones `data-avi` nuevas `irFam`, `agregar`, `quitar` y el total `.avi-total` |
 | `legajoMaterial` | 100 | Sección `#lgBalSec` «🧾 Material: calculado vs. entregado» en el legajo, debajo de «📦 Material entregado» (`calcularBalancePlaza`); tarjetas que filtran, barra por material, sobrante con `confirmarSobrante` (pone `avanceActivoId` y `balanceFilasActivas` de esa obra), planilla e impresión. `__legajoMaterial` |
 | `alternativas` | 101 | `__alternativas` {de(codigo, desc, un), rasgos, comparar, filaHtml, aplicar, notas}. Lee del nombre: tipo (la primera palabra que reconoce), conductores × sección, pulgadas, amperes, polos, curva, color, material, normas (IRAM/NM/ET), «Municipalidad», con/sin tuerca. 🟢 misma medida y la norma no choca · 🟡 otra norma, +1 conductor, sección mayor (≤ 2,6×), otro material de prensacable, sin tuerca, borne sin color. Nunca menor sección/menos conductores, otro amperaje/polos/curva, Al por Cu, otro color. Los cables se buscan en todas las familias (el 6001 3×1,5 está en la 6). Engancha en `calcObraBalanceHtml` (`fila` → `filaHtml`; `window.__corPedidoRef`, `pendientePedido.base`) y en `calcPanol.revisar` (cands). La equivalencia de unidad (m por rollo) queda en `localStorage ema.alt.factor`. **No une ni cambia códigos.** |
+| `obraComputo` | 102 | `__obraComputo` {difiere, pasar}: «🔄 Pasar este cálculo a la obra» cuando la obra registrada tiene el material de un cálculo anterior (pregunta, conserva `cantInstalada`) |
+| `colasYNumeros` | 102 | `fbOtCampo` escribe directo (sin colgarse sin señal, con dedupe); `fbAddMovimiento` guarda el `numero` del comprobante (por valeGrupo/devolGrupo); `numeroComprobante` usa el guardado (repetidos viejos → «-B»). `window.__colaDirecta`, `__sinSenalDirecto` |
+| `panolArreglos` | 102 | `__nU`, `__factorUn`, `__pedirFactor` (guarda `porUnidad` en `catalogoProductos`), `__sustitutos` (lo cambiado por otro material), `__apartadoObra`; anular ofrece la pareja; `fbDeleteMovimiento` no borra |
+| `ordenesArreglos` | 102 | Anular/borrar una orden cerrada ofrece revertir el avance (`cierre.avanceItems`, `cierre.avanceRevertido`); cierre de una anulada pregunta; editar una cerrada avisa |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -360,7 +364,7 @@ Otros globals útiles:
 
 ### 11.1 Contrato LPE 5589
 - **Módulo base** (Art. 05) = PAT completa (AP-TC-005/006) de una columna metálica de 7 m con capuchón y 1 brazo de 0,425 m con LED.
-  - Valor: **$281.998,71 sin IVA** ($341.218,44 con IVA). Precio de cada ítem = **K × módulo**.
+  - Valor del pliego: **$281.998,71 sin IVA** ($341.218,44 con IVA). **La app usa $296.126,45 sin IVA** (precio de oferta). Precio de cada ítem = **K × módulo**.
 - Anexo I con 92 ítems en K (Nota Aclaratoria N° 1, 31/08/2026):
   - ítems 1–82 iguales al itemizado de la Municipalidad («ITEMIZADO PLAZAS 17/06/2026»);
   - 83.1–89 son provisiones por eventualidad.
@@ -377,7 +381,7 @@ Otros globals útiles:
 - **Resto:**
   - 9/10 tablero aéreo/a nivel; 11/12 acometida aérea/subterránea; 13 apoyo PRFV; 14 tablero de transición;
   - 15–20 zanjeo (0,60/1,00 × natural/baldosa/hormigón); 21–24 cruce (tunelera/tierra/hormigón/asfalto);
-  - 25–40 cable por calibre (solo metros de zanja); 41 reacondicionamiento columna; 42 acometida subterránea nueva en columna metálica existente (K 1,77); 43 aplomado; 44 luminaria sobre existente;
+  - 25–40 cable por calibre: «Provisión y tendido en zanja de Cable Cu…» → paga el **cable**, con la subida y bajada por las columnas (regla de Ángel, v102: si el ítem paga zanja, solo metros de zanja; si paga el cable, con las ganancias). La zanja se cobra en 15–20. El 30 es «instalado en columna»; 41 reacondicionamiento columna; 42 acometida subterránea nueva en columna metálica existente (K 1,77); 43 aplomado; 44 luminaria sobre existente;
   - 45–49 retiros; 50–67 protecciones; 62 BPN 4 / **63 BPN 6**; 64 fotocontrol; 68 fusible 2–10 A; 73 apoya escalera;
   - 75 dispersor; 78/79 empalmes; 80 aislación; 81 medición PAT; 82 poda.
 - **Provisiones:** 83.1 col. metálica 7 m K 2,64 · 83.2 10 m K 4,37 · 84.1 PRFV 7 m K 2,75 · 84.2 10 m K 4,56 · 85.1 LED 75 W K 0,81 · 85.2 LED 180 W K 1,27 · 86 cable 3×1,5 K 0,02/m · 87 cable V/A 10 mm² 0,02/m · 88 jabalina K 0,09 · 89 tablero aéreo K 16,06.
@@ -396,13 +400,13 @@ Otros globals útiles:
   - Metálica: 1 portafusible y 1 bornera fase+neutro por luminaria.
 - **Fusibles:** 2 A por artefacto, cilíndrico 10×38 (3017; el 3014 de 8,5×31,5 **no entra** en la tabaquera 10×38 3053). Simple 2 + vacío · doble 2+2 · triple 4+2 · cuádruple 4+4 (4 A = 3073).
 - **Fundación** H-13 (1:2,5:4; 5,2 bolsas, 0,55 arena, 0,80 piedra, 170 L agua por m³):
-  - PRFV 7 m: 0,60×0,60×1,20 → 0,4057 m³; 10 m: 0,80×0,80×1,30 → 0,8035 m³;
+  - PRFV 7 m: 0,60×0,60×1,20; 10 m: 0,80×0,80×1,30. **El código y la guía usan 0,403 / 0,728 m³** (antes decía acá 0,4057 / 0,8035): **a confirmar** cuál vale;
   - molde PVC = Ø base + 50 (247 / 403 mm; comercial Ø250 / Ø400, si no Ø450);
   - telgopor a 350 mm del fondo, desagüe PVC Ø25,4, arena hasta −50 mm y sello de 50 mm.
 - **Columnas PRFV:**
   - 7 m: AP-C-033-A, Ø base 197. 10 m: AP-C-033-B, Ø base 353.
   - Cajas borneras a 3,50 m del piso. Entre cajas **solo cable 4×4 XLPE, sin caño**.
-- **Cable de subida 3×1,5:** 7 m por artefacto + max(0, brazo − 0,400).
+- **Cable de subida 3×1,5:** en el código = altura − caja + brazo + 0,60 (4,5 / 5,5 / 8,1 m). Antes decía acá «7 m por artefacto + max(0, brazo − 0,400)»: **a confirmar** con Ángel.
 - **Ganancia del troncal** = subidas × altura. Subidas = 2 × columnas − circuitos (en el cableado por circuitos, por punto).
 - **Vínculos:** brazo 400 mm (AP-C-008, ítems LP 10.15/16/17, cuádruple 10.20). 0,425 = capuchón triple (criterio de obra).
 - **Zanja** (AP-TC-001):
@@ -541,6 +545,7 @@ Ejemplos:
 | 098 | «Quedan N de T» de la orden lee también el Avance de obra (itemizado, lo mayor entre las dos cosas); «¿Olvidaste tu contraseña o tu usuario?» en la entrada (`recuperarClave`) |
 | 099 | Proyectista: tocar / mover / borrar puntos en el mapa y el plano, forma de los tramos (`punto.via`), dibujar el camino caminando, plano que se mueve y se acerca, ↶ Deshacer |
 | 100 | Avance de obra limpio y gráfico (ítem por ítem por rubro, con colores); «🧾 Material: calculado vs. entregado» en el legajo (`legajoMaterial`) |
+| 102 | Revisión completa (auditoría v101): columnas sin vínculo y 2 tableros en la orden, pasar el cálculo a la obra registrada, «Finalizada» única, obras ocultas en la plata, ganancia sin IVA, números de comprobante guardados, unidades del pañol (`porUnidad`), sustitutos, órdenes cerradas que siguen otro día, revertir avance al anular (`obraComputo`, `colasYNumeros`, `panolArreglos`, `ordenesArreglos`, `window.__obraFin`) |
 | 101 | Alternativas del pañol debajo de lo que falta en «📦 Material de esta obra» (🟢 casi igual / 🟡 sirve con diferencias, con la norma) y «Pedir esta en su lugar»; «Calculadora ↔ pañol» con la misma comparación (`alternativas`) |
 
 ---
@@ -557,6 +562,7 @@ Ejemplos:
 - 40 `setInterval` permanentes: consolidar en un planificador que se pause con `document.hidden`.
 - Barrio: faltan planos AP-TC-055 A–G, AP-TC-024, AP-TC-004, AP-TC-021, AP-CC-010, AP-T-014 y el itemizado de barrio.
 - Entrar con huella (WebAuthn), medidor GPS/RTK: ideas charladas, **no hacer todavía**.
+- **De la auditoría v101, sin hacer todavía** (ver `docs/AUDITORIA_v101.md`): Proyectista (largo del tramo por la cadena de puntos, subida igual a la calculadora, memoria «a confirmar», fases por columna PRFV), Usuarios (unificar filtros de «foto borrada», push al cambiar de usuario, aviso «Material para retirar» por `personaClave`, permiso de fotos antes de R2, `esCrew` con ajustes, permisos de borrar obra / nombrar columnas iguales a las reglas, reintentos con espera), provisiones 83–89 en el % (preguntar), zanja rápida 0,40.
 - **Proyectista** (relevamiento con GPS RTK → plano DXF automático → cálculo lumínico tipo DIALux → caídas de tensión y tablero → proyecto completo; después BT/MT/AT/loteos): idea y plan por etapas en `docs/PROYECTISTA.md`. **No programar sin pedido de Ángel**; arrancar por la etapa que él elija.
 
 ---
