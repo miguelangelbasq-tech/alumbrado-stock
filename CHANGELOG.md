@@ -2,6 +2,62 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v104 — 03/11/2026 · «📌 Seguimiento» de tareas y «↩ Sigue en obra» (incluye la v103)
+
+**Pedido de Ángel:**
+- «Que tenga su propio ítem: las tareas que se van haciendo y lo que no se hace. Un registro: ayer se le dio esta tarea a Pablo y solo hizo estas dos; quedó pendiente esto otro. Y la opción de darle esa tarea hoy, o dársela a otra persona. Detallado, bien a la vista, por personas y obras.»
+- «Si me la mandan por equivocación y no marcaron todo, la opción de volver a poner que sigue en obra y que no se cerró.»
+
+**Cambios**
+- **Órdenes › «📌 Seguimiento»**, pestaña propia (módulo `seguimientoTareas`, `__seguimiento`):
+  - cada tarea dada: fecha, orden, obra, quién (una persona, repartida, juntos o por equipos), cuánto se dio, cuánto se hizo, cuánto falta;
+  - estados: ✅ hecha · 🟡 hizo una parte · ⛔ no se hizo · ⚠ sin cerrar · ⏳ en obra · 🔁 se volvió a dar (otra orden posterior de la misma obra con esa tarea);
+  - cuadros que filtran (pendientes por defecto) y filtros de fechas, persona y obra;
+  - resumen por persona y por obra: dadas, hechas, parte, no, pendientes, % cumplió;
+  - **📅 Darla hoy** y **👤 Darla a otro**: arman la orden de hoy solo con esa tarea y lo que faltó, ya asignada a esa persona. La oficina la revisa y toca «Emitir»;
+  - «✅ Cargar lo hecho» en las sin cerrar;
+  - en el celular, tarjetas.
+  - Solo lee: no cambia ninguna orden.
+- **«↩ Sigue en obra»** en las órdenes de «Para revisar» (y «Mover a… En obra», que antes no la sacaba de ahí):
+  - pregunta, vuelve a «En obra» sin cerrar y sin borrar lo marcado;
+  - deja anotado quién la había mandado (`ot.devuelta`) y le avisa al celular que siga y vuelva a tocar «Enviar» (`__devolverOt`).
+
+**Pruebas**
+- `t_v104`: 10/10 en PC y celular.
+
+## v103 — 03/11/2026 · Respuestas de Ángel: mismo material, bajas, unidades, alambre, ganancia, provisiones, puntos
+
+**Pedido de Ángel (respuestas):**
+- 7010 y 1032, 3038 y 3039, 7005 y 7006 son el mismo material (otro proveedor / lo daba la Municipalidad).
+- 7004–7007 están mal (la tierra va verde): sacarlos.
+- Los cables siempre en metros («todo metros»); el alambre siempre en kg y calcularlo para el aislador MN y el rack.
+- 3/4" de plástico.
+- Ganancia: las subidas hasta la caja + 0,50 m, y un 5 % más.
+- Provisiones: «lo que sea mejor».
+- «Los ajustes, sacalos: las quincenas pasadas fueron pruebas; los puntos cuentan a partir de esta quincena».
+
+**Cambios**
+- **Mismo material:** si falta uno, ofrece el otro en verde, «es el mismo material» (`__alternativasMismo`). No une códigos.
+- **7004–7007 de baja** en el catálogo base (`activo:false`): no se ofrecen; siguen para los movimientos viejos.
+- **Unidades del catálogo base:**
+  - cables en m: 1002–1005, 1009, 1012, 1013, 1015, 1017–1026, 1030–1032, 7008, 7009, 7011, 7012;
+  - alambre 1001 en kg.
+  - Si alguien cambió la unidad de un producto desde Alta de productos, eso manda (está en la base).
+- **Alambre en kg:**
+  - 2 m por atadura en cada aislador MN 17 (acometida) y MN 16 (barrio), alambre galvanizado N° 14 ≈ 25 g/m → ≈ 0,05 kg por aislador;
+  - no hay dato publicado (EPEC, fabricantes): calculado por vueltas, **a confirmar**.
+- **Ganancia del troncal PRFV:** 3,50 m hasta la caja + 0,50 m = **4 m por subida** (antes la altura entera, 7/10 m).
+  - El material del troncal lleva **5 % de reserva**.
+  - El ítem del itemizado (25–40) cobra zanja + subidas, **sin** la reserva (`itemCant`).
+- **Provisiones 83–89** fuera del % de avance físico y del «qué falta». Lo que se cobra no cambia.
+- **Puntos:** cuentan desde el **01/11/2026**. Las quincenas anteriores no dan ajustes ni suman (`__puntosPiso`; un reinicio posterior manda).
+
+**Pruebas**
+- `t_v103`: 7/7.
+- Pruebas viejas actualizadas:
+  - `t_v055` y `t_v056` fijan las unidades viejas en sus datos;
+  - el arnés pone `__puntosPisoFijo` en las pruebas viejas (`pisoReal:true` prueba el piso).
+
 ## v102 — 03/11/2026 · Revisión completa: arreglos en todas las áreas
 
 **Pedido de Ángel:** «Revisá todo de nuevo, cada módulo, cada línea, que todo tenga sentido» (la auditoría quedó en `docs/AUDITORIA_v101.md`) y después «resolvelo todo». Además: «el ítem de cable: si paga solo zanja, son los metros zanjeados; si paga el cable, va con las ganancias», «hay obras con dos tableros y en la orden no aparecen los dos» y «calculé una plaza de 4 columnas y en la orden salían 3».
