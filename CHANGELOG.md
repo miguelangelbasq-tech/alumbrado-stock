@@ -2,6 +2,77 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v102 — 03/11/2026 · Revisión completa: arreglos en todas las áreas
+
+**Pedido de Ángel:** «Revisá todo de nuevo, cada módulo, cada línea, que todo tenga sentido» (la auditoría quedó en `docs/AUDITORIA_v101.md`) y después «resolvelo todo». Además: «el ítem de cable: si paga solo zanja, son los metros zanjeados; si paga el cable, va con las ganancias», «hay obras con dos tableros y en la orden no aparecen los dos» y «calculé una plaza de 4 columnas y en la orden salían 3».
+
+**Calculadora, itemizado y órdenes**
+- **4 columnas → 3 en la orden:** el paso a ítems contaba las columnas por los vínculos. Una columna de 7 m sin vínculo ahora entra como de 1 brazo, con un aviso «⚠ a revisar».
+- **2 tableros:** el tablero se reconoce también por el código (3058). La cuenta de la orden («Quedan N de T») ya no usa un resultado viejo después de recalcular.
+- **Obra ya registrada y recalculada:** aparece «🔄 Pasar este cálculo a la obra». Pregunta antes, y conserva lo ya instalado. Antes el legajo, Material por obra y el pedido seguían con el cálculo viejo.
+- **Cable del itemizado:** los ítems 25–40 dicen «Provisión y tendido en zanja de Cable Cu…». Pagan el cable, así que van con la subida a las columnas, como ya estaba y como certifica la Municipalidad. El zanjeo (15–20) cobra solo los metros de zanja. Se aclaró el motivo de cada renglón.
+- El paso al itemizado reconoce el material **por código**, aunque se haya renombrado en el catálogo.
+- Notas corregidas:
+  - PAT metálica: «+ N de los tableros», antes decía siempre «+1»;
+  - BPN: todas de 6 mm², las punteras siguen el calibre;
+  - el 4×4 entre tableritos sí se computa.
+- **Prensacables:** la cuenta usa la regla acordada: 1×10 → 1/2", 3×1,5 y 4×2,5 → 3/4", 4×6 → 7/8", 4×10 → 1", 4×16 → 1 1/4".
+
+**Avance, legajo, informes y plata**
+- Etapa y «qué falta» salen de los ítems. Antes, una obra al 100 % decía «Falta: Poste de PRFV».
+- Tildar la Inspección pregunta antes de marcar todo el material como instalado.
+- **«Finalizada» tiene un solo criterio** en Inicio y en el mapa: encendida, o marcada Finalizada, o el avance al 100 %.
+- Colores del avance iguales a los del mapa.
+- Las obras **ocultas (terminadas) siguen sumando** en los totales de plata del Itemizado 2026 y en la Ganancia.
+- **Ganancia sin IVA**, igual que los gastos. Antes subía 21 % si en Itemizado se elegía «con IVA».
+- Cargar el certificado plaza por plaza deja lo mismo que «Cargar todas»: si la plaza está finalizada, lo hecho = lo contratado.
+- El legajo muestra «N de M materiales completos», igual que el Avance.
+
+**Sin señal y comprobantes**
+- Las marcas y fotos en cola se escriben directo cuando vuelve la señal, sin quedar esperando.
+- Los vales, entradas y devoluciones guardan su número. Antes un número podía cambiar o repetirse al anular uno viejo. Los repetidos viejos se muestran con «-B».
+
+**Pañol**
+- Material de la obra: respeta la unidad del cálculo. Si el pañol cuenta en Un., pregunta «📏 ¿Cuántos m trae cada Un.?» y lo guarda en el producto (`porUnidad`).
+- Lo cambiado por otro material («⇄ Ofrecer otro», alternativas) ya no sale como faltante ni se pide dos veces. La alternativa elegida se recuerda.
+- Las reservas no cuentan lo marcado «No hay».
+- La lista de compras usa lo libre (no apartado) y descuenta lo ya apartado para la obra.
+- Anular un movimiento ofrece anular su pareja (corrección / uso de cargo) y avisa si tiene reserva. Los movimientos no se borran.
+
+**Órdenes y puntos**
+- Reinicio de puntos: las quincenas ya pagadas no dan ajustes negativos.
+- Tarea repartida: lo que queda para toda la cuadrilla cuenta una vez, aunque lo marquen varios.
+- «Quedan»: una orden cerrada que sigue otro día deja lo que falta asignado. «Terminada» sin cierre no cuenta como hecho.
+- Mis tareas: una orden cerrada no se puede tocar (antes dejaba marcar y la base lo rechazaba). Si sigue otro día, sigue en Hoy.
+- Inicio de la cuadrilla: solo las órdenes donde la persona está en el personal.
+- Las anuladas no suman en el informe de órdenes.
+- Las fotos se limpian solo si el cierre se guardó.
+- Anular o borrar una orden cerrada ofrece **revertir el avance** que había sumado.
+
+**Pruebas**
+- Nuevas: `t_v102a` 10/10 (cel 11/11), `t_v102b` 8/8, `t_v102c` 11/11 (cel 12/12), `t_v102d` 8/8, `t_v102e` 6/6, en PC y celular.
+- `t_v055` actualizada: «📏 ¿Cuántos m trae cada Un.?» en lugar de «Poner unidad».
+- Batería completa en PC y celular: todo OK. `t_v083` es vieja. `t_v028` en celular esta vez pasó.
+
+**No cambia:** los datos (todo arreglo pregunta antes), las reglas de Firebase ni el APK.
+
+**Queda para la próxima** (de la auditoría, menos urgente):
+- Proyectista: largo del tramo por la cadena de puntos, subida igual a la calculadora.
+- Usuarios: filtros de «foto borrada», push al cambiar de usuario, `esCrew` con ajustes, reintentos con espera.
+
+**Preguntas para Ángel**
+- Códigos repetidos del catálogo: 7010/1032, 3038=3039, 7005=7006…
+- ¿Son BPN los 7004–7007?
+- Unidad del 1009.
+- 3/4": ¿5029 plástico o 5023 aluminio?
+- Las provisiones 83–89 pesan en el % de avance: ¿las sacamos?
+- Ganancia del troncal PRFV: ¿altura entera o hasta la caja (3,5 m)?
+
+**Huella SHA-256**
+- `102_2026-11-03_app-EMA_ORIGINAL.html` (63.402 líneas): `72538524f4659740a1a90b69e9eae49fa5bafb6ae9b756468994b3d0c234e16f`
+- `index.html`: `b645889b4dd290c44dc51c8ac3cc7756f441c7db253432f2268504725c3c5885`
+- Versión: `2026-11-03 06:41 · d4264c`
+
 ## v101 — 03/11/2026 · Alternativas del pañol para lo que falta en el cálculo
 
 **Pedido de Ángel:** «Revisá Calculadora ↔ pañol: hay algo que no se soluciona». Después del diagnóstico: «el 1019 y el 1025 son 3×1,5; cambia que antes nos lo daba la Municipalidad y ahora lo proveemos nosotros, y cambian las normas. Que apenas hacemos el cálculo nos salga en rojo que no tenés esta, pero en verde o en amarillo tenés estas opciones muy iguales, teniendo en cuenta las normas».
