@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **03/11/2026**, última versión entregada: **v106** (ver `CHANGELOG.md`).
+> Estado al **03/11/2026**, última versión entregada: **v107** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -305,6 +305,7 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `ordenesArreglos` | 102 | Anular/borrar una orden cerrada ofrece revertir el avance (`cierre.avanceItems`, `cierre.avanceRevertido`); cierre de una anulada pregunta; editar una cerrada avisa |
 | `seguimientoTareas` | 104 | Órdenes › «📌 Seguimiento» (`#otSeguimientoPanel`, `__seguimiento` {pintar, filas, quienes}): cada tarea dada con lo hecho y lo que falta, estados, filtros persona/obra/fechas, resumen por persona y obra, «📅 Darla hoy» / «👤 Darla a otro» (usa `repetirOrden` y deja solo esa tarea). Lee `window.__seg` {E, J} de `ordenesCampo`. También `__devolverOt(id)`: «↩ Sigue en obra» (borra `campo.enviados`, guarda `ot.devuelta`, avisa) |
 | `cierreIntegrante` | 106 | En el cierre de la orden, «＋ Agregar a alguien que también fue» (`#ciAddSel`): nómina sin los que ya están, suma a `personal` (rol de la nómina, `agregadoAlCerrar`) y `personalNombres`, redibuja el cierre conservando lo cargado. `__cierreIntegrante` |
+| `misFotos` | 107 | «📷 Mis fotos (N)» dentro de la plantilla de la orden de Mis tareas (envuelve `__mtComoLlegar`), abre `emaGaleria` con las fotos propias (`campo.fotos` por = la persona, sin borradas); en la cámara «🗑 La última» (`.ec-borrar-ult`, engancha `__camDisparo`/`__camGuardada`, usa `__fotoMia`/`__fotoSacarMia`). `__misFotos` |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -556,6 +557,7 @@ Ejemplos:
 | 104 | «📌 Seguimiento» de tareas en Órdenes (por persona y obra, darla hoy o a otro) y «↩ Sigue en obra» para lo que mandaron por error |
 | 105 | «📅 Tareas de hoy» en Seguimiento; lo de hoy en obra cuenta como pendiente |
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
+| 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
 | 101 | Alternativas del pañol debajo de lo que falta en «📦 Material de esta obra» (🟢 casi igual / 🟡 sirve con diferencias, con la norma) y «Pedir esta en su lugar»; «Calculadora ↔ pañol» con la misma comparación (`alternativas`) |
 
 ---

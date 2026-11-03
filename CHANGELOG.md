@@ -2,6 +2,33 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v107 — 04/11/2026 · La cuadrilla ve y borra sus fotos
+
+**Pedido de Ángel:** «Está bien que saque sin preguntar si está bien o no, pero tienen que poder sacar varias, poder verlas ellos y poder borrar, como la galería. Y yo poder verlas al instante en Obras y legajos».
+
+**Cambios** (módulo nuevo `misFotos`, `__misFotos`)
+- En cada orden de Mis tareas, **«📷 Mis fotos (N)»** con las últimas miniaturas:
+  - abre la galería de siempre (deslizar, zoom) con las fotos de esa persona en esa orden;
+  - cada foto tiene «🗑 Sacar» mientras la orden está abierta.
+- En la cámara, **«🗑 La última»**:
+  - espera a que la foto se guarde y después la saca al toque;
+  - las de la cámara del menú (sueltas, sin orden) no se pueden sacar desde la cuadrilla.
+- La cámara sigue sacando y guardando al toque, varias seguidas.
+- Sin cambios en lo de la oficina:
+  - las fotos aparecen en el legajo apenas se guardan;
+  - las que saca la cuadrilla dejan de verse ahí (ya pasaba desde la v080);
+  - la oficina las borra de verdad al cerrar la orden.
+
+**Pruebas**
+- `t_v107`: 6/6 en PC y celular.
+- Las 35 pruebas de fotos, cámara y Mis tareas en PC y celular: OK.
+  - `t_v028` y `t_v032` en celular fallaron con la máquina cargada y repetidas solas pasaron.
+
+**Huella SHA-256**
+- `106_2026-11-03_app-EMA_ORIGINAL.html`: `1fd53951801c9edb735215237970735e40b9ecadfcde0781c817fa182afaab4c`
+- `index.html`: `e1578935cb7da4cb37f950939774a300b282403a5724230940bb016bf4a6ae72`
+- Versión: `2026-11-03 12:24 · bb24b3`
+
 ## v106 — 04/11/2026 · Agregar a alguien al cerrar la orden
 
 **Pedido de Ángel:** «En las tareas, cuando la voy a aprobar y cerrar, la posibilidad de agregar algún integrante».
