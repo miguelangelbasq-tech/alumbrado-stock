@@ -15,6 +15,7 @@ function datos() {
     { desc: 'Material 1004 — varios', cod: 1004, cantNecesaria: 10, un: 'Un.' },
     { desc: 'Zanjeo', tarea: true, cantNecesaria: 1 }
   ]);
+  d.db.catalogoProductos = { '1001': { codigo: 1001, un: 'm' }, '1002': { codigo: 1002, un: 'Un.' }, '1003': { codigo: 1003, un: 'Un.' }, '1004': { codigo: 1004, un: 'Un.' } };   // v103: la base ahora tiene cables en m y alambre en kg; la prueba sigue con las unidades de antes
   d.db.movimientos = { m1: { tipo: 'entrada', codigo: 1001, cantidad: 50, fecha: d.hoy, ts: ahora }, m3: { tipo: 'entrada', codigo: 1003, cantidad: 100, fecha: d.hoy, ts: ahora }, m4: { tipo: 'entrada', codigo: 1004, cantidad: 4, fecha: d.hoy, ts: ahora }, m2: { tipo: 'salida', codigo: 1001, cantidad: 10, plazaId: 'p1', plazaNombre: 'Plaza San Martín', fecha: d.hoy, ts: ahora } };
   return d;
 }

@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **03/11/2026**, última versión entregada: **v102** (ver `CHANGELOG.md`).
+> Estado al **03/11/2026**, última versión entregada: **v104** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -303,6 +303,7 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `colasYNumeros` | 102 | `fbOtCampo` escribe directo (sin colgarse sin señal, con dedupe); `fbAddMovimiento` guarda el `numero` del comprobante (por valeGrupo/devolGrupo); `numeroComprobante` usa el guardado (repetidos viejos → «-B»). `window.__colaDirecta`, `__sinSenalDirecto` |
 | `panolArreglos` | 102 | `__nU`, `__factorUn`, `__pedirFactor` (guarda `porUnidad` en `catalogoProductos`), `__sustitutos` (lo cambiado por otro material), `__apartadoObra`; anular ofrece la pareja; `fbDeleteMovimiento` no borra |
 | `ordenesArreglos` | 102 | Anular/borrar una orden cerrada ofrece revertir el avance (`cierre.avanceItems`, `cierre.avanceRevertido`); cierre de una anulada pregunta; editar una cerrada avisa |
+| `seguimientoTareas` | 104 | Órdenes › «📌 Seguimiento» (`#otSeguimientoPanel`, `__seguimiento` {pintar, filas, quienes}): cada tarea dada con lo hecho y lo que falta, estados, filtros persona/obra/fechas, resumen por persona y obra, «📅 Darla hoy» / «👤 Darla a otro» (usa `repetirOrden` y deja solo esa tarea). Lee `window.__seg` {E, J} de `ordenesCampo`. También `__devolverOt(id)`: «↩ Sigue en obra» (borra `campo.enviados`, guarda `ot.devuelta`, avisa) |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -407,7 +408,10 @@ Otros globals útiles:
   - 7 m: AP-C-033-A, Ø base 197. 10 m: AP-C-033-B, Ø base 353.
   - Cajas borneras a 3,50 m del piso. Entre cajas **solo cable 4×4 XLPE, sin caño**.
 - **Cable de subida 3×1,5:** en el código = altura − caja + brazo + 0,60 (4,5 / 5,5 / 8,1 m). Antes decía acá «7 m por artefacto + max(0, brazo − 0,400)»: **a confirmar** con Ángel.
-- **Ganancia del troncal** = subidas × altura. Subidas = 2 × columnas − circuitos (en el cableado por circuitos, por punto).
+- **Ganancia del troncal** = subidas × (en PRFV: **3,50 m hasta la caja + 0,50 m = 4 m**, v103, Ángel; metálica 5 m). Subidas = 2 × columnas − circuitos (en el cableado por circuitos, por punto). El material del troncal lleva **5 % de reserva**; el ítem 25–40 cobra zanja + subidas sin la reserva (`itemCant`).
+- **Alambre de atar (1001, en kg):** 2 m por atadura en cada aislador MN 17 / MN 16, galvanizado N° 14 ≈ 25 g/m → ≈ 0,05 kg por aislador (**a confirmar**: calculado por vueltas, no hay dato publicado).
+- **Unidades:** los cables siempre en **metros**; el alambre en **kg** (v103).
+- **Mismo material, otro código** (Ángel): 7010 = 1032, 3038 = 3039, 7005 = 7006 (`__alternativasMismo`). 7004–7007 de baja (la tierra va verde: usar 2010).
 - **Vínculos:** brazo 400 mm (AP-C-008, ítems LP 10.15/16/17, cuádruple 10.20). 0,425 = capuchón triple (criterio de obra).
 - **Zanja** (AP-TC-001):
   - tapada 0,60 + 0,15 → excavar 0,75 m; anchos 200/400/600 (1/2/3 conductores);
@@ -471,6 +475,7 @@ Ejemplos:
 - **Correr:** `APP=ruta/index.html node t_v084.js` (PC) y `… node t_v084.js cel` (celular 390×844). Cada prueba imprime `RESULTADO vNNN: X/Y OK`.
 - **Batería completa** = todas las `t_*.js` en PC y en celular. Corré en tandas (Chromium se pone lento con todo junto). Algunas son sensibles a tiempos si la máquina está cargada (`t_v026`, `t_v037`, `t_v073`, `t_v076`); si fallan, repetí solas antes de concluir.
 - **Modos de compatibilidad** que el arnés pone en las pruebas viejas:
+  - `__puntosPisoFijo='2000-01-01'` (los puntos de cualquier fecha) salvo `pisoReal:true`;
   - `__mtVistaTodas=true` (Mis tareas desplegado) salvo `mtNuevo:true`;
   - `ema.rs.porObra=0` salvo `rsObra:true`;
   - `__lgPlegTodoAbierto=true` salvo `lgPleg:true`.
@@ -546,6 +551,8 @@ Ejemplos:
 | 099 | Proyectista: tocar / mover / borrar puntos en el mapa y el plano, forma de los tramos (`punto.via`), dibujar el camino caminando, plano que se mueve y se acerca, ↶ Deshacer |
 | 100 | Avance de obra limpio y gráfico (ítem por ítem por rubro, con colores); «🧾 Material: calculado vs. entregado» en el legajo (`legajoMaterial`) |
 | 102 | Revisión completa (auditoría v101): columnas sin vínculo y 2 tableros en la orden, pasar el cálculo a la obra registrada, «Finalizada» única, obras ocultas en la plata, ganancia sin IVA, números de comprobante guardados, unidades del pañol (`porUnidad`), sustitutos, órdenes cerradas que siguen otro día, revertir avance al anular (`obraComputo`, `colasYNumeros`, `panolArreglos`, `ordenesArreglos`, `window.__obraFin`) |
+| 103 | Respuestas de Ángel: mismo material con otro código, 7004–7007 de baja, cables en m y alambre en kg (con alambre por aislador), ganancia 3,5 + 0,5 m y 5 % de reserva, provisiones fuera del %, puntos desde el 01/11/2026 (`__puntosPiso`) |
+| 104 | «📌 Seguimiento» de tareas en Órdenes (por persona y obra, darla hoy o a otro) y «↩ Sigue en obra» para lo que mandaron por error |
 | 101 | Alternativas del pañol debajo de lo que falta en «📦 Material de esta obra» (🟢 casi igual / 🟡 sirve con diferencias, con la norma) y «Pedir esta en su lugar»; «Calculadora ↔ pañol» con la misma comparación (`alternativas`) |
 
 ---

@@ -16,7 +16,8 @@ function datos() {
   ] }];
   d.db.catalogoProductos = {
     '1450': { codigo: 1450, desc: 'Alambre para ataduras galvanizado N° 16', un: 'm', sector: 'pañol', stock: 0, costo: 0, creado: ahora },
-    '1004': { codigo: 1004, activo: false }
+    '1004': { codigo: 1004, activo: false },
+    '1001': { codigo: 1001, un: 'm' }, '1002': { codigo: 1002, un: 'Un.' }   // v103: la base ahora tiene cables en m y alambre en kg; la prueba sigue con las unidades de antes
   };
   d.db.movimientos = { m1: { tipo: 'entrada', codigo: 1450, desc: 'Alambre para ataduras galvanizado N° 16', un: 'm', cantidad: 50, fecha: d.hoy, ts: ahora, usuario: 'admin@ema-alumbrado.app' } };
   return d;
