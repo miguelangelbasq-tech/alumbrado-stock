@@ -2,6 +2,42 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v101 — 03/11/2026 · Alternativas del pañol para lo que falta en el cálculo
+
+**Pedido de Ángel:** «Revisá Calculadora ↔ pañol: hay algo que no se soluciona». Después del diagnóstico: «el 1019 y el 1025 son 3×1,5; cambia que antes nos lo daba la Municipalidad y ahora lo proveemos nosotros, y cambian las normas. Que apenas hacemos el cálculo nos salga en rojo que no tenés esta, pero en verde o en amarillo tenés estas opciones muy iguales, teniendo en cuenta las normas».
+
+**Diagnóstico**
+- La calculadora pide sus códigos, en metros: 6001 (cable 3×1,5), 7010 (cable verde-amarillo 10 mm²), 5027 (prensacable 5/8" con tuerca)…
+- El pañol tiene los productos del Excel, muchos en Un. (rollos): 1019 y 1025, 1032 / 7011 / 7012, 5024 + 5032…
+- Por eso lo calculado salía en 0 aunque hubiera stock.
+- La comparación de nombres de «Calculadora ↔ pañol» no veía esos casos y además marcaba como «parecidos» productos de otra medida: 1/2" con 1 1/2", 1 A con 2 A, 4×4 con 4×6.
+
+**Cambios**
+- **«📦 Material de esta obra»** (aparece al calcular una obra registrada y en Material por obra): debajo de cada material en rojo o amarillo, lo que hay en el pañol y se parece.
+  - 🟢 **Casi igual:** mismo tipo y misma medida (conductores × sección, pulgadas, amperes, polos, curva), y la norma no choca.
+  - 🟡 **Sirve con diferencias:** otra norma, un conductor de más, sección mayor (hasta 2,6 veces), otro material del prensacable, sin tuerca, borne sin color, o un nombre que dice más.
+  - Cada diferencia queda escrita, junto con «lo daba la Municipalidad», «no dice la norma» y «lo cuentan en rollos».
+  - Nunca se ofrece: menor sección, menos conductores, otro amperaje, polos o curva, aluminio por cobre, otro color, un fotocontrol por una térmica, ni un terminal de otra sección.
+- **«Pedir esta en su lugar»:**
+  - si el pañol la cuenta en otra unidad, pregunta la equivalencia («¿cuántos m trae cada rollo?») y la recuerda en ese aparato;
+  - cambia el pedido al pañol;
+  - lo anota en las notas («1025 en lugar de 6001, revisar norma y medida»);
+  - si el pañol tiene una parte, pide esa parte y completa con la alternativa.
+- **«Calculadora ↔ pañol»:** el aviso «En 0, pero hay otro parecido» usa la misma comparación, con 🟢 / 🟡 y las diferencias.
+- **No une ni cambia códigos**, porque cambian la norma y el origen. No cambian los datos ni las reglas de Firebase. No hace falta APK nuevo.
+
+**Pruebas**
+- `t_v101`: 10/10 en PC y 11/11 en celular.
+- `t_v056` se actualizó: las filas de alternativas no se cuentan como materiales.
+- `t_v055` sigue OK: el alambre 1001 encuentra el 1450 «galvanizado», por la regla de palabras para lo que no tiene medida.
+- Batería completa en PC y celular: OK.
+  - `t_v083` es vieja.
+  - `t_v028` en celular falla a veces: la foto de «T1 · C2 · Col 5» no queda guardada. Pasa también con la v100 (1 de cada 4 corridas), así que ya estaba. **Queda pendiente revisarla.**
+
+**Huella SHA-256**
+- `101_2026-11-02_app-EMA_ORIGINAL.html` (63.106 líneas): `e43ca2227407138d34ea7452dd547dc1e37c03487e89eced058a630bfcb1ef06`
+- `index.html`: `b4241172a2d5678e3a29fa1b091f952ee3c45fbd5f72192e9c0d537427e8bc9a`
+
 ## v100 — 02/11/2026 · Avance de obra limpio y gráfico · material calculado vs. entregado en el legajo
 
 **Pedido de Ángel:** «Sacar del avance de obra las etapas (criterio EPEC), la valorización de la licitación, el material entregado vs. calculado (que vaya a Obras y legajos, con colores, bien a la vista) y las fotos de la plaza (ya están en el legajo). Que el avance de obra sea solo la obra y su avance ítem por ítem: bien gráfico, lindo de ver, fácil e interactivo para cambiar cuántas se hicieron».

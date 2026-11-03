@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **02/11/2026**, última versión entregada: **v100** (ver `CHANGELOG.md`).
+> Estado al **02/11/2026**, última versión entregada: **v101** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -298,6 +298,7 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `recuperarClave` | 098 | «¿Olvidaste tu contraseña o tu usuario?» en la portada: usuario o correo → `configEquipo/alias` → `sendPasswordResetEmail` (`languageCode="es"`). Sin correo real (`@ema-alumbrado.app`) no manda y deriva a la oficina. `__recuperarClave` {ver, mandar} |
 | `avanceItems` (v100) + `avanceProCss` | 100 | El «📋 Avance de la obra, ítem por ítem»: `html(o)` nuevo con rubros (`FAM`: col/tab/zan/cab/pat/otro/prov), niveles de color `p0`–`p4` (gris/rojo/amarillo/azul/verde como los pines del mapa), acciones `data-avi` nuevas `irFam`, `agregar`, `quitar` y el total `.avi-total` |
 | `legajoMaterial` | 100 | Sección `#lgBalSec` «🧾 Material: calculado vs. entregado» en el legajo, debajo de «📦 Material entregado» (`calcularBalancePlaza`); tarjetas que filtran, barra por material, sobrante con `confirmarSobrante` (pone `avanceActivoId` y `balanceFilasActivas` de esa obra), planilla e impresión. `__legajoMaterial` |
+| `alternativas` | 101 | `__alternativas` {de(codigo, desc, un), rasgos, comparar, filaHtml, aplicar, notas}. Lee del nombre: tipo (la primera palabra que reconoce), conductores × sección, pulgadas, amperes, polos, curva, color, material, normas (IRAM/NM/ET), «Municipalidad», con/sin tuerca. 🟢 misma medida y la norma no choca · 🟡 otra norma, +1 conductor, sección mayor (≤ 2,6×), otro material de prensacable, sin tuerca, borne sin color. Nunca menor sección/menos conductores, otro amperaje/polos/curva, Al por Cu, otro color. Los cables se buscan en todas las familias (el 6001 3×1,5 está en la 6). Engancha en `calcObraBalanceHtml` (`fila` → `filaHtml`; `window.__corPedidoRef`, `pendientePedido.base`) y en `calcPanol.revisar` (cands). La equivalencia de unidad (m por rollo) queda en `localStorage ema.alt.factor`. **No une ni cambia códigos.** |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -540,6 +541,7 @@ Ejemplos:
 | 098 | «Quedan N de T» de la orden lee también el Avance de obra (itemizado, lo mayor entre las dos cosas); «¿Olvidaste tu contraseña o tu usuario?» en la entrada (`recuperarClave`) |
 | 099 | Proyectista: tocar / mover / borrar puntos en el mapa y el plano, forma de los tramos (`punto.via`), dibujar el camino caminando, plano que se mueve y se acerca, ↶ Deshacer |
 | 100 | Avance de obra limpio y gráfico (ítem por ítem por rubro, con colores); «🧾 Material: calculado vs. entregado» en el legajo (`legajoMaterial`) |
+| 101 | Alternativas del pañol debajo de lo que falta en «📦 Material de esta obra» (🟢 casi igual / 🟡 sirve con diferencias, con la norma) y «Pedir esta en su lugar»; «Calculadora ↔ pañol» con la misma comparación (`alternativas`) |
 
 ---
 
@@ -547,9 +549,10 @@ Ejemplos:
 
 - Confirmar en celulares reales el APK 1.1 (Moto g24 power: pantalla negra/velocidad). Si el login falla en el APK, revisar si la API key de Firebase tiene restricción por dominio (`https://localhost`).
 - Push nativo (FCM) dentro del APK: hoy los avisos con la app cerrada no llegan al APK. Necesita APK nuevo.
+- `t_v028` en celular falla a veces (la foto de «T1 · C2 · Col 5» no queda guardada); pasa desde antes de la v101. Revisar si es la prueba o un problema real de la cámara en el celu.
 - Lista de compras cortada en el celular (tabla `#cardStockCompras` con min-width 620 px).
 - **Ítem propio por tarea** (idea de Ángel, v098): que cada tarea del baremo tenga un ítem propio, aunque se llame distinto, para que el avance de obra la descuente también (hoy excavación, hormigonado, BPN, sellado y vínculos cuentan solo por las órdenes). **No hacer sin pedido.**
-- Calculadora ↔ pañol: equivalencias (un material = un código del pañol con nombre del itemizado), unidades/presentaciones, unir duplicados. Ángel dijo «lo vemos», **no hacer sin pedido**.
+- Calculadora ↔ pañol: v101 hizo las **alternativas** (no une códigos: Ángel aclaró que el 1019 y el 1025 son 3×1,5 pero de distinto origen/norma). Siguen pendientes, **sin pedido**: equivalencias guardadas en la base (hoy los m por rollo quedan en el aparato), kits (prensacable 5027 = 5024 + 5032), botón «No es el mismo» para descartar avisos, y que la reserva ofrezca la alternativa cuando el pañol no tiene. Dudas abiertas: si 7004–7007 «Borne de puesta a tierra 6 mm²» son las BPN; cómo se cuenta el 1009 (4×2,5: el catálogo dice Un.).
 - Paquetes de tableros en el pañol (esperando el Excel de las planillas).
 - 40 `setInterval` permanentes: consolidar en un planificador que se pause con `document.hidden`.
 - Barrio: faltan planos AP-TC-055 A–G, AP-TC-024, AP-TC-004, AP-TC-021, AP-CC-010, AP-T-014 y el itemizado de barrio.

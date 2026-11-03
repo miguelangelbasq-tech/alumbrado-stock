@@ -20,3 +20,7 @@ Estas pruebas se suman al arnés del kit (`h.js`, `firebase_stub.js`, `reglas_st
 
 - `t_v100.js`: Avance de obra sin etapas EPEC, valorización, balance ni fotos; rubros con % y colores, columnas a la vista, +, total del ítem, agregar y sacar ítems, inspección; legajo con «🧾 Material: calculado vs. entregado» (tarjetas, filtro, orden, devolver lo que sobró).
 - Se actualizaron `t_v045.js` (ya no hay tabla de valorización ni lista de etapas a mano: se controla la fila del ítem y que la inspección se tilde aparte) y `t_v047.js` (las filas ahora van agrupadas por rubro: se toma la primera fila de la lista).
+
+# Pruebas de la v101
+
+- `t_v101.js`: alternativas del pañol en «📦 Material de esta obra» (Calculadora › Material por obra). El cable 3×1,5 (6001) que no hay muestra en verde el 1019 y el 1025 (con «lo daba la Municipalidad», «no dice la norma», «rollos») y en amarillo el 3×2,5. La BPN que no alcanza muestra el 2003 «no dice el color». No ofrece prensacable 1 1/2" por 1/2" ni fusible 1 A o Neozed por 2 A. «Pedir esta en su lugar» pregunta los m por rollo, cambia el pedido y lo anota. «Calculadora ↔ pañol» usa la misma comparación.
