@@ -2,6 +2,25 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v106 — 04/11/2026 · Agregar a alguien al cerrar la orden
+
+**Pedido de Ángel:** «En las tareas, cuando la voy a aprobar y cerrar, la posibilidad de agregar algún integrante».
+
+**Cambios** (módulo nuevo `cierreIntegrante`, `__cierreIntegrante`)
+- En el cierre, **«＋ Agregar a alguien que también fue»**:
+  - la nómina, sin los que ya están en la orden, y «✏ Otra persona»;
+  - pregunta antes y lo suma a `personal` (con su rol de la nómina y `agregadoAlCerrar: true`) y a `personalNombres`;
+  - el cierre se vuelve a dibujar con lo que ya estaba cargado, y la persona nueva aparece con sus horas y puntos.
+
+**Pruebas**
+- `t_v106`: 4/4 en PC y celular.
+- Las 52 pruebas de órdenes y cierre en PC: OK.
+
+**Huella SHA-256**
+- `106_2026-11-03_app-EMA_ORIGINAL.html`: `ec11344f298736a54d3c48d775b37dce2a4955e720a97b2f738313d3f694869c`
+- `index.html`: `db50e118cef442e03ab5fead8904269a9de4c9711e8ebd3ddef7c73d6568a4f4`
+- Versión: `2026-11-03 11:57 · 15831a`
+
 ## v105 — 04/11/2026 · «📅 Tareas de hoy» en Seguimiento
 
 **Pedido de Ángel:** «Falta las de hoy… o sea, la opción tareas de hoy».

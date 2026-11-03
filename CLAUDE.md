@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **03/11/2026**, última versión entregada: **v105** (ver `CHANGELOG.md`).
+> Estado al **03/11/2026**, última versión entregada: **v106** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -304,6 +304,7 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `panolArreglos` | 102 | `__nU`, `__factorUn`, `__pedirFactor` (guarda `porUnidad` en `catalogoProductos`), `__sustitutos` (lo cambiado por otro material), `__apartadoObra`; anular ofrece la pareja; `fbDeleteMovimiento` no borra |
 | `ordenesArreglos` | 102 | Anular/borrar una orden cerrada ofrece revertir el avance (`cierre.avanceItems`, `cierre.avanceRevertido`); cierre de una anulada pregunta; editar una cerrada avisa |
 | `seguimientoTareas` | 104 | Órdenes › «📌 Seguimiento» (`#otSeguimientoPanel`, `__seguimiento` {pintar, filas, quienes}): cada tarea dada con lo hecho y lo que falta, estados, filtros persona/obra/fechas, resumen por persona y obra, «📅 Darla hoy» / «👤 Darla a otro» (usa `repetirOrden` y deja solo esa tarea). Lee `window.__seg` {E, J} de `ordenesCampo`. También `__devolverOt(id)`: «↩ Sigue en obra» (borra `campo.enviados`, guarda `ot.devuelta`, avisa) |
+| `cierreIntegrante` | 106 | En el cierre de la orden, «＋ Agregar a alguien que también fue» (`#ciAddSel`): nómina sin los que ya están, suma a `personal` (rol de la nómina, `agregadoAlCerrar`) y `personalNombres`, redibuja el cierre conservando lo cargado. `__cierreIntegrante` |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -554,6 +555,7 @@ Ejemplos:
 | 103 | Respuestas de Ángel: mismo material con otro código, 7004–7007 de baja, cables en m y alambre en kg (con alambre por aislador), ganancia 3,5 + 0,5 m y 5 % de reserva, provisiones fuera del %, puntos desde el 01/11/2026 (`__puntosPiso`) |
 | 104 | «📌 Seguimiento» de tareas en Órdenes (por persona y obra, darla hoy o a otro) y «↩ Sigue en obra» para lo que mandaron por error |
 | 105 | «📅 Tareas de hoy» en Seguimiento; lo de hoy en obra cuenta como pendiente |
+| 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
 | 101 | Alternativas del pañol debajo de lo que falta en «📦 Material de esta obra» (🟢 casi igual / 🟡 sirve con diferencias, con la norma) y «Pedir esta en su lugar»; «Calculadora ↔ pañol» con la misma comparación (`alternativas`) |
 
 ---
