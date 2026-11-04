@@ -20,11 +20,16 @@ Autor: Miguel Ángel Díaz © 2026
   - con el APK viejo avisa «hace falta la app nueva (1.3)» y ofrece «Abrir en Chrome», en vez del «PDF listo» falso.
 - **La hoja de impresión** (`hojaPdf`): en el APK 1.3, «Compartir PDF» abre el menú de Android (WhatsApp, mail, Drive…) y «Bajar PDF» guarda en el celular.
 - En el navegador y la PC no cambia nada.
+- **La foto de Mis tareas ya no se pierde** (`fotoSegura`, encontrado al probar):
+  - si la pantalla se redibujaba mientras la persona tenía la cámara abierta (otra foto del equipo, cambios de la base, volver de la cámara), la foto llegaba a un botón que ya no estaba en la página y no se guardaba, sin avisar;
+  - pasaba también en la v107; era la prueba `t_v028` del celular que «fallaba a veces»;
+  - ahora la foto se pasa al botón nuevo de la misma fila y se guarda como siempre; si no encuentra la fila, avisa que hay que sacarla de nuevo.
 - Incluye la v108 completa (todavía no publicada).
 
 **Pruebas**
 - `t_v109` (simula el APK con y sin plugins, y el navegador): 6/6 en PC y 7/7 en celular.
 - El arnés suma la opción `antes` (preparar la página antes de abrir la app).
+- `t_v028` ahora espera 1,5 s con la cámara abierta, como una persona. Con la v107, esperando 0,4 s ya fallaba 0 de 6; con la v109, 4 de 4 OK en el celular.
 
 ## v108 — 04/11/2026 · El circuito de la obra: diccionario de tareas, cierre por partes y «Diferencias con lo hecho»
 
