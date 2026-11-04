@@ -20,8 +20,11 @@ const cel = process.argv[2] === 'cel';
   r = await p.evaluate(() => [...document.querySelectorAll('#ofObrasRec [data-of-obra]')].map((b) => b.textContent));
   c(r.includes('Plaza San Martín'), 'obras recientes con un toque · ' + r.join(', '));
   await p.click('#ofObrasRec [data-of-obra="p1"]'); await p.waitForTimeout(1500);
+  r = await p.evaluate(() => !!document.getElementById('ofPend'));
+  c(!r, 'v119: al elegir la obra el cartel de pendientes ya NO se abre solo (pedido de Ángel)');
+  await p.evaluate(() => { const b = document.querySelector('[data-of-pend]'); b && b.click(); }); await p.waitForTimeout(800);
   r = await p.evaluate(() => ({ t: (document.querySelector('#ofPend h3') || {}).textContent || '', n: document.querySelectorAll('#ofPend [data-op-k]').length, ks: [...document.querySelectorAll('#ofPend [data-op-k]')].map((x) => x.dataset.opK) }));
-  c(/tareas pendientes/.test(r.t) && r.n >= 5 && r.ks.includes('montaje_prfv'), 'al elegir la obra sale el cartel «tiene N tareas pendientes» · ' + r.t);
+  c(/tareas pendientes/.test(r.t) && r.n >= 5 && r.ks.includes('montaje_prfv'), 'con el botón «Ver las N tareas pendientes» sale el cartel · ' + r.t);
   // dejar solo 2: montaje y excavación
   await p.evaluate(() => { document.querySelectorAll('#ofPend [data-op-k]').forEach((x) => { x.checked = ['montaje_prfv', 'excavacion'].includes(x.dataset.opK); }); });
   await p.click('#ofPend [data-op="si"]'); await p.waitForTimeout(800);

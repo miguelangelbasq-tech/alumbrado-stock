@@ -2,6 +2,37 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v119 — 04/11/2026 · Nada encima mientras escribís, editar sin pisar órdenes viejas, calendario en Planificación (incluye v118)
+
+**Pedido de Ángel**
+- La OT-2026-098, vieja y cerrada, apareció con fecha 05/11: «yo no la creé». Probablemente se guardó una edición sin querer, porque «Llenar orden» seguía en modo edición.
+- «Cuando escribo la obra se me sobrepone una lista» y el cartel de pendientes: «nada que se abra solo encima».
+- La hoja de otra orden (la 098) quedaba abajo de la orden nueva.
+- La lista de nombres del teclado salía transparente y encimada.
+- Planificación en el celu: «un calendario, aprieto el día y me aparece ese día»; imprimir eligiendo qué órdenes; franja celeste EMA por obra.
+
+**Cambios**
+- **`edicionClara`:**
+  - cartel naranja fijo «✏ Estás EDITANDO la OT-xxx…» con «✕ Salir y hacer una orden nueva»;
+  - si cambiás de pestaña o salís de Órdenes sin guardar, la edición se cancela sola y el formulario queda limpio;
+  - si cambiás la fecha al guardar, pregunta antes (y avisa si la orden ya estaba cerrada);
+  - la hoja de la derecha se vacía apenas tocás el formulario o entrás a «Llenar orden».
+- **`planCalendario`:**
+  - calendario del mes en Planificación, con cuántas órdenes tiene cada día; tocás un día y se ve solo ese día;
+  - «🖨 Imprimir…» con casillas por orden (`window.__planSoloIds` / `__planConEntradas` en `imprimirPlanificacion`).
+- **Planificación detallada impresa:** franja celeste EMA (`#e3f2f8`, borde `#84C3DA`) en cada orden.
+- **`sugerencias`:** en el celu, los `<datalist>` se reemplazan por una caja blanca de la app con botones de 44 px.
+- **Buscador de la obra sin lista** (`otPlazaBuscar` sin `list`). El cartel de tareas pendientes ya no se abre solo: se abre con «📋 Ver las N tareas pendientes de la obra». En la v118 esperaba a que se terminara de escribir.
+- **Pruebas actualizadas:** `t_v112` y `t_v118` ya no esperan que el cartel de pendientes se abra solo.
+
+**Pruebas**
+- `t_v118` 3/3 y `t_v119` 12/12 en PC (13/13 en celular).
+- Batería completa en PC y celular: 226 OK. Solo falla `t_v083`, que es vieja.
+
+**Huella SHA-256**
+- `119_2026-11-04_app-EMA_ORIGINAL.html`: `f99fb3210ffdda35cd00489c3774604a737fe630e39478a537450423d425f347`
+- `index.html`: `db99676d2543e6cc880c7576384b794b280e4ea08a4ca9639b5e276d433367d6`
+
 ## v117 — 04/11/2026 · Menos lecturas de Firebase + el 👁 vuelve a mostrar la orden
 
 **Pedido de Ángel**

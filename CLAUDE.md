@@ -320,6 +320,9 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `cierreDiaUnico` | 113 | Producción › Cierre del día guarda por `guardarCierreOt` (abre el cierre oculto con `body.cd-auto`, pone cantidades, horas, reparto y novedades); pregunta del itemizado en el parte (`.cd-co`); puntos del parte con `__puntosDia` (= `puntosDeOrden`). Pruebas viejas con `__ofCompat`: el camino de antes |
 | `unirRepetidos` | 113 | «Por persona / obra» dentro de Seguimiento (`#urBuscar` / `#urVolver`, la pestaña `buscar` oculta), período «Avance del mes (sin fotos)» con aviso al informe con fotos, formulario de vehículos de Gastos oculto (se cargan en Personal) |
 | `supervisorOt` | 113 | Responsable de oficina de la orden: `#supSel` en el paso 2, `ot.supervisor` {uid, email, nombre}, aviso `tipo:'supervisor'`, «👔 Órdenes que seguís» (`#supSeguir`) arriba de Mis tareas con «✅ Cerrar» → `abrirCierreOt` |
+| `edicionClara` | 119 | Cartel «✏ Estás EDITANDO» (`#edBanner`), sale sola de la edición al cambiar de pestaña o de hoja, confirma si cambia la fecha, vacía `#parteResultCard` al armar una nueva. `__edicionClara`, `__salirEdicionOt` |
+| `planCalendario` | 119 | Calendario del mes (`#pcCal`, `data-pc-dia`) que muestra un solo día (`#planGrid.pc-uno`); casillas para imprimir (`#pcPrintSel`, `__planSoloIds`, `__planConEntradas`). `__planCalendario` |
+| `sugerencias` | 119 | En táctil (o `__sugForzar`), saca `list` de los inputs (`data-sug-list`) y muestra `#sugCaja` blanca. `__sugerencias` |
 | `lecturasCuenta` | 117 | Después del SDK de Firebase: envuelve `onSnapshot`/`get` de Query y DocumentReference y cuenta lecturas aprox. por colección y día (`localStorage ema.lecturas`, `__lecturas.texto()` en menú › Versión). No cambia lo que se lee |
 | `compartirApp` | 116 | En la app de Android arma `navigator.share`/`canShare` sobre `Share` (+ `Filesystem` CACHE para archivos); cancelar = `AbortError`. Así todo «Compartir» con Web Share abre el menú del celular. `__compartirApp` |
 | `relojitosAhorro` | 114 | **Primer script de la página.** Envuelve `setInterval`: con `document.hidden`, cada relojito de menos de 60 s corre como mucho una vez por minuto; a la vista, normal. No toca `setTimeout` |
@@ -578,6 +581,7 @@ Ejemplos:
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
 | 108 | Circuito de la obra: diccionario de 47 tareas claras (HH × dificultad), cierre por partes del ítem, «🔎 Diferencias con lo hecho» en el Itemizado (Sí/No), «Solo lo de esta obra» (`diccionarioTareas`, `circuitoObra`) |
 | 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
+| 119 | Editar sin pisar órdenes viejas (`edicionClara`), calendario y elegir qué imprimir en Planificación (`planCalendario`), sugerencias propias en el celu (`sugerencias`), buscador de obra sin lista, cartel de pendientes solo con botón, franja celeste por obra |
 | 117 | Menos lecturas: personal en vivo solo con el Mapa abierto, contador de lecturas en menú › Versión (`lecturasCuenta`); 👁 Ver orden pasa a «Llenar orden» |
 | 116 | «Compartir» abre WhatsApp/Drive en la app de Android (`compartirApp`: `navigator.share` sobre el plugin Share); resumen de «Llenar orden» opaco |
 | 115 | Avisos con la app cerrada en la app de Android: Worker `ema-avisos` manda por FCM (`workers/ema-avisos.js`), `FCM_LISTO` prendido |
