@@ -17,16 +17,17 @@ Autor: Miguel Ángel Díaz © 2026
   - No cambia nada de lo que lee la app.
 - **👁 Ver orden** (Historial, tablero, legajo): ahora pasa a «Llenar orden», que es donde se arma la hoja, y la muestra. Antes se armaba escondida.
   - Con una orden a la vista, el resumen de la derecha deja de quedar fijo arriba (`#ofResumen.of-estatico`).
+- **`pdfLogo`:** después de la captura con html2canvas, cada imagen `data:` (el logo) cuyo lugar quedó en blanco se dibuja a mano. Es un refuerzo para los celulares que no la dibujan. El PDF de Ángel tenía el logo: el visor del celular lo mostraba bajado.
 - **Worker `ema-avisos` v116:** la clave VAPID se lee una sola vez y solo si hay avisos para navegador. El 429 se explica en castellano.
 
 **Pruebas**
-- `t_v117`: 6/6 en PC y celular.
+- `t_v117`: 7/7 en PC y celular (con el PDF con logo). `t_v077`, `t_v109`, `t_v110` y `t_v116` repetidas con el refuerzo del logo: OK.
 - El contador, probado en Node con clases falsas y en Chromium con el SDK compat 12.17.1 real, sin red.
 - Batería completa en PC y celular: 222 OK. Solo falla `t_v083`, que es vieja.
 
 **Huella SHA-256**
-- `117_2026-11-04_app-EMA_ORIGINAL.html`: `d10b18ea49e699a4efdaaf60796e0648c7a480b396d7b922d76a5e112a953ece`
-- `index.html`: `2b1927c243801a9d1421b5ca70a7d1c63feff909a9d7859ee5f7c9755f329509`
+- `117_2026-11-04_app-EMA_ORIGINAL.html`: `e7376e5a2c24aed2d96ea2b6b398d72a0fe92c6961f8b57a21c6d2b6b00ced6a`
+- `index.html`: `20faed966321f811e27a86c4589fc25232c427b2fc0048e7dea40abf23fe49d1`
 
 ## v116 — 04/11/2026 · «Compartir» con WhatsApp en la app de Android + resumen de la orden sin encimarse
 

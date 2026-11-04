@@ -39,5 +39,15 @@ const espia = () => {
   r = await q.evaluate(() => { const rc = document.getElementById('parteResultCard'), rs = document.getElementById('ofResumen'); return { vis: !!(rc && rc.offsetParent && rc.offsetHeight > 200 && !rc.querySelector('.empty-state')), pos: rs ? getComputedStyle(rs).position : 'sin' }; });
   c(r.vis && (r.pos === 'static' || r.pos === 'sin'), '👁 desde el Historial muestra la orden, sin el resumen encima · ' + JSON.stringify(r));
   await B.browser.close();
+  // PDF con el logo aunque html2canvas no dibuje la imagen (pasa en algunos celulares)
+  const C = await abrir({ sesion: 'admin', cel, datos: baseDatos(), espera: 3000 }), w = C.page;
+  await w.evaluate(() => { window.__pags = []; const P = HTMLCanvasElement.prototype, d0 = P.toDataURL; P.toDataURL = function (...a) { const r = d0.apply(this, a); if (this.width > 1000 && /jpeg/.test(a[0] || '')) window.__pags.push(r); return r; }; });
+  const logoOscuro = () => w.evaluate(async () => { const u = window.__pags[window.__p0]; if (!u) return -1; const im = new Image(); im.src = u; await im.decode(); const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const g = c.getContext('2d'); g.drawImage(im, 0, 0); const d = g.getImageData(52, 52, 270, 90).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] < 150) n++; return n; });
+  const pdf = async () => { await w.evaluate(() => imprimirPlanificacion('detallada', 'dia', fechaAISO(new Date()))); await w.waitForTimeout(1500); const n0 = await w.evaluate(() => (window.__p0 = window.__pags.length)); await w.click('#hojaOv [data-hj="bajar"]'); await w.waitForFunction((n) => window.__pags.length > n, n0, { timeout: 40000 }).catch(() => { }); await w.waitForTimeout(500); await w.evaluate(() => { const x = document.querySelector('#hojaOv [data-hj="cerrar"]'); x && x.click(); }); await w.waitForTimeout(400); };
+  await pdf(); const conLogo = await logoOscuro(); if (process.env.DBG) { const u = await w.evaluate(() => (window.__pags.slice(-1)[0] || '') + ' n=' + window.__pags.length); require('fs').writeFileSync(__dirname + '/x_pag.txt', u); }
+  await w.evaluate(() => { const o = window.html2canvas; window.html2canvas = (el, op) => o(el, Object.assign({}, op, { ignoreElements: (e) => e.tagName === 'IMG' })); });   // como en el celular que no dibuja la imagen
+  await pdf(); const sinH2c = await logoOscuro();
+  c(conLogo > 500 && sinH2c > 500, 'el PDF sale con el logo aunque el celular no lo dibuje en la captura · ' + conLogo + ' / ' + sinH2c);
+  await C.browser.close();
   await A.browser.close(); process.exit(c.fin() ? 1 : 0);
 })();
