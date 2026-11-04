@@ -2,6 +2,39 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v110 — 04/11/2026 · La app de Android 1.3 completa: abrir PDF, imprimir directo, fotos que no se pierden, avisos y lector QR
+
+**Pedido de Ángel**
+- «¿No hay alguna mejora que quieras que implementemos, así hacemos actualizar una sola vez?». Eligió las cuatro propuestas (avisos con la app cerrada, abrir el PDF al bajarlo, no perder fotos de la cámara, imprimir directo) y «algo más que tengan las apps pro: investigá».
+
+**Qué tienen las apps profesionales de obra** (Salesforce Field Service, Dynamics 365 Field Service y otras)
+- Trabajo sin señal: la app ya lo tiene.
+- Avisos al celular: van en esta versión.
+- Lector de códigos de barras o QR para equipos y materiales: va en esta versión (la pieza; las pantallas del pañol, cuando Ángel las pida).
+- Firma en pantalla como comprobante: no necesita APK, se puede hacer después en el index.
+
+**APK 1.3** (además de Filesystem y Share de la v109)
+- Plugins oficiales o de la comunidad, versiones estables con más de dos semanas:
+  - `@capacitor/push-notifications` 8.1.3, `@capacitor/camera` 8.2.6 y `@capacitor/app` 8.1.2;
+  - `@capacitor-community/file-opener` 8.0.1, `@capgo/capacitor-printer` 8.1.8 y `@capacitor-mlkit/barcode-scanning` 8.2.1.
+- Manifest:
+  - permiso `POST_NOTIFICATIONS`;
+  - ícono chico de los avisos (`ic_stat_ema`), color y canal «avisos»;
+  - el lector de Google (`barcode_ui`).
+- `COMPILAR.bat` avisa si falta `google-services.json` (sin ese archivo compila igual, pero no hay avisos). El `LEEME.txt` explica cómo bajarlo de Firebase.
+
+**Cambios en la app** (`archivosApp` y módulo nuevo `androidPro`)
+- «Bajar PDF» guarda y **abre el PDF** en el visor del celular.
+- «Imprimir» va **directo a la impresora de Android** (`Printer.printBase64` con el PDF de la hoja). Si falla, hace lo de la v109 (PDF → menú).
+- **Fotos de Mis tareas** por la cámara del celular (plugin Camera): si Android cierra la app con la cámara abierta, al volver la foto se recupera (`appRestoredResult`) y se guarda en su fila. El dato de qué fila era queda en `localStorage ema.cam.pend`.
+- **Avisos con la app cerrada (FCM):** el código está, pero **dormido** (`FCM_LISTO = false`) hasta actualizar el servicio de avisos (Worker `ema-avisos`) para que mande por FCM. Así el Worker de hoy no recibe anotaciones que no conoce. Cuando esté, se prende subiendo un index, sin otro APK. El celular se anota en `pushSubs/fcm-…` con `tipo:"fcm"`, y tocar el aviso abre la hoja de `data.vista`.
+- **Lector de códigos:** `window.__escanear()` devuelve el texto del código.
+- Con la app vieja o en el navegador no cambia nada.
+
+**Pruebas**
+- `t_v110` (simula la app 1.3 con todas las piezas, más el navegador): 8/8 en PC y celular.
+- `t_v109`, `t_v028`, `t_v107` y `t_cargador` OK en PC y celular.
+
 ## v109 — 04/11/2026 · Bajar y compartir PDF en la app de Android (APK 1.3)
 
 **Pedido de Ángel**
