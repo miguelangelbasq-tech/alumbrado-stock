@@ -2,6 +2,29 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v114 — 04/11/2026 · Ahorro de batería
+
+**Pedido de Ángel**
+- «¿Puede que la app consuma mucha batería? ¿Cuánto? ¿Cómo lo solucionamos sin que se arruine la app y funcione súper bien, sin fallas?»
+
+**Qué gasta**
+- **La ubicación en vivo** es lo que más gasta, y es a propósito. En la app de Android, unos 3 a 6 % por hora. En Chrome bastante más, porque la pantalla tiene que quedar prendida para que el GPS no se corte.
+- **Unos 66 relojitos** (`setInterval`) revisan cosas cada uno o dos segundos. Algunos seguían andando con la app en segundo plano.
+
+**Cambios**
+- **`relojitosAhorro`**, primer script de la página: con la app fuera de la vista (`document.hidden`: otra app o pantalla apagada), cada `setInterval` de menos de 1 minuto corre como mucho una vez por minuto. A la vista sigue a su ritmo.
+  - Es lo mismo que Chrome ya hace por su cuenta en segundo plano, así que no cambia lo que hace cada relojito.
+  - No toca `setTimeout`.
+  - La ubicación nativa de Android no depende de los relojitos. Su latido escondido manda cada ~1 minuto, igual que el `cadaSeg` de 60 s.
+- **No se tocó el GPS:** ajustarlo podía dejar «sin actualizar» a alguien que está quieto.
+- **Recomendaciones para Ángel:**
+  - la cuadrilla con la app de Android, no Chrome;
+  - el horario justo en Usuarios › Ubicación en vivo;
+  - si hace falta ahorrar más, enviar cada 120 s.
+
+**Pruebas**
+- `t_v114`: 4/4 en PC y celular.
+
 ## v113 — 04/11/2026 · Una sola forma de hacer cada cosa + responsable de oficina de la orden
 
 **Pedido de Ángel**

@@ -320,6 +320,7 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `cierreDiaUnico` | 113 | Producción › Cierre del día guarda por `guardarCierreOt` (abre el cierre oculto con `body.cd-auto`, pone cantidades, horas, reparto y novedades); pregunta del itemizado en el parte (`.cd-co`); puntos del parte con `__puntosDia` (= `puntosDeOrden`). Pruebas viejas con `__ofCompat`: el camino de antes |
 | `unirRepetidos` | 113 | «Por persona / obra» dentro de Seguimiento (`#urBuscar` / `#urVolver`, la pestaña `buscar` oculta), período «Avance del mes (sin fotos)» con aviso al informe con fotos, formulario de vehículos de Gastos oculto (se cargan en Personal) |
 | `supervisorOt` | 113 | Responsable de oficina de la orden: `#supSel` en el paso 2, `ot.supervisor` {uid, email, nombre}, aviso `tipo:'supervisor'`, «👔 Órdenes que seguís» (`#supSeguir`) arriba de Mis tareas con «✅ Cerrar» → `abrirCierreOt` |
+| `relojitosAhorro` | 114 | **Primer script de la página.** Envuelve `setInterval`: con `document.hidden`, cada relojito de menos de 60 s corre como mucho una vez por minuto; a la vista, normal. No toca `setTimeout` |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -575,6 +576,7 @@ Ejemplos:
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
 | 108 | Circuito de la obra: diccionario de 47 tareas claras (HH × dificultad), cierre por partes del ítem, «🔎 Diferencias con lo hecho» en el Itemizado (Sí/No), «Solo lo de esta obra» (`diccionarioTareas`, `circuitoObra`) |
 | 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
+| 114 | Ahorro de batería: los relojitos corren como mucho 1 vez por minuto con la app fuera de la vista (`relojitosAhorro`) |
 | 113 | Una sola forma de cada cosa: Cierre del día por el mismo cierre, Buscar dentro de Seguimiento, un solo informe mensual, vehículos en un lugar; responsable de oficina con «Órdenes que seguís» (`cierreDiaUnico`, `unirRepetidos`, `supervisorOt`) |
 | 112 | «Llenar orden» por pasos con resumen y puntos por persona, cartel de pendientes, obras y gente con un toque; envío de la cuadrilla combinado y un solo aviso; tareas de barrio y reclamos; «＋ Crear tarea» (`ordenNueva`, `envioEquipo`, `tareaNueva`) |
 | 111 | Cierre: 0 horas = 0 puntos, puntos a mano con «Te quedan N para repartir», «✕ No fue» (`cierreGente`) |
@@ -592,7 +594,7 @@ Ejemplos:
 - **Ítem propio por tarea** (idea de Ángel, v098): que cada tarea del baremo tenga un ítem propio, aunque se llame distinto, para que el avance de obra la descuente también (hoy excavación, hormigonado, BPN, sellado y vínculos cuentan solo por las órdenes). **No hacer sin pedido.**
 - Calculadora ↔ pañol: v101 hizo las **alternativas** (no une códigos: Ángel aclaró que el 1019 y el 1025 son 3×1,5 pero de distinto origen/norma). Siguen pendientes, **sin pedido**: equivalencias guardadas en la base (hoy los m por rollo quedan en el aparato), kits (prensacable 5027 = 5024 + 5032), botón «No es el mismo» para descartar avisos, y que la reserva ofrezca la alternativa cuando el pañol no tiene. Dudas abiertas: si 7004–7007 «Borne de puesta a tierra 6 mm²» son las BPN; cómo se cuenta el 1009 (4×2,5: el catálogo dice Un.).
 - Paquetes de tableros en el pañol (esperando el Excel de las planillas).
-- 40 `setInterval` permanentes: consolidar en un planificador que se pause con `document.hidden`.
+- `setInterval` permanentes (unos 66): desde la v114 `relojitosAhorro` los frena a 1 por minuto con la app escondida; consolidarlos en un planificador sigue pendiente, sin pedido.
 - Barrio: faltan planos AP-TC-055 A–G, AP-TC-024, AP-TC-004, AP-TC-021, AP-CC-010, AP-T-014 y el itemizado de barrio.
 - Entrar con huella (WebAuthn), medidor GPS/RTK: ideas charladas, **no hacer todavía**.
 - **De la auditoría v101, sin hacer todavía** (ver `docs/AUDITORIA_v101.md`): Proyectista (largo del tramo por la cadena de puntos, subida igual a la calculadora, memoria «a confirmar», fases por columna PRFV), Usuarios (unificar filtros de «foto borrada», push al cambiar de usuario, aviso «Material para retirar» por `personaClave`, permiso de fotos antes de R2, `esCrew` con ajustes, permisos de borrar obra / nombrar columnas iguales a las reglas, reintentos con espera), provisiones 83–89 en el % (preguntar), zanja rápida 0,40.
