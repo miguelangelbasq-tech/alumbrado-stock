@@ -40,6 +40,12 @@ Autor: Miguel Ángel Díaz © 2026
 **Pruebas**
 - `t_v113`: 10/10 en PC y 11/11 en celular.
 - Las pruebas viejas siguen con el cierre del día de antes (`__ofCompat`).
+- **Batería completa** (v110 a v113 juntas), en PC y celular: 214 OK. Solo falla `t_v083`, que es vieja.
+
+**Huella SHA-256**
+- `113_2026-11-04_app-EMA_ORIGINAL.html`: `4d50badddb8498af4546a4dbe349f018f4030767a02fb6c48b9475229225d5f6`
+- `index.html`: `b5fc3e764ff5f3493f1077309ac8fd0d396471e0b30fedd02634f5339b4ebde9`
+- Versión: `2026-11-04 10:50 · dfb263`
 
 ## v112 — 04/11/2026 · «Llenar orden» por pasos, envío de la cuadrilla una sola vez, tareas de barrio y «＋ Crear tarea»
 
