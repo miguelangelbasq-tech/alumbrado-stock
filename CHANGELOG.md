@@ -2,6 +2,56 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v108 — 04/11/2026 · El circuito de la obra: diccionario de tareas, cierre por partes y «Diferencias con lo hecho»
+
+**Pedido de Ángel**
+- «Es un circuito: calculo con la calculadora, me dice todo lo que tengo que hacer (columnas, tableros, poda, metros de cable y zanja), los materiales y las órdenes de trabajo».
+- «Lo que se hace en las órdenes tiene que sumar en el avance de obra».
+- «El itemizado es sensible: que me dé la opción, “en las órdenes hiciste esto de más, ¿querés que lo agreguemos?”, esta sí, esta no».
+- «Las tareas tienen que ser claras: armar luminaria, armar el vínculo, armado de tablerito, montaje de columna, montaje del vínculo, limpieza, izado de poste de madera y de PRFV, colocación del tablero, acometida, poda, grúa para la basura…».
+- «Armar el diccionario, armar todo lo que haga falta y crearlo».
+
+**Cambios**
+- **Diccionario de tareas** (`diccionarioTareas`, `DICC_TAREAS`): 47 tareas, cada una una acción clara. Cada tarea tiene:
+  - horas-hombre estándar y dificultad (+0,2 por barquilla o altura, peso, riesgo eléctrico, oficio; tope 1,8);
+  - puntos = horas × dificultad;
+  - qué ítem del Itemizado 2026 avanza y con qué parte.
+- **Tareas nuevas en las órdenes:** armado de luminaria, de vínculo y de tablerito; prueba de artefactos; carga y descarga; replanteo; zanja con máquina; tapado; vereda; montaje de vínculo y de luminaria; conexionado del tablerito; izado de poste de madera; colocación del tablero; armado del tablero general; acometida aérea y subterránea; pintura; limpieza; grúa para basura y traslados; prueba de encendido; inspección; reparación de falla.
+  - Las tareas que juntaban varias acciones (vínculo y luminaria, BPN, galpón, tablero, acometida, limpieza y pintura, verificación, inspección y pruebas, fundaciones) quedan en «Tareas viejas», para las órdenes de antes.
+  - Los puntos de las tareas que ya existían no cambian solos. En Producción, «⚖ Usar los del diccionario» los copia, y hay que tocar «Guardar».
+- **Cierre por partes:**
+  - El ítem de columna completa (1 a 8) se reparte entre sus tareas: pozo 12 %, fundación 13 %, izaje 25 %, armado del vínculo 5 %, montaje del vínculo 8 %, armado de la luminaria 5 %, montaje de la luminaria 12 % (por artefacto), tablerito 5 %, conexionado 10 % y sellado 5 %.
+  - Zanja: excavación 70 % y tapado 30 %.
+  - Tablero aéreo (ítem 9): armado 60 % y colocación 40 %. Tablero a nivel (ítem 10): base 30 %, armado 40 % y colocación 30 %.
+  - Apoyo del tablero (ítem 13): pozo 30 % e izado 70 %.
+  - El montaje de la luminaria avanza también el cable de subida en columna (ítem 30).
+  - Todos estos porcentajes son **a confirmar**.
+  - Cada tarea llena solo su parte, y queda anotado qué tarea sumó cada cosa (`cierre.avanceItems[].k`). Lo que pasa de lo contratado queda como «sobran», sin meterse en la parte de otra tarea.
+- **Itemizado 2026 › «🔎 Diferencias con lo hecho (N)»** en cada plaza:
+  - qué se hizo de más en las órdenes cerradas, comparado con lo contratado (columnas, zanja, cable, cruce, tablero, apoyo, acometida, jabalinas, mediciones, empalmes, existentes, retiros, poda);
+  - **Sí, sumar** suma la cantidad al ítem como ajuste (`CO.aplicarAjuste`), con motivo, quién y cuándo, y avanza lo hecho;
+  - **No** guarda `difDescartadas` y no vuelve a preguntar mientras no se haga más.
+- **Orden de trabajo:**
+  - «📋 Solo lo de esta obra» deja a la vista las tareas que salen del cálculo, más las tildadas;
+  - los atajos «Lo que queda» no muestran las tareas viejas.
+- **«Quedan» desde el Avance:** cuenta solo el ítem principal de la tarea; las luminarias se cuentan por artefacto.
+- **Producción › Cuánto vale cada tarea:** al lado de cada tarea sale el valor del diccionario («4 HH × 1,4»), no el del pliego.
+- **Planilla** `docs/Baremo_propuesta_puntos.xlsx`, con hojas «Diccionario» y «Diferencias».
+- **Sin cambios** en reglas ni APK, ni en las órdenes ya cerradas.
+
+**Pruebas**
+- `t_v108`: 10/10 en PC y celular.
+- El arnés pone `__avanceEntero` en las pruebas viejas (el avance de antes, la tarea completa el ítem). `porPartes:true` prueba el reparto.
+- Batería completa en PC y celular: todo OK.
+  - `t_v045` y `t_v047` fallaron antes del modo de compatibilidad; repetidas, pasan.
+  - `t_v083` es vieja.
+  - `t_v028` en celular es la intermitente de siempre (3 de 3 solas OK).
+
+**Huella SHA-256**
+- `108_2026-11-04_app-EMA_ORIGINAL.html`: `f76a71208a52208617ce4279bc5769d3d4f9fd25445bb2503e40459fc806cbd1`
+- `index.html`: `261eee7bcda3777da5c584e8b472edca40231de36da56c46924d27747b517531`
+- Versión: `2026-11-03 21:10 · 30d10b`
+
 ## v107 — 04/11/2026 · La cuadrilla ve y borra sus fotos
 
 **Pedido de Ángel:** «Está bien que saque sin preguntar si está bien o no, pero tienen que poder sacar varias, poder verlas ellos y poder borrar, como la galería. Y yo poder verlas al instante en Obras y legajos».

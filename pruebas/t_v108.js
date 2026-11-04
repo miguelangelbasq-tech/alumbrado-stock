@@ -9,7 +9,7 @@ const cel = process.argv[2] === 'cel';
   const P = [{ nombre: 'Juan Pérez', rol: 'Oficial' }, { nombre: 'Pedro Gómez', rol: 'Ayudante' }], pn = ['juan perez', 'pedro gomez'];
   const ot = (id, act, extra) => Object.assign({ numero: 'OT-2026-6' + id, fecha: hoy, plazaId: 'p1', plazaNombre: 'Plaza San Martín', cuadrilla: 'C1', horaInicio: '07:00', horaFin: '15:00', personal: P, personalNombres: pn, actividades: act, previsto: {}, estado: 'En curso', creado: Date.now() }, extra || {});
   d.db.ordenesTrabajo = { a1: ot('01', ['montaje_prfv', 'zanjeo', 'prueba_encendido']) };
-  const A = await abrir({ sesion: 'admin', cel, datos: d, espera: 3500, reglas: true }), p = A.page;
+  const A = await abrir({ sesion: 'admin', cel, datos: d, espera: 3500, reglas: true, porPartes: true }), p = A.page;
   p.on('dialog', (x) => x.accept());
   let r = await p.evaluate(() => { const ids = ACTIVIDADES_CATALOGO.map((x) => x.id); return { nuevas: ['armado_luminaria', 'montaje_luminaria', 'armado_vinculo', 'montaje_vinculo', 'armado_tablerito', 'conexionado_tablerito', 'colocacion_tablero', 'armado_tablero', 'poste_madera', 'basura_grua', 'limpieza_obra'].every((k) => ids.includes(k)), vieja: metaDeTarea('vinculo_luminaria').fase, pts: (window.baremoActual() || {}).armado_tablero, partes: metaDeTarea('montaje_prfv').grupos[0].pct }; });
   c(r.nuevas && /Tareas viejas/.test(r.vieja) && r.pts && r.pts.pts === 5.6 && r.partes === 0.25, 'el diccionario suma las tareas claras (armar luminaria, montar vínculo, tablerito, tablero…) con puntos = horas × dificultad; las viejas quedan aparte · ' + JSON.stringify(r));

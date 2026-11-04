@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **03/11/2026**, última versión entregada: **v107** (ver `CHANGELOG.md`).
+> Estado al **03/11/2026**, última versión entregada: **v108** (ver `CHANGELOG.md`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -306,6 +306,8 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `seguimientoTareas` | 104 | Órdenes › «📌 Seguimiento» (`#otSeguimientoPanel`, `__seguimiento` {pintar, filas, quienes}): cada tarea dada con lo hecho y lo que falta, estados, filtros persona/obra/fechas, resumen por persona y obra, «📅 Darla hoy» / «👤 Darla a otro» (usa `repetirOrden` y deja solo esa tarea). Lee `window.__seg` {E, J} de `ordenesCampo`. También `__devolverOt(id)`: «↩ Sigue en obra» (borra `campo.enviados`, guarda `ot.devuelta`, avisa) |
 | `cierreIntegrante` | 106 | En el cierre de la orden, «＋ Agregar a alguien que también fue» (`#ciAddSel`): nómina sin los que ya están, suma a `personal` (rol de la nómina, `agregadoAlCerrar`) y `personalNombres`, redibuja el cierre conservando lo cargado. `__cierreIntegrante` |
 | `misFotos` | 107 | «📷 Mis fotos (N)» dentro de la plantilla de la orden de Mis tareas (envuelve `__mtComoLlegar`), abre `emaGaleria` con las fotos propias (`campo.fotos` por = la persona, sin borradas); en la cámara «🗑 La última» (`.ec-borrar-ult`, engancha `__camDisparo`/`__camGuardada`, usa `__fotoMia`/`__fotoSacarMia`). `__misFotos` |
+| `diccionarioTareas` | 108 | Antes del script del catálogo. `DICC_TAREAS` (47 tareas: id, label, fase, un, hh, f{alt,pes,rie,ofi}, dif, pts, grupos[{items, pct (número u objeto por ítem), porArt, prop}], noAvanza), `DICC_VIEJAS`, `DICC_DIF` (grupos para Diferencias), `__diccCompletar` (suma tareas a `ACTIVIDADES_CATALOGO`, completa `TAREA_META` con `grupos`/`noAvanza`, fases «Galpón y logística», «Varios», «Tareas viejas»), `__DICC_SE`/`__DICC_UN` (puntos y unidades por defecto solo de las nuevas). Los porcentajes son **a confirmar** |
+| `circuitoObra` | 108 | El cierre (`ve` de la base) reparte por partes: cada tarea llena `cantidad × pct` de su ítem menos lo que ya sumó esa tarea (`__avancePorTarea`, por `cierre.avanceItems[].k`); lo de más queda en «sobran». `__diferenciasObra(obra)` + `__verDiferencias(id)` (Itemizado › botón por plaza): Sí → `CO.aplicarAjuste` + avanza lo hecho; No → `obra.difDescartadas`. «📋 Solo lo de esta obra» (`#otSoloObra`, `.sa-tiene`). Baremo con el valor del diccionario. Pruebas viejas: `__avanceEntero` (la tarea completa el ítem) salvo `porPartes:true` |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -478,6 +480,7 @@ Ejemplos:
 - **Batería completa** = todas las `t_*.js` en PC y en celular. Corré en tandas (Chromium se pone lento con todo junto). Algunas son sensibles a tiempos si la máquina está cargada (`t_v026`, `t_v037`, `t_v073`, `t_v076`); si fallan, repetí solas antes de concluir.
 - **Modos de compatibilidad** que el arnés pone en las pruebas viejas:
   - `__puntosPisoFijo='2000-01-01'` (los puntos de cualquier fecha) salvo `pisoReal:true`;
+  - `__avanceEntero=true` (el cierre de antes: la tarea completa el ítem) salvo `porPartes:true`;
   - `__mtVistaTodas=true` (Mis tareas desplegado) salvo `mtNuevo:true`;
   - `ema.rs.porObra=0` salvo `rsObra:true`;
   - `__lgPlegTodoAbierto=true` salvo `lgPleg:true`.
@@ -557,6 +560,7 @@ Ejemplos:
 | 104 | «📌 Seguimiento» de tareas en Órdenes (por persona y obra, darla hoy o a otro) y «↩ Sigue en obra» para lo que mandaron por error |
 | 105 | «📅 Tareas de hoy» en Seguimiento; lo de hoy en obra cuenta como pendiente |
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
+| 108 | Circuito de la obra: diccionario de 47 tareas claras (HH × dificultad), cierre por partes del ítem, «🔎 Diferencias con lo hecho» en el Itemizado (Sí/No), «Solo lo de esta obra» (`diccionarioTareas`, `circuitoObra`) |
 | 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
 | 101 | Alternativas del pañol debajo de lo que falta en «📦 Material de esta obra» (🟢 casi igual / 🟡 sirve con diferencias, con la norma) y «Pedir esta en su lugar»; «Calculadora ↔ pañol» con la misma comparación (`alternativas`) |
 
