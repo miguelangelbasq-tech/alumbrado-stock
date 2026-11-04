@@ -39,7 +39,30 @@ Autor: Miguel Ángel Díaz © 2026
 - **Planilla** `docs/Baremo_propuesta_puntos.xlsx`, con hojas «Diccionario» y «Diferencias».
 - **Sin cambios** en reglas ni APK, ni en las órdenes ya cerradas.
 
+**Revisión (segunda pasada, pedido «dale una revisada de nuevo»)**
+- «Quedan» de la orden con el cierre por partes: cada tarea cuenta lo que sumó ella (÷ su parte), no el avance total del ítem. Antes, cerrar el izaje de 4 columnas marcaba como hechos también 1 pozo, 1 fundación, etc.
+- Avance de antes de la v108 (órdenes viejas o cargado a mano en el Avance): cuenta como completo para todas las tareas. Así no se vuelve a llenar la parte de una columna que ya estaba hecha.
+- Zanja a mano y zanja con máquina comparten el mismo 70 % (`parte: "zanja"`): no suman dos veces los mismos metros.
+- Sin cálculo de la obra, el montaje de la luminaria no llena el cable de subida (ítem 30) de una.
+- Redondeo a 4 decimales: una columna con todas sus tareas llega justo al 100 % (antes podía quedar en 0,99).
+- Jabalinas: el total de la tarea son los dispersores (75), o los caños (77) si no hay dispersores. Antes sumaba los dos.
+- Una orden anulada sin revertir el avance sigue contando en el reparto por partes, porque su avance sigue en el itemizado.
+- Cierre:
+  - avisa que cada tarea suma solo su parte (el izaje es el 25 %);
+  - lo que sobra dice la unidad y que se revisa en «🔎 Diferencias con lo hecho».
+- Las tareas nuevas proponen su etapa al cerrar: zanja, tapado, vínculos, tablero, acometida, pintura, inspección.
+- «Diferencias con lo hecho»:
+  - si no se pudo guardar, avisa y deja la obra como estaba (antes decía «✓ Sumado» igual);
+  - al sumar, refresca las pantallas del Avance;
+  - en el celular, la lista de ítems ya no se sale de la pantalla.
+- «Solo lo de esta obra»:
+  - sin obra elegida (o sin cálculo), avisa en vez de dejar la lista vacía;
+  - al cambiar a una obra sin cálculo, vuelve a mostrar todo;
+  - esconde las fases vacías y las tareas viejas.
+- La app no se pone lenta: lo de Diferencias y del baremo se recalcula solo cuando cambia el Itemizado o Producción.
+
 **Pruebas**
+- `t_v108b` (nueva, lo de la revisión): 11/11 en PC y celular.
 - `t_v108`: 10/10 en PC y celular.
 - El arnés pone `__avanceEntero` en las pruebas viejas (el avance de antes, la tarea completa el ítem). `porPartes:true` prueba el reparto.
 - Batería completa en PC y celular: todo OK.
@@ -48,9 +71,9 @@ Autor: Miguel Ángel Díaz © 2026
   - `t_v028` en celular es la intermitente de siempre (3 de 3 solas OK).
 
 **Huella SHA-256**
-- `108_2026-11-04_app-EMA_ORIGINAL.html`: `f76a71208a52208617ce4279bc5769d3d4f9fd25445bb2503e40459fc806cbd1`
-- `index.html`: `261eee7bcda3777da5c584e8b472edca40231de36da56c46924d27747b517531`
-- Versión: `2026-11-03 21:10 · 30d10b`
+- `108_2026-11-04_app-EMA_ORIGINAL.html`: `e08667c6d691209be536b09c48ce0a27b0246c92e19954d782aaa6068b51576f`
+- `index.html`: `738424352b7b90157ee3fd333e4309dda8161b493c1998c8419f1263dc1fdc8f`
+- Versión: `2026-11-03 23:55 · 7600d6`
 
 ## v107 — 04/11/2026 · La cuadrilla ve y borra sus fotos
 
