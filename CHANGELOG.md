@@ -2,6 +2,45 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v113 — 04/11/2026 · Una sola forma de hacer cada cosa + responsable de oficina de la orden
+
+**Pedido de Ángel**
+- «Que las cosas para hacer no se repitan: que no haya dos cerrar el día en dos lugares… fijate si hay eso o no».
+- Eligió arreglar las cuatro cosas que encontré.
+- «En llenar la OT poner un responsable: cualquiera de oficina o administración, que le llegue lo que tiene a cargo y las que tiene que cerrar (las pueden cerrar otros igual), que en Mis tareas le salga el seguimiento y al cerrar lo mande a la hoja para cerrar».
+
+**Qué había repetido** (revisión de toda la app)
+- **Producción › «Cierre del día»** cerraba las órdenes por otro camino. Con eso:
+  - no avanzaba el itemizado ni hacía el paso del itemizado;
+  - no mandaba el aviso «⭐ Puntos aprobados» con la app cerrada;
+  - no borraba las fotos que la cuadrilla sacó;
+  - no dejaba sacar ni agregar gente;
+  - 0 horas valía la jornada entera;
+  - mostraba puntos solo por el peso del rol, distintos de los que se guardaban;
+  - guardar ahí una orden ya cerrada borraba el reparto por persona y por equipo.
+- **Órdenes › «Por persona / obra»** y **«Seguimiento»** mostraban casi lo mismo.
+- **«Informe mensual»** en el Centro de informes y **«📑 Informe mensual con fotos»** tenían el mismo nombre para cosas distintas.
+- **Vehículos:** se podían cargar en Gastos y en Producción › Personal (la misma lista, dos formularios).
+- Todas las otras entradas a «Cargar lo hecho» ya usaban el mismo cierre: Tablero, Seguimiento, Historial y Mis tareas.
+
+**Cambios**
+- **«Cierre del día»** (`cierreDiaUnico`): queda como carga rápida de todo el día, pero «Guardar el parte» y «Guardar todo el día» guardan por el **mismo cierre** de la orden (`guardarCierreOt`).
+  - Abre el cierre sin mostrarlo y le pone las cantidades, las horas (0 = 0), el reparto a mano y las novedades.
+  - Los puntos del parte son los mismos que los del cierre (`puntosDeOrden`) y se recalculan al cambiar horas o cantidades.
+  - Cada orden con obra lleva en el parte la misma pregunta del cierre: «¿agregó o sacó algo del itemizado?». Con «No» se guarda directo; con «Sí» abre el cierre completo para cargar el cambio. Si no se contesta, también abre el cierre.
+- **Seguimiento:** se va la pestaña «Por persona / obra». En Seguimiento está «🔎 Buscar en las órdenes» (el mismo buscador), con «← Volver a Seguimiento».
+- **Informes:** el período «Informe mensual» pasa a llamarse «Avance del mes (sin fotos)» y avisa que el de la certificación es «📑 Informe mensual con fotos».
+- **Vehículos:** se cargan solo en Producción › Personal del equipo. En Gastos se ven, con el botón para ir.
+- **Responsable de oficina** (`supervisorOt`):
+  - en el paso 2 de «Llenar orden» se elige a alguien de Oficina o Administración (de entrada, quien la emite);
+  - se guarda en `ot.supervisor` {uid, email, nombre};
+  - si no es quien la emite, le llega el aviso «👔 Te toca seguir una orden»;
+  - en su **Mis tareas** aparece **«👔 Órdenes que seguís»**: cómo va cada una (marcadas, quién envió), «🔔 Para cerrar», «📸 Ver avance» y «✅ Cerrar», que abre el cierre de esa orden. La pueden cerrar otros igual.
+
+**Pruebas**
+- `t_v113`: 10/10 en PC y 11/11 en celular.
+- Las pruebas viejas siguen con el cierre del día de antes (`__ofCompat`).
+
 ## v112 — 04/11/2026 · «Llenar orden» por pasos, envío de la cuadrilla una sola vez, tareas de barrio y «＋ Crear tarea»
 
 **Pedido de Ángel**
