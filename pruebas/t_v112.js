@@ -6,6 +6,8 @@ const cel = process.argv[2] === 'cel';
   const c = prueba('v112' + (cel ? ' cel' : ''));
   const d = baseDatos(), hoy = d.hoy;
   d.db.avanceObras.p1.valorItems = [{ id: 1, itemPliego: '5', cantidad: 7, cantidadAvanzada: 0 }];
+  d.db.configEquipo.personal.vehiculos = [{ id: 'v1', nombre: 'Hilux', patente: 'AB123CD' }, { id: 'v2', nombre: 'Ranger', patente: '' }];
+  d.db.configEquipo.personal.lista[0].vehiculoId = 'v1'; d.db.configEquipo.personal.lista[1].vehiculoId = 'v2';
   d.db.ordenesTrabajo = { v1: { numero: 'OT-2026-090', fecha: hoy, plazaId: 'p1', plazaNombre: 'Plaza San Martín', personal: [{ nombre: 'Juan Pérez', rol: 'Oficial' }], personalNombres: ['juan perez'], actividades: ['poda'], previsto: { poda: 1 }, estado: 'Anulada', creado: Date.now() - 86400000 } };
   const A = await abrir({ sesion: 'admin', cel, datos: d, espera: 3500, porPartes: true, ofPasos: true }), p = A.page;
   p.on('dialog', (x) => x.accept());
@@ -32,6 +34,13 @@ const cel = process.argv[2] === 'cel';
   r = await p.evaluate(() => personal.map((x) => x.nombre + '/' + x.rol));
   c(r.join() === 'Juan Pérez/Oficial,Pedro Gómez/Ayudante', 'la gente de la nómina se suma con un toque (con su rol) · ' + r.join(', '));
   await p.fill('#otCuadrilla', 'Cuadrilla 1'); await p.waitForTimeout(1500);
+  // en qué vehículo va cada uno (con los vehículos de la orden; sale el que tiene a cargo o el primero; se puede cambiar)
+  await p.click('#otVehBox [data-otveh="v1"]'); await p.waitForTimeout(300); await p.click('#otVehBox [data-otveh="v2"]'); await p.waitForTimeout(1200);
+  r = await p.evaluate(() => [...document.querySelectorAll('#vpBox [data-vp]')].map((s) => s.dataset.vp + '=' + s.value));
+  c(r.join() === 'Juan Pérez=v1,Pedro Gómez=v1', 'con dos vehículos en la orden, cada persona elige en cuál va (de entrada, el primero) · ' + r.join(', '));
+  await p.selectOption('#vpBox [data-vp="Pedro Gómez"]', 'v2'); await p.waitForTimeout(1200);
+  r = await p.evaluate(() => (document.querySelector('#ofResumen .of-fila[data-of-ir="2"] small') || {}).textContent || '');
+  c(/Hilux: Juan · Ranger: Pedro/.test(r), 'el resumen dice en qué vehículo va cada uno · ' + r);
   // 4) puntos por persona si terminan todo
   r = await p.evaluate(() => [...document.querySelectorAll('#ofResumen .of-pp')].map((x) => x.textContent.replace(/\s+/g, ' ').trim()));
   c(r.length === 3 && /Juan Pérez/.test(r[0]) && /pts/.test(r[1]) && /Total/.test(r[2]), 'el resumen dice los puntos de cada uno si terminan todo · ' + r.join(' | '));
@@ -39,8 +48,8 @@ const cel = process.argv[2] === 'cel';
   else await p.screenshot({ path: __dirname + '/v112_orden_pc.png' });
   // 5) emitir desde el resumen
   await p.click('#ofResumen [data-of-emitir]'); await p.waitForTimeout(2500);
-  r = await p.evaluate(() => Object.values(window.__stubDB().ordenesTrabajo).filter((o) => o.estado !== 'Anulada').map((o) => ({ pz: o.plazaId, act: (o.actividades || []).slice().sort().join(), pers: (o.personal || []).length })));
-  c(r.length === 1 && r[0].pz === 'p1' && r[0].act === 'excavacion,montaje_prfv' && r[0].pers === 2, '«Emitir» del resumen emite la orden como siempre · ' + JSON.stringify(r));
+  r = await p.evaluate(() => Object.values(window.__stubDB().ordenesTrabajo).filter((o) => o.estado !== 'Anulada').map((o) => ({ pz: o.plazaId, act: (o.actividades || []).slice().sort().join(), pers: (o.personal || []).length, vp: Object.entries(o.vehiculoPersona || {}).map(([n, v]) => n + '=' + v.nombre).join() })));
+  c(r.length === 1 && r[0].pz === 'p1' && r[0].act === 'excavacion,montaje_prfv' && r[0].pers === 2 && r[0].vp === 'Juan Pérez=Hilux,Pedro Gómez=Ranger', '«Emitir» del resumen emite la orden como siempre · ' + JSON.stringify(r));
   // 6) la cuadrilla: lo más completo gana
   r = await p.evaluate(() => {
     const L = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '_');

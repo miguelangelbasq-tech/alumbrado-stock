@@ -21,6 +21,10 @@ Autor: Miguel Ángel Díaz © 2026
   - **en el celu**, una barra fija abajo: «📋 N tareas · 👷 N · ⭐ pts», «Resumen» y «Emitir»;
   - **obras recientes** y **gente de la nómina** con un toque (con su rol);
   - **cartel de pendientes al elegir la obra** (`saldoObra`): «📋 HÍPICA tiene N tareas pendientes». Se marcan todas, algunas o ninguna, con lo que queda de cada una, y se pueden sumar más. También sale desde «📋 Ver las N tareas pendientes de la obra» en el resumen.
+- **En qué vehículo va cada uno** (`vehiculoPersona`, pedido de Ángel). En el paso 2, con los vehículos de la orden elegidos, cada persona elige en cuál va:
+  - de entrada, el que tiene a cargo o el primero de la orden;
+  - se guarda en `ot.vehiculoPersona` («Nombre» → {id, nombre, patente});
+  - se ve en el resumen («🚚 Hilux: Juan · Ranger: Pedro») y en el cierre, al lado de cada persona.
 - **Envío de la cuadrilla** (`envioEquipo`):
   - cada uno guarda su marca en `campo.marcasPor.<tarea>.<persona>`;
   - `campo.marcas.<tarea>` (lo que ve la oficina y lo que propone el cierre) es la **combinación**: hecha si alguno la hizo, la cantidad mayor y las notas de todos (`porTodos`). Antes la última marca pisaba a la otra;
@@ -35,7 +39,7 @@ Autor: Miguel Ángel Díaz © 2026
   - **«＋ Crear tarea»**: nombre, fase, unidad, horas por unidad, lo que tiene la tarea y cómo se hace; calcula los puntos al instante y la guarda con las tareas propias del equipo (`registrarTareasNuevas`, ahora con `fase`, `hh` y `f`).
 
 **Pruebas**
-- `t_v112`: 11/11 en PC y 12/12 en celular.
+- `t_v112`: 13/13 en PC y 14/14 en celular (con el vehículo de cada uno).
 - Arnés: `__ofCompat` en las pruebas viejas (todo junto, sin cartel ni barra), salvo `ofPasos:true`.
 - `t_v076`, `t_v079`, `t_v094`, `t_v097`, `t_v104`, `t_v072`, `t_v098`, `t_v096`, `t_cuadrilla` y `t_v022` OK.
 - **Batería completa (v110 + v111 + v112 juntas), en PC y celular: 211 OK.**
