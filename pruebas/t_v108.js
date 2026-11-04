@@ -33,7 +33,7 @@ const cel = process.argv[2] === 'cel';
   await p.waitForTimeout(700);
   txt = await cerrar('a2', { montaje_prfv: 1, zanjeo: 20 });
   r = await p.evaluate(() => { const o = window.__stubDB().avanceObras.p1; return o.valorItems.map((x) => x.itemPliego + ':' + x.cantidadAvanzada).join(); });
-  c(/sobran 1,00/.test(txt) && /sobran 20,00/.test(txt) && r === '5:1.75,15:70', 'una columna y 20 m de más no se meten en la parte de otras tareas: quedan como «sobran» · ' + r);
+  c(/sobran 1 columna/.test(txt) && /sobran 20 metro/.test(txt) && r === '5:1.75,15:70', 'una columna y 20 m de más no se meten en la parte de otras tareas: quedan como «sobran» · ' + r);
   // diferencias con lo hecho
   r = await p.evaluate(() => window.__diferenciasObra(avanceObras.find((x) => x.id === 'p1')).map((d) => d.nombre + ':' + d.hecho + '/' + d.contratado));
   c(r.join() === 'Columnas PRFV:8/7,Zanja:120/100', 'Diferencias con lo hecho: columnas 8 hechas de 7 contratadas, zanja 120 de 100 · ' + r.join());
