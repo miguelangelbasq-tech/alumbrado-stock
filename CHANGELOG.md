@@ -38,6 +38,15 @@ Autor: Miguel Ángel Díaz © 2026
 - `t_v112`: 11/11 en PC y 12/12 en celular.
 - Arnés: `__ofCompat` en las pruebas viejas (todo junto, sin cartel ni barra), salvo `ofPasos:true`.
 - `t_v076`, `t_v079`, `t_v094`, `t_v097`, `t_v104`, `t_v072`, `t_v098`, `t_v096`, `t_cuadrilla` y `t_v022` OK.
+- **Batería completa (v110 + v111 + v112 juntas), en PC y celular: 211 OK.**
+  - `t_v077` falló en PC porque «Compartir PDF» ahora abre el menú. Se actualizó para tocar «Otra app» y pasa 16/16 en PC y celular.
+  - `t_v083` es vieja.
+
+**Huella SHA-256**
+- `112_2026-11-04_app-EMA_ORIGINAL.html`: `fae757b2376e413b4e3b1c7ba2f0adeaec65164116ad046fac86e79407cf675c`
+- `index.html`: `9618fee4a8acddccc7a33970709f48303b81a6f41bfe965fd351c3ad190cdb16`
+- Versión: `2026-11-04 08:48 · d882f3`
+- APK: `AlumbradoApp_v1.3.zip` (versionCode 4, versionName 1.3, 10 plugins)
 
 ## v111 — 04/11/2026 · Cierre de la orden: horas, puntos y «No fue»
 
