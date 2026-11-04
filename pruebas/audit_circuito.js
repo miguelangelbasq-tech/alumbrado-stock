@@ -27,12 +27,12 @@ const { abrir, baseDatos } = require('./h');
   console.log('2) ITEMIZADO cargado → tareas que salen (Quedan T):', JSON.stringify(r2));
   // orden con varias tareas
   await p.evaluate(async (hoy) => {
-    await firebase.firestore().collection('ordenesTrabajo').doc('o1').set({ numero: 'OT-2026-500', fecha: hoy, plazaId: 'p1', plazaNombre: 'Plaza San Martín', cuadrilla: 'C1', horaInicio: '07:00', horaFin: '15:00', personal: [{ nombre: 'Juan Pérez', rol: 'Oficial' }, { nombre: 'Pedro Gómez', rol: 'Ayudante' }], personalNombres: ['juan perez', 'pedro gomez'], actividades: ['excavacion', 'hormigonado', 'galpon_prep', 'montaje_prfv', 'bpn', 'vinculo_luminaria', 'zanjeo', 'tendido_cable', 'tablero', 'pat', 'sellado_base'], previsto: {}, estado: 'En curso', creado: Date.now() });
+    await firebase.firestore().collection('ordenesTrabajo').doc('o1').set({ numero: 'OT-2026-500', fecha: hoy, plazaId: 'p1', plazaNombre: 'Plaza San Martín', cuadrilla: 'C1', horaInicio: '07:00', horaFin: '15:00', personal: [{ nombre: 'Juan Pérez', rol: 'Oficial' }, { nombre: 'Pedro Gómez', rol: 'Ayudante' }], personalNombres: ['juan perez', 'pedro gomez'], actividades: ['excavacion', 'hormigonado', 'armado_vinculo', 'armado_luminaria', 'armado_tablerito', 'montaje_prfv', 'montaje_vinculo', 'montaje_luminaria', 'conexionado_tablerito', 'sellado_base', 'zanjeo', 'tapado_zanja', 'tendido_cable', 'colocacion_tablero', 'armado_tablero', 'pat', 'prueba_encendido'], previsto: {}, estado: 'En curso', creado: Date.now() });
   }, d.hoy);
   await w(900);
   await p.evaluate(() => mostrarVista('parte')); await w(400);
   await p.evaluate(() => window.abrirCierreOt('o1')); await w(900);
-  const q = { excavacion: 7, hormigonado: 7, galpon_prep: 7, montaje_prfv: 8, bpn: 7, vinculo_luminaria: 7, zanjeo: 120, tendido_cable: 150, tablero: 1, pat: 3, sellado_base: 7 };
+  const q = { excavacion: 7, hormigonado: 7, armado_vinculo: 7, armado_luminaria: 7, armado_tablerito: 7, montaje_prfv: 8, montaje_vinculo: 7, montaje_luminaria: 7, conexionado_tablerito: 7, sellado_base: 7, zanjeo: 120, tapado_zanja: 120, tendido_cable: 150, colocacion_tablero: 1, armado_tablero: 1, pat: 3, prueba_encendido: 1 };
   for (const [k, v] of Object.entries(q)) { await p.fill(`#cierreCuerpo .cierre-qty[data-k="${k}"]`, String(v)).catch(() => console.log('sin campo', k)); }
   await w(1200);
   const r3 = await p.evaluate(() => ({ efectos: (document.getElementById('cierreEfectos') || {}).innerText, co: [...document.querySelectorAll('#cierreCuerpo input[type=radio]')].map((x) => x.name + ':' + x.value + ' «' + ((x.closest('label') || {}).innerText || '').slice(0, 80) + '»') }));
@@ -48,6 +48,8 @@ const { abrir, baseDatos } = require('./h');
   console.log('5) «Quedan» para la próxima orden:', JSON.stringify(r5));
   const r6 = await p.evaluate(async () => { window.irSubOrdenes('nueva'); await new Promise((r) => setTimeout(r, 600)); const sel = document.getElementById('otPlaza') || document.querySelector('#viewParteDiario select'); if (sel) { const op = [...sel.options].find((o) => /San Mart/.test(o.textContent)); if (op) { sel.value = op.value; sel.dispatchEvent(new Event('change', { bubbles: true })); } } await new Promise((r) => setTimeout(r, 800)); const ts = [...document.querySelectorAll('.ot-tarea')]; return { total: ts.length, conQuedan: ts.filter((t) => /Quedan|quedan/.test(t.innerText)).length, primeras: ts.slice(0, 8).map((t) => t.innerText.replace(/\s+/g, ' ').slice(0, 70)) }; });
   console.log('6) ORDEN NUEVA para la obra:', JSON.stringify(r6, null, 1));
+  const r7 = await p.evaluate(() => { const o = avanceObras.find((x) => x.id === 'p1'); return window.__diferenciasObra(o).map((d) => `${d.nombre}: hecho ${d.hecho} contratado ${d.contratado} de más ${d.deMas} → ítem ${d.item}`); });
+  console.log('7) DIFERENCIAS CON LO HECHO:', JSON.stringify(r7, null, 1));
   console.log('diálogos:', dlg);
   await A.browser.close();
 })();
