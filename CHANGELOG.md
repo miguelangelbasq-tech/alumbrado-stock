@@ -2,6 +2,28 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v116 — 04/11/2026 · «Compartir» con WhatsApp en la app de Android + resumen de la orden sin encimarse
+
+**Pedido de Ángel**
+- «Cuando pongo compartir ya no me sale WhatsApp y otros como me salía antes; está bien que salga copiar, pero también que salga WhatsApp.»
+- «Mirá otro error, se sobrepone»: el resumen de «Llenar orden» se encimaba con la hoja.
+
+**Cambios**
+- **`compartirApp`:** en la app de Android, `navigator.share` / `canShare` se arman sobre el plugin Share, porque el WebView no los trae. Los archivos se guardan en la caché con Filesystem. Si el menú se cierra sin elegir, da `AbortError`.
+  - Así abren el menú del celular (WhatsApp, Drive, Gmail…) todos los «Compartir» que usaban Web Share: la ubicación de la plaza, las fotos, el ZIP…
+  - En el navegador no cambia nada.
+- **`#ofResumen`:** fondo blanco sólido, sin vidrio, con sombra y `z-index`. Si es más alto que la pantalla, se baja adentro del recuadro.
+- Incluye la v115 (avisos FCM).
+
+**Pruebas**
+- `t_v116`: 4/4 en PC y celular.
+- Batería completa en PC y celular: 220 OK. Solo falla `t_v083`, que es vieja.
+- `t_v112` y `t_v113` repetidas con el arreglo del resumen: OK.
+
+**Huella SHA-256**
+- `116_2026-11-04_app-EMA_ORIGINAL.html`: `3d8f6459e489ffc8525de2a35d2e1a762d5162a5cd7e1ff0568d7a38e9b10d33`
+- `index.html`: `bda1bb7abf360cea812b526f0a8efc9ac94f6f38505c3a5b5159a5a29e6f23fc`
+
 ## v115 — 04/11/2026 · Avisos con la app cerrada en la app de Android
 
 **Pedido de Ángel**

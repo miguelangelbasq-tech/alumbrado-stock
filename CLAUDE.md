@@ -320,6 +320,7 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `cierreDiaUnico` | 113 | Producción › Cierre del día guarda por `guardarCierreOt` (abre el cierre oculto con `body.cd-auto`, pone cantidades, horas, reparto y novedades); pregunta del itemizado en el parte (`.cd-co`); puntos del parte con `__puntosDia` (= `puntosDeOrden`). Pruebas viejas con `__ofCompat`: el camino de antes |
 | `unirRepetidos` | 113 | «Por persona / obra» dentro de Seguimiento (`#urBuscar` / `#urVolver`, la pestaña `buscar` oculta), período «Avance del mes (sin fotos)» con aviso al informe con fotos, formulario de vehículos de Gastos oculto (se cargan en Personal) |
 | `supervisorOt` | 113 | Responsable de oficina de la orden: `#supSel` en el paso 2, `ot.supervisor` {uid, email, nombre}, aviso `tipo:'supervisor'`, «👔 Órdenes que seguís» (`#supSeguir`) arriba de Mis tareas con «✅ Cerrar» → `abrirCierreOt` |
+| `compartirApp` | 116 | En la app de Android arma `navigator.share`/`canShare` sobre `Share` (+ `Filesystem` CACHE para archivos); cancelar = `AbortError`. Así todo «Compartir» con Web Share abre el menú del celular. `__compartirApp` |
 | `relojitosAhorro` | 114 | **Primer script de la página.** Envuelve `setInterval`: con `document.hidden`, cada relojito de menos de 60 s corre como mucho una vez por minuto; a la vista, normal. No toca `setTimeout` |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
@@ -576,6 +577,7 @@ Ejemplos:
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
 | 108 | Circuito de la obra: diccionario de 47 tareas claras (HH × dificultad), cierre por partes del ítem, «🔎 Diferencias con lo hecho» en el Itemizado (Sí/No), «Solo lo de esta obra» (`diccionarioTareas`, `circuitoObra`) |
 | 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
+| 116 | «Compartir» abre WhatsApp/Drive en la app de Android (`compartirApp`: `navigator.share` sobre el plugin Share); resumen de «Llenar orden» opaco |
 | 115 | Avisos con la app cerrada en la app de Android: Worker `ema-avisos` manda por FCM (`workers/ema-avisos.js`), `FCM_LISTO` prendido |
 | 114 | Ahorro de batería: los relojitos corren como mucho 1 vez por minuto con la app fuera de la vista (`relojitosAhorro`) |
 | 113 | Una sola forma de cada cosa: Cierre del día por el mismo cierre, Buscar dentro de Seguimiento, un solo informe mensual, vehículos en un lugar; responsable de oficina con «Órdenes que seguís» (`cierreDiaUnico`, `unirRepetidos`, `supervisorOt`) |
