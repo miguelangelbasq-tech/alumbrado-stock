@@ -37,6 +37,14 @@ function datos() {
   await p.click('#hojaOv [data-hj="imprimir"]'); await p.waitForFunction(() => window.__pr.length > 0, null, { timeout: 30000 }).catch(() => { });
   r = await p.evaluate(() => ({ pr: window.__pr.slice(), sh: window.__sh.length }));
   c(r.pr.length === 1 && r.pr[0].mime === 'application/pdf' && r.pr[0].n > 1000 && r.sh === 0, '«Imprimir» abre la impresora de Android directo (sin pasar por Drive) · ' + JSON.stringify(r.pr));
+  // menú «Compartir» como en las apps pro: WhatsApp · Drive · Mail · Copiar · Guardar · Otra app
+  await p.click('#hojaOv [data-hj="compartir"]'); await p.waitForTimeout(300);
+  r = await p.evaluate(() => [...document.querySelectorAll('#hjComp .hc-b')].map((b) => b.textContent.trim()));
+  c(r.join('|') === '✆WhatsApp|▲Drive|✉Mail|⧉Copiar|⬇Guardar|⋯Otra app', 'el menú «Compartir» tiene WhatsApp, Drive, Mail, Copiar, Guardar y Otra app · ' + r.join(', '));
+  if (cel) { const sw = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth); c(sw <= 0, 'el menú entra en el celular sin scroll de costado · ' + sw); await p.screenshot({ path: __dirname + '/v110_compartir_cel.png' }); }
+  await p.click('#hjComp [data-hc="wa"]'); await p.waitForFunction(() => window.__sh.length > 0, null, { timeout: 30000 }).catch(() => { });
+  await p.waitForTimeout(300); r = await p.evaluate(() => ({ sh: window.__sh.slice(-1)[0], m: (document.querySelector('#hojaOv .hj-msg') || {}).textContent, abierto: !!document.getElementById('hjComp') }));
+  c(r.sh && /\.pdf$/.test(r.sh.files[0]) && /EMA Servicios/.test(r.sh.text) && r.sh.dialogTitle === 'Compartir' && /WhatsApp/.test(r.m) && !r.abierto, 'en la app de Android, «WhatsApp» abre el menú del celular con el PDF y su descripción · ' + r.m);
   r = await p.evaluate(async () => ({ cod: await window.__escanear(), push: window.__pushReg, v: await window.__androidPro.version() }));
   c(r.cod === 'H-014', 'lector de códigos: __escanear() devuelve el código leído · ' + r.cod);
   c(r.push === 0, 'avisos FCM dormidos hasta que el servicio de avisos esté listo (no se anota el celular)');
@@ -58,7 +66,26 @@ function datos() {
   const fotos = await p.evaluate(() => Object.values(((ordenesTrabajo.find((x) => x.id === 'ot1') || {}).campo || {}).fotos || {}).map((x) => x.num));
   c(fotos.includes('T1 · C1 · Col 2'), 'si Android cerró la app con la cámara abierta, la foto se recupera al volver y queda en su fila · ' + JSON.stringify(fotos));
   await A.browser.close();
-  // 4) en el navegador sigue el selector de siempre
+  // 4) navegador / PC: el mismo menú; WhatsApp y Drive bajan el PDF y dan el botón para abrirlos; Copiar copia
+  A = await abrir({ sesion: 'admin', cel, datos: baseDatos(), espera: 3000, https: true }); p = A.page;   // el portapapeles pide https, como GitHub Pages
+  try { await p.context().grantPermissions(['clipboard-read', 'clipboard-write']); } catch (e) { }
+  await p.evaluate(() => hojaEMA.abrir('Planificación de prueba', '<!doctype html><html><body><h1>Hoja de prueba</h1><p>Texto para copiar</p></body></html>')); await p.waitForTimeout(1200);
+  await p.click('#hojaOv [data-hj="compartir"]'); await p.waitForTimeout(300);
+  if (!cel) {
+    const [dl] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }).catch(() => null), p.click('#hjComp [data-hc="wa"]')]);
+    await p.waitForTimeout(2500);
+    r = await p.evaluate(() => ({ m: (document.querySelector('#hjComp .hc-msg') || {}).textContent, href: (document.querySelector('#hjComp .hc-msg a') || {}).href }));
+    c(dl && /\.pdf$/.test(dl.suggestedFilename()) && r.href === 'https://web.whatsapp.com/', 'PC: «WhatsApp» baja el PDF y da el botón «Abrir WhatsApp Web» · ' + r.m);
+  }
+  await p.click('#hjComp [data-hc="co"]'); await p.waitForTimeout(3000);
+  r = await p.evaluate(async () => { let tx = ''; try { tx = await navigator.clipboard.readText(); } catch (e) { tx = 'ERR ' + e.message; } return { m: (document.querySelector('#hojaOv .hj-msg') || {}).textContent, tx }; });
+  c(/Copiado/.test(r.m) && /imagen/.test(r.m) && /Texto para copiar/.test(r.tx), '«Copiar» copia la hoja (imagen y texto) para pegar en WhatsApp o un mail · ' + r.m);
+  await p.click('#hojaOv [data-hj="compartir"]'); await p.waitForTimeout(300);
+  const [dl2] = await Promise.all([p.waitForEvent('download', { timeout: 30000 }).catch(() => null), p.click('#hjComp [data-hc="gu"]')]);
+  c(dl2 && /\.pdf$/.test(dl2.suggestedFilename()), '«Guardar» baja el PDF · ' + (dl2 && dl2.suggestedFilename()));
+  await A.browser.close();
+  // 5) en el navegador el 📷 sigue con el selector de siempre
+
   A = await abrir({ sesion: 'juan', cel, datos: datos(), espera: 4000, reglas: true }); p = A.page;
   const ch2 = await Promise.all([p.waitForEvent('filechooser', { timeout: 3000 }).then(() => true).catch(() => false), p.click(caja + ' label.fl-cam')]);
   c(ch2[0], 'en el navegador el 📷 sigue como siempre');

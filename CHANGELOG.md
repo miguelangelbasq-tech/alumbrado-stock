@@ -2,6 +2,33 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v111 — 04/11/2026 · Cierre de la orden: horas, puntos y «No fue»
+
+**Pedido de Ángel**
+- «Si anoto un número en las horas no sube, pero si subo con la flecha sí».
+- «Si quiero quitarle puntos a alguno no me deja, y si quiero quitar a alguien porque al final no fue, no me deja».
+- «Si reparto los puntos y le bajo a uno, que me diga: tenés disponibles 8 puntos para repartir».
+
+**Qué pasaba**
+- Las horas vacías valen la jornada de la orden (5 h), pero no se veía. Escribir «5» en una vacía no cambiaba nada, y con la flecha arrancaba de 0.
+- **0 horas** valía lo mismo que vacío: la jornada entera. Por eso no se le podían sacar los puntos a nadie.
+- Los puntos estaban bloqueados hasta tildar «Repartir los puntos a mano», sin avisar.
+
+**Cambios** (módulo `cierreGente` + 4 reemplazos)
+- Horas:
+  - el campo vacío muestra la jornada en gris;
+  - **0 horas = 0 puntos**;
+  - al guardar, vacío queda con la jornada y 0 queda en 0 (`cierre.horasPersonaV: 2`). Las órdenes de antes se cuentan como antes.
+- Tocar los puntos de alguien pasa solo a «Repartir a mano» y deja escribir.
+- A mano, abajo: «**Te quedan N puntos para repartir**» (o «te pasaste N»), con el botón «Repartirlos entre los demás» (por el peso del rol, sin tocar a los que cambiaste a mano).
+- **«✕ No fue»** en cada persona, con confirmación:
+  - lo saca de la orden: `personal`, `personalNombres` y lo que tenía asignado, repartido o en equipo;
+  - queda anotado en `ot.quitadosAlCerrar`;
+  - el cierre conserva lo cargado.
+
+**Pruebas**
+- `t_v111`: 7/7 en PC y 8/8 en celular.
+
 ## v110 — 04/11/2026 · La app de Android 1.3 completa: abrir PDF, imprimir directo, fotos que no se pierden, avisos y lector QR
 
 **Pedido de Ángel**
@@ -30,9 +57,16 @@ Autor: Miguel Ángel Díaz © 2026
 - **Avisos con la app cerrada (FCM):** el código está, pero **dormido** (`FCM_LISTO = false`) hasta actualizar el servicio de avisos (Worker `ema-avisos`) para que mande por FCM. Así el Worker de hoy no recibe anotaciones que no conoce. Cuando esté, se prende subiendo un index, sin otro APK. El celular se anota en `pushSubs/fcm-…` con `tipo:"fcm"`, y tocar el aviso abre la hoja de `data.vista`.
 - **Lector de códigos:** `window.__escanear()` devuelve el texto del código.
 - Con la app vieja o en el navegador no cambia nada.
+- **Menú «Compartir»** (`compartirHoja`), igual en el celular y en la PC (pedido de Ángel: «como en las apps pro: compartir, copiar, WhatsApp, Drive, otro»). «📄 Compartir PDF» abre un menú con **WhatsApp · Drive · Mail · Copiar · Guardar · Otra app**:
+  - **celular:** WhatsApp, Drive, Mail y Otra app abren el menú de compartir del celular con el PDF ya adjunto y su descripción («… · EMA Servicios»). Android no deja mandarlo directo a una app;
+  - **PC:** WhatsApp baja el PDF, copia la primera hoja como imagen (se pega con Ctrl+V) y da el botón «Abrir WhatsApp Web». Drive baja el PDF y da «Abrir Drive». Mail baja el PDF y abre el correo para adjuntarlo;
+  - **Copiar:** la primera hoja como imagen, más el texto; si el aparato no deja copiar imágenes, solo el texto;
+  - **Guardar:** igual que «Bajar PDF»;
+  - cuando sale bien, el menú se cierra y el aviso queda en la hoja.
 
 **Pruebas**
-- `t_v110` (simula la app 1.3 con todas las piezas, más el navegador): 8/8 en PC y celular.
+- `t_v110` (simula la app 1.3 con todas las piezas, el menú «Compartir» y el navegador): 13/13 en PC y celular.
+- `t_v109` actualizada: «Compartir» ahora abre el menú y se toca «Otra app».
 - `t_v109`, `t_v028`, `t_v107` y `t_cargador` OK en PC y celular.
 
 ## v109 — 04/11/2026 · Bajar y compartir PDF en la app de Android (APK 1.3)

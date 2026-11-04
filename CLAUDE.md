@@ -311,6 +311,8 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `archivosApp` | 109 | En la app de Android: atrapa todos los «download» blob/data (`a.click()` y clics) → `__archivoNativo.guardar(blob, nombre, compartir)`: Bajar = Filesystem en `DOCUMENTS/EMA/`, Compartir = CACHE + `Share.share({files})`. En la app, «Imprimir» de `hojaPdf` también va por el PDF + Share (el WebView no imprime). Sin los plugins (APK ≤ 1.2) avisa «hace falta la app 1.3» con «Abrir en Chrome». `hojaPdf` lo usa para sus dos botones |
 | `fotoSegura` | 109 | Si Mis tareas se redibuja con la cámara abierta, la foto llega a un `input.mt-foto-t` que ya no está en la página: se pasa (DataTransfer) al input equivalente de la misma orden / tarea / fila (`data-fli`, `data-fln`) y se dispara `change`. Engancha en el clic y en `HTMLInputElement.prototype.click` |
 | `androidPro` | 110 | APK 1.3: fotos de Mis tareas por `Camera.takePhoto` (intercepta el 📷 y `input.click()`), recuperadas con `App` `appRestoredResult` + `localStorage ema.cam.pend` → `__fotoSegura.equivalente`; avisos FCM (`FCM_LISTO`, hoy **false** hasta que el Worker mande por FCM; `pushSubs/fcm-<sha>` con `tipo:'fcm'`); `__escanear()` lector QR; `__androidPro` |
+| `compartirHoja` | 110 | «📄 Compartir PDF» de la hoja abre el menú `#hjComp` (WhatsApp · Drive · Mail · Copiar · Guardar · Otra app). Celular: menú del aparato (`Share`/`navigator.share`) con el PDF y texto; PC: baja + copia la 1.ª hoja como imagen (`ClipboardItem`) + botón «Abrir WhatsApp Web/Drive», mail con `mailto`. `__compartirHoja` |
+| `cierreGente` | 111 | Cierre: 0 horas = 0 (`cierre.horasPersonaV: 2`; vacío = jornada, `data-def`), tocar puntos → a mano, «Te quedan N puntos para repartir» + «Repartirlos entre los demás», «✕ No fue» (saca de `personal`/`personalNombres`/asignaciones, `ot.quitadosAlCerrar`). `__cierreGente` |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -565,6 +567,7 @@ Ejemplos:
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
 | 108 | Circuito de la obra: diccionario de 47 tareas claras (HH × dificultad), cierre por partes del ítem, «🔎 Diferencias con lo hecho» en el Itemizado (Sí/No), «Solo lo de esta obra» (`diccionarioTareas`, `circuitoObra`) |
 | 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
+| 111 | Cierre: 0 horas = 0 puntos, puntos a mano con «Te quedan N para repartir», «✕ No fue» (`cierreGente`) |
 | 110 | App de Android 1.3 completa: abrir el PDF al bajarlo, imprimir directo, fotos que se recuperan si Android cierra la app, avisos FCM (dormidos hasta el Worker), lector QR (`androidPro`) |
 | 109 | Bajar y compartir PDF (y planillas, ZIP, DXF) en la app de Android: APK 1.3 con Filesystem + Share (`archivosApp`) |
 | 101 | Alternativas del pañol debajo de lo que falta en «📦 Material de esta obra» (🟢 casi igual / 🟡 sirve con diferencias, con la norma) y «Pedir esta en su lugar»; «Calculadora ↔ pañol» con la misma comparación (`alternativas`) |

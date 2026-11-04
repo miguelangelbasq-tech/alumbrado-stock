@@ -21,7 +21,7 @@ const apk = (conPlugins) => {
   c(r.length === 1 && r[0].dir === 'DOCUMENTS' && /^EMA\/EMA_.*\.pdf$/.test(r[0].path) && r[0].n > 1000, 'app de Android: «Bajar PDF» guarda el PDF en Documentos › EMA · ' + JSON.stringify(r));
   await p.waitForTimeout(300); let m = await hojaMsg(p);
   c(/Guardado en el celular/.test(m), 'dice dónde quedó · ' + m);
-  await p.click('#hojaOv [data-hj="compartir"]');
+  await p.click('#hojaOv [data-hj="compartir"]'); await p.waitForTimeout(300); await p.click('#hjComp [data-hc="ot"]');   // v110: «Compartir» abre el menú propio; «Otra app» = el menú de Android
   await p.waitForFunction(() => window.__sh.length > 0, null, { timeout: 30000 }).catch(() => { });
   r = await p.evaluate(() => ({ sh: window.__sh.slice(), fs: window.__fsW.slice(-1)[0] }));
   c(r.sh.length === 1 && r.sh[0].files && /\.pdf$/.test(r.sh[0].files[0]) && r.fs.dir === 'CACHE', '«Compartir PDF» abre el menú de Android con el archivo (WhatsApp, mail, Drive…) · ' + JSON.stringify(r.sh));
