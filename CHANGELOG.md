@@ -64,6 +64,7 @@ Autor: Miguel Ángel Díaz © 2026
 **Pruebas**
 - `t_v108b` (nueva, lo de la revisión): 11/11 en PC y celular.
 - `t_v108`: 10/10 en PC y celular.
+- Batería completa después de la revisión: 203 de 206 OK. `t_v083` (vieja) falla en PC y celular, como siempre. `t_v108` en PC falló una vez porque buscaba «sobran 1,00» y ahora dice «sobran 1 columna»: se actualizó la prueba y pasa 10/10.
 - El arnés pone `__avanceEntero` en las pruebas viejas (el avance de antes, la tarea completa el ítem). `porPartes:true` prueba el reparto.
 - Batería completa en PC y celular: todo OK.
   - `t_v045` y `t_v047` fallaron antes del modo de compatibilidad; repetidas, pasan.
