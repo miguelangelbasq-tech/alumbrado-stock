@@ -24,6 +24,12 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas**
 - `t_v114`: 4/4 en PC y celular.
+- Batería completa (v110 a v114 juntas), en PC y celular: 216 OK. Solo falla `t_v083`, que es vieja; las de ubicación en vivo (`t_v084`–`t_v092`) pasan todas.
+
+**Huella SHA-256**
+- `114_2026-11-04_app-EMA_ORIGINAL.html`: `f520c6fb9c5d4d7512c75917c635f0680b4afae0e45cb6e09cd5f3b976799faf`
+- `index.html`: `b5b7c293af49d88193f8e0535d93019e701f86bf96cfb39a069b91711a7d0fa0`
+- Versión: `2026-11-04 12:44 · 9f8b02`
 
 ## v113 — 04/11/2026 · Una sola forma de hacer cada cosa + responsable de oficina de la orden
 
