@@ -2,6 +2,43 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v112 — 04/11/2026 · «Llenar orden» por pasos, envío de la cuadrilla una sola vez, tareas de barrio y «＋ Crear tarea»
+
+**Pedido de Ángel**
+- «La pantalla donde lleno las órdenes no está bien acomodada… más fácil y más rápido».
+- «Si selecciono una plaza, que me diga: tenés estas tareas pendientes, ¿querés agregarlas hoy? Sí, no, o algunas; después poder agregar más».
+- «Seleccionar rápido al personal y las obras».
+- «Bien marcado: los puntos que va a terminar teniendo cada uno si finaliza todas las tareas».
+- «Ventanas para que sea más prolijo… prolijidad, agilidad y algo exacto».
+- «Si van dos de una cuadrilla, que puedan enviar los dos, pero que a mí me llegue una sola vez esa tarea. Puede pasar que uno envíe incompleto y el otro más completo».
+- «Faltan las tareas de barrio: cortes de media (poner la jabalina y la descarga) y reclamos (ir a ver por qué se apagó, cambiar o subir una térmica); ponerles puntos».
+- «En Cuánto vale cada tarea, poner bien cómo se suman los puntos y un apartado para crear tareas y darles puntos».
+
+**Cambios**
+- **«Llenar orden»** (`ordenNueva`). No cambia ids ni lo que se guarda:
+  - **pasos:** 1 Obra y fecha · 2 Gente (con la cuadrilla, el capataz, las cuadrillas guardadas y el vehículo) · 3 Tareas · 4 Material y emitir, con «Siguiente →» y «← Atrás». «Ver todo junto» deja todo a la vista y se recuerda en `ema.of.todo`;
+  - **resumen al costado:** obra, fecha, gente, tareas y **⭐ «Si terminan todo, cada uno suma»** (`puntosDeOrden` sobre el borrador), más «Emitir». La hoja vacía de la derecha no aparece hasta que se emite;
+  - **en el celu**, una barra fija abajo: «📋 N tareas · 👷 N · ⭐ pts», «Resumen» y «Emitir»;
+  - **obras recientes** y **gente de la nómina** con un toque (con su rol);
+  - **cartel de pendientes al elegir la obra** (`saldoObra`): «📋 HÍPICA tiene N tareas pendientes». Se marcan todas, algunas o ninguna, con lo que queda de cada una, y se pueden sumar más. También sale desde «📋 Ver las N tareas pendientes de la obra» en el resumen.
+- **Envío de la cuadrilla** (`envioEquipo`):
+  - cada uno guarda su marca en `campo.marcasPor.<tarea>.<persona>`;
+  - `campo.marcas.<tarea>` (lo que ve la oficina y lo que propone el cierre) es la **combinación**: hecha si alguno la hizo, la cantidad mayor y las notas de todos (`porTodos`). Antes la última marca pisaba a la otra;
+  - los avisos «📨 … envió lo de hoy» (push y en la app) salen **una vez por orden**. Después, solo si un envío suma tareas hechas: «Pedro completó lo de hoy: +2 tareas hechas».
+- **Diccionario:** fase nueva «Barrios y reclamos», con horas y dificultad **a confirmar**:
+  - corte de media tensión (jabalina y descarga), 1,5 h × 1,6 = 2,4 por corte;
+  - reclamo (ir a ver por qué se apagó), 1,5 × 1,4 = 2,1 por reclamo;
+  - cambiar una térmica, 0,75 × 1,6 = 1,2;
+  - subir una térmica, 0,25 × 1,4 = 0,35.
+- **Producción › Cuánto vale cada tarea** (`tareaNueva`):
+  - explica cómo se suman los puntos: 1 punto = 1 hora-hombre, × dificultad (+0,2 por barquilla o altura, pesado, riesgo, oficio; tope 1,8), y el tiempo es fijo;
+  - **«＋ Crear tarea»**: nombre, fase, unidad, horas por unidad, lo que tiene la tarea y cómo se hace; calcula los puntos al instante y la guarda con las tareas propias del equipo (`registrarTareasNuevas`, ahora con `fase`, `hh` y `f`).
+
+**Pruebas**
+- `t_v112`: 11/11 en PC y 12/12 en celular.
+- Arnés: `__ofCompat` en las pruebas viejas (todo junto, sin cartel ni barra), salvo `ofPasos:true`.
+- `t_v076`, `t_v079`, `t_v094`, `t_v097`, `t_v104`, `t_v072`, `t_v098`, `t_v096`, `t_cuadrilla` y `t_v022` OK.
+
 ## v111 — 04/11/2026 · Cierre de la orden: horas, puntos y «No fue»
 
 **Pedido de Ángel**

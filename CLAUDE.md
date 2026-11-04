@@ -312,7 +312,11 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `fotoSegura` | 109 | Si Mis tareas se redibuja con la cámara abierta, la foto llega a un `input.mt-foto-t` que ya no está en la página: se pasa (DataTransfer) al input equivalente de la misma orden / tarea / fila (`data-fli`, `data-fln`) y se dispara `change`. Engancha en el clic y en `HTMLInputElement.prototype.click` |
 | `androidPro` | 110 | APK 1.3: fotos de Mis tareas por `Camera.takePhoto` (intercepta el 📷 y `input.click()`), recuperadas con `App` `appRestoredResult` + `localStorage ema.cam.pend` → `__fotoSegura.equivalente`; avisos FCM (`FCM_LISTO`, hoy **false** hasta que el Worker mande por FCM; `pushSubs/fcm-<sha>` con `tipo:'fcm'`); `__escanear()` lector QR; `__androidPro` |
 | `compartirHoja` | 110 | «📄 Compartir PDF» de la hoja abre el menú `#hjComp` (WhatsApp · Drive · Mail · Copiar · Guardar · Otra app). Celular: menú del aparato (`Share`/`navigator.share`) con el PDF y texto; PC: baja + copia la 1.ª hoja como imagen (`ClipboardItem`) + botón «Abrir WhatsApp Web/Drive», mail con `mailto`. `__compartirHoja` |
-| `cierreGente` | 111 | Cierre: 0 horas = 0 (`cierre.horasPersonaV: 2`; vacío = jornada, `data-def`), tocar puntos → a mano, «Te quedan N puntos para repartir» + «Repartirlos entre los demás», «✕ No fue» (saca de `personal`/`personalNombres`/asignaciones, `ot.quitadosAlCerrar`). `__cierreGente` |
+| `cierreGente` | 112 | «Llenar orden» por pasos con resumen y puntos por persona, cartel de pendientes, obras y gente con un toque; envío de la cuadrilla combinado y un solo aviso; tareas de barrio y reclamos; «＋ Crear tarea» (`ordenNueva`, `envioEquipo`, `tareaNueva`) |
+| 111 | Cierre: 0 horas = 0 (`cierre.horasPersonaV: 2`; vacío = jornada, `data-def`), tocar puntos → a mano, «Te quedan N puntos para repartir» + «Repartirlos entre los demás», «✕ No fue» (saca de `personal`/`personalNombres`/asignaciones, `ot.quitadosAlCerrar`). `__cierreGente` |
+| `envioEquipo` | 112 | Marcas de la cuadrilla combinadas: `__marcaEquipo(ot,k,persona,marca,L)` escribe `campo.marcasPor.<k>.<persona>` y `campo.marcas.<k>` = lo más completo (hecha si alguno, cantidad mayor, notas juntas, `porTodos`); `__hechasOt`. Avisos de envío una vez por orden (después solo si suma hechas) |
+| `ordenNueva` | 112 | «Llenar orden» por pasos (`#ofPasos`, `data-paso` en las 4 tarjetas, `ema.of.todo`), resumen `#ofResumen` con puntos por persona si terminan todo, barra `#ofBarra` en el celu, obras recientes (`#ofObrasRec`), gente rápida (`#ofGenteRap`), cartel de pendientes `#ofPend` (`saldoObra`). Pruebas viejas: `__ofCompat` salvo `ofPasos:true`. `__ordenNueva` |
+| `tareaNueva` | 112 | Producción › Cuánto vale cada tarea: «¿Cómo se suman los puntos?» y «＋ Crear tarea» (`#tnCard`) → `registrarTareasNuevas([{label, un, pts, pasos, fase, hh, f}])` |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
@@ -488,7 +492,8 @@ Ejemplos:
   - `__avanceEntero=true` (el cierre de antes: la tarea completa el ítem) salvo `porPartes:true`;
   - `__mtVistaTodas=true` (Mis tareas desplegado) salvo `mtNuevo:true`;
   - `ema.rs.porObra=0` salvo `rsObra:true`;
-  - `__lgPlegTodoAbierto=true` salvo `lgPleg:true`.
+  - `__lgPlegTodoAbierto=true` salvo `lgPleg:true`;
+  - `__ofCompat=true` («Llenar orden» todo junto, sin cartel) salvo `ofPasos:true`.
 - **Señal lenta simulada (v086):** `window.__stubKbps = 2000` (en `firebase_stub.js`): cada consulta tarda lo que tarda bajar sus datos por un caño compartido. Lo usa `t_v086`.
 - `t_v083` quedó reemplazada por `t_v084` (buscaba el cartel viejo de ubicación).
 - **Cada versión nueva suma su `t_vNNN.js`.** Si cambia un comportamiento probado, actualizá la prueba vieja y decí por qué.

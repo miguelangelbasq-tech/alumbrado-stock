@@ -34,3 +34,12 @@ Estas pruebas se suman al arnés del kit (`h.js`, `firebase_stub.js`, `reglas_st
 - `t_v104.js`: «📌 Seguimiento» (lo dado, lo hecho, lo que falta; darla a otro) y «↩ Sigue en obra».
 - `t_v055.js` y `t_v056.js` se actualizaron (v103): fijan en sus datos las unidades de antes (la base ahora tiene cables en m y alambre en kg).
 - **Arnés (v103):** `h.js` tiene que poner `window.__puntosPisoFijo = "2000-01-01"` en las pruebas viejas (salvo `pisoReal:true`), porque desde la v103 los puntos cuentan desde el 01/11/2026.
+
+# Pruebas de la v108 a la v112
+
+- `t_v108.js` y `t_v108b.js`: circuito de la obra (cierre por partes, Diferencias con lo hecho). **Arnés:** `window.__avanceEntero = true` en las pruebas viejas, salvo `porPartes:true`.
+- `t_v109.js`: bajar, compartir e imprimir en la app de Android simulada (con y sin plugins). **Arnés:** opción `antes` (`op.antes` y `op.antesArg` → `page.addInitScript`) para preparar la página.
+- `t_v110.js`: app de Android 1.3 (abrir PDF, impresora, cámara que se recupera, lector QR, FCM dormido) y el menú «Compartir» (celular y PC; el portapapeles necesita `https:true`).
+- `t_v111.js`: cierre: 0 horas, puntos a mano con saldo, «✕ No fue».
+- `t_v112.js`: «Llenar orden» por pasos, cartel de pendientes, gente con un toque, puntos por persona, marcas combinadas, tareas de barrio, «＋ Crear tarea». **Arnés:** `window.__ofCompat = true` en las pruebas viejas, salvo `ofPasos:true`.
+- `t_v028.js` (v109): espera 1,5 s con la cámara abierta, como una persona. Antes contestaba al instante y no veía que la foto se perdía si la pantalla se redibujaba.
