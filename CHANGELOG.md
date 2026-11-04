@@ -30,7 +30,7 @@ Autor: Miguel Ángel Díaz © 2026
 - `t_v109` (simula el APK con y sin plugins, y el navegador): 6/6 en PC y 7/7 en celular.
 - El arnés suma la opción `antes` (preparar la página antes de abrir la app).
 - `t_v028` ahora espera 1,5 s con la cámara abierta, como una persona. Con la v107, esperando 0,4 s ya fallaba 0 de 6; con la v109, 4 de 4 OK en el celular.
-- Batería completa: 204 de 206 OK. Solo falla `t_v083` (vieja) en PC y celular.
+- Batería completa: 206 de 208 OK. Solo falla `t_v083` (vieja) en PC y celular.
 
 **Huella SHA-256**
 - `109_2026-11-04_app-EMA_ORIGINAL.html`: `ec700d21e12a653ea9d8c1c0e00d96e286732785cd6fa5ee854a5055076891db`
