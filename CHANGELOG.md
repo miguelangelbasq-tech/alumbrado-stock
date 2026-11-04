@@ -2,6 +2,30 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v109 — 04/11/2026 · Bajar y compartir PDF en la app de Android (APK 1.3)
+
+**Pedido de Ángel**
+- «La de compartir y bajar PDF no funciona, antes funcionaba. No arruines cosas, mejorá eso» (captura: «✓ PDF listo», pero no pasa nada).
+
+**Qué pasaba**
+- El código del PDF no cambió desde la v086.
+- Adentro de la app de Android (APK), un «bajar» de la página no hace nada y no existe «compartir archivo». Igual la app decía «✓ PDF listo».
+- En Chrome y en la PC sí anda. Lo mismo pasaba con todo lo que se baja: planillas, Word, ZIP de fotos, DXF.
+
+**Cambios**
+- **APK 1.3** (versionCode 4): plugins oficiales `@capacitor/filesystem` 8.1.5 y `@capacitor/share` 8.0.3, más el permiso de guardar en Android 10 o menos. Hay que compilarlo (COMPILAR.bat) e instalarlo encima.
+- **Módulo `archivosApp`** (`window.__archivoNativo` {enApp, hay, guardar, aviso, sinPlugins, abrirEnChrome}):
+  - en la app de Android atrapa todos los «download» con blob o data (clic o `a.click()`, sin tocar cada módulo);
+  - «Bajar» guarda en **Documentos › EMA**; si Android no deja, abre el menú para elegir dónde;
+  - con el APK viejo avisa «hace falta la app nueva (1.3)» y ofrece «Abrir en Chrome», en vez del «PDF listo» falso.
+- **La hoja de impresión** (`hojaPdf`): en el APK 1.3, «Compartir PDF» abre el menú de Android (WhatsApp, mail, Drive…) y «Bajar PDF» guarda en el celular.
+- En el navegador y la PC no cambia nada.
+- Incluye la v108 completa (todavía no publicada).
+
+**Pruebas**
+- `t_v109` (simula el APK con y sin plugins, y el navegador): 6/6 en PC y 7/7 en celular.
+- El arnés suma la opción `antes` (preparar la página antes de abrir la app).
+
 ## v108 — 04/11/2026 · El circuito de la obra: diccionario de tareas, cierre por partes y «Diferencias con lo hecho»
 
 **Pedido de Ángel**
