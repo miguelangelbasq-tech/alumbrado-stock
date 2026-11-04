@@ -18,7 +18,8 @@ Autor: Miguel Ángel Díaz © 2026
   - en la app de Android atrapa todos los «download» con blob o data (clic o `a.click()`, sin tocar cada módulo);
   - «Bajar» guarda en **Documentos › EMA**; si Android no deja, abre el menú para elegir dónde;
   - con el APK viejo avisa «hace falta la app nueva (1.3)» y ofrece «Abrir en Chrome», en vez del «PDF listo» falso.
-- **La hoja de impresión** (`hojaPdf`): en el APK 1.3, «Compartir PDF» abre el menú de Android (WhatsApp, mail, Drive…) y «Bajar PDF» guarda en el celular.
+- **La hoja de impresión** (`hojaPdf`, por donde pasa toda impresión de la app): en el APK 1.3, «Compartir PDF» abre el menú de Android (WhatsApp, mail, Drive…), «Bajar PDF» guarda en el celular e **«Imprimir»** arma el PDF y lo abre para mandarlo a la impresora o a Drive (el WebView no imprime).
+- Cubre todo lo que se baja hoy y lo que se agregue: PDF, planos de AutoCAD (DXF), planillas, Word, ZIP de fotos.
 - En el navegador y la PC no cambia nada.
 - **La foto de Mis tareas ya no se pierde** (`fotoSegura`, encontrado al probar):
   - si la pantalla se redibujaba mientras la persona tenía la cámara abierta (otra foto del equipo, cambios de la base, volver de la cámara), la foto llegaba a un botón que ya no estaba en la página y no se guardaba, sin avisar;
@@ -27,15 +28,15 @@ Autor: Miguel Ángel Díaz © 2026
 - Incluye la v108 completa (todavía no publicada).
 
 **Pruebas**
-- `t_v109` (simula el APK con y sin plugins, y el navegador): 6/6 en PC y 7/7 en celular.
+- `t_v109` (simula el APK con y sin plugins, y el navegador; incluye «Imprimir» y DXF): 8/8 en PC y 9/9 en celular.
 - El arnés suma la opción `antes` (preparar la página antes de abrir la app).
 - `t_v028` ahora espera 1,5 s con la cámara abierta, como una persona. Con la v107, esperando 0,4 s ya fallaba 0 de 6; con la v109, 4 de 4 OK en el celular.
 - Batería completa: 206 de 208 OK. Solo falla `t_v083` (vieja) en PC y celular.
 
 **Huella SHA-256**
-- `109_2026-11-04_app-EMA_ORIGINAL.html`: `ec700d21e12a653ea9d8c1c0e00d96e286732785cd6fa5ee854a5055076891db`
-- `index.html`: `f161d5479be6bdac9c71d70cccdf174c78666d8b42aa132ff7addaec1949057c`
-- Versión: `2026-11-04 01:44 · a9524b`
+- `109_2026-11-04_app-EMA_ORIGINAL.html`: `59b2a9e18fdbdb09f30c47cacd09d8cd615a3c9ea8e8f0effcdd8c546451f34d`
+- `index.html`: `657d108b47c2421c542acfe3533fe44106a0120c5f087bec5652e99fb0da4baa`
+- Versión: `2026-11-04 07:26 · 8b02e1`
 - APK: `AlumbradoApp_v1.3.zip` (versionCode 4, versionName 1.3)
 
 ## v108 — 04/11/2026 · El circuito de la obra: diccionario de tareas, cierre por partes y «Diferencias con lo hecho»
