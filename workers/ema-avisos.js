@@ -1,5 +1,6 @@
 // Worker «ema-avisos» (Cloudflare) · Avisos al celular con la app CERRADA — EMA Servicios.
 // v050: Web Push (navegador / PWA). v115: también FCM (la app de Android 1.3).
+// v116: lee menos de Firestore (la clave VAPID una sola vez y solo si hay avisos) y explica el «429» (límite gratis del día).
 //
 // Cómo funciona:
 //  · La app, cuando pasa algo (orden nueva para una persona, material listo para retirar), deja un aviso en Firestore
@@ -18,7 +19,7 @@
 // Cron Trigger (Settings › Triggers › Cron): * * * * *   (cada minuto)
 // Rutas: /salud (estado), /vapid (clave pública), /probar (fuerza una vuelta ahora).
 
-const VERSION = "v115-fcm";
+const VERSION = "v116-fcm";
 const PROYECTO_DEF = "alumbrado-stock";
 const MAX_AVISOS = 40;
 const enc = new TextEncoder();
@@ -67,9 +68,11 @@ function firestore(proyecto, token, fetchFn) {
 }
 
 // ---------- claves VAPID (se crean la primera vez)
+let vapidCache = null;
 async function clavesVapid(db) {
+  if (vapidCache) return vapidCache;
   const g = await db.get("secretosServidor/vapid");
-  if (g && g.privJwk && g.pub) return { jwk: JSON.parse(g.privJwk), pub: g.pub };
+  if (g && g.privJwk && g.pub) return (vapidCache = { jwk: JSON.parse(g.privJwk), pub: g.pub });
   const kp = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
   const jwk = await crypto.subtle.exportKey("jwk", kp.privateKey), pub = b64u(await crypto.subtle.exportKey("raw", kp.publicKey));
   await db.set("secretosServidor/vapid", { privJwk: JSON.stringify(jwk), pub, creado: Date.now() });
@@ -142,10 +145,12 @@ async function vuelta(env, dep = {}) {
   const sa = JSON.parse(env.FB_SA_JSON), proyecto = sa.project_id || env.PROYECTO || PROYECTO_DEF;
   const token = dep.token || await tokenGoogle(sa, ahora, fetchFn);
   const db = dep.db || firestore(proyecto, token, fetchFn);
-  const vapid = await clavesVapid(db), contacto = env.CONTACTO || "mailto:avisos@ema-alumbrado.app";
+  const contacto = env.CONTACTO || "mailto:avisos@ema-alumbrado.app";
   const avisos = (await db.consulta("avisosPush", ["enviado", "EQUAL", false], MAX_AVISOS)).sort((a, b) => (a.ts || 0) - (b.ts || 0));
   if (!avisos.length) return { ok: true, version: VERSION, avisos: 0, enviados: 0 };
   const subs = await db.consulta("pushSubs", null, 500);
+  // la clave VAPID solo hace falta para los celulares de navegador (Web Push), y se lee una sola vez
+  let vapid = null; const vapidDe = async () => vapid || (vapid = await clavesVapid(db));
   let enviados = 0, enviadosFcm = 0, borradas = 0; const muertas = new Set(), errores = [];
   for (const a of avisos) {
     const dest = subs.filter((s) => !muertas.has(s.id) && ((a.clave && norm(s.clave) === norm(a.clave)) || (a.email && String(s.email || "").toLowerCase() === String(a.email).toLowerCase()) || (a.uid && s.uid === a.uid)));
@@ -155,7 +160,7 @@ async function vuelta(env, dep = {}) {
       try {
         const esFcm = s.tipo === "fcm" && s.fcm;
         if (!esFcm && !(s.endpoint && s.p256dh && s.auth)) continue;
-        const r = esFcm ? await enviarFcm(s, datos, proyecto, token, fetchFn) : await enviarPush(s, datos, vapid, contacto, fetchFn, ahora);
+        const r = esFcm ? await enviarFcm(s, datos, proyecto, token, fetchFn) : await enviarPush(s, datos, await vapidDe(), contacto, fetchFn, ahora);
         if (r.ok) { ok++; if (esFcm) okFcm++; }
         else if (r.muerta) { muertas.add(s.id); await db.borrar("pushSubs/" + s.id); borradas++; }
         else if (errores.length < 5) errores.push((esFcm ? "fcm " : "web ") + r.status + (r.error ? ": " + r.error : ""));
@@ -183,7 +188,7 @@ export default {
       }
       if (u.pathname === "/probar") return json(await vuelta(env));
       return json({ ok: false, error: "ruta desconocida" }, 404);
-    } catch (e) { return json({ ok: false, error: e.message }, 500); }
+    } catch (e) { return json({ ok: false, error: /\b429\b/.test(e.message) ? "Firebase llegó al límite gratis de lecturas del día (429). Se destraba solo a la madrugada (≈ 05:00)." : e.message }, 500); }
   },
   async scheduled(event, env, ctx) { ctx.waitUntil(vuelta(env).catch((e) => console.log("vuelta: " + e.message))); }
 };
