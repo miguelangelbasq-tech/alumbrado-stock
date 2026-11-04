@@ -320,6 +320,7 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `cierreDiaUnico` | 113 | Producción › Cierre del día guarda por `guardarCierreOt` (abre el cierre oculto con `body.cd-auto`, pone cantidades, horas, reparto y novedades); pregunta del itemizado en el parte (`.cd-co`); puntos del parte con `__puntosDia` (= `puntosDeOrden`). Pruebas viejas con `__ofCompat`: el camino de antes |
 | `unirRepetidos` | 113 | «Por persona / obra» dentro de Seguimiento (`#urBuscar` / `#urVolver`, la pestaña `buscar` oculta), período «Avance del mes (sin fotos)» con aviso al informe con fotos, formulario de vehículos de Gastos oculto (se cargan en Personal) |
 | `supervisorOt` | 113 | Responsable de oficina de la orden: `#supSel` en el paso 2, `ot.supervisor` {uid, email, nombre}, aviso `tipo:'supervisor'`, «👔 Órdenes que seguís» (`#supSeguir`) arriba de Mis tareas con «✅ Cerrar» → `abrirCierreOt` |
+| `lecturasCuenta` | 117 | Después del SDK de Firebase: envuelve `onSnapshot`/`get` de Query y DocumentReference y cuenta lecturas aprox. por colección y día (`localStorage ema.lecturas`, `__lecturas.texto()` en menú › Versión). No cambia lo que se lee |
 | `compartirApp` | 116 | En la app de Android arma `navigator.share`/`canShare` sobre `Share` (+ `Filesystem` CACHE para archivos); cancelar = `AbortError`. Así todo «Compartir» con Web Share abre el menú del celular. `__compartirApp` |
 | `relojitosAhorro` | 114 | **Primer script de la página.** Envuelve `setInterval`: con `document.hidden`, cada relojito de menos de 60 s corre como mucho una vez por minuto; a la vista, normal. No toca `setTimeout` |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
@@ -577,6 +578,7 @@ Ejemplos:
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
 | 108 | Circuito de la obra: diccionario de 47 tareas claras (HH × dificultad), cierre por partes del ítem, «🔎 Diferencias con lo hecho» en el Itemizado (Sí/No), «Solo lo de esta obra» (`diccionarioTareas`, `circuitoObra`) |
 | 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
+| 117 | Menos lecturas: personal en vivo solo con el Mapa abierto, contador de lecturas en menú › Versión (`lecturasCuenta`); 👁 Ver orden pasa a «Llenar orden» |
 | 116 | «Compartir» abre WhatsApp/Drive en la app de Android (`compartirApp`: `navigator.share` sobre el plugin Share); resumen de «Llenar orden» opaco |
 | 115 | Avisos con la app cerrada en la app de Android: Worker `ema-avisos` manda por FCM (`workers/ema-avisos.js`), `FCM_LISTO` prendido |
 | 114 | Ahorro de batería: los relojitos corren como mucho 1 vez por minuto con la app fuera de la vista (`relojitosAhorro`) |
@@ -597,6 +599,7 @@ Ejemplos:
 - **Ítem propio por tarea** (idea de Ángel, v098): que cada tarea del baremo tenga un ítem propio, aunque se llame distinto, para que el avance de obra la descuente también (hoy excavación, hormigonado, BPN, sellado y vínculos cuentan solo por las órdenes). **No hacer sin pedido.**
 - Calculadora ↔ pañol: v101 hizo las **alternativas** (no une códigos: Ángel aclaró que el 1019 y el 1025 son 3×1,5 pero de distinto origen/norma). Siguen pendientes, **sin pedido**: equivalencias guardadas en la base (hoy los m por rollo quedan en el aparato), kits (prensacable 5027 = 5024 + 5032), botón «No es el mismo» para descartar avisos, y que la reserva ofrezca la alternativa cuando el pañol no tiene. Dudas abiertas: si 7004–7007 «Borne de puesta a tierra 6 mm²» son las BPN; cómo se cuenta el 1009 (4×2,5: el catálogo dice Un.).
 - Paquetes de tableros en el pañol (esperando el Excel de las planillas).
+- **Cupo de Firestore (v117):** el 04/11/2026 el plan Spark cortó con 429 (lecturas del día). Con el cupo vencido también fallan las escrituras, porque las reglas hacen `get()`. Opciones: bajar lecturas (ver el contador de cada aparato) y/o pasar a Blaze con aviso de gasto (lo decide Ángel).
 - `setInterval` permanentes (unos 66): desde la v114 `relojitosAhorro` los frena a 1 por minuto con la app escondida; consolidarlos en un planificador sigue pendiente, sin pedido.
 - Barrio: faltan planos AP-TC-055 A–G, AP-TC-024, AP-TC-004, AP-TC-021, AP-CC-010, AP-T-014 y el itemizado de barrio.
 - Entrar con huella (WebAuthn), medidor GPS/RTK: ideas charladas, **no hacer todavía**.

@@ -2,6 +2,32 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v117 — 04/11/2026 · Menos lecturas de Firebase + el 👁 vuelve a mostrar la orden
+
+**Pedido de Ángel**
+- Firebase dio «429»: el plan gratis llegó al límite de lecturas del día. «¿Cómo podés hacer para que no pase eso?»
+- «Aprieto el ojito para ver y no funciona.»
+
+**Cambios**
+- **Personal en vivo:** la oficina escucha `ubicacionVivo` solo con el Mapa abierto, y a los 15 s de salir deja de escuchar.
+  - Antes escuchaba desde que entraba: cada ubicación de la cuadrilla (1 por minuto por persona) era una lectura para cada aparato de la oficina.
+  - `window.__uvEscucharSiempre` vuelve al comportamiento de antes.
+- **`lecturasCuenta`** (después del SDK, antes de las escuchas): cuenta aproximada de lecturas por aparato, por día y por colección. Al abrir una escucha cuenta su tamaño; después, los cambios que llegan del servidor; `get` cuenta lo que trae.
+  - Queda en `localStorage ema.lecturas`, se ve en menú › Versión y en `__lecturas`.
+  - No cambia nada de lo que lee la app.
+- **👁 Ver orden** (Historial, tablero, legajo): ahora pasa a «Llenar orden», que es donde se arma la hoja, y la muestra. Antes se armaba escondida.
+  - Con una orden a la vista, el resumen de la derecha deja de quedar fijo arriba (`#ofResumen.of-estatico`).
+- **Worker `ema-avisos` v116:** la clave VAPID se lee una sola vez y solo si hay avisos para navegador. El 429 se explica en castellano.
+
+**Pruebas**
+- `t_v117`: 6/6 en PC y celular.
+- El contador, probado en Node con clases falsas y en Chromium con el SDK compat 12.17.1 real, sin red.
+- Batería completa en PC y celular: 222 OK. Solo falla `t_v083`, que es vieja.
+
+**Huella SHA-256**
+- `117_2026-11-04_app-EMA_ORIGINAL.html`: `d10b18ea49e699a4efdaaf60796e0648c7a480b396d7b922d76a5e112a953ece`
+- `index.html`: `2b1927c243801a9d1421b5ca70a7d1c63feff909a9d7859ee5f7c9755f329509`
+
 ## v116 — 04/11/2026 · «Compartir» con WhatsApp en la app de Android + resumen de la orden sin encimarse
 
 **Pedido de Ángel**
