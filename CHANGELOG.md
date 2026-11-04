@@ -2,6 +2,34 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v115 — 04/11/2026 · Avisos con la app cerrada en la app de Android
+
+**Pedido de Ángel**
+- Terminar los avisos de la app 1.3: «¿cómo sería el tema de los avisos?». Pasó el código del Worker `ema-avisos`.
+
+**Cambios**
+- **Worker `ema-avisos` v115** (`workers/ema-avisos.js`, se pega en Cloudflare):
+  - además de Web Push, manda por **FCM HTTP v1** a los `pushSubs` con `tipo:"fcm"` (campo `fcm` = token);
+  - usa la misma cuenta de servicio (`FB_SA_JSON`): el token pide también el permiso `firebase.messaging`. No hace falta ninguna clave nueva;
+  - canal `avisos`, ícono `ic_stat_ema`, color navy y `data.vista` (Mis tareas; pañol para reservas; Órdenes para envíos), para abrir la hoja al tocar;
+  - borra el celular si FCM dice que el token ya no existe (`UNREGISTERED` / 404);
+  - `/salud` y `/probar` muestran `version: "v115-fcm"`, `enviadosFcm` y los primeros errores.
+- **index:** `FCM_LISTO = true` en `androidPro`. Además, si el WebView no da `crypto.subtle`, el id de `pushSubs/fcm-…` sale de un resumen propio.
+
+**Qué tiene que hacer Ángel**
+1. Pegar el Worker nuevo y tocar Deploy. Revisar en `/salud` que diga `v115-fcm`.
+2. Firebase › Configuración › Cloud Messaging: «API de Firebase Cloud Messaging (V1)» habilitada.
+3. Subir `index.html`. No hace falta APK nuevo.
+
+**Pruebas**
+- Worker en Node con Firestore y FCM simulados: manda a 2 celulares, borra el token muerto y abre la hoja correcta.
+- `t_v115`: 4/4 en PC y celular. `t_v110` actualizada: ya no espera los avisos dormidos.
+- Batería completa en PC y celular: 218 OK. Solo falla `t_v083`, que es vieja.
+
+**Huella SHA-256**
+- `115_2026-11-04_app-EMA_ORIGINAL.html`: `bd5f4a15a633b0923fa6bf15a1c07b8794131abcd009b56dd7a4128c31f34113`
+- `index.html`: `b33d080ce7786bf29d6b33c45fbfc419615a9770a6edc3c70fcaca8ed119ed0d`
+
 ## v114 — 04/11/2026 · Ahorro de batería
 
 **Pedido de Ángel**

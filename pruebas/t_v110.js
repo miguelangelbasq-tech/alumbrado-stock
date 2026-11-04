@@ -45,9 +45,9 @@ function datos() {
   await p.click('#hjComp [data-hc="wa"]'); await p.waitForFunction(() => window.__sh.length > 0, null, { timeout: 30000 }).catch(() => { });
   await p.waitForTimeout(300); r = await p.evaluate(() => ({ sh: window.__sh.slice(-1)[0], m: (document.querySelector('#hojaOv .hj-msg') || {}).textContent, abierto: !!document.getElementById('hjComp') }));
   c(r.sh && /\.pdf$/.test(r.sh.files[0]) && /EMA Servicios/.test(r.sh.text) && r.sh.dialogTitle === 'Compartir' && /WhatsApp/.test(r.m) && !r.abierto, 'en la app de Android, «WhatsApp» abre el menú del celular con el PDF y su descripción · ' + r.m);
-  r = await p.evaluate(async () => ({ cod: await window.__escanear(), push: window.__pushReg, v: await window.__androidPro.version() }));
+  r = await p.evaluate(async () => ({ cod: await window.__escanear(), push: window.__pushReg, fcm: window.__androidPro.FCM_LISTO, v: await window.__androidPro.version() }));
   c(r.cod === 'H-014', 'lector de códigos: __escanear() devuelve el código leído · ' + r.cod);
-  c(r.push === 0, 'avisos FCM dormidos hasta que el servicio de avisos esté listo (no se anota el celular)');
+  c(r.fcm === true, 'avisos FCM: dormidos hasta la v115; desde la v115 se prenden (lo prueba t_v115)');
   await A.browser.close();
   // 2) cuadrilla en la app de Android: el 📷 abre la cámara del celular y la foto queda en su fila
   A = await abrir({ sesion: 'juan', cel, datos: datos(), espera: 4000, reglas: true, antes: apk, antesArg: FOTO64 }); p = A.page;
