@@ -17,7 +17,12 @@ Autor: Miguel Ángel Díaz © 2026
   - «Emitir» ya no espera los avisos a la cuadrilla ni al responsable (salen igual, por atrás).
 
 **Pruebas**
-- `t_v122` 8/8 en PC y 9/9 en celular.
+- `t_v122` 8/8 en PC y 9/9 en celular; `t_circuito` 15/15.
+- Batería completa en PC y celular: 236 OK. Solo falla `t_v083`, que es vieja.
+
+**Huella SHA-256**
+- `122_2026-11-05_app-EMA_ORIGINAL.html`: `9201086a5d1820f3d9eaf6916b9b4ac4059615138fc143389a93a695a7f2f740`
+- `index.html`: `d3738c6d0639df5371621b7f137702d4e6c25ead72a2c2fa48b3a2bdbeb22edb`
 
 ## v121 — 05/11/2026 · Hora de cada tarea obligatoria para la cuadrilla y personas en el buscador del Mapa (incluye v120)
 
