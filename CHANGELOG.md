@@ -19,9 +19,12 @@ Autor: Miguel Ángel Díaz © 2026
 - Ganchos nuevos en la plantilla de `ordenesCampo`: `__mtAPI`, `__mtTareaClase`, `__mtTareaPie`, `__mtAccAntes`, `__mtEnvClase`.
 - **Fotos «esperando que la oficina arregle el permiso» que ya estaban arriba** (Pablo Picone, OT-154 / OT-158, «en el celu figura bien»): la cuadrilla puede **crear** la ficha de la foto pero no **reescribirla**. Si la primera subida llegó y el celu no se enteró (mala señal), cada reintento era una reescritura y la base lo negaba para siempre. Ahora, ante un «permiso negado», `fotosSinSenal.mandar` se fija en la base (`get({source:'server'})`): si la foto ya está, la saca de la cola (`__fotosYaArriba`). Sin cambiar reglas.
 - **Fotos de una orden que se borró** (Ángel: «una vez que le llega ese cartel no se le sale… eso no debería pasar»): si la foto no está arriba y la orden ya no existe, queda marcada `huerfana`, sale del candadito y de los reintentos, y aparece un aviso claro «🗑 N fotos de una orden que ya no existe (OT-xxx): no se pueden subir · Sacarlas del celu» (`#fssHuerf`, con confirmación). El candadito queda solo cuando de verdad falta un permiso.
+- **Una tarea escrita a mano sin puntaje trababa «Emitir» y «Guardar cambios»** (OT-188 de Ángel con «limpieza general»; también el «no me deja crear» con «prueba internas control»): el aviso «Poné cuántos puntos vale…» quedaba escondido en el paso 3 y parecía que no hacía nada. Ahora guarda igual: la tarea queda suelta, sin puntaje, con aviso en naranja; las que tienen puntos se suman a la lista como antes.
+- **«Guardar cambios» con mala señal** espera como mucho 15 s (`fbOtUpdate`, igual que «Emitir» en la v122) y no espera los avisos a la gente nueva.
 
 **Pruebas**
 - `t_v123` 18/18 en PC y 19/19 en celular (incluye la foto que ya estaba arriba y la de una orden borrada).
+- `t_v123b` 3/3 en PC y celular (editar con tarea a mano sin puntaje; guardar con la señal lenta).
 - `t_circuito` actualizada al envío por tarea: 16/16 en PC y celular.
 
 ## v122 — 05/11/2026 · Cambiar el orden de las tareas y «no me deja crear» la orden
