@@ -47,7 +47,7 @@ const cel = process.argv[2] === 'cel';
   // 4) «Órdenes que seguís» en Mis tareas (la x1 la sigue el admin)
   await p.evaluate(() => mostrarVista('mistareas')); await p.waitForTimeout(1800);
   r = await p.evaluate(() => ({ t: (document.querySelector('#supSeguir h2') || {}).textContent || '', n: document.querySelectorAll('#supSeguir .sup-ot').length, cerrar: document.querySelectorAll('#supSeguir [data-sup-cerrar]').length }));
-  c(/Órdenes que seguís/.test(r.t) && r.n === 1 && r.cerrar === 0, 'en Mis tareas aparece «👔 Órdenes que seguís» con cómo va cada una (la cerrada, sin botón) · ' + JSON.stringify(r));
+  c(r.n === 0, 'v120: la orden ya cerrada NO aparece en «👔 Órdenes que seguís» (Ángel: «si ya se cerraron, no me tienen que salir») · ' + JSON.stringify(r));
   // 5) informe mensual único y vehículos en un solo lugar
   await p.evaluate(() => mostrarVista('informe')); await p.waitForTimeout(800);
   await p.selectOption('#informePeriodo', 'Informe mensual'); await p.waitForTimeout(1300);

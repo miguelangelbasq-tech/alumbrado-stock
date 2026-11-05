@@ -17,17 +17,19 @@ Autor: Miguel Ángel Díaz © 2026
 12/12 en PC y celular. Se revisaron a ojo las capturas de cada pantalla.
 
 **Cambios (lo que se encontró)**
+- «👔 Órdenes que seguís» **solo de hoy y ayer, y nunca las ya cerradas**. Ángel: «las cerradas no me tienen que salir; solo las de hoy, o entre hoy y ayer». La OT-174 del 03/11 aparecía como si fuera de hoy. Las atrasadas siguen en Órdenes › Tablero.
 - «👔 Órdenes que seguís» compacta: las para cerrar siempre a la vista y el resto plegado con «Ver todas las que seguís (N más)». Fechas `05/11/2026` y botones en una línea (📸 · ✅ Cerrar).
 - La barra de abajo de «Llenar orden» en el celu es blanca, sin transparencia: ya no se ve el texto de atrás. Además, más espacio abajo.
 - Fotos por columna: el nombre se ve completo («T1 · C1 · Col 2»), en dos renglones si hace falta; antes se cortaba en «T1 · C1 · …».
 
 **Pruebas**
-- `t_v120`: 3/3 en PC y 4/4 en celular.
+- `t_v120`: 4/4 en PC y 5/5 en celular.
+- `t_v113` actualizada: la orden cerrada ya no aparece en «Órdenes que seguís».
 - Batería completa en PC y celular, con `t_circuito`: 230 OK. Solo falla `t_v083`, que es vieja.
 
 **Huella SHA-256**
-- `120_2026-11-05_app-EMA_ORIGINAL.html`: `3e2dee2a4de742353dff909fb57f1325e6559ecbb6d4c46b34ad1634715b30a2`
-- `index.html`: `760535f13fd0f3ce9b817f790671116e51abef1050d8599f5862c320d8f015b5`
+- `120_2026-11-05_app-EMA_ORIGINAL.html`: `666092bc115dd9fcf9ba902334243b020b4041b9adfad5b6af7b68bd147b8508`
+- `index.html`: `9d8711640a3a3cfd617390b9c2ac3f468b8c02b65262ebb202ea84fea6cb62c6`
 
 ## v119 — 04/11/2026 · Nada encima mientras escribís, editar sin pisar órdenes viejas, calendario en Planificación (incluye v118)
 
