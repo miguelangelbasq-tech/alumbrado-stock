@@ -19,17 +19,21 @@ Autor: Miguel Ángel Díaz © 2026
 **Cambios (lo que se encontró)**
 - «👔 Órdenes que seguís» **solo de hoy y ayer, y nunca las ya cerradas**. Ángel: «las cerradas no me tienen que salir; solo las de hoy, o entre hoy y ayer». La OT-174 del 03/11 aparecía como si fuera de hoy. Las atrasadas siguen en Órdenes › Tablero.
 - «👔 Órdenes que seguís» compacta: las para cerrar siempre a la vista y el resto plegado con «Ver todas las que seguís (N más)». Fechas `05/11/2026` y botones en una línea (📸 · ✅ Cerrar).
+- **`seguimientoEditar`:** «✏ Editar» en cada fila de 📌 Seguimiento. Ángel: «tengo que poder editar, por ejemplo cancelar esa tarea… una ventana mediana».
+  - Se puede cambiar cuánto (`previsto`) y quién (`asignada`: toda la cuadrilla o una persona), «🚫 Sacar esta tarea de la orden» (guarda `ot.tareasSacadas` con quién y cuándo) y «Abrir la orden completa».
+  - Una orden cerrada no se toca. No se saca la única tarea de una orden (en ese caso se anula la orden). Si la cuadrilla ya marcó la tarea, avisa. Una tarea con reparto especial se cambia en la orden completa.
 - La barra de abajo de «Llenar orden» en el celu es blanca, sin transparencia: ya no se ve el texto de atrás. Además, más espacio abajo.
 - Fotos por columna: el nombre se ve completo («T1 · C1 · Col 2»), en dos renglones si hace falta; antes se cortaba en «T1 · C1 · …».
 
 **Pruebas**
 - `t_v120`: 4/4 en PC y 5/5 en celular.
+- `t_v120b` (editar desde Seguimiento): 6/6 en PC y 7/7 en celular.
 - `t_v113` actualizada: la orden cerrada ya no aparece en «Órdenes que seguís».
-- Batería completa en PC y celular, con `t_circuito`: 230 OK. Solo falla `t_v083`, que es vieja.
+- Batería completa en PC y celular, con `t_circuito`: 232 OK. Solo falla `t_v083`, que es vieja.
 
 **Huella SHA-256**
-- `120_2026-11-05_app-EMA_ORIGINAL.html`: `666092bc115dd9fcf9ba902334243b020b4041b9adfad5b6af7b68bd147b8508`
-- `index.html`: `9d8711640a3a3cfd617390b9c2ac3f468b8c02b65262ebb202ea84fea6cb62c6`
+- `120_2026-11-05_app-EMA_ORIGINAL.html`: `f19aa8ceb8a612eaa38d1ee3562428217f6b96d0009be002b7cbee5b29bc0ae2`
+- `index.html`: `90112bca6da4f1004cf8827ea7d5a0e585778b4693af0e5bb07a776c424154b0`
 
 ## v119 — 04/11/2026 · Nada encima mientras escribís, editar sin pisar órdenes viejas, calendario en Planificación (incluye v118)
 
