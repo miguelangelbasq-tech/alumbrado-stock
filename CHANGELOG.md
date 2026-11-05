@@ -25,6 +25,11 @@ Autor: Miguel Ángel Díaz © 2026
 **Pruebas**
 - `t_v123` 18/18 en PC y 19/19 en celular (incluye la foto que ya estaba arriba y la de una orden borrada).
 - `t_v123b` 3/3 en PC y celular (editar con tarea a mano sin puntaje; guardar con la señal lenta).
+- Batería completa en PC y celular: 240 OK. Solo falla `t_v083`, que es vieja.
+
+**Huella SHA-256**
+- `123_2026-11-05_app-EMA_ORIGINAL.html`: `20afb2d57fd976629d5e2d15e29be4f4f883e08ebd0211cf4369672fc0c2f75b`
+- `index.html`: `96c39933f07dcd39611f1870cfa6b78942afbfd530aa560d09d6988e46a91c27`
 - `t_circuito` actualizada al envío por tarea: 16/16 en PC y celular.
 
 ## v122 — 05/11/2026 · Cambiar el orden de las tareas y «no me deja crear» la orden
