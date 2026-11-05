@@ -2,6 +2,23 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v122 — 05/11/2026 · Cambiar el orden de las tareas y «no me deja crear» la orden
+
+**Pedido de Ángel**
+- «También estaría bueno poder cambiar el orden de las tareas una vez que las armo.»
+- «No me deja crear» (la orden quedaba con «⚠ Ingresá el nombre/número de la cuadrilla.», con el campo escondido en el paso 2).
+
+**Cambios**
+- **`ordenTareas`:** en «Llenar orden», arriba de la lista de tareas, «↕ Orden de las tareas» con ↑ ↓ (desde 2 tareas tildadas). Ese orden queda en `ot.actividades`: así lo ve la cuadrilla y así sale en la hoja. Al editar, arranca con el orden guardado.
+- **`emitirSeguro`:**
+  - si el nombre de la cuadrilla está vacío, se pone solo con los nombres de la gente («Marcos y Mauricio»);
+  - el cartel rojo de un intento anterior se borra apenas cambiás algo;
+  - `fbOtAdd` guarda con `doc().set()` y espera como mucho 15 s: con señal lenta o la base al tope, la orden queda en el aparato y se sube sola (cartel ⏳); si después la base la rechaza, avisa;
+  - «Emitir» ya no espera los avisos a la cuadrilla ni al responsable (salen igual, por atrás).
+
+**Pruebas**
+- `t_v122` 8/8 en PC y 9/9 en celular.
+
 ## v121 — 05/11/2026 · Hora de cada tarea obligatoria para la cuadrilla y personas en el buscador del Mapa (incluye v120)
 
 **Pedido de Ángel**

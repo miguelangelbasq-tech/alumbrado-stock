@@ -320,6 +320,8 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `cierreDiaUnico` | 113 | Producción › Cierre del día guarda por `guardarCierreOt` (abre el cierre oculto con `body.cd-auto`, pone cantidades, horas, reparto y novedades); pregunta del itemizado en el parte (`.cd-co`); puntos del parte con `__puntosDia` (= `puntosDeOrden`). Pruebas viejas con `__ofCompat`: el camino de antes |
 | `unirRepetidos` | 113 | «Por persona / obra» dentro de Seguimiento (`#urBuscar` / `#urVolver`, la pestaña `buscar` oculta), período «Avance del mes (sin fotos)» con aviso al informe con fotos, formulario de vehículos de Gastos oculto (se cargan en Personal) |
 | `supervisorOt` | 113 | Responsable de oficina de la orden: `#supSel` en el paso 2, `ot.supervisor` {uid, email, nombre}, aviso `tipo:'supervisor'`, «👔 Órdenes que seguís» (`#supSeguir`) arriba de Mis tareas con «✅ Cerrar» → `abrirCierreOt` |
+| `ordenTareas` | 122 | «↕ Orden de las tareas» (`#otOrdenT`, ↑ ↓ `data-ord`) en «Llenar orden»; envuelve `datosOtDesdeFormulario` (ordena `actividades`) y `editarOrdenTrabajo` (arranca con el orden guardado). `__ordenTareas` |
+| `emitirSeguro` | 122 | Cuadrilla vacía → nombres de la gente; `fbOtAdd` con `doc().set()` y tope de 15 s (`__otAddLento`, `__otAddFallo`, `__otAddEspera` en pruebas); avisos sin esperar. `__emitirSeguro` |
 | `horasTarea` | 121 | `__mtHorasTareaHtml(o,p)` en la plantilla de la tarea hecha; `campo.horasTarea.<k>` {ini, fin, por, ts}; «Enviar» las exige (salvo `__ofCompat`); el cierre las precarga. `__horasTarea` |
 | `mapaPersonas` | 121 | Personas del `#uvPanel` en el buscador `#mapaBuscar` (`#mpPersonas`), filtra el panel. `__mapaPersonas` |
 | `seguimientoEditar` | 120 | «✏ Editar» en cada fila de Seguimiento → `#sgEdit`: cuánto (`previsto`), quién (`asignada`), sacar la tarea (`actividades`, `tareasSacadas`), abrir la orden; cerrada no se toca. `__seguimientoEditar` |
@@ -585,6 +587,7 @@ Ejemplos:
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
 | 108 | Circuito de la obra: diccionario de 47 tareas claras (HH × dificultad), cierre por partes del ítem, «🔎 Diferencias con lo hecho» en el Itemizado (Sí/No), «Solo lo de esta obra» (`diccionarioTareas`, `circuitoObra`) |
 | 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
+| 122 | Cambiar el orden de las tareas de la orden (`ordenTareas`); la orden sale aunque falte el nombre de la cuadrilla y «Emitir» no se cuelga con señal lenta (`emitirSeguro`) |
 | 121 | Hora de inicio y fin de cada tarea obligatoria para la cuadrilla (`horasTarea`), personas en el buscador del Mapa (`mapaPersonas`), «Personal en vivo» abajo |
 | 120 | Revisión del circuito de la cuadrilla (`t_circuito`: oficina → cuadrilla → cierre); «Órdenes que seguís» compacta; barra de «Llenar orden» opaca; nombres de columna completos en las fotos |
 | 119 | Editar sin pisar órdenes viejas (`edicionClara`), calendario y elegir qué imprimir en Planificación (`planCalendario`), sugerencias propias en el celu (`sugerencias`), buscador de obra sin lista, cartel de pendientes solo con botón, franja celeste por obra |
