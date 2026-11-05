@@ -320,6 +320,7 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `cierreDiaUnico` | 113 | Producción › Cierre del día guarda por `guardarCierreOt` (abre el cierre oculto con `body.cd-auto`, pone cantidades, horas, reparto y novedades); pregunta del itemizado en el parte (`.cd-co`); puntos del parte con `__puntosDia` (= `puntosDeOrden`). Pruebas viejas con `__ofCompat`: el camino de antes |
 | `unirRepetidos` | 113 | «Por persona / obra» dentro de Seguimiento (`#urBuscar` / `#urVolver`, la pestaña `buscar` oculta), período «Avance del mes (sin fotos)» con aviso al informe con fotos, formulario de vehículos de Gastos oculto (se cargan en Personal) |
 | `supervisorOt` | 113 | Responsable de oficina de la orden: `#supSel` en el paso 2, `ot.supervisor` {uid, email, nombre}, aviso `tipo:'supervisor'`, «👔 Órdenes que seguís» (`#supSeguir`) arriba de Mis tareas con «✅ Cerrar» → `abrirCierreOt` |
+| `envioTarea` | 123 | Mis tareas: cada tarea se manda sola (`[data-et=si/no/corregir]`, cartelito `#etPop` con horas o porqué), `campo.tareaEnv.<k>.<persona>`, línea verde/roja (`.mt-env.env-si/no`), aviso por tarea, la orden se envía sola con todas mandadas; ganchos `__mtAPI`, `__mtTareaClase`, `__mtTareaPie`, `__mtAccAntes`, `__mtEnvClase`. `__envioTarea` |
 | `ordenTareas` | 122 | «↕ Orden de las tareas» (`#otOrdenT`, ↑ ↓ `data-ord`) en «Llenar orden»; envuelve `datosOtDesdeFormulario` (ordena `actividades`) y `editarOrdenTrabajo` (arranca con el orden guardado). `__ordenTareas` |
 | `emitirSeguro` | 122 | Cuadrilla vacía → nombres de la gente; `fbOtAdd` con `doc().set()` y tope de 15 s (`__otAddLento`, `__otAddFallo`, `__otAddEspera` en pruebas); avisos sin esperar. `__emitirSeguro` |
 | `horasTarea` | 121 | `__mtHorasTareaHtml(o,p)` en la plantilla de la tarea hecha; `campo.horasTarea.<k>` {ini, fin, por, ts}; «Enviar» las exige (salvo `__ofCompat`); el cierre las precarga. `__horasTarea` |
@@ -509,7 +510,7 @@ Ejemplos:
   - `__lgPlegTodoAbierto=true` salvo `lgPleg:true`;
   - `__ofCompat=true` («Llenar orden» todo junto, sin cartel) salvo `ofPasos:true`.
 - **Señal lenta simulada (v086):** `window.__stubKbps = 2000` (en `firebase_stub.js`): cada consulta tarda lo que tarda bajar sus datos por un caño compartido. Lo usa `t_v086`.
-- **`t_circuito`** (v120): el circuito completo con todo lo nuevo prendido (oficina arma por pasos → cuadrilla en el celu: seguridad, fotos por columna, enviar → oficina cierra → puntos y avance). Correrlo siempre.
+- **`t_circuito`** (v120, v123): el circuito completo con todo lo nuevo prendido (oficina arma por pasos → cuadrilla en el celu: seguridad, fotos por columna, «📤 Listo, enviar esta tarea» con la hora → la orden se envía sola → oficina cierra → puntos y avance). Correrlo siempre.
 - `t_v083` quedó reemplazada por `t_v084` (buscaba el cartel viejo de ubicación).
 - **Cada versión nueva suma su `t_vNNN.js`.** Si cambia un comportamiento probado, actualizá la prueba vieja y decí por qué.
 
@@ -587,6 +588,7 @@ Ejemplos:
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
 | 108 | Circuito de la obra: diccionario de 47 tareas claras (HH × dificultad), cierre por partes del ítem, «🔎 Diferencias con lo hecho» en el Itemizado (Sí/No), «Solo lo de esta obra» (`diccionarioTareas`, `circuitoObra`) |
 | 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
+| 123 | La cuadrilla manda cada tarea apenas la termina: «Se hizo» con la hora o «No se hizo» con el porqué, en verde o rojo; la orden se envía sola (`envioTarea`) |
 | 122 | Cambiar el orden de las tareas de la orden (`ordenTareas`); la orden sale aunque falte el nombre de la cuadrilla y «Emitir» no se cuelga con señal lenta (`emitirSeguro`) |
 | 121 | Hora de inicio y fin de cada tarea obligatoria para la cuadrilla (`horasTarea`), personas en el buscador del Mapa (`mapaPersonas`), «Personal en vivo» abajo |
 | 120 | Revisión del circuito de la cuadrilla (`t_circuito`: oficina → cuadrilla → cierre); «Órdenes que seguís» compacta; barra de «Llenar orden» opaca; nombres de columna completos en las fotos |

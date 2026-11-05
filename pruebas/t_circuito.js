@@ -72,21 +72,19 @@ const FOTO = __dirname + '/foto.jpg', shot = (pg, n) => pg.screenshot({ path: __
   r = await q.evaluate((id) => Object.keys(((ordenesTrabajo.find((o) => o.id === id) || {}).campo || {}).fotos || {}).length, otId);
   c(r >= 2, 'cuadrilla: saca una foto por columna (2) · ' + r + ' foto(s)');
   await shot(q, '6_marcada');
-  // sin las horas de la tarea no deja enviar
-  dlgJ.length = 0;
-  await q.click(`.mt-ot[data-ot="${otId}"] .mt-enviar`, { timeout: 8000 }).catch((e) => console.log("   enviar1:", e.message.split("\n").slice(0, 6).join(" | "))); await q.waitForTimeout(800);
-  const avisoTxt = await q.evaluate(() => { const e = [...document.querySelectorAll('body *')].find((x) => x.children.length < 3 && /de qué hora a qué hora hicieron/.test(x.textContent) && x.offsetParent !== null); return e ? e.textContent : ''; });
-  await q.click('button:has-text("Entendido")', { timeout: 2000 }).catch(() => { }); await q.waitForTimeout(400);
-  r = await q.evaluate((id) => Object.keys(((window.__stubDB().ordenesTrabajo[id] || {}).campo || {}).enviados || {}).length, otId);
-  dlgJ.push(avisoTxt);
-  c(r === 0 && dlgJ.some((m) => /de qué hora a qué hora/.test(m)), 'cuadrilla: sin la hora de inicio y fin de la tarea no deja enviar · ' + (dlgJ[0] || '').slice(0, 70));
-  await q.fill(`${T} .mt-htarea .mt-ht-ini`, '08:00'); await q.dispatchEvent(`${T} .mt-htarea .mt-ht-ini`, 'change'); await q.waitForTimeout(600);
-  await q.fill(`${T} .mt-htarea .mt-ht-fin`, '10:30'); await q.dispatchEvent(`${T} .mt-htarea .mt-ht-fin`, 'change'); await q.waitForTimeout(1200);
+  // v123: cada tarea se manda sola; el botón general queda escondido hasta que estén todas
+  r = await q.evaluate((id) => { const b = document.querySelector(`.mt-ot[data-ot="${id}"] .mt-enviar`); return { oculto: !b || b.offsetParent === null, guia: ((document.querySelector(`.mt-ot[data-ot="${id}"] .et-guia`) || {}).textContent || '') }; }, otId);
+  c(r.oculto && /Mandá cada tarea/.test(r.guia), 'cuadrilla: le explica que mande cada tarea apenas la termina · ' + r.guia.slice(0, 80));
+  await q.click(`${T} [data-et="si"]`, { timeout: 5000 }).catch((e) => console.log('   et:', e.message.split('\n')[0])); await q.waitForTimeout(700);
+  await shot(q, '6b_horas');
+  r = await q.evaluate(() => !!document.querySelector('#etPop #etIni'));
+  c(r, 'cuadrilla: al tocar «📤 Listo, enviar esta tarea» sale el cartelito de qué hora a qué hora');
+  await q.fill('#etPop #etIni', '08:00'); await q.fill('#etPop #etFin', '10:30'); await q.waitForTimeout(300);
+  await q.click('#etPop [data-etp="enviar"]'); await q.waitForTimeout(3500);
   r = await q.evaluate((id) => (((window.__stubDB().ordenesTrabajo[id] || {}).campo || {}).horasTarea || {}).montaje_prfv || {}, otId);
   c(r.ini === '08:00' && r.fin === '10:30', 'cuadrilla: pone de qué hora a qué hora hizo la tarea · ' + JSON.stringify(r));
-  await q.click(`.mt-ot[data-ot="${otId}"] .mt-enviar`, { timeout: 8000 }).catch((e) => console.log('   enviar:', e.message.split('\n')[0])); await q.waitForTimeout(3000);
-  r = await q.evaluate((id) => { const o = window.__stubDB().ordenesTrabajo[id] || {}; return { env: Object.keys((o.campo || {}).enviados || {}), marca: (((o.campo || {}).marcas || {}).montaje_prfv || {}).hecho }; }, otId);
-  c(r.env.length === 1 && r.marca, 'cuadrilla: marca «se hizo» y envía · ' + JSON.stringify(r) + ' · avisos: ' + dlgJ.join(' / ').slice(0, 120));
+  r = await q.evaluate((id) => { const o = window.__stubDB().ordenesTrabajo[id] || {}; return { env: Object.keys((o.campo || {}).enviados || {}), marca: (((o.campo || {}).marcas || {}).montaje_prfv || {}).hecho, te: Object.keys(((o.campo || {}).tareaEnv || {}).montaje_prfv || {}) }; }, otId);
+  c(r.env.length === 1 && r.marca && r.te.length === 1, 'cuadrilla: manda la tarea y, como era la única, la orden se envía sola · ' + JSON.stringify(r) + ' · avisos: ' + dlgJ.join(' / ').slice(0, 120));
   await shot(q, '7_enviada');
   const sw = await q.evaluate(() => document.documentElement.scrollWidth - innerWidth);
   c(sw <= 0, 'cuadrilla: sin scroll de costado en el celu · ' + sw);

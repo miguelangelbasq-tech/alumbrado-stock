@@ -2,6 +2,26 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v123 — 05/11/2026 · La cuadrilla manda cada tarea apenas la termina («Se hizo» / «No se hizo» con el porqué)
+
+**Pedido de Ángel**
+- «Que se pueda enviar por tareas… lo que no se puede hacer, ponerle que no se hizo por qué y que desaparezca… verde se hizo, rojo que no… que les quede limpio.» Hoy, si una tarea no se podía terminar, sus fotos trababan el envío de toda la orden.
+
+**Cambios**
+- **`envioTarea`** (con `__ofCompat` sigue como antes):
+  - «✓ Se hizo» → fotos y cantidad → «📤 Listo, enviar esta tarea»: pide las fotos y medidas **solo de esa tarea** y abre el cartelito «⏱ ¿De qué hora a qué hora?» (inicio = fin de la tarea anterior o la hora de la orden; fin = ahora) → Enviar;
+  - «✗ No se hizo» abre directo «¿Por qué no se hizo?» (Lluvia · Faltó material · Falta EPEC · No alcanzó el tiempo · Otro + nota) → Enviar;
+  - la tarea mandada queda en una línea verde o roja con lo hecho, las horas o el porqué, y «Corregir»;
+  - guarda `campo.tareaEnv.<tarea>.<persona>` = {estado si/no, ts, por}, las horas en `campo.horasTarea`;
+  - aviso a la oficina por cada tarea (`tipo:'envio'`, tag `ema-envt-…`);
+  - cuando están todas mandadas, la orden se envía sola («Mis horas» del primer inicio al último fin) y pasa a Terminadas;
+  - el botón general «Enviar lo de hoy» queda escondido hasta entonces, con la guía «Te quedan N de M»; el recuadro de horas de la v121 dentro de la tarea ya no se muestra (lo pide el cartelito).
+- Ganchos nuevos en la plantilla de `ordenesCampo`: `__mtAPI`, `__mtTareaClase`, `__mtTareaPie`, `__mtAccAntes`, `__mtEnvClase`.
+
+**Pruebas**
+- `t_v123` 16/16 en PC y 17/17 en celular.
+- `t_circuito` actualizada al envío por tarea: 16/16 en PC y celular.
+
 ## v122 — 05/11/2026 · Cambiar el orden de las tareas y «no me deja crear» la orden
 
 **Pedido de Ángel**
