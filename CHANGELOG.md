@@ -2,6 +2,32 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v121 — 05/11/2026 · Hora de cada tarea obligatoria para la cuadrilla y personas en el buscador del Mapa (incluye v120)
+
+**Pedido de Ángel**
+- «Cuando llenan las tareas… que pongan cuánto se tardó en cada tarea, sí o sí.»
+- «En el buscador del mapa, que también pueda buscar personas.»
+- «Personal en vivo» abajo de las plazas, y el aviso de cortes salía una palabra por renglón.
+
+**Cambios**
+- **`horasTarea`:**
+  - en Mis tareas, cada tarea con «✓ Se hizo» muestra «⏱ ¿De qué hora a qué hora? · obligatorio» (gancho `__mtHorasTareaHtml` dentro de la plantilla);
+  - se guarda en `campo.horasTarea.<tarea>` = {ini, fin, por, ts} por `mtCampoGuardar` (anda sin señal);
+  - «Enviar» no deja mandar si falta alguna hora o si el fin es antes del inicio;
+  - en el cierre, `cierre-hini/hfin` vienen completas con lo de la cuadrilla.
+  - Las pruebas viejas (`__ofCompat`) siguen sin exigirlo.
+- **`mapaPersonas`:** el buscador del Mapa encuentra personas de «Personal en vivo»; al tocarla, el mapa va a donde está, y la lista de personal también se filtra.
+- **«Personal en vivo»** pasa abajo de la lista de plazas, y los avisos (`.uv-porque`) van a lo ancho, en la columna 2 de la grilla.
+
+**Pruebas**
+- `t_v121` 4/4 en PC y 5/5 en celular.
+- `t_circuito` 15/15: sin horas no envía; con horas envía, y el cierre las trae.
+- Batería completa en PC y celular: 234 OK. Solo falla `t_v083`, que es vieja.
+
+**Huella SHA-256**
+- `121_2026-11-05_app-EMA_ORIGINAL.html`: `67b10d2055b4b0c4d5da9b648f2b51673a4f92690656a2432d3648b28d7083be`
+- `index.html`: `50de323a9ef32e8c8c508922015a86e10b3b1443b5327ae0d3c971565b31064c`
+
 ## v120 — 05/11/2026 · Revisión del circuito de la cuadrilla en el celu
 
 **Pedido de Ángel**

@@ -320,6 +320,8 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `cierreDiaUnico` | 113 | Producción › Cierre del día guarda por `guardarCierreOt` (abre el cierre oculto con `body.cd-auto`, pone cantidades, horas, reparto y novedades); pregunta del itemizado en el parte (`.cd-co`); puntos del parte con `__puntosDia` (= `puntosDeOrden`). Pruebas viejas con `__ofCompat`: el camino de antes |
 | `unirRepetidos` | 113 | «Por persona / obra» dentro de Seguimiento (`#urBuscar` / `#urVolver`, la pestaña `buscar` oculta), período «Avance del mes (sin fotos)» con aviso al informe con fotos, formulario de vehículos de Gastos oculto (se cargan en Personal) |
 | `supervisorOt` | 113 | Responsable de oficina de la orden: `#supSel` en el paso 2, `ot.supervisor` {uid, email, nombre}, aviso `tipo:'supervisor'`, «👔 Órdenes que seguís» (`#supSeguir`) arriba de Mis tareas con «✅ Cerrar» → `abrirCierreOt` |
+| `horasTarea` | 121 | `__mtHorasTareaHtml(o,p)` en la plantilla de la tarea hecha; `campo.horasTarea.<k>` {ini, fin, por, ts}; «Enviar» las exige (salvo `__ofCompat`); el cierre las precarga. `__horasTarea` |
+| `mapaPersonas` | 121 | Personas del `#uvPanel` en el buscador `#mapaBuscar` (`#mpPersonas`), filtra el panel. `__mapaPersonas` |
 | `seguimientoEditar` | 120 | «✏ Editar» en cada fila de Seguimiento → `#sgEdit`: cuánto (`previsto`), quién (`asignada`), sacar la tarea (`actividades`, `tareasSacadas`), abrir la orden; cerrada no se toca. `__seguimientoEditar` |
 | `edicionClara` | 119 | Cartel «✏ Estás EDITANDO» (`#edBanner`), sale sola de la edición al cambiar de pestaña o de hoja, confirma si cambia la fecha, vacía `#parteResultCard` al armar una nueva. `__edicionClara`, `__salirEdicionOt` |
 | `planCalendario` | 119 | Calendario del mes (`#pcCal`, `data-pc-dia`) que muestra un solo día (`#planGrid.pc-uno`); casillas para imprimir (`#pcPrintSel`, `__planSoloIds`, `__planConEntradas`). `__planCalendario` |
@@ -583,6 +585,7 @@ Ejemplos:
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
 | 108 | Circuito de la obra: diccionario de 47 tareas claras (HH × dificultad), cierre por partes del ítem, «🔎 Diferencias con lo hecho» en el Itemizado (Sí/No), «Solo lo de esta obra» (`diccionarioTareas`, `circuitoObra`) |
 | 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
+| 121 | Hora de inicio y fin de cada tarea obligatoria para la cuadrilla (`horasTarea`), personas en el buscador del Mapa (`mapaPersonas`), «Personal en vivo» abajo |
 | 120 | Revisión del circuito de la cuadrilla (`t_circuito`: oficina → cuadrilla → cierre); «Órdenes que seguís» compacta; barra de «Llenar orden» opaca; nombres de columna completos en las fotos |
 | 119 | Editar sin pisar órdenes viejas (`edicionClara`), calendario y elegir qué imprimir en Planificación (`planCalendario`), sugerencias propias en el celu (`sugerencias`), buscador de obra sin lista, cartel de pendientes solo con botón, franja celeste por obra |
 | 117 | Menos lecturas: personal en vivo solo con el Mapa abierto, contador de lecturas en menú › Versión (`lecturasCuenta`); 👁 Ver orden pasa a «Llenar orden» |
@@ -608,6 +611,7 @@ Ejemplos:
 - Paquetes de tableros en el pañol (esperando el Excel de las planillas).
 - **Cupo de Firestore (v117):** el 04/11/2026 el plan Spark cortó con 429 (lecturas del día). Con el cupo vencido también fallan las escrituras, porque las reglas hacen `get()`. Opciones: bajar lecturas (ver el contador de cada aparato) y/o pasar a Blaze con aviso de gasto (lo decide Ángel).
 - `setInterval` permanentes (unos 66): desde la v114 `relojitosAhorro` los frena a 1 por minuto con la app escondida; consolidarlos en un planificador sigue pendiente, sin pedido.
+- **Abrazaderas que usan (Ángel, 05/11/2026):** rack 20 sin hueco · tablero 22 sin hueco · apoya escalera 22 con hueco. **A confirmar** la unidad (¿cm del poste?) y si la calculadora las tiene que proponer.
 - Barrio: faltan planos AP-TC-055 A–G, AP-TC-024, AP-TC-004, AP-TC-021, AP-CC-010, AP-T-014 y el itemizado de barrio.
 - Entrar con huella (WebAuthn), medidor GPS/RTK: ideas charladas, **no hacer todavía**.
 - **De la auditoría v101, sin hacer todavía** (ver `docs/AUDITORIA_v101.md`): Proyectista (largo del tramo por la cadena de puntos, subida igual a la calculadora, memoria «a confirmar», fases por columna PRFV), Usuarios (unificar filtros de «foto borrada», push al cambiar de usuario, aviso «Material para retirar» por `personaClave`, permiso de fotos antes de R2, `esCrew` con ajustes, permisos de borrar obra / nombrar columnas iguales a las reglas, reintentos con espera), provisiones 83–89 en el % (preguntar), zanja rápida 0,40.

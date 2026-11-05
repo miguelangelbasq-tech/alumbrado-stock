@@ -72,6 +72,18 @@ const FOTO = __dirname + '/foto.jpg', shot = (pg, n) => pg.screenshot({ path: __
   r = await q.evaluate((id) => Object.keys(((ordenesTrabajo.find((o) => o.id === id) || {}).campo || {}).fotos || {}).length, otId);
   c(r >= 2, 'cuadrilla: saca una foto por columna (2) · ' + r + ' foto(s)');
   await shot(q, '6_marcada');
+  // sin las horas de la tarea no deja enviar
+  dlgJ.length = 0;
+  await q.click(`.mt-ot[data-ot="${otId}"] .mt-enviar`, { timeout: 8000 }).catch((e) => console.log("   enviar1:", e.message.split("\n").slice(0, 6).join(" | "))); await q.waitForTimeout(800);
+  const avisoTxt = await q.evaluate(() => { const e = [...document.querySelectorAll('body *')].find((x) => x.children.length < 3 && /de qué hora a qué hora hicieron/.test(x.textContent) && x.offsetParent !== null); return e ? e.textContent : ''; });
+  await q.click('button:has-text("Entendido")', { timeout: 2000 }).catch(() => { }); await q.waitForTimeout(400);
+  r = await q.evaluate((id) => Object.keys(((window.__stubDB().ordenesTrabajo[id] || {}).campo || {}).enviados || {}).length, otId);
+  dlgJ.push(avisoTxt);
+  c(r === 0 && dlgJ.some((m) => /de qué hora a qué hora/.test(m)), 'cuadrilla: sin la hora de inicio y fin de la tarea no deja enviar · ' + (dlgJ[0] || '').slice(0, 70));
+  await q.fill(`${T} .mt-htarea .mt-ht-ini`, '08:00'); await q.dispatchEvent(`${T} .mt-htarea .mt-ht-ini`, 'change'); await q.waitForTimeout(600);
+  await q.fill(`${T} .mt-htarea .mt-ht-fin`, '10:30'); await q.dispatchEvent(`${T} .mt-htarea .mt-ht-fin`, 'change'); await q.waitForTimeout(1200);
+  r = await q.evaluate((id) => (((window.__stubDB().ordenesTrabajo[id] || {}).campo || {}).horasTarea || {}).montaje_prfv || {}, otId);
+  c(r.ini === '08:00' && r.fin === '10:30', 'cuadrilla: pone de qué hora a qué hora hizo la tarea · ' + JSON.stringify(r));
   await q.click(`.mt-ot[data-ot="${otId}"] .mt-enviar`, { timeout: 8000 }).catch((e) => console.log('   enviar:', e.message.split('\n')[0])); await q.waitForTimeout(3000);
   r = await q.evaluate((id) => { const o = window.__stubDB().ordenesTrabajo[id] || {}; return { env: Object.keys((o.campo || {}).enviados || {}), marca: (((o.campo || {}).marcas || {}).montaje_prfv || {}).hecho }; }, otId);
   c(r.env.length === 1 && r.marca, 'cuadrilla: marca «se hizo» y envía · ' + JSON.stringify(r) + ' · avisos: ' + dlgJ.join(' / ').slice(0, 120));
@@ -85,6 +97,8 @@ const FOTO = __dirname + '/foto.jpg', shot = (pg, n) => pg.screenshot({ path: __
   c(new RegExp(num.replace(/-\d{4}-/, '-')).test(r) && /Para revisar 1/.test(r) && /revisar|cerrar/i.test(r), 'oficina: en el tablero la orden aparece para revisar y cerrar · ' + (r || '').slice(0, 300));
   await p.evaluate((id) => window.abrirCierreOt(id), otId); await p.waitForTimeout(1200);
   await p.fill('#cierreCuerpo .cierre-qty[data-k="montaje_prfv"]', '2'); await p.waitForTimeout(500);
+  r = await p.evaluate(() => ({ ini: (document.querySelector('#cierreCuerpo .cierre-hini[data-k="montaje_prfv"]') || {}).value, fin: (document.querySelector('#cierreCuerpo .cierre-hfin[data-k="montaje_prfv"]') || {}).value }));
+  c(r.ini === '08:00' && r.fin === '10:30', 'oficina: en el cierre ya aparecen las horas que puso la cuadrilla · ' + JSON.stringify(r));
   await shot(p, '8_cierre');
   await p.evaluate(async () => { const x = document.querySelector('input[name="coCierreResp"][value="no"]'); x && (x.checked = true); await guardarCierreOt(); }); await p.waitForTimeout(2500);
   r = await p.evaluate((id) => { const db = window.__stubDB(); const o = db.ordenesTrabajo[id] || {}, ci = o.cierre || {}; const pts = ci.puntos || {}; return { cerrada: !!ci.cerradoTs, pts: pts.porPersona ? pts.porPersona.map((x) => x.nombre + ' ' + x.pts) : pts, it5: db.avanceObras.p1.valorItems[0].cantidadAvanzada, avP: Object.values(db.avisosPush || {}).filter((x) => x.tipo === 'puntos').length }; }, otId);
