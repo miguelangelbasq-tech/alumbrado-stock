@@ -2,6 +2,33 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v120 — 05/11/2026 · Revisión del circuito de la cuadrilla en el celu
+
+**Pedido de Ángel**
+- «Fijate que esté funcionando todo bien. El tema de la cuadrilla también, fijate si le funciona bien; hacé pruebas.»
+- Mandó fotos de «Órdenes que seguís»: larga, con fechas «2026-11-05».
+
+**Prueba nueva: `t_circuito`** (circuito completo con todo lo nuevo prendido):
+1. La oficina arma la orden por pasos y avisa a cada uno.
+2. La cuadrilla en el celu ve la orden en Hoy, completa «🦺 Antes de arrancar», saca una foto por columna (eligiendo cuál) y envía.
+3. La oficina la ve «Para revisar» en el tablero y la cierra: quedan los puntos, avanza el itemizado y se avisa.
+4. A la cuadrilla le queda en «Terminadas».
+
+12/12 en PC y celular. Se revisaron a ojo las capturas de cada pantalla.
+
+**Cambios (lo que se encontró)**
+- «👔 Órdenes que seguís» compacta: las para cerrar siempre a la vista y el resto plegado con «Ver todas las que seguís (N más)». Fechas `05/11/2026` y botones en una línea (📸 · ✅ Cerrar).
+- La barra de abajo de «Llenar orden» en el celu es blanca, sin transparencia: ya no se ve el texto de atrás. Además, más espacio abajo.
+- Fotos por columna: el nombre se ve completo («T1 · C1 · Col 2»), en dos renglones si hace falta; antes se cortaba en «T1 · C1 · …».
+
+**Pruebas**
+- `t_v120`: 3/3 en PC y 4/4 en celular.
+- Batería completa en PC y celular, con `t_circuito`: 230 OK. Solo falla `t_v083`, que es vieja.
+
+**Huella SHA-256**
+- `120_2026-11-05_app-EMA_ORIGINAL.html`: `3e2dee2a4de742353dff909fb57f1325e6559ecbb6d4c46b34ad1634715b30a2`
+- `index.html`: `760535f13fd0f3ce9b817f790671116e51abef1050d8599f5862c320d8f015b5`
+
 ## v119 — 04/11/2026 · Nada encima mientras escribís, editar sin pisar órdenes viejas, calendario en Planificación (incluye v118)
 
 **Pedido de Ángel**

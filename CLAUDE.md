@@ -504,6 +504,7 @@ Ejemplos:
   - `__lgPlegTodoAbierto=true` salvo `lgPleg:true`;
   - `__ofCompat=true` («Llenar orden» todo junto, sin cartel) salvo `ofPasos:true`.
 - **Señal lenta simulada (v086):** `window.__stubKbps = 2000` (en `firebase_stub.js`): cada consulta tarda lo que tarda bajar sus datos por un caño compartido. Lo usa `t_v086`.
+- **`t_circuito`** (v120): el circuito completo con todo lo nuevo prendido (oficina arma por pasos → cuadrilla en el celu: seguridad, fotos por columna, enviar → oficina cierra → puntos y avance). Correrlo siempre.
 - `t_v083` quedó reemplazada por `t_v084` (buscaba el cartel viejo de ubicación).
 - **Cada versión nueva suma su `t_vNNN.js`.** Si cambia un comportamiento probado, actualizá la prueba vieja y decí por qué.
 
@@ -581,6 +582,7 @@ Ejemplos:
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
 | 108 | Circuito de la obra: diccionario de 47 tareas claras (HH × dificultad), cierre por partes del ítem, «🔎 Diferencias con lo hecho» en el Itemizado (Sí/No), «Solo lo de esta obra» (`diccionarioTareas`, `circuitoObra`) |
 | 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
+| 120 | Revisión del circuito de la cuadrilla (`t_circuito`: oficina → cuadrilla → cierre); «Órdenes que seguís» compacta; barra de «Llenar orden» opaca; nombres de columna completos en las fotos |
 | 119 | Editar sin pisar órdenes viejas (`edicionClara`), calendario y elegir qué imprimir en Planificación (`planCalendario`), sugerencias propias en el celu (`sugerencias`), buscador de obra sin lista, cartel de pendientes solo con botón, franja celeste por obra |
 | 117 | Menos lecturas: personal en vivo solo con el Mapa abierto, contador de lecturas en menú › Versión (`lecturasCuenta`); 👁 Ver orden pasa a «Llenar orden» |
 | 116 | «Compartir» abre WhatsApp/Drive en la app de Android (`compartirApp`: `navigator.share` sobre el plugin Share); resumen de «Llenar orden» opaco |
