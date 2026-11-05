@@ -63,6 +63,19 @@ const cel = process.argv[2] === 'cel';
   await q.click(`${T('zanjeo')} [data-et="corregir"]`); await q.waitForTimeout(1200);
   r = await q.evaluate((s) => (document.querySelector(s) || {}).className || '', T('zanjeo'));
   c(!/mt-env/.test(r), '«Corregir» vuelve a abrir la tarea · ' + r);
+  // 5) foto que «espera permiso» pero ya estaba arriba (Pablo): se saca de la cola; la que de verdad no tiene permiso, queda
+  r = await q.evaluate(async () => {
+    const db = firebase.firestore();
+    await db.collection('adjuntos').doc('yaArriba1').set({ otId: 'ot1', por: 'Juan Pérez', ts: Date.now() });
+    const put = (it) => new Promise((ok, mal) => { const rq = indexedDB.open('ema-fotos-cola', 1); rq.onupgradeneeded = () => rq.result.createObjectStore('pend', { keyPath: 'k' }); rq.onsuccess = () => { const t = rq.result.transaction('pend', 'readwrite'); t.objectStore('pend').put(it); t.oncomplete = ok; t.onerror = mal; }; });
+    await put({ k: 'adjuntos/yaArriba1', col: 'adjuntos', id: 'yaArriba1', data: { otId: 'ot1', por: 'Juan Pérez', ts: Date.now() }, ts: Date.now(), neg: Date.now() });
+    await put({ k: 'adjuntos/sinPermiso1', col: 'adjuntos', id: 'sinPermiso1', data: { otId: 'otNoEsMia', por: 'Juan Pérez', ts: Date.now() }, ts: Date.now(), neg: Date.now() });
+    await window.__fotosSinSenal.contar(); const antes = window.__fotosSinSenal.cantidad();
+    await window.__fotosSinSenal.reintentar(true); await new Promise((ok) => setTimeout(ok, 800)); await window.__fotosSinSenal.contar();
+    const l = await window.__fotosSinSenal.todos();
+    return { antes, despues: window.__fotosSinSenal.cantidad(), ids: l.map((x) => x.id), ya: window.__fotosYaArriba || 0 };
+  });
+  c(r.antes === 2 && r.despues === 1 && r.ids[0] === 'sinPermiso1' && r.ya === 1, 'la foto que ya estaba arriba sale de «esperando permiso»; la que no tiene permiso sigue esperando · ' + JSON.stringify(r));
   if (cel) { const sw = await q.evaluate(() => document.documentElement.scrollWidth - innerWidth); c(sw <= 0, 'sin scroll de costado · ' + sw); }
   const errs = (A.errores || []).filter((e) => !/Missing or insufficient permissions|permission-denied|ERR_|Failed to fetch|aborted|fetching the script/i.test(e));
   c(!errs.length, 'sin errores de JS ' + JSON.stringify(errs.slice(0, 3)));

@@ -17,9 +17,10 @@ Autor: Miguel Ángel Díaz © 2026
   - cuando están todas mandadas, la orden se envía sola («Mis horas» del primer inicio al último fin) y pasa a Terminadas;
   - el botón general «Enviar lo de hoy» queda escondido hasta entonces, con la guía «Te quedan N de M»; el recuadro de horas de la v121 dentro de la tarea ya no se muestra (lo pide el cartelito).
 - Ganchos nuevos en la plantilla de `ordenesCampo`: `__mtAPI`, `__mtTareaClase`, `__mtTareaPie`, `__mtAccAntes`, `__mtEnvClase`.
+- **Fotos «esperando que la oficina arregle el permiso» que ya estaban arriba** (Pablo Picone, OT-154 / OT-158, «en el celu figura bien»): la cuadrilla puede **crear** la ficha de la foto pero no **reescribirla**. Si la primera subida llegó y el celu no se enteró (mala señal), cada reintento era una reescritura y la base lo negaba para siempre. Ahora, ante un «permiso negado», `fotosSinSenal.mandar` se fija en la base (`get({source:'server'})`): si la foto ya está, la saca de la cola (`__fotosYaArriba`). Sin cambiar reglas.
 
 **Pruebas**
-- `t_v123` 16/16 en PC y 17/17 en celular.
+- `t_v123` 17/17 en PC y 18/18 en celular (incluye la foto que ya estaba arriba).
 - `t_circuito` actualizada al envío por tarea: 16/16 en PC y celular.
 
 ## v122 — 05/11/2026 · Cambiar el orden de las tareas y «no me deja crear» la orden
