@@ -17,6 +17,11 @@ Autor: Miguel Ángel Díaz © 2026
 **Pruebas**
 - `t_v126` 8/8 en PC y 9/9 en celular.
 - `t_v122` actualizada: cuando sale el cartel nuevo toca «Hacer otra orden igual» (la prueba arma varias órdenes para la misma obra y día a propósito).
+- Batería completa en PC y celular: todo OK salvo `t_v083` (vieja); `t_cargador` falló una vez con la máquina cargada y pasa sola en PC y celular.
+
+**Huella SHA-256**
+- `126_2026-11-06_app-EMA_ORIGINAL.html`: `a075a98b19e7895e595659e34d46e0a74699f366fc7815ccaca267ec52d873d0`
+- `index.html`: `fc513bb4d3217c64a29670d09f7d7052aac35282fecc3eb17f0bc13167cd60b8`
 
 ## v125 — 06/11/2026 · La cuadrilla saca fotos de cualquier obra, aunque no tenga orden ahí (reglas v125)
 
