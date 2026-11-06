@@ -92,7 +92,7 @@ const FOTO = __dirname + '/foto.jpg', shot = (pg, n) => pg.screenshot({ path: __
   await p.evaluate(() => mostrarVista('parte')); await p.waitForTimeout(500);
   await p.click('#subtabsOrdenes .subtab[data-sub="tablero"]'); await p.waitForTimeout(2500);
   r = await p.evaluate((n) => (document.getElementById('otTablero') || {}).textContent.replace(/\s+/g, ' '), num);
-  c(new RegExp(num.replace(/-\d{4}-/, '-')).test(r) && /Para revisar 1/.test(r) && /revisar|cerrar/i.test(r), 'oficina: en el tablero la orden aparece para revisar y cerrar · ' + (r || '').slice(0, 300));
+  c(new RegExp(num.replace(/-\d{4}-/, '-')).test(r) && /Para revisar y cerrar 1/.test(r) && /Revisar y cerrar/.test(r), 'oficina: en el tablero la orden aparece para revisar y cerrar · ' + (r || '').slice(0, 300));
   await p.evaluate((id) => window.abrirCierreOt(id), otId); await p.waitForTimeout(1200);
   await p.fill('#cierreCuerpo .cierre-qty[data-k="montaje_prfv"]', '2'); await p.waitForTimeout(500);
   r = await p.evaluate(() => ({ ini: (document.querySelector('#cierreCuerpo .cierre-hini[data-k="montaje_prfv"]') || {}).value, fin: (document.querySelector('#cierreCuerpo .cierre-hfin[data-k="montaje_prfv"]') || {}).value }));

@@ -2,6 +2,23 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v124 — 06/11/2026 · Tablero de órdenes por subíndices (incluye la v123)
+
+**Pedido de Ángel**
+- «La parte de tablero tendría que ser con subíndices: hoy, recibidas para verificar y cerrar, futuras por fecha como calendario (tocás la fecha y te sale todo), cerradas aparte, sin cerrar o anuladas… más ordenado.»
+
+**Cambios**
+- **`tableroSub`** (con `__ofCompat` siguen las 4 columnas): Órdenes › Tablero con subíndices 🔧 Hoy · 🔔 Para revisar y cerrar · 📅 Próximas · ⚠ Sin cerrar · ✅ Cerradas · 🚫 Anuladas, cada uno con su cantidad (naranja si hay para revisar, rojo si hay sin cerrar).
+  - Arranca en «Para revisar» si hay algo; si no, en «Hoy». Se acuerda del último (`localStorage ema.tb.sub`).
+  - «Próximas»: calendario del mes (‹ ›) con los días que tienen órdenes; al tocar el día salen sus órdenes.
+  - Las tarjetas son las de siempre (`Oe`): revisar y cerrar, editar, mover. El buscador filtra todos los subíndices.
+  - Cerradas y anuladas de a 24, con «Ver más».
+- En la base: `B()` llama a `window.__tbSubHtml(grupos, tarjeta)`; `window.__tbB` redibuja.
+
+**Pruebas**
+- `t_v124` 10/10 en PC y 11/11 en celular.
+- `t_circuito` actualizada al subíndice «Para revisar y cerrar».
+
 ## v123 — 05/11/2026 · La cuadrilla manda cada tarea apenas la termina («Se hizo» / «No se hizo» con el porqué)
 
 **Pedido de Ángel**
