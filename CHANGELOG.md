@@ -15,6 +15,13 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas**
 - `t_v125` 6/6 en PC y 7/7 en celular.
+- `t_v069` y `t_v070` actualizadas: ahora quedan **2** cosas en la cola del celu cuando la base rechaza la foto (la foto y su ficha del legajo), antes 1.
+- Batería completa en PC y celular: todo OK salvo `t_v083` (vieja).
+
+**Huella SHA-256**
+- `125_2026-11-06_app-EMA_ORIGINAL.html`: `17609692a5f28f1b7c562108983461a5225053b814b800b76af8d6fba69c70d3`
+- `index.html`: `643cb2af1073369f2f752d92d71ceffdd847659f0d5faa8d914ced9a2109ad96`
+- `Reglas_Firestore_v125.txt`: `737ed1b18c5699669ac65ff292c85e30a298cd42abfa7c43a14729e22d49ca29`
 
 ## v124 — 06/11/2026 · Tablero de órdenes por subíndices (incluye la v123)
 
