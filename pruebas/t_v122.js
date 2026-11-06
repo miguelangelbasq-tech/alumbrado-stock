@@ -21,7 +21,7 @@ const cel = process.argv[2] === 'cel';
   r = await filas();
   c(r[0] === ultima, 'con ↑ la última pasa a ser la primera · ' + r.join(' / '));
   if (cel) { await p.evaluate(() => document.getElementById('otOrdenT').scrollIntoView({ block: 'center' })); await p.waitForTimeout(300); await p.screenshot({ path: __dirname + '/v122_orden_cel.png' }); }
-  await p.evaluate(() => window.emitirOrdenTrabajo()); await p.waitForTimeout(1800);
+  await p.evaluate(() => { window.emitirOrdenTrabajo(); }); await p.waitForTimeout(600); await p.click('#uoPop [data-uo="otra"]', { timeout: 1500 }).catch(() => { }); await p.waitForTimeout(1800);   // v126: si ya hay una para la misma obra y día, «Hacer otra orden igual»
   const o = await p.evaluate(() => Object.entries(window.__stubDB().ordenesTrabajo).map(([id, v]) => Object.assign({ id }, v))[0]);
   const labs = await p.evaluate((a) => a.map((k) => ACTIVIDADES_CATALOGO.find((x) => x.id === k).label), o.actividades);
   c(JSON.stringify(labs) === JSON.stringify(r), 'la orden se guarda con las tareas en ese orden · ' + labs.join(' / '));
@@ -41,13 +41,13 @@ const cel = process.argv[2] === 'cel';
   await p.evaluate(() => { const s = document.getElementById('otPlaza'); s.value = 'p1'; s.dispatchEvent(new Event('change', { bubbles: true })); document.getElementById('otCuadrilla').value = ''; personal = [{ nombre: 'Marcos Mancloba', rol: 'Oficial' }, { nombre: 'Mauricio Mainini', rol: 'Ayudante' }]; typeof renderPersonal == 'function' && renderPersonal(); const cb = document.querySelector('#otActividades .ot-act-check'); cb.checked = true; cb.dispatchEvent(new Event('change', { bubbles: true })); });
   await p.waitForTimeout(600);
   const antes = await p.evaluate(() => Object.keys(window.__stubDB().ordenesTrabajo).length);
-  await p.evaluate(() => window.emitirOrdenTrabajo()); await p.waitForTimeout(1800);
+  await p.evaluate(() => { window.emitirOrdenTrabajo(); }); await p.waitForTimeout(600); await p.click('#uoPop [data-uo="otra"]', { timeout: 1500 }).catch(() => { }); await p.waitForTimeout(1800);   // v126: si ya hay una para la misma obra y día, «Hacer otra orden igual»
   r = await p.evaluate(() => ({ n: Object.keys(window.__stubDB().ordenesTrabajo).length, c: Object.values(window.__stubDB().ordenesTrabajo).map((o) => o.cuadrilla), m: document.getElementById('otMsg').textContent }));
   c(r.n === antes + 1 && r.c.includes('Marcos y Mauricio'), 'sin nombre de cuadrilla la orden sale igual, con los nombres de la gente · ' + JSON.stringify(r).slice(0, 200));
   // señal lenta: «Emitir» no se queda colgado
   await p.evaluate(() => { window.__otAddEspera = 1500; window.__stubSinRed = true; document.getElementById('otCuadrilla').value = 'Lenta'; const cb = document.querySelector('#otActividades .ot-act-check'); cb.checked = true; cb.dispatchEvent(new Event('change', { bubbles: true })); });
   await p.waitForTimeout(400);
-  await p.evaluate(() => { window.emitirOrdenTrabajo(); }); await p.waitForTimeout(3500);
+  await p.evaluate(() => { window.emitirOrdenTrabajo(); }); await p.waitForTimeout(600); await p.click('#uoPop [data-uo="otra"]', { timeout: 1500 }).catch(() => { }); await p.waitForTimeout(3500);
   r = await p.evaluate(() => ({ m: document.getElementById('otMsg').textContent, dis: document.getElementById('otEmitirBtn').disabled }));
   c(/se sube sola/.test(r.m) && !r.dis, 'con la señal lenta, a los segundos avisa que quedó en el aparato y el botón vuelve · ' + r.m.slice(0, 160));
   await p.evaluate(() => { window.__stubSinRed = false; }); await p.waitForTimeout(1500);

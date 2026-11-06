@@ -2,6 +2,22 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v126 — 06/11/2026 · Una sola orden por obra y por día (incluye la v125)
+
+**Pedido de Ángel**
+- «Tendría que haber una sola orden por obra… y ahí dividir qué hace cada uno»; «no le está apareciendo la foto de uno al otro».
+- Causa: las fotos y marcas se comparten dentro de UNA orden (eso anda: `t_v076`). Con dos órdenes para la misma plaza el mismo día, cada uno ve solo las de la suya.
+
+**Cambios**
+- **`unaObra`** (con `__ofCompat` no actúa):
+  - al emitir una orden nueva para una obra y un día que ya tienen otra abierta, cartel `#uoPop`: «➕ Sumar a la OT-xxx» (tareas, cantidades sumadas, gente, quién hace qué, vehículos, notas; avisa a los que se suman) · «Hacer otra orden igual» · «Cancelar»;
+  - en el tablero, aviso `#uoAviso` «⚠ Obras con más de una orden el mismo día» con «Unir en OT-xxx»: pasa a la más vieja tareas, gente, fotos, marcas (la más completa), horas, envíos y la seguridad; la otra queda **Anulada** con `unidaEn` (no se borra). Pregunta antes. Las cerradas no se tocan.
+- En la base no cambia nada más; no hay reglas nuevas (además de las v125).
+
+**Pruebas**
+- `t_v126` 8/8 en PC y 9/9 en celular.
+- `t_v122` actualizada: cuando sale el cartel nuevo toca «Hacer otra orden igual» (la prueba arma varias órdenes para la misma obra y día a propósito).
+
 ## v125 — 06/11/2026 · La cuadrilla saca fotos de cualquier obra, aunque no tenga orden ahí (reglas v125)
 
 **Pedido de Ángel**
