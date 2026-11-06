@@ -18,6 +18,13 @@ Autor: Miguel Ángel Díaz © 2026
 **Pruebas**
 - `t_v124` 10/10 en PC y 11/11 en celular.
 - `t_circuito` actualizada al subíndice «Para revisar y cerrar».
+- `t_v121` arreglada: el corte de prueba era de «hace 3 horas» y, cerca de la medianoche, caía en el día anterior y el aviso no salía (no era un error de la app).
+- `envolturasUnaVez` va justo después de `relojitosAhorro` (que tiene que seguir primero, `t_v114`).
+- Batería completa en PC y celular: todo OK salvo `t_v083` (vieja); `t_v121`, que fallaba por la hora, pasa sola en PC y celular.
+
+**Huella SHA-256**
+- `124_2026-11-05_app-EMA_ORIGINAL.html`: `ff3345267f3eac0f42b011e4bfca3f02792bb29b667d5fd97655319a4b49f2fc`
+- `index.html`: `8ee21cb2ce5d4662734d320ac17502473d9764714b94fce449316c9a62095e5f`
 
 ## v123 — 05/11/2026 · La cuadrilla manda cada tarea apenas la termina («Se hizo» / «No se hizo» con el porqué)
 

@@ -5,7 +5,7 @@ const cel = process.argv[2] === 'cel';
 (async () => {
   const c = prueba('v121' + (cel ? ' cel' : ''));
   const d = baseDatos(), ahora = Date.now();
-  const u = (id, nombre, lat) => ({ uid: id, email: id + '@' + DOM, persona: nombre, clave: nombre.toLowerCase(), lat, lng: -64.18, acc: 3, ts: ahora - 30000, posTs: ahora - 30000, fuente: 'app', activo: true, cortesHoy: 1, ultCorteDesde: ahora - 3 * 3600e3, ultCorteHasta: ahora - 2 * 3600e3, ultCorteTipo: 'app cerrada' });
+  const u = (id, nombre, lat) => ({ uid: id, email: id + '@' + DOM, persona: nombre, clave: nombre.toLowerCase(), lat, lng: -64.18, acc: 3, ts: ahora - 30000, posTs: ahora - 30000, fuente: 'app', activo: true, cortesHoy: 1, ultCorteDesde: ahora - Math.min(3 * 3600e3, (ahora - new Date(new Date().toDateString()).getTime()) / 3), ultCorteHasta: ahora - Math.min(2 * 3600e3, (ahora - new Date(new Date().toDateString()).getTime()) / 4), ultCorteTipo: 'app cerrada' });
   d.db.ubicacionVivo = { a1: u('a1', 'AXEL ESCUDERO', -31.41), a2: u('a2', 'Bruno Federico Cherino', -31.43) };
   d.db.configEquipo.ubicacion = { activo: true, desde: '00:00', hasta: '23:59', dias: [0, 1, 2, 3, 4, 5, 6], cadaSeg: 60 };
   const A = await abrir({ sesion: 'admin', cel, dpr: cel ? 2 : 1, datos: d, espera: 3500, leaflet: true }), p = A.page;
