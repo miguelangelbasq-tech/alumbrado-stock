@@ -20,17 +20,14 @@ Autor: Miguel Ángel Díaz © 2026
 - **Fotos «esperando que la oficina arregle el permiso» que ya estaban arriba** (Pablo Picone, OT-154 / OT-158, «en el celu figura bien»): la cuadrilla puede **crear** la ficha de la foto pero no **reescribirla**. Si la primera subida llegó y el celu no se enteró (mala señal), cada reintento era una reescritura y la base lo negaba para siempre. Ahora, ante un «permiso negado», `fotosSinSenal.mandar` se fija en la base (`get({source:'server'})`): si la foto ya está, la saca de la cola (`__fotosYaArriba`). Sin cambiar reglas.
 - **Fotos de una orden que se borró** (Ángel: «una vez que le llega ese cartel no se le sale… eso no debería pasar»): si la foto no está arriba y la orden ya no existe, queda marcada `huerfana`, sale del candadito y de los reintentos, y aparece un aviso claro «🗑 N fotos de una orden que ya no existe (OT-xxx): no se pueden subir · Sacarlas del celu» (`#fssHuerf`, con confirmación). El candadito queda solo cuando de verdad falta un permiso.
 - **Una tarea escrita a mano sin puntaje trababa «Emitir» y «Guardar cambios»** (OT-188 de Ángel con «limpieza general»; también el «no me deja crear» con «prueba internas control»): el aviso «Poné cuántos puntos vale…» quedaba escondido en el paso 3 y parecía que no hacía nada. Ahora guarda igual: la tarea queda suelta, sin puntaje, con aviso en naranja; las que tienen puntos se suman a la lista como antes.
+- **«Se tilda» / el cartel «⏳ La señal está lenta» repetido decenas de veces** (Ángel, 06/11): 32 envolturas de funciones (`emitirOrdenTrabajo`, `datosOtDesdeFormulario`, `editarOrdenTrabajo`, `abrirCierreOt`…) se fijaban con su propia marca (`__ed`, `__saldo`, `__eq`, `__cs`…) si ya habían envuelto, pero la envoltura nueva no traía las marcas de las otras: se envolvían entre ellas cada segundo, sin fin (ya pasaba en la v121: unas 200 envolturas nuevas en 30 s). Con la app abierta un rato, cada «Guardar» corría decenas de veces y todo se ponía lento. Ahora `window.__heredar` (script `envolturasUnaVez`, antes de `relojitosAhorro`) le pasa las marcas a cada envoltura nueva: queda quieta.
+- **Barra de abajo de «Llenar orden»** (celular): sin su propio «Emitir» (Ángel: «a todo dice emitir»); queda «Ver resumen», y el botón del resumen dice «Guardar cambios en OT-…» cuando se edita.
 - **«Guardar cambios» con mala señal** espera como mucho 15 s (`fbOtUpdate`, igual que «Emitir» en la v122) y no espera los avisos a la gente nueva.
 
 **Pruebas**
 - `t_v123` 18/18 en PC y 19/19 en celular (incluye la foto que ya estaba arriba y la de una orden borrada).
-- `t_v123b` 3/3 en PC y celular (editar con tarea a mano sin puntaje; guardar con la señal lenta).
-- Batería completa en PC y celular: 240 OK. Solo falla `t_v083`, que es vieja.
-
-**Huella SHA-256**
-- `123_2026-11-05_app-EMA_ORIGINAL.html`: `20afb2d57fd976629d5e2d15e29be4f4f883e08ebd0211cf4369672fc0c2f75b`
-- `index.html`: `96c39933f07dcd39611f1870cfa6b78942afbfd530aa560d09d6988e46a91c27`
-- `t_circuito` actualizada al envío por tarea: 16/16 en PC y celular.
+- `t_v123b` 5/5 en PC y celular (editar con tarea a mano sin puntaje; guardar con la señal lenta; las funciones no se vuelven a envolver solas — la v122 falla esta; sin «Emitir» en la barra).
+- Batería completa: ver abajo.
 
 ## v122 — 05/11/2026 · Cambiar el orden de las tareas y «no me deja crear» la orden
 

@@ -23,5 +23,10 @@ const cel = process.argv[2] === 'cel';
   await p.evaluate(() => { window.__stubSinRed = false; }); await p.waitForTimeout(1500);
   r = await p.evaluate(() => window.__stubDB().ordenesTrabajo.ot1.previsto.montaje_prfv);
   c(r === 7, 'cuando vuelve la señal, el cambio se guarda · ' + r);
+  // las envolturas quedan quietas (antes se envolvían entre ellas sin fin: «se tilda», cartel repetido)
+  r = await p.evaluate(async () => { const N = ['emitirOrdenTrabajo', 'datosOtDesdeFormulario', 'editarOrdenTrabajo', 'abrirCierreOt', 'mostrarVista', 'guardarCierreOt']; const a = N.map((n) => window[n]); await new Promise((ok) => setTimeout(ok, 8000)); return N.filter((n, i) => window[n] !== a[i]); });
+  c(!r.length, 'con la app abierta, las funciones de las órdenes no se vuelven a envolver solas · ' + JSON.stringify(r));
+  r = await p.evaluate(() => { const b = document.getElementById('ofBarra'); return b ? b.querySelectorAll('[data-of-emitir]').length : 0; });
+  c(r === 0, 'la barra de abajo ya no tiene su propio «Emitir» · ' + r);
   await A.browser.close(); process.exit(c.fin() ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(2); });
