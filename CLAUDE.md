@@ -251,13 +251,13 @@ Los roles están en `window.PERMISOS` (script `usuariosPermisos`) y en las regla
 - `reinicios` (`saldoDesde` def. 2026-10-29, `saldoObras`, `puntosDesde`, `puntosSinObras[]`, `puntosSinDias[]`);
 - `ubicacion` (`activo, desde, hasta, dias[0-6], cadaSeg`; por defecto 07:00–15:00 L–V, 60 s).
 
-### 7.2 Reglas (Reglas_Firestore_v089 = v083 + `proyectos`; Ángel tiene que publicarlas)
+### 7.2 Reglas (Reglas_Firestore_v125 = v089 + `fotoLibre` (fotos de la cuadrilla sin orden); v089 = v083 + `proyectos`; Ángel tiene que publicarlas)
 - Están en `firebase/`. Se publican pegándolas en Firebase › Firestore › Reglas. Ángel lo hace a mano.
 - **Lección clave (v070):** Firestore corta en **10 lecturas de documentos / 1.000 expresiones por pedido** y responde «permission-denied» aunque la persona tenga permiso.
   - Leé el usuario **una sola vez** por regla (`let d = yo()`).
   - Armá solo el mapa del rol de la persona (`permisosDeRol(rol)` con ternarios).
   - No repitas `get()`.
-- Funciones: `confirmado()`, `esAdmin()`, `adminUOficina()`, `edita([hojas])`, `lee([hojas])`, `equipo()`, `renombraObra()`, `soyDeLaOrden(ot)`, `marcaCampo()`, `fotoDeMiOrden()`.
+- Funciones: `confirmado()`, `esAdmin()`, `adminUOficina()`, `edita([hojas])`, `lee([hojas])`, `equipo()`, `renombraObra()`, `soyDeLaOrden(ot)`, `marcaCampo()`, `fotoDeMiOrden()`, `fotoLibre()` (v125).
 - Si un cambio necesita colección o permiso nuevo: **entregá las reglas nuevas completas** (archivo `Reglas_Firestore_vNNN.txt`) y decile a Ángel que las publique. La app tiene que avisar «falta publicar las reglas» si no están.
 
 ### 7.3 Límites de Firestore que ya mordieron
@@ -591,6 +591,7 @@ Ejemplos:
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
 | 108 | Circuito de la obra: diccionario de 47 tareas claras (HH × dificultad), cierre por partes del ítem, «🔎 Diferencias con lo hecho» en el Itemizado (Sí/No), «Solo lo de esta obra» (`diccionarioTareas`, `circuitoObra`) |
 | 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
+| 125 | La cuadrilla saca fotos de cualquier obra desde la Cámara, aunque no tenga orden (reglas v125: `fotoLibre`) |
 | 124 | Tablero de órdenes por subíndices: Hoy · Para revisar y cerrar · Próximas (calendario) · Sin cerrar · Cerradas · Anuladas (`tableroSub`) |
 | 123 | La cuadrilla manda cada tarea apenas la termina: «Se hizo» con la hora o «No se hizo» con el porqué, en verde o rojo; la orden se envía sola (`envioTarea`) |
 | 122 | Cambiar el orden de las tareas de la orden (`ordenTareas`); la orden sale aunque falte el nombre de la cuadrilla y «Emitir» no se cuelga con señal lenta (`emitirSeguro`) |

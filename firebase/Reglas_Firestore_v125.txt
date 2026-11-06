@@ -1,0 +1,185 @@
+rules_version = '2';
+// Reglas de la base «alumbrado-stock» — EMA Servicios — versión 06/11/2026 (app v125): las de la v089 + la cuadrilla puede guardar fotos de cualquier obra sin orden (fotoLibre).
+// (v089: + «proyectos» (Proyectista, solo Administración y Oficina).)
+// (v083: + «ubicacionVivo» y «configEquipo/ubicacion», ubicación en vivo del personal de obra.)
+// (v072: + «configEquipo/reinicios», reiniciar puntos, solo administrador.)
+// MISMOS PERMISOS que las del 22/10 (app v050); solo cambia CÓMO se calculan, para que la base no se pase de sus límites.
+//
+// Por qué se cambian (28/10/2026): con las del 22/10, para un usuario de la cuadrilla cada foto o marca hacía que la base
+// recalculara la tabla completa de roles 6 a 10 veces y leyera su usuario más de 10 veces en el mismo pedido. Firestore tiene
+// un tope por pedido (10 lecturas de documentos y 1.000 operaciones): al pasarse, rechaza con «permiso denegado» aunque la
+// persona SÍ figure en la orden. A la oficina no le pasaba porque su primer permiso ya daba «sí» y la base no seguía
+// calculando. Ahora el usuario se lee UNA vez por regla y solo se arma la parte de la tabla de SU rol.
+//
+// Historial: 02/10 operarios marcan sus tareas · 03/10 borrar obras solo Admin/Oficina, movimientos del pañol, reservas,
+// fotos de obra · 04/10 cada uno lee solo lo que su rol ve, guías · 05/10 planos · 07/10 herramientas · 09/10 presencia ·
+// 20/10 puntos del mapa · 21/10 cierres de quincena · 22/10 cuadrilla y operario solo miran (marcan desde Mis tareas),
+// avisos al celular · 28/10 mismas reglas, más livianas.
+// Pegar en: Firebase → Firestore Database → Reglas → (borrar todo) pegar → Publicar.
+// Si algo sale mal: en esa misma pantalla, arriba, el historial de reglas permite volver a la versión anterior.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Quién soy (una sola lectura de mi usuario por regla) ----------
+    function logueado()  { return request.auth != null; }
+    function miDoc()     { return /databases/$(database)/documents/usuarios/$(request.auth.uid); }
+    function yo()        { return get(miDoc()).data; }
+    // Confirmado = activo y ya aprobado por el administrador.
+    function okU(d)      { return d.get('activo', true) != false && d.get('pendiente', false) != true; }
+    function confirmado(){ return logueado() && okU(yo()); }
+    function esAdmin()   { let d = yo(); return logueado() && okU(d) && d.get('rol', 'mirar') == 'admin'; }
+    function adminUOficina() { let d = yo(); return logueado() && okU(d) && d.get('rol', 'mirar') in ['admin', 'oficina']; }
+
+    // ---------- Roles (iguales a los de la app) — solo se arma el del rol de la persona ----------
+    // Orden: admin/oficina · pañol · cuadrilla/operario (personal de obra: marcan SUS tareas por «soyDeLaOrden» y miran pañol,
+    // planificación, mapa, normas y cálculos) · y 'mirar' (o cualquier rol desconocido).
+    function permisosDeRol(rol) {
+      return rol == 'admin' || rol == 'oficina'
+        ? { 'inicio':'editar','registro':'editar','calc':'editar','parte':'editar','plan':'editar','avance':'editar','mapa':'editar','stock':'editar','informe':'editar','gastos':'editar','produccion':'editar','normas':'editar' }
+        : rol == 'panol'
+          ? { 'inicio':'ver','registro':'ver','calc':'oculto','parte':'oculto','plan':'oculto','avance':'ver','mapa':'ver','stock':'editar','informe':'oculto','gastos':'oculto','produccion':'oculto','normas':'ver' }
+          : rol == 'cuadrilla' || rol == 'operario'
+            ? { 'inicio':'ver','registro':'oculto','calc':'ver','parte':'oculto','plan':'ver','avance':'oculto','mapa':'ver','stock':'ver','informe':'oculto','gastos':'oculto','produccion':'oculto','normas':'ver' }
+            : { 'inicio':'ver','registro':'ver','calc':'ver','parte':'ver','plan':'ver','avance':'ver','mapa':'ver','stock':'ver','informe':'ver','gastos':'oculto','produccion':'oculto','normas':'ver' };
+    }
+    // Permiso de una hoja para el usuario d: su ajuste propio (si tiene) o lo que da su rol.
+    function nv(d, h)      { return d.get('ajustes', {}).get(h, permisosDeRol(d.get('rol', 'mirar')).get(h, 'ver')); }
+    function ed(d, h)      { return nv(d, h) == 'editar'; }
+    function vi(d, h)      { return nv(d, h) != 'oculto'; }
+    // Edita alguna de las hojas de la lista (hasta 6) — UNA lectura del usuario
+    function edita(hs) {
+      let d = yo();
+      return logueado() && okU(d) && (ed(d, hs[0])
+        || (hs.size() > 1 && ed(d, hs[1])) || (hs.size() > 2 && ed(d, hs[2]))
+        || (hs.size() > 3 && ed(d, hs[3])) || (hs.size() > 4 && ed(d, hs[4])) || (hs.size() > 5 && ed(d, hs[5])));
+    }
+    // Ve (no oculta) alguna de las hojas de la lista (hasta 6)
+    function lee(hs) {
+      let d = yo();
+      return logueado() && okU(d) && (vi(d, hs[0])
+        || (hs.size() > 1 && vi(d, hs[1])) || (hs.size() > 2 && vi(d, hs[2]))
+        || (hs.size() > 3 && vi(d, hs[3])) || (hs.size() > 4 && vi(d, hs[4])) || (hs.size() > 5 && vi(d, hs[5])));
+    }
+    // «Personal de oficina/obra»: ve al menos una de las hojas generales (el operario de celu, no).
+    function equipo()  { return lee(['inicio', 'avance', 'stock', 'parte', 'registro', 'calc']); }
+    // Editar una obra (Registrar obra / Avance) cambia su nombre, ID o barrio también en lo que lo tiene copiado:
+    // eso se permite aunque no se tenga permiso en esa hoja, pero SOLO esos campos.
+    function renombraObra() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['plazaNombre','obraId','barrio','destino','nombre','id','form','obra'])
+        && edita(['registro', 'avance']);
+    }
+
+    // ---------- Operarios / cuadrilla: marcan SUS tareas desde el celu ----------
+    // Un usuario con «persona» vinculada (personaClave) puede tocar SOLO `campo` y pasar la orden a «En curso»,
+    // y solo en las órdenes donde figura (personalNombres). También sube las fotos de esas órdenes.
+    function soyDeLaOrden(ot) {
+      let d = yo();
+      let c = d.get('personaClave', '');
+      return logueado() && okU(d) && c != '' && ot.get('personalNombres', []).hasAny([c]);
+    }
+    function marcaCampo() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['campo','estado'])
+        && request.resource.data.get('estado', '') in ['Emitida','En curso']
+        && soyDeLaOrden(resource.data);
+    }
+    // v125: la cuadrilla (cuadrilla / operario confirmado) guarda fotos de cualquier obra desde la Cámara aunque no tenga
+    // orden ahí: solo CREAR la ficha, sin orden (otId vacío) y con la obra (plazaId). No puede cambiar ni borrar fotos.
+    function fotoLibre() {
+      let d = yo();
+      let p = request.resource.data.get('plazaId', '');
+      return logueado() && okU(d) && d.get('rol', 'mirar') in ['cuadrilla', 'operario']
+        && request.resource.data.get('otId', '') == '' && p is string && p != '';
+    }
+    function fotoDeMiOrden() {
+      let ot = request.resource.data.get('otId', '');
+      return ot is string && ot != ''
+        && soyDeLaOrden(get(/databases/$(database)/documents/ordenesTrabajo/$(ot)).data);
+    }
+
+    // ---------- Usuarios ----------
+    match /usuarios/{uid} {
+      // Cada uno lee SU ficha siempre (para saber si está «A confirmar»); la lista completa, solo los confirmados.
+      allow read: if (logueado() && request.auth.uid == uid) || confirmado();
+      // La primera vez, cada uno se anota a sí mismo, pero solo como «Solo mirar» y «a confirmar».
+      allow create: if (logueado() && request.auth.uid == uid
+            && request.resource.data.keys().hasOnly(['email','usuario','nombre','rol','pendiente','activo','creado'])
+            && request.resource.data.rol == 'mirar'
+            && request.resource.data.pendiente == true
+            && request.resource.data.activo == true
+            && request.resource.data.email == request.auth.token.email)
+        || esAdmin();
+      allow update, delete: if esAdmin();
+    }
+
+    // Quién está en la app: cada uno escribe SOLO su propio «estoy en la app»; solo el administrador ve la lista.
+    match /presencia/{uid} { allow read: if esAdmin(); allow write: if logueado() && request.auth.uid == uid; }
+
+    // Usuario corto → correo: se lee ANTES de entrar (para poder escribir «angel» en vez del correo).
+    match /configEquipo/alias {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    // ---------- Cosas que la app escribe sola ----------
+    match /tableros/{id}             { allow read, write: if confirmado(); }
+    match /configEquipo/presencia    { allow read, write: if confirmado(); }
+    match /configEquipo/salud        { allow read, write: if confirmado(); }
+    match /auditoria/{id} {
+      allow read: if equipo();
+      allow create: if request.resource.data.usuario == request.auth.token.email && confirmado();
+      // nadie la cambia ni la borra: es el registro de lo que se hizo
+    }
+
+    // ---------- Datos: cada colección la cargan las hojas que la usan ----------
+    match /movimientos/{id}        { allow read: if equipo(); allow create: if edita(['stock', 'avance']); allow update: if edita(['stock']) || renombraObra(); allow delete: if edita(['stock']); }
+    match /catalogoProductos/{id}  { allow read: if equipo(); allow write: if edita(['stock', 'calc']); }
+    match /avanceObras/{id}        { allow read: if confirmado(); allow create, update: if edita(['registro', 'avance', 'calc', 'mapa', 'parte', 'informe']); allow delete: if adminUOficina(); }
+    match /historialEtapas/{id}    { allow read: if equipo(); allow write: if edita(['avance']); allow update: if renombraObra(); }
+    match /ordenesTrabajo/{id}     { allow read: if confirmado(); allow write: if edita(['parte', 'plan', 'produccion']); allow update: if marcaCampo() || renombraObra(); }
+    match /planSemanal/{id}        { allow read: if equipo(); allow write: if edita(['plan']); allow update: if renombraObra(); }
+    match /gastosObra/{id}         { allow read: if lee(['gastos', 'informe']); allow write: if edita(['gastos']); allow update: if renombraObra(); }
+    match /historialCalculos/{id}  { allow read: if equipo(); allow write: if edita(['calc']); allow update: if renombraObra(); }
+    // Fotos (adjuntos): las cargan Pañol, Avance y Órdenes; la cuadrilla, las de SU orden.
+    match /adjuntos/{id}           { allow read: if confirmado();
+                                     allow create: if fotoDeMiOrden() || fotoLibre() || edita(['stock', 'avance', 'parte']);
+                                     allow update: if edita(['stock', 'avance', 'parte']) || renombraObra();
+                                     allow delete: if edita(['stock', 'avance', 'parte']); }
+    // Reservas de material: las crea la oficina (o quien carga órdenes / avance / pañol); el pañol las alista y entrega.
+    match /reservas/{id}           { allow read: if confirmado(); allow create, update: if edita(['parte', 'stock', 'avance']); allow delete: if adminUOficina(); }
+    // Fotos de obra: fichas livianas con miniatura. La cuadrilla sube las de SU orden desde «Mis tareas».
+    match /fotosObra/{id}          { allow read: if confirmado();
+                                     allow create: if fotoDeMiOrden() || fotoLibre() || edita(['avance', 'registro', 'parte', 'stock']);
+                                     allow update, delete: if edita(['avance', 'registro']); }
+    // Planos de obra: imagen en pedazos (planosImg), ficha con miniatura (planosObra) y notas (planosNotas).
+    match /planosObra/{id}         { allow read: if confirmado(); allow write: if edita(['avance', 'registro']); }
+    match /planosImg/{id}          { allow read: if confirmado(); allow write: if edita(['avance', 'registro']); }
+    match /planosNotas/{id}        { allow read: if confirmado(); allow write: if edita(['avance', 'registro', 'parte']); }
+    // Herramientas del pañol: las ven todos los confirmados; las carga quien carga en el pañol.
+    match /herramientas/{id}       { allow read: if confirmado(); allow write: if edita(['stock']); }
+    match /herramientasMov/{id}    { allow read: if confirmado(); allow create: if edita(['stock']); allow update, delete: if adminUOficina(); }
+    // Puntos del mapa: los ven todos los confirmados; los cargan quienes cargan Mapa, Avance o Registrar obra.
+    match /mapaPuntos/{id}         { allow read: if confirmado(); allow write: if edita(['mapa', 'avance', 'registro']); }
+    match /cierresQuincena/{id}    { allow read: if lee(['produccion']) || adminUOficina(); allow write: if adminUOficina(); }
+    match /configEquipo/baremo     { allow read: if confirmado(); allow write: if edita(['produccion']); }
+    match /configEquipo/personal   { allow read: if confirmado(); allow write: if edita(['produccion', 'parte']); }
+    match /configEquipo/cuadrillas { allow read: if confirmado(); allow write: if edita(['parte']); }
+    // Guías «cómo se hace»: todos las leen; aprueban y suman videos Administración u Oficina.
+    match /configEquipo/guias      { allow read: if confirmado(); allow write: if adminUOficina(); }
+    match /configEquipo/precios    { allow read: if equipo(); allow write: if edita(['informe', 'avance', 'gastos', 'produccion']); }
+    // Avisos al celular con la app cerrada (Worker «ema-avisos», entra con su propia cuenta de servicio).
+    //  · pushSubs: cada celular anotado; cada uno anota o borra solo el suyo. Nadie los lee desde la app.
+    //  · avisosPush: los avisos que quedan para mandar; cualquiera del equipo los deja, nadie los lee ni los cambia desde la app.
+    //  · configEquipo/vapid: la clave PÚBLICA. La privada está en «secretosServidor», que no tiene regla: nadie la lee.
+    match /pushSubs/{id}           { allow create, update: if logueado() && request.resource.data.uid == request.auth.uid; allow delete: if logueado() && resource.data.uid == request.auth.uid; }
+    match /avisosPush/{id}         { allow create: if request.resource.data.enviado == false && confirmado(); }
+    match /configEquipo/vapid      { allow read: if confirmado(); }
+    // v072: reinicio de puntos y del conteo de las obras. Todos lo leen (para contar igual); solo el administrador lo cambia.
+    match /configEquipo/reinicios  { allow read: if confirmado(); allow write: if esAdmin(); }
+    // v083: ubicación en vivo del personal de obra. Cada persona escribe SOLO la suya (un documento por usuario, se pisa);
+    // la ven Administración y Oficina en el Mapa. El horario lo leen todos (para saber cuándo mandar) y lo cambia la oficina.
+    match /ubicacionVivo/{uid}     { allow read: if adminUOficina(); allow create, update: if confirmado() && request.auth.uid == uid; allow delete: if esAdmin(); }
+    match /configEquipo/ubicacion  { allow read: if confirmado(); allow write: if adminUOficina(); }
+    // v089: Proyectista (relevamiento en obra → plano). Solo Administración y Oficina leen y cargan; la cuadrilla no lo ve.
+    match /proyectos/{id}          { allow read, write: if adminUOficina(); }
+  }
+}

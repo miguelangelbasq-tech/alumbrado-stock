@@ -2,6 +2,20 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v125 — 06/11/2026 · La cuadrilla saca fotos de cualquier obra, aunque no tenga orden ahí (reglas v125)
+
+**Pedido de Ángel**
+- «Los de cuadrilla solo pueden sacar fotos a los lugares que tienen OT… tienen que poder buscar cualquier plaza.» (Lo aprobó: «Bueno, sí».)
+
+**Cambios**
+- **Cámara del menú** (`camaraApp`): para la cuadrilla/operario confirmado, «¿De qué obra?» muestra también la lista de **Obras** con buscador (antes solo la oficina), y «📍 Parece que estás en…» por el GPS (ya existía, ahora también para ellos). La foto va al legajo de la obra con `otId` vacío y `origen:'cuadrilla'`. Con `__ofCompat` (pruebas viejas) sigue como antes.
+- Sin las reglas nuevas publicadas: la foto queda en el celu y avisa «falta que la oficina publique las reglas nuevas de Firebase (v125)»; se sube sola cuando estén.
+- `guardarFotoObra`: si la foto queda esperando permiso, la ficha del legajo (`fotosObra`, con su miniatura) también queda en la cola y se sube con ella (antes se perdía la ficha).
+- **Reglas `Reglas_Firestore_v125.txt`** = v089 + `fotoLibre()`: cuadrilla/operario confirmado puede **crear** `adjuntos` y `fotosObra` sin orden (`otId` vacío) y con la obra (`plazaId`). No puede cambiar ni borrar fotos. `reglas_stub.js` igual (con `__reglasSinV125` para simular las reglas de antes).
+
+**Pruebas**
+- `t_v125` 6/6 en PC y 7/7 en celular.
+
 ## v124 — 06/11/2026 · Tablero de órdenes por subíndices (incluye la v123)
 
 **Pedido de Ángel**
