@@ -2,6 +2,22 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v127 — 06/11/2026 · Ver y corregir los puntos de una orden cerrada; en Producción, las órdenes de cada obra
+
+**Pedido de Ángel**
+- «Si quiero modificar porque no di puntos a una tarea, me tendría que salir los puntos y las tareas… en Producción que entre a la obra y me salgan todas las OT… y que entre a la OT con dos subíndices: la orden sola con todas las tareas y otro para editar los puntos (personas y puntos por las tareas dadas).»
+
+**Cambios**
+- **`puntosEditar`:** ventana `#peOv` de una orden con «📋 La orden» (gente con horas, tareas con previsto / hecho / no se hizo, notas, «✏ Abrir el cierre») y «⭐ Puntos»:
+  - cada tarea con su cantidad hecha y **cuántos puntos vale cada unidad en esta orden** (las de 0, en rojo);
+  - al cambiar un valor, el total sube y se reparte entre la gente **como estaba** (por partes iguales si estaba todo en 0); se puede corregir a mano cada persona, con «Te quedan N para repartir» y «Repartirlos entre los demás»;
+  - guarda `cierre.puntos` (foto fija con renglones y porPersona `aMano`), `cierre.reparto` y `cierre.puntosHist` (quién, cuándo, antes → después); si la quincena está cerrada, avisa antes.
+- Se abre con «⭐ Puntos» en las tarjetas cerradas del tablero y en las filas cerradas del Historial; y en **Producción** › persona: tocar una **obra** deja solo sus órdenes y tocar una **orden** abre la ventana.
+- No cambia lo que vale cada tarea en «Cuánto vale cada tarea» (eso sigue para las órdenes que se cierren desde ahora).
+
+**Pruebas**
+- `t_v127` 11/11 en PC y 12/12 en celular.
+
 ## v126 — 06/11/2026 · Una sola orden por obra y por día (incluye la v125)
 
 **Pedido de Ángel**
