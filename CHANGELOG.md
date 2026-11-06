@@ -17,6 +17,11 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas**
 - `t_v127` 11/11 en PC y 12/12 en celular.
+- Batería completa en PC y celular: todo OK salvo `t_v083` (vieja).
+
+**Huella SHA-256**
+- `127_2026-11-06_app-EMA_ORIGINAL.html`: `be5dc1d9b50cdb5e055695e394c734146ee73de42bb0253b2866f97dd925df5d`
+- `index.html`: `6ca86dafeb55f5ad6ca3cd9ae4ec9f51530e8a2495f21d403662662270576d06`
 
 ## v126 — 06/11/2026 · Una sola orden por obra y por día (incluye la v125)
 
