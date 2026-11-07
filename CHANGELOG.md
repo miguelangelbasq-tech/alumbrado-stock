@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v128 — 07/11/2026 · En el cierre, por tarea: repartir sus puntos y pasar lo que falta a otro día
+## v128 — 07/11/2026 · En el cierre, por tarea: repartir sus puntos, pasar lo que falta a otro día y corregir la tarea; fotos más rápidas
 
 **Pedido de Ángel**
 - «En cada tarea tendría que tener la posibilidad de… pasar lo que no se hizo para otro día y poder elegir para qué día… y si quiero asignar a las mismas personas o a otras… y para repartir los puntos, por tarea según a quién le di: una ventana con las personas de esa tarea, los puntos totales y repartir uniformemente o darle más a uno.»
@@ -11,10 +11,12 @@ Autor: Miguel Ángel Díaz © 2026
 - **`cierreTarea`** (con `__ofCompat` no aparece): debajo de cada tarea del cierre, dos botones:
   - **«👥 Puntos de esta tarea»** (`#ctPop`): la gente a la que se le dio esa tarea (por «Elegir quiénes», reparto o asignada; si no, toda la orden), los puntos de la tarea, «⚖ Repartir parejo», a mano por persona («Te quedan N…»), «Como siempre (rol y horas)». Se guarda con el cierre en `cierre.puntosTarea.<tarea>` = {persona: puntos}; `puntosDeOrden` reparte esa tarea así (en la misma proporción si cambia la cantidad) y el resto como siempre. Si estaba tildado el reparto a mano de la orden entera, se destilda.
   - **«📅 Lo que falta, a otro día»**: cuánto (de entrada, previsto − hecho), qué día (de entrada el próximo hábil) y quiénes (los de la tarea tildados; se puede sumar cualquiera de la nómina). Si ese día ya hay una orden abierta de esa obra, se suma ahí (tarea, cantidad, gente, a quién); si no, se arma una orden nueva con esa tarea (`vieneDe`). A cada uno le llega el aviso. La orden de hoy guarda `pasadoA.<tarea>` y lo muestra.
+  - **«🔁 Era otra tarea»**: si se cargó la tarea equivocada, se busca la correcta en el catálogo (con lo que vale); se cambia en la orden (actividades, previsto, a quién / quiénes, etapas; queda `tareasCambiadas`) y el cierre se vuelve a abrir con lo cargado (cantidad, horas, gente, novedades, el reparto de la tarea). Los puntos salen con lo que vale la tarea correcta.
 - En la base: gancho `__cierreTareaBtns` en la fila de la tarea del cierre; `guardarCierreOt` guarda `puntosTarea`; `puntosDeOrden` lo usa.
+- **La foto desde la tarea tardaba ~13 s** (cuadrilla): la app esperaba el GPS (hasta 5 s), la nube (hasta 8 s) y la base (hasta 6 s, dos veces), una atrás de la otra. Ahora (`fotoRapida` + ajustes): si el seguimiento en vivo tiene una ubicación reciente y buena se usa al instante; si no, el GPS espera 1,5 s (3 s si no hay ninguna); la nube 5 s; la base 2,5 s — si tarda más, la foto queda en el celu y se sube sola por atrás. Medido en la prueba: GPS lento + nube a 2 s: 7,1 → 5,1 s (0 s de GPS con el seguimiento en vivo); todo lento y sin señal: 13,1 → 8,1 s. Menú › Versión muestra cuánto tardaron las últimas fotos (`ema.fotos.tiempos`).
 
 **Pruebas**
-- `t_v128` 9/9 en PC y 10/10 en celular.
+- `t_v128` 10/10 en PC y 11/11 en celular; `t_v128b` 5/5 (tiempos de la foto).
 
 ## v127 — 06/11/2026 · Ver y corregir los puntos de una orden cerrada; en Producción, las órdenes de cada obra
 
