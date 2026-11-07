@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v128 — 07/11/2026 · En el cierre, por tarea: repartir sus puntos, pasar lo que falta a otro día y corregir la tarea; fotos más rápidas
+## v128 — 07/11/2026 · En el cierre, por tarea: repartir sus puntos, pasar lo que falta a otro día y corregir la tarea; fotos más rápidas; tarea en una orden sin cerrar; «Unir» que no vuelve a aparecer
 
 **Pedido de Ángel**
 - «En cada tarea tendría que tener la posibilidad de… pasar lo que no se hizo para otro día y poder elegir para qué día… y si quiero asignar a las mismas personas o a otras… y para repartir los puntos, por tarea según a quién le di: una ventana con las personas de esa tarea, los puntos totales y repartir uniformemente o darle más a uno.»
@@ -14,9 +14,20 @@ Autor: Miguel Ángel Díaz © 2026
   - **«🔁 Era otra tarea»**: si se cargó la tarea equivocada, se busca la correcta en el catálogo (con lo que vale); se cambia en la orden (actividades, previsto, a quién / quiénes, etapas; queda `tareasCambiadas`) y el cierre se vuelve a abrir con lo cargado (cantidad, horas, gente, novedades, el reparto de la tarea). Los puntos salen con lo que vale la tarea correcta.
 - En la base: gancho `__cierreTareaBtns` en la fila de la tarea del cierre; `guardarCierreOt` guarda `puntosTarea`; `puntosDeOrden` lo usa.
 - **La foto desde la tarea tardaba ~13 s** (cuadrilla): la app esperaba el GPS (hasta 5 s), la nube (hasta 8 s) y la base (hasta 6 s, dos veces), una atrás de la otra. Ahora (`fotoRapida` + ajustes): si el seguimiento en vivo tiene una ubicación reciente y buena se usa al instante; si no, el GPS espera 1,5 s (3 s si no hay ninguna); la nube 5 s; la base 2,5 s — si tarda más, la foto queda en el celu y se sube sola por atrás. Medido en la prueba: GPS lento + nube a 2 s: 7,1 → 5,1 s (0 s de GPS con el seguimiento en vivo); todo lento y sin señal: 13,1 → 8,1 s. Menú › Versión muestra cuánto tardaron las últimas fotos (`ema.fotos.tiempos`).
+- **Tarea que está en una orden sin cerrar** (`tareaSinCerrar`; Ángel: «me dice que ya se hizo pero no cerré esa orden… tendría que decirme orden no cerrada, ¿asignar igual?… y que se abra esa tarea sola para cerrarla rápido»): en «Llenar orden», cada tarea que está en una orden de esa obra de hoy o de antes sin cerrar muestra «⚠ Está en la OT-xxx del …, sin cerrar» con **«Asignar igual»** (la tilda con esa cantidad y en «¿por qué asignás de más?» ya viene «Sigue de la OT-xxx (sin cerrar)») y **«⚡ Cerrar esa tarea»** (abre el cierre de esa orden mostrando solo esa tarea, con «Ver todas»; si la orden tiene otras tareas, no la da por terminada).
+- **«Unir» no funcionaba bien** (Ángel: «ayer uní y me siguen apareciendo»). Por qué: el celu de la cuadrilla, sin señal, mandaba tarde sus marcas a la orden vieja con «En curso» y la orden anulada se volvía a abrir; con tres o más órdenes se perdían las fotos de la segunda; y al volver a unir se sumaba dos veces lo previsto. Ahora (`unirSeguro` + `unaObra`):
+  - unir es una sola escritura de las dos órdenes (todo o nada) y la buena anota `unidas.<id>`: si se vuelve a unir, solo pasa lo nuevo de la cuadrilla, sin sumar cantidades otra vez;
+  - con tres o más, quedan las fotos y marcas de todas;
+  - lo que el celu manda a una orden ya unida va a la orden buena; si el celu no sabía, la base lo rechaza (**reglas v128**) y el celu lo redirige solo.
+- **Reglas v128** (`firebase/Reglas_Firestore_v128.txt`) = v125 + la cuadrilla no puede reabrir una orden anulada o terminada (`marcaCampo` mira también el estado de antes). Hay que publicarlas.
 
 **Pruebas**
-- `t_v128` 10/10 en PC y 11/11 en celular; `t_v128b` 5/5 (tiempos de la foto).
+- `t_v128` 10/10 en PC y 11/11 en celular; `t_v128b` 5/5 (tiempos de la foto); `t_v128c` (tarea sin cerrar) 6/6 PC y 7/7 celular; `t_v128d` (unir) 10/10.
+- Batería completa en PC y celular: todo OK salvo `t_v083` (reemplazada por `t_v084`).
+
+**Huellas** (sello «2026-11-07 09:57 · ff75ef»)
+- `index.html`: `e5f2d57a7be20d7f92a81e79b7deca5cd168b5066346773ed84e25c30031bb30`
+- `128_2026-11-07_app-EMA_ORIGINAL.html`: `7453f35d75f0d3ecf8ea1cdf5a49fee72a161ae1a94ba22e84fec2f6187250dc`
 
 ## v127 — 06/11/2026 · Ver y corregir los puntos de una orden cerrada; en Producción, las órdenes de cada obra
 

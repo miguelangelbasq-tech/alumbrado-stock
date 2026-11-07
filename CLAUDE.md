@@ -251,7 +251,7 @@ Los roles están en `window.PERMISOS` (script `usuariosPermisos`) y en las regla
 - `reinicios` (`saldoDesde` def. 2026-10-29, `saldoObras`, `puntosDesde`, `puntosSinObras[]`, `puntosSinDias[]`);
 - `ubicacion` (`activo, desde, hasta, dias[0-6], cadaSeg`; por defecto 07:00–15:00 L–V, 60 s).
 
-### 7.2 Reglas (Reglas_Firestore_v125 = v089 + `fotoLibre` (fotos de la cuadrilla sin orden); v089 = v083 + `proyectos`; Ángel tiene que publicarlas)
+### 7.2 Reglas (Reglas_Firestore_v128 = v125 + `marcaCampo` mira el estado de antes (la cuadrilla no reabre una anulada/terminada); v125 = v089 + `fotoLibre` (fotos de la cuadrilla sin orden); v089 = v083 + `proyectos`; Ángel tiene que publicarlas)
 - Están en `firebase/`. Se publican pegándolas en Firebase › Firestore › Reglas. Ángel lo hace a mano.
 - **Lección clave (v070):** Firestore corta en **10 lecturas de documentos / 1.000 expresiones por pedido** y responde «permission-denied» aunque la persona tenga permiso.
   - Leé el usuario **una sola vez** por regla (`let d = yo()`).
@@ -322,6 +322,8 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `supervisorOt` | 113 | Responsable de oficina de la orden: `#supSel` en el paso 2, `ot.supervisor` {uid, email, nombre}, aviso `tipo:'supervisor'`, «👔 Órdenes que seguís» (`#supSeguir`) arriba de Mis tareas con «✅ Cerrar» → `abrirCierreOt` |
 | `cierreTarea` | 128 | Cierre por tarea: «👥 Puntos de esta tarea» (`#ctPop`, `cierre.puntosTarea.<k>` = {persona: pts}, lo usa `puntosDeOrden`) «📅 Lo que falta, a otro día» (suma a la orden de ese día de la obra o crea una con `vieneDe`; `ot.pasadoA.<k>`) y «🔁 Era otra tarea» (cambia la tarea en la orden, `tareasCambiadas`, reabre el cierre con lo cargado). Gancho `__cierreTareaBtns(ot, tarea)`. `__cierreTarea`, `__ptTarea` |
 | `fotoRapida` | 128 | Tiempos de cada foto (`ema.fotos.tiempos`, menú › Versión: `__fotoTiempos()`); `__fotoGpsVivo()` = ubicación del seguimiento en vivo para el sello. Esperas: GPS 1,5 s (3 s sin ninguna), nube 5 s, base 2,5 s (lo lento sigue por la cola) |
+| `tareaSinCerrar` | 128 | «Llenar orden»: `.sc-linea` en la tarea que está en una orden de esa obra (hoy o antes) sin cerrar, «Asignar igual» (`data-scigual`, `__saSinCerrarOpt(k)` en el «¿por qué de más?») y «⚡ Cerrar esa tarea» (`abrirCierreOt` con `body.sc-solo`, `#scSolo` «Ver todas»). `__tareaSinCerrar` |
+| `unirSeguro` | 128 | Envuelve `fbOtCampo`: lo que va a una orden anulada con `unidaEn` se manda a la buena (sin `estado` si no está Emitida); si la base lo niega, lee la orden del servidor y redirige. `unaObra.unir` escribe las dos órdenes en un `batch` y anota `unidas.<id>` (re-unir no suma `previsto`). `__unirSeguro` |
 | `puntosEditar` | 127 | Ventana `#peOv` «📋 La orden» / «⭐ Puntos» de una orden cerrada: puntos por unidad de cada tarea en esa orden y por persona (`[data-pet]`, `[data-peg]`), guarda `cierre.puntos` + `cierre.reparto` + `cierre.puntosHist`; botones `[data-peabrir]` en tablero e Historial; Producción: `.prod-obra[data-probra]` filtra y `tr[data-penum]` abre. `__puntosEditar` |
 | `unaObra` | 126 | Una orden por obra y día: al emitir, si hay otra abierta para esa obra y fecha, `#uoPop` «Sumar a la OT-xxx» / «Hacer otra» / «Cancelar» (`juntar`); en el tablero `#uoAviso` «Unir en…» (`juntar` + `juntarCampo`, la otra queda Anulada con `unidaEn`). `__unaObra` |
 | `tableroSub` | 124 | Órdenes › Tablero por subíndices (`[data-tbs]` obra/revisar/prox/atras/cerr/anul, calendario `.tb-cal` con `[data-tbdia]`, `[data-tbmes]`, `[data-tbmas]`), `localStorage ema.tb.sub`; la base `B()` llama a `__tbSubHtml(grupos, Oe)` salvo `__ofCompat`; `window.__tbB` redibuja. `__tableroSub` |
@@ -595,7 +597,7 @@ Ejemplos:
 | 106 | Al cerrar la orden, «＋ Agregar a alguien que también fue» (`cierreIntegrante`) |
 | 108 | Circuito de la obra: diccionario de 47 tareas claras (HH × dificultad), cierre por partes del ítem, «🔎 Diferencias con lo hecho» en el Itemizado (Sí/No), «Solo lo de esta obra» (`diccionarioTareas`, `circuitoObra`) |
 | 107 | La cuadrilla ve y borra sus fotos: «📷 Mis fotos (N)» en la orden y «🗑 La última» en la cámara (`misFotos`) |
-| 128 | En el cierre, por tarea: repartir sus puntos, pasar lo que falta a otro día y «Era otra tarea» (`cierreTarea`); fotos de la tarea más rápidas (`fotoRapida`) |
+| 128 | En el cierre, por tarea: repartir sus puntos, pasar lo que falta a otro día y «Era otra tarea» (`cierreTarea`); fotos de la tarea más rápidas (`fotoRapida`); «Asignar igual» / «⚡ Cerrar esa tarea» para lo que está en una orden sin cerrar (`tareaSinCerrar`); «Unir» que no se reabre (`unirSeguro`, reglas v128) |
 | 127 | Ver y corregir los puntos de una orden cerrada (tablero, Historial, Producción › persona › obra › orden) (`puntosEditar`) |
 | 126 | Una sola orden por obra y por día: «Sumar a la OT-xxx» al emitir y «Unir en una» las repetidas (`unaObra`) |
 | 125 | La cuadrilla saca fotos de cualquier obra desde la Cámara, aunque no tenga orden (reglas v125: `fotoLibre`) |
