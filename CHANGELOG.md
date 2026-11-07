@@ -2,6 +2,20 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v128 — 07/11/2026 · En el cierre, por tarea: repartir sus puntos y pasar lo que falta a otro día
+
+**Pedido de Ángel**
+- «En cada tarea tendría que tener la posibilidad de… pasar lo que no se hizo para otro día y poder elegir para qué día… y si quiero asignar a las mismas personas o a otras… y para repartir los puntos, por tarea según a quién le di: una ventana con las personas de esa tarea, los puntos totales y repartir uniformemente o darle más a uno.»
+
+**Cambios**
+- **`cierreTarea`** (con `__ofCompat` no aparece): debajo de cada tarea del cierre, dos botones:
+  - **«👥 Puntos de esta tarea»** (`#ctPop`): la gente a la que se le dio esa tarea (por «Elegir quiénes», reparto o asignada; si no, toda la orden), los puntos de la tarea, «⚖ Repartir parejo», a mano por persona («Te quedan N…»), «Como siempre (rol y horas)». Se guarda con el cierre en `cierre.puntosTarea.<tarea>` = {persona: puntos}; `puntosDeOrden` reparte esa tarea así (en la misma proporción si cambia la cantidad) y el resto como siempre. Si estaba tildado el reparto a mano de la orden entera, se destilda.
+  - **«📅 Lo que falta, a otro día»**: cuánto (de entrada, previsto − hecho), qué día (de entrada el próximo hábil) y quiénes (los de la tarea tildados; se puede sumar cualquiera de la nómina). Si ese día ya hay una orden abierta de esa obra, se suma ahí (tarea, cantidad, gente, a quién); si no, se arma una orden nueva con esa tarea (`vieneDe`). A cada uno le llega el aviso. La orden de hoy guarda `pasadoA.<tarea>` y lo muestra.
+- En la base: gancho `__cierreTareaBtns` en la fila de la tarea del cierre; `guardarCierreOt` guarda `puntosTarea`; `puntosDeOrden` lo usa.
+
+**Pruebas**
+- `t_v128` 9/9 en PC y 10/10 en celular.
+
 ## v127 — 06/11/2026 · Ver y corregir los puntos de una orden cerrada; en Producción, las órdenes de cada obra
 
 **Pedido de Ángel**
