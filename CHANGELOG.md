@@ -2,6 +2,23 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v129 — 07/11/2026 · Cierre: las horas que puso la cuadrilla y «✅ Aprobar» por tarea o todo junto
+
+**Pedido de Ángel**
+- «En esa hora me tiene que salir el horario que la app le hace poner a ellos, y falta un botón para aprobar esa tarea… que se pueda aprobar por tarea y también en su totalidad.» Al aprobar una tarea: **puntos al toque** (lo eligió él).
+
+**Cambios**
+- **Horas:** la fila de cada tarea del cierre arma las horas de inicio y fin con lo que mandó la cuadrilla (`campo.horasTarea`), si la oficina no cargó otras. Antes se ponían después, con un relojito, y a veces no llegaban.
+- **`aprobarTarea`** (con `__ofCompat` no aparece):
+  - **«✅ Aprobar esta tarea»** en cada fila: guarda el cierre solo con esa tarea y las ya aprobadas, así sus puntos y su avance de obra se suman en ese momento. La orden sigue «En curso» para las demás, la ventana no se cierra y lo cargado en las otras no se pierde. La aprobada queda en verde («✅ Aprobada · quién · hora», con «Volver a aprobar»). Cuando se aprueba la última, la orden queda terminada.
+  - **«✅ Aprobar todo y cerrar»** al lado de «Guardar lo hecho»: aprueba todas y termina la orden.
+  - Si falta responder la pregunta del itemizado, avisa y lleva hasta ahí.
+  - Queda en `cierre.aprobadas.<tarea>` = {ts, por}. «Guardar lo hecho» sigue como siempre.
+- En la base: `guardarCierreOt` llama a `__aprobFiltrar(t, d)` (solo las aprobadas al aprobar una) y guarda `aprobadas` (`__aprobLeer`).
+
+**Pruebas**
+- `t_v129` 9/9 en PC y 10/10 en celular.
+
 ## v128 — 07/11/2026 · En el cierre, por tarea: repartir sus puntos, pasar lo que falta a otro día y corregir la tarea; fotos más rápidas; tarea en una orden sin cerrar; «Unir» que no vuelve a aparecer
 
 **Pedido de Ángel**
