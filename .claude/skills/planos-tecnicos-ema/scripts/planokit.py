@@ -8,6 +8,10 @@ K = "#111"; G = "#555"; OR = "#c2410c"; NV = "#1d2160"
 CAD = 'font-family="Arial Narrow,Roboto Condensed,Arial,sans-serif"'
 MONO = 'font-family="JetBrains Mono,monospace"'
 INT = 'font-family="Inter,Arial"'
+# MATERIALES EN 3D (regla de Ángel, 07/11/2026): cada material con color y textura propios; nunca dos vecinos parecidos.
+#  hormigón conc3 (gris claro, opaco, con áridos) · hormigón pobre concP3 (gris beige) · PRFV prfv + fibra (RAL 7043, gris oscuro
+#  satinado con veta) · acero galvanizado galv (gris azulado con brillo) · PVC pvc (gris muy claro, brillante) · PEAD pead (negro) ·
+#  bronce bronce · cobre cobre · arena sand3 · tierra soil3 · pasto grass · ladrillo lad3 · telgopor foam3 · malla mesh · asfalto asph3
 # colores de fase (AEA 90364): L1 marrón · L2 negro · L3 rojo · N celeste
 CORES = [("#7b3f1d", "L1 MARRON"), ("#1a1a1a", "L2 NEGRO"), ("#c62828", "L3 ROJO"), ("#4fa3d9", "N CELESTE")]
 DEFS = '''<defs>
@@ -28,7 +32,14 @@ DEFS = '''<defs>
 <pattern id="asph3" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="#4b4b4b"/><circle cx="3" cy="3" r=".9" fill="#6a6a6a"/><circle cx="8" cy="7" r=".8" fill="#5c5c5c"/></pattern>
 <linearGradient id="cyl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#555"/><stop offset=".35" stop-color="#2a2a2a"/><stop offset="1" stop-color="#0d0d0d"/></linearGradient>
 <linearGradient id="pvc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f4f6"/><stop offset=".5" stop-color="#cfd3d8"/><stop offset="1" stop-color="#9aa0a6"/></linearGradient>
-<linearGradient id="prfv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8d949b"/><stop offset=".4" stop-color="#d7dbe0"/><stop offset="1" stop-color="#7d848b"/></linearGradient>
+<linearGradient id="prfv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3b403f"/><stop offset=".28" stop-color="#6b716f"/><stop offset=".42" stop-color="#9aa09d"/><stop offset=".55" stop-color="#5f6563"/><stop offset="1" stop-color="#2f3332"/></linearGradient>
+<pattern id="fibra" width="6" height="40" patternUnits="userSpaceOnUse"><path d="M1,0 V40 M4,6 V34" stroke="#c9cfcc" stroke-width=".35" opacity=".45"/></pattern>
+<linearGradient id="galv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7f8b96"/><stop offset=".35" stop-color="#dfe6ec"/><stop offset=".5" stop-color="#aab6c0"/><stop offset="1" stop-color="#6c7883"/></linearGradient>
+<linearGradient id="pead" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a3a"/><stop offset=".3" stop-color="#1c1c1c"/><stop offset="1" stop-color="#050505"/></linearGradient>
+<linearGradient id="bronce" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3b765"/><stop offset=".5" stop-color="#b9862f"/><stop offset="1" stop-color="#8a5f1c"/></linearGradient>
+<linearGradient id="cobre" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9c5a1c"/><stop offset=".5" stop-color="#f0a860"/><stop offset="1" stop-color="#9c5a1c"/></linearGradient>
+<pattern id="foam3" width="9" height="9" patternUnits="userSpaceOnUse"><rect width="9" height="9" fill="#fbfbf7"/><circle cx="2.5" cy="2.5" r="2" fill="none" stroke="#d8d8cc" stroke-width=".5"/><circle cx="7" cy="6.5" r="2.2" fill="none" stroke="#d8d8cc" stroke-width=".5"/></pattern>
+<pattern id="lad3" width="26" height="13" patternUnits="userSpaceOnUse"><rect width="26" height="13" fill="#d9775a"/><path d="M0,.5 H26 M0,6.5 H26 M13,.5 V6.5 M0,6.5 V12.5" stroke="#8a3a24" stroke-width=".8" fill="none"/></pattern>
 </defs>'''
 
 class Hoja:
@@ -138,7 +149,10 @@ class Hoja:
         p0 = self.P(xc, yc, z0); p1 = self.P(xc, yc, z1)
         self.a(f'<polygon points="{p0[0]-w0:.1f},{p0[1]:.1f} {p1[0]-w1:.1f},{p1[1]:.1f} {p1[0]+w1:.1f},{p1[1]:.1f} {p0[0]+w0:.1f},{p0[1]:.1f}" fill="{fill}" stroke="{st}" stroke-width=".7"/>')
         self.a(f'<ellipse cx="{p0[0]:.1f}" cy="{p0[1]:.1f}" rx="{w0:.1f}" ry="{w0*.5:.1f}" fill="{fill}" stroke="{st}" stroke-width=".7"/>')
-        self.a(f'<ellipse cx="{p1[0]:.1f}" cy="{p1[1]:.1f}" rx="{w1:.1f}" ry="{w1*.5:.1f}" fill="#d7dbe0" stroke="{st}" stroke-width=".7"/>')
+        if fill == "url(#prfv)":   # PRFV: veta de la fibra a lo largo del poste
+            self.a(f'<polygon points="{p0[0]-w0:.1f},{p0[1]:.1f} {p1[0]-w1:.1f},{p1[1]:.1f} {p1[0]+w1:.1f},{p1[1]:.1f} {p0[0]+w0:.1f},{p0[1]:.1f}" fill="url(#fibra)" stroke="none"/>')
+        tapa = "#7a807e" if fill == "url(#prfv)" else "#d7dbe0"
+        self.a(f'<ellipse cx="{p1[0]:.1f}" cy="{p1[1]:.1f}" rx="{w1:.1f}" ry="{w1*.5:.1f}" fill="{tapa}" stroke="{st}" stroke-width=".7"/>')
     def g3(self, n, p, gx, gy, texto, c=NV):
         x, y = self.P(*p); self.globo(n, x, y, gx, gy, c, 12); self.txt(gx + 18, gy + 4, texto, 11, 700, c)
     def guardar(self, ruta):

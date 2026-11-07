@@ -38,6 +38,27 @@ description: Estilo y método para dibujar los planos técnicos de EMA (tipos co
   - plano: Arial Narrow en MAYÚSCULAS;
   - números de tabla: JetBrains Mono;
   - texto del 3D: Inter.
+- **Materiales en el 3D: cada uno con su color y su textura, fieles a la realidad** (pedido de Ángel, 07/11/2026). **Nunca dos materiales vecinos que se parezcan.**
+
+  | Material | Patrón | Cómo se ve |
+  |---|---|---|
+  | Hormigón | `conc3` | gris claro, opaco, con áridos |
+  | Hormigón pobre o sello | `concP3` | gris beige |
+  | Poste PRFV | `prfv` | gris RAL 7043, oscuro y satinado, con la veta de la fibra (`fibra`); **no se tiene que parecer al hormigón** |
+  | Acero galvanizado | `galv` | gris azulado con brillo |
+  | PVC | `pvc` | gris muy claro y brillante |
+  | PEAD | `pead` | negro |
+  | Bronce y cobre | `bronce`, `cobre` | sus colores |
+  | Arena | `sand3` | — |
+  | Tierra | `soil3` | — |
+  | Pasto | `grass` | — |
+  | Ladrillo | `lad3` | con juntas |
+  | Telgopor | `foam3` | blanco con celdas |
+  | Malla de advertencia | `mesh` | naranja |
+  | Asfalto | `asph3` | — |
+  | Cables | — | cubierta negra; conductores marrón, negro, rojo, celeste; cobre |
+
+  Revisá en la imagen que se distingan.
 - **3D:** isométrico (x → derecha-abajo, y → izquierda-abajo, z arriba). Se ven las caras +x, +y y la de arriba. Colores: tierra `soil3`, arena `sand3`, hormigón `conc3`, pasto `grass`, malla `mesh`, PVC `pvc`, PRFV `prfv`.
 
 ## Datos: no se inventa nada

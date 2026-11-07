@@ -122,12 +122,12 @@ for zh in range(-1150,0,60):
 cara_y(c0,c0+rm,-Ez,0,"url(#sand3)"); cara_x(c0,c0+rm,-Ez,0,"url(#sand3)")
 cara_y(c0,c0+rm,-50,0,"url(#concP3)"); cara_x(c0,c0+rm,-50,0,"url(#concP3)")
 # telgopor del lado de la zanja (+x), borde de abajo a -650
-cara_y(c0+rm,Bz,-650+50,0,"#f4f4f4")
+cara_y(c0+rm,Bz,-650+50,0,"url(#foam3)")
 for z in range(-560,0,40):
     a1=h.P(c0+rm,c0,z); b1=h.P(Bz,c0,z); h.ln(*a1,*b1,"#bbb",.5)
 # canal del cable al borde exterior (+x) a la altura de la entrada «C»
-h.tuboX(c0+rp0,Bz+260,c0,-625,25,"url(#pvc)","#555")
-h.poly3(h.circX(Bz+260,c0,-625,25),"#d6d9dd","#555",.7); h.poly3(h.circX(Bz+262,c0,-625,12,16),"#7b3f1d","#000",.5)
+h.tuboX(c0+rp0,Bz+260,c0,-625,25,"url(#pead)","#000")
+h.poly3(h.circX(Bz+260,c0,-625,25),"#2a2a2a","#000",.7); h.poly3(h.circX(Bz+262,c0,-625,12,16),"#7b3f1d","#000",.5)
 # desagüe
 cara_y(c0,c0+13,-Pz,-Ez,"#fff"); cara_x(c0,c0+13,-Pz,-Ez,"#fff")
 # poste (cono) entero arriba y su mitad en el corte
