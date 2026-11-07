@@ -61,6 +61,15 @@ description: Estilo y método para dibujar los planos técnicos de EMA (tipos co
   Revisá en la imagen que se distingan.
 - **3D:** isométrico (x → derecha-abajo, y → izquierda-abajo, z arriba). Se ven las caras +x, +y y la de arriba. Colores: tierra `soil3`, arena `sand3`, hormigón `conc3`, pasto `grass`, malla `mesh`, PVC `pvc`, PRFV `prfv`.
 
+## Reglas de Ángel (no se negocian)
+- **Siempre las dos cosas juntas:** el plano tipo AutoCAD y el 3D, en la misma hoja, uno al lado del otro. Vale para todos los tipos constructivos, las fichas y las guías.
+- **Los cables se ven entrar por donde entran**, en todas las vistas: corte, planta y 3D (ej. el cable que viene de la zanja, pasa por el canal del telgopor y entra en la «C» del poste).
+- **Variantes de obra:** si hay dos formas válidas, se dibuja **la que se usa hoy** y la otra va como «VARIANTE» en un detalle chico y en la lista.
+  - Ej. acometida de la fundación PRFV: hoy con **telgopor**; variante con caño PEAD.
+  - Ante la duda, se marca «a confirmar» y se pregunta.
+- **Textura y color de cada material** según la tabla de materiales (ver «Reglas de dibujo»). Los «detallitos» importan: revisá la imagen a zoom.
+- **El corte pasa por lo importante** (la acometida, la caja, la unión) y su línea se marca en las otras vistas.
+
 ## Datos: no se inventa nada
 - Las medidas salen del **plano oficial**, de la ficha de Normas de la app (`NORMAS_FICHAS`, `s({ id: "AP-…" })`), de las constantes de la calculadora (ej. `CRUCE_AP_TC_002`, `TABLERO_NIVEL`) y de CLAUDE.md §11.
 - Lo que no esté va en **naranja con (*)** y en las notas como «a confirmar». Ejemplos: medida del ladrillo, referencia de la malla a 300, espesor del telgopor, separación entre caños.

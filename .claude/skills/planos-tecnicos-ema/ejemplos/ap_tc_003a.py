@@ -30,10 +30,11 @@ h.path(f"M{mR},{Y0+50*k} L{mR},{yE} L{pR0},{yE} L{pR1+(pR0-pR1)*(50/1000)},{Y0+5
 h.rect(mL,Y0,pL1-mL,50*k,"url(#CONCP)",K,.5); h.rect(pR1,Y0,mR-pR1,50*k,"url(#CONCP)",K,.5)
 # telgopor del lado de la zanja: borde de abajo a 350 del fondo del hueco (= -650)
 tg=R-mR; yT=yE-350*k; CA=50*k   # canal de la acometida: del molde a la cara de la zanja, desde el piso hasta -650
-h.rect(mR,Y0,tg,yT-Y0-CA,"url(#FOAM)",K,.9)
-# caño de la acometida (Ø50, a confirmar) apoyado en el fondo del canal, de la zanja a la entrada «C»
-yc1=yT-CA; h.rect(pR0,yc1,R+200*k*0.6-pR0,CA,"#fff",K,1.1)
-h.ln(pR0,yT-CA/2,R+200*k*0.6,yT-CA/2,"#7b3f1d",2.4)
+h.rect(mR,Y0,tg,yT-Y0,"url(#FOAM)",K,.9)
+# cable de la acometida: sale de la zanja, va por el fondo del canal del telgopor y entra en la «C»
+yc1=yT-CA; ycab=yT-4
+h.path(f"M{R+200*k*0.5},{zz-75*k} C{R+10},{zz-75*k} {R+5},{ycab} {R-10},{ycab} L{pR0+2},{ycab}","none","#111",6)
+h.path(f"M{R+200*k*0.5},{zz-75*k} C{R+10},{zz-75*k} {R+5},{ycab} {R-10},{ycab} L{pR0+2},{ycab}","none","#555",1.2)
 h.rect(pR0-3,yc1-2,5,CA+4,"#111",K,.4)   # entrada «C» del poste
 h.txt(pR0-8,yc1-6,"C",11,700,K,"end")
 # línea de corte B-B por el medio de la acometida
@@ -52,7 +53,7 @@ h.dimH(yF+24,L,R,"600",ext=yF+2); h.dimH(Y0-24,mL,mR,"Ø247",ext=Y0-2)
 h.dimH(yE+34,pL0,pR0,"Ø197",ext=yE+2,dy=14)
 gx=420
 h.globo("1",L+12,Y0+260*k,gx,170); h.globo("2",mL+6,Y0+420*k,gx,215,K); h.globo("3",pL1+8,Y0+300*k,gx,255)
-h.globo("4",mR+tg*.7,Y0+250*k,gx,295); h.globo("5",pL1+3,Y0+8*k,gx,135); h.globo("6",cx,yF-10,gx,yF-20); h.globo("7",R+10,yT-CA/2,gx,yT+20)
+h.globo("4",mR+tg*.7,Y0+250*k,gx,295); h.globo("5",pL1+3,Y0+8*k,gx,135); h.globo("6",cx,yF-10,gx,yF-20); h.globo("8",R-12,ycab,gx,yT+20); h.globo("7",pR1-4,Y0-40,gx,95)
 # ======== PLANTA
 h.titulo(500,62,"PLANTA","ESC. 1:20")
 pcx,pcy=650,230; s=0.3
@@ -61,6 +62,7 @@ h.circ(pcx,pcy,DM/2*s,"url(#SAND)",K,1); h.circ(pcx,pcy,DT/2*s,"#fff",K,1.2)
 h.circ(pcx,pcy,DT/2*s-3,"none",K,.4)
 WS=150
 h.rect(pcx+DM/2*s,pcy-WS/2*s,B/2*s-DM/2*s,WS*s,"url(#FOAM)",K,.9)
+h.ln(pcx+DT/2*s,pcy,pcx+B/2*s+40,pcy,"#111",2.2,h.OCULTA)
 xbp=pcx+(DM/2+B/2)/2*s
 h.ln(xbp,pcy-B/2*s-22,xbp,pcy+B/2*s+22,K,1,h.EJE)
 for yy in (pcy-B/2*s-22,pcy+B/2*s+22): h.ln(xbp-7,yy,xbp+7,yy,K,1.8)
@@ -87,12 +89,16 @@ h.rect(60,by,bl-60,P*kb+14,"url(#EARTH)",K,0); h.rect(br,by,400-br,P*kb+14,"url(
 h.path(f"M{bl},{by} V{byF} H{br} V{by} Z","url(#CONC)",K,1.6)
 sl,sr=bx-WS/2*kb,bx+WS/2*kb; ys=by+650*kb
 h.rect(sl,by,WS*kb,650*kb,"url(#FOAM)",K,1)
-h.cano(bx,ys-25*kb,25*kb*1.25,21*kb*1.25,"#fff"); h.cable(bx,ys-25*kb,4.2,True,False)
+h.cable(bx,ys-5,4.6,True,False)
+# variante con caño PEAD
+vx,vy=380,by+150
+h.circ(vx,vy,26,"#fff",K,.7,'stroke-dasharray="3 2"'); h.cano(vx,vy,16,13); h.cable(vx,vy+3,7,True,False)
+h.txt(vx,vy+42,"VARIANTE: CAÑO",9.5,700,K,"middle"); h.txt(vx,vy+54,"PEAD Ø50 (*)",9.5,700,OR,"middle")
 h.path(f"M{bl},{by} H60 M{br},{by} H400","none",K,1.6)
 h.dimH(by-14,bl,br,"600",ext=by-2); h.dimH(byF+22,sl,sr,"150 (*)",ext=byF+2,c=OR,dy=12)
 h.dimV(br+20,by,ys,"650",ext=br+2); h.dimV(br+42,by,byF,"1200",ext=br+22)
-h.globo("4",sl+4,by+40,425,by+40); h.globo("8",bx+5,ys-25*kb,425,ys-6)
-h.txt(438,ys-2,"CAÑO Ø50 (*)",10.5)
+h.globo("4",sl+4,by+40,425,by+40); h.globo("8",bx+4,ys-6,425,ys-6)
+h.txt(438,ys-2,"CABLE",10.5)
 h.txt(438,by+44,"TELGOPOR",10.5)
 # ======== notas
 h.notas(40,925,["COTAS EN mm. DOSIFICACION H-13 1:2,5:4 (5,2 BOLSAS, 0,55 m³ ARENA, 0,80 m³ PIEDRA, 170 L AGUA POR m³).",
@@ -100,7 +106,8 @@ h.notas(40,925,["COTAS EN mm. DOSIFICACION H-13 1:2,5:4 (5,2 BOLSAS, 0,55 m³ AR
 "TELGOPOR CONTRA EL MOLDE, DEL LADO DE LA ZANJA, CON SU BORDE DE ABAJO A 350 DEL FONDO DEL HUECO: PASO DEL CABLE A LA ENTRADA «C».",
 "ARENA FINA SECA COMPACTADA EN CAPAS HASTA 50 BAJO EL PISO; LOS ULTIMOS 50, SELLO. FRAGUADO 72 h ANTES DEL IZAJE.",
 "(*) EL DIBUJO DICE «MORTERO» Y LA NOTA «SELLO DE HORMIGON»: CONFIRMAR CUAL. CLAUDE.md DICE 0,4057 m³: VALE 0,403 (VERIFICADO).",
-"(*) ANCHO DEL CANAL (150) Y CAÑO DE LA ACOMETIDA (Ø50): NO ESTAN ACOTADOS EN LA FICHA, CONFIRMAR CON EL PLANO."])
+"LA ACOMETIDA SE HACE CON TELGOPOR (LO QUE SE USA HOY) O CON CAÑO PEAD: LAS DOS VALEN.",
+"(*) ANCHO DEL CANAL (150) Y Ø DEL CAÑO DE LA VARIANTE: CONFIRMAR CON EL PLANO."])
 # ======== 3D
 h.titulo(890,62,"VISTA 3D EN CORTE - FUNDACION PRFV 7 m","CORTADA A UN CUARTO PARA VER EL MOLDE, EL POSTE, LA ARENA Y EL TELGOPOR")
 h.iso(.27,1190,290)
@@ -126,8 +133,10 @@ cara_y(c0+rm,Bz,-650+50,0,"url(#foam3)")
 for z in range(-560,0,40):
     a1=h.P(c0+rm,c0,z); b1=h.P(Bz,c0,z); h.ln(*a1,*b1,"#bbb",.5)
 # canal del cable al borde exterior (+x) a la altura de la entrada «C»
-h.tuboX(c0+rp0,Bz+260,c0,-625,25,"url(#pead)","#000")
-h.poly3(h.circX(Bz+260,c0,-625,25),"#2a2a2a","#000",.7); h.poly3(h.circX(Bz+262,c0,-625,12,16),"#7b3f1d","#000",.5)
+h.tuboX(c0,Bz+300,c0,-632,16,"url(#cyl)","#000")
+h.poly3(h.circX(Bz+300,c0,-632,16),"#1c1c1c","#000",.6); h.poly3(h.circX(Bz+301,c0,-632,13.5),"#c8c8c8","#000",.3)
+for i,col in enumerate(["#7b3f1d","#1a1a1a","#c62828","#4fa3d9"]):
+    ang=math.radians(45+90*i); h.poly3(h.circX(Bz+302,c0+7*math.cos(ang),-632+7*math.sin(ang),5,12),col,"#000",.3); h.poly3(h.circX(Bz+303,c0+7*math.cos(ang),-632+7*math.sin(ang),2.6,10),"#d08a3f","#000",.2)
 # desagüe
 cara_y(c0,c0+13,-Pz,-Ez,"#fff"); cara_x(c0,c0+13,-Pz,-Ez,"#fff")
 # poste (cono) entero arriba y su mitad en el corte
@@ -140,10 +149,10 @@ h.g3("4",(c0+rm+80,c0,-300),GX,440,"TELGOPOR (CANAL)")
 h.g3("5",(c0+rm*.8,c0,-25),GX,510,"SELLO (*)")
 h.g3("6",(c0+6,c0,-Pz+100),GX,580,"DESAGUE PVC Ø25,4")
 h.g3("7",(c0,c0,420),GX,160,"POSTE PRFV 7 m (SIGUE)")
-h.g3("8",(Bz+200,c0,-600),GX,650,"CAÑO ACOMETIDA Ø50 (*)")
+h.g3("8",(Bz+220,c0,-620),GX,650,"CABLE (POR EL CANAL)")
 # lista de materiales
 h.tabla(890,780,[(40,"c",False),(460,"l",False),(110,"c",True),(140,"c",False)],
- [("POS.","DESCRIPCION","CANT.","CODIGO"),("1","HORMIGON H-13 (1:2,5:4)","0,403 m³","-"),("2","MOLDE CAÑO PVC Ø250 COMERCIAL (Ø base + 50 = 247)","1 m","A VINCULAR"),("3","ARENA FINA SECA, COMPACTADA EN CAPAS","~0,018 m³","A VINCULAR"),("4","TELGOPOR, DEL LADO DE LA ZANJA (*)","1 u","A VINCULAR"),("5","SELLO DE BASE, 50 mm (*)","-","A VINCULAR"),("6","CAÑO PVC Ø25,4 DE DESAGUE","0,2 m","A VINCULAR"),("7","POSTE PRFV 7 m (AP-C-033-A)","1 u","SEGUN PAÑOL"),("8","CAÑO DE LA ACOMETIDA Ø50 (*), DE LA ZANJA A LA «C»","~0,6 m","A VINCULAR")],
+ [("POS.","DESCRIPCION","CANT.","CODIGO"),("1","HORMIGON H-13 (1:2,5:4)","0,403 m³","-"),("2","MOLDE CAÑO PVC Ø250 COMERCIAL (Ø base + 50 = 247)","1 m","A VINCULAR"),("3","ARENA FINA SECA, COMPACTADA EN CAPAS","~0,018 m³","A VINCULAR"),("4","TELGOPOR, DEL LADO DE LA ZANJA (*)","1 u","A VINCULAR"),("5","SELLO DE BASE, 50 mm (*)","-","A VINCULAR"),("6","CAÑO PVC Ø25,4 DE DESAGUE","0,2 m","A VINCULAR"),("7","POSTE PRFV 7 m (AP-C-033-A)","1 u","SEGUN PAÑOL"),("8","CABLE DE LA ACOMETIDA: DE LA ZANJA A LA «C», POR EL CANAL","~0,6 m","SEGUN CALCULO"),("9","VARIANTE: CAÑO PEAD Ø50 (*) EN LUGAR DEL TELGOPOR","~0,6 m","A VINCULAR")],
  rowh=22,titulo="LISTA DE MATERIALES (1 FUNDACION)",colores=lambda i,j,t: OR if t=="A VINCULAR" else K)
 h.rotulo(890,h.H-150,750,"AP-TC-003-A","FUNDACION DE HORMIGON","PARA POSTE PRFV 7 m","CORTE, PLANTA, CUADRO, COMPUTO Y VISTA 3D","1:20","3D S/E",fecha="07/11/2026")
 h.guardar("ap_tc_003a.svg"); print("ok")
