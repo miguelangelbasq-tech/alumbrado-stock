@@ -2,6 +2,31 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v130 — 07/11/2026 · Mis tareas por tarjetas, «te faltan fotos» con el porqué y galería con quién sacó cada foto
+
+**Pedido de Ángel** (eligió los modelos en imágenes antes)
+- «Que se distingan bien las tareas… tarjetas por cada tarea, con una flecha a la derecha o izquierda que te lleva a otra… el nombre un poco más grande.» «Hiciste 3 de 5, te quedan 2, en verde y rojo» (chiquito). «Si no sacó alguna foto, que lo deje cerrar pero que le salga "te faltan…"… y que ponga por qué.» «Entrar a la foto del tablero y ver quién la sacó… como galería.»
+
+**Cambios** (`tareasTarjetas`; con `__ofCompat` o `__mtTarjetasNo` no aparece)
+- **Una tarea por vez:** con 2 o más tareas tuyas en la orden, se ve una sola tarjeta con ‹ › (o deslizando con el dedo) y puntitos (verde mandada, rojo «no se hizo»). Arranca en la primera sin mandar y, al mandar una, pasa sola a la siguiente. El nombre de la tarea va más grande (22 px).
+- **Arriba, una línea finita:** «✅ 3 de 5 hechas ▬ 2 te quedan» (cuenta las tareas mandadas).
+- **Te faltan fotos:** «📤 Listo, enviar esta tarea» con fotos sin sacar ya no frena. Sale «⚠ Te faltan N fotos» con cuáles, y dos opciones:
+  - «📷 Sacar las que faltan» (lleva a la primera);
+  - «Enviar igual», que pide el porqué: sin batería / celu roto, no se ve (de noche), no había acceso, u otro con texto.
+  - Queda en `campo.sinFotos.<tarea>.<persona>` y la oficina lo ve en el cierre de esa tarea (`.ff-cierre`).
+- **Galería de cada foto pedida:** tocando una foto pedida ya sacada (ej. «Tablero por dentro ›»), se abre su galería con cada foto, quién la sacó y la hora, más «📷 Sacar otra» (hasta 4). Tocando una se ve grande.
+- En la base: ganchos `__mtTareaCab` (arriba de cada tarea) y `__mtProgHtml` (la línea de arriba) en la plantilla de Mis tareas, y `__fotosFaltanPop` en el envío de la tarea.
+- Arnés: `tarjetas:true` prende las tarjetas; las pruebas viejas siguen viendo todas las tareas juntas (`__mtTarjetasNo`).
+
+**Pruebas**
+- `t_v130` 10/10 en PC y 11/11 en celular.
+- Batería completa (incluye la v129) en PC y celular: todo OK salvo `t_v083` (reemplazada por `t_v084`).
+
+**Huellas** (sello «2026-11-07 12:05 · 0c3700
+([^»)
+- `index.html`: `8205c2f724258adbd0f0e78892671de097e5c1883475c1ecd896efbf13708fc0`
+- `130_2026-11-07_app-EMA_ORIGINAL.html`: `75e2c2ffffcef14ffcb8cf556eab86c42fd61cfb20215794c7f6515f88b8d947`
+
 ## v129 — 07/11/2026 · Cierre: las horas que puso la cuadrilla y «✅ Aprobar» por tarea o todo junto
 
 **Pedido de Ángel**
@@ -17,7 +42,7 @@ Autor: Miguel Ángel Díaz © 2026
 - En la base: `guardarCierreOt` llama a `__aprobFiltrar(t, d)` (solo las aprobadas al aprobar una) y guarda `aprobadas` (`__aprobLeer`).
 
 **Pruebas**
-- `t_v129` 9/9 en PC y 10/10 en celular.
+- `t_v129` 9/9 en PC y 10/10 en celular. Se entrega junto con la v130 (la batería completa se corrió sobre la v130).
 
 ## v128 — 07/11/2026 · En el cierre, por tarea: repartir sus puntos, pasar lo que falta a otro día y corregir la tarea; fotos más rápidas; tarea en una orden sin cerrar; «Unir» que no vuelve a aparecer
 
