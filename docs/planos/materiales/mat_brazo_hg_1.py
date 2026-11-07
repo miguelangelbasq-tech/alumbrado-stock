@@ -9,7 +9,7 @@ h = nueva(); m = h.m
 k = 0.14; PX, YB = 150, 470          # PX = cara del poste, YB = abrazadera de abajo
 h.titulo(40, 62, "ELEVACION - BRAZO MONTADO", "ESC. 1:30 - COTAS EN mm - SOBRE POSTE H°A° Ø≈220 (*)")
 DP = 220
-h.rect(PX - DP * k, 90, DP * k, 440, "url(#CONC)", K, 1.4)                 # poste (cara)
+h.rect(PX - DP * k, 90, DP * k, 410, "url(#CONC)", K, 1.4)                 # poste (cara)
 L = 2130; ZB = 600                   # separación vertical abrazadera brazo ↔ abrazadera tensor (*)
 yA = YB - ZB * k                     # abrazadera de arriba (brazo)
 for yy in (yA, YB): h.rect(PX - DP * k - 6, yy - 8, DP * k + 12, 16, "url(#STEEL)", K, 1)
@@ -20,13 +20,13 @@ xt = PX + 0.55 * L * k; yt = yA - rise * k * .55
 h.path(f"M{PX},{YB-3} L{xt},{yt+2} L{xt+3},{yt+5} L{PX},{YB+3} Z", "#fff", K, 1)                                      # tensor (*)
 h.rect(PX + L * k - 6, yA - rise * k - 14, 70, 22, "#fff", K, .7, 'stroke-dasharray="4 2"'); h.txt(PX + L * k + 30, yA - rise * k - 20, "LUMINARIA LED", 9, 700, K, "middle")
 h.dimH(yA - rise * k - 50, PX - DP * k, PX + L * k, "LARGO TOTAL 2.130", ext=yA - rise * k - 16)
-h.dimV(PX + L * k + 36, yA - rise * k, yA, "150 (*)", ext=PX + L * k + 2, c=OR)
+h.dimV(PX + L * k + 72, yA - rise * k, yA, "150 (*)", ext=PX + L * k + 2, c=OR)
 h.dimV(PX - DP * k - 26, yA, YB, "600 (*)", ext=PX - DP * k - 8, c=OR)
 h.dimH(YB + 50, PX - DP * k, PX, "Ø≈220 (*)", ext=YB + 10, c=OR)
 h.globo("1", PX + 200, yA - 19, 230, 200); h.globo("2", PX + 100, YB - 40, 260, 500, OR); h.globo("3", PX - DP * k - 6, yA, 60, 250)
 h.globo("4", PX - DP * k - 6, YB, 60, 430); h.globo("5", PX + L * k + 30, yA - rise * k - 4, 500, 200)
 corteMarca(h, PX - DP * k - 30, yA - 18, PX + 30, yA - 18, "A")
-h.txt(PX - DP * k + 4, 530 + 16, "POSTE (6501 · 6023 · 6502)", 9.5, 400, G)
+h.txt(PX - DP * k + 4, 548, "POSTE (6501 · 6023 · 6502)", 9.5, 400, G)
 
 # ======================= CORTE A-A · ABRAZADERA (1:5)
 h.titulo(560, 62, "CORTE A-A", "ABRAZADERA DEL BRAZO - ESC. 1:7 - ESQUEMA (*)")
@@ -41,7 +41,7 @@ for sx in (-1, 1):
 h.rect(cx - 30, cy - R - 64, 60, 58, "#fff", K, 1.1); h.txt(cx, cy - R - 32, "ACOPLE", 9, 700, K, "middle")
 h.circ(cx, cy - R - 35, 19, "#fff", K, 1.1); h.circ(cx, cy - R - 35, 16, "url(#STEEL)", K, .7)
 h.dimH(cy + R + 32, cx - R, cx + R, "Ø DEL POSTE (SE MIDE)", ext=cy + 8)
-h.txt(cx + R + 26, cy - 34, "2 BULONES Ø12 × 90 (*)", 9.5, 400, OR)
+h.txt(cx, cy + R + 78, "2 BULONES Ø12 × 90 POR ABRAZADERA (*)", 9.5, 400, OR, "middle")
 h.txt(cx, cy + R + 52, "ABRAZADERA POR Ø: ≤140 · ≤200 · ≤220 · ≤240 · ≤260 · ≤300 · +", 9, 400, G, "middle")
 h.txt(cx, cy + R + 64, "(CODIGOS 4001…4008, FICHA «HERRAJES»)", 9, 400, G, "middle")
 h.globo("3", cx - R - 5, cy - 30, 600, 160); h.globo("1", cx, cy - R - 35, 760, 130)

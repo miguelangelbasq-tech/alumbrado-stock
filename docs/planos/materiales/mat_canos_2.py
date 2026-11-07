@@ -102,7 +102,7 @@ h.g3b("2", (-60 + Rb, 0, Rb + 90), 1420, 175, "CABLE QUE SALE POR EL CAÑO")
 h.txt(900, 400, "PEAD: SE CURVA, VA SIN UNIONES EN EL TRAMO (*)", 10.5, 400, OR, "start", INT)
 
 # corrugado + grampa sobre una pared
-h.iso(1.25, 1140, 560)
+h.iso(1.0, 1110, 520)
 h.BOX(-60, 260, -40, -34, -60, 60, "#d6d9dc", "#b9bec4", "#c3c8cc", "#555", .6)
 m = M3(h)
 Re, Ri = 11, 8.4
@@ -137,8 +137,7 @@ for xg in (40, 150):
 h.g3b("3", (100, -22, Re), 1420, 470, "CORRUGADO 3/4\" (5006)")
 h.g3b("4", (150 + 7, -34 + 1, Re + 6), 1420, 515, "GRAMPA (5015) CON TORNILLO")
 h.g3b("5", (xx + 40, -22, 3.6), 1420, 560, "CABLE 1 × 10 V/A (PAT)")
-X, Y = h.P(-60, -40, 60); h.txt(X - 10, Y - 12, "PARED (EJEMPLO DE MONTAJE)", 10, 400, G, "start", INT)
-h.txt(900, 690, "Medidas del corrugado y la grampa: ilustrativas (*).", 10.5, 400, OR, "start", INT)
+h.txt(900, 690, "Montaje de ejemplo sobre una pared. Medidas del corrugado y la grampa: ilustrativas (*).", 10.5, 400, OR, "start", INT)
 
 h.bloque(890, 730, "DATOS TECNICOS", [
     "PEAD Ø50 PN6: POLIETILENO DE ALTA DENSIDAD, NEGRO",

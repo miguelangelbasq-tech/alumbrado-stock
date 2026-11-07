@@ -169,8 +169,7 @@ g(h, (1050, 100, -680), X + 14, py + 292, "cable sobre la arena")
 cx, top, w, dd, k = plano(h, X, py, 4, "CORTE · CABLE TENDIDO")
 h.dimV(cx + w / 2 + 52, top + dd - 75 * k, top + dd, "75", ext=cx + w / 2 + 2)
 h.llamadaDet(cx, top + dd - 75 * k, 7, "D1")
-cara_cable(h, cx, top + 80, 22); h.txt(cx, top + 116, "D1", 10, 700, K, "middle")
-h.txt(cx, py + 278, "D1: 4 × S Cu XLPE · L1 L2 L3 N", 9, 400, K, "middle")
+cara_cable(h, cx, top + 80, 22); h.txt(cx, top + 116, "D1", 10, 700, K, "middle"); h.txt(cx, top + 130, "L1 L2 L3 N", 8.5, 400, K, "middle")
 X = W / 2 + 18
 py = panel(h, X, 5, "Arena arriba y ladrillos",
            ["5 cm de arena sobre el cable (paquete de 0,15 m).",
@@ -241,7 +240,7 @@ cx0, cy0 = X + 300, py + 40; chk(h, cx0, cy0)
 h.txt(cx0 - 16, cy0 + 5, "cerrada hoy", 12, 800, "#14632b", "end", INT)
 g(h, (1100, -200, 0), X + 326, py + 112, "mortero 2 cm", "end")
 g(h, (L, -200, -60), X + 326, py + 150, "contrapiso 8 cm", "end")
-g(h, (L, 100, -400), X + 230, py + 290, "relleno compactado", "start")
+g(h, (L, 100, -400), X + 326, py + 290, "relleno compactado", "end")
 # plano: corte bajo vereda
 k = .27; cx, top = X + 338 + 106, py + 58; w = AZ * k; dd = PZ * k
 h.rect(cx - w / 2 - 40, top, w + 80, dd + 12, "url(#EARTH)", K, 0)

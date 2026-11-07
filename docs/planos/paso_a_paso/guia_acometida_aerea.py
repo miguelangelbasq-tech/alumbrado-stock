@@ -279,6 +279,6 @@ h.txt(px + 106, py2 + 290, "D4: LLEGADA AL NH", 10, 700, K, "middle")
 X = W / 2 + 18
 asi_queda(h, X, "../hojas/ap_t_019.png", (1330, 75, 2485, 830), "Plano completo: AP-T-019 (con AP-T-018, apoyo PRFV).", "guía «Puesta a tierra y medición».",
           "Morsetos firmes y con la cabeza cortada, capuchones puestos, vano sin tensión exagerada, entrada sellada, ojales comprimidos. No energizar hasta que esté verificado todo lo de aguas abajo. Foto: «Conexión / acometida».",
-          ["si la conexión se hace con corte o con tensión y el EPP exacto (EPEC)."])
+          ["si la conexión se hace con corte o con tensión y el EPP exacto (EPEC)."], nombre="acometida_aerea_fin.png")
 h.guardar(f"{ID}_p5.svg")
 print("ok")

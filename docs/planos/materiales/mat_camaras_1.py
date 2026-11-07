@@ -45,22 +45,21 @@ h.txt(60, y0 + 360, "ZC: EJE DE LOS CAÑOS. EL PLANO PIDE PROFUNDIDAD MAXIMA 0,6
 
 # ============ PLANTA
 h.titulo(620, 62, "PLANTA · SIN TAPA", "ESC. 1:8")
-k2 = .42; px, py = 720, 170; L = 400 * k2
+k2 = .36; px, py = 700, 140; L = 400 * k2
 h.rect(px - T * k2, py - T * k2, L + 2 * T * k2, L + 2 * T * k2, K, K, .3); h.rect(px, py, L, L, "#fff", K, .8)
 h.rect(px - 10, py - 10, L + 20, L + 20, "none", K, .6, 'stroke-dasharray="5 3"')
 for xa, xb in ((px - 70, px - T * k2), (px + L + T * k2, px + L + 60)):
     h.rect(xa, py + L / 2 - 55 * k2, xb - xa, 110 * k2, "#fff", K, .9)
 h.circ(px + L / 2, py + L / 2, 3, K, K, 0)
 h.ln(px - 80, py + L / 2, px + L + 70, py + L / 2, K, .5, h.EJE)
-for xx, lab in ((px - 80, "A"), (px + L + 70, "A")):
+for xx, lab in ((px - 80, "A"), (px + L + 66, "A")):
     h.ln(xx, py + L / 2 - 14, xx, py + L / 2 + 14, K, 1.4); h.txt(xx, py + L / 2 - 18, lab, 12, 700, K, "middle")
-h.dimH(py + L + 30, px, px + L, "400", ext=py + L)
-h.dimV(px + L + 30 + 50, py, py + L, "400", ext=px + L)
+h.dimH(py + L + 30, px, px + L, "400 × 400 INT.", ext=py + L)
 h.txt(px + L / 2, py + L + 60, "LINEA DE TRAZOS: MARCO DE BRONCE", 9.5, 400, G, "middle")
 
 # ============ D1 MARCO Y TAPA
-h.titulo(620, 360, "DETALLE D1 · MARCO Y TAPA", "ESC. 1:2 · BRONCE · MEDIDAS DEL PERFIL (*)")
-dx, dy, kd = 640, 430, 1.6
+h.titulo(620, 400, "DETALLE D1 · MARCO Y TAPA", "ESC. 1:2 · BRONCE · MEDIDAS DEL PERFIL (*)")
+dx, dy, kd = 640, 480, 1.6
 h.rect(dx, dy, 120, 10, "url(#CONC)", K, .8)                 # solado
 h.path(f"M{dx+120},{dy} h40 v-2 h-30 v40 h-10 z", "url(#BRZ)", K, 1)    # marco (perfil L) (*)
 h.rect(dx + 132, dy - 6, 70, 6, "url(#BRZ)", K, 1.2)           # tapa
@@ -69,7 +68,7 @@ h.rect(dx + 112, dy + 10, 8, 50, K, K, .3)                     # pared de la cá
 h.flecha_llamada(dx + 125, dy + 30, dx + 50, dy + 70, "MARCO (*)", 10, "end")
 h.flecha_llamada(dx + 116, dy + 50, dx + 50, dy + 92, "PARED CAMARA", 10, "end")
 h.dimH(dy - 26, dx + 132, dx + 202, "(*)", ext=dy - 6, c=OR)
-h.txt(dx, dy + 125, "TAPA A NIVEL DEL SOLADO TERMINADO.", 10, 400, K)
+h.txt(dx + 180, dy + 60, "TAPA A NIVEL", 10, 400, K); h.txt(dx + 180, dy + 74, "DEL SOLADO", 10, 400, K)
 
 # ============ CODIGOS / DATOS
 EX = {5003: "40 × 40 · h ≤ 50", 5016: "bronce · «A.P.»", 5017: "1 por boca"}
@@ -90,7 +89,7 @@ h.notasM(40, 860, [
 
 # ============ 3D
 h.titulo(890, 62, "VISTA 3D · CAMARA CORTADA A UN CUARTO Y TAPA LEVANTADA", "PVC GRIS CLARO · MARCO Y TAPA DE BRONCE · MASILLA EN LAS BOCAS · ARENA")
-h.iso(.56, 1250, 470)
+h.iso(.42, 1240, 560)
 A = 200; ZC_ = HC - ZC
 h.caja(-280, 280, -280, 280, -60, 0, C_ARENA, "arenaT", "#8a6a2a", .6)
 # caño izquierdo (atrás) y pared trasera / izquierda
@@ -118,13 +117,12 @@ h.caja(-A + 4, A - 4, -A + 4, A - 4, zt, zt + 8, C_BRONCE, None, "#6b4a12", .7)
 h.txtZ(0, 0, zt + 8, "A.P.", 40, 800, "#6b4a12", "middle")
 for xx in (-A - 20, A + 20):
     a = h.P(xx, A + 20, HC + 4); b = h.P(xx, A + 20, zm); h.ln(a[0], a[1], b[0], b[1], NV, .6, 'stroke-dasharray="4 3"')
-h.g3b("1", (-A - T, 120, 300), 1450, 170, "CAMARA PVC 40 × 40 (5003)")
-h.g3b("2", (A, 0, zt + 4), 1450, 120, "MARCO Y TAPA «A.P.» (5016)")
+h.g3b("1", (-A - T, 120, 300), 1450, 230, "CAMARA PVC 40 × 40 (5003)")
+h.g3b("2", (A - 4, 0, zt + 4), 1450, 150, "MARCO Y TAPA «A.P.» (5016)")
 h.g3b("3", (A + T + 3, -100, ZC_ + 60), 1450, 300, "MASILLA EN LA BOCA (5017)")
 h.g3b("4", (420, -100, ZC_ + 55), 1450, 360, "CAÑO Ø110 DEL CRUCE")
-h.g3b("5", (200, 260, -30), 1450, 610, "ARENA DE ASIENTO (*)")
+h.g3b("5", (200, 260, -30), 1450, 640, "ARENA DE ASIENTO (*)")
 h.cota3((-A, A + T, 0), (-A, A + T, HC), "≤ 500", off=(-60, 0, 0), c=NV, sz=10, lado=-1)
-h.cota3((-A, A + 20, zt + 8), (0, A + 20, zt + 8), "200 (MITAD)", off=(0, 60, 0), c=NV, sz=9.5, lado=1)
 
 h.bloque(890, 730, "DATOS TECNICOS", [
     "CAMARA DE PVC TIPO DESAGÜE CLOACAL, 40 × 40 cm INTERIOR",

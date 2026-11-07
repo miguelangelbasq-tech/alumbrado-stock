@@ -74,10 +74,10 @@ def antes(h, filas, materiales, x0=40, extra=None):
     return y
 
 
-def asi_queda(h, X, png, crop, ref, sigue, control, pendientes):
+def asi_queda(h, X, png, crop, ref, sigue, control, pendientes, nombre=None):
     """crop = (x0,y0,x1,y1) en px de la PNG de la hoja; recorta con PIL y lo pone en el recuadro"""
     from PIL import Image
-    im = Image.open(png).crop(crop); nombre = png.split("/")[-1].replace(".png", "_3d.png"); im.save(nombre)
+    im = Image.open(png).crop(crop); nombre = nombre or png.split("/")[-1].replace(".png", "_3d.png"); im.save(nombre)
     h.txt(X, 128, "ASÍ QUEDA", 18, 800, "#28285E", "start", INT)
     h.rect(X, 140, 550, 400, "#f7f8fc", "#d5d9e6", 1, 'rx="12"')
     h.a(f'<image href="{nombre}" x="{X+10}" y="150" width="530" height="380" preserveAspectRatio="xMidYMid meet"/>')
@@ -152,15 +152,16 @@ def morseto(h, x, y, z, e=1.0, abierto=False, cabeza="si", linea=True, deriv=Tru
     zl, zd = z + 26 * e + g, z - 26 * e   # ejes de los canales
     if linea: tubo(h, (x - lin_len * e, y, zl), (x + lin_len * e, y, zl), 10 * e, "#1a1a1a", "#666")
     if deriv: tubo(h, (x - der_len * e, y, zd), (x + 30 * e, y, zd), 7 * e, col_der, "#888", cap="butt")
-    # mordazas de nylon
+    # bulón abajo (asoma), mordaza de abajo, bulón en la abertura, mordaza de arriba, bulón/tuerca/cabeza arriba
+    h.tuboZ(z - 60 * e, z - 48 * e, x, y, 5 * e, 5 * e, "url(#galv)", "#444")
     h.BOX(x - 30 * e, x + 30 * e, y - 24 * e, y + 24 * e, z - 48 * e, z - 4 * e, "#3a3a3a", "url(#nylon)", "#262626", "#000", .7)
+    for k in range(-2, 3): lin3(h, (x + k * 10 * e, y + 24 * e, z - 5 * e), (x + k * 10 * e + 3 * e, y + 24 * e, z - 1 * e), "#d6b36a", 1.4)
+    h.tuboZ(z - 4 * e, z + 4 * e + g, x, y, 5 * e, 5 * e, "url(#galv)", "#444")
     h.BOX(x - 30 * e, x + 30 * e, y - 24 * e, y + 24 * e, z + 4 * e + g, z + 48 * e + g, "#3a3a3a", "url(#nylon)", "#262626", "#000", .7)
-    # dientes de cobre estañado a la vista entre mordazas
-    for k in range(-2, 3): lin3(h, (x + k * 10 * e, y + 24 * e, z - 4 * e), (x + k * 10 * e + 3 * e, y + 24 * e, z + 4 * e + g), "#d6b36a", 1.4)
+    if not linea: h.F3(h.circX(x + 30 * e, y, zl, 10 * e, 24), "#0b0b0b", "#000", .5)
     # capuchón del canal de derivación
     h.BOX(x + 30 * e, x + 44 * e, y - 12 * e, y + 12 * e, zd - 12 * e, zd + 12 * e, "#2a2a2a", "#1c1c1c", "#333", "#000", .6)
-    # bulón, tuerca y cabeza fusible
-    h.tuboZ(z - 60 * e, z + 62 * e + g, x, y, 5 * e, 5 * e, "url(#galv)", "#444")
+    h.tuboZ(z + 48 * e + g, z + 62 * e + g, x, y, 5 * e, 5 * e, "url(#galv)", "#444")
     h.tuboZ(z + 48 * e + g, z + 60 * e + g, x, y, 11 * e, 11 * e, "url(#galv)", "#444")
     if cabeza == "si": h.tuboZ(z + 60 * e + g, z + 74 * e + g, x, y, 9 * e, 9 * e, "url(#galv)", "#444")
     if pf:   # portafusible Neozed al costado
@@ -169,13 +170,17 @@ def morseto(h, x, y, z, e=1.0, abierto=False, cabeza="si", linea=True, deriv=Tru
     return zl, zd
 
 
-def g(h, p, tx, ty, t, anc="start"):
-    x, y = h.P(*p); h.ln(x, y, tx - (4 if anc == "start" else -4), ty - 4, NV, .8); h.circ(x, y, 2.4, NV, NV, 0)
-    h.txt(tx, ty, t, 11.5, 700, NV, anc, INT)
-
-
 def g2(h, x, y, tx, ty, t, anc="start"):
-    h.ln(x, y, tx - (4 if anc == "start" else -4), ty - 4, NV, .8); h.circ(x, y, 2.4, NV, NV, 0); h.txt(tx, ty, t, 11.5, 700, NV, anc, INT)
+    L = 6.4 * len(t)
+    if anc == "start": ax = tx - 4 if x <= tx + L / 2 else tx + L + 4
+    elif anc == "end": ax = tx + 4 if x >= tx - L / 2 else tx - L - 4
+    else: ax = tx
+    ay = ty - 4 if anc != "middle" else (ty + 4 if y > ty else ty - 14)
+    h.ln(x, y, ax, ay, NV, .8); h.circ(x, y, 2.4, NV, NV, 0); h.txt(tx, ty, t, 11.5, 700, NV, anc, INT)
+
+
+def g(h, p, tx, ty, t, anc="start"):
+    x, y = h.P(*p); g2(h, x, y, tx, ty, t, anc)
 
 
 def rotar(h, cx, cy, r, sentido=1, txt=None, col="#c2410c"):

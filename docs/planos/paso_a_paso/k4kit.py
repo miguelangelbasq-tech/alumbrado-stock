@@ -32,10 +32,10 @@ def pagina(n, total, titulo, sub, plano):
 
 
 def caja_txt(h, x0, y, texto, fondo, borde, color, signo, ancho=550, n=60):
-    ws = wrap(texto, n); hh = 16 + len(ws) * 19
+    ws = wrap(signo + " " + texto, n); hh = 16 + len(ws) * 19
     h.rect(x0, y, ancho, hh, fondo, borde, 1.2, 'rx="10"')
     for i, w in enumerate(ws):
-        h.txt(x0 + 12, y + 20 + i * 19, (signo + " " if i == 0 else "  ") + w, 14, 700, color, "start", INT)
+        h.txt(x0 + 12, y + 20 + i * 19, w, 14, 700, color, "start", INT)
     return y + hh + 10
 
 
@@ -92,9 +92,9 @@ def asi_queda(h, x0, img, plano, sigue, control, pend, alto=420):
     y = 140 + alto + 14
     h.txt(x0, y + 6, f"Plano completo: {plano} (cortes, cómputo y materiales).", 13, 600, "#4B5670", "start", INT)
     y += 18
-    y = caja_txt(h, x0, y, control, "#eefaf1", "#34C759", "#14632b", "✓ CONTROL FINAL:", n=58)
+    y = caja_txt(h, x0, y, control, "#eefaf1", "#34C759", "#14632b", "✓ CONTROL FINAL:", n=64)
     for p in pend:
-        y = caja_txt(h, x0, y, "(*) " + p, "#fff4e0", "#FF9F0A", "#5c3a00", "⚠", n=60)
+        y = caja_txt(h, x0, y, "(*) " + p, "#fff4e0", "#FF9F0A", "#5c3a00", "⚠", n=64)
     h.txt(x0, y + 12, "Sigue: guía «" + sigue + "».", 15, 800, "#28285E", "start", INT)
     if y + 12 > H - 52: print("!! asi_queda desborda", y)
 
@@ -102,13 +102,13 @@ def asi_queda(h, x0, img, plano, sigue, control, pend, alto=420):
 def g(h, p, tx, ty, t, anc="start"):
     """etiqueta 3D: punto en p (3D) y texto en (tx,ty) de la hoja"""
     x, y = h.P(*p)
-    ex = tx - 4 if anc == "start" else tx + 4
-    h.ln(x, y, ex, ty - 4, NV, .8); h.circ(x, y, 2.4, NV, NV, 0)
-    h.txt(tx, ty, t, 11.5, 700, NV, anc, INT)
+    g2(h, x, y, tx, ty, t, anc)
 
 
 def g2(h, x, y, tx, ty, t, anc="start"):
-    ex = tx - 4 if anc == "start" else tx + 4
+    wt = len(t) * 6.6
+    if anc == "start": ex = tx + wt + 4 if x > tx + wt else tx - 4
+    else: ex = tx - wt - 4 if x < tx - wt else tx + 4
     h.ln(x, y, ex, ty - 4, NV, .8); h.circ(x, y, 2.4, NV, NV, 0)
     h.txt(tx, ty, t, 11.5, 700, NV, anc, INT)
 
@@ -179,3 +179,21 @@ def chk(h, x, y, ok=True):
     h.circ(x, y, 11, "#34C759" if ok else "#FF3B30", "#fff", 1.5)
     if ok: h.path(f"M{x-5},{y} l3.5,4 l6.5,-8", "none", "#fff", 2.4)
     else: h.path(f"M{x-4.5},{y-4.5} l9,9 M{x+4.5},{y-4.5} l-9,9", "none", "#fff", 2.4)
+
+
+_clip = [0]
+def clip_ini(h, x, y, w, hh):
+    _clip[0] += 1; cid = f"k4c{_clip[0]}"
+    h.a(f'<clipPath id="{cid}"><rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{hh:.1f}"/></clipPath><g clip-path="url(#{cid})">')
+def clip_fin(h): h.a('</g>')
+def reloj(h, cx, cy, t="72 h"):
+    h.circ(cx, cy, 22, "#fff", "#28285E", 2.4); h.ln(cx, cy, cx, cy - 14, "#28285E", 2.4); h.ln(cx, cy, cx + 10, cy + 5, "#28285E", 2.4)
+    h.txt(cx, cy + 40, t, 14, 800, "#28285E", "middle", INT)
+
+
+def cabinet(h, s, ox, oy, f=.4):
+    """proyección oblicua de gabinete: x a la derecha, z arriba, y hacia el que mira (abajo-izquierda).
+    Se ven la cara +y (frente), la +x (costado derecho) y la de arriba."""
+    h._s, h._ox, h._oy = s, ox, oy
+    c = f * math.cos(math.radians(40)); d = f * math.sin(math.radians(40))
+    h.P = lambda x, y, z: (ox + s * (x - c * y), oy - s * z + s * d * y)
