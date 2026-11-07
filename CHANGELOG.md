@@ -22,8 +22,7 @@ Autor: Miguel Ángel Díaz © 2026
 - `t_v130` 10/10 en PC y 11/11 en celular.
 - Batería completa (incluye la v129) en PC y celular: todo OK salvo `t_v083` (reemplazada por `t_v084`).
 
-**Huellas** (sello «2026-11-07 12:05 · 0c3700
-([^»)
+**Huellas** (sello «2026-11-07 12:05 · 0c3700»)
 - `index.html`: `8205c2f724258adbd0f0e78892671de097e5c1883475c1ecd896efbf13708fc0`
 - `130_2026-11-07_app-EMA_ORIGINAL.html`: `75e2c2ffffcef14ffcb8cf556eab86c42fd61cfb20215794c7f6515f88b8d947`
 
