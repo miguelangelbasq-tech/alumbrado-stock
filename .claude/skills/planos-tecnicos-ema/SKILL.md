@@ -81,3 +81,31 @@ description: Estilo y método para dibujar los planos técnicos de EMA (tipos co
 2. Copiá un ejemplo de `ejemplos/` y cambiá los datos.
 3. Mirá la imagen (Playwright, `deviceScaleFactor: 1.5`) y corregí lo que se pise: globos, textos, el 3D contra la lista.
 4. Los planos van a la app como SVG (Tipos constructivos y Guías). El DXF para AutoCAD sale con `ezdxf` (mismas medidas, capas por material). Se agrega como «Bajar DXF» si Ángel lo pide.
+
+## Formato «paso a paso» (PDF como un video en papel)
+Lo pidió Ángel el 07/11/2026, para las guías de «Cómo se hace». Ejemplo: `ejemplos/paso_a_paso/` (fundación PRFV, 4 hojas).
+
+**Hoja**
+- A4 apaisada (1188 × 840), **2 pasos por hoja**.
+- Arriba, la banda azul con el título, el plano de referencia y «HOJA N DE M».
+- La **hoja 1** lleva «Antes de empezar» (EPP, autorización, herramientas, materiales) y la tabla de medidas.
+- La **última hoja** lleva «Así queda» (el 3D del plano terminado) y qué guía sigue.
+
+**Cada paso**
+- Número grande y título corto con verbo («Excavá a la medida»).
+- **3D del momento exacto de ese paso** (el pozo abierto, el molde puesto, el hormigón a medio llenar…), al lado del **plano** de ese paso. Las dos cosas juntas, siempre.
+- Viñetas cortas con las medidas.
+- **⚠ OJO** (naranja): el error típico o el riesgo.
+- **✓ CONTROL** (verde): qué se verifica y qué foto se saca.
+
+**Contenido**
+- El texto sale de la guía de la app (`GUIAS_OBRA`: `pasos[].t/txt`, `antes`, `control`, `pendientes`).
+- Las medidas salen del plano (ficha `NORMAS_FICHAS`).
+- Lo que falta va «(*) a confirmar».
+
+**Armado**
+- `fund_prfv.py` dibuja las hojas en SVG.
+- `pdf.js` las pasa a PNG y arma el PDF A4:
+  ```
+  NODE_PATH=… node pdf.js salida.pdf p1 p2 p3 p4
+  ```
