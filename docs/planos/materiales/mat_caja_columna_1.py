@@ -1,10 +1,12 @@
-"""MAT-CAJA_COLUMNA-1 (rev. B) · Caja estanca de aluminio inyectado 200 × 150 × 100 IP65 (6003) y caja de conexión con señal (6002).
+"""MAT-CAJA_COLUMNA-1 (rev. C) · rev. C (grupo «nobra»): alta del equipo 6024 caja 200 × 200 × 100 (VARIANTE + 3D r3d/out/nobra_caja6024.png).
+ · Caja estanca de aluminio inyectado 200 × 150 × 100 IP65 (6003) y caja de conexión con señal (6002).
 Plano con CAJA_AL de r3d/piezas/perfiles_protab.mjs; 3D: r3d/out/protab_cc1.png (caja en la columna, tapa sacada, tablerito adentro).
 Datos: FICHAS_TEC.caja_columna pieza 1 (Conextube; tapa con junta, tornillos imperdibles, prensacable), AP-PL-003 (externa en columna existente, a 2,50 m,
 2 juegos de abrazaderas = Ø de la columna; ítem 14.1), AP-PL-002 (riel 14 cm + 2 tornillos 6 × 3/8, ojal Ø50, prensacable 3/4" BSC o 1/2" BSP — ZA3 / ZA11, cable 6–12 mm), AP-CC-010 / 014."""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from protabkit import *
+from nobrakit import catN, colorN
 
 C = PT["CAJA_AL"]; W, H, P, tp, e = C["W"], C["H"], C["P"], C["tapa"], C["pared"]; off = C["tornillos"]["off"]
 h = nueva3()
@@ -76,24 +78,25 @@ h.path(f"M{cx + 6},{cy - 22} L{cx - 10},{cy + 6} L{cx + 2},{cy + 6} L{cx - 8},{c
 h.txt(cx, cy + 58, "RIESGO ELECTRICO", 9.5, 700, K, "middle")
 
 # =============== TABLAS ===============
-dd = {"6003": "200 x 150 x 100 · IP65", "6002": "MEDIDAS (*)"}
+dd = {"6003": "200 x 150 x 100 · IP65", "6002": "MEDIDAS (*)", "6024": "200 x 200 x 100 · IP (*)"}
 yt = h.tabla(40, 780, [(52, "c", True), (520, "l", False), (40, "c", False), (188, "l", False)],
-             [["CODIGO", "DESCRIPCION (CATALOGO DEL PAÑOL)", "UN.", "MEDIDAS (FICHA)"]] + [cat(c, 74) + [dd[str(c)]] for c in (6003, 6002)], rowh=16, titulo="CODIGOS DEL PAÑOL (2)", colores=colorOR)
+             [["CODIGO", "DESCRIPCION (CATALOGO DEL PAÑOL)", "UN.", "MEDIDAS (FICHA)"]] + [cat(c, 74) + [dd[str(c)]] for c in (6003, 6002)] + [[r_[0], "▪ " + r_[1], r_[2], dd["6024"]] for r_ in [catN(6024, 72)]], rowh=16, titulo="CODIGOS DEL PAÑOL (3 · ▪ ALTA DEL EQUIPO)", colores=colorN)
 ydat = bloque(h, 890, 690, "DATOS TECNICOS", [
-    "ALUMINIO INYECTADO · IP65 · TAPA CON JUNTA Y 4 TORNILLOS IMPERDIBLES.",
-    "200 x 150 x 100 mm (TAMBIEN EXISTE 200 x 200 x 100, AP-PL-003).",
-    "ENTRADA POR PRENSACABLE 3/4\" BSC o 1/2\" BSP (ZA3 / ZA11), CABLE 6-12 mm (AP-PL-002).",
-    "ADENTRO: TABLERITO AP-CC-014 (RIEL, BPN, PORTAFUSIBLES, BULON DE PAT)."], w=370, sz=9.5, lh=12.5)
+    "ALUMINIO INYECTADO · IP65 · TAPA CON JUNTA · 4 TORNILLOS.",
+    "6003: 200 x 150 x 100 · 6024: 200 x 200 x 100 (AP-PL-003).",
+    "PRENSACABLE 3/4\" BSC o 1/2\" BSP · CABLE 6-12 (AP-PL-002).",
+    "ADENTRO: TABLERITO AP-CC-014 (RIEL, BPN, FUSIBLES, PAT)."], w=370, sz=9.5, lh=12.5)
 yu = bloque(h, 1280, 690, "DONDE SE USA", [
     "AP-PL-003 / ITEM 14.1: CAJA EXTERNA PARA COLUMNA EXISTENTE, A 2,50 m. ITEMIZADO 2026: ITEM 42.",
     "AP-CC-010 (BARRIO): TABLERO DE COLUMNA EXTERNO (PLANO OFICIAL PENDIENTE).",
     "GUIA «CAJA DE COLUMNA PRFV»: COLUMNAS SIN CAJA INCORPORADA."], w=370, sz=9.5, lh=12.5)
-rayadosRef(h, 890, max(ydat, yu) + 8, ["ALU", "MET", "GOMA", "PLAS2"], cols=4, dx=185)
+rayadosRef(h, 40, 1050, ["ALU", "MET", "GOMA", "PLAS2"], cols=4, dx=185)
 notasW(h, 40, yt + 22, [
     "COTAS EN mm: 200 x 150 x 100 (CONEXTUBE, FICHA DE LA APP Y AP-PL-003).",
     "(*) PARED 4, TAPA 14, JUNTA, COLUMNAS DE ESQUINA, TORNILLOS M5 Y PRENSACABLE: PROPORCIONALES, A CONFIRMAR CON EL FABRICANTE.",
     "(*) RIEL: AP-PL-002 DICE 14 cm; ADENTRO DE ESTA CAJA ENTRA UNO DE 132 (DIBUJO).",
-    "(*) 6002 (CAJA CON SEÑAL «RIESGO ELECTRICO»): SIN MEDIDAS NI MATERIAL EN LA FICHA."], w=800, lh=14)
+    "(*) 6002 (CAJA CON SEÑAL «RIESGO ELECTRICO»): SIN MEDIDAS NI MATERIAL EN LA FICHA.",
+    "REV. C: 6024 «CAJA ESTANCA ALUMINIO INYECTADO 200 X 200 X 100 P/ COLUMNA» (ALTA DEL EQUIPO). LA DESCRIPCION NO DICE IP: SE DIBUJA IGUAL A LA 6003 (PARED, TAPA, JUNTA, TORNILLOS Y PRENSACABLE) CON 50 mm MAS DE ALTO. (*) IP, MARCA Y RIEL QUE ENTRA (≈ 132 ANCHO; CABEN 2 FILAS): A CONFIRMAR CON LA CAJA."], w=800, lh=14)
 
 # =============== 3D ===============
 h.titulo(890, 62, "VISTA 3D - CAJA EN LA COLUMNA EXISTENTE", "TAPA SACADA (SE VE LA JUNTA) · TABLERITO AP-CC-014 · 2 ABRAZADERAS · PRENSACABLE")
@@ -102,5 +105,17 @@ columna(h, A, [("columna", "", "COLUMNA EXISTENTE"), ("abraz", "", "ABRAZADERA (
                ("tablerito", "4", "TABLERITO (CHAPA)"), ("bpn", "7", "BORNES BPN 6"), ("tabaquera", "5", "TABAQUERAS 10x38"), ("pat", "6", "BULON DE PAT"),
                ("tapa", "3", "TAPA"), ("junta", "9", "JUNTA DE GOMA"), ("tornillo", "", "TORNILLO IMPERDIBLE"), ("prensa", "8", "PRENSACABLE"), ("cable", "", "CABLE 6-12 mm")],
         1490, 96, 600, paso=32)
-rotuloMat(h, "MAT-CAJA_COLUMNA-1", "CAJA ESTANCA ALUMINIO", "200 x 150 x 100 IP65", "FRENTE, CORTE A-A, D1, INSTALACION, D2, CODIGOS Y 3D", "1,3:1", "D1 4:1 · 3D S/E", rev="B", fecha="08/11/2026")
+# =============== REV. C · VARIANTE 6024 200 x 200 x 100 ===============
+h.titulo(890, 818, "VARIANTE 6024 - 200 x 200 x 100", "FRENTE CON TAPA · ESC. 1:1,5")
+s2 = .64; Hv = 200; X2 = lambda x: 935 + (x + W / 2) * s2; Z2 = lambda z: 872 + (Hv - z) * s2
+h.rect(X2(-W / 2), Z2(Hv), W * s2, Hv * s2, "url(#ALU)", K, 1.4, f'rx="{C["radio"]*s2}"'); h.rect(X2(-W / 2 + e + 2), Z2(Hv - e - 2), (W - 2 * e - 4) * s2, (Hv - 2 * e - 4) * s2, "#fff", K, .6, f'rx="{(C["radio"]-e)*s2}"')
+for sx in (-1, 1):
+    for z in (off, Hv - off): h.circ(X2(sx * (W / 2 - off)), Z2(z), 4.5 * s2, "#fff", K, .7); h.ln(X2(sx * (W / 2 - off)) - 2, Z2(z), X2(sx * (W / 2 - off)) + 2, Z2(z), K, .5)
+h.rect(X2(-30) - 8, Z2(0), 16, 12, "#fff", K, .7); h.txt(X2(0), Z2(Hv / 2), "TAPA IP (*)", 8.5, 400, OR, "middle")
+h.rect(X2(-W / 2), Z2(150), W * s2, 150 * s2, "none", NV, .6, 'stroke-dasharray="5 3"'); h.txt(X2(W / 2) - 4, Z2(150) - 4, "6003 (150)", 8.5, 700, NV, "end")
+h.dimH(Z2(Hv) - 10, X2(-W / 2), X2(W / 2), "200", ext=Z2(Hv) - 2); h.dimV(X2(-W / 2) - 12, Z2(Hv), Z2(0), "200", ext=X2(-W / 2) - 2)
+h.dimV(X2(W / 2) + 14, Z2(Hv), Z2(0), "", ext=X2(W / 2) + 2); h.txt(X2(W / 2) + 20, Z2(Hv / 2) + 4, "FONDO 100", 9, 400)
+A6 = img3d(h, "nobra_caja6024", 1180, 830, 300)
+columna(h, A6, [("c6024", "", "6024 · 200 x 200"), ("c6003", "", "6003 · 200 x 150"), ("tornillo", "", "4 TORNILLOS"), ("prensa", "8", "PRENSACABLE")], 1500, 845, 1010, paso=22)
+rotuloMat(h, "MAT-CAJA_COLUMNA-1", "CAJA ESTANCA ALUMINIO", "200 x 150 / 200 x 200 x 100", "FRENTE, CORTE, D1, D2, VARIANTE 6024 Y 3D", "1,3:1", "D1 4:1 · 3D S/E", rev="C", fecha="08/11/2026")
 h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_caja_columna_1.svg"))

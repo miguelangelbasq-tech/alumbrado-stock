@@ -1,10 +1,12 @@
-"""MAT-PRENSACABLES-1 (rev. B) · Prensacable de aluminio, rosca eléctrica (RE), 1/2" a 2", con tuercas sueltas (18 códigos).
+"""MAT-PRENSACABLES-1 (rev. C) · Prensacable de aluminio, rosca eléctrica (RE), 1/2" a 2", con tuercas sueltas (21 códigos).
+Rev. C (grupo «nobra»): altas del equipo 5043 (1 1/2"), 5044 (1") y 5045 (7/8") RE SIN TUERCA (respaldo/nuevos.csv, tal cual).
 Plano y 3D con los mismos números: r3d/piezas/perfiles_conex.mjs (PRENSA, PRENSA_TABLA). 3D: r3d/out/conex_prensa_corte.png y conex_prensa_despiece.png.
 Datos: FICHAS_TEC.prensacables (Pampaco, serie Compacto, rosca BSC: rango de Ø de cable por rosca), PRENSACABLES de la calculadora, catálogo del pañol.
 Medidas de la pieza: (*) proporcionales a prensacables metálicos de catálogo (no hay ficha de Pampaco en la web)."""
 import sys, os, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from conexkit import *
+from nobrakit import catN, colorN
 
 h = nueva3()
 P = PC["PRENSA"]
@@ -100,7 +102,8 @@ h.txt(cx + 72, cy + 12, "4 x 2,5: L1 L2", 9, 400); h.txt(cx + 72, cy + 24, "L3 N
 
 # ================= TABLAS =================
 TY = 414
-ft = [["ROSCA", "Ø DEL CABLE (mm)", "CODIGOS DEL PAÑOL", "USO TIPICO"]] + [list(r) for r in PC["PRENSA_TABLA"]]
+NUEVOS = {'7/8"': "5045", '1"': "5044", '1 1/2"': "5043"}   # rev. C: altas del equipo SIN TUERCA
+ft = [["ROSCA", "Ø DEL CABLE (mm)", "CODIGOS DEL PAÑOL", "USO TIPICO"]] + [[r[0], r[1], r[2] + (" · " + NUEVOS[r[0]] if r[0] in NUEVOS else ""), r[3]] for r in PC["PRENSA_TABLA"]]
 yt = h.tabla(40, TY, [(64, "c", False), (120, "c", True), (210, "c", True), (170, "l", False)], ft, rowh=14,
              titulo="SE ELIGE POR EL Ø EXTERIOR DEL CABLE (FICHA: PAMPACO COMPACTO)", colores=lambda i, j, t: OR if "(*)" in str(t) else (NV if i == 3 else K))
 h.txt(40, yt + 12, "EN AZUL: 3/4\", EL DIBUJADO. LA CALCULADORA USA 1 1/2\": 25-32 Y 2\": 32-37 (VER NOTA 3).", 9.5, 400, NV)
@@ -108,18 +111,21 @@ bloque(h, 640, TY + 14, "COMO SE ARMA", ["PASAR LA TAPA, LA GOMA Y LA PINZA POR 
                                      "PASAR EL CABLE Y APRETAR LA TAPA: LOS DEDOS CIERRAN LA GOMA.", "TIRAR DEL CABLE: NO TIENE QUE MOVERSE."], w=210, sz=9.5, lh=12.5)
 DES = {5020: "1/2\" C/T Y A", 5024: "5/8\" SIN TUERCA", 5027: "5/8\" C/T Y A", 5032: "TUERCA 5/8\"", 5022: "3/4\" SIN TUERCA", 5023: "3/4\" C/T Y A", 5029: "3/4\" PLASTICO",
        5034: "TUERCA 3/4\"", 5028: "7/8\" C/T Y A", 5018: "1\" (*)", 5026: "1\" C/TUERCA", 5031: "TUERCA 1\"", 5025: "1 1/4\" C/T Y A", 5033: "TUERCA 1 1/4\"",
-       5019: "1 1/2\" C/T Y A", 5021: "2\" C/T Y A", 5012: "CAJA-CAÑO Ø40", 5013: "CAJA-CAÑO Ø40"}
+       5019: "1 1/2\" C/T Y A", 5021: "2\" C/T Y A", 5012: "CAJA-CAÑO Ø40", 5013: "CAJA-CAÑO Ø40",
+       5045: "7/8\" SIN TUERCA", 5044: "1\" SIN TUERCA", 5043: "1 1/2\" SIN TUERCA"}
 fc = [["CODIGO", "DESCRIPCION (CATALOGO DEL PAÑOL)", "UN.", "TIPO"]]
-for c in [5020, 5024, 5027, 5032, 5022, 5023, 5029, 5034, 5028, 5018, 5026, 5031, 5025, 5033, 5019, 5021, 5012, 5013]:
-    r_ = cat(c, 62); fc.append([r_[0], r_[1], r_[2], DES[c]])
-yc_ = h.tabla(40, yt + 30, [(50, "c", True), (440, "l", False), (34, "c", False), (130, "l", False)], fc, rowh=13.2, titulo="CODIGOS DEL PAÑOL (18)", colores=colorOR)
+for c in [5020, 5024, 5027, 5032, 5022, 5023, 5029, 5034, 5028, 5045, 5018, 5026, 5044, 5031, 5025, 5033, 5019, 5043, 5021, 5012, 5013]:
+    r_ = catN(c, 60) if c >= 5043 else cat(c, 62); fc.append([r_[0], ("▪ " if c >= 5043 else "") + r_[1], r_[2], DES[c]])
+yc_ = h.tabla(40, yt + 30, [(50, "c", True), (440, "l", False), (34, "c", False), (130, "l", False)], fc, rowh=13.2, titulo="CODIGOS DEL PAÑOL (21 · ▪ ALTA DEL EQUIPO)", colores=colorN)
 yr = rayados3(h, 720, yt + 30, ["ALU", "MET", "GOM", "PLAS", "PLAS2"], cols=1, dx=200)
 notasW(h, 40, yc_ + 18, [
     "Ø DE CABLE POR ROSCA Y CODIGOS: FICHA DE LA APP (PAMPACO, PRENSACABLES DE ALUMINIO SERIE COMPACTO, ROSCA BSC). COMPARAR CON EL Ø EXTERIOR DEL CABLE, NO CON LA SECCION.",
     "(*) MEDIDAS DE LA PIEZA (HEXAGONO, LARGOS, DOMO, PINZA, JUNTA, PASO DE ROSCA): NO HAY FICHA DE PAMPACO EN LA WEB. PROPORCIONALES, A CONFIRMAR MIDIENDO UNO.",
     "(*) LA FICHA DICE 1 1/2\": 23-30 Y 2\": 30-40; LA CALCULADORA (PRENSACABLES) Y EL PAÑOL (5019 / 5021) DICEN 25-32 / 25-30 Y 32-37 / 30-40. 1/2\": LA AP-PL-002 DICE 6 A 12.",
     "5031 / 5032 / 5033 / 5034 SON TUERCAS SUELTAS; 5022 Y 5024 VIENEN SIN TUERCA. 5012 / 5013 SON CONECTORES CAJA-CAÑO Ø40 (OTRA PIEZA). 5018 «PRENSACABLE 1»: SIN MATERIAL (*).",
-    "EL PLANO DE LA CAJA DE COLUMNA PIDE PRENSACABLE METALICO: EL PLASTICO 5029 NO VA AHI."], w=800, lh=13.2)
+    "EL PLANO DE LA CAJA DE COLUMNA PIDE PRENSACABLE METALICO: EL PLASTICO 5029 NO VA AHI.",
+    "REV. C: 5045 (7/8\"), 5044 (1\") Y 5043 (1 1/2\") SON ALTAS DEL EQUIPO «AL ... RE (SIN TUERCA)»: MISMA PIEZA SIN LA TUERCA (2) NI LA CONTRATUERCA (1) DEL DESPIECE.",
+    "(*) PEDIR LA TUERCA APARTE: PARA 1\" ESTA 5031; PARA 7/8\" Y 1 1/2\" NO HAY TUERCA SUELTA EN EL PAÑOL (A CONFIRMAR / A VINCULAR)."], w=800, lh=13.2)
 
 # ================= 3D =================
 h.titulo(890, 62, "VISTA 3D - PRENSACABLE 3/4\" MONTADO EN LA CAJA", "CORTE A CUARTO: CUERPO, JUNTA, TUERCAS, PINZA, GOMA Y TAPA, CON EL CABLE 4 x 2,5")
@@ -132,9 +138,13 @@ A2 = img3d(h, "conex_prensa_despiece", 880, 574, 640)
 pts = [("contratuerca", "1"), ("tuerca", "2"), ("junta", "3"), ("cuerpo", "4"), ("pinza", "5"), ("goma", "6"), ("tapa", "7")]
 for an, n in pts:
     ax, ay = A2(an); globo3d(h, (ax, ay), n, ax, ay - 34)
+# rev. C: las «SIN TUERCA» vienen sin 1 y 2
+x1_, y1_ = A2("contratuerca"); x2_, y2_ = A2("tuerca"); yb_ = 808
+h.path(f"M{x1_ - 30:.1f},{yb_ - 8:.1f} V{yb_:.1f} H{x2_ + 30:.1f} V{yb_ - 8:.1f}", "none", NV, 1.0)
+h.txt(x1_ - 30, yb_ + 13, "1 + 2: NO VIENEN EN 5022 · 5024 · 5043 · 5044 · 5045 (SIN TUERCA)", 9.5, 700, NV, "start", INT)
 bloque(h, 890, 840, "DONDE SE USA", [
     "ENTRADA DE CABLES A CAJAS, TABLEROS Y LUMINARIAS: 1 PRENSACABLE 3/4\" POR ARTEFACTO.",
     "1 x 10 → 1/2\" · 3 x 1,5 Y 4 x 2,5 → 3/4\" · 4 x 6 → 7/8\" · 4 x 10 → 1\" · Cu 4 x 16 → 1 1/4\" (CLAUDE.md §11.3)."], w=740, sz=10, lh=14)
 h.txt(890, 1022, "RENDER: three.js (r3d/escenas/conex_prensa_*.mjs) CON LOS MISMOS PERFILES DEL PLANO. FUENTES: r3d/FUENTES_conex.md", 9.5, 400, G, "start", INT)
-rotuloB(h, "MAT-PRENSACABLES-1", "PRENSACABLE DE ALUMINIO", "ROSCA ELECTRICA · 1/2\" A 2\"", "CORTE A-A, D1, SECCION B-B, TABLA Y 3D", "7:1 · 18:1", "INDICADAS · 3D S/E")
+rotuloMat(h, "MAT-PRENSACABLES-1", "PRENSACABLE DE ALUMINIO", "ROSCA ELECTRICA · 1/2\" A 2\"", "CORTE A-A, D1, SECCION B-B, TABLA Y 3D", "7:1 · 18:1", "INDICADAS · 3D S/E", rev="C", fecha=FECHA)
 guardar(h, "mat_prensacables_1")

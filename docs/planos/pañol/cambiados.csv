@@ -1,0 +1,23 @@
+codigo,desc,un,activo,desc_base,un_base,que_cambia
+1001,Alambre para ataduras,KG,True,Alambre para ataduras,kg,un(solo mayúsc.)
+1005,Cable acometida flexible de cobre XLPE 1 x 4 mm,M,True,Cable acometida flexible de cobre XLPE 1 x 4 mm,m,un(solo mayúsc.)
+1010,,,False,Cable Cu 4×4 mm² XLPE + vaina PVC (IRAM 2178-1),m,activo
+1011,,,False,Cable Cu 4×6 mm² XLPE + vaina PVC (IRAM 2178-1),m,activo
+1016,Cable preensamblado Al-Al 3×1×25/50 mm² XLPE (IRAM 2263),M,True,Cable preensamblado Al-Al 3×1×25/50 mm² XLPE (IRAM 2263),m,un(solo mayúsc.)
+2003,,,False,BORNE BPN-06 P/CAB. FLEX/RIG. 6mm POLIAMIDA,Un.,activo
+2026,,,False,PUENTE FIJO P/BPN 4MM,Un.,activo
+2041,Separador para borne BPN 4/6,Un.,True,Separador para borne BPN,Un.,desc
+2057,"Spaghetti Termocontraíble pared fina 5,0/2,5 mm",M,True,"Termocontraíble pared fina 5,0/2,5 mm",Un.,"desc,un"
+3015,FUSIBLE CILINDRICO 8.5 X 31.5 4 A,Un.,True,FUSIBLE CERAMICO 8.5 X 31.5 4 A,Un.,desc
+3046,,,False,INTERRUPTOR UNIPOLAR 6 A,Un.,activo
+3051,,u,,Morseto de derivación para acometida a tablero Metal-CE 1995/1,m,un
+4026,Morseto de derivación de fase con portafusible Metal-CE 1995/4 (LCT PKD-14PF),Un.,True,Morseto de derivación de fase con portafusible Metal-CE 1995/4 (LCT PKD-14PF),m,un
+4027,Morseto de derivación de neutro Metal-CE 1995/6 (LCT PKD-14),Un.,True,Morseto de derivación de neutro Metal-CE 1995/6 (LCT PKD-14),m,un
+4029,,,False,Precinto 200 x 4.5 nylon 66,m,activo
+5005,,m,,Caño PEAD Ø50 mm PN6,Un.,un
+6011,Luminarias Led 200 W (Plaza Municipalidad de Cordoba),Un.,True,Luminarias Led 200 W (Plaza Municipalidad de Cordoba),m,un
+7008,,,False,Cable cobre 1 x 2.5 mm verde y amarillo,m,activo
+7013,ANTEOJO DE SEGURIDAD,Un.,True,CONECTOR C COMPRESION para PAT TIPO C CMC -7 (JAB5/8 CABLE 6-16),Un.,desc
+7015,"Dispersor (jabalina) de Cu con alma de acero Ø14,6 × 1500 mm (IRAM 2309)",UN,True,"Dispersor (jabalina) de Cu con alma de acero Ø14,6 × 1500 mm (IRAM 2309)",Un.,un(solo mayúsc.)
+7019,Tomacable WGC / TGC para conexión de jabalina. CMC 7,Un.,True,Tomacable WGC / TGC para conexión de jabalina,Un.,desc
+8017,,m,,"Malla subterránea de advertencia «Peligro Eléctrico», ancho 30 cm",Un.,un

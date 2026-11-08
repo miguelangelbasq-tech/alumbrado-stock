@@ -1,4 +1,5 @@
-"""MAT-HERRAJES-1 (rev. B) · Abrazaderas H°G° de planchuela 4,76 × 31,7: lisas Ø220–340 (4004–4008), con 1 escote Ø140 (4001) y 2 escotes Ø200 (4002).
+"""MAT-HERRAJES-1 (rev. C) · rev. C (grupo «nobra»): altas del equipo 4050 lisa Ø200, 4049 lisa Ø280 y 4047 2 escotes Ø240 (respaldo/nuevos.csv).
+ · Abrazaderas H°G° de planchuela 4,76 × 31,7: lisas Ø220–340 (4004–4008), con 1 escote Ø140 (4001) y 2 escotes Ø200 (4002).
 Geometría: r3d/piezas/perfiles_pat.mjs (ABR, BUL) y pat.mjs abrazadera(); 3D: r3d/out/pat_her1a.png, pat_her1b.png. Fuentes: r3d/FUENTES_pat.md"""
 import sys, os, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -60,9 +61,10 @@ h.txt(560, 376, "SI SE RAYA, PINTURA RICA EN ZINC (*).", 9.5, 400, OR)
 
 # ================= TABLA DE DIAMETROS =================
 yT = tablaC(h, 40, 470, [(52, "c", True), (240, "l", False), (90, "c", True), (120, "c", True), (150, "l", False)],
-            [("CODIGO", "TIPO", "Ø INTERIOR", "REF. FABRICANTE", "USO"), ("4004", "LISA", "220", "405220", "POSTE / APOYO"), ("4005", "LISA", "240", "405240", "POSTE / APOYO"),
-             ("4006", "LISA", "260", "405260", "CON BULON 4018"), ("4007", "LISA", "300", "405300", "POSTE / APOYO"), ("4008", "LISA", "340", "405340", "POSTE / APOYO"),
-             ("4001", "1 ESCOTE (ARRIBA)", "140", "406140", "PERNO DEL RACK"), ("4002", "2 ESCOTES (ARRIBA Y ABAJO)", "200", "407200", "2 PERNOS OPUESTOS")], "DIAMETROS DEL PAÑOL (FICHA DE LA APP)", rowh=16)
+            [("CODIGO", "TIPO", "Ø INTERIOR", "REF. FABRICANTE", "USO"), ("4050", "LISA ▪", "200", "405200 (*)", "POSTE / APOYO"), ("4004", "LISA", "220", "405220", "POSTE / APOYO"), ("4005", "LISA", "240", "405240", "POSTE / APOYO"),
+             ("4006", "LISA", "260", "405260", "CON BULON 4018"), ("4049", "LISA ▪", "280", "405280 (*)", "POSTE / APOYO"), ("4007", "LISA", "300", "405300", "POSTE / APOYO"), ("4008", "LISA", "340", "405340", "POSTE / APOYO"),
+             ("4001", "1 ESCOTE (ARRIBA)", "140", "406140", "PERNO DEL RACK"), ("4002", "2 ESCOTES (ARRIBA Y ABAJO)", "200", "407200", "2 PERNOS OPUESTOS"),
+             ("4047", "2 ESCOTES (ARRIBA Y ABAJO) ▪", "240", "407240 (*)", "2 PERNOS OPUESTOS")], "DIAMETROS DEL PAÑOL (FICHA DE LA APP · ▪ ALTA DEL EQUIPO, VER TABLA ABAJO)", rowh=15)
 yD = bloque(h, 40, yT + 18, "DATOS TECNICOS", [
     "PLANCHUELA 4,76 × 31,7 mm CINCADA · AGUJEROS Ø14 (OREJAS Y ESCOTE) · CIERRE CON 2 BULONES 1/2\" + ARANDELA PLANA + PRESION + TUERCA (MAT-HERRAJES-3).",
     "SE PIDE POR EL Ø DEL POSTE EN EL PUNTO DONDE VA: EL POSTE ES CONICO (≈ 15 mm POR METRO (*)). MEDIR ANTES DE PEDIR.",
@@ -70,11 +72,16 @@ yD = bloque(h, 40, yT + 18, "DATOS TECNICOS", [
 yU = bloque(h, 40, yD + 4, "DONDE SE USA", [
     "AP-T-012: SUJECION DEL TABLERO AEREO AL APOYO · AP-T-018: APOYO PRFV · AP-PL-003: CAJA ESTANCA EXTERNA.",
     "AP-TC-055: BRAZO H°G° DE BARRIO, 2 ABRAZADERAS POR Ø DEL POSTE. EL ESCOTE TOMA EL PERNO DEL RACK (MAT-HERRAJES-2)."], w=800, sz=10, lh=13.5)
-notasW(h, 40, yU + 4, [
+yN = notasW(h, 40, yU + 4, [
     "COTAS EN mm. MANDA LA COTA. LA PLANTA ES LA DE 2 ESCOTES Ø200; LAS LISAS SON IGUALES SIN LENGÜETA.",
     "(*) LARGO DE LAS OREJAS (40), LUZ ENTRE OREJAS (8), ALTO DEL ESCOTE (40) Y CALIDAD DEL ACERO: NO ESTAN EN LA FICHA. A CONFIRMAR CON EL FABRICANTE.",
     "(*) LA FICHA DICE «ESCOTE (PUNTA) CON AGUJERO Ø14»: SE DIBUJA COMO LENGÜETA PLANA DOBLADA A 90° (FORMA A CONFIRMAR).",
-    "FUENTES: CATALOGO DE ABRAZADERAS HP ELECTRICIDAD (RIO CUARTO), REF. 405xxx / 406xxx / 407xxx; ISO 1461; r3d/FUENTES_pat.md."], w=800, lh=14)
+    "FUENTES: CATALOGO DE ABRAZADERAS HP ELECTRICIDAD (RIO CUARTO), REF. 405xxx / 406xxx / 407xxx; ISO 1461; r3d/FUENTES_pat.md.",
+    "REV. C: ▪ ALTAS DEL EQUIPO 4047, 4049 Y 4050 (TABLA «ALTAS DEL EQUIPO», DESCRIPCION Y UNIDAD TAL CUAL EL PAÑOL). MISMA FORMA QUE LA PLANTA.",
+    "(*) REF. 405200 / 405280 / 407240: SE ARMA CON LA REGLA DEL CATALOGO HP (TIPO + Ø); CONFIRMAR CON EL PROVEEDOR. LA UNIDAD DE 4050 VIENE «UN» Y LAS OTRAS «Un.» (MISMA UNIDAD)."], w=800, lh=14)
+tablaC(h, 40, yN + 6, [(52, "c", True), (628, "l", False), (60, "c", False)],
+       [("CODIGO", "DESCRIPCION DEL PAÑOL (TAL CUAL, respaldo/nuevos.csv)", "UN."), ("4047", "Abrazadera con 2 escotes H°G° Ø240 mm", "Un."),
+        ("4049", "Abrazadera lisa H°G° Ø280 mm", "Un."), ("4050", "Abrazadera lisa H°G° Ø200 mm", "UN")], "▪ ALTAS DEL EQUIPO", rowh=15)
 rayadosC(h, 40, 1104, ["ACE", "ZN", "HG"], cols=3, dx=200)
 
 # ================= 3D =================
@@ -86,5 +93,5 @@ h.txt(890, 570, "EN SU LUGAR - SOBRE EL POSTE DE H°A° (SE ELIGE POR EL Ø EN E
 Ab = img3d(h, "pat_her1b", 880, 576, 500)
 columna(h, Ab, [("poste", "", "POSTE H°A° (MEDIR EL Ø)"), ("bulon", "3", "BULON 1/2\""), ("escote", "", "OREJAS CERRADAS"), ("abrazadera", "1", "ABRAZADERA LISA"), ("tuerca", "4", "TUERCA")], 1400, 640, 990, paso=40)
 h.txt(890, 1026, "RENDER: three.js (r3d/escenas/pat_her1a.mjs, pat_her1b.mjs) CON LA MISMA GEOMETRIA DEL PLANO. FUENTES: r3d/FUENTES_pat.md", 9.5, 400, G, "start", INT)
-rotuloMat(h, "MAT-HERRAJES-1", "ABRAZADERAS H°G°", "LISAS Y CON ESCOTE", "PLANTA, CORTE, D1 GALVANIZADO, TABLA Y 3D", "1:1 / 5:1", "D1 S/E · 3D S/E", rev="B", fecha="08/11/2026")
+rotuloMat(h, "MAT-HERRAJES-1", "ABRAZADERAS H°G°", "LISAS Y CON ESCOTE", "PLANTA, CORTE, D1 GALVANIZADO, TABLA Y 3D", "1:1 / 5:1", "D1 S/E · 3D S/E", rev="C", fecha="08/11/2026")
 h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_herrajes_1.svg"))
