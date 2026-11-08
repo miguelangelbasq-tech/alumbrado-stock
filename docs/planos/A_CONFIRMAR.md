@@ -56,3 +56,35 @@
 - Barrio: hojas B a G de AP-TC-055 (qué es TIPO 1, 2 y 3), AP-TC-024, AP-TC-004, AP-TC-021, AP-CC-010, AP-T-014; modelos de grampas y ménsulas que acepta EPEC; tensión de tendido.
 - Puesta a tierra: la hoja «Así queda» muestra una columna metálica porque no hay plano PRFV con la jabalina.
 - Esquema TN-C / TN-S según proyecto.
+
+## 6. Nuevo de la revisión B de materiales (08/11/2026)
+
+Las medidas de internet salen del resumen del buscador (los PDF de fabricantes no se pudieron abrir desde la nube): conviene verificarlas en la ficha. Cada una tiene su URL en `r3d/FUENTES_*.md`.
+
+**Contradicciones**
+- Punteras: la ficha dice «DIN 46228-4» pero sus colores son de la serie francesa (NF C 63-023). En DIN: 2,5 azul · 4 gris · 6 amarillo · 10 rojo. El 2055 dice «azul 2,5/6».
+- Prensacables 1 1/2" y 2": ficha 23–30 / 30–40, calculadora 25–32 / 32–37, pañol 25–30 / 30–40. 1/2": AP-PL-002 dice 6–12 y la app 5–8.
+- Termocontraíble 2057 (Ø5/2,5): la calculadora lo pide para ojales de 16 mm², pero no entra (Ø ≈ 7,3).
+- Preensamblado 3×1×25/50: haz ≈ 30,5 por cuenta, la ficha dice 26. 3×25+1×16: ficha 32, cuenta ≈ 22.
+- Módulo DIN: 17,5 (DIN 43880) vs 18 por polo (iC60).
+- AP-PL-002 pide riel de 14 cm; en la caja de 200 entra uno de 132.
+- Contactor LC1D25 con bobina CC: 101 de profundidad, no 92.
+- Fotocontrol: AP-T-007/008 piden electromecánico; los datos garantizados son de uno electrónico.
+- Tomacable: la ETG prohíbe el de ajuste a rosca; el 7019 de Genrod aprieta con tornillo. Si no sirve, conector C 7013/7014.
+- Fleje ítem 71: «0,7"» debería ser 0,7 mm.
+- Jabalina: capa de cobre ≥ 254 µm (ficha) vs 250 µm (familia).
+- Columna metálica: con tramos de referencia la reducción cae en la caja (2,50 m); los tramos suman 8,00 y AP-C-005 pide 7,70. Empotramiento ETG 0,70/1,00 vs fabricante 0,80/1,10. Puerta 95×160 o 100×170 (IRAM 2620).
+- Bolsa de cemento: pañol y calculadora cuentan 50 kg; hoy se vende de 25 kg (sería el doble de bolsas).
+- Cal: la que se consigue (Cacique) es hidráulica, no hidratada.
+- PEAD «PN6»: en PE100 la pared sería ≈ 2,0; se dibujó 3,0.
+- Hilada de 0,075 con ladrillo de 50: junta de 25, muy gruesa.
+- Cámara: con 0,60 de profundidad y tapada 0,50 los caños quedan casi en el fondo. La cámara y el marco no tienen ítem en el Anexo I.
+
+**Pañol (no se tocó)**
+- Más unidades en «m» que serían «Un.»: 4023 (espárrago), 2038 (riel: la calculadora lo pide en m; acá es al revés, está en Un.), 4029 (vs 4030 en Un.).
+- Sin saber qué es: 4017 «NO4-R 25 mm», 2043/2044 «ACC», 2018 «prensacable 1» (material).
+- Sin código: peine de pines para termomagnéticas, jabalina seccional con manguito, empalme en gel / termocontraíble, terminal de pala, pinza para punteras de 1,5–4 mm².
+- 4018 «bulón Ø12×90 para abrazadera Ø260»: ver qué largo va con los otros Ø. 4016 (250 mm) es largo para el bloquete.
+- 1015 (2×25) sin datos; 6002 sin medidas; 2011, 2012, 2002, 2039, 2040, 2042 sin ficha.
+- 3038 = 3039 (mismo material).
+- 5501, 5502, 5503 sin familia en las fichas.
