@@ -34,6 +34,12 @@ async function abrir(op = {}) {
         if (global.__catPedidos) global.__catPedidos.push(new URL(u).pathname);
         return fs.existsSync(f) ? r.fulfill({ body: fs.readFileSync(f), contentType: 'application/json' }) : r.fulfill({ status: 404, body: 'no' });
       }
+      if (/^https?:\/\/app\.test\/materiales\//.test(u)) {   // v131: hojas de material junto a la app (op.matDir; si no, APPDIR/materiales)
+        const dir = op.matDir || (process.env.APPDIR ? process.env.APPDIR + '/materiales' : ''), f = dir + new URL(u).pathname.replace(/^\/materiales/, '');
+        if (global.__matPedidos) global.__matPedidos.push(new URL(u).pathname);
+        if (global.__matSinRed) return r.abort('internetdisconnected');
+        return dir && fs.existsSync(f) ? r.fulfill({ body: fs.readFileSync(f), contentType: /\.json$/.test(f) ? 'application/json' : /\.webp$/.test(f) ? 'image/webp' : 'image/png' }) : r.fulfill({ status: 404, body: 'no' });
+      }
       if (/^https?:\/\/app\.test\//.test(u)) return r.fulfill({ body: html, contentType: 'text/html; charset=utf-8' });
       if (/firebase-app-compat/.test(u)) return r.fulfill({ body: STUB, contentType: 'application/javascript' });
       if (/firebase-.*\.js/.test(u)) return r.fulfill({ body: '', contentType: 'application/javascript' });
