@@ -4,7 +4,7 @@
 Uso:
   python3 armar_materiales.py <carpeta_de_hojas> <carpeta_salida> [--catalogo catalogo.json] [--todo]
 
-- Toma las hojas vigentes mat_*.png (2520×1782) de la carpeta de hojas; ignora las viejas *_v1.* y *_vB.*.
+- Toma las hojas vigentes mat_*.png (2520×1782) de la carpeta de hojas; ignora las viejas *_v1.*, *_vB.*, *_vC.* (cualquier _v<versión>).
 - Por cada hoja escribe en <carpeta_salida>:
     <hoja>_plano.webp  mitad izquierda (el plano), ancho máx. 1400
     <hoja>_3d.webp     mitad derecha (el 3D) sin el rótulo de abajo, ancho máx. 1400
@@ -31,15 +31,34 @@ CORTE_3D = (1304, 20, 2500, 1545)      # x 1290–2520 sin el rótulo de abajo (
 CALIDAD = 80
 MAX_MITAD, MAX_HOJA = 1400, 2000
 
-# Palabras extra para buscar herramientas (además de las del título de la hoja)
-PALABRAS_EXTRA = {
-    'herramientas': ['pinza', 'alicate', 'destornillador', 'llave', 'martillo', 'pala', 'pico', 'escalera'],
-    'epp': ['casco', 'guante', 'anteojo', 'botin', 'arnes', 'chaleco', 'protector'],
-    'instrumentos': ['telurimetro', 'megohmetro', 'multimetro', 'pinza amperometrica', 'tester', 'luxometro', 'buscapolo', 'busca polo'],
+# Palabras para reconocer las herramientas del pañol (H-xxx) por su nombre, además de las del título de la hoja.
+# En singular: la app las compara como comienzo de palabra («pinza» reconoce «Pinzas»). Gana la más específica
+# («pinza amperometrica» le gana a «pinza»). Sacadas de los productos de cada hoja; sumá acá las hojas nuevas.
+PALABRAS_HOJA = {
+    'mat_epp_1': ['guante dielectrico', 'alfombra', 'cobertor'],
+    'mat_epp_2': ['guante', 'anteojo', 'tapon', 'protector auditivo'],
+    'mat_epp_3': ['arnes', 'cabo de vida', 'cinturon', 'cola de amarre', 'altura'],
+    'mat_herramientas_1': ['pinza', 'alicate', 'cuchillo'],
+    'mat_herramientas_2': ['corta cable', 'cortacable', 'crimpeadora', 'pinza alicate corta'],
+    'mat_herramientas_3': ['destornillador'],
+    'mat_herramientas_4': ['llave', 'francesa', 'allen', 'combinada'],
+    'mat_herramientas_5': ['martillo', 'maza', 'puntero', 'punta de hierro'],
+    'mat_herramientas_6': ['fratacho', 'hacha'],
+    'mat_herramientas_7': ['disco'],
+    'mat_herramientas_8': ['mecha', 'cepillo'],
+    'mat_herramientas_9': ['caja de herramienta', 'organizador', 'estuche'],
+    'mat_herramientas_10': ['pasacable', 'pistola', 'cinta de papel'],
+    'mat_herramientas_11': ['pila', 'caloventor', 'electrodo'],
+    'mat_instrumentos_1': ['pinza amperometrica', 'detector de tension'],
+    'mat_instrumentos_2': ['probador de tension', 'busca polo', 'buscapolo'],
 }
 STOP = set('para con sin por del los las una uno que tipo y de la el en a o al x mm cm m'.split())
 # palabras del título que no sirven para reconocer una herramienta (son de muchas)
-GENERICAS = set('trabajo equipo equipos juego juegos aislados aislado aislante cable cables corta varios tipos medida'.split())
+GENERICAS = set('trabajo equipo equipos juego juegos aislados aislado aislante cable cables corta varios tipos medida mano corte desbaste tension cabo alambre papel herramientas cajas criquet francesas combinada'.split())
+
+
+def singular(w):
+    return w[:-2] if re.search(r'(or|on)es$', w) else w[:-1] if w.endswith('s') and not w.endswith('ss') else w
 
 
 def norm(s):
@@ -88,7 +107,7 @@ def main():
         cat = json.load(open(sys.argv[sys.argv.index('--catalogo') + 1], encoding='utf-8'))
     os.makedirs(salida, exist_ok=True)
     pngs = sorted(p for p in glob.glob(os.path.join(hojas, 'mat_*.png'))
-                  if not re.search(r'_v1\.|_vB\.', os.path.basename(p)))
+                  if not re.search(r'_v[0-9A-Z]\w*\.png$', os.path.basename(p)))
     codigos, titulos, herr, hechas = {}, {}, [], 0
     for png in pngs:
         h = os.path.basename(png)[:-4]
@@ -107,11 +126,17 @@ def main():
             codigos.setdefault(c, []).append(h)
         fam = re.match(r'mat_(herramientas|epp|instrumentos)_', h)
         if fam:
-            pal = [w for w in norm(tit).split() if len(w) >= 4 and w not in STOP and w not in GENERICAS and not w.isdigit()]
-            for w in PALABRAS_EXTRA[fam.group(1)]:
-                if w in norm(tit) and w not in pal:
-                    pal.append(w)
+            pal = list(PALABRAS_HOJA.get(h, []))
+            for w in norm(tit).split():
+                if len(w) >= 4 and w not in STOP and w not in GENERICAS and not w.isdigit() and not re.search(r'\d', w):
+                    w = singular(w)
+                    if w not in pal and not any(w == x.split()[0] for x in pal):
+                        pal.append(w)
             herr.append({'hoja': h, 'palabras': pal or [norm(tit)]})
+    vig = {os.path.basename(p)[:-4] for p in pngs}
+    for f in glob.glob(os.path.join(salida, 'mat_*.webp')):   # lo de hojas que ya no están (o versiones viejas) se borra
+        if re.sub(r'_(plano|3d|hoja)\.webp$', '', os.path.basename(f)) not in vig:
+            os.remove(f); print('borrado (ya no es vigente):', os.path.basename(f))
     ind = {'v': datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=-3))).strftime('%Y-%m-%d %H:%M'),
            'codigos': dict(sorted(codigos.items())), 'herramientas': herr, 'titulos': titulos}
     json.dump(ind, open(os.path.join(salida, 'indice.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
