@@ -26,6 +26,16 @@ Autor: Miguel Ángel Díaz © 2026
 1. Subir `index.html` y la carpeta `materiales/` a GitHub (junto al index).
 2. No hay reglas nuevas ni APK nuevo.
 
+**Pruebas**
+- `t_v131` 28/28 en PC y 29/29 en celular: panel de arreglos con el stub (detecta unidades, 7013 y repetidos; no escribe nada hasta confirmar; al confirmar escribe catálogo, par de corrección de stock y auditoría; la cuadrilla no lo ve) y carrusel (sin foto arranca en el 3D, con foto foto → 3D → plano, foto nueva pasa primera, ‹ ›, deslizar, puntitos, visor claro con zoom, sin señal, herramienta con y sin hoja, índice una sola vez).
+- Batería completa en PC y celular: todo OK salvo `t_v083` (reemplazada por `t_v084`). En una primera corrida con la máquina cargada fallaron `t_cargador`, `t_v024`, `t_v031` y `t_v078` (tiempos); solas pasaron, y en la corrida final pasó todo.
+- Prueba vieja cambiada: ninguna. `h.js` sirve `materiales/`.
+
+**Huellas** (sello «2026-11-08 20:14 · ab52be»)
+- `index.html`: `6afbdb593a40b123d3f7412cda29ccab948ed4f75c30fa794cbfe94c75790f15`
+- `131_2026-11-08_app-EMA_ORIGINAL.html`: `1ee4cf6ac7a02929655c25fb5d85497192b9de3c5c8b6ee272dc4c5b8b6b15b8`
+- `materiales/indice.json`: `54b2bcc97c23bc07ac53ca9046639d88b5708e72759039d0bbe3506f1cea229a`
+
 ## v130 — 07/11/2026 · Mis tareas por tarjetas, «te faltan fotos» con el porqué y galería con quién sacó cada foto
 
 **Pedido de Ángel** (eligió los modelos en imágenes antes)
