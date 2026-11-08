@@ -8,11 +8,16 @@ Tardás unos 10 minutos.
 
 ## 1. Sacar la clave de Claude
 
-1. Entrá a **platform.claude.com** con tu cuenta.
-2. Andá a **API Keys** y tocá **Create Key**. Ponele de nombre `ema-ia`.
-3. Copiá la clave (empieza con `sk-ant-…`). **Se muestra una sola vez.**
-4. No la pegues en ningún otro lado que no sea el paso 3 de abajo: ni en WhatsApp, ni en el chat, ni en un archivo.
-5. Fijate que la cuenta tenga saldo cargado (**Billing**). Si no, el asistente contesta «se quedó sin saldo».
+> ✅ **Esto ya lo hiciste** (08/11/2026): organización «EMA Servicios», créditos del plan Max (USD 100 por mes) vinculados, límite de gasto de USD 30 por mes, clave `ema-ia` creada. Si ya tenés la clave guardada, pasá directo al paso 2.
+
+Para hacerlo de nuevo (por ejemplo, si hay que cambiar la clave):
+
+1. Entrá a **platform.claude.com** (organización **EMA Servicios**).
+2. Menú de la izquierda: **Claves y acceso** › **Crear clave**. Si aparece el cartel de «federación de identidades», salteálo: Cloudflare necesita una clave común.
+3. Nombre: `ema-ia` · Vence: **Nunca** · Alcance: **Espacio de trabajo predeterminado (default)**, no «Organización».
+4. Tocá **Crear** y copiá la clave (empieza con `sk-ant-…`). **Se muestra una sola vez.**
+5. No la pegues en ningún otro lado que no sea el paso 3 de abajo: ni en WhatsApp, ni en el chat, ni en un archivo.
+6. El saldo sale de los **USD 100 por mes del plan Max**. Para ver o cambiar el tope: **Gasto** › **Límites de gasto**. Sin tarjeta cargada no se cobra nada aparte; si se acaba el crédito, el asistente contesta «se quedó sin saldo» hasta el mes siguiente.
 
 ## 2. Crear el Worker y pegar el código
 
@@ -70,8 +75,8 @@ Tiene que decir algo así:
 - **«Tu sesión no es válida»**: la persona tiene que cerrar y volver a entrar a la app.
 - **«Llegaste a N pedidos…»**: es el límite por persona. Esperá un minuto, o hasta mañana si es el del día.
 - **«La clave del asistente no funciona»**: la clave se borró o está mal. Creá una nueva (paso 1), cargala de nuevo (paso 3) y borrá la vieja en platform.claude.com.
-- **«Se quedó sin saldo»**: cargá saldo en platform.claude.com › Billing.
-- **Si pegaste la clave en otro lado por error** (chat, mensaje, archivo): borrala en platform.claude.com, creá una nueva y cargala en el paso 3.
+- **«Se quedó sin saldo»**: se gastaron los créditos del mes o se llegó al tope de USD 30. Se renueva el 1 de cada mes; si hace falta antes, subí el tope en platform.claude.com › Gasto › Límites de gasto.
+- **Si pegaste la clave en otro lado por error** (chat, mensaje, archivo): borrala en platform.claude.com › Claves y acceso, creá una nueva y cargala en el paso 3.
 
 ## Qué modelos usa
 
