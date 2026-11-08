@@ -2,6 +2,28 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v131 — 08/11/2026 · «🔧 Revisar el catálogo» del pañol y carrusel foto → 3D → plano en cada material y herramienta
+
+**Pedido de Ángel**
+- «Corrijamos las cosas mal» del catálogo del pañol.
+- «Cada producto tiene su foto: esa es la principal, pero se tiene que poder deslizar y ver el plano y el 3D. Las que no tienen foto quedan con el plano y el 3D hasta que les suban la foto. Lo mismo con herramientas.» Ajuste: sin fondo negro; sin foto, primero el 3D y después el plano; con foto: foto → 3D → plano.
+
+**Cambios**
+- **`catalogoArreglos`** — Pañol › Acceso y respaldo › «🔧 Revisar el catálogo» (solo admin/oficina). La app **no arregla sola**: muestra lo que encontró con casillas y recién al confirmar («¿Guardo estos N cambios?» con la lista) escribe en `catalogoProductos` y en la Auditoría.
+  - **Unidades:** UN/un/Un/UNIDAD/unidad/u/U → «Un.»; M/METRO/metro/mts/Mts → «m»; KG/Kg → «kg» (marcadas). «c/a» y otras raras: desplegable Un./m/kg/otra, sin proponer.
+  - **Código reutilizado:** un código del catálogo original cuyo nombre de hoy no comparte ninguna palabra con el original (el 7013, hoy «ANTEOJO DE SEGURIDAD»). El 7013 vuelve a ser «CONECTOR C COMPRESION para PAT TIPO C CMC -7…» y el anteojo se da de alta con un código que escribe la persona (sugerido: el siguiente libre después del mayor 9xxx en 9001–9499; se valida que tenga 4 cifras, que esté en x001–x499 y que no exista ni tenga movimientos). Opcional: pasar su stock al código nuevo. Los movimientos viejos del 7013 quedan donde están.
+  - **Repetidos:** misma descripción normalizada y misma unidad (marcados) y los tres «parecen el mismo, confirmá» (8039→8008, 8042→8005, 8043→8009, sin marcar). Las fichas de baja no cuentan. Unificar = el que sobra queda **de baja** (`activo:false`, `unidoEn`), nunca se borra ni se reutiliza.
+  - **Stock de los unificados:** pasa al que queda con el mismo par de movimientos que ya usa el pañol para «🔀 Corrección de código» (salida + entrada con `correccion:true`, `correccionGrupo`, nota «unificación 8039→8008»): queda trazable y se puede anular en pareja. Si el que sobra tiene stock negativo, no se mueve y avisa «pasalo a mano».
+  - En la base: el cómputo que enlaza materiales por nombre sigue `unidoEn` (un material unificado se enlaza con el código que quedó).
+- **`materialesFichas`** — En la foto de la ficha del material y de la herramienta, un carrusel que se desliza (dedo, ‹ ›, puntitos): foto(s) → 🧊 3D → 📐 Plano; sin foto arranca en el 3D. Usa la misma foto de siempre: cuando la suben, pasa a ser la primera sola. Tocar el 3D o el plano abre la hoja completa en un visor **claro** (fondo del tema) con zoom de dos dedos, rueda, doble toque y ＋/−. Las herramientas se buscan por palabras del nombre.
+  - Las imágenes **no van en Firestore**: carpeta `materiales/` en GitHub junto al index (`indice.json` + `<hoja>_3d.webp`, `_plano.webp`, `_hoja.webp`). Se piden recién al abrir la ficha; el índice se trae una vez y queda guardado. En el APK, la dirección sale de `__cargador.url`. Sin señal: «Sin señal: el plano se ve cuando vuelva».
+  - `herramientas/armar_materiales.py <carpeta de hojas> <salida> [--catalogo …]`: corta plano y 3D de cada hoja vigente (ignora `_v1`/`_vB`), WebP calidad 80 (1400 / 2000 px), lee los códigos y el título del `.svg`, palabras de herramientas de las hojas `mat_herramientas_*`, `mat_epp_*`, `mat_instrumentos_*`, y avisa qué códigos no tienen hoja. Se vuelve a correr cuando hay hojas nuevas (solo rehace lo cambiado).
+- Arnés: `h.js` sirve `materiales/` (`op.matDir` o `APPDIR/materiales`; `global.__matSinRed` simula sin señal).
+
+**Qué tiene que hacer Ángel**
+1. Subir `index.html` y la carpeta `materiales/` a GitHub (junto al index).
+2. No hay reglas nuevas ni APK nuevo.
+
 ## v130 — 07/11/2026 · Mis tareas por tarjetas, «te faltan fotos» con el porqué y galería con quién sacó cada foto
 
 **Pedido de Ángel** (eligió los modelos en imágenes antes)
