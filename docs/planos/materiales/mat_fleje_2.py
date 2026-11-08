@@ -1,89 +1,91 @@
-import math, sys, os
+"""MAT-FLEJE-2 (rev. B) · Transición aéreo-subterránea AP-TC-024: caño H°G° Ø2" × 6,4 m (5501), pipeta (5502), flejes con hebilla, alternativa doble aislación (5004).
+Geometría: r3d/piezas/perfiles_pat.mjs (CANO.c2, FLE); 3D: r3d/out/pat_fle2a.png, pat_fle2b.png. Plano oficial AP-TC-024 pendiente: medidas «(*)». Fuentes: r3d/FUENTES_pat.md"""
+import sys, os, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from matkit import Ficha, K, G, OR, NV, CAD, MONO, INT
-h = Ficha(); m = h.m
-# ================= ELEVACION TRANSICION (esquema AP-TC-024)
-h.titulo(40, 62, "TRANSICION AEREO-SUBTERRANEA (AP-TC-024)", "ESQUEMA 1:60 - PLANO OFICIAL PENDIENTE: MEDIDAS A CONFIRMAR (*)")
-k = 0.058; x0, yb = 170, 568
-h.path(f"M{x0-18},{yb+40} L{x0-12},{yb-440} H{x0+12} L{x0+18},{yb+40} Z", "url(#CONC)", K, 1.4)
-h.rect(x0 + 18, yb - 6400 * k, 12, 6400 * k, "url(#STEEL)", K, 1.2)
-h.path(f"M{x0+18},{yb-6400*k} q2,-22 26,-24 l4,12 q-16,2 -18,12 z", "url(#STEEL)", K, 1.1)   # pipeta
-for yy in (yb - 330, yb - 200, yb - 70): h.rect(x0 - 22, yy, 60, 6, "url(#STEEL)", K, .9)
-h.path(f"M{x0+60},{yb-6400*k-40} C{x0+52},{yb-6400*k-36} {x0+48},{yb-6400*k-30} {x0+44},{yb-6400*k-20}", "none", K, 2.5)
-h.path(f"M{x0+300},{yb-6400*k-50} L{x0+60},{yb-6400*k-40}", "none", K, 2.5)
-h.ln(40, yb, 470, yb, K, 1.4); h.txt(40, yb - 6, "±0,00", 10.5)
-h.rect(40, yb, 430, 40, "url(#EARTH)", K, 0)
-h.path(f"M{x0+24},{yb} Q{x0+26},{yb+22} {x0+60},{yb+22} H460", "none", K, 4)
-h.dimV(x0 + 80, yb - 6400 * k, yb, "6400 H°G° (8.03) · 4000 DOBLE AISL. (8.02)", ext=x0 + 32)
-h.globo("1", x0 + 34, yb - 6400 * k - 16, x0 + 160, yb - 6400 * k + 10); h.txt(x0 + 176, yb - 6400 * k + 14, "PIPETA + ESPUMA (5502 / 8010)", 10.5)
-h.globo("2", x0 + 38, yb - 327, x0 + 160, yb - 300); h.txt(x0 + 176, yb - 296, '3 FLEJES INOX 3/4" CON HEBILLA', 10.5)
-h.globo("3", x0 + 24, yb - 140, x0 + 160, yb - 150); h.txt(x0 + 176, yb - 146, 'CAÑO H°G° Ø2" (5501)', 10.5)
-h.globo("4", x0 + 200, yb + 22, x0 + 220, yb + 56); h.txt(x0 + 236, yb + 60, "SIGUE EN PEAD Ø50 (5005) A LA ZANJA", 10.5)
-h.globo("5", x0 + 200, yb - 6400 * k - 46, x0 + 230, yb - 6400 * k - 74); h.txt(x0 + 246, yb - 6400 * k - 70, "TOMA DE LA RED: 1995/1 (3051)", 10.5)
-# ================= CORTE DEL CAÑO Y PIPETA
-h.titulo(560, 260, "CORTE A-A DEL CAÑO", "ESC. 1:1 (ESQUEMA)")
-cx, cy = 660, 360
-h.circ(cx, cy, 30, "url(#STEEL)", K, 1.4); h.circ(cx, cy, 26, "#fff", K, 1)
-for a in range(0, 360, 90): h.circ(cx + 12 * math.cos(math.radians(a + 45)), cy + 12 * math.sin(math.radians(a + 45)), 6, "url(#cuH)", K, .5)
-h.dimH(cy + 46, cx - 30, cx + 30, 'Ø2" (≈Ø60,3 ext.) (*)', ext=cy + 32, c=OR)
-h.txt(cx + 40, cy - 30, "ESPESOR (*)", 10.5, 400, OR)
-# códigos
-y2 = h.codigos(40, 670, [5501, 5502, 5004], extra={5501: "ítem 8.03", 5502: "boca de arriba", 5004: "ítem 8.02 (alternativa)"}, wx=170)
-y3 = h.datos(40, y2 + 30, [("CAÑO 5501", 'H°G° Ø2" · L = 6,4 m'), ("ALTERNATIVA 5004", 'doble aislación Ø2" · L = 4 m'), ("SUJECION", "3 flejes con hebilla como mínimo"),
-    ("BOCA DE ARRIBA", "pipeta y sellado"), ("BOCA DE ABAJO", "sellada con espuma (8010)"), ("PAGO", "ítem 6.07 por m · 6.08 por unidad")], w=430, c1=140)
-h.lista(500, y2 + 30, "DONDE SE USA", [
-    "· AP-TC-024: pasa la red aérea a tendido",
-    "   subterráneo (o a una columna de A.P.)",
-    "   bajando por un poste de madera o H°A°.",
-    "· Calculadora modo Barrio →",
-    "   «Transición aéreo-subterránea».",
-    "· AP-T-014 (pipeta).",
-])
-h.notas(40, 1010, [
-    "ESQUEMA: EL PLANO OFICIAL AP-TC-024 NO LO TENEMOS TODAVIA. DIBUJO Y MEDIDAS A CONFIRMAR (*).",
-    "(*) Ø EXTERIOR Y ESPESOR DEL CAÑO 2\", FORMA DE LA PIPETA Y SEPARACION DE LOS FLEJES: A CONFIRMAR CON EL FABRICANTE / PLANO.",
-    "LOS FLEJES Y HEBILLAS SON LOS DE MAT-FLEJE-1 (4024 / 4025). LA ESPUMA ES 8010 (OTRA FAMILIA).",
-    "5501 Y 5502 SON CODIGOS DE LA APP (RANGO x500-x999), MATERIAL DE BARRIO.",
-    "FUENTE: LP 21478 ANEXO I (6.07 / 6.08 / 8.02 / 8.03); ETG CORDOBA; FICHA AP-TC-024 DE LA APP.",
-])
-# ================= 3D PIPETA Y CAÑO
-h.titulo(890, 62, "VISTA 3D - PIPETA SOBRE EL CAÑO H°G°", "EL CABLE ENTRA POR LA PIPETA, QUE NO DEJA PASAR EL AGUA")
-h.iso(1.15, 1130, 360)
-m.cyl([0, 0, -70], [0, 0, 0], 30.15, "galv", n=32, seg=2); m.render()
-m.cyl([0, 0, 0], [0, 0, 20], 34, "galv", n=32); m.render()
-# curva de la pipeta: segmentos de toro
-N = 14; AM = 160
-def anillo(a, r=32, n=28):
-    c = [40 * (1 - math.cos(a)), 0, 20 + 40 * math.sin(a)]; e1 = [-math.cos(a), 0, math.sin(a)]
-    return [[c[0] + r * math.cos(2 * math.pi * t / n) * e1[0], r * math.sin(2 * math.pi * t / n), c[2] + r * math.cos(2 * math.pi * t / n) * e1[2]] for t in range(n)]
-RG = [anillo(math.radians(AM * k / 24)) for k in range(25)]
-for k in range(24):
-    A, B = RG[k], RG[k + 1]
-    for t in range(28): m.face([A[t], A[(t + 1) % 28], B[(t + 1) % 28], B[t]], "galv")
-m.render()
-aE = math.radians(AM); pE = [40 * (1 - math.cos(aE)), 0, 20 + 40 * math.sin(aE)]; tE = [math.sin(aE), 0, math.cos(aE)]
-m.cyl(pE, [pE[0] + tE[0] * .6, 0, pE[2] + tE[2] * .6], 30, "#202020", n=28); m.render()
-p2 = [pE[0] + tE[0] * 25, 0, pE[2] + tE[2] * 25]
-m.cyl(pE, p2, 9, "negro", n=14); m.cyl(p2, [p2[0] + 20, 0, p2[2] - 10], 9, "negro", n=14); m.cyl([p2[0] + 20, 0, p2[2] - 10], [230, -40, 60], 9, "negro", n=14, seg=3); m.render()
-h.g3("1", (40, 32, 52), 1450, 150, "PIPETA 5502 (BOCA HACIA ABAJO)")
-h.g3("3", (0, 30, -40), 1450, 200, 'CAÑO H°G° Ø2" 5501')
-h.g3("6", (180, -25, 50), 1450, 250, "CABLE DE LA RED")
-h.txt(890, 520, "(*) Forma de la pipeta: esquemática, a confirmar con el plano AP-TC-024.", 11, 400, OR, "start", INT)
-# ================= EN SU LUGAR
-h.titulo(890, 560, "EN SU LUGAR - BAJADA POR EL POSTE", "CAÑO 6,4 m, 3 FLEJES, PIPETA ARRIBA Y PEAD Ø50 A LA ZANJA")
-h.iso(.053, 1170, 990)
-m.box(-500, 500, -500, 500, -200, 0, "#c9a77c", pat="soil3", edge="#6b5236"); m.render()
-m.cyl([0, 0, -200], [0, 0, 7200], 150, "conc", n=36, seg=10, r1=105, pat="conc3"); m.render()
-m.cyl([0, 190, -150], [0, 165, 6400], 34, "galv", n=16, seg=10); m.render()
-for z in (1200, 3200, 5200):
-    rr = 150 - 45 * z / 7200
-    m.ring([0, 0, z], [1, 0, 0], [0, 1, 0], [0, 0, 1], rr, rr + 10, 0, 80, -50, 140, "inox", n=24); m.render()
-m.cyl([0, 165, 6400], [60, 165, 6560], 40, "galv", n=16); m.render()
-m.cyl([60, 165, 6560], [900, -300, 7000], 12, "negro", n=10, seg=4); m.render()
-m.cyl([0, 190, -150], [0, 500, -150], 30, "#1c1c1c", n=12, seg=4); m.render()
-h.g3("1", (60, 165, 6560), 1450, 640, "PIPETA 5502")
-h.g3("2", (0, 150, 3240), 1450, 700, "3 FLEJES CON HEBILLA")
-h.g3("3", (0, 190, 2000), 1450, 760, "CAÑO H°G° 5501 (6,4 m)")
-h.g3("4", (0, 450, -150), 1450, 820, "PEAD Ø50 A LA ZANJA")
-h.rotulo(890, h.H - 150, 750, "MAT-FLEJE-2", "CAÑO H°G° 2\" Y PIPETA", "TRANSICION AP-TC-024", "ESQUEMA, CORTE, DATOS Y 3D", "1:60 / 1:1", "ESQUEMAS Y 3D S/E")
-h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_fleje_2.svg")); print("ok")
+from patkit import *
+
+C = PP["CANO"]; c2 = C["c2"]; ro = c2["De"] / 2; ri = ro - c2["e"]
+h = hojaP()
+
+# ================= ELEVACION (1:60) =================
+h.titulo(40, 62, "TRANSICION AEREO-SUBTERRANEA (AP-TC-024)", "ESC. 1:60 · PLANO OFICIAL PENDIENTE: MEDIDAS A CONFIRMAR (*)")
+k = 1 / 60 * 3.3; x0, yb = 120, 560
+h.path(f"M{x0 - 18},{yb + 40} L{x0 - 12},{yb - 7200 * k} H{x0 + 12} L{x0 + 18},{yb + 40} Z", "url(#HORM)", K, 1.4)
+h.rect(x0 + 17, yb - 6400 * k, 60.3 * k * 6, 6400 * k + 10, "url(#HG)", K, 1.0)
+for z in (800, 3200, 5800): h.rect(x0 - 16, yb - z * k - 2.5, 34 + 60.3 * k * 6, 5, "url(#INX)", K, .8)
+px = x0 + 17 + 60.3 * k * 3
+h.path(f"M{px - 9},{yb - 6400 * k} v-8 a16,14 0 0 1 32,0 v8 h-8 v-6 a8,7 0 0 0 -16,0 v6 Z", "#fff", K, 1.1)
+h.path(f"M{px + 19},{yb - 6400 * k + 4} C{px + 30},{yb - 6400 * k + 40} {px + 120},{yb - 6400 * k - 20} {px + 260},{yb - 6400 * k - 30}", "none", K, 2.2)
+h.path(f"M{px},{yb} Q{px + 2},{yb + 24} {px + 40},{yb + 24} H{x0 + 330}", "none", K, 3)
+h.ln(x0 - 70, yb, x0 + 340, yb, K, 1.6); h.nivel(x0 + 300, yb, "±0,00")
+h.path(f"M{x0 + 60},{yb + 6} h270 v40 h-270 Z", "none", K, .6, 'stroke-dasharray="5 3"'); h.txt(x0 + 200, yb + 58, "ZANJA (AP-TC-001)", 9, 400, G, "middle")
+h.dimV(x0 + 66, yb - 6400 * k, yb, "6400 (5501) · 4000 (5004)", ext=x0 + 26)
+h.dimV(x0 - 44, yb - 7200 * k, yb, "POSTE ≥ 7 m (*)", ext=x0 - 14, c=OR)
+for n, (gx, gy), (tx, ty), t in [("1", (px, yb - 6400 * k - 12), (x0 + 170, yb - 6400 * k + 40), "PIPETA 5502 + ESPUMA 8010"), ("2", (x0 + 25, yb - 3200 * k), (x0 + 170, yb - 3200 * k), "3 FLEJES INOX 3/4\" CON HEBILLA"),
+                                   ("3", (x0 + 22, yb - 1800 * k), (x0 + 170, yb - 1800 * k), "CAÑO H°G° Ø2\" (5501)"), ("4", (x0 + 200, yb + 24), (x0 + 220, yb + 90), "SIGUE EN PEAD Ø50 (5005) A LA ZANJA"),
+                                   ("5", (px + 200, yb - 6400 * k - 25), (x0 + 170, yb - 6400 * k - 50), "TOMA DE LA RED: 1995/1 (3051)")]:
+    h.globo(n, gx, gy, tx, ty, r=8); h.txt(tx + 14, ty + 4, t, 9.5)
+lineaCorte(h, x0 + 2, yb - 1000 * k, x0 + 30 + 60.3 * k * 6, yb - 1000 * k, "A")
+
+# ================= CORTE A-A (3:1) =================
+h.titulo(500, 62, "CORTE A-A DEL CAÑO", "ESC. 2:1 · CAÑO H°G° 2\" (IRAM 2502 / BSP) · CABLE DE LA RED ADENTRO")
+e = 2.0; cx, cy = 610, 170
+h.circ(cx, cy, ro * e, "url(#HG)", K, 1.4); h.circ(cx, cy, ri * e, "#fff", K, 1.0)
+h.circ(cx - 12, cy + 10, PC["CAB"]["p1x25"]["Ro"] * e, "url(#PVCV)", K, 1.0); h.circ(cx - 12, cy + 10, 2.9 * e, "url(#ALU)", K, .7)
+ejeH(h, cx - ro * e - 12, cx + ro * e + 12, cy); ejeV(h, cx, cy - ro * e - 12, cy + ro * e + 12)
+h.dimH(cy + ro * e + 20, cx - ro * e, cx + ro * e, "Ø60,3", ext=cy)
+h.dimV(cx + ro * e + 20, cy - ro * e, cy - ri * e, "3,65 (*)", ext=cx)
+llamada(h, cx - 12, cy + 10, cx + ro * e + 30, cy + 40, "PILOTO Al 1 × 25 (Ø9,5)")
+
+# ================= D1 PIPETA EN CORTE (1:1,5) =================
+h.titulo(500, 300, "D1 - PIPETA ENROSCADA (CORTE)", "ESC. 1:1 · FORMA (*) · BOCA HACIA ABAJO: NO ENTRA EL AGUA")
+e2 = 1.0; dx, dy = 600, 560; X = lambda x: dx + x * e2; Z = lambda z: dy - z * e2
+Lr = C["rosca"]; Rb = 48; P2 = c2["paso"]; Hf = P2 / (2 * math.tan(math.radians(27.5)))
+def rr(z):
+    s_ = ((z + 200) / P2) % 1; tri = 1 - abs(2 * s_ - 1); return min(ro - Hf / 6, max(ro - Hf * 5 / 6, ro - Hf + Hf * tri))
+zs = [-Lr + Lr * i / 120 for i in range(121)]
+for lado in (-1, 1):
+    pts = [(X(lado * ri), Z(-150)), (X(lado * ro), Z(-150)), (X(lado * ro), Z(-Lr))] + [(X(lado * rr(z)), Z(z)) for z in zs] + [(X(lado * ri), Z(0))]
+    h.path("M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in pts) + " Z", "url(#HG)", K, 1.0)
+    h.path(f"M{X(lado * (ro + .3)):.1f},{Z(6):.1f} V{Z(-Lr):.1f} H{X(lado * (ro + 7)):.1f} V{Z(6):.1f} Z", "url(#ALU)", K, 1.1)
+# codo de 180° (pared de 7) que termina con la boca hacia abajo en x = 2 Rb
+for (r_o, r_i) in ((Rb + ro + 7, Rb + ro), (Rb - ro, Rb - ro - 7)):
+    h.path(f"M{X(Rb - r_o)},{Z(6)} A{r_o * e2},{r_o * e2 * .9} 0 0 1 {X(Rb + r_o)},{Z(6)} H{X(Rb + r_i)} A{r_i * e2},{r_i * e2 * .9} 0 0 0 {X(Rb - r_i)},{Z(6)} Z", "url(#ALU)", K, 1.2)
+h.path(f"M{X(2 * Rb + 50)},{Z(-150)} C{X(2 * Rb + 10)},{Z(-90)} {X(2 * Rb)},{Z(-40)} {X(2 * Rb)},{Z(6)} A{Rb * e2},{Rb * e2 * .9} 0 0 0 {X(0)},{Z(6)} V{Z(-150)}", "none", K, 2.4)
+ejeV(h, X(0), Z(-160), Z(Rb + 30))
+h.dimV(X(-ro - 7) - 14, Z(0), Z(-Lr), "30 (*)", ext=X(-ro - 7), c=OR)
+llamada(h, X(-ro + 1), Z(-Lr + 6), X(-ro) - 50, Z(-Lr - 20), "ROSCA BSP 2\"", K, "end"); llamada(h, X(Rb), Z(6 + (Rb + ro + 4) * .9), X(Rb) + 70, Z(6 + (Rb + ro + 4) * .9) - 6, "PIPETA 5502 (*)")
+llamada(h, X(2 * Rb + 6), Z(-70), X(2 * Rb) + 50, Z(-90), "CABLE DE LA RED"); llamada(h, X(-ro + 1), Z(-120), X(-ro) - 50, Z(-130), "CAÑO 5501", K, "end")
+h.circ(X(-ro), Z(-Lr / 2), 11, "none", K, .6, 'stroke-dasharray="3 2"'); h.txt(X(-ro) - 14, Z(-Lr / 2) - 10, "D2", 10, 700, K, "end")
+
+# ================= D2 rosca BSP 2" =================
+h.titulo(40, 640, "D2 - ROSCA GAS BSP 2\" (CAÑO)", "ESC. 10:1 · 55° · P = 2,309 (25,4 / 11) · CONICA 1:16 (ISO 7-1)")
+P = c2["paso"]; ed = 10.0; x2, y2 = 60, 730; Hf = P / (2 * math.tan(math.radians(27.5))); pts = []
+for i in range(4 * 16 + 1):
+    z = 4 * P * i / 64; s = (z / P) % 1; tri = 1 - abs(2 * s - 1); rr = min(Hf * 5 / 6, max(Hf / 6, Hf * tri)); pts.append((x2 + z * ed, y2 - (rr - Hf / 6) * ed + z * ed / 32))
+h.path(poly(pts) + f" L{x2 + 4 * P * ed},{y2 + 26} L{x2},{y2 + 26} Z", "url(#HG)", K, 1.1)
+h.dimH(y2 - .64 * P * ed - 14, x2 + P * ed * .5, x2 + P * ed * 1.5, "2,309", ext=y2 - .64 * P * ed)
+h.txt(x2 + 4 * P * ed + 20, y2 - 4, "PROFUNDIDAD 0,64 P = 1,48 · CRESTAS REDONDEADAS", 9.5); h.txt(x2 + 4 * P * ed + 20, y2 + 10, "LA PIPETA ENROSCA EN LA PUNTA DEL CAÑO; SELLAR CON CINTA", 9.5)
+
+# ================= TABLAS =================
+yC = codigos(h, 40, 770, [5501, 5502, 5004, 8010, 5005, 4024, 4025], {5501: "ítem 8.03 · L = 6,4 m", 5502: "boca de arriba", 5004: "ítem 8.02 (alternativa)", 8010: "sellado de las bocas", 5005: "sigue a la zanja", 4024: "3 por bajada (MAT-FLEJE-1)", 4025: "3 por bajada"}, wdesc=420, wx=180, rowh=15)
+yD = bloque(h, 40, yC + 14, "DATOS TECNICOS Y DONDE SE USA", [
+    "CAÑO 5501: H°G° Ø2\" × 6,4 m (ÍTEM 8.03) · ALTERNATIVA 5004: DOBLE AISLACION Ø2\" × 4 m (ÍTEM 8.02) · PAGO: ÍTEM 6.07 POR m · 6.08 POR UNIDAD.",
+    "AP-TC-024: PASA LA RED AEREA A SUBTERRANEO (O A UNA COLUMNA) BAJANDO POR UN POSTE. 3 FLEJES COMO MINIMO · BOCA DE ARRIBA CON PIPETA · BOCAS SELLADAS CON ESPUMA.",
+    "CALCULADORA MODO BARRIO → «TRANSICION AEREO-SUBTERRANEA»."], w=800, sz=10, lh=13.5)
+notasW(h, 40, yD + 2, [
+    "ESQUEMA: EL PLANO OFICIAL AP-TC-024 NO LO TENEMOS TODAVIA. DIBUJO Y MEDIDAS A CONFIRMAR (*). 5501 / 5502 SON CODIGOS DE LA APP (RANGO x500).",
+    "(*) ESPESOR DEL CAÑO (3,65), LARGO ROSCADO, FORMA DE LA PIPETA Y SEPARACION DE LOS FLEJES: A CONFIRMAR CON EL FABRICANTE / PLANO. FUENTES: r3d/FUENTES_pat.md."], w=800, lh=14)
+rayadosC(h, 40, 1104, ["HG", "ALU", "INX", "HORM", "PVCV"], cols=5, dx=160)
+
+# ================= 3D =================
+h.titulo(890, 62, "VISTA 3D - PIPETA SOBRE EL CAÑO H°G° (CORTADO A CUARTO)", "ROSCA BSP REAL · EL CABLE ENTRA POR LA BOCA DE ABAJO DE LA PIPETA Y BAJA POR EL CAÑO")
+A = img3d(h, "pat_fle2a", 870, 96, 560)
+columna(h, A, [("pipeta", "1", "PIPETA 5502 (*)"), ("boca", "", "BOCA HACIA ABAJO"), ("roscaP", "", "ROSCA DE LA PIPETA"), ("rosca", "", "ROSCA BSP 2\" (CORTE)"), ("cable", "", "CABLE DE LA RED"),
+               ("pared", "", "PARED DEL CAÑO"), ("cano", "3", "CAÑO H°G° Ø2\" 5501")], 1440, 130, 510, paso=40)
+h.txt(890, 566, "EN SU LUGAR - ARRIBA DEL POSTE: CAÑO, FLEJE, PIPETA Y BAJADA DE LA RED (*)", 11, 700, NV, "start", INT)
+A2 = img3d(h, "pat_fle2b", 880, 576, 500)
+columna(h, A2, [("cable", "5", "BAJADA DE LA RED"), ("pipeta", "1", "PIPETA"), ("boca", "", "ENTRADA DEL CABLE"), ("poste", "", "POSTE H°A°"), ("fleje", "2", "FLEJE + HEBILLA"), ("cano", "3", "CAÑO H°G° 5501")], 1400, 620, 990, paso=40)
+h.txt(890, 1026, "RENDER: three.js (r3d/escenas/pat_fle2a.mjs, pat_fle2b.mjs) CON LA MISMA GEOMETRIA DEL PLANO. FUENTES: r3d/FUENTES_pat.md", 9.5, 400, G, "start", INT)
+rotuloMat(h, "MAT-FLEJE-2", "CAÑO H°G° 2\" Y PIPETA", "TRANSICION AP-TC-024", "ELEVACION, CORTE, D1 PIPETA, D2 ROSCA Y 3D", "1:60 / 2:1", "D1 1:1 · D2 10:1", rev="B", fecha="08/11/2026")
+h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_fleje_2.svg"))

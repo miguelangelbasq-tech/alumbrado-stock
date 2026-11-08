@@ -1,164 +1,160 @@
-import math, sys, os
+"""MAT-CAÑOS-1 (rev. B) · Caños de PVC rígido Ø25,4 a Ø160, unión pegada con enchufe, curva 90°, tapa 5030 y cordón guía 5014.
+Plano y 3D con las mismas medidas (r3d/piezas/perfiles_civil.mjs → perfiles_civil.json). 3D: r3d/out/civil_pvc_union.png y civil_pvc_cmp.png.
+Fuentes: ficha de la app (Tigre / ETG Córdoba), CRUCE_AP_TC_002, Wavin S-40 (IRAM 13326) y r3d/FUENTES_civil.md. Lo que no está: naranja (*)."""
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from mk_obra import *
+from civilkit import *
 
-h = HojaO()
-COD = [5007, 5008, 5010, 5009, 5011, 5030, 5014]
-h.check_codigos(COD)
+P = PC["PVC"]; d110 = P["d110"]; E = P["enchufe"]; CU = P["curva"]; TP = P["tapa"]
+h = nuevaC()
 
-# ============ A · CORTES TRANSVERSALES (ficha caños: tabla de espesores)
-h.titulo(40, 62, "CORTES · Ø EXTERIOR Y ESPESOR DE PARED", "ESC. 1:1,2 (k = 0,85 px/mm) · PARED EN NEGRO POR SER FINA · VER D1")
-k = .85; yc = 205
-CAN = [(160, 3.2, "5008", 112, "REF. 4,7"), (110, 3.2, "5007", 262, None), (90, 2.7, "5010", 382, None), (50, 3.2, "5009", 480, None), (25.4, None, "5011", 556, None)]
-for D, e, cod, cx, alt in CAN:
-    r = D / 2 * k
-    h.circ(cx, yc, r, K, K, .9)
-    ee = (e if e else 1.8) * k
-    h.circ(cx, yc, r - ee, "#fff", K, .6)
-    h.ln(cx - r - 8, yc, cx + r + 8, yc, K, .4, h.EJE); h.ln(cx, yc - r - 8, cx, yc + r + 8, K, .4, h.EJE)
-    h.dimH(yc + 88, cx - r, cx + r, "Ø" + str(D).replace(".", ","), ext=yc)
-    et = ("e " + str(e).replace(".", ",")) if e else "e (*)"
-    h.txt(cx, yc + 108, et, 10.5, 700, OR if not e else K, "middle")
-    if alt: h.txt(cx, yc + 122, "(" + alt + ")", 9.5, 400, K, "middle")
-    h.txt(cx, yc - 80, cod, 11, 700, K, "middle", MONO)
-h.txt(40, yc + 150, "Ø110: EL CATALOGO DICE «Ø100 INTERIOR», PERO 110 − 2 × 3,2 = 103,6 (VER NOTA 2).", 10.5, 400, OR)
+# =============== 1. CORTES TRANSVERSALES (los 5 Ø) ===============
+h.titulo(40, 62, "CORTES TRANSVERSALES A-A", "ESC. 1:1,25 · PVC RIGIDO · LA PARED SE VE AMPLIADA EN D1")
+k = .8; yc = 190
+for key, cx in (("d160", 112), ("d110", 268), ("d90", 388), ("d50", 486), ("d25", 560)):
+    c = P[key]; ro = c["D"] / 2 * k; ri = (c["D"] / 2 - c["e"]) * k
+    anillo(h, cx, yc, ro, ri, "PVCr", 1.1)
+    h.ln(cx - ro - 9, yc, cx + ro + 9, yc, K, .4, h.EJE); h.ln(cx, yc - ro - 9, cx, yc + ro + 9, K, .4, h.EJE)
+    D = str(c["D"]).replace(".", ","); h.dimH(yc + 76, cx - ro, cx + ro, "Ø" + D, ext=yc)
+    et = "e " + str(c["e"]).replace(".", ",") + (" (*)" if c.get("eAC") else "")
+    h.txt(cx, yc + 96, et, 10.5, 700, OR if c.get("eAC") else K, "middle")
+    if c.get("eRef"): h.txt(cx, yc + 109, "(REF. 4,7)", 9, 400, G, "middle")
+    h.txt(cx, yc - 76, str(c["cod"]), 11, 700, K, "middle", MONO)
+h.txt(40, yc + 128, "Ø110 (5007): EL PAÑOL DICE «Ø100 INTERIOR»; CON e = 3,2 EL INTERIOR DA 103,6 (VER NOTA 2).", 9.5, 400, OR)
+# llamada D1 en el Ø110
+cx1 = 268; ro1 = 55 * k; h.llamadaDet(cx1 + ro1 * .707, yc - ro1 * .707, 10, "D1")
 
-# D1: pared del Ø110 ampliada
-h.titulo(620, 62, "DETALLE D1", "PARED Ø110 · ESC. 10:1")
-h.llamadaDet(262 + 46 * .707, yc - 46 * .707, 9, "D1")
-x1, y1, kk = 650, 118, 10
-h.rect(x1, y1, 160, 3.2 * kk, "url(#ANSI31)", K, 1.3)
-h.ln(x1 - 6, y1 + 3.2 * kk + 40, x1 + 166, y1 + 3.2 * kk + 40, K, .4, h.EJE)
-h.txt(x1 + 168, y1 + 3.2 * kk + 44, "EJE", 9.5, 400, G)
-h.dimV(x1 + 182, y1, y1 + 3.2 * kk, "3,2", ext=x1 + 160)
-h.txt(x1, y1 - 8, "CARA EXTERIOR (Ø110)", 10, 400, G); h.txt(x1, y1 + 3.2 * kk + 16, "CARA INTERIOR (Ø103,6)", 10, 400, G)
-h.path(f"M{x1-6},{y1-4} l6,4 l-6,4 l6,4 l-6,4 l6,4 l-6,4 l6,4 l-6,4", "none", K, .6)
-h.path(f"M{x1+166},{y1-4} l-6,4 l6,4 l-6,4 l6,4 l-6,4 l6,4 l-6,4 l6,4", "none", K, .6)
+# D1: pared Ø110 ampliada 10:1
+x1, y1, kk = 640, 92, 10
+subt(h, 618, 62, "D1 - PARED Ø110", "ESC. 10:1")
+h.rect(x1, y1 + 14, 170, 3.2 * kk, "url(#PVCr)", K, 1.3)
+for xx in (x1, x1 + 170): h.path(f"M{xx},{y1 + 8} l-4,6 l4,6 l-4,6 l4,6 l-4,6 l4,6", "none", K, .6)
+h.dimV(x1 + 188, y1 + 14, y1 + 14 + 32, "3,2", ext=x1 + 170)
+h.txt(x1, y1 + 8, "CARA EXTERIOR Ø110", 9.5, 400, G); h.txt(x1, y1 + 62, "CARA INTERIOR Ø103,6", 9.5, 400, G)
+h.ln(x1, y1 + 110, x1 + 170, y1 + 110, K, .4, h.EJE); h.txt(x1 + 174, y1 + 113, "EJE", 9, 400, G)
+h.dimV(x1 - 14, y1 + 14, y1 + 110, "55 (R)", ext=x1)
 
-# ============ B · BARRA CON ENCHUFE Y UNION PEGADA (medio corte)
-h.titulo(40, 392, "VISTA Y MEDIO CORTE B-B · UNION DE DOS BARRAS Ø110", "ESC. 1:1,2 · ARRIBA EN CORTE, ABAJO EN VISTA · BARRA CON ENCHUFE (CABEZA) PARA PEGAR (*)")
-k2 = 1.0; yc2 = 528; R = 55 * k2; E = 3.2 * k2 * 1.4
-xa, xs, xs2, xb = 60, 380, 470, 800        # barra 1 hasta el enchufe; enchufe xs..xs2; barra 2 entra hasta xs
-# barra 1 (vista abajo, corte arriba)
-h.rect(xa, yc2 - R, xs - xa, E, K, K, .4)                    # pared superior cortada
-h.ln(xa, yc2 + R, xs, yc2 + R, K, 1.2)                         # contorno inferior (vista)
-h.ln(xa, yc2 - R + E, xs, yc2 - R + E, K, .5)
-# enchufe (cabeza) de la barra 1: diámetro exterior mayor
-RE = R + E
-h.path(f"M{xs-24},{yc2-R} L{xs},{yc2-RE} H{xs2} V{yc2-RE+E} H{xs} L{xs-24+3},{yc2-R+E} Z", K, K, .4)
-h.path(f"M{xs-24},{yc2+R} L{xs},{yc2+RE} H{xs2} V{yc2+R}", "none", K, 1.2)
-# barra 2: espiga dentro del enchufe
-h.rect(xs + 2, yc2 - R, xb - xs - 2, E, K, K, .4)
-h.ln(xs2, yc2 + R, xb, yc2 + R, K, 1.2); h.ln(xs + 2, yc2 - R + E, xb, yc2 - R + E, K, .5)
-h.ln(xs + 2, yc2 - R, xs + 2, yc2 - R + E, K, 1)
-h.ln(xs + 2, yc2 + R, xs + 2, yc2 + R - 8, K, .5, h.OCULTA)
+# =============== 2. MEDIO CORTE B-B · UNION PEGADA ===============
+h.titulo(40, 352, "MEDIO CORTE B-B · UNION DE DOS BARRAS Ø110 (ENCHUFE PEGADO)", "ESC. 1:0,6 · ARRIBA EN CORTE, ABAJO EN VISTA · LA ESPIGA DE UNA BARRA ENTRA EN EL ENCHUFE (CABEZA) DE LA OTRA")
+kb = .95; yb = 476; X0 = 330            # x = 0 en la boca del enchufe
+def bx(x): return X0 + x * kb
+ro, e = d110["D"] / 2, d110["e"]; ri = ro - e; j, ad, Lc, Tr = E["juego"], P["adhesivo"], E["Lc"], E["trans"]
+roS, riS = ro + j + ad + e, ro + j + ad
+def by(r): return yb - r * kb
+xa, xb = -240, 330
+# espiga (barra 2): de xa a Lc - 2, arriba en corte
+h.path(f"M{bx(xa)},{by(ro)} H{bx(Lc - 2)} V{by(ri)} H{bx(xa)} Z", "url(#PVCr)", K, 1.1)
+# barra 1: enchufe + abocardado + caño
+pts_o = [(-4, roS), (Lc, roS), (Lc + Tr, ro), (xb, ro)]; pts_i = [(xb, ri), (Lc + Tr, ri), (Lc, riS), (-4, riS)]
+h.path("M" + " L".join(f"{bx(x):.1f},{by(r):.1f}" for x, r in pts_o + pts_i) + " Z", "url(#PVCr)", K, 1.1)
 # adhesivo
-h.ln(xs + 4, yc2 - R - 1.2, xs2, yc2 - R - 1.2, OR, 1.6)
-h.flecha_llamada(xs + 60, yc2 - R - 1.5, xs + 130, yc2 - R - 22, "ADHESIVO PARA PVC (*)", 10, "start", OR)
-# cortes de barra (líneas de rotura)
-for xx in (xa, xb):
-    h.path(f"M{xx},{yc2-RE-8} l-5,10 l10,8 l-5,10 V{yc2+RE+8}", "none", K, .7)
-h.ln(xa - 10, yc2, xb + 10, yc2, K, .5, h.EJE)
-h.dimV(xa + 30, yc2 - R, yc2 + R, "Ø110", ext=None)
-h.dimH(yc2 + RE + 28, xs, xs2, "L ENCHUFE (*)", ext=yc2 + RE, c=OR)
-h.txt((xa + xs) / 2 + 20, yc2 + 26, "BARRA: LARGO COMERCIAL (*) · 5007 SE DA POR UNIDAD", 10, 400, OR, "middle")
-h.globo("1", xa + 140, yc2 - R + 2, xa + 160, yc2 - R - 26)
-h.globo("2", xs + 30, yc2 - RE + 2, xs - 16, yc2 - RE - 22)
-h.globo("3", xb - 120, yc2 - R + 2, xb - 100, yc2 - R - 26)
-h.txt(xa + 182, yc2 - R - 22, "BARRA", 10, 400, G); h.txt(xs - 36, yc2 - RE - 18, "ENCHUFE", 10, 400, G, "end"); h.txt(xb - 82, yc2 - R - 22, "ESPIGA DE LA OTRA BARRA", 10, 400, G)
+h.rect(bx(1), by(riS), (Lc - 4) * kb, (riS - ro) * kb, OR, OR, .3)
+# abajo: vista (contornos)
+h.path(f"M{bx(xa)},{by(-ro)} H{bx(-4)} M{bx(-4)},{by(-roS)} H{bx(Lc)} L{bx(Lc + Tr)},{by(-ro)} H{bx(xb)}", "none", K, 1.2)
+h.ln(bx(-4), by(-ro), bx(-4), by(-roS), K, 1.0)
+h.path(f"M{bx(Lc - 2)},{by(-ri)} V{by(-ro)}", "none", K, .6, h.OCULTA)
+for xx in (xa, xb): h.path(f"M{bx(xx)},{by(roS) - 8} l-5,10 l10,8 l-5,10 V{by(-roS) + 8}", "none", K, .7)
+h.ln(bx(xa) - 10, yb, bx(xb) + 10, yb, K, .45, h.EJE)
+h.ln(bx(Lc - 2), by(ri), bx(Lc - 2), yb - 20, K, .5, h.OCULTA)
+h.dimH(by(-roS) + 20, bx(0), bx(Lc), "Lc 53,5 (*)", ext=by(-roS), c=OR, dy=13)
+h.dimH(by(-roS) + 20, bx(Lc), bx(Lc + Tr), "", ext=by(-roS), c=OR); h.txt(bx(Lc + Tr) + 8, by(-roS) + 24, "18 (*)", 11, 400, OR)
+h.dimV(bx(xb) + 22, by(ro), by(-ro), "Ø110", ext=bx(xb))
+h.dimV(bx(xa) - 18, by(ri), by(-ri), "Ø103,6", ext=bx(xa))
+h.dimV(bx(-30), by(roS), by(-roS), "Ø117,3", ext=None)
+for n, (x, r), (gx, gy) in [("1", (-160, ro - e / 2), (bx(-160), by(roS) - 30)), ("2", (Lc * .3, roS - e / 2), (bx(0) - 50, by(roS) - 30)),
+                            ("3", (Lc * .55, ro + .3), (bx(Lc) + 70, by(roS) - 30)), ("4", (Lc + Tr / 2, (roS + ro) / 2), (bx(Lc + Tr) + 110, by(roS) - 30)),
+                            ("5", (250, ro - e / 2), (bx(250), by(roS) - 30))]:
+    h.globo(n, bx(x), by(r), gx, gy, r=9)
+cx, cy = bx(Lc * .5), by(roS - 2); h.llamadaDet(cx, cy, 22, ""); h.txt(cx + 25, cy - 16, "D2", 11, 700)
+h.txt(bx(xa) + 230, by(-roS) + 52, "1 BARRA (ESPIGA) · 2 ENCHUFE · 3 ADHESIVO PARA PVC (*) · 4 ABOCARDADO · 5 BARRA", 9.5, 400, G)
 
-# ============ C · ACCESORIOS
-h.titulo(40, 640, "ACCESORIOS · VISTAS", "ESC. 1:3 · CUPLA Y CURVAS: NO TIENEN CODIGO EN EL PAÑOL (A VINCULAR)")
-k3 = .45; yc3 = 728; r3 = 55 * k3
-# cupla (medio corte)
-cx = 90; lc = 120 * k3
-h.ln(cx - 70, yc3, cx + lc + 70, yc3, K, .4, h.EJE)
-h.rect(cx - 60, yc3 - r3, 60 + 4, 2 * r3, "#fff", K, 1); h.rect(cx + lc - 4, yc3 - r3, 64, 2 * r3, "#fff", K, 1)
-h.rect(cx, yc3 - r3 - 4, lc, 2 * r3 + 8, "#fff", K, 1.3); h.rect(cx, yc3 - r3 - 4, lc, 4, K, K, .3)
-h.ln(cx + lc / 2, yc3 - r3 - 4, cx + lc / 2, yc3 - r3, K, 1.2)
-h.txt(cx + lc / 2, yc3 + r3 + 24, "CUPLA Ø110", 10.5, 700, K, "middle"); h.txt(cx + lc / 2, yc3 + r3 + 38, "A VINCULAR", 10, 700, OR, "middle")
-h.dimH(yc3 - r3 - 16, cx, cx + lc, "L (*)", ext=yc3 - r3 - 4, c=OR)
-# curva 90°
-ox, oy, Rc = 330, yc3 + 40, 140 * k3 * 1.0
-def arco(rr, a0=180, a1=270):
-    return " ".join(f"{ox + rr * math.cos(math.radians(a)):.1f},{oy + rr * math.sin(math.radians(a)):.1f}" for a in range(a0, a1 + 1, 5))
-h.a(f'<polyline points="{arco(Rc + r3)}" fill="none" stroke="{K}" stroke-width="1.2"/>')
-h.a(f'<polyline points="{arco(Rc - r3)}" fill="none" stroke="{K}" stroke-width="1.2"/>')
-h.a(f'<polyline points="{arco(Rc)}" fill="none" stroke="{K}" stroke-width=".4" {h.EJE}/>')
-h.ln(ox - Rc - r3, oy, ox - Rc + r3, oy, K, 1.2); h.ln(ox, oy - Rc - r3, ox, oy - Rc + r3, K, 1.2)
-h.ln(ox, oy, ox - Rc, oy, K, .4, h.OCULTA); h.ln(ox, oy, ox, oy - Rc, K, .4, h.OCULTA)
-h.txt(ox - Rc / 2, oy + 14, "R (*)", 10.5, 700, OR, "middle")
-h.txt(ox - 60, yc3 + r3 + 24 + 30, "CURVA 90° Ø110", 10.5, 700, K, "middle"); h.txt(ox - 60, yc3 + r3 + 38 + 30, "A VINCULAR", 10, 700, OR, "middle")
-# curva 45°
-ox2, oy2 = 520, yc3 + 40
-h.a(f'<polyline points="{" ".join(f"{ox2 + (Rc + r3) * math.cos(math.radians(a)):.1f},{oy2 + (Rc + r3) * math.sin(math.radians(a)):.1f}" for a in range(225, 271, 5))}" fill="none" stroke="{K}" stroke-width="1.2"/>')
-h.a(f'<polyline points="{" ".join(f"{ox2 + (Rc - r3) * math.cos(math.radians(a)):.1f},{oy2 + (Rc - r3) * math.sin(math.radians(a)):.1f}" for a in range(225, 271, 5))}" fill="none" stroke="{K}" stroke-width="1.2"/>')
-for a in (225, 270):
-    c, s = math.cos(math.radians(a)), math.sin(math.radians(a))
-    h.ln(ox2 + (Rc - r3) * c, oy2 + (Rc - r3) * s, ox2 + (Rc + r3) * c, oy2 + (Rc + r3) * s, K, 1.2)
-h.txt(ox2 - 30, yc3 + r3 + 54, "CURVA 45° Ø110", 10.5, 700, K, "middle"); h.txt(ox2 - 30, yc3 + r3 + 68, "A VINCULAR", 10, 700, OR, "middle")
-# tapa 5030 (corte)
-tx = 650
-h.ln(tx - 50, yc3, tx + 100, yc3, K, .4, h.EJE)
-h.rect(tx - 50, yc3 - r3, 90, 2 * r3, "#fff", K, 1)
-h.path(f"M{tx+20},{yc3-r3-3} H{tx+52} V{yc3+r3+3} H{tx+20} V{yc3+r3} H{tx+48} V{yc3-r3} H{tx+20} Z", K, K, .5)
-h.flecha_llamada(tx + 50, yc3 - r3 + 4, tx + 80, yc3 - r3 - 30, "5030 TAPA", 10.5)
-h.flecha_llamada(tx - 20, yc3 + 4, tx - 40, yc3 + r3 + 30, "CORDON GUIA 5014 ADENTRO", 10, "start")
-h.ln(tx - 50, yc3 + 4, tx + 44, yc3 + 4, "#111", 1.4, 'stroke-dasharray="6 3"')
-h.txt(tx + 30, yc3 + r3 + 70, "CAÑO DE RESERVA CERRADO", 10, 700, K, "middle")
+# =============== 3. D2 · JUNTA PEGADA ===============
+subt(h, 40, 625, "D2 - JUNTA PEGADA", "ESC. 8:1 · JUEGO + ADHESIVO ENTRE ESPIGA Y ENCHUFE")
+k2 = 12; xd, yd = 62, 672
+def dy(r): return yd + (roS - r) * k2
+h.rect(xd, dy(roS), 200, e * k2, "url(#PVCr)", K, 1.1)                        # pared del enchufe
+h.rect(xd, dy(riS), 200, (riS - ro) * k2, OR, OR, .4)                          # adhesivo + juego
+h.rect(xd, dy(ro), 200, e * k2, "url(#PVCr)", K, 1.1)                          # pared de la espiga
+for yy in (dy(roS), dy(ri)): h.path(f"M{xd},{yy - 4} l-4,6 l4,6 l-4,6 l4,6 l-4,6", "none", K, .5)
+h.dimV(xd + 222, dy(roS), dy(riS), "3,2", ext=xd + 200)
+h.dimV(xd + 222, dy(ro), dy(ri), "3,2", ext=xd + 200)
+llamada(h, xd + 196, (dy(riS) + dy(ro)) / 2, xd + 140, dy(ri) + 46, "JUEGO + ADHESIVO 0,65 (*)", c=OR, sz=9)
+llamada(h, xd + 80, dy(roS) + 12, xd + 110, dy(roS) - 12, "ENCHUFE (BARRA 1)", sz=9)
+llamada(h, xd + 40, dy(ro) + 14, xd + 10, dy(ri) + 26, "ESPIGA (BARRA 2)", sz=9)
 
-# ============ CODIGOS
-EX = {5007: "Ø110 · e 3,2", 5008: "Ø160 · e 3,2 / 4,7", 5010: "Ø90 · e 2,7 (cl. 6)", 5009: "Ø50 · e 3,2", 5011: "Ø25,4 · e (*)", 5030: "para Ø110", 5014: "Ø10 nylon"}
-y = h.codigos(40, 852, COD, (46, 0, 34), wtot=800, rowh=17, titulo="VARIANTES Y CODIGOS DEL PAÑOL", extra_col=("Ø × PARED", EX, 150))
-h.notasM(40, 1014, [
-    "MEDIDAS: FICHA DE LA APP (TIGRE, CATALOGO DE CAÑOS; ETG CORDOBA: CRUCE CON PVC REFORZADO Ø100 × 3,2) Y CRUCE_AP_TC_002 (2 CAÑOS Ø110).",
-    "(*) Ø110: EL PAÑOL DICE «Ø100 INTERIOR»; CON e = 3,2 DA 103,6. CONFIRMAR CON EL FABRICANTE CUAL SE COMPRA.",
-    "(*) LARGO DE BARRA, LARGO DEL ENCHUFE, RADIO DE CURVAS, CUPLA Y PARED DEL Ø25,4: A CONFIRMAR CON EL FABRICANTE.",
-    "(*) ITEM 21 DEL PLIEGO: «1 CAÑO Ø160» (5008); EL PLANO AP-TC-002: 2 Ø110. CERRAR CON LA INSPECCION.",
-], 800, 10.5)
+# =============== 4. CURVA 90° Ø110 (medio corte) ===============
+subt(h, 330, 625, "CURVA 90° Ø110 CON ENCHUFES", "ESC. 1:3,5 · MEDIO CORTE · A VINCULAR")
+k3 = .5; ox, oy = 372, 812            # centro del arco
+Rk, rS, rSi = CU["R"] * k3, roS * k3, riS * k3; L3 = (Lc + 8) * k3
+# enchufe horizontal (abajo, sale hacia la izquierda) y vertical (arriba)
+ax, ay = ox, oy - Rk                   # el arco va de (ox, oy - R) ... uso centro (ox + R, oy)
+cxa, cya = ox + Rk, oy                 # centro del arco
+def P2(a, r): return (cxa + r * math.cos(math.radians(a)), cya + r * math.sin(math.radians(a)))
+# media curva (lado de arriba en corte = anillo exterior entre Rk+rSi..Rk+rS y Rk-rS..Rk-rSi)
+for r0, r1 in ((Rk + rSi, Rk + rS), (Rk - rS, Rk - rSi)):
+    p = "M" + " L".join(f"{P2(a, r1)[0]:.1f},{P2(a, r1)[1]:.1f}" for a in range(180, 271, 5)) + " L" + " L".join(f"{P2(a, r0)[0]:.1f},{P2(a, r0)[1]:.1f}" for a in range(270, 179, -5)) + " Z"
+    h.path(p, "url(#PVCr)", K, 1.0)
+h.path(arcoPath(cxa, cya, Rk, 180, 270), "none", K, .45, h.EJE)
+# enchufes rectos en las dos puntas
+for (sx, sy, dx, dy_) in ((cxa - Rk, cya, 0, 1), (cxa, cya - Rk, -1, 0)):
+    if dx == 0:
+        h.rect(sx - rS, sy, rS - rSi, L3, "url(#PVCr)", K, 1.0); h.rect(sx + rSi, sy, rS - rSi, L3, "url(#PVCr)", K, 1.0)
+    else:
+        h.rect(sx, sy - rS, L3, rS - rSi, "url(#PVCr)", K, 1.0); h.rect(sx, sy + rSi, L3, rS - rSi, "url(#PVCr)", K, 1.0)
+h.ln(cxa, cya, cxa - Rk, cya, K, .4, h.OCULTA); h.ln(cxa, cya, cxa, cya - Rk, K, .4, h.OCULTA)
+h.txt(cxa - Rk / 2, cya + 12, "R 165 (*)", 9.5, 700, OR, "middle")
+h.dimH(cya - Rk - rS - 12, cxa, cxa + L3, "61,5", ext=cya - Rk - rS)
+h.ln(cxa - Rk - 30, cya, cxa + 10, cya, K, .4, h.EJE); h.ln(cxa, cya - Rk - 20, cxa, cya + 10, K, .4, h.EJE)
+h.txt(cxa - Rk - rS - 4, cya + L3 + 16, "CURVA 90° = 1,5 × D (*)", 9, 400, OR)
 
-# ============ 3D
-h.titulo(890, 62, "VISTA 3D · CRUCE CON 2 CAÑOS Ø110 Y MEDIDAS COMPARADAS", "PVC GRIS CLARO BRILLANTE · TAPA Y CORDON GUIA EN EL DE RESERVA")
-h.iso(.42, 1150, 250)
-# caño de trabajo (atrás, y = 0) con unión
-h.cano3("x", -250, 120, 0, 0, 55, 3.2, C_PVC)
-h.cil("x", 120, 220, 0, 0, 58.2, sombra(C_PVC, .96), tapa=None, metal=False, borde="#555", bw=.5)
-h.cano3("x", 220, 700, 0, 0, 55, 3.2, C_PVC)
-# caño de reserva (adelante, y = 250) con tapa separada y cordón
-h.cano3("x", -250, 700, 250, 0, 55, 3.2, C_PVC)
-# cordón guía (amarillo) que sale del caño
-cam = [(690, 250, -20), (740, 256, -26), (790, 262, -50), (830, 268, -70)]
-h.a('<polyline points="' + " ".join(f"{h.P(*p)[0]:.1f},{h.P(*p)[1]:.1f}" for p in cam) + '" fill="none" stroke="#c9a400" stroke-width="3"/>')
-h.a('<polyline points="' + " ".join(f"{h.P(*p)[0]:.1f},{h.P(*p)[1]:.1f}" for p in cam) + '" fill="none" stroke="#f2d200" stroke-width="1.5" stroke-dasharray="3 2"/>')
-# tapa 5030 separada
-h.cil("x", 800, 830, 250, 70, 58.5, "#c7ccd1", tapa="#d9dde1", borde="#555", bw=.6)
-h.g3b("1", (-100, 0, 55), 1400, 110, "CAÑO DE TRABAJO Ø110 (5007)")
-h.g3b("2", (170, 0, 58), 1400, 150, "UNION CON ENCHUFE (*)")
-h.g3b("3", (0, 250, 55), 1400, 190, "CAÑO DE RESERVA Ø110 (5007)")
-h.g3b("4", (815, 250, 128), 1400, 230, "TAPA DE CIERRE (5030)")
-h.g3b("5", (790, 262, -50), 1400, 270, "CORDON GUIA Ø10 (5014)")
-h.cota3((700, 0, 0), (700, 250, 0), "250 (*) SEPARACION 0,25 m", off=(0, 0, -110), c=NV, sz=9.5, lado=1)
+# =============== 5. TAPA 5030 Y CORDON 5014 ===============
+subt(h, 610, 625, "TAPA 5030 + CORDON 5014", "ESC. 1:2 · CAÑO DE RESERVA CERRADO")
+k4 = .5; tx, ty = 620, 725; rr = ro * k4; rT = (ro + j + TP["e"]) * k4
+h.ln(tx, ty, tx + 210, ty, K, .4, h.EJE)
+h.rect(tx, ty - rr, 130, e * k4 + .5, "url(#PVCr)", K, .9); h.rect(tx, ty + rr - e * k4 - .5, 130, e * k4 + .5, "url(#PVCr)", K, .9)
+h.path(f"M{tx + 130 - TP['L'] * k4 + 6},{ty - rT} H{tx + 130 + TP['fondo'] * k4 + 6} V{ty + rT} H{tx + 130 - TP['L'] * k4 + 6} V{ty + rr} H{tx + 136} V{ty - rr} H{tx + 130 - TP['L'] * k4 + 6} Z", K, K, .5)
+h.path(f"M{tx + 10},{ty + 6} C{tx + 60},{ty + 18} {tx + 100},{ty - 2} {tx + 126},{ty + 4}", "none", K, 1.6, 'stroke-dasharray="5 3"')
+h.dimH(ty - rT - 12, tx + 130 - TP["L"] * k4 + 6, tx + 136 + TP["fondo"] * k4, "62 (*)", ext=ty - rT, c=OR)
+llamada(h, tx + 136, ty - rT + 3, tx + 160, ty - rT - 28, "TAPA 5030", sz=9.5)
+llamada(h, tx + 60, ty + 13, tx + 20, ty + rr + 22, "CORDON GUIA Ø10 (5014), ATADO (*)", sz=9)
+h.txt(tx, ty + rr + 40, "EL CAÑO DE TRABAJO SE SELLA DE LOS DOS LADOS", 9, 400, G)
 
-# medidas comparadas (tramos parados, cortados)
-h.txt(890, 470, "TRAMOS CORTADOS, A LA MISMA ESCALA", 11, 700, NV, "start", INT)
-h.iso(.6, 1060, 590)
-xs_ = [(0, 160, 3.2, "Ø160 · 5008"), (230, 110, 3.2, "Ø110 · 5007"), (400, 90, 2.7, "Ø90 · 5010"), (530, 50, 3.2, "Ø50 · 5009"), (620, 25.4, 2.0, "Ø25,4 · 5011")]
-for xx, D, e, t in xs_:
-    h.cano3("z", 0, 140, xx, -xx * .6, D / 2, e, C_PVC, n=48)
-for xx, D, e, t in xs_:
-    X, Y = h.P(xx, -xx * .6, 0); h.txt(X, Y + D / 2 * .62 + 18, t, 10, 700, NV, "middle", INT)
+# =============== TABLAS Y NOTAS ===============
+EX = {5007: "Ø110 · e 3,2", 5008: "Ø160 · e 3,2 (4,7)", 5010: "Ø90 · e 2,7 (cl. 6)", 5009: "Ø50 · e 3,2", 5011: "Ø25,4 · e (*)", 5030: "PARA Ø110", 5014: "Ø10 NYLON"}
+yt = tablaCod(h, 40, 880, [5007, 5008, 5010, 5009, 5011, 5030, 5014], EX, w=800, rowh=14.5, titulo="CODIGOS DEL PAÑOL", tit_extra="Ø × PARED", wext=130)
+rayadosC(h, 640, 812, ["PVCr"], cols=1)
+notasW(h, 40, yt + 22, [
+    "COTAS EN mm. Ø Y PARED: FICHA DE LA APP (TIGRE; ETG CORDOBA: CRUCE CON PVC REFORZADO Ø100 × 3,2) Y CRUCE_AP_TC_002 (2 CAÑOS Ø110).",
+    "(*) 5007 DICE «Ø100 INTERIOR»; CON e = 3,2 EL INTERIOR DA 103,6. CONFIRMAR CON EL PROVEEDOR CUAL SE COMPRA.",
+    "(*) Lc = 53,5: LARGO MINIMO DE ENCHUFE PARA DN 110 (WAVIN S-40, IRAM 13326), LEIDO DE LA TABLA. ABOCARDADO, ADHESIVO, R DE LA CURVA, TAPA: PROPORCIONALES.",
+    "(*) PLIEGO ITEM 21: «1 CAÑO Ø160» (5008); PLANO AP-TC-002: 2 Ø110. CERRAR CON LA INSPECCION. CURVAS Y CUPLAS NO TIENEN CODIGO (A VINCULAR).",
+    "FUENTES DE CADA MEDIDA: r3d/FUENTES_civil.md."], w=800, lh=14)
 
-h.bloque(890, 730, "DATOS TECNICOS", [
+# =============== 3D ===============
+h.titulo(890, 62, "VISTA 3D - UNION Y CURVA Ø110 EN MEDIO CORTE", "SE SACO LA MITAD DE ADELANTE: SE VE LA PARED, EL ENCHUFE Y EL ADHESIVO · ATRAS EL CAÑO DE RESERVA")
+A = img3d(h, "civil_pvc_union", 884, 84, 610)
+columna(h, A, [("reserva", "6", "CAÑO DE RESERVA Ø110"), ("tapa", "7", "TAPA 5030"), ("cordon", "8", "CORDON GUIA 5014"), ("enchufeC", "9", "ENCHUFE DE LA CURVA"),
+               ("curva", "10", "CURVA 90° (A VINCULAR)")], 1508, 104, 300)
+columna(h, A, [("pared", "1", "PARED 3,2 (CORTE)"), ("enchufe", "2", "ENCHUFE"), ("adhesivo", "3", "ADHESIVO (*)"), ("abocardado", "4", "ABOCARDADO"),
+               ("barra", "5", "BARRA Ø110")], 1508, 318, 440, paso=25)
+h.txt(890, 470, "D2 EN 3D: LA JUNTA PEGADA", 11, 700, NV, "start", INT)
+A3 = img3d(h, "civil_pvc_det", 884, 478, 380)
+for an, t, gy in (("enchufe", "ENCHUFE", 492), ("adhesivo", "ADHESIVO (*)", 516), ("abocardado", "ABOCARDADO", 540), ("tope", "PUNTA DE LA ESPIGA", 564), ("espiga", "ESPIGA", 700)):
+    globo3d(h, A3(an), "", 1275, gy, t)
+h.txt(1420, 600, "LOS 5 Ø A LA MISMA ESCALA", 10, 700, NV, "start", INT)
+A2 = img3d(h, "civil_pvc_cmp", 1415, 606, 230)
+for key, t in (("d160", "160"), ("d110", "110"), ("d90", "90"), ("d50", "50"), ("d25", "25,4")):
+    x, y = A2(key + "b"); h.txt(x, y + 12, t, 8.5, 700, NV, "middle", INT)
+bloque(h, 890, 870, "DATOS TECNICOS", [
     "PVC RIGIDO REFORZADO (Ø110, Ø160, Ø50) · Ø90 CLASE 6",
-    "ESPESORES: Ø110 Y Ø50 = 3,2 · Ø160 = 3,2 (REFORZADO 4,7) · Ø90 = 2,7",
-    "UNION POR ENCHUFE PEGADO (*) · CUPLA Y CURVAS SIN CODIGO",
-    "CORDON GUIA: NYLON Ø10 EN EL CAÑO DE RESERVA",
-], 370)
-h.bloque(1270, 730, "DONDE SE USA", [
-    "AP-TC-002 CRUCE DE CALZADA: 2 Ø110 (1 DE RESERVA, CON TAPA Y CORDON)",
-    "AP-TC-007 TABLERO A NIVEL: Ø90 INGRESO EPEC",
-    "PAT: CONDUCTO Ø50 EXCLUSIVO · Ø1\" PAT / DESAGÜE DE LA FUNDACION (AP-TC-003)",
-    "GUIA «ZANJEO Y TENDIDO»",
-], 370)
-h.rotuloM("MAT-CAÑOS-1", "CAÑOS DE PVC RIGIDO", "Ø25,4 A Ø160 · TAPA Y CORDON GUIA", "CORTES, UNION, ACCESORIOS Y VISTA 3D", "1:1,2 / 1:3", "3D S/E")
-guardar(h, "mat_canos_1")
+    "UNION POR ENCHUFE PEGADO: LIMPIAR, LIJAR, ADHESIVO EN LAS DOS CARAS, ENCHUFAR HASTA EL FONDO SIN GIRAR (*)",
+    "CORDON GUIA DE NYLON Ø10 EN EL CAÑO DE RESERVA, CON TAPA",
+    "CURVAS Y CUPLAS: SIN CODIGO EN EL PAÑOL (*)"], w=360, sz=10, lh=13.5)
+bloque(h, 1270, 870, "DONDE SE USA", [
+    "AP-TC-002 CRUCE DE CALZADA: 2 Ø110 (TRABAJO + RESERVA), DE CAMARA A CAMARA",
+    "AP-TC-007 TABLERO A NIVEL: Ø90 INGRESO DE LA ACOMETIDA EPEC",
+    "PAT: CONDUCTO Ø50 EXCLUSIVO · Ø25,4 DESAGÜE DE LA FUNDACION (AP-TC-003)",
+    "GUIA «ZANJEO Y TENDIDO»"], w=360, sz=10, lh=13.5)
+nota3d(h, 890, 1022, "RENDER: three.js (r3d/escenas/civil_pvc_*.mjs) CON LAS MISMAS MEDIDAS DEL PLANO. FUENTES: r3d/FUENTES_civil.md")
+rotuloMat(h, "MAT-CAÑOS-1", "CAÑOS DE PVC RIGIDO", "Ø25,4 A Ø160 · UNION Y CURVA", "CORTES A-A Y B-B, D1, D2, CURVA, TAPA Y 3D", "VARIAS", "INDICADAS · 3D S/E", rev="B", fecha=FECHA)
+guardarC(h, "mat_canos_1")

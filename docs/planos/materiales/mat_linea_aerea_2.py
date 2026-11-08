@@ -1,85 +1,64 @@
-import math, sys, os
+"""MAT-LINEA_AEREA-2 (rev. B) · Preensamblado Al 2 × 16 (1502) y Al-Al 3 × 25 + 1 × 16 (1503), sin portante (IRAM 2263 · ET-1005); 1015, 1016.
+Plano con la geometría de r3d/piezas/perfiles_cables.mjs (HAZ.h3x25_16, h2x16); 3D: r3d/out/linea2.png.
+Solo el Ø del haz 3 × 25 + 1 × 16 (≈ 32) está en la ficha: lo demás (*). Fuentes: r3d/FUENTES_cables.md."""
+import sys, os, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from mk_cab import *
+from cableskit import *
 
-h = HojaMat()
-COD = [1502, 1503, 1015, 1016]
-h.check_codigos(COD)
-# proporciones esquemáticas (*): fase 25 r=1, neutro 16 r=.82 (relación de raíz de secciones), conductor = raíz(4S/pi)
-RF = 32 / (2 * (1 / math.sin(math.pi / 4) + 1)); RN = RF * math.sqrt(16 / 25)   # mm: el haz 3x25+1x16 da Ø ≈ 32 (ficha)
+H3, H2 = PC["HAZ"]["h3x25_16"], PC["HAZ"]["h2x16"]
+h = hoja()
 
-def corte(cx, cy, s, formacion, color):
-    if formacion == "2x16":
-        r = RN * s; cores = [(-r, 0, r, "F"), (r, 0, r, "N")]
-    else:
-        d = RF * s / math.sin(math.pi / 4); cores = []
-        for i, a in enumerate((135, 45, 315, 225)):
-            rr = (RN if i == 3 else RF) * s; dd = d - (RF - RN) * s * (1 if i == 3 else 0)
-            cores.append((dd * math.cos(math.radians(a)), -dd * math.sin(math.radians(a)), rr, "N" if i == 3 else "F%d" % (i + 1)))
-    for x, y, r, t in cores:
-        h.circ(cx + x, cy + y, r, "#202226" if color else "#fff", K, 1.1)
-        h.cobre2d(cx + x, cy + y, r * .62, color, 7, al=True)
-        h.txt(cx + x + r * .55, cy + y - r * .6, t, 10, 700, "#fff" if color else K, "middle")
-    return cores
+# =============== CORTES ===============
+h.titulo(40, 62, "CORTE A-A · 3 x 25 + 1 x 16 (1503)", "ESC. 7:1 · 4 CONDUCTORES RETORCIDOS, SIN PORTANTE")
+e = 7.0; cx, cy = 180, 230
+haz2d(h, cx, cy, e, H3, a0=45)
+Rh = H3["Dh"] / 2 * e; h.circ(cx, cy, Rh, "none", G, .6, 'stroke-dasharray="4 3"')
+h.dimH(cy + Rh + 22, cx - Rh, cx + Rh, "Ø HAZ ≈ 22 (CALC.) · FICHA ≈ 32 (*)", ext=cy, c=OR)
+f0 = H3["fases"][0]
+for i, t in enumerate(["FASES 1-2-3: Al 25, 7 ALAMBRES (*)", "AISLACION XLPE NEGRA 1,4 (*)", "NEUTRO: Al 16 (EL MENOR), XLPE 1,2 (*)", "SIN NEUTRO PORTANTE: EL HAZ SE SOSTIENE", "ENTERO CON GRAMPAS (*)"]):
+    h.txt(340, 120 + i * 18, t, 9.6, 400, OR if "(*)" in t else K)
+h.titulo(560, 62, "CORTE B-B · 2 x 16 (1502)", "ESC. 7:1 · RED MONOFASICA")
+haz2d(h, 690, 230, e, H2, a0=0)
+R2 = H2["Dh"] / 2 * e; h.circ(690, 230, R2, "none", G, .6, 'stroke-dasharray="4 3"')
+h.dimH(230 + R2 + 22, 690 - R2, 690 + R2, "Ø HAZ ≈ 15 (*)", ext=230, c=OR)
 
-# ============ CORTES
-h.titulo(40, 62, "CORTE A-A · 3 x 25 + 1 x 16 (1503)", "ESC. 4:1 · PROPORCIONES DE LOS CONDUCTORES ESQUEMATICAS (*)")
-s = 4.0; cx, cy = 180, 215
-corte(cx, cy, s, "3", False)
-Rh = (RF / math.sin(math.pi / 4) + RF) * s
-h.circ(cx, cy, Rh, "none", G, .6, 'stroke-dasharray="4 3"')
-h.dimH(cy + Rh + 22, cx - Rh, cx + Rh, "Ø HAZ ≈ 32 (FICHA, ORIENTATIVO)", ext=cy)
-h.titulo(470, 62, "CORTE B-B · 2 x 16 (1502)", "ESC. 4:1 · ESQUEMATICO (*)")
-corte(600, 215, s, "2x16", False)
-h.dimH(215 + RN * s + 22, 600 - 2 * RN * s, 600 + 2 * RN * s, "Ø HAZ (*)", ext=215, c=OR)
-h.globo("1", cx + 4, cy - Rh * .5, 380, 140); h.globo("2", cx - Rh * .38, cy - Rh * .3, 380, 170)
+# =============== D1 color ===============
+h.titulo(40, 380, "DETALLE D1 - A COLOR", "S/E · XLPE NEGRA · ALUMINIO EN CUERDA (7 ALAMBRES (*))")
+haz2d(h, 170, 490, 5.4, H3, color=True, a0=45); haz2d(h, 420, 490, 5.4, H2, color=True, a0=0)
+h.txt(170, 580, "3 x 25 + 1 x 16 (1503)", 10.5, 700, K, "middle"); h.txt(420, 580, "2 x 16 (1502)", 10.5, 700, K, "middle")
+h.txt(560, 450, "LOS CONDUCTORES SE IDENTIFICAN 1-2-3-N", 9.6); h.txt(560, 465, "(EN LA APP F1-F2-F3-N); EL NEUTRO ES EL", 9.6); h.txt(560, 480, "DE MENOR SECCION. MARCA EXACTA (NUMEROS", 9.6, 400, OR); h.txt(560, 495, "O NERVIOS) SEGUN FABRICANTE (*).", 9.6, 400, OR)
 
-# ============ D1 color
-h.titulo(40, 380, "DETALLE D1 - A COLOR", "S/E · XLPE NEGRA, ALUMINIO EN CUERDA (7 ALAMBRES (*))")
-corte(170, 530, 5.0, "3", True)
-corte(440, 530, 5.0, "2x16", True)
-h.txt(170, 620, "3 x 25 + 1 x 16 (1503)", 10.5, 700, K, "middle"); h.txt(440, 620, "2 x 16 (1502)", 10.5, 700, K, "middle")
-h.parrafo(560, 460, "LOS CONDUCTORES SE IDENTIFICAN F1-F2-F3-N (EN LA APP); EL NEUTRO ES EL DE MENOR SECCION. (*) MARCA EXACTA (NUMEROS O NERVIOS) SEGUN FABRICANTE.", 270, 10, OR)
+# =============== VISTA LATERAL ===============
+h.titulo(40, 612, "VISTA LATERAL DEL HAZ 3 x 25 + 1 x 16", "S/E · CUATRO CONDUCTORES RETORCIDOS ENTRE SI · PASO (*)")
+X0, YC = 60, 690
+lateral_haz(h, X0, YC, 1.6, H3, 300, 260, a0=45)
+el = 1.6
+h.ln(X0 - 10, YC, X0 + 300 * el + 10, YC, K, .45, h.EJE)
+h.dimH(YC + 30, X0, X0 + 260 * el, "PASO ≈ 260 (*)", ext=YC + 16, c=OR)
 
-# ============ VISTA LATERAL
-h.titulo(40, 640, "VISTA LATERAL DEL HAZ 3 x 25 + 1 x 16", "S/E · CUATRO CONDUCTORES RETORCIDOS ENTRE SI, SIN PORTANTE")
-dd = RF / math.sin(math.pi / 4)
-dd = RF / math.sin(math.pi / 4)
-cores = [("#222", RF, .6 * RF, dd, math.radians(a)) for a in (135, 45, 315)] + [("#222", RN, .6 * RN, dd - (RF - RN), math.radians(225))]
-haz_lateral(h, 60, 715, 2.4, 320, 240, cores)
-h.dimH(770, 60, 60 + 240 * 2.4, "PASO DE CABLEADO (*)", ext=745, c=OR)
-
-# ============ tabla
-y = h.codigos(40, 810, COD, (52, 0, 40), extra_col=("ITEM LP 21478", {1502: "7.10", 1015: "7.11", 1503: "7.15", 1016: "—"}, 110), wtot=800, rowh=20)
-h.notasM(40, 950, [
-    "SOLO EL Ø DEL HAZ 3 x 25 + 1 x 16 (≈ 32) ESTA EN LA FICHA, Y ES ORIENTATIVO: VERIFICAR EN LA FICHA DEL FABRICANTE ANTES DE ELEGIR GRAMPA.",
-    "(*) Ø DE CADA CONDUCTOR, ESPESOR DE AISLACION, PASO DE CABLEADO Y Ø DEL 2 x 16: A CONFIRMAR CON EL FABRICANTE.",
+# =============== TABLA ===============
+fil = [["CODIGO", "DESCRIPCION (CATALOGO DEL PAÑOL)", "UN.", "ITEM LP 21478"]]
+it = {1502: "7.10", 1015: "7.11", 1503: "7.15", 1016: "— (MAT-CABLE_ACOMETIDA-1)"}
+for c in [1502, 1503, 1015, 1016]: r = cat(c, 54); fil.append([r[0], r[1], r[2], it[c]])
+yt = tablaC(h, 40, 760, [(52, "c", True), (400, "l", False), (32, "c", False), (200, "c", False)], fil, "CODIGOS DEL PAÑOL (4)", rowh=16)
+rayadosC(h, 560, 600, ["XLP", "ALU"], cols=2, dx=140)
+ydat = bloque(h, 40, yt + 22, "DATOS TECNICOS", [
+    "NORMA IRAM 2263 · EPEC ET-1005 · 0,6/1,1 kV · CONDUCTORES DE ALUMINIO AISLADOS EN XLPE, RETORCIDOS EN HAZ.",
+    "2 x 16: RED MONOFASICA DE ALUMBRADO · 3 x 25 + 1 x 16: RED TRIFASICA (HAZ ≈ 32 SEGUN FICHA). UNIDAD: METRO."], w=800, sz=10, lh=13.5)
+notasW(h, 40, ydat + 4, [
+    "(*) SOLO EL Ø DEL HAZ 3 x 25 + 1 x 16 (≈ 32) ESTA EN LA FICHA Y ES ORIENTATIVO; CON AISLACION 1,4 EL HAZ DA ≈ 22. VERIFICAR ANTES DE ELEGIR GRAMPA.",
+    "(*) Ø DE CADA CONDUCTOR, AISLACION, ALAMBRES, PASO DE CABLEADO Y Ø DEL 2 x 16: A CONFIRMAR CON EL FABRICANTE.",
     "1016 (3 x 1 x 25/50, CON NEUTRO PORTANTE) TIENE SU HOJA: MAT-CABLE_ACOMETIDA-1.",
-    "FUENTE: LP 21478 ANEXO I (7.10 / 7.11 / 7.15); EPEC ET-1005; IRAM 2263.",
-], 790)
+    "FUENTES: LP 21478 ANEXO I (7.10 / 7.11 / 7.15); EPEC ET-1005; IRAM 2263; r3d/FUENTES_cables.md."], w=800, lh=14)
 
-# ============ 3D
-h.titulo(890, 62, "VISTA 3D - PREENSAMBLADO 3 x 25 + 1 x 16", "HAZ RETORCIDO · PUNTAS PELADAS EN ESCALONES")
-h.iso(4.2, 990, 190)
-c3 = [(C_VAINA, RF, .6 * RF, dd, math.radians(a)) for a in (135, 45, 315)] + [("#3a3d42", RN, .6 * RN, dd - (RF - RN), math.radians(225))]
-o = haz3d(h, c3, 130, 200, u_fin=[104, 114, 124, 96], L_cu=14, hilos=7, al=True)
-fin = o["fin"]
-h.g3b("1", (40, 0, dd + RF * .7), 1440, 170, "FASE Al 25 XLPE")
-h.g3b("2", (fin[0][0] + 10, fin[0][1], fin[0][2] + .6 * RF), 1440, 240, "Al EN CUERDA")
-h.g3b("3", (fin[3][0] - 4, fin[3][1], fin[3][2] + RN), 1440, 310, "NEUTRO Al 16")
-h.txt(890, 640, "Proporciones, paso y largos de pelado ilustrativos (*); el Ø del haz manda en el corte A-A.", 11, 400, OR, "start", INT)
-h.bloque(890, 700, "DATOS TECNICOS", [
-    "NORMA: IRAM 2263 · EPEC ET-1005",
-    "CONDUCTORES DE ALUMINIO AISLADOS EN XLPE, RETORCIDOS EN HAZ",
-    "2 x 16: RED MONOFASICA DE ALUMBRADO",
-    "3 x 25 + 1 x 16: RED TRIFASICA · HAZ Ø ≈ 32",
-    "UNIDAD DE COMPRA: METRO",
-], 360)
-h.bloque(1270, 700, "DONDE SE USA", [
-    "RED AEREA DE ALUMBRADO DE BARRIO · GUIA «TENDIDO AEREO BARRIO»",
-    "SE SUJETA POR EL HAZ CON GRAMPAS Y MENSULAS (FAMILIA «MORSETERIA DE LINEA AEREA»)",
-    "VANO MAXIMO 40 m (ET-1005)",
-], 370)
-h.rotuloM("MAT-LINEA_AEREA-2", "PREENSAMBLADO Al 2 x 16 Y", "Al-Al 3 x 25 + 1 x 16 (IRAM 2263)", "CORTES, DETALLE, VISTA LATERAL Y VISTA 3D", "4:1", "D1, 3D S/E")
+# =============== 3D ===============
+h.titulo(890, 62, "VISTA 3D - PREENSAMBLADOS 3 x 25 + 1 x 16 Y 2 x 16", "HACES RETORCIDOS · PUNTAS PELADAS EN ESCALONES")
+A = img3d(h, "linea2", 900, 92, 660)
+columna(h, A, [("f0", "", "FASE Al 25 · XLPE"), ("c0", "", "Al 7 ALAMBRES"), ("f3", "", "NEUTRO Al 16"), ("g0", "", "2 x 16 (1502)")], 1500, 140, 560, paso=36)
+bloque(h, 890, 650, "DONDE SE USA", [
+    "RED AEREA DE ALUMBRADO DE BARRIO · GUIA «TENDIDO AEREO BARRIO».",
+    "SE SUJETA POR EL HAZ CON GRAMPAS Y MENSULAS (MAT-MORSETERIA_AEREA-1).",
+    "SE DERIVA CON MORSETOS DE PERFORACION (MAT-MORSETO-1 / -2). VANO MAXIMO 40 m (ET-1005)."], w=740, sz=10, lh=14)
+h.txt(890, 1010, "RENDER: three.js (r3d/escenas/linea2.mjs) CON LA MISMA GEOMETRIA DEL PLANO. FUENTES: r3d/FUENTES_cables.md", 9.5, 400, G, "start", INT)
+rotuloMat(h, "MAT-LINEA_AEREA-2", "PREENSAMBLADO Al 2 x 16", "Y 3 x 25 + 1 x 16 (IRAM 2263)", "CORTES, D1, VISTA LATERAL Y 3D", "7:1", "INDICADAS · 3D S/E", rev="B", fecha="08/11/2026")
 h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_linea_aerea_2.svg"))
-print("ok")

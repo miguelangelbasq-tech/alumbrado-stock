@@ -1,92 +1,115 @@
-"""MAT-TABLERO-1 · Gabinete de PRFV 530 × 430 × 200 mm (3020) y su placa de montaje (3052).
-Datos: FICHAS_TEC.tablero pieza 1 (PRFV, IP66 / IK10, doble aislación, puerta 180°, cierres ¼ de vuelta, placa aparte, montaje a ≥ 5 m con la
-puerta hacia el espacio verde; referencia Schneider PanelSeT PLM NSYPLM54G 530 × 430 × 200 RAL 7035), plano() de la ficha (frente 430 × 530,
-perfil 200), FAMILIAS_MAT.tablero, Normas AP-T-012 (2 juegos de semiabrazaderas por Ø del poste), hoja aprobada AP-T-012 (4003)."""
-from ilukit import *
-h = nueva(); m = h.m
+"""MAT-TABLERO-1 (rev. B) · Gabinete de PRFV 530 × 430 × 200 mm (3020) y su placa de montaje (3052).
+Plano con GAB de r3d/piezas/perfiles_protab.mjs; 3D: r3d/out/protab_tab1.png y protab_tab1_cierre.png.
+Datos: FICHAS_TEC.tablero pieza 1 (PRFV, IP66 / IK10, doble aislación, puerta 180°, placa aparte, montaje ≥ 5 m, puerta al espacio verde;
+referencia Schneider PanelSeT PLM NSYPLM54G 530 × 430 × 200 RAL 7035, «2 cierres con inserto doble barra»), AP-T-012 (semiabrazaderas 4003)."""
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from protabkit import *
 
-# ======================= VISTA DE FRENTE (1:5 → 0,8 px/mm × 0,7)
-s = .56; X0, Y0 = 90, 120
-W, Hh, P = 430, 530, 200
-h.titulo(40, 62, "VISTA DE FRENTE", "ESC. 1:7 - COTAS EN mm - PUERTA CERRADA")
-h.rect(X0, Y0, W * s, Hh * s, "#fff", K, 1.6); h.rect(X0 + 10, Y0 + 10, W * s - 20, Hh * s - 20, "none", K, .6)
-for yy in (Y0 + 60, Y0 + Hh * s - 60): h.circ(X0 + W * s - 24, yy, 7, "#fff", K, 1); h.ln(X0 + W * s - 29, yy, X0 + W * s - 19, yy, K, 1.4)   # cierres ¼ vuelta
-for yy in (Y0 + 40, Y0 + Hh * s - 40): h.rect(X0 - 5, yy - 14, 5, 28, "#fff", K, .8)                                                      # bisagras
-h.path(f"M{X0 + W*s/2 - 22},{Y0 + 70} l22,-38 l22,38 z", "#fff", K, 1.2); h.txt(X0 + W * s / 2, Y0 + 64, "!", 18, 700, K, "middle")
-h.txt(X0 + W * s / 2, Y0 + 100, "RIESGO ELECTRICO", 8.5, 700, K, "middle")
-h.dimH(Y0 - 16, X0, X0 + W * s, "430", ext=Y0)
-h.dimV(X0 + W * s + 44, Y0, Y0 + Hh * s, "530", ext=X0 + W * s + 2)
-h.globo("1", X0 + 60, Y0 + 200, 60, Y0 + Hh * s + 30); h.globo("2", X0 + W * s - 24, Y0 + 60, X0 + W * s + 60, Y0 + 40)
-h.globo("3", X0 - 3, Y0 + 40, 60, Y0 + 30)
-corteMarca(h, X0 - 20, Y0 + Hh * s / 2, X0 + W * s + 14, Y0 + Hh * s / 2, "A")
+G_ = PT["GAB"]; W, H, P, e, pu = G_["W"], G_["H"], G_["P"], G_["pared"], G_["puerta"]; pl = G_["placa"]
+h = nueva3()
 
-# ======================= CORTE A-A / PERFIL
-h.titulo(430, 62, "CORTE A-A", "ESC. 1:7 - PERFIL, PLACA Y SOPORTES")
-X1 = 560
-h.rect(X1, Y0, P * s, Hh * s, "#fff", K, 1.6)
-h.rect(X1 + 3, Y0 + 3, 4, Hh * s - 6, "#111", K, .3)                          # pared trasera en corte
-h.rect(X1 + P * s - 7, Y0 + 3, 4, Hh * s - 6, "#111", K, .3)                  # puerta en corte
-h.rect(X1 + 20, Y0 + 18, 4, Hh * s - 36, "url(#STEEL)", K, .8)                # placa de montaje (*)
-h.ln(X1 + 7, Y0 + 30, X1 + 20, Y0 + 30, K, 2); h.ln(X1 + 7, Y0 + Hh * s - 30, X1 + 20, Y0 + Hh * s - 30, K, 2)
-h.dimH(Y0 - 16, X1, X1 + P * s, "200", ext=Y0)
-h.globo("4", X1 + 22, Y0 + 150, X1 + 150, Y0 + 150); h.txt(X1 + 166, Y0 + 154, "PLACA 3052 (*)", 9.5, 400, OR)
-h.txt(X1 + P * s + 6, Y0 + Hh * s - 6, "PUERTA", 9, 400, G)
-for yy in (Y0 + 50, Y0 + Hh * s - 50):
-    h.rect(X1 - 30, yy - 6, 30, 12, "url(#STEEL)", K, .8)
-h.circ(X1 - 70, Y0 + Hh * s / 2, 46, "url(#fibra)", K, 1); h.circ(X1 - 70, Y0 + Hh * s / 2, 46, "none", K, 1.2)
-h.txt(X1 - 70, Y0 + Hh * s / 2 + 64, "APOYO", 9, 700, K, "middle")
-h.globo("5", X1 - 15, Y0 + 50, X1 + 150, Y0 + 40); h.txt(X1 + 166, Y0 + 44, "SEMIABRAZ. 4003", 9.5, 400)
+# =============== FRENTE ===============
+s = .6; X0, Y0 = 92, 118
+X = lambda x: X0 + (x + W / 2) * s; Z = lambda z: Y0 + (H - z) * s
+h.titulo(40, 62, "FRENTE (PUERTA CERRADA)", "ESC. 1:1,7 · RAL 7035 (*)")
+h.rect(X(-W / 2), Z(H), W * s, H * s, "#fff", K, 1.7, f'rx="{14*s}"'); h.rect(X(-W / 2) + 5, Z(H) + 5, W * s - 10, H * s - 10, "none", K, .5, f'rx="{10*s}"')
+for z in G_["cierres"]:
+    h.circ(X(W / 2 - 34), Z(z), 13 * s, "#fff", K, 1.1); h.rect(X(W / 2 - 34) - 6.5 * s, Z(z) - 1.6 * s, 13 * s, 3.2 * s, "#111", K, .3); h.rect(X(W / 2 - 34) - 1.6 * s, Z(z) - 1.6 * s, 3.2 * s, 5 * s, "#111", K, .3)
+for z in G_["bisagras"]: h.rect(X(-W / 2) - 7 * s, Z(z + 27), 7 * s, 54 * s, "#fff", K, .9)
+for (sx, z) in ((-1, 30), (1, 30), (-1, H - 30), (1, H - 30)):
+    x = sx * (W / 2 + G_["pie"]["l"] / 2 - 6); h.rect(X(x - 18), Z(z + 20), 36 * s, 40 * s, "#fff", K, .8); h.circ(X(x + sx * 6), Z(z), 4.2 * s, "#fff", K, .7)
+h.rect(X(-45), Z(H - 57), 90 * s, 26 * s, "#fff", K, .7); h.txt(X(0), Z(H - 67) + 2, "RIESGO ELECTRICO", 7.5, 700, K, "middle")
+for x in (-110, 0, 110): h.rect(X(x - 15), Z(0), 30 * s, 34 * s, "#fff", K, .8); h.rect(X(x - 6), Z(-34), 12 * s, 26 * s, "#fff", K, .6)
+h.dimH(Z(H) - 30, X(-W / 2), X(W / 2), "430", ext=Z(H) - 2)
+h.dimV(X(W / 2) + 46, Z(H), Z(0), "530", ext=X(W / 2) + 26)
+lineaCorte(h, X(-W / 2) - 30, Z(H / 2), X(W / 2) + 34, Z(H / 2), "A") if False else None
+lineaCorte(h, X(0), Z(H) - 12, X(0), Z(0) + 38, "A")
+for n, (x, z), (gx, gy) in [("1", (-120, 300), (56, 300)), ("2", (W / 2 - 34, G_["cierres"][1]), (X(W / 2) + 30, Z(G_["cierres"][1]) - 40)), ("3", (-W / 2 - 4, G_["bisagras"][1]), (56, Z(G_["bisagras"][1]))),
+                            ("8", (-110, -20), (56, Z(0) + 30)), ("9", (W / 2 + 14, H - 30), (X(W / 2) + 30, Z(H) + 18))]:
+    h.globo(n, X(x), Z(z), gx, gy, r=9)
 
-# ======================= D1 · CIERRE ¼ DE VUELTA + DATOS DE MONTAJE
-h.titulo(430, 455, "D1 · CIERRE ¼ DE VUELTA", "ESQUEMA (*)")
-cx, cy = 470, 520
-h.circ(cx, cy, 22, "#fff", K, 1.2); h.rect(cx - 16, cy - 3, 32, 6, "#fff", K, 1); flecha(h, cx + 30, cy + 10, cx + 10, cy + 30, OR)
-h.txt(cx + 40, cy + 4, "ABRE Y CIERRA CON ¼ DE VUELTA", 9.5, 400)
-h.txt(90, 470, "MONTAJE: A 5 m O MAS DEL PISO, PUERTA HACIA EL ESPACIO VERDE.", 9.5, 700)
+# =============== CORTE A-A ===============
+vc = Vista(h, 560, 440, .5)
+h.titulo(400, 62, "CORTE A-A", "ESC. 1:2 · PLACA Y SEMIABRAZADERAS")
+vc.poly([[0, 0], [P - pu, 0], [P - pu, e], [e, e], [e, H - e], [P - pu, H - e], [P - pu, H], [0, H]], "url(#PRFV)", 1.2)
+vc.rect(P - pu, P, 0, H, "url(#PRFV)", 1.2)
+vc.rect(P - pu - 9.5, P - pu - 7, 8, 8 + G_["junta"]["a"], "url(#GOMA)", .5); vc.rect(P - pu - 9.5, P - pu - 7, H - 8 - G_["junta"]["a"], H - 8, "url(#GOMA)", .5)
+vc.rect(pl["y"], pl["y"] + pl["e"] * 2, (H - pl["H"]) / 2, (H + pl["H"]) / 2, "url(#MET)", .8)
+for z in ((H - pl["H"]) / 2 + 15, (H + pl["H"]) / 2 - 15): vc.rect(e, pl["y"], z - 6, z + 6, "#fff", .7)
+for z in G_["cierres"]: vc.rect(P - pu - 16, P - pu - 12, z - 7, z + 7, "url(#MET)", .6); vc.rect(P, P + 7, z - 13, z + 13, "url(#PLAS2)", .7)
+vc.rect(P / 2 - 13, P / 2 + 13, -34, 0, "#fff", .8); vc.rect(P / 2 - 7, P / 2 + 7, -70, -34, "#fff", .6)
+Rp = 110; yC = -Rp - 26
+vc.rect(yC - Rp, yC + Rp, -60, H + 40, "url(#PRFV)", .9)
+for zq in (-60, H + 40): a, b = vc.p(yC - Rp - 4, zq), vc.p(yC + Rp + 4, zq); h.path(f"M{a[0]:.1f},{a[1]:.1f} l{(b[0]-a[0])/3:.1f},-5 l{(b[0]-a[0])/3:.1f},10 L{b[0]:.1f},{b[1]:.1f}", "#fff", K, .8)
+for z in (90, H - 90): vc.rect(yC + Rp, 0, z - 20, z + 20, "url(#MET)", .8); vc.rect(yC - Rp - 2.5, yC + Rp, z - 20, z + 20, "none", .5)
+vc.eje(yC, -70, yC, H + 50)
+vc.cotaH(0, P, -90, "200", zext=-2)
+vc.cotaH(0, pl["y"], H + 20, "22 (*)", zext=H, c=OR)
+vc.cotaV(P + 20, (H - pl["H"]) / 2, (H + pl["H"]) / 2, "480 (*)", yext=pl["y"] + 4, c=OR)
+for n, (y, z), (gx, gy) in [("4", (pl["y"] + 2, 330), (650, 210)), ("5", (12, (H + pl["H"]) / 2 - 15), (650, 130)), ("6", (P - pu - 8, 60), (650, 400)),
+                            ("7", (yC + Rp / 2 + 30, H - 90), (400, 200)), ("2", (P - pu - 14, G_["cierres"][1]), (650, 290)), ("8", (P / 2, -20), (650, 440))]:
+    h.globo(n, *vc.p(y, z), gx, gy, r=9)
+h.txt(*vc.p(yC, H + 62), "APOYO PRFV Ø (*)", 8.5, 400, OR, "middle")
 
-# ======================= TABLAS
-y2 = h.codigos(40, 600, [3020, 3052], extra={3020: "530 × 430 × 200 mm", 3052: "UN. «m» en el pañol (*)"}, wx=180)
-h.datos(40, y2 + 30, [("MATERIAL", "PRFV (poliéster + fibra de vidrio)"), ("PROTECCION", "IP66 · IK10 · doble aislación"),
-        ("COLOR (REF.)", "gris RAL 7035"), ("PUERTA", "abre 180°, cierres ¼ de vuelta"), ("MEDIDAS", "530 × 430 × 200 mm (alto × ancho × fondo)"),
-        ("PLACA", "aparte (3052)"), ("MONTAJE", "≥ 5 m, puerta al espacio verde"), ("REFERENCIA", "Schneider PanelSeT NSYPLM54G")], w=420, c1=110)
-textoBloque(h, 485, y2 + 30, "DONDE SE USA", [
-    "· AP-T-019 / 018: tablero aéreo sobre el",
-    "   apoyo PRFV (6015) o poste H°A°.",
-    "· AP-T-012: sujeción con 2 juegos de",
-    "   semiabrazaderas por Ø (4003).",
-    "· Adentro: AP-T-007 (TT) / AP-T-008 (TN-S),",
-    "   ver MAT-TABLERO-2.",
-    "· Pliego 9.02: el gabinete trae sus",
-    "   abrazaderas (si vienen, 4003 no se pide)."], sz=10, dy=15)
-h.notas(40, 1040, [
-    "COTAS EN mm. MEDIDAS DEL CATALOGO (3020) Y DE LA REFERENCIA SCHNEIDER: CONFIRMAR CON CADA PROVEEDOR.",
-    "(*) PLACA DE MONTAJE: EL PAÑOL LA TIENE EN «m» (DEBERIA SER «Un.»); NO SE CAMBIA SIN EL OK DE ANGEL. MEDIDAS DE LA PLACA (*).",
-    "(*) FORMA DEL CIERRE Y DE LA BISAGRA: ESQUEMA, SEGUN EL FABRICANTE.",
-    "FUENTE: SCHNEIDER PANELSET PLM NSYPLM54G; PLIEGO LP 21478 (AP-T-012 / 019); CATALOGO DEL PAÑOL."])
+# =============== D1 · JUNTA ===============
+D1x, D1y = 680, 62
+h.titulo(D1x, D1y, "D1 - JUNTA Y PUERTA", "ESC. 3:1 · CERRADA (*)")
+vj = Vista(h, D1x - 145.5 * 3, D1y + 30 + 535 * 3, 3.0)
+h.a(f'<clipPath id="cpJ"><rect x="{D1x}" y="{D1y + 30}" width="190" height="150"/></clipPath>'); h.rect(D1x, D1y + 30, 190, 150, "none", K, .5)
+h.a('<g clip-path="url(#cpJ)">')
+vj.poly([[P - pu - 60, H - e], [P - pu, H - e], [P - pu, H], [P - pu - 60, H]], "url(#PRFV)", 1.1)
+vj.poly([[P - pu - 6, H - e - 6], [P - pu, H - e - 6], [P - pu, H - e], [P - pu - 6, H - e]], "url(#PRFV)", .8)
+vj.rect(P - pu, P, H - 60, H + 2, "url(#PRFV)", 1.1)
+vj.rect(P - pu - 7, P - pu, H - 5 - 7, H - 5, "url(#PRFV)", .8)
+vj.rect(P - pu - 9.5, P - pu - 7, H - 8 - G_["junta"]["a"], H - 8, "url(#GOMA)", .6)
+h.a('</g>')
+for t, (y, z), (tx, ty) in [("CUERPO PRFV 4 (*)", (P - pu - 30, H - 2), (D1x + 6, D1y + 44)), ("PUERTA 4,5 (*)", (P - pu / 2, H - 40), (D1x + 110, D1y + 150)),
+                             ("JUNTA DE GOMA (*)", (P - pu - 8, H - 14), (D1x + 6, D1y + 150))]:
+    a = vj.p(y, z); llamada(h, a[0], a[1], tx, ty, t, sz=8.5)
 
-# ======================= 3D
-h.titulo(890, 62, "VISTA 3D - GABINETE PRFV 530 × 430 × 200", "PUERTA ABIERTA 110° · PLACA DE MONTAJE · RAL 7035 (*)")
-h.iso(.6, 1150, 560)
-X0g, X1g, Yg, Zg = -100, 100, 215, 530
-F = lambda *p: [list(q) for q in p]
-m.face(F((X0g, -Yg, 0), (X0g, Yg, 0), (X0g, Yg, Zg), (X0g, -Yg, Zg)), "#e9eae4", 0, "#999")          # fondo (por dentro)
-m.face(F((X0g, -Yg, 0), (X1g, -Yg, 0), (X1g, -Yg, Zg), (X0g, -Yg, Zg)), "#dcddd6", 0, "#999")       # costado derecho (por dentro)
-m.face(F((X0g, -Yg, 0), (X1g, -Yg, 0), (X1g, Yg, 0), (X0g, Yg, 0)), "#d4d5ce", 0, "#999")          # piso
-m.render()
-m.box(-90, -84, -185, 185, 30, 500, "galv", edge="#666"); m.render()                                  # placa de montaje (*) contra el fondo
-m.face(F((X0g, Yg, 0), (X1g, Yg, 0), (X1g, Yg, Zg), (X0g, Yg, Zg)), "prfvGab", 0, "#777")            # costado izquierdo
-m.face(F((X0g, -Yg, Zg), (X1g, -Yg, Zg), (X1g, Yg, Zg), (X0g, Yg, Zg)), "prfvGab", 0, "#777")        # techo
-m.render()
-th = math.radians(115); dxp, dyp = math.sin(th), math.cos(th)
-hx, hy = 100, -215; ex, ey = hx + 430 * dxp, hy + 430 * dyp
-m.face([[hx, hy, 0], [ex, ey, 0], [ex, ey, 530], [hx, hy, 530]], "prfvGab", 0, "#777"); m.render()
-for z in (60, 470): m.cyl([hx, hy, z - 20], [hx, hy, z + 20], 6, "gris", n=10)
-m.cyl([hx + 400 * dxp, hy + 400 * dyp, 460], [hx + 400 * dxp + 12, hy + 400 * dyp, 460], 10, "gris", n=12)
-m.render()
-h.g3("1", (0, 215, 200), 1200, 820, "GABINETE PRFV 3020", NV)
-h.g3("2", (hx + 400 * dxp + 10, hy + 400 * dyp, 460), 1200, 700, "CIERRE ¼ DE VUELTA (*)", OR)
-h.g3("3", (hx, hy, 470), 1200, 740, "BISAGRA (PUERTA 180°)", NV)
-h.g3("4", (-84, 100, 300), 1200, 780, "PLACA DE MONTAJE 3052", NV)
-h.txt(960, 900, "VER ADENTRO: MAT-TABLERO-2 (TABLERO ARMADO)", 10, 400, G, "start", INT)
-h.rotulo(890, h.H - 150, 750, "MAT-TABLERO-1", "GABINETE PRFV", "530 × 430 × 200 mm", "FRENTE, CORTE, CIERRE, CODIGOS, DATOS Y 3D", "1:7", "D1 S/E · 3D S/E")
-guardar(h, "mat_tablero_1")
+# =============== D2 · CIERRE DOBLE BARRA ===============
+D2x, D2y = 680, 262
+h.titulo(D2x, D2y, "D2 - CIERRE", "ESC. 2:1 · CON LLAVE (*)")
+cx, cy = D2x + 50, D2y + 82
+h.circ(cx, cy, 26, "#fff", K, 1.3); h.circ(cx, cy, 22, "none", K, .6)
+h.rect(cx - 13, cy - 3.2, 26, 6.4, "#111", K, .4); h.rect(cx - 3.2, cy - 13, 6.4, 10, "#111", K, .4)
+h.txt(cx, cy + 44, "INSERTO DOBLE BARRA", 8.5, 400, K, "middle")
+lx = D2x + 86; h.rect(lx, cy - 6, 60, 12, "url(#MET)", K, .8); h.circ(lx + 6, cy, 5, "#fff", K, .8)
+h.path(f"M{lx + 40},{cy - 26} a22,22 0 0,1 20,18", "none", OR, 1); h.txt(lx + 4, cy + 30, "LEVA ¼ VUELTA (*)", 8.5, 400, OR)
+
+# =============== TABLAS ===============
+filas = [["CODIGO", "DESCRIPCION (CATALOGO DEL PAÑOL)", "UN.", "DATO"]]
+for c, d in ((3020, "530 x 430 x 200 mm"), (3052, "UN. «m» EN EL PAÑOL (*)")):
+    r = cat(c, 60); filas.append([r[0], r[1], r[2], d])
+yt = h.tabla(40, 500, [(52, "c", True), (450, "l", False), (40, "c", False), (258, "l", False)], filas, rowh=16, titulo="CODIGOS DEL PAÑOL (2)", colores=colorOR)
+dat = [("DATO", "VALOR"), ("MATERIAL", "PRFV (POLIESTER + FIBRA DE VIDRIO)"), ("PROTECCION", "IP66 · IK10 · DOBLE AISLACION"), ("COLOR (REF.)", "GRIS RAL 7035"),
+       ("PUERTA", "ABRE 180° · 2 CIERRES CON INSERTO DOBLE BARRA"), ("MEDIDAS", "530 x 430 x 200 (ALTO x ANCHO x FONDO)"), ("PLACA", "APARTE (3052) · 480 x 380 (*)"),
+       ("MONTAJE", "≥ 5 m, PUERTA AL ESPACIO VERDE"), ("REFERENCIA", "SCHNEIDER PANELSET PLM NSYPLM54G")]
+ydt = h.tabla(40, yt + 24, [(120, "l", False), (300, "l", False)], dat, rowh=16, titulo="DATOS TECNICOS", colores=lambda i, j, t: OR if "(*)" in t else K)
+yu = bloque(h, 480, yt + 24, "DONDE SE USA", [
+    "AP-T-019 / 018: TABLERO AEREO SOBRE EL APOYO PRFV (6015) O POSTE H°A°.",
+    "AP-T-012: 2 JUEGOS DE SEMIABRAZADERAS POR Ø DEL POSTE (4003).",
+    "ADENTRO: AP-T-007 (TT) / AP-T-008 (TN-S), VER MAT-TABLERO-2.",
+    "PLIEGO 9.02: EL GABINETE TRAE SUS ABRAZADERAS (SI VIENEN, 4003 NO SE PIDE)."], w=360, sz=10, lh=13.5)
+rayadosRef(h, 480, yu + 10, ["PRFV", "MET", "GOMA", "PLAS2"], cols=2, dx=180)
+notasW(h, 40, max(ydt, yu + 70) + 20, [
+    "COTAS EN mm. 530 x 430 x 200: CATALOGO (3020) Y REFERENCIA SCHNEIDER NSYPLM54G; CONFIRMAR CON CADA PROVEEDOR.",
+    "(*) PARED 4, PUERTA 4,5, JUNTA, SEPARADORES (22), PLACA 480 x 380 x 2, PIES Y CIERRES: PROPORCIONALES, A CONFIRMAR.",
+    "(*) LA PLACA DE MONTAJE ESTA EN «m» EN EL PAÑOL (DEBERIA SER «Un.»); NO SE CAMBIA SIN EL OK DE ANGEL.",
+    "(*) Ø DEL APOYO A 5 m Y LARGO DE LAS SEMIABRAZADERAS: SEGUN EL POSTE (4003 SE PIDE POR Ø).",
+    "PRENSACABLES: CANTIDAD Y MEDIDA SEGUN LOS CABLES DE LA OBRA (NO VIENEN CON EL GABINETE (*))."], w=800, lh=14)
+
+# =============== 3D ===============
+h.titulo(890, 62, "VISTA 3D - GABINETE ABIERTO EN EL APOYO", "PUERTA ABIERTA · PLACA DE MONTAJE · 2 SEMIABRAZADERAS · PRENSACABLES ABAJO")
+A = img3d(h, "protab_tab1", 892, 82, 520)
+columna(h, A, [("poste", "7", "APOYO PRFV"), ("semi", "7", "SEMIABRAZADERA (4003)"), ("pie", "9", "PIE DE FIJACION"), ("cuerpo", "1", "CUERPO PRFV (3020)"),
+               ("placa", "4", "PLACA DE MONTAJE (3052)"), ("separador", "5", "SEPARADOR"), ("bulon", "", "BULON DE TIERRA (*)"), ("bisagra", "3", "BISAGRA"),
+               ("junta", "6", "JUNTA DE GOMA"), ("cierre", "2", "CIERRE (LEVA)"), ("puerta", "", "PUERTA"), ("prensa", "8", "PRENSACABLE (*)"), ("cable", "", "CABLE")],
+        1430, 100, 640, paso=30)
+h.titulo(890, 680, "CERRADO, DE ABAJO", "CIERRES, BISAGRAS, ROTULO Y PRENSACABLES")
+A2 = img3d(h, "protab_tab1_cierre", 892, 700, 380)
+columna(h, A2, [("rotulo", "", "ROTULO RIESGO ELECTRICO"), ("cierre", "2", "INSERTO DOBLE BARRA"), ("bisagra", "3", "BISAGRA"), ("pie", "9", "PIE"),
+                ("prensa", "8", "PRENSACABLE"), ("cable", "", "CABLE")], 1290, 720, 990, paso=30)
+rotuloMat(h, "MAT-TABLERO-1", "GABINETE PRFV", "530 x 430 x 200 mm", "FRENTE, CORTE A-A, D1, D2, CODIGOS, DATOS Y 3D", "1:1,7", "D1 3:1 · D2 2:1 · 3D S/E", rev="B", fecha="08/11/2026")
+h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_tablero_1.svg"))

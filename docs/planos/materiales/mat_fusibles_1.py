@@ -1,162 +1,121 @@
-"""MAT-FUSIBLES-1 · Portafusible seccionable 10×38 (tabaquera) y fusible cilíndrico 10×38 gG.
-Datos: FICHAS_TEC.fusibles pieza 1 (Schneider DF101 17,5 × 79,5 × 61; Mersen FR10GG Ø10,3 × 38 gG 500 V 120 kA; 3001 32 A 690 V),
-FAMILIAS_MAT.fusibles, catálogo, CLAUDE.md §11.3 (2 A por artefacto; 3014 no entra), TC-PRFV-01/02, AP-CC-014 (contradicción)."""
-import sys, os, math
+"""MAT-FUSIBLES-1 (rev. B) · Portafusible seccionable 10×38 «tabaquera» (3053) y fusible cilíndrico 10×38 gG (3017 2 A, 3073 4 A).
+Plano con los perfiles de r3d/piezas/perfiles.mjs (TAB, F10x38); 3D: r3d/out/tab_par.png y fus10x38.png.
+Datos: FICHAS_TEC.fusibles (Schneider DF101 17,5 × 79,5 × 61; Mersen FR10GG Ø10,3 × 38 gG 500 V 120 kA; 3001 32 A 690 V),
+CLAUDE.md §11.3 (2 A por artefacto; 3014 no entra), TC-PRFV-01/02, AP-CC-014. Fuentes: r3d/FUENTES.md. Lo que no está: naranja (*)."""
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from matbfc import *
+from fuskit import *
 
-h = nueva()
-W, H_, D = 17.5, 79.5, 61
-YN = 44          # comienzo del cuello del frente (*)
-ZN0, ZN1 = 17, 62  # alto del cuello / tapa rebatible (*)
-e = 2.4
-# ================= VISTA DE FRENTE =================
-FX, FY = 70, 120
-h.titulo(40, 62, "VISTA DE FRENTE", "ESC. 5:2 - COTAS EN mm")
-h.rect(FX, FY, W * e, H_ * e, "#fff", K, 1.6)
-for zz in (8, H_ - 8):
-    h.rect(FX + 4, FY + (H_ - zz) * e - 7, W * e - 8, 14, "#fff", K, .7)
-    h.circ(FX + W * e / 2, FY + (H_ - zz) * e, 5, "#fff", K, .8); h.ln(FX + W * e / 2 - 4, FY + (H_ - zz) * e + 3, FX + W * e / 2 + 4, FY + (H_ - zz) * e - 3, K, .8)
-h.rect(FX + 3, FY + (H_ - ZN1) * e, W * e - 6, (ZN1 - ZN0) * e, "#fff", K, 1)          # tapa rebatible
-h.rect(FX + 9, FY + (H_ - 50) * e, W * e - 18, 18 * e, "#fff", K, .6)                    # visor (*)
-h.txt(FX + W * e / 2, FY + (H_ - 40) * e + 4, "2A", 9, 700, K, "middle")
-h.ln(FX + W * e / 2, FY - 14, FX + W * e / 2, FY + H_ * e + 14, K, .4, h.EJE)
-# línea de corte A-A (vertical por el eje)
-for yy in (FY - 22, FY + H_ * e + 22): h.ln(FX + W * e / 2 - 8, yy, FX + W * e / 2 + 8, yy, K, 1.8)
-h.txt(FX + W * e / 2 + 12, FY - 18, "A", 13, 700); h.txt(FX + W * e / 2 + 12, FY + H_ * e + 30, "A", 13, 700)
-h.dimH(FY + H_ * e + 46, FX, FX + W * e, "17,5", ext=FY + H_ * e + 2)
-h.dimV(FX - 18, FY, FY + H_ * e, "79,5", ext=FX - 2)
-h.globo("2", FX + W * e - 6, FY + (H_ - 45) * e, FX + W * e + 34, FY + 70)
-h.globo("3", FX + W * e / 2 + 4, FY + 8 * e, FX + W * e + 34, FY + 20)
+T, F = PERF["TAB"], PERF["F10x38"]
+H_, D_, W_ = T["H"], T["D"], T["W"]; n0, n1 = T["cuello"]
+h = nueva2()
+e = 2.8; OY = 380          # z = 0 de las vistas de la fila de arriba
 
-# ================= PERFIL =================
-PX, PY = 210, 120
-h.titulo(PX, 62, "PERFIL", "ESC. 5:2 - TAPA ABIERTA EN PUNTOS")
-prof = [(0, 0), (YN, 0), (YN, ZN0), (D, ZN0), (D, ZN1), (YN, ZN1), (YN, H_), (0, H_)]
-d = "M" + " L".join(f"{PX + y * e:.1f},{PY + (H_ - z) * e:.1f}" for y, z in prof) + " Z"
-h.path(d, "#fff", K, 1.6)
-ab = [rot(p, (D, ZN0), 55) for p in [(YN, ZN0), (D, ZN0), (D, ZN1), (YN, ZN1)]]
-h.path("M" + " L".join(f"{PX + y * e:.1f},{PY + (H_ - z) * e:.1f}" for y, z in ab) + " Z", "none", K, .8, h.OCULTA)
-# riel NS35 en la cara de atrás (de canto)
-h.rect(PX - 7.5 * e, PY + (H_ / 2 - 17.5) * e, 7.5 * e, 35 * e, "url(#ANSI31)", K, .8)
-h.txt(PX - 7.5 * e - 4, PY + H_ / 2 * e + 4, "RIEL", 9.5, 400, G, "end")
-h.dimH(PY + H_ * e + 28, PX, PX + D * e, "61", ext=PY + H_ * e + 2)
-h.dimH(PY - 16, PX + YN * e, PX + D * e, "17 (*)", ext=PY + (H_ - ZN1) * e - 2, c=OR)
-h.dimV(PX + D * e + 22, PY + (H_ - ZN1) * e, PY + (H_ - ZN0) * e, "45 (*)", ext=PX + D * e + 2, c=OR)
-h.globo("2", PX + (D - 4) * e, PY + (H_ - 40) * e, PX + D * e + 60, PY + 30)
-h.globo("1", PX + 20 * e, PY + (H_ - 60) * e, PX + 20 * e, PY - 30 + 4)
+# =============== 1. VISTA DE FRENTE ===============
+h.titulo(40, 62, "FRENTE", "ESC. 2,8:1")
+X, Z = portaFrente(h, 64, OY - H_ * e, e, T)
+h.dimH(OY + 52, X(0), X(W_), "17,5", ext=OY + 2)
+h.dimV(X(0) - 14, Z(H_), Z(0), "79,5", ext=X(0) - 2)
+lineaCorte(h, X(W_ / 2), Z(H_) - 22, X(W_ / 2), Z(0) + 22, "A")
+h.globo("2", X(W_ - 3), Z(n1 - 4), X(W_) + 26, Z(n1 + 2), r=9); h.globo("9", X(W_ / 2), Z(T["visor"]["z"]), X(W_) + 26, Z(T["visor"]["z"] - 6), r=9)
+h.globo("4", X(W_ / 2 + 3), Z(T["tornillo"]["z"]), X(W_) + 26, Z(T["tornillo"]["z"] + 8), r=9)
 
-# ================= CORTE A-A =================
-CX, CY = 470, 120
-h.titulo(CX, 62, "CORTE A-A", "ESC. 5:2 - FUSIBLE EN LA TAPA")
-d = "M" + " L".join(f"{CX + y * e:.1f},{CY + (H_ - z) * e:.1f}" for y, z in prof) + " Z"
-h.path(d, "url(#ANSI31)", K, 1.6)
-# hueco interior de la tapa + fusible (eje vertical)
-h.rect(CX + (YN - 6) * e, CY + (H_ - ZN1 + 2) * e, (D - YN + 4) * e, (ZN1 - ZN0 - 4) * e, "#fff", K, .8)
-fz0, fz1 = 21, 59; fy = 52.5
-h.rect(CX + (fy - 5.15) * e, CY + (H_ - fz1) * e, 10.3 * e, 38 * e, "#fff", K, 1.1)
-for zc in (fz0, fz1 - 6): h.rect(CX + (fy - 5.15) * e, CY + (H_ - zc - 6) * e, 10.3 * e, 6 * e, "url(#cuH)", K, .7)
-h.ln(CX + fy * e, CY + (H_ - fz1 - 4) * e, CX + fy * e, CY + (H_ - fz0 + 4) * e, K, .4, h.EJE)
-# contactos (pinzas) y bornes de cable
-for zc in (fz0 - 2, fz1 + 2):
-    h.rect(CX + (YN - 14) * e, CY + (H_ - zc) * e - 2, 14 * e + (fy - YN - 5) * e, 4, "url(#cuH)", K, .6)
-for zz in (8, H_ - 8):
-    h.rect(CX + 8 * e, CY + (H_ - zz - 5) * e, 14 * e, 10 * e, "#fff", K, .8)
-    h.rect(CX + 13 * e, CY + (H_ - zz - 13) * e if zz > 40 else CY + (H_ - zz + 5) * e, 4 * e, 8 * e, "#fff", K, .6)
-    h.rect(CX - 26, CY + (H_ - zz) * e - 4, 26 + 12 * e, 8, "#fff", K, .8)
-h.dimV(CX + D * e + 20, CY + (H_ - fz1) * e, CY + (H_ - fz0) * e, "38", ext=CX + (fy + 5.15) * e)
-h.globo("4", CX + fy * e, CY + (H_ - 40) * e, CX + D * e + 54, CY + 110)
-h.globo("5", CX - 20, CY + 8 * e + 0, CX - 30, CY + H_ * e + 30)
-h.txt(CX - 20, CY + H_ * e + 60, "CABLE CON PUNTERA (ENTRA Y SALE)", 9.5, 400, G)
+# =============== 2. PERFIL (CARRO CERRADO) ===============
+vp = Vista(h, 205, OY, e)
+h.titulo(178, 62, "PERFIL", "CARRO CERRADO · CABLES ARRIBA Y ABAJO")
+portaPerfil(vp, T, F)
+vp.cotaH(0, D_, -15, "61", zext=0)
+vp.cotaH(0, T["Dr"], -21, "44 (*)", zext=1, c=OR)
+vp.cotaV(D_ + 6, n0, n1, "45 (DIN 43880)", yext=D_ + .5)
+vp.cotaV(-11, T["zM"] - 17.5, T["zM"] + 17.5, "35", yext=-7.5)
+vp.cotaV(D_ + 15, 0, H_, "79,5", yext=T["Dr"] + 1)
+h.globo("10", *vp.p(-4, T["zM"] + 10), vp.p(-14, T["zM"] + 30)[0], vp.p(-14, T["zM"] + 30)[1], r=9)
+h.globo("12", *vp.p(8, -1.2), vp.p(-12, -6)[0], vp.p(-12, -6)[1], r=9)
+h.globo("13", *vp.p(31.7, H_ + 12), vp.p(14, H_ + 8)[0], vp.p(14, H_ + 8)[1], r=9)
 
-# ================= D1 FUSIBLE =================
-DX, DY = 470, 410
-h.titulo(DX, DY, "D1 - FUSIBLE CILINDRICO 10 x 38 gG", "ESC. 4:1 - CUERPO CERAMICO, CASQUILLOS DE LATON NIQUELADO (*)")
-k4 = 4.0; fx, fyy = DX + 40, DY + 72
-h.rect(fx + 6 * k4, fyy - 10.3 * k4 / 2 + 2, (38 - 12) * k4, 10.3 * k4 - 4, "#fff", K, 1)
-for xx in (fx, fx + 32 * k4): h.rect(xx, fyy - 10.3 * k4 / 2, 6 * k4, 10.3 * k4, "url(#cuH)", K, 1)
-h.ln(fx - 10, fyy, fx + 38 * k4 + 10, fyy, K, .4, h.EJE)
-h.txt(fx + 19 * k4, fyy + 4, "gG 2A 500V", 10, 700, K, "middle")
-h.dimH(fyy + 10.3 * k4 / 2 + 22, fx, fx + 38 * k4, "38", ext=fyy + 10.3 * k4 / 2 + 2)
-h.dimV(fx + 38 * k4 + 22, fyy - 10.3 * k4 / 2, fyy + 10.3 * k4 / 2, "Ø10,3", ext=fx + 38 * k4 + 2)
-h.dimH(fyy - 10.3 * k4 / 2 - 14, fx, fx + 6 * k4, "", ext=fyy - 10.3 * k4 / 2 - 2)
-h.txt(fx + 3 * k4, fyy - 10.3 * k4 / 2 - 20, "6 (*)", 10.5, 400, OR, "middle")
+# =============== 3. CORTE A-A (plano medio) ===============
+vc = Vista(h, 492, OY, e)
+h.titulo(462, 62, "CORTE A-A", "PLANO MEDIO · BORNE, FLEJE, PINZA, CARRO, FUSIBLE")
+portaCorte(vc, T, F)
+a, b = vc.p(T["Dr"] - 4, T["pinza"]["zS"]), vc.p(D_ + 4, T["pinza"]["zS"]); lineaCorte(h, a[0] - 8, a[1], b[0] + 6, b[1], "C")
+vc.cotaV(D_ + 7, T["fus"]["z0"], T["fus"]["z1"], "38", yext=T["fus"]["y"] + 5.4)
+for n, (y, z), (gx, gy) in [("1", (12, 40), (446, 120)), ("3", (27.5, 70), (446, 150)), ("5", (29, 60), (446, 180)), ("6", (T["Dr"] + 2, T["pinza"]["zS"] + 2), (710, 120)),
+                            ("7", (T["fus"]["y"] + 2, T["zM"] + 6), (710, 150)), ("8", (T["fus"]["y"], T["fus"]["z1"] - 4), (710, 180)), ("2", (D_ - 2.5, T["zM"] - 8), (710, 290)),
+                            ("11", T["pivote"], (710, 330)), ("14", (31.7, -12), (446, 380)), ("4", (40, T["H"] - T["tornillo"]["z"]), (446, 340))]:
+    h.globo(n, *vc.p(y, z), gx, gy, r=9)
 
-# ================= TABLA DE CODIGOS =================
+# =============== 4. PERFIL CON EL CARRO ABIERTO ===============
+e2 = 2.0; va = Vista(h, 64, 646, e2)
+h.titulo(40, 456, "CARRO ABIERTO", f"ESC. 2:1 · GIRA {T['abre']}° (*) Y SACA EL FUSIBLE")
+portaPerfil(va, T, F, abierto=True, cables=False)
+tip = rot(T["carro"][5], T["pivote"], T["abre"]); a = va.p(*tip); h.txt(a[0] + 8, a[1], f"{T['abre']}° (*)", 10, 700, OR)
+h.txt(*va.p(T["Dr"] + 4, 4), "CORTA EL CIRCUITO AL ABRIR", 9, 400, G)
+
+# =============== 5. D1 · FUSIBLE 10×38 EN CORTE ===============
+k = 4.2; vd = Vista(h, 350, 0, k)
+h.titulo(300, 456, "D1 - FUSIBLE 10 x 38 gG EN CORTE", "ESC. 4:1 · IEC 60269-2")
+# lo dibujo horizontal: uso una vista girada (z del fusible → x de la hoja)
+class Vh(Vista):
+    def p(s, y, z): return (s.ox + z * s.e, s.oy - y * s.e)
+vh = Vh(h, 322, 560, k)
+fusibleLong(vh, F, 0, 0)
+vh.cotaV = None
+h.dimH(560 + F["D"] / 2 * k + 16, 322, 322 + 38 * k, "38", ext=560 + F["D"] / 2 * k + 2)
+h.dimV(322 + 38 * k + 22, 560 - F["D"] / 2 * k, 560 + F["D"] / 2 * k, "Ø10,3", ext=322 + 38 * k + 2)
+h.dimH(560 - F["D"] / 2 * k - 14, 322, 322 + F["cap"] * k, "", ext=560 - F["D"] / 2 * k - 2); h.txt(322 + F["cap"] * k / 2, 560 - F["D"] / 2 * k - 20, "10 (*)", 9.5, 400, OR, "middle")
+h.dimV(322 - 12, 560 - F["tubo"] / 2 * k, 560 + F["tubo"] / 2 * k, "9,7 (*)", ext=322 + 12 * k, c=OR)
+for t, (zz, yy), (tx, ty) in [("CASQUILLO LATON NIQ.", (36, 4.6), (470, 520)), ("TUBO CERAMICO", (25, -4.4), (322, 616)), ("ARENA DE CUARZO", (18, 2.4), (380, 515)),
+                             ("ESTRANGULAMIENTO", (11.75, 0), (322, 632)), ("PUNTO DE ESTAÑO (*)", (19, -.3), (440, 632))]:
+    a = vh.p(yy, zz); llamada(h, a[0], a[1], tx, ty, t, sz=8.5)
+
+# =============== 6. SECCION C-C · PINZA ===============
+h.titulo(660, 456, "SECCION C-C", "ESC. 5:1 · PINZA Y CASQUILLO")
+P = pinzaCorte(h, 700, 520, 5, T)
+llamada(h, *P(T["fD"] / 2 + .3, T["fus"]["y"] - 1), 745, 545, "PINZA (RESORTE)", sz=8.5)
+llamada(h, *P(1.5, T["Dr"] + .5), 745, 610, "FLEJE AL BORNE", sz=8.5)
+llamada(h, *P(2, T["fus"]["y"] + 3), 745, 490, "CASQUILLO 10x38", sz=8.5)
+
+# =============== TABLAS ===============
+TY = 668
 filas = [["CODIGO", "DESCRIPCION (CATALOGO DEL PAÑOL)", "UN.", "DATO (FICHA)"]]
 dato = {"3053": "2 POR COLUMNA PRFV", "3001": "32 A · 690 V", "3016": "1 A", "3017": "2 A · EN USO", "3073": "4 A · EN USO", "3013": "AMPERAJE (*)"}
 for c in [3053, 3001, 3017, 3073, 3016, 3013]:
-    r = cat(c, 66); filas.append([r[0], r[1], r[2], dato[str(c)]])
-TY = 520
-yt = h.tabla(40, TY, [(52, "c", True), (470, "l", False), (40, "c", False), (238, "l", False)], filas, rowh=17, titulo="CODIGOS DEL PAÑOL (6)", colores=colorOR)
-# cuadro de fusibles por columna (CLAUDE.md §11.3)
+    r = cat(c, 54); filas.append([r[0], r[1], r[2], dato[str(c)]])
+yt = h.tabla(40, TY, [(52, "c", True), (370, "l", False), (40, "c", False), (140, "l", False)], filas, rowh=15, titulo="CODIGOS DEL PAÑOL (6)", colores=colorOR)
 fc = [["ARTEF.", "S", "T"], ["1", "2 A", "VACIO"], ["2", "2 A", "2 A"], ["3", "4 A", "2 A"], ["4", "4 A", "4 A"]]
-yq = h.tabla(40, yt + 30, [(56, "c", True), (60, "c", True), (60, "c", True)], fc, rowh=17, titulo="FUSIBLES POR COLUMNA (2 A x ART.)")
-h.txt(40, yq + 14, "2 A = 3017 · 4 A = 3073", 10, 400, G)
-ydat = bloque(h, 300, yt + 30, "DATOS TECNICOS", [
-    "PORTAFUSIBLE MODULAR DE 1 POLO, 17,5 mm DE ANCHO, PARA RIEL NS35.",
-    "TAPA REBATIBLE: AL ABRIRLA SACA EL FUSIBLE Y CORTA EL CIRCUITO.",
+yq = h.tabla(40, yt + 22, [(56, "c", True), (60, "c", True), (60, "c", True)], fc, rowh=15, titulo="FUSIBLES POR COLUMNA")
+h.txt(40, yq + 13, "2 A = 3017 · 4 A = 3073", 9.5, 400, G)
+ydat = bloque(h, 250, yt + 22, "DATOS TECNICOS", [
+    "PORTAFUSIBLE SECCIONABLE DE 1 POLO, 1 MODULO (17,5 mm), RIEL NS35.",
+    "CARRO BASCULANTE: AL ABRIRLO SACA EL FUSIBLE DE LAS PINZAS Y CORTA.",
     "FUSIBLE CILINDRICO gG Ø10,3 x 38 · 500 V · 120 kA (MERSEN FR10GG).",
     "BASE 3001: 32 A · 690 V.",
-    "SECCION DE CABLE QUE TOMAN LOS BORNES Y PAR DE APRIETE (*)"], w=520)
-yu = bloque(h, 40, max(ydat, yq + 22) + 10, "DONDE SE USA", [
+    "SECCION QUE TOMAN LOS BORNES Y PAR DE APRIETE (*)"], w=560, sz=10, lh=13.5)
+rayadosRef(h, 650, TY, ["PLAS", "CU", "MET", "CER", "ARE"], cols=1, dx=200)
+yu = bloque(h, 40, max(ydat, yq + 22) + 14, "DONDE SE USA", [
     "TC-PRFV-01 / 02: 2 PORTAFUSIBLES (S Y T) EN EL TABLERITO DE ARRIBA; DE AHI SALE EL 3x1,5 (6001) A CADA LUMINARIA.",
-    "COLUMNA METALICA: 1 PORTAFUSIBLE POR LUMINARIA. GUIA «CAJA DE COLUMNA PRFV».",
-    "CALCULADORA: 2 A POR ARTEFACTO; SIMPLE 2 + VACIO · DOBLE 2+2 · TRIPLE 4+2 · CUADRUPLE 4+4."], w=790)
-notasW(h, 40, yu + 12, [
-    "COTAS EN mm. 17,5 x 79,5 x 61 = SCHNEIDER DF101; Ø10,3 x 38 = MERSEN FR10GG (FICHA DE LA APP).",
-    "(*) FORMA DEL PERFIL (CUELLO 17 x 45), VISOR Y LARGO DE LOS CASQUILLOS (6): A CONFIRMAR CON EL FABRICANTE.",
+    "COLUMNA METALICA: 1 PORTAFUSIBLE POR LUMINARIA. CALCULADORA: 2 A POR ARTEFACTO (SIMPLE 2+0 · DOBLE 2+2 · TRIPLE 4+2 · CUADRUPLE 4+4)."], w=800, sz=10, lh=13.5)
+notasW(h, 40, yu + 8, [
+    "COTAS EN mm. 17,5 x 79,5 x 61 = SCHNEIDER DF101 (FICHA DE LA APP); OTRA FICHA DE SCHNEIDER DICE 88,5 x 64 (*). Ø10,3 x 38 = MERSEN FR10GG.",
+    "CUELLO DE 45 mm Y MODULO DE 17,5 mm: DIN 43880. (*) HOMBRO (44), CARRO, PIVOTE, PINZAS, BORNES Y ANGULO DE APERTURA: PROPORCIONALES, A CONFIRMAR.",
+    "(*) CASQUILLO: 10 mm EN LA FICHA DE UN 10 x 38 aM; OTRA FICHA DA 8,5. TUBO 9,7, PARED Y FORMA DEL ELEMENTO: ESQUEMATICOS (IEC 60269-2).",
     "EL FUSIBLE 3014 (8,5 x 31,5) NO ENTRA EN LA TABAQUERA 10 x 38 (3053). VER MAT-FUSIBLES-2.",
-    "(*) AP-CC-014 PIDE 3 PORTAFUSIBLES 8,5 x 31,5 CON 4 A POR FASE; LA OBRA Y LOS PROYECTOS 2026 USAN 2 TABAQUERAS 10 x 38 CON 2 A POR ARTEFACTO.",
-    "(*) 3013 «FUSIBLE CERAMICO 10 x 38» SIN AMPERAJE EN EL CATALOGO: A CONFIRMAR."], w=800)
+    "(*) AP-CC-014 PIDE 3 PORTAFUSIBLES 8,5 x 31,5 CON 4 A POR FASE; LA OBRA 2026 USA 2 TABAQUERAS 10 x 38 CON 2 A POR ARTEFACTO.",
+    "(*) 3013 «FUSIBLE CERAMICO 10 x 38» SIN AMPERAJE EN EL CATALOGO. INDICADOR (9): SOLO EN LA VERSION CON LAMPARA (*)."], w=800, lh=14)
 
-# ================= 3D =================
-h.titulo(890, 62, "VISTA 3D - DOS PORTAFUSIBLES EN EL RIEL (S Y T)", "EL DE LA DERECHA CON LA TAPA ABIERTA: SE VE EL FUSIBLE 10 x 38")
-h.iso(3.5, 1150, 560)
-placaV(h, -8, 72, -25, 105)
-riel3dV(h, -6, 70, H_ / 2)
-BODY = ("#fbfbf8", "#e9e8e2", "#c9c7bd")
-# el aparato «de pie»: y = profundidad (frente en +y), z = alto. Lo apoyo con la espalda en la placa: giro el perfil (y,z)
-def aparato(x0, abierto):
-    prisma(h, [(0, 0), (YN, 0), (YN, H_), (0, H_)], x0, x0 + W, BODY, "#333", .6)
-    for zz in (8, H_ - 8):
-        q = [(x0 + 3, YN, zz - 6), (x0 + W - 3, YN, zz - 6), (x0 + W - 3, YN, zz + 6), (x0 + 3, YN, zz + 6)]
-        poly(h, q, "#22252a", "#000", .4); tornilloY(h, x0 + W / 2, YN + .01, zz, 2.8)
-    tapa = [(YN, ZN0), (D, ZN0), (D, ZN1), (YN, ZN1)]
-    if abierto:
-        # hueco donde va la tapa, contactos, y la tapa girada 55° con el fusible
-        q = [(x0 + 2, YN, ZN0), (x0 + W - 2, YN, ZN0), (x0 + W - 2, YN, ZN1), (x0 + 2, YN, ZN1)]
-        poly(h, q, "#3a3d42", "#000", .4)
-        for zc in (ZN0 + 3, ZN1 - 3):
-            q = [(x0 + 4, YN, zc - 1.5), (x0 + W - 4, YN, zc - 1.5), (x0 + W - 4, YN, zc + 1.5), (x0 + 4, YN, zc + 1.5)]; poly(h, q, "url(#bronce)", "#5a3d10", .4)
-        tr = [rot(p, (D, ZN0), 55) for p in tapa]
-        prisma(h, tr, x0 + 1, x0 + W - 1, BODY, "#333", .6)
-        a = rot((52.5, 21), (D, ZN0), 55); b = rot((52.5, 59), (D, ZN0), 55)
-        ya, za = a; yb, zb = b
-        f = lambda t: (x0 + W / 2, ya + (yb - ya) * t, za + (zb - za) * t)
-        cil3(h, f(6 / 38), f(32 / 38), 5.15, "url(#ceram)", "#efe9d6")
-        cil3(h, f(0), f(6 / 38), 5.15, "url(#niq)", "#d6dbe0"); cil3(h, f(32 / 38), f(1), 5.15, "url(#niq)", "#d6dbe0")
-    else:
-        prisma(h, tapa, x0 + 1, x0 + W - 1, BODY, "#333", .6)
-        q = [(x0 + 4, D, 30), (x0 + W - 4, D, 30), (x0 + W - 4, D, 48), (x0 + 4, D, 48)]; poly(h, q, "#30343a", "#000", .4)
-aparato(0, False)
-aparato(W, True)
-# cables 3x1,5 saliendo por abajo (bornes de abajo)
-for xc, col in ((W / 2, "#1a1a1a"), (W * 1.5, "#c62828")):
-    cil3(h, (xc, YN + 1, 8), (xc, YN + 30, 8), 2.2, col, col)
-h.g3("1", (W / 2, 22, H_), 1430, 150, "CUERPO AISLANTE, 1 POLO")
-h.g3("3", (W * 1.5, YN, H_ - 8), 1430, 200, "BORNE (ARRIBA Y ABAJO)")
-h.g3("2", (W / 2, D, 40), 920, 300, "TAPA REBATIBLE (3053)")
-h.g3("4", (W * 1.5, 75, 52), 1430, 380, "FUSIBLE 10 x 38 gG 2 A (3017)")
-h.g3("6", (60, -2, H_ / 2 + 17), 1430, 560, "RIEL DIN NS35 (2038)")
-h.g3("7", (70, -7.5, 0), 1430, 610, "TABLERITO 80 x 130 (SIN CODIGO)")
-h.g3("5", (W * 1.5, YN + 26, 8), 920, 730, "3 x 1,5 A LA LUMINARIA (6001)")
-# fusible suelto
-h.txt(890, 800, "FUSIBLE CILINDRICO 10 x 38", 12, 700, NV, "start", INT)
-h.iso(3.0, 930, 840)
-cil3(h, (0, 0, 0), (6, 0, 0), 5.15, "url(#niq)", "#d6dbe0"); cil3(h, (6, 0, 0), (32, 0, 0), 5.15, "url(#ceram)", "#efe9d6"); cil3(h, (32, 0, 0), (38, 0, 0), 5.15, "url(#niq)", "#d6dbe0")
-h.txt(1100, 840, "CUERPO CERAMICO · CASQUILLOS METALICOS (*)", 11, 400, K, "start", INT)
-h.txt(1100, 858, "gG · 500 V · 120 kA · 2 A (3017) / 4 A (3073) / 1 A (3016)", 11, 400, K, "start", INT)
-h.txt(890, 990, "FUENTE: FICHA TECNICA DE LA APP (SCHNEIDER DF101, MERSEN FR10GG), CLAUDE.md §11.3 Y CATALOGO DEL PAÑOL.", 10.5, 400, G, "start", INT)
-rotuloMat(h, "MAT-FUSIBLES-1", "PORTAFUSIBLE 10 x 38", "Y FUSIBLE CILINDRICO", "FRENTE, PERFIL, CORTE, DETALLE, CODIGOS Y 3D", "5:2 · 4:1", "3D S/E")
+# =============== 3D ===============
+h.titulo(890, 62, "VISTA 3D - DOS TABAQUERAS 10 x 38 EN EL RIEL", "LA DE ADELANTE CORTADA A CUARTO; LA DE ATRAS CON EL CARRO ABIERTO Y EL FUSIBLE AFUERA")
+A = img3d(h, "tab_par", 960, 82, 520)
+columna(h, A, [("cuerpo", "1", "CUERPO DE PA"), ("jaula", "3", "JAULA"), ("tornillo", "4", "TORNILLO"), ("fleje", "5", "FLEJE DE COBRE"),
+               ("pinza", "6", "PINZA"), ("arena", "7", "ARENA"), ("casquillo", "8", "CASQUILLO"), ("visor", "9", "INDICADOR (*)"), ("manija", "2", "CARRO / MANIJA"),
+               ("traba", "12", "TRABA DEL RIEL")], 1500, 110, 560)
+columna(h, A, [("cableS", "13", "CABLE CON PUNTERA"), ("fusSuelto", "15", "FUSIBLE 10x38 gG 2A"), ("pivote", "11", "PIVOTE"), ("riel", "10", "RIEL NS35")],
+        925, 140, 560, lado="der")
+h.txt(890, 620, "FUSIBLE CILINDRICO 10 x 38 gG POR DENTRO (IEC 60269-2)", 11, 700, NV, "start", INT)
+A2 = img3d(h, "fus10x38", 900, 628, 500)
+columna(h, A2, [("casquillo", "8", "CASQUILLO LATON NIQUELADO"), ("tubo", "", "TUBO CERAMICO"), ("arena", "7", "ARENA DE CUARZO"),
+                ("elemento", "", "ELEMENTO DE PLATA"), ("muesca", "", "ESTRANGULAMIENTO"), ("estano", "", "PUNTO DE ESTAÑO (*)"), ("soldadura", "", "SOLDADURA AL CASQUILLO"),
+                ("entero", "", "4 A (3073) ENTERO")], 1415, 640, 880, paso=25)
+h.txt(890, 1012, "RENDER: three.js (r3d/escenas/tab_par.mjs, fus10x38.mjs) CON LOS MISMOS PERFILES DEL PLANO. FUENTES: r3d/FUENTES.md", 9.5, 400, G, "start", INT)
+rotuloMat(h, "MAT-FUSIBLES-1", "PORTAFUSIBLE 10 x 38", "Y FUSIBLE CILINDRICO", "VISTAS, CORTES A-A Y C-C, DETALLE D1 Y 3D", "VARIAS", "INDICADAS · 3D S/E", rev="B")
 h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_fusibles_1.svg"))

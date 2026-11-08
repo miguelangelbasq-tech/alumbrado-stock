@@ -1,120 +1,95 @@
-"""MAT-VINCULOS-2 · Vínculo octogonal (6016) y medio vínculo octogonal (6013), AP-C-011.
-Datos: FICHAS_TEC.vinculos (tabla: 6016 / 6013 → AP-C-011), FAMILIAS_MAT.vinculos, catálogo del pañol, hoja aprobada AP-C-011
-(ítems 10.21 / 10.22, 4 y 2 artefactos, brazo «s/plano»: la calculadora usa 0,40). La app NO tiene medidas de esta pieza: todo es ESQUEMA (*)."""
-from ilukit import *
-h = nueva(); m = h.m
-AP = 250; LB = 400                      # apotema del aro (*) y brazo (*) → 650 del eje (*)
+"""MAT-VINCULOS-2 (rev. B) · Vínculo octogonal (6016) y medio vínculo octogonal (6013), AP-C-011.
+Geometría: r3d/piezas/perfiles_col.mjs (VIN.oct) → perfiles_col.json; 3D: r3d/out/col_vin2.png.
+Datos: FICHAS_TEC.vinculos (6016 / 6013 → AP-C-011), catálogo del pañol, hoja aprobada AP-C-011 (ítems 10.21 / 10.22, 4 y 2 artefactos, brazo
+«s/plano»: la calculadora usa 0,40). La app NO tiene medidas de esta pieza y la web tampoco: todo es ESQUEMA (*)."""
+from colkit import *
+
+h = nueva3()
+O, Cp, Br = VIN["oct"], VIN["cap"], VIN["brazo"]
+AP, LB = O["ap"], O["brazo"]; Ro = AP / math.cos(math.radians(22.5))
 
 def octo(cx, cy, q, medio=False):
-    R = AP / math.cos(math.radians(22.5)) * q
-    pts = [(cx + R * math.cos(math.radians(22.5 + 45 * i)), cy - R * math.sin(math.radians(22.5 + 45 * i))) for i in range(8)]
-    if medio:   # medio: la mitad del aro (lado de los 2 brazos) + cierre recto
-        pts = [p for p in pts if p[1] <= cy + 1]
-        h.path("M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in [(cx + AP / math.cos(math.radians(22.5)) * q * 0 + AP * q, cy)] + pts + [(cx - AP * q, cy)]), "none", K, 2.2)
-        h.ln(cx - AP * q, cy, cx + AP * q, cy, K, 1.2)
-    else:
-        h.path("M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in pts) + " Z", "none", K, 2.2)
-    angs = (0, 180) if medio else (0, 90, 180, 270)
-    for g in (0, 90, 180, 270) if not medio else (0, 90, 180):
+    P = [(cx + Ro * q * math.cos(math.radians(22.5 + 45 * i)), cy - Ro * q * math.sin(math.radians(22.5 + 45 * i))) for i in range(9)]
+    w = O["rayo"] / 2 * q * 1.6
+    def barra(a, b, w_, fill="#fff"):
+        dx, dy = b[0] - a[0], b[1] - a[1]; L = math.hypot(dx, dy) or 1; nx, ny = -dy / L * w_, dx / L * w_
+        poly(h, [(a[0] + nx, a[1] + ny), (b[0] + nx, b[1] + ny), (b[0] - nx, b[1] - ny), (a[0] - nx, a[1] - ny)], fill, .9)
+    for i in range(8):
+        if medio and (P[i][1] > cy + 1 or P[i + 1][1] > cy + 1): continue
+        barra(P[i], P[i + 1], w)
+    if medio: barra((cx - AP * q, cy), (cx + AP * q, cy), w); barra(P[0], (cx + AP * q, cy), w); barra(P[3], (cx - AP * q, cy), w)
+    for g in ((0, 90, 180) if medio else (0, 90, 180, 270)):
         dx, dy = math.cos(math.radians(g)), -math.sin(math.radians(g))
-        h.ln(cx + dx * 13 * q * 4, cy + dy * 13 * q * 4, cx + dx * AP * q, cy + dy * AP * q, OR, 1.4)     # rayos (*)
-    for g in angs:
-        dx, dy = math.cos(math.radians(g)), -math.sin(math.radians(g)); nx, ny = -dy, dx; w = 30.15 * q
-        a0, a1 = AP * q, (AP + LB) * q
-        h.path(f"M{cx+dx*a0+nx*w:.1f},{cy+dy*a0+ny*w:.1f} L{cx+dx*a1+nx*w:.1f},{cy+dy*a1+ny*w:.1f} L{cx+dx*a1-nx*w:.1f},{cy+dy*a1-ny*w:.1f} L{cx+dx*a0-nx*w:.1f},{cy+dy*a0-ny*w:.1f} Z", "#fff", K, 1.1)
-        lx, ly = cx + dx * (a1 + 20), cy + dy * (a1 + 20)
-        if abs(dx) > .5: h.rect(lx - 17, ly - 10, 34, 20, "#fff", K, .6, 'stroke-dasharray="3 2"')
-        else: h.rect(lx - 10, ly - 17, 20, 34, "#fff", K, .6, 'stroke-dasharray="3 2"')
-    h.circ(cx, cy, 57 * q * 1.4, "#fff", K, 1.3); h.circ(cx, cy, 2, K, K, 0)
-    return R
+        barra((cx + dx * Cp["D"] / 2 * q, cy + dy * Cp["D"] / 2 * q), (cx + dx * AP * q, cy + dy * AP * q), w, "url(#MET)")
+    for g in ((0, 180) if medio else (0, 90, 180, 270)):
+        dx, dy = math.cos(math.radians(g)), -math.sin(math.radians(g))
+        barra((cx + dx * (AP - 10) * q, cy + dy * (AP - 10) * q), (cx + dx * (AP + LB) * q, cy + dy * (AP + LB) * q), Br["D"] / 2 * q)
+        lx, ly = cx + dx * (AP + LB + 60) * q, cy + dy * (AP + LB + 60) * q
+        if abs(dx) > .5: h.rect(lx - 15, ly - 9, 30, 18, "#fff", G, .6, 'stroke-dasharray="3 2"')
+        else: h.rect(lx - 9, ly - 15, 18, 30, "#fff", G, .6, 'stroke-dasharray="3 2"')
+    h.circ(cx, cy, Cp["D"] / 2 * q, "#fff", K, 1.3); h.circ(cx, cy, 1.8, K, K, 0)
+    return P
 
-# ======================= VISTA DESDE ARRIBA · OCTOGONAL (1:20 → 0,2 px/mm)
-q = .2; cx, cy = 245, 285
-h.titulo(40, 62, "VISTA DESDE ARRIBA - OCTOGONAL (6016)", "ESC. 1:20 - ESQUEMA (*) - 4 ARTEFACTOS")
-R = octo(cx, cy, q)
-h.dimH(cy + 34, cx, cx + (AP + LB) * q, "650 (*)", ext=cy + 8, c=OR)
-h.txt(cx + 60, cy - 60, "APOTEMA 250 (*)", 9.5, 400, OR)
-corteMarca(h, cx - (AP + LB) * q - 70, cy, cx + (AP + LB) * q + 70, cy, "A")
-h.globo("1", cx + R * .92 * math.cos(math.radians(60)), cy - R * .92 * math.sin(math.radians(60)), cx + 150, cy - 175)
-h.globo("2", cx + AP * q * .6, cy, cx + 150, cy - 140, OR); h.globo("3", cx, cy - (AP + 200) * q, cx - 150, cy - 175)
-h.globo("4", cx - 6, cy + 8, cx - 150, cy + 110)
+# ======================= 1. ARRIBA · OCTOGONAL (1:20)
+q = .2; cx, cy = 230, 285
+h.titulo(40, 62, "DESDE ARRIBA - OCTOGONAL (6016)", "ESC. 1:20 · ESQUEMA (*) · 4 ARTEFACTOS")
+P = octo(cx, cy, q)
+h.ln(cx - (AP + LB + 90) * q, cy, cx + (AP + LB + 90) * q, cy, K, .4, h.EJE); h.ln(cx, cy - (AP + LB + 90) * q, cx, cy + (AP + LB + 90) * q, K, .4, h.EJE)
+h.dimH(cy + (AP + LB) * q + 30, cx, cx + (AP + LB) * q, f"{AP + LB} (*)", ext=cy + 8, c=OR)
+h.dimH(cy + (AP + LB) * q + 14, cx, cx + AP * q, f"APOTEMA {AP} (*)", ext=cy + 8, c=OR)
+lineaCorte(h, cx - (AP + LB) * q - 30, cy - 4, cx + (AP + LB) * q + 30, cy - 4, "A")
+h.globo("1", *P[1], cx + 160, cy - 160, r=9); h.globo("2", cx, cy - AP * q * .55, cx - 160, cy - 160, OR, r=9)
+h.globo("3", cx - (AP + LB * .6) * q, cy, cx - 165, cy + 60, r=9); h.globo("4", cx + 6, cy + 8, cx + 130, cy + 150, r=9)
 
-# ======================= VISTA DESDE ARRIBA · MEDIO (1:20)
-h.titulo(500, 62, "MEDIO OCTOGONAL (6013)", "ESC. 1:20 - ESQUEMA (*) - 2 ARTEFACTOS")
-octo(670, 300, q, medio=True)
-h.txt(670, 420, "LOS 2 BRAZOS OPUESTOS · 180°", 10, 700, K, "middle")
+# ======================= 2. ARRIBA · MEDIO (1:20)
+h.titulo(470, 62, "MEDIO OCTOGONAL (6013)", "ESC. 1:20 · ESQUEMA (*) · 2 ARTEFACTOS")
+octo(650, 285, q, medio=True)
+h.txt(650, 335, "2 BRAZOS OPUESTOS · 180° (*)", 9.5, 700, K, "middle")
+h.txt(650, 350, "CIERRE RECTO DEL MEDIO ARO (*)", 9, 400, OR, "middle")
 
-# ======================= CORTE A-A (lateral) 1:20
-h.titulo(40, 470, "CORTE A-A - LATERAL", "ESC. 1:20 - POR EL EJE Y 2 BRAZOS - ESQUEMA (*)")
-cx2, yp = 245, 600
-h.rect(cx2 - 57 * q, yp, 114 * q, 60, "url(#STEEL)", K, 1)                          # adaptador Ø114 del poste PRFV 10 m (*)
-h.rect(cx2 - 90 * q, yp + 60, 180 * q, 30, "#fff", K, 1.1); h.txt(cx2, yp + 104, "POSTE PRFV 10 m (*)", 9, 700, K, "middle")
-h.rect(cx2 - 65 * q, yp - 200 * q, 130 * q, 260 * q, "#fff", K, 1.4)                # capuchón (*)
-for sx in (-1, 1):
-    h.ln(cx2 + sx * 65 * q, yp - 150 * q, cx2 + sx * AP * q, yp - 150 * q - 4, OR, 1.6)      # rayo (*)
-    h.rect(min(cx2 + sx * AP * q, cx2 + sx * (AP + LB) * q), yp - 150 * q - 6 - 30 * q - 4, LB * q, 60 * q, "#fff", K, 1.1)
-    h.rect(cx2 + sx * AP * q - 4, yp - 150 * q - 20, 8, 28, "#111", K, .5)            # aro en corte
-h.ln(cx2, yp - 90, cx2, yp + 100, K, .4, h.EJE)
-h.dimV(cx2 - (AP + LB) * q - 18, yp - 150 * q - 4, yp, "≈150 (*)", ext=cx2 - 30, c=OR)
-h.globo("3", cx2 + (AP + 200) * q, yp - 150 * q - 10, cx2 + 170, yp - 80); h.globo("1", cx2 + AP * q, yp - 150 * q - 18, cx2 + 140, yp - 110)
-h.globo("4", cx2 + 8, yp - 20, cx2 + 120, yp + 40)
+# ======================= 3. CORTE A-A LATERAL (1:20)
+h.titulo(40, 470, "CORTE A-A - LATERAL", "POR EL EJE Y 2 BRAZOS · ESC. 1:20 · ESQUEMA (*)")
+cx2, yp = 230, 600
+Y = lambda z: yp - z * q
+h.rect(cx2 - 57 * q, Y(0), 114 * q, 60, "url(#MET)", K, 1); h.rect(cx2 - 90 * q, Y(0) + 60, 180 * q, 30, "url(#PRFV)", K, 1.1)
+h.txt(cx2 + 30, Y(0) + 78, "POSTE PRFV 10 m + ADAPTADOR Ø114 (*)", 8.5, 400, OR)
+for s in (-1, 1):
+    poly(h, [(cx2 + s * Cp["D"] / 2 * q, Y(-60)), (cx2 + s * Cp["D"] / 2 * q, Y(Cp["H"] - 60)), (cx2 + s * (Cp["D"] / 2 - Cp["e"]) * q, Y(Cp["H"] - 60)), (cx2 + s * (Cp["D"] / 2 - Cp["e"]) * q, Y(-60))], "url(#MET)", .9)
+    h.rect(min(cx2 + s * Cp["D"] / 2 * q, cx2 + s * AP * q), Y(O["z"]) - O["rayo"] / 2 * q * 1.6, abs(AP - Cp["D"] / 2) * q, O["rayo"] * q * 1.6, "#fff", K, .9)
+    h.circ(cx2 + s * AP * q, Y(O["z"]), O["rayo"] / 2 * q * 1.8, "url(#MET)", K, .9)
+    x0, x1 = cx2 + s * (AP - 10) * q, cx2 + s * (AP + LB) * q; dz = LB * math.tan(math.radians(5)) * q
+    poly(h, [(x0, Y(O["z"]) - Br["D"] / 2 * q), (x1, Y(O["z"]) - Br["D"] / 2 * q - dz), (x1, Y(O["z"]) + Br["D"] / 2 * q - dz), (x0, Y(O["z"]) + Br["D"] / 2 * q)], "#fff", 1.1)
+h.rect(cx2 - Cp["D"] / 2 * q, Y(Cp["H"] - 60) - 1.5, Cp["D"] * q, 1.5, "#111", K, .2)
+h.ln(cx2, Y(Cp["H"]) - 20, cx2, Y(0) + 95, K, .4, h.EJE)
+h.dimV(cx2 - (AP + LB) * q - 16, Y(O["z"]), Y(0), f"≈{O['z']} (*)", ext=cx2 - 30, c=OR)
+h.globo("3", cx2 + (AP + 200) * q, Y(O["z"] + 8), cx2 + 170, yp - 95, r=9); h.globo("1", cx2 + AP * q, Y(O["z"]), cx2 + 140, yp - 125, r=9)
+h.globo("4", cx2 + 8, Y(100), cx2 + 110, yp + 30, r=9)
 
-# ======================= TABLAS (columna derecha del plano)
-h.tabla(475, 470, [(62, "c", True), (120, "l", False), (90, "c", False), (93, "c", False)],
-        [("CODIGO", "VINCULO", "ARTEFACTOS", "ITEM VIEJO"), ("6016", "OCTOGONAL", "4", "10.21"), ("6013", "MEDIO OCTOGONAL", "2", "10.22")],
-        rowh=20, titulo="VARIANTES (AP-C-011)")
-textoBloque(h, 475, 580, "DONDE SE USA", [
-    "· AP-C-011: columnas altas y nodos viales.",
-    "· Se dibuja sobre el poste PRFV 10 m",
-    "   (adaptador Ø114) (*): confirmar columna.",
-    "· Sin ítem propio en el Itemizado 2026:",
-    "   cómo se cobra, a confirmar (*).",
-    "· Calculadora: brazo 0,40 para la subida."], sz=10, dy=15)
-y2 = h.codigos(40, 740, [6016, 6013])
-h.datos(40, y2 + 30, [("MATERIAL", "acero galvanizado (*)"), ("ARO", "octogonal, apotema 250 (*)"),
-        ("BRAZOS", "caño Ø60,3 (*), 400 desde el aro (*)"), ("FIJACION LUM.", "bulón pasante 4019 + 4038"),
-        ("FUSIBLES", "4 art.: 4 A + 4 A · 2 art.: 2 A + 2 A")], w=420, c1=110)
-h.lista(485, y2 + 30, "QUE LLEVA (POR VINCULO: OCT. · 1/2)", [
-    "· Luminaria LED 6010: 4 · 2",
-    "· Bulón pasante 4019 + 4038: 4 · 2",
-    "· Cable 3×1,5 (6001): uno por artefacto",
-    "· Prensacable 3/4\" (5029): 4 · 2"], sz=10.5, dy=16)
-h.notas(40, 1040, [
-    "(*) ESQUEMA: LA APP NO TIENE MEDIDAS DEL AP-C-011 (BRAZO «S/PLANO»). ARO, RAYOS, BRAZOS Y ALTURAS: A CONFIRMAR CON EL PLANO.",
+# ======================= TABLAS (derecha)
+yv = tablaD(h, 470, 470, [("CODIGO", "VINCULO", "ARTEF.", "ITEM VIEJO"), ("6016", "OCTOGONAL", "4", "10.21"), ("6013", "MEDIO OCTOGONAL", "2", "10.22")],
+            [(62, "c", True), (130, "l", False), (70, "c", False), (100, "c", False)], "VARIANTES (AP-C-011)", rowh=17)
+bloque(h, 470, yv + 20, "DONDE SE USA", ["AP-C-011: COLUMNAS ALTAS Y NODOS VIALES.", "SE DIBUJA SOBRE EL PRFV 10 m (ADAPTADOR Ø114) (*).",
+       "SIN ITEM PROPIO EN EL ITEMIZADO 2026: COMO SE COBRA (*).", "CALCULADORA: BRAZO 0,40 PARA LA SUBIDA."], w=370, sz=9.5, lh=12.5)
+yc_ = codTabla(h, 40, 735, [6016, 6013, 4019, 4038], {6016: "4 ART. · ITEM 10.21", 6013: "2 ART. · ITEM 10.22", 4019: "1 POR ARTEFACTO", 4038: "1 POR BULON"}, wd=150)
+yd = tablaD(h, 40, yc_ + 20, [("DATO", "VALOR"), ("MATERIAL", "ACERO GALVANIZADO (*)"), ("ARO", "OCTOGONAL, APOTEMA 250 (*)"),
+        ("RAYOS / ARO", "CAÑO Ø26,9 (*)"), ("BRAZOS", "CAÑO Ø60,3, 400 DESDE EL ARO (*)"), ("FIJACION LUM.", "BULON PASANTE 4019 + 4038"),
+        ("FUSIBLES", "4 ART.: 4 A + 4 A · 2 ART.: 2 A + 2 A")], [(110, "l", False), (300, "l", False)], "DATOS TECNICOS", rowh=14)
+ry = rayadosRef(h, 470, yc_ + 20, ["MET", "PRFV"], cols=1, dx=180)
+yl = bloque(h, 470, ry + 8, "QUE LLEVA (OCTOGONAL · MEDIO)", ["LUMINARIA LED 6010: 4 · 2", "BULON 4019 + 4038: 4 · 2", "CABLE 3×1,5 (6001): UNO POR ARTEFACTO",
+            "PRENSACABLE 3/4\": UNO POR ARTEFACTO"], w=370, sz=9.5, lh=12.5)
+notasW(h, 40, max(yd, yl) + 20, [
+    "(*) ESQUEMA: LA APP NO TIENE MEDIDAS DEL AP-C-011 (BRAZO «S/PLANO») Y NO SE ENCONTRO PLANO PUBLICO. ARO, RAYOS, BRAZOS Y ALTURAS: A CONFIRMAR.",
     "OCTOGONAL = 4 ARTEFACTOS (ITEM 10.21, 6016) · MEDIO OCTOGONAL = 2 ARTEFACTOS (ITEM 10.22, 6013).",
-    "LOS CABLES 3×1,5 SUBEN POR ADENTRO DEL POSTE Y DEL ADAPTADOR; CADA UNO VA POR SU RAYO Y SU BRAZO HASTA EL EQUIPO (*).",
-    "LOS RAYOS (NARANJA) NO FIGURAN EN NINGUN DATO DE LA APP (*). FUENTE: LP 21478 (AP-C-011), CATALOGO DEL PAÑOL, HOJA AP-C-011."])
+    "LOS CABLES 3×1,5 SUBEN POR EL POSTE Y EL ADAPTADOR; CADA UNO VA POR SU RAYO Y SU BRAZO HASTA EL EQUIPO (*)."], w=800, lh=13.5)
 
 # ======================= 3D
-def vinculo3d(medio=False):
-    m.cyl([0, 0, -500], [0, 0, -100], 90, "prfv", n=30, pat="fibra"); m.render()
-    m.cyl([0, 0, -100], [0, 0, 0], 57, "galv", n=28); m.render()
-    m.cyl([0, 0, -60], [0, 0, 200], 65, "galv", n=30, capmat="#b8c2ca"); m.render()
-    Ro = AP / math.cos(math.radians(22.5))
-    sides = range(8) if not medio else [i for i in range(8) if math.sin(math.radians(22.5 + 45 * i + 22.5)) >= -0.01]
-    angs_r = (0, 90, 180, 270) if not medio else (0, 90, 180)
-    for g in angs_r:
-        dx, dy = math.cos(math.radians(g)), math.sin(math.radians(g))
-        m.cyl([dx * 60, dy * 60, 150], [dx * AP, dy * AP, 150], 14, "galv", n=12, seg=2)
-    for i in range(8):
-        a0, a1 = math.radians(22.5 + 45 * i), math.radians(22.5 + 45 * (i + 1))
-        p0 = [Ro * math.cos(a0), Ro * math.sin(a0), 150]; p1 = [Ro * math.cos(a1), Ro * math.sin(a1), 150]
-        if medio and (p0[1] < -1 or p1[1] < -1): continue
-        m.cyl(p0, p1, 16, "galv", n=12, seg=2)
-    if medio: m.cyl([AP, 0, 150], [-AP, 0, 150], 14, "galv", n=12, seg=3)
-    m.render()
-    for g in ((0, 180) if medio else (0, 90, 180, 270)):
-        dx, dy = math.cos(math.radians(g)), math.sin(math.radians(g))
-        m.cyl([dx * AP, dy * AP, 150], [dx * (AP + LB), dy * (AP + LB), 150 + LB * math.tan(math.radians(5))], 30.15, "galv", n=18, seg=3, capmat="#c9d1d8")
-    m.render()
-h.titulo(890, 62, "VISTA 3D - VINCULO OCTOGONAL (6016)", "GALVANIZADO (*) · ESQUEMA: FORMA A CONFIRMAR CON EL PLANO (*)")
-h.iso(.27, 1170, 360); vinculo3d()
-h.g3("1", (AP * .7, -AP * .7, 150), 1380, 170, "ARO OCTOGONAL (*)", NV)
-h.g3("2", (0, -150, 150), 1380, 210, "RAYOS (*)", OR)
-h.g3("3", (0, -(AP + 250), 160), 1380, 250, "BRAZO CAÑO Ø60,3 (*)", NV)
-h.g3("4", (0, 0, 120), 1380, 470, "CAPUCHON SOBRE ADAPTADOR Ø114", NV)
-h.titulo(890, 640, "VISTA 3D - MEDIO OCTOGONAL (6013)", "2 BRAZOS OPUESTOS · ESQUEMA (*)")
-h.iso(.27, 1170, 860); vinculo3d(medio=True)
-h.txt(1450, 880, "LUMINARIAS NO DIBUJADAS:", 10, 700, G, "start", INT); h.txt(1450, 895, "VER MAT-LUMINARIA_LED-1", 10, 400, G, "start", INT)
-h.rotulo(890, h.H - 150, 750, "MAT-VINCULOS-2", "VINCULO OCTOGONAL", "Y MEDIO OCTOGONAL", "ESQUEMA (*): ARRIBA, CORTE, CODIGOS Y 3D (AP-C-011)", "1:20", "3D S/E")
-guardar(h, "mat_vinculos_2")
+h.titulo(890, 62, "VISTA 3D - OCTOGONAL (6016) Y MEDIO (6013)", "GALVANIZADO (*) · ESQUEMA: FORMA A CONFIRMAR CON EL PLANO (*) · SIN LUMINARIAS")
+A = img3d(h, "col_vin2", 895, 100, 740)
+columna(h, A, [("aro", "1", "ARO OCTOGONAL (*)"), ("rayo", "2", "RAYO (*)"), ("brazo", "3", "BRAZO Ø60,3 (*)"), ("cap", "4", "CAPUCHON (*)"), ("adapt", "", "ADAPTADOR Ø114 (10 m)")],
+        910, 560, 760, paso=30)
+columna(h, A, [("medio", "", "MEDIO ARO + CIERRE (*)"), ("medioBrazo", "", "2 BRAZOS A 180°")], 1400, 560, 700, paso=30)
+h.txt(1030, 130, "6016 · 4 ARTEFACTOS", 12, 700, NV, "middle", INT); h.txt(1480, 130, "6013 · 2 ARTEFACTOS", 12, 700, NV, "middle", INT)
+h.txt(905, 830, "LUMINARIAS: VER MAT-LUMINARIA_LED-1 · BRAZO Y CAPUCHON: VER MAT-VINCULOS-1", 10, 400, G, "start", INT)
+pie3d(h, "", "RENDER three.js: r3d/escenas/col_vin2.mjs · MISMA GEOMETRIA DEL PLANO · FUENTES: r3d/FUENTES_col.md")
+rotuloMat(h, "MAT-VINCULOS-2", "VINCULO OCTOGONAL", "Y MEDIO OCTOGONAL", "ESQUEMA (*): ARRIBA, CORTE A-A, CODIGOS Y 3D", "1:20", "3D S/E", rev="B", fecha="08/11/2026")
+guardarCol(h, "mat_vinculos_2")

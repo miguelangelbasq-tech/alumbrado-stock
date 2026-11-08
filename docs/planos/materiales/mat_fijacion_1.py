@@ -1,132 +1,122 @@
-import math, sys, os
+"""MAT-FIJACION-1 (rev. B) · Precintos nylon 66 200 × 4,5 (4029) y 250 × 4,5 negro (4030), cinta aisladora 19 mm × 20 m (4021),
+soporte para caños (4033), tornillo con fisher n° 8 (4035), alambre para ataduras (1001) y pintura gris (9002).
+Plano y 3D con las mismas medidas (perfiles_civil.json: PREC, FISHER, CINTA, ALAMBRE). 3D: r3d/out/civil_fijacion.png, civil_precinto.png, civil_fisher.png.
+Fuentes: ficha de la app (precintos nylon 66 de 200 y 250 × 4,5; cinta 19 mm × 20 m), HellermannTyton T50R (200 × 4,6 · 225 N · −40 a 85 °C),
+Fischer SX 8 × 40 (broca 8, taladro 50, tornillo 4,5–6), Easy (taco S8 + tornillo 5 × 45), CLAUDE.md §11.3 (alambre). Lo que no está: naranja (*)."""
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from mk_obra import *
+from civilkit import *
 
-h = HojaO()
-COD = [4029, 4030, 4021, 4033, 4035, 1001, 9002]
-h.check_codigos(COD)
+P = PC["PREC"]; F = PC["FISHER"]; CI = PC["CINTA"]; AL = PC["ALAMBRE"]
+h = nuevaC()
 
-# ============ A · PRECINTO
-h.titulo(40, 62, "PRECINTO DE NYLON 66 (4029 / 4030) · VISTA", "S/E · LARGO 200 / 250 × ANCHO 4,5 · CABEZA CON TRABA (TRINQUETE)")
-px, py = 70, 130
-h.rect(px, py - 12, 28, 30, "#fff", K, 1.3); h.rect(px + 7, py - 5, 14, 16, "#fff", K, .8)
-h.path(f"M{px+28},{py-3} H{px+680} l14,6 l-14,6 H{px+28} Z", "#fff", K, 1.1)
-for q in range(0, 120): h.ln(px + 50 + q * 5, py - 3, px + 50 + q * 5, py + 9, K, .4)
-h.dimH(py + 44, px, px + 694, "LARGO 200 (4029) · 250 (4030)", ext=py + 18)
-h.dimV(px + 720, py - 3, py + 9, "4,5", ext=px + 694)
-h.llamadaDet(px + 14, py + 3, 22, "D1")
-# D1 cabeza en corte
-h.titulo(40, 230, "D1 · CABEZA EN CORTE", "S/E · LOS DIENTES TRABAN Y NO SE AFLOJA (*)")
-dx, dy = 70, 270
-h.rect(dx, dy, 90, 70, "url(#PLAS)", K, 1.2); h.rect(dx + 30, dy, 30, 70, "#fff", K, .8)
-h.path(f"M{dx+34},{dy+20} l14,10 l-14,4 z", K, K, .4)
-for q in range(5): h.path(f"M{dx+60},{dy+6+q*12} l-6,6 l6,0 z", K, K, .3)
-h.flecha_llamada(dx + 42, dy + 28, dx + 140, dy + 20, "UÑA (TRABA)", 10, "start")
-h.flecha_llamada(dx + 57, dy + 50, dx + 140, dy + 56, "DIENTES DE LA TIRA", 10, "start")
+# =============== 1. PRECINTO · VISTA ===============
+h.titulo(40, 62, "PRECINTO NYLON 66 (4029 / 4030) · VISTA DE ARRIBA Y DE COSTADO", "ESC. 1:1,25 · 200 (250) × 4,5 · CABEZA CON UÑA DE TRABA")
+k = 3.2; px, py = 70, 140
+cab = P["cab"]
+h.rect(px, py - cab[2] / 2 * k, cab[0] * k, cab[2] * k, "#fff", K, 1.2); h.rect(px + 2.5 * k, py - P["w"] / 2 * k + .5, 1.6 * k, P["w"] * k - 1, "#fff", K, .7)
+h.path(f"M{px + cab[0] * k},{py - P['w'] / 2 * k} H{px + (P['L'] - 12) * k} L{px + P['L'] * k},{py - P['w'] / 2 * k + 3} V{py + P['w'] / 2 * k - 3} L{px + (P['L'] - 12) * k},{py + P['w'] / 2 * k} H{px + cab[0] * k} Z", "#fff", K, 1.1)
 
-# ============ B · CINTA AISLADORA
-h.titulo(420, 230, "CINTA AISLADORA PVC (4021)", "S/E · 19 mm × 20 m · Ø DEL ROLLO (*)")
-cx, cy = 520, 320
-h.circ(cx, cy, 50, "#fff", K, 1.4); h.circ(cx, cy, 30, "#fff", K, .9); h.circ(cx, cy, 26, "url(#WOOD)", K, .6)
-h.rect(640, cy - 50, 19 * 2.4, 100, "url(#PLAS)", K, 1.3)
-h.dimH(cy + 70, 640, 640 + 19 * 2.4, "19", ext=cy + 50)
-h.dimH(cy + 70, cx - 50, cx + 50, "Ø (*)", ext=cy + 50, c=OR)
-h.txt(720, cy + 4, "20 m POR ROLLO", 10.5, 700, K)
+h.dimH(py - cab[2] / 2 * k - 14, px, px + P["L"] * k, "200 (4029) · 250 (4030)", ext=py - cab[2] / 2 * k)
+h.dimV(px + P["L"] * k + 16, py - P["w"] / 2 * k, py + P["w"] / 2 * k, "4,5", ext=px + P["L"] * k)
+h.dimV(px - 12, py - cab[2] / 2 * k, py + cab[2] / 2 * k, "7 (*)", ext=px, c=OR)
+# costado
+sy = py + 44
+h.rect(px, sy - cab[1] * k, cab[0] * k, cab[1] * k, "#fff", K, 1.2)
+h.rect(px + cab[0] * k, sy - P["t"] * k, (P["L"] - cab[0]) * k, P["t"] * k, "#fff", K, 1.0)
+h.dimV(px - 12, sy - cab[1] * k, sy, "6 (*)", ext=px, c=OR); h.dimH(sy + 14, px, px + cab[0] * k, "8,2 (*)", ext=sy, c=OR)
+h.dimV(px + 160, sy - P["t"] * k, sy, "", ext=px + 150); h.txt(px + 166, sy - 1, "1,25 (*)", 9, 400, OR)
 
-# ============ C · TORNILLO + FISHER y SOPORTE
-h.titulo(40, 430, "TORNILLO CON FISHER N° 8 (4035) Y SOPORTE PARA CAÑOS (4033)", "S/E · MEDIDAS (*) · EL FISHER (TACO) VA EN EL AGUJERO DE LA PARED")
-tx, ty = 70, 500
-h.rect(tx, ty - 8, 20, 70, "url(#ANSI31)", K, 1)                       # pared
-h.rect(tx + 20, ty - 8, 4, 70, "#fff", K, .4)
-h.path(f"M{tx+24},{ty+10} h80 l8,6 v4 l-8,6 h-80 z", "url(#PLAS)", K, 1)     # taco
-h.path(f"M{tx+4},{ty+20} h120 l10,3 l-10,3 h-120 z", "url(#STEEL)", K, 1)   # tornillo
-h.rect(tx - 10, ty + 10, 14, 26, "#fff", K, 1.2)                             # cabeza
-h.flecha_llamada(tx + 80, ty + 12, tx + 160, ty - 10, "FISHER N° 8 (*)", 10, "start", OR)
-h.flecha_llamada(tx + 120, ty + 23, tx + 200, ty + 46, "TORNILLO (*)", 10, "start", OR)
-h.dimH(ty + 80, tx + 24, tx + 112, "L TACO (*)", ext=ty + 36, c=OR)
-# soporte (abrazadera de 1 ala) con caño
-sx, sy = 470, 520
-h.rect(sx - 10, sy + 40, 260, 14, "url(#ANSI31)", K, 1)
-h.circ(sx + 130, sy + 10, 28, "#fff", K, 1)
-h.path(f"M{sx+60},{sy+40} V{sy+34} H{sx+98} A32,32 0 1 1 {sx+162},{sy+34} V{sy+40} h-4 v-2 A28,28 0 1 0 {sx+102},{sy+38} v2 Z", "url(#STEEL)", K, 1)
-h.rect(sx + 70, sy + 30, 8, 24, K, K, .3)
-h.txt(sx + 130, sy + 14, "CAÑO", 9, 400, G, "middle")
-h.flecha_llamada(sx + 160, sy - 10, sx + 210, sy - 30, "SOPORTE (4033)", 10, "start")
-h.flecha_llamada(sx + 74, sy + 50, sx + 20, sy + 80, "TORNILLO + FISHER", 10, "start")
+# =============== 2. CORTE A-A POR LA CABEZA ===============
+subt(h, 40, 240, "CORTE A-A · CABEZA CERRADA SOBRE LA COLA", "ESC. 8:1 · LA UÑA ENTRA EN EL DENTADO: SUBE, NO BAJA")
+k2 = 11; cx0, cy0 = 250, 380
+def X(x): return cx0 + x * k2
+def Y(z): return cy0 - z * k2
+x0, x1 = -2.9, -2.9 + cab[0]
+h.path(f"M{X(x0)},{Y(0)} H{X(-.05)} V{Y(cab[1])} H{X(x0)} Z M{X(1.65)},{Y(0)} H{X(x1)} V{Y(cab[1])} H{X(1.65)} Z", "url(#PLAS)", K, 1.2)
+h.rect(X(-2.3), Y(5.3), 2.25 * k2, 3.6 * k2, "#fff", K, .8)
+una = [(-2.3, 5.3), (-1.5, 5.3), (.8 - P["t"] / 2 - P["diente"] * .2, 2.15), (.8 - P["t"] / 2 - P["diente"] * 1.05, 2.0), (-2.3, 4.6)]
+h.path("M" + " L".join(f"{X(a):.1f},{Y(b):.1f}" for a, b in una) + " Z", "url(#PLAS2)", K, 1.1)
+xs, t, d, p = .8, P["t"], P["diente"], P["pasoD"]
+pts = [(xs + t / 2, -3)] + [(xs + t / 2, 9)]
+dent = []
+z = -3
+while z < 9:
+    dent += [(xs - t / 2, z), (xs - t / 2 - d, z + p * .98)]; z += p
+h.path("M" + " L".join(f"{X(a):.1f},{Y(b):.1f}" for a, b in [(xs + t / 2, -3), (xs + t / 2, 9)] + list(reversed(dent))) + " Z", "url(#PLAS)", K, 1.0)
+h.dimH(Y(cab[1]) - 12, X(x0), X(x1), "8,2 (*)", ext=Y(cab[1]), c=OR)
+h.dimV(X(x1) + 14, Y(0), Y(cab[1]), "6 (*)", ext=X(x1), c=OR)
+h.dimH(Y(-3) + 14, X(xs - t / 2), X(xs + t / 2), "1,25 (*)", ext=Y(-3), c=OR)
+llamada(h, X(-.6), Y(3.6), X(-10), Y(7.5), "UÑA (TRINQUETE)", sz=9, anc="end")
+llamada(h, X(xs - t / 2 - .2), Y(-1.5), X(-8), Y(-3.5), "DENTADO DE LA COLA", sz=9, anc="end")
+llamada(h, X(1.6), Y(7.6), X(5.5), Y(8.8), "COLA (SALE POR ARRIBA)", sz=9)
+llamada(h, X(4), Y(3), X(8.5), Y(1.5), "CABEZA", sz=9)
+h.path(f"M{X(xs + 3.2)},{Y(-1)} V{Y(3)}", "none", OR, 1.6); h.path(f"M{X(xs + 3.2) - 4},{Y(3) + 7} l4,-8 l4,8", OR, OR, .5); h.txt(X(xs + 3.6), Y(1), "TIRA", 9, 700, OR)
 
-# ============ D · ALAMBRE DE ATAR y PINTURA
-h.titulo(40, 650, "ALAMBRE PARA ATADURAS (1001) · ATADURA EN EL AISLADOR", "S/E · GALVANIZADO N° 14 ≈ 25 g/m (*) · 2 m POR ATADURA (CLAUDE.md §11.3)")
-ax, ay = 140, 740
-h.circ(ax, ay, 34, "url(#PORC)", K, 1.2); h.circ(ax, ay, 18, "#fff", K, .8)
-h.ln(ax - 110, ay - 34, ax + 110, ay - 34, K, 3)
-for q in range(-3, 4): h.path(f"M{ax+q*9-5},{ay-42} q5,14 10,0", "none", K, 1)
-h.txt(ax, ay + 56, "AISLADOR MN 16 / MN 17", 10, 700, K, "middle")
-cols = [(200, "l", False), (130, "c", True), (170, "l", False)]
-fil = [["ALAMBRE (CALCULADO)", "CANTIDAD", "CALCULO"], ["POR ATADURA", "2 m", "CLAUDE.md §11.3"], ["PESO POR METRO (N° 14)", "≈ 25 g/m (*)", "A CONFIRMAR"],
-       ["POR AISLADOR", "≈ 0,05 kg (*)", "2 m × 25 g/m"]]
-h.tablaM(300, 690, cols, fil, 19, None)
+# =============== 3. TORNILLO + FISHER EN LA PARED ===============
+subt(h, 450, 240, "TORNILLO + FISHER N° 8 EN LA PARED", "ESC. 2:1 · MEDIO CORTE · SOPORTE 4033 APRETADO")
+k3 = 3.2; fx, fy = 470, 385
+def FX(y): return fx + (y + 8) * k3
+def FY(r): return fy - r * k3
+h.rect(FX(0), FY(25), 15 * k3, 50 * k3, "url(#MORT)", K, 1.0); h.rect(FX(15), FY(25), 47 * k3, 50 * k3, "url(#LAD)", K, 1.0)
+h.rect(FX(0), FY(F["d"] / 2), F["prof"] * k3, F["d"] * k3, "#fff", K, .8)
+h.rect(FX(-1.2), FY(9), 1.2 * k3, 34 * k3, "url(#MET)", K, .9)
+for s in (1, -1):
+    h.path(f"M{FX(1)},{FY(s * (F['d'] / 2 - .15))} H{FX(F['L'] + 1)} V{FY(s * 2.7)} H{FX(11)} V{FY(s * 2.55)} H{FX(1)} Z", "url(#PLAS)", K, .9)
+h.path(f"M{FX(-1.2)},{FY(4.75)} L{FX(-4)},{FY(4.75)} L{FX(-4)},{FY(-4.75)} L{FX(-1.2)},{FY(-4.75)} Z", "url(#MET)", K, .9)
+h.rect(FX(-1.2), FY(2.5), (F["tornillo"][1] - 6) * k3, 5 * k3, "#fff", K, .9)
+for i in range(int((F["tornillo"][1] - 6) / 2.2)): xx = FX(-1.2 + i * 2.2); h.ln(xx, FY(2.5), xx + 1.1 * k3, FY(-2.5), K, .5)
+h.path(f"M{FX(F['tornillo'][1] - 7.2)},{FY(2.5)} L{FX(F['tornillo'][1] - 1)},{FY(0)} L{FX(F['tornillo'][1] - 7.2)},{FY(-2.5)}", "#fff", K, .9)
+h.dimH(FY(25) - 12, FX(0), FX(F["prof"]), "50 (TALADRO)", ext=FY(F["d"] / 2))
+h.dimH(FY(-25) + 14, FX(1), FX(F["L"] + 1), "40 (TACO)", ext=FY(-F["d"] / 2))
+h.dimV(FX(62) + 12, FY(F["d"] / 2), FY(-F["d"] / 2), "Ø8", ext=FX(F["prof"]))
+llamada(h, FX(25), FY(3.5), FX(35), FY(18), "PATAS ABIERTAS", sz=9)
+llamada(h, FX(8), FY(0), FX(-3), FY(-18), "TORNILLO 5 × 45", sz=9, anc="end")
+llamada(h, FX(-1), FY(8), FX(-3), FY(16), "SOPORTE 4033", sz=9, anc="end")
+h.txt(FX(2), FY(-25) + 34, "REVOQUE", 8.5, 400, G); h.txt(FX(30), FY(-25) + 34, "LADRILLO", 8.5, 400, G)
 
-EX = {4029: "200 × 4,5", 4030: "250 × 4,5 · negro", 4021: "19 mm × 20 m", 4033: "medida (*)", 4035: "n° 8", 1001: "≈ 25 g/m (*)", 9002: "envase (*)"}
-y = h.codigos(40, 830, COD, (46, 0, 34), wtot=800, rowh=18, titulo="VARIANTES Y CODIGOS DEL PAÑOL", extra_col=("MEDIDA", EX, 140))
-h.notasM(40, y + 22, [
+# =============== 4. CINTA, ALAMBRE Y PINTURA ===============
+subt(h, 40, 490, "CINTA 4021 · ALAMBRE 1001 · PINTURA 9002", "ESC. 1:2 · ROLLO 19 mm × 20 m · ALAMBRE N° 14 ≈ 2 mm (*)")
+cx, cy = 110, 590
+h.circ(cx, cy, 45, "url(#PLAS2)", K, 1.2); h.circ(cx, cy, 27, "#fff", K, 1.0); h.circ(cx, cy, 24, "none", K, .5)
+h.dimH(cy + 60, cx - 45, cx + 45, "≈ Ø90 (*)", ext=cy, c=OR); h.txt(cx, cy - 56, "4021 · 19 × 20 m", 9, 700, K, "middle")
+h.rect(cx + 80, cy - 45, 19 * 1.2, 90, "url(#PLAS2)", K, 1.0); h.dimH(cy + 60, cx + 80, cx + 80 + 19 * 1.2, "19", ext=cy + 45)
+ax = 300
+for i in range(6): h.circ(ax, cy, 40 + i * 2.2, "none", K, 1.0)
+h.txt(ax, cy - 56, "1001 · ALAMBRE (kg)", 9, 700, K, "middle"); h.txt(ax, cy + 66, "N° 14 ≈ 2,03 · ≈ 25 g/m (*)", 9, 400, OR, "middle")
+lx = 410
+h.rect(lx, cy - 40, 80, 80, "#fff", K, 1.1); h.rect(lx - 2, cy - 43, 84, 4, "#fff", K, .8); h.rect(lx + 8, cy - 22, 64, 40, "none", K, .5)
+h.txt(lx + 40, cy - 56, "9002 · PINTURA GRIS", 9, 700, K, "middle"); h.txt(lx + 40, cy + 56, "ENVASE (*)", 9, 400, OR, "middle")
+bloque(h, 540, 520, "ATADURA EN EL AISLADOR", [
+    "2 m DE ALAMBRE POR ATADURA (MN 16 / MN 17)",
+    "N° 14 GALVANIZADO ≈ 25 g/m → ≈ 0,05 kg POR AISLADOR (*)",
+    "CALCULADO POR VUELTAS: NO HAY DATO PUBLICADO (*)"], w=300, sz=9.5, lh=13)
+
+# =============== TABLAS Y NOTAS ===============
+EX = {4029: "200 × 4,5", 4030: "250 × 4,5 · NEGRO", 4021: "19 mm × 20 m", 4033: "MEDIDA (*)", 4035: "N° 8 · 5 × 45", 1001: "≈ 25 g/m (*)", 9002: "ENVASE (*)"}
+yt = tablaCod(h, 40, 690, [4029, 4030, 4021, 4033, 4035, 1001, 9002], EX, w=800, rowh=14.5, tit_extra="MEDIDA", wext=150)
+cols = [(250, "l", False), (180, "c", False), (370, "l", False)]
+fil = [["DATO", "VALOR", "DE DONDE SALE"], ["PRECINTO: RESISTENCIA", "225 N (REF.)", "HELLERMANNTYTON T50R 200 × 4,6, PA 66"],
+       ["PRECINTO: TEMPERATURA", "−40 A 85 °C (REF.)", "T50R · EL NEGRO (4030) PARA SOL (*)"],
+       ["FISHER N° 8", "BROCA 8 · TALADRO 50", "FISCHER SX 8 × 40 · TORNILLO 4,5 A 6"]]
+yt = tablaG(h, 40, yt + 18, cols, fil, rowh=14.5, titulo="DATOS DE REFERENCIA")
+notasW(h, 40, yt + 18, [
     "DATOS: FICHA DE LA APP (PRECINTOS NYLON 66 DE 200 Y 250 × 4,5; CINTA PVC 19 mm × 20 m) Y CLAUDE.md §11.3 (ALAMBRE: 2 m POR ATADURA).",
-    "(*) 4029 FIGURA EN EL CATALOGO EN «m» Y 4030 EN «Un.»: CONFIRMAR LA UNIDAD. ALAMBRE: PESO POR METRO Y kg POR AISLADOR A CONFIRMAR (CALCULADO POR VUELTAS).",
-    "(*) MEDIDAS DEL TORNILLO, DEL FISHER, DEL SOPORTE Y ENVASE / COLOR DE LA PINTURA GRIS: A CONFIRMAR.",
-], 800, 10.5)
+    "(*) 4029 FIGURA EN EL CATALOGO EN «m» Y 4030 EN «Un.»: CONFIRMAR LA UNIDAD. FORMA DE LA CABEZA Y UÑA: PROPORCIONAL A T50R.",
+    "(*) MEDIDAS DEL SOPORTE 4033, DEL ROLLO DE CINTA, ENVASE Y COLOR DE LA PINTURA GRIS, PESO DEL ALAMBRE: A CONFIRMAR. FUENTES: r3d/FUENTES_civil.md."], w=800, lh=14)
 
-# ============ 3D
-h.titulo(890, 62, "VISTA 3D · ATANDO, ENCINTANDO Y FIJANDO", "NYLON BLANCO Y NEGRO · CINTA PVC NEGRA · ACERO CINCADO · ALAMBRE GALVANIZADO")
-# haz de cables con 2 precintos
-h.iso(1.6, 1000, 230)
-for (a, b, c) in ((0, 0, "#7b3f1d"), (14, 0, "#1a1a1a"), (7, 12, "#c62828"), (7, -12, "#4fa3d9")):
-    h.cil("x", 0, 170, a - 7, b, 7, c, tapa=sombra(c, 1.2), borde="#000", bw=.4)
-for xx, col in ((40, C_NYLON_B), (120, C_NYLON_N)):
-    h.cil("x", xx, xx + 4.5, 0, 0, 23, col, tapa=None, borde="#555", bw=.4)
-    h.caja(xx - 3, xx + 7, -8, 8, 20, 30, col, None, "#555", .5)
-    h.cil("z", 30, 70, xx + 2, 6, 2, col, borde="#555", bw=.3)
-h.g3b("1", (42, 0, 24), 1200, 110, "PRECINTO 200 (4029)")
-h.g3b("2", (122, 0, 24), 1200, 150, "PRECINTO NEGRO 250 (4030)")
-# rollo de cinta
-h.iso(1.3, 1490, 300)
-h.cil("y", 0, 19, 0, 0, 48, "#1c1d20", tapa="#2d2f33", borde="#000", bw=.5, agujero=(30, "#c9b48a"))
-h.circ3("y", 19.2, 0, 0, 26, "#fff", "#999", .4)
-h.g3b("3", (0, 19, 48), 1420, 210, "CINTA PVC 19 mm (4021)")
-# tornillo + fisher + soporte con caño sobre una pared
-h.iso(1.2, 1060, 500)
-h.caja(-20, 0, -60, 160, -40, 90, "#d6d9dc", None, "#666", .6)
-h.cil("x", 0, 40, 100, 30, 22, "#d9dcdf", tapa="#e9ebed", borde="#666", bw=.5, agujero=(19, "#8d949b"))
-from matkit import M3
-mm = M3(h); mm.ring([0, 100, 30], [0, 1, 0], [0, 0, 1], [1, 0, 0], 22, 24.5, 10, 24, 0, 180, "galv"); mm.render()
-h.caja(0, 3, 50, 76, 15, 30, "#b8c2ca", None, "#555", .4); h.caja(0, 3, 124, 150, 15, 30, "#b8c2ca", None, "#555", .4)
-h.cil("x", 3, 7, 63, 22, 5, "#c8cdd2", tapa="#d9dde1", metal=True, borde="#555", bw=.4)
-h.cil("x", 3, 7, 137, 22, 5, "#c8cdd2", tapa="#d9dde1", metal=True, borde="#555", bw=.4)
-# fisher suelto + tornillo suelto
-h.cil("x", 70, 110, 70, -40, 4, "#e9e3c8", tapa="#f4efd8", borde="#777", bw=.4)
-h.cil("x", 120, 160, 70, -40, 2.2, "#c8cdd2", metal=True, borde="#555", bw=.4)
-h.cil("x", 160, 163, 70, -40, 4.5, "#c8cdd2", tapa="#d9dde1", metal=True, borde="#555", bw=.4)
-h.g3b("4", (17, 100, 54), 1200, 470, "SOPORTE PARA CAÑOS (4033) (*)")
-h.g3b("5", (140, 70, -40), 1200, 640, "TORNILLO + FISHER N° 8 (4035)")
-# rollo de alambre y lata
-h.iso(1.0, 1460, 560)
-for rr in (40, 37, 34, 31):
-    h.cil("z", 0, 8, 0, 0, rr, "#aab3ba", tapa="none" if False else None, metal=True, borde="#666", bw=.3)
-h.cil("z", 0, 10, 0, 0, 41, "#aab3ba", tapa="#c3cad0", metal=True, borde="#666", bw=.4, agujero=(28, "#ffffff"))
-h.cil("z", 0, 90, 120, -40, 40, "#8d9399", tapa="#b9bec4", metal=True, borde="#444", bw=.5)
-h.txtX(160, -40, 50, "GRIS", 10, 800, "#ffffff")
-h.g3b("6", (0, 0, 10), 1470, 470, "ALAMBRE (1001)")
-h.g3b("7", (120, -40, 90), 1470, 660, "PINTURA GRIS (9002)")
-
-h.bloque(890, 730, "DATOS TECNICOS", [
-    "PRECINTOS NYLON 66: 200 × 4,5 Y 250 × 4,5 (NEGRO)",
-    "CINTA AISLADORA PVC 19 mm × 20 m",
-    "TORNILLO CON FISHER N° 8 · SOPORTE PARA CAÑOS AMURADO",
-    "ALAMBRE PARA ATADURAS (kg) · PINTURA GRIS DE TERMINACION",
-], 370)
-h.bloque(1270, 730, "DONDE SE USA", [
-    "PRECINTOS: ORDENAR CABLES EN TABLEROS Y COLUMNAS",
-    "ALAMBRE: ATADURAS EN AISLADORES MN 16 / MN 17 (LINEA AEREA)",
-    "SOPORTE + FISHER: FIJAR CAÑOS A PARED",
-    "PINTURA GRIS: TERMINACION",
-], 370)
-h.rotuloM("MAT-FIJACION-1", "PRECINTOS, CINTA, TORNILLOS,", "ALAMBRE Y PINTURA", "VISTAS, DETALLES, COMPUTO Y VISTA 3D", "S/E", "")
-guardar(h, "mat_fijacion_1")
+# =============== 3D ===============
+h.titulo(890, 62, "VISTA 3D - PRECINTO CORTADO POR LA CABEZA", "LA UÑA ENGANCHA EL DENTADO · CERRADO SOBRE UN MAZO DE 3 CABLES (CORTADOS)")
+A = img3d(h, "civil_precinto", 884, 90, 380)
+columna(h, A, [("cola", "1", "COLA DENTADA"), ("una", "2", "UÑA (TRINQUETE)"), ("cabeza", "3", "CABEZA"), ("ranura", "", "RANURA"), ("dientes", "", "DIENTES"),
+               ("corte", "", "CARA DE CORTE"), ("banda", "4", "BANDA"), ("mazo", "", "MAZO DE CABLES")], 1290, 110, 420, paso=28)
+h.txt(890, 450, "TORNILLO + FISHER N° 8 EN MEDIO CORTE", 11, 700, NV, "start", INT)
+A2 = img3d(h, "civil_fisher", 884, 458, 380)
+columna(h, A2, [("cabeza", "5", "TORNILLO 5 × 45"), ("soporte", "6", "SOPORTE 4033"), ("taco", "7", "FISHER N° 8"), ("patas", "", "PATAS ABIERTAS"),
+                ("revoque", "", "REVOQUE"), ("ladrillo", "", "LADRILLO"), ("agujero", "", "FONDO DEL TALADRO")], 1290, 478, 740, paso=28)
+h.txt(890, 790, "PRECINTOS, CINTA, ALAMBRE, TORNILLO, FISHER Y PINTURA", 11, 700, NV, "start", INT)
+A3 = img3d(h, "civil_fijacion", 1150, 795, 330)
+columna(h, A3, [("p200", "", "4029 PRECINTO 200"), ("p250", "", "4030 PRECINTO 250"), ("cinta", "", "4021 CINTA"), ("alambre", "", "1001 ALAMBRE"), ("lata", "", "9002 PINTURA"), ("fisher", "", "4035 TORNILLO + FISHER")], 1110, 820, 1000, lado="izq", paso=28)
+nota3d(h, 890, 1022, "RENDER: three.js (r3d/escenas/civil_precinto.mjs, civil_fisher.mjs, civil_fijacion.mjs). FUENTES: r3d/FUENTES_civil.md")
+rotuloMat(h, "MAT-FIJACION-1", "PRECINTOS, CINTA, TORNILLOS,", "ALAMBRE Y PINTURA", "VISTAS, CORTE A-A, FISHER, COMPUTO Y 3D", "VARIAS", "INDICADAS · 3D S/E", rev="B", fecha=FECHA)
+guardarC(h, "mat_fijacion_1")

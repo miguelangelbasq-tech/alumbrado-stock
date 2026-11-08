@@ -1,113 +1,90 @@
-import math, sys, os
+"""MAT-HERRAJES-1 (rev. B) · Abrazaderas H°G° de planchuela 4,76 × 31,7: lisas Ø220–340 (4004–4008), con 1 escote Ø140 (4001) y 2 escotes Ø200 (4002).
+Geometría: r3d/piezas/perfiles_pat.mjs (ABR, BUL) y pat.mjs abrazadera(); 3D: r3d/out/pat_her1a.png, pat_her1b.png. Fuentes: r3d/FUENTES_pat.md"""
+import sys, os, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from matkit import Ficha, K, G, OR, NV, CAD, MONO, INT
-h = Ficha(); m = h.m
-def mitad(cx, cy, R, sg, escote, e=4.76, k=1.0, oreja=36, luz=4.7):
-    """media abrazadera en planta: sg=-1 la de arriba, +1 la de abajo. Devuelve el path."""
-    yo = cy + sg * luz / 2 * k
-    pts = []
-    for i in range(0, 61):
-        a = math.pi - i * math.pi / 60   # de 180° a 0°
-        rr = R
-        if escote and abs(a - math.pi / 2) < math.radians(22): rr = R + (R * .2) * (1 - abs(a - math.pi / 2) / math.radians(22))
-        pts.append((cx + rr * math.cos(a), yo + sg * rr * math.sin(a)))
-    return pts
-def abrazadera2d(cx, cy, R, tipo, k):
-    t = 4.76 * k
-    for sg in (-1, 1):
-        esc = (tipo >= 1 and sg == -1) or (tipo >= 2 and sg == 1)
-        inn = mitad(cx, cy, R, sg, esc, k=k); out = mitad(cx, cy, R + t, sg, esc, k=k)
-        yo = cy + sg * 4.7 / 2 * k
-        d = f"M{cx-R-t-36*k},{yo} L" + " L".join(f"{x:.1f},{y:.1f}" for x, y in out) + f" L{cx+R+t+36*k},{yo} L{cx+R+t+36*k},{yo+sg*t} L{cx+R},{yo+sg*t} L" + \
-            " L".join(f"{x:.1f},{y:.1f}" for x, y in reversed(inn[1:-1])) + f" L{cx-R},{yo+sg*t} L{cx-R-t-36*k},{yo+sg*t} Z"
-        h.path(d, "url(#STEEL)", K, 1.1)
-        if esc:
-            ty = yo + sg * (R * 1.2 + t / 2) ; h.circ(cx, ty - sg * 1, 7 * k, "#fff", K, .9)
-    for xx in (cx - R - t - 18 * k, cx + R + t + 18 * k):
-        h.rect(xx - 6 * k, cy - 4.7 / 2 * k - 4.76 * k - 9 * k, 12 * k, 4.7 * k + 2 * 4.76 * k + 18 * k, "#fff", K, .9)   # bulón
-        h.ln(xx, cy - 30 * k, xx, cy + 30 * k, K, .4, h.EJE)
-    h.circ(cx, cy, R, "none", K, .4, 'stroke-dasharray="6 3"')
-# ================= VISTAS EN PLANTA
-h.titulo(40, 62, "VISTA EN PLANTA (DESDE ARRIBA DEL POSTE)", "ESQUEMA - PLANCHUELA 4,76 × 31,7 - BULONES EN LAS OREJAS")
-k = .55
-abrazadera2d(170, 220, 220 / 2 * k, 0, k)
-h.txt(170, 340, "LISA (4004-4008)", 11, 700, K, "middle"); h.txt(170, 356, "Ø220 A Ø340", 10.5, 400, G, "middle")
-h.dimH(220 - 220 / 2 * k - 34, 170 - 220 / 2 * k, 170 + 220 / 2 * k, "Ø NOMINAL INT.", ext=220)
-abrazadera2d(455, 220, 140 / 2 * k * 1.3, 1, k)
-h.txt(455, 340, "1 ESCOTE (4001)", 11, 700, K, "middle"); h.txt(455, 356, "Ø140 · ESCOTE CON Ø14", 10.5, 400, G, "middle")
-abrazadera2d(705, 220, 200 / 2 * k, 2, k)
-h.txt(705, 340, "2 ESCOTES (4002)", 11, 700, K, "middle"); h.txt(705, 356, "Ø200 · 2 ESCOTES CON Ø14", 10.5, 400, G, "middle")
-h.txt(40, 384, "LUZ ENTRE OREJAS ≈ 4,7 · AGUJEROS DE LAS OREJAS Ø14 · SE CIERRA CON 2 BULONES (VER MAT-HERRAJES-3)", 10.5)
-# ================= PLANCHUELA
-h.titulo(40, 430, "PLANCHUELA (VISTA DE ARRIBA, EXTENDIDA)", "ESC. 1:2 - ACERO CINCADO (H°G°)")
-x, l, n, o = 70, 480, 360, 31.7 * 1.6
-h.rect(x, l, n, o, "url(#STEEL)", K, 1.4)
-for e in (x + 31 * 1.6, x + n - 31 * 1.6):
-    h.circ(e, l + o / 2, 7 * 1.6, "#fff", K, 1); h.ln(e, l - 8, e, l + o + 8, K, .4, h.EJE)
-h.ln(x - 10, l + o / 2, x + n + 10, l + o / 2, K, .4, h.EJE)
-h.dimH(l - 16, x, x + 31 * 1.6, "31", ext=l); h.dimV(x - 18, l, l + o, "31,7", ext=x)
-h.dimH(l + o + 26, x + n - 31 * 1.6 - 7 * 1.6, x + n - 31 * 1.6 + 7 * 1.6, "Ø14", ext=l + o / 2)
-h.txt(x + n + 30, l + 14, "ESPESOR 4,76", 10.5, 700); h.txt(x + n + 30, l + 30, "LARGO DESARROLLADO SEGUN Ø (*)", 10.5, 400, OR)
-# códigos
-y2 = h.codigos(40, 590, [4004, 4005, 4006, 4007, 4008, 4001, 4002],
-               extra={4004: "Ø220 (ref. fab. 405220)", 4005: "Ø240 (405240)", 4006: "Ø260 (405260)", 4007: "Ø300 (405300)", 4008: "Ø340 (405340)", 4001: "Ø140 (406140)", 4002: "Ø200 (407200)"}, wx=170)
-y3 = h.datos(40, y2 + 30, [("PLANCHUELA", "acero 4,76 × 31,7 mm, cincada"), ("CIERRE", "2 medias abrazaderas + 2 bulones"), ("AGUJEROS", "Ø14 (orejas y escote)"),
-    ("SE PIDE POR", "Ø del poste en el punto de colocación"), ("Ø LISA QUE HAY", "60 a 550 mm (fabricante)"), ("Ø ESCOTE QUE HAY", "60 a 550 (1 esc.) · 140 a 550 (2 esc.)")], w=430, c1=140)
-h.lista(500, y2 + 30, "DONDE SE USA", [
-    "· AP-T-012: sujeción del tablero aéreo",
-    "   al apoyo; AP-T-018: apoyo PRFV.",
-    "· AP-PL-003: caja estanca externa.",
-    "· AP-TC-055: brazo H°G° de barrio:",
-    "   2 abrazaderas por Ø del poste.",
-    "· El escote toma un perno o el bulón",
-    "   del rack.",
-])
-h.notas(40, 1010, [
-    "COTAS EN mm. LA PLANTA ES UN ESQUEMA: LA ABRAZADERA SE PIDE POR EL Ø DEL POSTE EN EL PUNTO DONDE VA.",
-    "Ø QUE SE CONSIGUEN (LISA): 60 · 120 · 140 · 150 · 160 · 180 · 200 · 220 · 230 · 240 · 250 · 260 · 270 · 280 · 300 … 550.",
-    "(*) LARGO DE LAS OREJAS Y DESARROLLO DE LA PLANCHUELA: NO ESTAN EN LA FICHA. A CONFIRMAR CON EL FABRICANTE.",
-    "(*) EL POSTE ES CONICO: MEDIR EL Ø EN LA ALTURA DE COLOCACION ANTES DE PEDIR.",
-    "FUENTE: CATALOGO DE ABRAZADERAS Y COLLARES DE HP ELECTRICIDAD (RIO CUARTO), REF. ENTRE PARENTESIS; FICHA DE LA APP.",
-])
-# ================= 3D DE LAS TRES
-def abraz3d(cx, cy, R, tipo, z0=0, w=31.7, t=4.76, oreja=40, luz=4.7, frente=False, lados=(-1, 1), anillo=True):
-    for sg in (1, -1):
-        a0, a1 = (0, 180) if sg > 0 else (180, 360)
-        if frente: a0, a1 = (0, 140) if sg > 0 else (305, 360)
-        if anillo: m.ring([cx, cy + sg * luz / 2, z0], [1, 0, 0], [0, 1, 0], [0, 0, 1], R, R + t, 0, w, a0, a1, "galv", n=40)
-        m.render()
-        for side in lados:
-            m.box(cx + side * (R + t) if side > 0 else cx - R - t - oreja, cx + R + t + oreja if side > 0 else cx - R - t,
-                  min(cy + sg * luz / 2, cy + sg * (luz / 2 + t)), max(cy + sg * luz / 2, cy + sg * (luz / 2 + t)), z0, z0 + w, "galv", edge="#55606a")
-            m.render()
-        esc = anillo and (tipo >= 1 and sg > 0) or (tipo >= 2 and sg < 0)
-        if esc:
-            m.prism([(-R * .25, 0), (0, R * .22), (R * .25, 0)], [cx, cy + sg * (R + t / 2 + luz / 2), z0], [1, 0, 0], [0, sg, 0], [0, 0, 1], w, "galv", edge="#55606a")
-            m.render()
-    for side in lados:
-        xb = cx + side * (R + t + oreja / 2)
-        m.cyl([xb, cy - 18, z0 + w / 2], [xb, cy + 18, z0 + w / 2], 6, "galv", n=12); m.render()
-        m.cyl([xb, cy + 12, z0 + w / 2], [xb, cy + 20, z0 + w / 2], 10, "galv", n=6, edge="#444"); m.render()
-h.titulo(890, 62, "VISTA 3D - LISA, 1 ESCOTE Y 2 ESCOTES", "HIERRO GALVANIZADO, CERRADAS CON SUS BULONES")
-h.iso(.62, 1080, 230)
-abraz3d(0, 0, 110, 0)
-h.iso(.62, 1300, 300)
-abraz3d(0, 0, 70, 1)
-h.iso(.62, 1180, 450)
-abraz3d(0, 0, 100, 2)
-h.iso(.62, 1080, 230); h.g3("1", (0, 110, 31), 1450, 130, "LISA Ø220 (4004)")
-h.iso(.62, 1300, 300); h.g3("2", (0, 90, 31), 1450, 180, "1 ESCOTE Ø140 (4001)")
-h.iso(.62, 1180, 450); h.g3("3", (0, 120, 31), 1450, 230, "2 ESCOTES Ø200 (4002)")
-h.g3("4", (100 + 4.76 + 20, 20, 16), 1450, 280, "BULON EN LA OREJA")
-# ================= 3D EN SU LUGAR
-h.titulo(890, 560, "EN SU LUGAR - SOBRE EL POSTE", "SE ELIGE POR EL Ø DEL POSTE EN EL PUNTO DE COLOCACION")
-h.iso(.5, 1180, 900)
-ZS = [(z, 130 - 10 * (z + 150) / 570 + 1) for z in (60, 300)]
-for z, rr in ZS: abraz3d(0, 0, rr, 0, z0=z, lados=(-1,), anillo=False)
-m.cyl([0, 0, -150], [0, 0, 420], 130, "#5f6563", n=40, seg=6, r1=120); m.render()
-for z, rr in ZS: abraz3d(0, 0, rr, 0, z0=z, frente=True, lados=(1,))
-h.g3("1", (0, 132, 330), 1450, 680, "ABRAZADERA LISA (POR Ø)")
-h.g3("4", (rr + 25, 20, 316), 1450, 730, "2 BULONES POR ABRAZADERA")
-h.g3("5", (0, 125, 200), 1450, 780, "POSTE PRFV / H°A° (MEDIR EL Ø)")
-h.rotulo(890, h.H - 150, 750, "MAT-HERRAJES-1", "ABRAZADERAS H°G°", "LISAS Y CON ESCOTE", "PLANTA, PLANCHUELA, DATOS Y 3D", "S/E / 1:2", "3D S/E")
-h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_herrajes_1.svg")); print("ok")
+from patkit import *
+
+A = PP["ABR"]; W = PP["BUL"]["w12"]; Bu = PP["BUL"]
+h = hojaP()
+
+# ================= PLANTA (1:1,6) =================
+h.titulo(40, 62, "PLANTA - ABRAZADERA CON 2 ESCOTES Ø200 (4002)", "ESC. 1:1 · 2 MEDIAS DE PLANCHUELA 4,76 × 31,7 Y 2 BULONES 1/2\"")
+e = 1.0; ox, oy = 280, 300; X = lambda x: ox + x * e; Y = lambda y: oy - y * e
+D = 200; R0 = D / 2; ee = A["e"]; luz = A["luz"] / 2; ore = A["oreja"]
+for s in (1, -1):
+    th0 = math.asin(luz / R0); xA = R0 * math.cos(th0); th1 = math.asin((luz + ee) / (R0 + ee))
+    inn = [(-(xA + ore), s * luz)] + [(R0 * math.cos(math.pi - th0 - (math.pi - 2 * th0) * i / 64), s * R0 * math.sin(math.pi - th0 - (math.pi - 2 * th0) * i / 64)) for i in range(65)] + [(xA + ore, s * luz)]
+    out = [(-(xA + ore), s * (luz + ee))] + [((R0 + ee) * math.cos(math.pi - th1 - (math.pi - 2 * th1) * i / 64), s * (R0 + ee) * math.sin(math.pi - th1 - (math.pi - 2 * th1) * i / 64)) for i in range(65)] + [(xA + ore, s * (luz + ee))]
+    h.path("M" + " L".join(f"{X(u):.1f},{Y(v):.1f}" for u, v in inn + out[::-1]) + " Z", "url(#ACE)", K, 1.3)
+    # escote (lengüeta radial) en el medio de cada media, con agujero Ø14
+    yb = s * (R0 + ee)
+    h.rect(X(-A["a"] / 2), min(Y(yb), Y(yb + s * A["escote"]["h"])), A["a"] * e, A["escote"]["h"] * e, "#fff", K, 1.2)
+    h.circ(X(0), Y(yb + s * A["escote"]["h"] * .6), A["agujero"] / 2 * e, "#fff", K, 1)
+# bulones en las orejas (vista: cabeza arriba, tuerca abajo)
+for sx in (-1, 1):
+    xo = sx * (R0 * math.cos(math.asin(luz / R0)) + ore / 2 + ee / 2)
+    h.rect(X(xo - W["d"] / 2), Y(luz + ee + 0), W["d"] * e, (2 * luz + 2 * ee) * e, "#fff", K, .8)
+    h.rect(X(xo - W["af"] / 2), Y(luz + ee + W["k"]), W["af"] * e, W["k"] * e, "#fff", K, 1.1)
+    h.rect(X(xo - Bu["plana"]["de"] / 2), Y(-luz - ee), Bu["plana"]["de"] * e, Bu["plana"]["e"] * e, "url(#HG)", K, .8)
+    h.rect(X(xo - W["af"] / 2), Y(-luz - ee - Bu["plana"]["e"] - Bu["presion"]["e"]), W["af"] * e, W["tuerca"] * e, "#fff", K, 1.1)
+ejeH(h, X(-R0 - 70), X(R0 + 70), oy); ejeV(h, X(0), Y(R0 + 60), Y(-R0 - 60))
+h.circ(X(0), Y(0), R0 * e, "none", K, .45, 'stroke-dasharray="6 3"'); h.txt(X(0), Y(R0 * .45), "POSTE", 9.5, 700, G, "middle")
+h.dimH(Y(-R0 * .45), X(-R0 * .89), X(R0 * .89), "", ext=None); h.txt(X(0), Y(-R0 * .45) - 6, "Ø200 INTERIOR (EL CODIGO)", 9.5, 700, K, "middle")
+h.dimH(Y(R0 + ee + A["escote"]["h"]) - 14, X(-A["a"] / 2), X(A["a"] / 2), "31,7", ext=Y(R0 + ee + A["escote"]["h"]))
+h.dimV(X(A["a"] / 2) + 22, Y(R0 + ee + A["escote"]["h"]), Y(R0 + ee), "40 (*)", ext=X(A["a"] / 2), c=OR)
+xr = R0 * math.cos(math.asin(luz / R0))
+h.dimH(Y(-R0) - 18 + 30, X(xr), X(xr + ore), "40 (*)", ext=Y(-luz), c=OR)
+h.dimV(X(R0 + ore + 30), Y(luz + ee), Y(-luz - ee), "", ext=X(xr + ore))
+h.txt(X(R0 + ore + 40), Y(0) + 4, "LUZ 8 + 2 × 4,76 (*)", 9.5, 400, OR)
+for n, (u, v), (gx, gy) in [("1", (-R0 * .7, R0 * .7 + 2), (-R0 - 30, R0 + 20)), ("2", (0, R0 + ee + 30), (60, R0 + 70)), ("3", (xr + ore / 2 + 2, luz + ee + W["k"] / 2), (R0 + 70, luz + 60)),
+                            ("4", (-(xr + ore / 2), -luz - ee - 6), (-R0 - 50, -luz - 50))]:
+    h.globo(n, X(u), Y(v), X(gx), Y(gy), r=8)
+lineaCorte(h, X(-R0 * math.cos(.6)) - 26 * math.cos(.6), Y(R0 * math.sin(.6)) , X(-R0 * math.cos(.6)) + 10, Y(R0 * math.sin(.6)) - 10, "A") if False else None
+
+# ================= CORTE DE LA PLANCHUELA + GALVANIZADO =================
+h.titulo(560, 62, "CORTE A-A DE LA PLANCHUELA", "ESC. 5:1 · ACERO (*) GALVANIZADO EN CALIENTE")
+e2 = 5.0; px, py = 600, 120
+h.rect(px, py, A["e"] * e2, A["a"] * e2, "url(#ACE)", K, 1.4)
+h.rect(px - 1.6, py - 1.6, A["e"] * e2 + 3.2, A["a"] * e2 + 3.2, "none", K, .9)
+h.dimV(px - 18, py, py + A["a"] * e2, "31,7 (1 1/4\")", ext=px)
+h.dimH(py + A["a"] * e2 + 20, px, px + A["e"] * e2, "4,76 (3/16\")", ext=py + A["a"] * e2)
+h.circ(px + A["e"] * e2, py + 20, 10, "none", K, .6, 'stroke-dasharray="3 2"'); h.txt(px + A["e"] * e2 + 12, py + 12, "D1", 10, 700)
+# D1 capa de zinc (esquema 400:1)
+dx, dy = 680, 110
+h.rect(dx, dy, 120, 70 * .4, "url(#ZN)", K, 1.0); h.rect(dx, dy + 28, 120, 50, "url(#ACE)", K, 1.0)
+h.dimV(dx + 136, dy, dy + 28, "≥ 70 µm", ext=dx + 120)
+h.txt(dx, dy - 8, "D1 (ESQUEMA): CAPA DE ZINC", 9.5, 700)
+h.txt(dx, dy + 96, "ISO 1461: ACERO 3–6 mm ≥ 70 µm", 9.5); h.txt(dx, dy + 109, "(> 6 mm: 85 µm · ROSCAS: 50 µm)", 9.5)
+h.txt(560, 350, "EL GALVANIZADO SE HACE DESPUES DE CORTAR,", 9.5); h.txt(560, 363, "DOBLAR Y AGUJEREAR: NO SE AGUJEREA EN OBRA.", 9.5, 700)
+h.txt(560, 376, "SI SE RAYA, PINTURA RICA EN ZINC (*).", 9.5, 400, OR)
+
+# ================= TABLA DE DIAMETROS =================
+yT = tablaC(h, 40, 470, [(52, "c", True), (240, "l", False), (90, "c", True), (120, "c", True), (150, "l", False)],
+            [("CODIGO", "TIPO", "Ø INTERIOR", "REF. FABRICANTE", "USO"), ("4004", "LISA", "220", "405220", "POSTE / APOYO"), ("4005", "LISA", "240", "405240", "POSTE / APOYO"),
+             ("4006", "LISA", "260", "405260", "CON BULON 4018"), ("4007", "LISA", "300", "405300", "POSTE / APOYO"), ("4008", "LISA", "340", "405340", "POSTE / APOYO"),
+             ("4001", "1 ESCOTE (ARRIBA)", "140", "406140", "PERNO DEL RACK"), ("4002", "2 ESCOTES (ARRIBA Y ABAJO)", "200", "407200", "2 PERNOS OPUESTOS")], "DIAMETROS DEL PAÑOL (FICHA DE LA APP)", rowh=16)
+yD = bloque(h, 40, yT + 18, "DATOS TECNICOS", [
+    "PLANCHUELA 4,76 × 31,7 mm CINCADA · AGUJEROS Ø14 (OREJAS Y ESCOTE) · CIERRE CON 2 BULONES 1/2\" + ARANDELA PLANA + PRESION + TUERCA (MAT-HERRAJES-3).",
+    "SE PIDE POR EL Ø DEL POSTE EN EL PUNTO DONDE VA: EL POSTE ES CONICO (≈ 15 mm POR METRO (*)). MEDIR ANTES DE PEDIR.",
+    "Ø QUE SE CONSIGUEN (LISA): 60 · 120 · 140 · 150 · 160 · 180 · 200 · 220 · 230 · 240 · 250 · 260 · 270 · 280 · 300 … 550. CON ESCOTE: 60–550 (1) · 140–550 (2)."], w=800, sz=10, lh=13.5)
+yU = bloque(h, 40, yD + 4, "DONDE SE USA", [
+    "AP-T-012: SUJECION DEL TABLERO AEREO AL APOYO · AP-T-018: APOYO PRFV · AP-PL-003: CAJA ESTANCA EXTERNA.",
+    "AP-TC-055: BRAZO H°G° DE BARRIO, 2 ABRAZADERAS POR Ø DEL POSTE. EL ESCOTE TOMA EL PERNO DEL RACK (MAT-HERRAJES-2)."], w=800, sz=10, lh=13.5)
+notasW(h, 40, yU + 4, [
+    "COTAS EN mm. MANDA LA COTA. LA PLANTA ES LA DE 2 ESCOTES Ø200; LAS LISAS SON IGUALES SIN LENGÜETA.",
+    "(*) LARGO DE LAS OREJAS (40), LUZ ENTRE OREJAS (8), ALTO DEL ESCOTE (40) Y CALIDAD DEL ACERO: NO ESTAN EN LA FICHA. A CONFIRMAR CON EL FABRICANTE.",
+    "(*) LA FICHA DICE «ESCOTE (PUNTA) CON AGUJERO Ø14»: SE DIBUJA COMO LENGÜETA PLANA DOBLADA A 90° (FORMA A CONFIRMAR).",
+    "FUENTES: CATALOGO DE ABRAZADERAS HP ELECTRICIDAD (RIO CUARTO), REF. 405xxx / 406xxx / 407xxx; ISO 1461; r3d/FUENTES_pat.md."], w=800, lh=14)
+rayadosC(h, 40, 1104, ["ACE", "ZN", "HG"], cols=3, dx=200)
+
+# ================= 3D =================
+h.titulo(890, 62, "VISTA 3D - LISA Ø220, 1 ESCOTE Ø140, 2 ESCOTES Ø200", "HIERRO GALVANIZADO EN CALIENTE, CERRADAS CON SUS BULONES 1/2\"")
+Aa = img3d(h, "pat_her1a", 870, 96, 560)
+columna(h, Aa, [("esc2", "2", "ESCOTE CON AGUJERO Ø14"), ("esc1", "", "1 ESCOTE Ø140 (4001)"), ("esc2b", "", "2 ESCOTES Ø200 (4002)"), ("lisa", "1", "LISA Ø220 (4004)"),
+                ("bulon", "3", "BULON 1/2\" EN LA OREJA"), ("tuerca", "4", "PLANA + PRESION + TUERCA"), ("oreja", "", "OREJA"), ("planchuela", "", "PLANCHUELA 4,76 × 31,7")], 1440, 120, 520, paso=36)
+h.txt(890, 570, "EN SU LUGAR - SOBRE EL POSTE DE H°A° (SE ELIGE POR EL Ø EN ESA ALTURA)", 11, 700, NV, "start", INT)
+Ab = img3d(h, "pat_her1b", 880, 576, 500)
+columna(h, Ab, [("poste", "", "POSTE H°A° (MEDIR EL Ø)"), ("bulon", "3", "BULON 1/2\""), ("escote", "", "OREJAS CERRADAS"), ("abrazadera", "1", "ABRAZADERA LISA"), ("tuerca", "4", "TUERCA")], 1400, 640, 990, paso=40)
+h.txt(890, 1026, "RENDER: three.js (r3d/escenas/pat_her1a.mjs, pat_her1b.mjs) CON LA MISMA GEOMETRIA DEL PLANO. FUENTES: r3d/FUENTES_pat.md", 9.5, 400, G, "start", INT)
+rotuloMat(h, "MAT-HERRAJES-1", "ABRAZADERAS H°G°", "LISAS Y CON ESCOTE", "PLANTA, CORTE, D1 GALVANIZADO, TABLA Y 3D", "1:1 / 5:1", "D1 S/E · 3D S/E", rev="B", fecha="08/11/2026")
+h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_herrajes_1.svg"))

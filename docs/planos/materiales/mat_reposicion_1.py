@@ -1,100 +1,89 @@
-import math, sys, os
+"""MAT-REPOSICION-1 (rev. B) · Baldosa de vereda para reposición (8004) y carpeta asfáltica (8007).
+Plano y 3D con las mismas medidas (perfiles_civil.json: VER, CALZ). 3D: r3d/out/civil_vereda.png.
+Fuentes: ficha de la app (pliego LP 21478: contrapiso 8 cm + mortero 2 cm + baldosa igual a la existente, en 48 h; relleno en capas de 15 cm;
+calzada H-21 0,20 (estimado) o carpeta), AP-TC-001 / AP-TC-002. Lo que no está: naranja (*)."""
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from mk_obra import *
+from civilkit import *
 
-h = HojaO()
-COD = [8004, 8007]
-h.check_codigos(COD)
+V = PC["VER"]; C = PC["CALZ"]
+h = nuevaC()
 
-# ============ A · CORTE VEREDA
-h.titulo(40, 62, "CORTE A-A · REPOSICION DE VEREDA", "S/E · BALDOSA IGUAL A LA EXISTENTE · REPONER EN 48 h")
-k = 1.0; x0, x1, y0 = 70, 520, 130
-EB = 25   # espesor baldosa (*)
-h.rect(x0, y0, x1 - x0, EB * .7, "url(#ASPH)", K, 1.2)
-for q in range(0, int((x1 - x0) / 64) + 1): h.ln(x0 + q * 64, y0, x0 + q * 64, y0 + EB * .7, K, 1)
-yb = y0 + EB * .7
-h.rect(x0, yb, x1 - x0, 20 * k, "url(#CONCP)", K, 1)
-yc = yb + 20 * k
-h.rect(x0, yc, x1 - x0, 80 * k, "url(#CONC)", K, 1.2)
-yr = yc + 80 * k
-h.rect(x0, yr, x1 - x0, 150 * k * .8, "url(#ANSI37)", K, .8)
-h.ln(x0, yr + 150 * k * .4, x1, yr + 150 * k * .4, K, .5, h.OCULTA)
-h.dimV(x1 + 70, y0, yb, "e (*)", ext=x1, c=OR)
-h.dimV(x1 + 20, yb, yc, "20", ext=x1)
-h.dimV(x1 + 20, yc, yr, "80", ext=x1)
-h.dimV(x1 + 46, yr, yr + 150 * k * .4, "150", ext=x1)
-h.nivel(x0 + 10, y0, "±0,00 VEREDA")
-for n, (ax, ay, t) in enumerate([(x0 + 100, y0 + 8, "BALDOSA (8004)"), (x0 + 220, yb + 16, "MORTERO DE ASIENTO 20"), (x0 + 330, yc + 60, "CONTRAPISO DE H° POBRE 80"),
-                                  (x0 + 420, yr + 50, "RELLENO COMPACTADO EN CAPAS DE 150")]):
-    h.globo(str(n + 1), ax, ay, 640, 130 + n * 50)
-    h.txt(656, 134 + n * 50, t.split(" ")[0], 10, 700, K)
-    h.txt(656, 148 + n * 50, " ".join(t.split(" ")[1:]), 9.5, 400, G)
+# =============== 1. CORTE A-A · VEREDA ===============
+h.titulo(40, 62, "CORTE A-A · REPOSICION DE VEREDA SOBRE LA ZANJA", "ESC. 1:7,5 · BALDOSA IGUAL A LA EXISTENTE · SE REPONE EN 48 h")
+k = .52; x0, y0 = 90, 120
+def X(x): return x0 + x * k
+def Y(z): return y0 - z * k
+zb = -V["baldosa"]; zm = zb - V["mortero"]; zc = zm - V["contrapiso"]; W = 1000; zw0, zw1 = 300, 700   # zanja de 400 (2 cond.) entre x 300 y 700
+for i in range(5):
+    xx = i * V["pan"]; h.rect(X(xx), Y(0), V["pan"] * k, V["baldosa"] * k, "url(#CERAM)", K, 1.0)
+h.rect(X(0), Y(zb), W * k, V["mortero"] * k, "url(#MORT)", K, .8)
+h.rect(X(0), Y(zm), W * k, V["contrapiso"] * k, "url(#CONCP)", K, 1.0)
+h.rect(X(0), Y(zc), zw0 * k, 450 * k, "url(#EARTH)", "none", 0); h.rect(X(zw1), Y(zc), (W - zw1) * k, 450 * k, "url(#EARTH)", "none", 0)
+for i in range(3):
+    h.rect(X(zw0), Y(zc - i * V["capa"]), (zw1 - zw0) * k, V["capa"] * k, "url(#ANSI37)", K, .8)
+h.ln(X(zw0), Y(zc), X(zw0), Y(zc - 450), K, 1.2); h.ln(X(zw1), Y(zc), X(zw1), Y(zc - 450), K, 1.2)
+h.nivel(X(W) - 60, Y(0), "±0,00")
+h.dimV(X(W) + 14, Y(0), Y(zb), "", ext=X(W)); h.txt(X(W) + 20, Y(zb / 2) + 4, "25 (*) BALDOSA", 9, 400, OR)
+h.dimV(X(W) + 14, Y(zb), Y(zm), "", ext=X(W)); h.txt(X(W) + 20, Y((zb + zm) / 2) + 4, "20 MORTERO", 9, 400, K)
+h.dimV(X(W) + 14, Y(zm), Y(zc), "80", ext=X(W)); h.txt(X(W) + 20, Y((zm + zc) / 2) + 4, "CONTRAPISO", 9, 400, K)
+for i in range(3): h.dimV(X(zw1) + 14, Y(zc - i * 150), Y(zc - (i + 1) * 150), "150", ext=X(zw1))
+h.dimH(Y(zc - 450) + 16, X(zw0), X(zw1), "ANCHO DE LA ZANJA", ext=Y(zc - 450))
+h.dimH(Y(0) - 14, X(zw0 - 100), X(zw1 + 100), "SOBREANCHO (*)", ext=Y(0), c=OR)
+llamada(h, X(500), Y(zc - 75), X(60), Y(zc - 470), "RELLENO COMPACTADO EN CAPAS DE 15", sz=9)
 
-# ============ B · CORTE CALZADA
-h.titulo(40, 400, "CORTE B-B · REPOSICION DE CALZADA", "S/E · HORMIGON H-21 DE 0,20 (ESTIMADO) O CARPETA ASFALTICA SEGUN EL PAVIMENTO")
-k2 = .6; cx0, cx1, cy = 70, 360, 450
-h.rect(cx0, cy, cx1 - cx0, 200 * k2, "url(#CONC)", K, 1.3)
-h.rect(cx0, cy + 200 * k2, cx1 - cx0, 50, "url(#ANSI37)", K, .8)
-h.dimV(cx1 + 18, cy, cy + 200 * k2, "200", ext=cx1)
-h.txt((cx0 + cx1) / 2, cy + 200 * k2 + 70, "CALLE DE HORMIGON: H-21 (8014)", 10.5, 700, K, "middle")
-ax0, ax1 = 470, 780
-h.rect(ax0, cy, ax1 - ax0, 50 * k2, "url(#ASPH)", K, 1.3)
-h.rect(ax0, cy + 50 * k2, ax1 - ax0, 150 * k2, "url(#CONCP)", K, 1)
-h.rect(ax0, cy + 200 * k2, ax1 - ax0, 50, "url(#ANSI37)", K, .8)
-h.dimV(ax1 + 18, cy, cy + 50 * k2, "e (*)", ext=ax1, c=OR); h.dimV(ax1 + 18, cy + 50 * k2, cy + 200 * k2, "BASE (*)", ext=ax1, c=OR)
-h.txt((ax0 + ax1) / 2, cy + 200 * k2 + 70, "CALLE DE ASFALTO: CARPETA (8007)", 10.5, 700, K, "middle")
-h.txt((ax0 + ax1) / 2, cy + 200 * k2 + 86, "ESPESOR Y BASE SEGUN EL PAVIMENTO (*)", 9.5, 400, OR, "middle")
+# =============== 2. BALDOSA ===============
+subt(h, 40, 462, "BALDOSA DE 9 PANES (8004)", "ESC. 1:4 · 200 × 200 (*) · IGUAL A LA EXISTENTE")
+kb = 1.0; bx, by = 70, 510
+h.rect(bx, by, 200 * kb, 200 * kb, "url(#CERAM)", K, 1.2)
+for p in range(3):
+    for q in range(3): h.rect(bx + 8 + p * 62, by + 8 + q * 62, 52, 52, "#fff", K, .8)
+h.dimH(by - 10, bx, bx + 200 * kb, "200 (*)", ext=by, c=OR); h.dimV(bx + 214, by, by + 200 * kb, "200 (*)", ext=bx + 200 * kb, c=OR)
+h.dimH(by + 222, bx + 8, bx + 60, "52 (*)", ext=by + 200, c=OR)
+h.rect(bx, by + 240, 200 * kb, 25, "url(#CERAM)", K, 1.0); h.txt(bx + 210, by + 257, "CANTO: 25 (*)", 9, 400, OR)
 
-# ============ C · CÓMPUTO
-cols = [(260, "l", False), (160, "c", True), (380, "l", False)]
-fil = [["COMPUTO (POR METRO DE ZANJA)", "CANTIDAD", "CALCULO"],
-       ["BALDOSA (8004) · ZANJA DE 1 CONDUCTOR", "0,20 m² (*)", "ANCHO 0,20 (AP-TC-001) × 1 m · + SOBREANCHO (*)"],
-       ["BALDOSA (8004) · 2 / 3 CONDUCTORES", "0,40 / 0,60 m² (*)", "ANCHO 0,40 / 0,60 × 1 m"],
-       ["CARPETA ASFALTICA (8007) · CRUCE", "0,50 m² (*)", "ANCHO DEL CRUCE 0,50 (CRUCE_AP_TC_002) × 1 m"],
-       ["H-21 (8014) · CRUCE EN CALLE DE H°", "0,100 m³", "0,50 × 0,20 (AP-TC-002)"]]
-y = h.tablaM(40, 700, cols, fil, 19, "COMPUTO")
-y = h.codigos(40, y + 30, COD, (46, 0, 40), wtot=800, rowh=20, titulo="VARIANTES Y CODIGOS DEL PAÑOL", extra_col=("SE MIDE", {8004: "m² de vereda", 8007: "m² de calzada"}, 140))
-h.notasM(40, y + 24, [
+# =============== 3. CORTE B-B · CALZADA ===============
+subt(h, 380, 470, "CORTE B-B · CALZADA (CRUCE AP-TC-002)", "ESC. 1:10 · CARPETA ASFALTICA O H-21")
+kc = .38; cx0, cy0 = 410, 520
+def CX(x): return cx0 + x * kc
+def CY(z): return cy0 - z * kc
+za = -C["asfalto"]; zh = za - C["h21"]; zbs = zh - C["base"]
+h.rect(CX(0), CY(0), 1000 * kc, C["asfalto"] * kc, "url(#ASPH)", K, 1.1)
+h.rect(CX(0), CY(za), 1000 * kc, C["h21"] * kc, "url(#CONC)", K, 1.1)
+h.rect(CX(0), CY(zh), 1000 * kc, C["base"] * kc, "url(#BASE)", K, .9)
+h.rect(CX(0), CY(zbs), 1000 * kc, 100 * kc, "url(#EARTH)", "none", 0)
+h.dimV(CX(1000) + 14, CY(0), CY(za), "50 (*)", ext=CX(1000), c=OR)
+h.dimV(CX(1000) + 14, CY(za), CY(zh), "200 (ESTIM.)", ext=CX(1000), c=OR)
+h.dimV(CX(1000) + 14, CY(zh), CY(zbs), "150 (*)", ext=CX(1000), c=OR)
+for t, z in (("CARPETA ASFALTICA 8007", za / 2), ("H-21 (8014)", (za + zh) / 2), ("BASE GRANULAR (*)", (zh + zbs) / 2)):
+    h.txt(CX(20), CY(z) + 4, t, 9, 700, OR if "(*)" in t else K)
+
+# =============== TABLAS Y NOTAS ===============
+yt = tablaCod(h, 40, 810, [8004, 8007], {8004: "m² DE VEREDA", 8007: "m² DE CALZADA"}, w=800, rowh=15, tit_extra="SE MIDE", wext=140)
+cols = [(330, "l", False), (150, "c", True), (320, "l", False)]
+fil = [["COMPUTO", "CANTIDAD", "CALCULO"], ["BALDOSA (8004)", "m²", "(ANCHO ZANJA + SOBREANCHO (*)) × LARGO"],
+       ["CARPETA (8007)", "m²", "ANCHO DEL CRUCE × LARGO"], ["CONTRAPISO / MORTERO", "m³", "m² × 0,08 / m² × 0,02"]]
+yt = tablaG(h, 40, yt + 20, cols, fil, rowh=15, titulo="COMPUTO")
+yr = rayadosC(h, 40, yt + 20, ["CERAM", "MORT", "CONCP", "ANSI37", "ASPH", "CONC", "BASE", "EARTH"], cols=4, dx=200)
+notasW(h, 40, yr + 12, [
     "DATOS: FICHA DE LA APP (PLIEGO LP 21478: CONTRAPISO 8 cm + MORTERO 2 cm + BALDOSA IGUAL, EN 48 h; RELLENO EN CAPAS DE 15 cm; CALZADA H-21 0,20 (ESTIMADO) O CARPETA).",
-    "(*) TIPO Y ESPESOR DE BALDOSA, ESPESOR DE LA CARPETA Y SU BASE, SOBREANCHO DE REPOSICION: SEGUN LA VEREDA / CALLE EXISTENTE (A CONFIRMAR).",
-], 800, 10.5)
+    "(*) TIPO Y ESPESOR DE LA BALDOSA, ESPESOR DE LA CARPETA Y DE SU BASE, SOBREANCHO DE REPOSICION: SEGUN LA VEREDA / CALLE EXISTENTE (A CONFIRMAR).",
+    "FUENTES: r3d/FUENTES_civil.md."], w=800, lh=14)
 
-# ============ 3D
-h.titulo(890, 62, "VISTA 3D EN CORTE ESCALONADO · VEREDA Y CALZADA", "BALDOSA · MORTERO · CONTRAPISO · RELLENO / CARPETA ASFALTICA SOBRE SU BASE")
-h.iso(.4, 1150, 230)
-Lx, Ly = 600, 500
-h.caja(0, Lx, 0, Ly, -380, -110, "#c9a77c", "soilT", "#6b5030", .6)
-h.caja(0, Lx - 60, 0, Ly - 60, -110, -30, "#cfcabf", "concPT", "#7a7466", .6)
-h.caja(0, Lx - 120, 0, Ly - 120, -30, -10, "#a9a59c", "morT", "#666", .6)
-T = 120
-for i in range(int((Lx - 180) / T) + 1):
-    for j in range(int((Ly - 180) / T) + 1):
-        a, b = i * T, j * T
-        if a < Lx - 180 and b < Ly - 180:
-            h.caja(a + 2, min(a + T - 2, Lx - 180), b + 2, min(b + T - 2, Ly - 180), -10, 15, "#cfc6b4", "baldT", "#8a8270", .5)
-h.g3b("1", (200, 200, 15), 1480, 120, "BALDOSA (8004)")
-h.g3b("2", (Lx - 120, 200, -20), 1480, 170, "MORTERO 20")
-h.g3b("3", (Lx - 60, 250, -70), 1480, 220, "CONTRAPISO 80")
-h.g3b("4", (Lx, 300, -250), 1480, 270, "RELLENO COMPACTADO")
-# calzada asfáltica
-h.iso(.26, 1420, 470)
-h.caja(0, 600, 0, 400, -320, -200, "#c9a77c", "soilT", "#6b5030", .6)
-h.caja(0, 560, 0, 360, -200, -50, "#cfcabf", "concPT", "#7a7466", .6)
-h.caja(0, 520, 0, 320, -50, 0, "#3f4042", "asfT", "#222", .6)
-h.F3([(240, 0, 0.5), (270, 0, .5), (270, 320, .5), (240, 320, .5)], "#f2f2f2", "none", 0)
-h.g3b("5", (150, 250, 0), 1180, 620, "CARPETA ASFALTICA (8007)")
-h.g3b("6", (560, 200, -120), 1520, 640, "BASE (*)")
-
-h.bloque(890, 740, "DATOS TECNICOS", [
+# =============== 3D ===============
+h.titulo(890, 62, "VISTA 3D - CORTE ESCALONADO · VEREDA Y CALZADA", "CADA CAPA TERMINA ANTES QUE LA DE ABAJO, ASI SE VEN TODAS")
+A = img3d(h, "civil_vereda", 884, 92, 600)
+columna(h, A, [("panes", "1", "BALDOSA DE 9 PANES (8004)"), ("mortero", "2", "MORTERO 20"), ("contrapiso", "3", "CONTRAPISO 80"), ("capa1", "4", "RELLENO · CAPA 1"),
+               ("capa2", "5", "CAPA 2"), ("capa3", "6", "CAPA 3")], 1500, 110, 300, paso=27)
+columna(h, A, [("asfalto", "7", "CARPETA ASFALTICA (8007)"), ("h21", "8", "H-21 0,20"), ("base", "9", "BASE GRANULAR (*)"), ("suelo", "10", "SUELO")], 1500, 330, 560, paso=27)
+bloque(h, 890, 780, "DATOS TECNICOS", [
     "VEREDA: CONTRAPISO 8 cm + MORTERO 2 cm + BALDOSA IGUAL A LA EXISTENTE",
-    "SE REPONE EN 48 h",
-    "CALZADA: H-21 DE 0,20 (ESTIMADO) O CARPETA ASFALTICA",
-    "RELLENO COMPACTADO EN CAPAS DE 15 cm",
-], 370)
-h.bloque(1270, 740, "DONDE SE USA", [
-    "AP-TC-001: ZANJA BAJO VEREDA CON BALDOSA (ZANJEO, ITEMS 15–20)",
+    "SE REPONE EN 48 h · RELLENO COMPACTADO EN CAPAS DE 15 cm",
+    "CALZADA: H-21 DE 0,20 (ESTIMADO) O CARPETA ASFALTICA"], w=360, sz=10, lh=13.5)
+bloque(h, 1270, 780, "DONDE SE USA", [
+    "AP-TC-001: ZANJA BAJO VEREDA CON BALDOSA (ITEMS 15–20)",
     "AP-TC-002: CRUCE DE CALZADA (H-21 O ASFALTO)",
-    "GUIA «ZANJEO Y TENDIDO»",
-], 370)
-h.rotuloM("MAT-REPOSICION-1", "REPOSICION DE VEREDA", "Y CALZADA", "CORTES, COMPUTO Y VISTA 3D ESCALONADA", "S/E", "")
-guardar(h, "mat_reposicion_1")
+    "GUIA «ZANJEO Y TENDIDO»"], w=360, sz=10, lh=13.5)
+nota3d(h, 890, 1022, "RENDER: three.js (r3d/escenas/civil_vereda.mjs) CON LAS MISMAS CAPAS DEL PLANO. FUENTES: r3d/FUENTES_civil.md")
+rotuloMat(h, "MAT-REPOSICION-1", "REPOSICION DE VEREDA", "Y CALZADA", "CORTES A-A Y B-B, BALDOSA, COMPUTO Y 3D", "VARIAS", "INDICADAS · 3D S/E", rev="B", fecha=FECHA)
+guardarC(h, "mat_reposicion_1")

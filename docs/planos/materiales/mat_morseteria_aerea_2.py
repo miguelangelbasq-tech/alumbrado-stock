@@ -1,104 +1,119 @@
-import math, sys, os
+"""MAT-MORSETERIA_AEREA-2 (rev. B) · Herrajes MN (H°G°) para poste de madera: bulón de ojo MN 505 (4506), ojal MN 377 (4507), tirafondo MN 520 (4508), arandela cuadrada MN 30 (4509);
+con el rack MN 4B2L (4032) y el aislador MN 16 / 17 (4009 / 4010) que los acompañan (hoja propia: MAT-HERRAJES-2).
+Plano con la geometría de r3d/piezas/perfiles_cables.mjs (MN) y r3d/piezas/aerea.mjs; 3D: r3d/out/mn_piezas.png y mn_poste.png.
+Solo el tirafondo tiene medidas (12,7 × 101,6, pliego 15.63); lo demás (*). Fuentes: r3d/FUENTES_cables.md."""
+import sys, os, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from matkit import Ficha, K, G, OR, NV, CAD, MONO, INT
-h = Ficha(); m = h.m
-def rosca2d(x0, x1, yc, r):
-    h.rect(x0, yc - r, x1 - x0, 2 * r, "#fff", K, 1.1)
-    xx = x0 + 3
-    while xx < x1 - 3: h.ln(xx, yc - r, xx + 4, yc + r, K, .45); xx += 5
-# ================= BULON DE OJO MN 505
-h.titulo(40, 62, "BULON DE OJO MN 505 (Q 182) - 4506", "ESC. 1:2 - LARGO SEGUN EL POSTE (PASANTE)")
-k = 1.6; y = 150; x0 = 90
-h.circ(x0, y, 24, "none", K, 8); h.circ(x0, y, 24, "none", "#fff", 4.5)
-h.rect(x0 + 22, y - 6.35 * k, 120, 12.7 * k, "#fff", K, 1.1); rosca2d(x0 + 142, x0 + 300, y, 6.35 * k)
-h.rect(x0 + 260, y - 12 * k, 14, 24 * k, "url(#STEEL)", K, 1)
-h.ln(x0 - 30, y, x0 + 320, y, K, .5, h.EJE)
-h.dimH(y - 40, x0 + 22, x0 + 300, "LARGO SEGUN POSTE (*)", ext=y - 12, c=OR)
-h.dimV(x0 + 330, y - 6.35 * k, y + 6.35 * k, 'Ø 1/2" (*)', ext=x0 + 302, c=OR)
-h.dimH(y + 44, x0 - 24, x0 + 24, "OJO Ø48 (*)", ext=y + 26, c=OR)
-h.txt(x0 + 270, y + 38, "TUERCA", 10.5, 700, K, "middle")
-# ================= OJAL MN 377
-h.titulo(480, 62, "OJAL MN 377 - 4507", "ESQUEMA S/E - MEDIDAS SEGUN NORMA MN (*)")
-ox, oy = 560, 150
-h.circ(ox, oy, 22, "none", K, 7); h.circ(ox, oy, 22, "none", "#fff", 3.5)
-h.rect(ox + 20, oy - 6, 60, 12, "#fff", K, 1.1); rosca2d(ox + 80, ox + 160, oy, 6)
-h.ln(ox - 30, oy, ox + 180, oy, K, .5, h.EJE)
-h.txt(ox + 40, oy + 46, "ROSCA / LARGO SEGUN MN 377 (*)", 10.5, 400, OR)
-# ================= TIRAFONDO MN 520
-h.titulo(40, 262, "BULON TIRAFONDO MN 520 - 4508", "ESC. 1:1 - 12,7 × 101 mm (PLIEGO 15.63)")
-tx, ty = 70, 340; k1 = 2.5
-h.rect(tx, ty - 10 * k1 / 1.2, 26, 20 * k1 / 1.2, "url(#STEEL)", K, 1.2)   # cabeza
-L = 101.6 * k1 * .85
-h.rect(tx + 26, ty - 6.35 * k1, 60, 12.7 * k1, "#fff", K, 1.1)
-h.path(f"M{tx+86},{ty-6.35*k1} L{tx+26+L-30},{ty-6.35*k1} L{tx+26+L},{ty} L{tx+26+L-30},{ty+6.35*k1} L{tx+86},{ty+6.35*k1} Z", "#fff", K, 1.1)
-xx = tx + 90
-while xx < tx + 26 + L - 20: h.path(f"M{xx},{ty-6.35*k1-3} l6,{12.7*k1+6}", "none", K, .9); xx += 9
-h.ln(tx - 10, ty, tx + 26 + L + 16, ty, K, .5, h.EJE)
-h.dimH(ty + 46, tx + 26, tx + 26 + L, '101,6 (4")', ext=ty + 18)
-h.dimV(tx + 26 + L + 40, ty - 6.35 * k1, ty + 6.35 * k1, 'Ø12,7 (1/2")', ext=tx + 26 + L - 20)
-h.txt(tx, ty - 34, "CABEZA CUADRADA / HEX. (*)", 10.5, 400, OR)
-h.txt(tx + 190, ty - 34, "ROSCA PARA MADERA, PUNTA CONICA", 10.5)
-# ================= ARANDELA CUADRADA MN 30
-h.titulo(480, 262, "ARANDELA CUADRADA MN 30 - 4509", "ESQUEMA S/E - MEDIDAS SEGUN NORMA MN (*)")
-ax, ay = 560, 325
-h.rect(ax, ay, 90, 90, "url(#STEEL)", K, 1.3); h.circ(ax + 45, ay + 45, 9, "#fff", K, 1)
-h.dimH(ay - 14, ax, ax + 90, "≈ 50 (*)", c=OR); h.dimV(ax - 16, ay, ay + 90, "≈ 50 (*)", c=OR)
-h.rect(ax + 130, ay, 10, 90, "url(#STEEL)", K, 1.3); h.dimH(ay + 106, ax + 130, ax + 140, "e (*)", c=OR)
-h.txt(ax + 160, ay + 30, "SE PONE DEBAJO", 10.5); h.txt(ax + 160, ay + 46, "DE LA TUERCA DEL", 10.5); h.txt(ax + 160, ay + 62, "BULON DE OJO", 10.5)
-# códigos
-y2 = h.codigos(40, 470, [4506, 4507, 4508, 4509], extra={4506: "retención, pasante", 4507: "MN 377", 4508: "suspensión · 15.63", 4509: "con el bulón de ojo"}, wx=150)
-y3 = h.datos(40, y2 + 32, [("MATERIAL", "acero galvanizado (H°G°)"), ("TIRAFONDO 4508", "12,7 × 101 mm · pliego 15.63"), ("BULON DE OJO", "MN 505 (Q 182), con tuerca"),
-    ("ARANDELA", "cuadrada MN 30"), ("SOLO EN", "postes de madera (no fleje)"), ("MEDIDAS MN 505 / 377 / 30", "según norma MN (*)")], w=410, c1=170)
-h.lista(480, y2 + 32, "DONDE SE USA", [
-    "· Red aérea de barrio sobre poste de madera:",
-    "   retención = bulón de ojo MN 505 pasante",
-    "   + arandela cuadrada MN 30;",
-    "   suspensión = tirafondo MN 520.",
-    "· AP-TC-055 hoja A (poste de madera).",
-    "· LP 21478 ítems 15.62 / 15.63.",
-])
-h.notas(40, 1010, [
-    "COTAS EN mm. MANDA LA COTA. DEL TIRAFONDO SE CONOCEN Ø12,7 Y LARGO 101,6 (CATALOGO Y PLIEGO 15.63).",
-    "(*) MEDIDAS DE MN 505 / MN 377 / MN 30 SEGUN LA NORMA MN: A CONFIRMAR CON EL PLANO DE LA INSPECCION.",
-    "(*) EL Ø DEL BULON DE OJO, EL OJO Y LA ARANDELA SE DIBUJAN ORIENTATIVOS.",
-    "EN POSTE DE H°A° NO SE USAN: VA FLEJE INOX CON HEBILLA (VER MAT-FLEJE-1 Y MAT-MORSETERIA_AEREA-1).",
-    "FUENTE: LP 21478 (15.62 / 15.63); NORMAS MN DE HERRAJES; CATALOGO METAL-CE; FICHA DE LA APP.",
-])
-# ================= 3D PIEZAS
-h.titulo(890, 62, "VISTA 3D - HERRAJES MN (H°G°)", "BULON DE OJO, OJAL, TIRAFONDO Y ARANDELA CUADRADA")
-h.iso(1.25, 1120, 230)
-# bulón de ojo (a lo largo de x)
-m.ring([0, 0, 0], [0, 1, 0], [0, 0, 1], [1, 0, 0], 16, 26, -5, 5, 0, 360, "galv", n=30); m.render()
-m.cyl([24, 0, 0], [80, 0, 0], 6.35, "galv", n=14); m.rosca([80, 0, 0], [200, 0, 0], 6.35, "galv", paso=4); m.render()
-m.box(160, 172, -11, 11, -11, 11, "galv", edge="#555"); m.render()
-# arandela cuadrada
-m.box(80, 140, 60, 66, -30, 30, "galv", edge="#555"); m.render()
-m.cyl([110, 66.2, 0], [110, 66.4, 0], 8, "#333333", n=16); m.render()
-# tirafondo
-m.cyl([0, 120, 0], [0, 120, 0.1], 1, "galv", n=4)
-m.box(-12, 0, 108, 132, -12, 12, "galv", edge="#555"); m.render()
-m.cyl([0, 120, 0], [50, 120, 0], 6.35, "galv", n=14); m.rosca([50, 120, 0], [100, 120, 0], 6.35, "galv", paso=5); m.cyl([100, 120, 0], [112, 120, 0], 6.35, "galv", n=14, r1=.5); m.render()
-# ojal
-m.ring([170, 140, 0], [0, 1, 0], [0, 0, 1], [1, 0, 0], 14, 22, -4, 4, 0, 360, "galv", n=30); m.render()
-m.cyl([190, 140, 0], [240, 140, 0], 6, "galv", n=12); m.rosca([240, 140, 0], [290, 140, 0], 6, "galv", paso=4); m.render()
-h.g3("1", (0, 0, 26), 1450, 130, "BULON DE OJO MN 505 · 4506")
-h.g3("2", (110, 63, 30), 1450, 180, "ARANDELA MN 30 · 4509")
-h.g3("3", (70, 120, 6), 1450, 230, "TIRAFONDO MN 520 · 4508")
-h.g3("4", (170, 140, 22), 1450, 280, "OJAL MN 377 · 4507")
-# ================= 3D EN SU LUGAR · POSTE DE MADERA
-h.titulo(890, 560, "EN SU LUGAR - POSTE DE MADERA", "RETENCION CON BULON DE OJO PASANTE Y SUSPENSION CON TIRAFONDO")
-h.iso(.7, 1150, 900)
-m.cyl([0, 0, 0], [0, 0, 260], 110, "madera", n=40, seg=4); m.render()
-m.ring([0, 0, 260], [1, 0, 0], [0, 1, 0], [0, 0, 1], 0, 110, -0.5, 0, 0, 360, "#c69a62", n=40); m.render()
-# bulón de ojo pasante en z=200, sale por +x (cara visible) el ojo y por -x la tuerca (atrás)
-m.box(110, 116, -30, 30, 170, 230, "galv", edge="#555"); m.render()
-m.ring([140, 0, 200], [0, 1, 0], [0, 0, 1], [1, 0, 0], 16, 26, -5, 5, 0, 360, "galv", n=30); m.render()
-m.cyl([116, 0, 200], [120, 0, 200], 6.35, "galv", n=12); m.render()
-# tirafondo en z=80 hacia +y
-m.cyl([0, 110, 80], [0, 140, 80], 6.35, "galv", n=12); m.box(-12, 12, 140, 152, 68, 92, "galv", edge="#555"); m.render()
-h.g3("1", (150, 0, 220), 1450, 660, "BULON DE OJO (PASANTE)")
-h.g3("2", (113, 20, 180), 1450, 710, "ARANDELA CUADRADA")
-h.g3("3", (0, 146, 92), 1450, 760, "TIRAFONDO (MENSULA DE SUSP.)")
-h.g3("5", (-60, 90, 230), 1450, 810, "POSTE DE MADERA")
-h.rotulo(890, h.H - 150, 750, "MAT-MORSETERIA_AEREA-2", "HERRAJES MN PARA", "POSTE DE MADERA", "VISTAS, DATOS Y 3D", "1:2 / 1:1", "ESQUEMAS Y 3D S/E")
-h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_morseteria_aerea_2.svg")); print("ok")
+from cableskit import *
+
+MN = PC["MN"]; B, O, T, W, I, KR = MN["bulonOjo"], MN["ojal"], MN["tirafondo"], MN["arandela"], MN["aislador"], MN["rack"]
+h = hoja()
+
+def rosca_h(x0, x1, yc, r, paso):
+    h.rect(x0, yc - r, x1 - x0, 2 * r, "#fff", K, 1)
+    xx = x0 + paso / 2
+    while xx < x1 - 1: h.ln(xx, yc - r, xx + paso * .5, yc + r, K, .45); xx += paso
+    h.ln(x0, yc - r * .82, x1, yc - r * .82, K, .35); h.ln(x0, yc + r * .82, x1, yc + r * .82, K, .35)
+
+# =============== BULON DE OJO MN 505 ===============
+h.titulo(40, 62, "BULON DE OJO MN 505 - 4506", "ESC. 1:2 · CON ARANDELA MN 30 Y TUERCA · LARGO SEGUN POSTE (PASANTE)")
+e = 1.35; x0, yc = 90, 165
+rm, rt = (B["ojoRi"] + B["ojoRe"]) / 2, (B["ojoRe"] - B["ojoRi"]) / 2
+h.circ(x0, yc, B["ojoRe"] * e, "url(#HG)", K, 1.2); h.circ(x0, yc, B["ojoRi"] * e, "#fff", K, 1.2)
+xs = x0 + (rm + rt * .6) * e; L = 200
+h.rect(xs, yc - B["M"] / 2 * e, L * .45 * e, B["M"] * e, "#fff", K, 1)
+rosca_h(xs + L * .45 * e, xs + L * e, yc, B["M"] / 2 * e, 2.2 * e * 1.5)
+xa = x0 + (rm + 150) * e
+h.rect(xa, yc - W["a"] / 2 * e, W["e"] * e, W["a"] * e, "url(#HG)", K, 1); h.rect(xa + W["e"] * e, yc - B["tuerca"] / math.sqrt(3) * e, 11 * e, 2 * B["tuerca"] / math.sqrt(3) * e, "#fff", K, 1.1)
+h.ln(x0 - 30, yc, xs + L * e + 12, yc, K, .45, h.EJE)
+h.dimH(yc - 44, xs, xs + L * e, "LARGO SEGUN POSTE (*)", ext=yc - B["M"] / 2 * e, c=OR)
+h.dimV(xs + L * e + 26, yc - B["M"] / 2 * e, yc + B["M"] / 2 * e, 'Ø 1/2" (*)', ext=xs + L * e + 2, c=OR)
+h.dimH(yc + 46, x0 - B["ojoRe"] * e, x0 + B["ojoRe"] * e, "OJO Ø46 (*)", ext=yc + B["ojoRe"] * e, c=OR)
+h.txt(xa + 8, yc + W["a"] / 2 * e + 14, "ARANDELA + TUERCA", 9.2, 400, K, "middle")
+
+# =============== OJAL MN 377 ===============
+h.titulo(500, 62, "OJAL MN 377 - 4507", "ESC. 1:2 · MEDIDAS SEGUN NORMA MN (*)")
+x0, yc = 560, 165; rm, rt = (O["ojoRi"] + O["ojoRe"]) / 2, (O["ojoRe"] - O["ojoRi"]) / 2
+h.circ(x0, yc, O["ojoRe"] * e, "url(#HG)", K, 1.2); h.circ(x0, yc, O["ojoRi"] * e, "#fff", K, 1.2)
+xs = x0 + rm * e
+h.path(f"M{xs:.1f},{yc-rt*1.6*e:.1f} L{xs+14*e:.1f},{yc-(O['M']/2+1)*e:.1f} V{yc+(O['M']/2+1)*e:.1f} L{xs:.1f},{yc+rt*1.6*e:.1f} Z", "url(#HG)", K, 1)
+rosca_h(xs + 14 * e, xs + O["L"] * e, yc, O["M"] / 2 * e, 2 * e * 1.5)
+h.ln(x0 - 30, yc, xs + O["L"] * e + 10, yc, K, .45, h.EJE)
+h.dimH(yc + 40, xs + 14 * e, xs + O["L"] * e, "ROSCA / LARGO (*)", ext=yc + O["M"] / 2 * e, c=OR)
+
+# =============== TIRAFONDO MN 520 ===============
+h.titulo(40, 260, "BULON TIRAFONDO MN 520 - 4508", "ESC. 1:1 · 12,7 x 101,6 (PLIEGO 15.63) · ROSCA PARA MADERA")
+e2 = 2.4; x0, yc = 80, 345; r = T["d"] / 2 * e2
+h.rect(x0, yc - T["cab"] / 2 * e2, T["k"] * e2, T["cab"] * e2, "url(#HG)", K, 1.2)
+xs = x0 + T["k"] * e2; Ll = T["L"] * .4
+h.rect(xs, yc - r, Ll * e2, 2 * r, "#fff", K, 1)
+core = r * .72; xe = xs + T["L"] * e2
+h.path(f"M{xs+Ll*e2:.1f},{yc-core:.1f} H{xe-12*e2:.1f} L{xe:.1f},{yc:.1f} L{xe-12*e2:.1f},{yc+core:.1f} H{xs+Ll*e2:.1f} Z", "#fff", K, 1)
+xx = xs + Ll * e2 + 2
+while xx < xe - 14:
+    rr = r if xx < xe - 12 * e2 else core + (r - core) * (xe - xx) / (12 * e2)
+    h.path(f"M{xx:.1f},{yc-rr:.1f} L{xx+5.5*e2*.5:.1f},{yc+rr:.1f}", "none", K, 1); xx += 5.5 * e2
+h.ln(x0 - 10, yc, xe + 10, yc, K, .45, h.EJE)
+h.dimH(yc + 40, xs, xe, '101,6 (4")', ext=yc + r)
+h.dimV(xe + 30, yc - r, yc + r, 'Ø12,7 (1/2")', ext=xs + 20)
+h.dimV(x0 - 16, yc - T["cab"] / 2 * e2, yc + T["cab"] / 2 * e2, "19 (*)", ext=x0, c=OR)
+h.txt(x0, yc - 40, "CABEZA CUADRADA (*)", 9.5, 400, OR); h.txt(xs + Ll * e2 + 20, yc - 40, "FILETE PARA MADERA, PASO ≈ 5,5 (*)", 9.5, 400, OR)
+
+# =============== ARANDELA MN 30 ===============
+h.titulo(560, 260, "ARANDELA CUADRADA MN 30 - 4509", "ESC. 1:2 · PLANTA Y CORTE (*)")
+e3 = 1.6; ax, ay = 600, 310; a = W["a"] * e3
+h.rect(ax, ay, a, a, "#fff", K, 1.2); h.circ(ax + a / 2, ay + a / 2, W["agujero"] / 2 * e3, "#fff", K, 1)
+h.ln(ax + a / 2, ay - 8, ax + a / 2, ay + a + 8, K, .45, h.EJE); h.ln(ax - 8, ay + a / 2, ax + a + 8, ay + a / 2, K, .45, h.EJE)
+h.dimH(ay - 12, ax, ax + a, "≈ 50 (*)", c=OR)
+h.rect(ax + a + 40, ay, W["e"] * e3 * 2, a, "url(#HG)", K, 1); h.txt(ax + a + 52, ay + a + 16, "e ≈ 5 (*)", 9.5, 400, OR, "middle")
+
+# =============== AISLADOR MN 16 + RACK ===============
+h.titulo(40, 440, "RACK MN 4B2L (4032) CON AISLADOR MN 16 (4009) - CORTE", "ESC. 1:2 · EL PILOTO VA ATADO EN LA GARGANTA · VER MAT-HERRAJES-2 (*)")
+e4 = 1.5; ox, oy = 150, 590
+Hh, r1, r2, ra = I["H"], I["Dmax"] / 2, I["Dcuello"] / 2, I["agujero"] / 2
+pf = [[ra, 0], [r1 - 4, 0], [r1, 4], [r1, 14], [r1 - 3, 18], [r2 + 2, 26], [r2, 32], [r2, Hh - 32], [r2 + 2, Hh - 26], [r1 - 3, Hh - 18], [r1, Hh - 14], [r1, Hh - 4], [r1 - 4, Hh], [ra, Hh]]
+for s in (1, -1):
+    d = "M" + " L".join(f"{ox + s * rr * e4:.1f},{oy - (t - Hh / 2) * e4:.1f}" for rr, t in pf) + " Z"
+    h.path(d, "url(#PORC)", K, 1.2)
+pinr = 7 * e4
+h.rect(ox - pinr, oy - (Hh / 2 + KR["e"] + 14) * e4, 2 * pinr, (Hh + 2 * KR["e"] + 28) * e4, "#fff", K, 1)
+H2 = Hh / 2 + KR["e"] + 2; sal = r1 + 22
+for sgn in (1, -1):
+    y0 = oy - sgn * H2 * e4; h.rect(ox - (sal + 6) * e4, min(y0, y0 - sgn * KR["e"] * e4), (sal + 6 + r1 + 6) * e4, KR["e"] * e4, "url(#HG)", K, 1)
+h.rect(ox - (sal + 6) * e4 - KR["e"] * e4, oy - (H2 + 22) * e4, KR["e"] * e4, (2 * H2 + 44) * e4, "url(#HG)", K, 1.2)
+pr = PC["CAB"]["p1x25"]; px = ox + (r2 + pr["Ro"]) * e4
+nucleo2d(h, px, oy, e4, pr["conds"][0], al=True)
+h.circ(px, oy, (pr["Ro"] + .9) * e4, "none", K, .8, 'stroke-dasharray="2 1.5"')
+h.ln(ox, oy - (Hh / 2 + 20) * e4, ox, oy + (Hh / 2 + 20) * e4, K, .45, h.EJE)
+h.dimV(ox + (r1 + 30) * e4, oy - Hh / 2 * e4, oy + Hh / 2 * e4, "≈ 76 (*)", ext=ox + r1 * e4, c=OR)
+h.dimH(oy + (Hh / 2 + 34) * e4, ox - r1 * e4, ox + r1 * e4, "Ø ≈ 76 (*)", ext=oy + Hh / 2 * e4, c=OR)
+for t, (qx, qy), ty in [("AISLADOR CARRETEL DE PORCELANA (*)", (ox - r1 * e4 * .7, oy - (Hh / 2 - 8) * e4), 500), ("PERNO DEL RACK", (ox, oy - (Hh / 2 + 8) * e4), 530),
+                        ("RACK: PLANCHUELA H°G°", (ox - (sal + 6.5) * e4, oy - 20), 560), ("PILOTO EN LA GARGANTA + ATADURA", (px + 3, oy - 3), 590), ("GARGANTA Ø ≈ 52 (*)", (ox + r2 * e4, oy + 30), 620)]:
+    llamada(h, qx, qy, 330, ty, t, OR if "(*)" in t else K, "start", 9.4)
+h.txt(330, 650, "ATADURA: ALAMBRE GALV. N° 14, 2 m POR AISLADOR", 9.4); h.txt(330, 665, "(≈ 0,05 kg, CLAUDE.md §11.3) (*)", 9.4, 400, OR)
+
+# =============== TABLAS ===============
+fil = [["CODIGO", "DESCRIPCION (CATALOGO DEL PAÑOL)", "UN.", "USO"]]
+uso = {4506: "RETENCION, PASANTE", 4507: "MN 377", 4508: "SUSPENSION · 15.63", 4509: "CON EL BULON DE OJO", 4032: "MAT-HERRAJES-2", 4009: "MAT-HERRAJES-2", 4010: "MAT-HERRAJES-2"}
+for c in [4506, 4507, 4508, 4509, 4032, 4009, 4010]: r = cat(c, 56); fil.append([r[0], r[1], r[2], uso[c]])
+yt = tablaC(h, 40, 730, [(52, "c", True), (400, "l", False), (34, "c", False), (170, "l", False)], fil, "CODIGOS DEL PAÑOL (4 + 3 QUE LOS ACOMPAÑAN)", rowh=15)
+rayadosC(h, 730, 730, ["HG", "PORC", "MAD", "ALU"], cols=1)
+ydat = bloque(h, 40, yt + 18, "DATOS TECNICOS", [
+    "ACERO GALVANIZADO EN CALIENTE (H°G°). SOLO EN POSTES DE MADERA (EN H°A° VA FLEJE: MAT-MORSETERIA_AEREA-1).",
+    "RETENCION = BULON DE OJO MN 505 PASANTE + ARANDELA MN 30 · SUSPENSION = TIRAFONDO MN 520 (12,7 x 101,6) · PILOTO EN RACK 4B2L CON AISLADOR MN 16 / 17."], w=800, sz=10, lh=13.5)
+notasW(h, 40, ydat + 2, [
+    "COTAS EN mm. MANDA LA COTA. DEL TIRAFONDO SE CONOCEN Ø 12,7 Y LARGO 101,6 (CATALOGO Y PLIEGO 15.63).",
+    "(*) MEDIDAS DE MN 505 / MN 377 / MN 30 / MN 16 / 4B2L: NORMAS MN, NO PUBLICADAS EN LA WEB. A CONFIRMAR CON EL PLANO DE LA INSPECCION.",
+    "(*) Ø DEL BULON DE OJO, EL OJO, LA ARANDELA, EL CARRETEL Y EL RACK: ORIENTATIVOS. FUENTES: LP 21478 (15.62 / 15.63); r3d/FUENTES_cables.md."], w=800, lh=13)
+
+# =============== 3D ===============
+h.titulo(890, 62, "VISTA 3D - HERRAJES MN (H°G°) Y RACK CON AISLADOR", "BULON DE OJO CON ARANDELA Y TUERCA · OJAL · TIRAFONDO · ARANDELA · RACK 4B2L + MN 16")
+A = img3d(h, "mn_piezas", 890, 92, 560)
+columna(h, A, [("ojo", "", "BULON DE OJO MN 505"), ("vastago", "", "VASTAGO ROSCADO"), ("tuerca", "", "ARANDELA + TUERCA"), ("ojal", "", "OJAL MN 377"),
+               ("tira", "", "TIRAFONDO MN 520"), ("rosca", "", "FILETE PARA MADERA"), ("arandela", "", "ARANDELA MN 30"), ("rack", "", "RACK 4B2L"), ("aislador", "", "AISLADOR MN 16"), ("perno", "", "PERNO")], 1460, 100, 520, paso=36)
+h.titulo(890, 548, "EN SU LUGAR - POSTE DE MADERA", "RETENCION CON BULON DE OJO PASANTE · PILOTO ATADO AL AISLADOR EN EL RACK")
+A2 = img3d(h, "mn_poste", 890, 572, 540)
+columna(h, A2, [("ojo", "", "BULON DE OJO"), ("grampa", "", "GRAMPA DE CUÑA (4503)"), ("tuerca", "", "TUERCA DEL OTRO LADO"), ("rack", "", "RACK 4B2L"), ("aislador", "", "AISLADOR MN 16"), ("atadura", "", "ATADURA"), ("piloto", "", "PILOTO Al 1 x 25"), ("poste", "", "POSTE DE MADERA")], 1460, 590, 990, paso=36)
+h.txt(890, 1026, "RENDER: three.js (r3d/escenas/mn_piezas.mjs, mn_poste.mjs). FUENTES: r3d/FUENTES_cables.md", 9.5, 400, G, "start", INT)
+rotuloMat(h, "MAT-MORSETERIA_AEREA-2", "HERRAJES MN PARA", "POSTE DE MADERA", "VISTAS, CORTE DEL RACK, DATOS Y 3D", "1:2 / 1:1", "INDICADAS · 3D S/E", rev="B", fecha="08/11/2026")
+h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_morseteria_aerea_2.svg"))

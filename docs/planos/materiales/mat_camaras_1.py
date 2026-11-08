@@ -1,139 +1,140 @@
-import math, sys, os
+"""MAT-CAMARAS-1 (rev. B) · Cámara de inspección PVC 40 × 40 (5003), marco y tapa de bronce «A.P.» (5016), masilla de boca (5017).
+Plano y 3D con las mismas medidas (perfiles_civil.json: CAM, PVC, VER). 3D: r3d/out/civil_camara.png.
+Fuentes: ficha de la app (pliego LP 21478, plano AP-TC-002 Detalle N° 3), CRUCE_AP_TC_002, r3d/FUENTES_civil.md. Lo que no está: naranja (*)."""
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from mk_obra import *
+from civilkit import *
 
-h = HojaO()
-COD = [5003, 5016, 5017]
-h.check_codigos(COD)
-T = 8          # pared de la cámara (*)
-HC = 500       # altura máxima 50 cm (CRUCE_AP_TC_002)
-ZC = 380       # eje de los caños: ≤ 0,60 m desde el solado (dibujado a 380 (*))
+C = PC["CAM"]; V = PC["VER"]; P = PC["PVC"]; mc = C["marco"]; tp = C["tapa"]
+h = nuevaC()
+a, e, hp, zf = C["A"] / 2, C["e"], C["hpobre"], -C["prof"]
+zb = -V["baldosa"]; zm = zb - V["mortero"]; zc = zm - V["contrapiso"]; zk = zf + C["zCano"]; ro = P["d110"]["D"] / 2
 
-# ============ CORTE A-A
-h.titulo(40, 62, "CORTE A-A · POR LOS CAÑOS", "ESC. 1:8 · CAMARA EN LA VEREDA, A UN LADO DEL CRUCE (AP-TC-002)")
-k = .5; cx, y0 = 300, 150          # y0 = nivel del solado
-xi0, xi1 = cx - 200 * k, cx + 200 * k
-# terreno a los costados
-h.rect(60, y0, xi0 - T * k - 60, 340, "url(#EARTH)", K, .5); h.rect(xi1 + T * k, y0, 540 - xi1 - T * k, 340, "url(#EARTH)", K, .5)
-h.rect(60, y0 - 4, 480, 8, "url(#CONC)", K, .8)      # solado / contrapiso
-h.nivel(80, y0 - 4, "±0,00 SOLADO")
-# paredes de la cámara
-for xa in (xi0 - T * k, xi1): h.rect(xa, y0, T * k, HC * k, K, K, .4)
-# arena de asiento
-h.rect(xi0 - 30, y0 + HC * k, xi1 - xi0 + 60, 26, "url(#SAND)", K, .8)
-h.rect(60, y0 + HC * k + 26, 480, 340 - HC * k - 26, "url(#EARTH)", K, .5)
-# caños Ø110 (corte longitudinal) entrando por las dos caras
-yC = y0 + ZC * k; rC = 55 * k
-for xa, xb in ((60, xi0), (xi1, 540)):
-    h.rect(xa, yC - rC, xb - xa, 2 * rC, "#fff", K, 1); h.ln(xa, yC - rC + 2, xb, yC - rC + 2, K, .5); h.ln(xa, yC + rC - 2, xb, yC + rC - 2, K, .5)
-    h.ln(xa, yC, xb, yC, K, .4, h.EJE)
-# masilla en la boca
-for xa in (xi0 - T * k - 4, xi1 - 2): h.rect(xa, yC - rC - 4, T * k + 6, 2 * rC + 8, "url(#RAMA)", K, .8)
-# marco y tapa
-h.rect(xi0 - 10, y0 - 6, xi1 - xi0 + 20, 8, "url(#BRZ)", K, 1.2)
-h.rect(xi0 - 2, y0 - 6, xi1 - xi0 + 4, 5, K, K, .3)
-h.dimH(y0 - 40, xi0, xi1, "400 INT.", ext=y0 - 6)
-h.dimV(xi1 + 50, y0, y0 + HC * k, "≤ 500", ext=xi1 + T * k)
-h.dimV(xi0 - 70, y0, yC, "≤ 600 (*) " if False else "ZC (*)", ext=xi0 - T * k, c=OR)
-h.dimV(570, yC - rC, yC + rC, "Ø110", ext=540)
-h.globo("1", xi0 - T * k / 2, y0 + 60, xi0 - 50, y0 + 40)
-h.globo("2", cx + 60, y0 - 4, cx + 100, y0 - 54)
-h.globo("3", xi1 + 2, yC - rC - 2, xi1 + 40, yC - rC - 40)
-h.globo("4", 460, yC, 480, yC - rC - 40)
-h.txt(cx, y0 + HC * k + 18, "ARENA DE ASIENTO (*)", 9.5, 400, G, "middle")
-h.txt(60, y0 + 360, "ZC: EJE DE LOS CAÑOS. EL PLANO PIDE PROFUNDIDAD MAXIMA 0,60 m.", 10, 400, OR)
+# =============== 1. CORTE A-A (por el eje de un caño) ===============
+h.titulo(40, 62, "CORTE A-A · POR EL EJE DEL CAÑO DE TRABAJO", "ESC. 1:10 · CAMARA EN LA VEREDA, A UN LADO DEL CRUCE (AP-TC-002)")
+k = .38; ox, oy = 250, 130             # (y = 0, z = 0) → hoja; y hacia la derecha
+def X(y): return ox + y * k
+def Y(z): return oy - z * k
+B = 540
+# suelo y vereda
+h.rect(X(-B), Y(zc), (2 * B) * k, (zc - (zf - hp - 160)) * k, "url(#ANSI37)", "none", 0)
+h.rect(X(-B), Y(zm), 2 * B * k, (zm - zc) * k, "url(#CONCP)", K, .6); h.rect(X(-B), Y(zb), 2 * B * k, (zb - zm) * k, "url(#MORT)", K, .6)
+h.rect(X(-B), Y(0), 2 * B * k, -zb * k, "url(#CERAM)", K, .8)
+# hormigón pobre de confinación
+h.path(f"M{X(-a - e - hp)},{Y(zc)} V{Y(zf - hp - e)} H{X(a + e + hp)} V{Y(zc)} H{X(a + e)} V{Y(zf - e)} H{X(-a - e)} V{Y(zc)} Z", "url(#CONCP)", K, 1.0)
+# cámara PVC (paredes y fondo)
+h.path(f"M{X(-a - e)},{Y(-mc['ala'])} V{Y(zf - e)} H{X(a + e)} V{Y(-mc['ala'])} H{X(a)} V{Y(zf)} H{X(-a)} V{Y(-mc['ala'])} Z", "url(#PVCr)", K, 1.3)
+# hueco de la cámara en el contrapiso / vereda
+h.rect(X(-a), Y(0), 2 * a * k, (0 - zf) * k, "#fff", "none", 0)
+h.path(f"M{X(-a - e)},{Y(-mc['ala'])} V{Y(zf - e)} H{X(a + e)} V{Y(-mc['ala'])} H{X(a)} V{Y(zf)} H{X(-a)} V{Y(-mc['ala'])} Z", "url(#PVCr)", K, 1.3)
+# marco (ángulo) y tapa
+for s in (-1, 1):
+    x0 = a if s > 0 else -a
+    h.path(f"M{X(x0)},{Y(0)} H{X(x0 + s * mc['ala'])} V{Y(-mc['e'])} H{X(x0 + s * mc['e'])} V{Y(-mc['ala'])} H{X(x0)} Z", "url(#BRZ)", K, .9)
+h.rect(X(-a + mc["e"] + tp["juego"]), Y(0), (2 * (a - mc["e"] - tp["juego"])) * k, tp["e"] * k, "url(#BRZ)", K, 1.0)
+# caño Ø110 que entra por la pared (y > a), cortado por su eje
+h.path(f"M{X(a - 12)},{Y(zk + ro)} H{X(B)} V{Y(zk + ro - 3.2)} H{X(a - 12)} Z M{X(a - 12)},{Y(zk - ro + 3.2)} H{X(B)} V{Y(zk - ro)} H{X(a - 12)} Z", "url(#PVCr)", K, .9)
+h.rect(X(a - 40), Y(zk + ro - 3.2), 28 * k, (2 * ro - 6.4) * k, "url(#MORT)", K, .8)    # masilla
+h.ln(X(-a + 60), Y(zk), X(B + 10), Y(zk), K, .45, h.EJE)
+h.path(f"M{X(B)},{Y(zk)} H{X(a - 40)} C{X(a - 150)},{Y(zk)} {X(a - 230)},{Y(zf + 40)} {X(a - 330)},{Y(zf + 11)}", "none", K, 2.2)   # cable
+# niveles y cotas
+h.nivel(X(-B) + 18, Y(0), "±0,00 SOLADO")
+h.dimH(Y(zf - hp - e) + 22, X(-a), X(a), "400", ext=Y(zf))
+h.dimH(Y(zf - hp - e) + 40, X(-a - e - hp), X(a + e + hp), "616 (*)", ext=Y(zf - hp - e), c=OR)
+h.dimV(X(-B) - 14, Y(0), Y(zf), "600 (PROF. MAX.)", ext=X(-a))
+h.dimV(X(-a - e - hp) - 14, Y(-mc["ala"]), Y(zf), "≤ 500 (*)", ext=X(-a - e), c=OR)
+h.dimV(X(B) + 14, Y(zk), Y(zf), "80 (*)", ext=X(a + e), c=OR)
+h.dimV(X(B) + 14, Y(0), Y(zc), "125", ext=X(B))
+lineaCorte(h, X(-B) - 6, Y(zk), X(-B) - 6, Y(zk), "") if False else None
+for n, (y, z), (gx, gy) in [("1", (-a - e / 2, -330), (X(-B) + 40, Y(-330))), ("2", (-a - e - hp / 2, -420), (X(-B) + 40, Y(-420))), ("3", (-a - mc["ala"] / 2, -2), (X(-a - 60), Y(0) - 30)),
+                            ("4", (0, tp["e"] / 2), (X(0), Y(0) - 30)), ("5", (a + 100, zk + ro - 1.6), (X(a + 100), Y(zk + ro) - 34)), ("6", (a - 26, zk + 20), (X(a - 120), Y(zk + 70))),
+                            ("7", (a - 230, zf + 40), (X(a - 260), Y(zf + 130))), ("8", (300, zf - hp - 80), (X(470), Y(zf - hp - 60))), ("9", (-300, (zc + zm) / 2), (X(-B) + 40, Y(zc) + 1))]:
+    h.globo(n, X(y), Y(z), gx, gy, r=8.5)
+cx, cy = X(-a), Y(-6); h.llamadaDet(cx, cy, 26, ""); h.txt(cx - 29, cy - 18, "D1", 11, 700, K, "end")
+cx2, cy2 = X(a - 20), Y(zk); h.llamadaDet(cx2, cy2, 30, ""); h.txt(cx2 + 33, cy2 - 20, "D2", 11, 700)
 
-# ============ PLANTA
-h.titulo(620, 62, "PLANTA · SIN TAPA", "ESC. 1:8")
-k2 = .36; px, py = 700, 140; L = 400 * k2
-h.rect(px - T * k2, py - T * k2, L + 2 * T * k2, L + 2 * T * k2, K, K, .3); h.rect(px, py, L, L, "#fff", K, .8)
-h.rect(px - 10, py - 10, L + 20, L + 20, "none", K, .6, 'stroke-dasharray="5 3"')
-for xa, xb in ((px - 70, px - T * k2), (px + L + T * k2, px + L + 60)):
-    h.rect(xa, py + L / 2 - 55 * k2, xb - xa, 110 * k2, "#fff", K, .9)
-h.circ(px + L / 2, py + L / 2, 3, K, K, 0)
-h.ln(px - 80, py + L / 2, px + L + 70, py + L / 2, K, .5, h.EJE)
-for xx, lab in ((px - 80, "A"), (px + L + 66, "A")):
-    h.ln(xx, py + L / 2 - 14, xx, py + L / 2 + 14, K, 1.4); h.txt(xx, py + L / 2 - 18, lab, 12, 700, K, "middle")
-h.dimH(py + L + 30, px, px + L, "400 × 400 INT.", ext=py + L)
-h.txt(px + L / 2, py + L + 60, "LINEA DE TRAZOS: MARCO DE BRONCE", 9.5, 400, G, "middle")
+# =============== 2. PLANTA ===============
+subt(h, 620, 62, "PLANTA (SIN TAPA)", "ESC. 1:10")
+kp = .28; px, py = 735, 220
+def PX(x): return px + x * kp
+def PY(y): return py - y * kp
+h.rect(PX(-a - mc["ala"]), PY(a + mc["ala"]), (2 * a + 2 * mc["ala"]) * kp, (2 * a + 2 * mc["ala"]) * kp, "url(#BRZ)", K, .9)
+h.rect(PX(-a), PY(a), 2 * a * kp, 2 * a * kp, "#fff", K, 1.1)
+h.rect(PX(-a - e - hp), PY(a + e + hp), (2 * (a + e + hp)) * kp, (2 * (a + e + hp)) * kp, "none", K, .5, h.OCULTA)
+for xx in (-125, 125):
+    h.ln(PX(xx - ro), PY(a), PX(xx - ro), PY(a + 250), K, .7, h.OCULTA); h.ln(PX(xx + ro), PY(a), PX(xx + ro), PY(a + 250), K, .7, h.OCULTA)
+    h.ln(PX(xx), PY(a + 260), PX(xx), PY(a - 20), K, .4, h.EJE)
+h.txt(PX(-125), PY(a + 268), "TRABAJO", 8.5, 400, G, "middle"); h.txt(PX(125), PY(a + 268), "RESERVA", 8.5, 400, G, "middle")
+h.dimH(PY(-a - mc["ala"]) + 16, PX(-a), PX(a), "400", ext=PY(-a))
+h.dimH(PY(-a - mc["ala"]) + 32, PX(-a - mc["ala"]), PX(a + mc["ala"]), "460 (*)", ext=PY(-a - mc["ala"]), c=OR)
+h.dimV(PX(a + e + hp) + 14, PY(125), PY(-125), "250 (*)", ext=PX(125), c=OR)
+lineaCorte(h, PX(-125), PY(-a - e - hp - 20), PX(-125), PY(a + e + hp + 20), "A", lado=-1)
+h.txt(PX(0), PY(-a - e - hp) + 66, "CAÑOS Ø110 DEL CRUCE", 9, 400, G, "middle")
 
-# ============ D1 MARCO Y TAPA
-h.titulo(620, 400, "DETALLE D1 · MARCO Y TAPA", "ESC. 1:2 · BRONCE · MEDIDAS DEL PERFIL (*)")
-dx, dy, kd = 640, 480, 1.6
-h.rect(dx, dy, 120, 10, "url(#CONC)", K, .8)                 # solado
-h.path(f"M{dx+120},{dy} h40 v-2 h-30 v40 h-10 z", "url(#BRZ)", K, 1)    # marco (perfil L) (*)
-h.rect(dx + 132, dy - 6, 70, 6, "url(#BRZ)", K, 1.2)           # tapa
-h.txt(dx + 166, dy - 10, "TAPA «A.P.»", 9.5, 700, K, "middle")
-h.rect(dx + 112, dy + 10, 8, 50, K, K, .3)                     # pared de la cámara
-h.flecha_llamada(dx + 125, dy + 30, dx + 50, dy + 70, "MARCO (*)", 10, "end")
-h.flecha_llamada(dx + 116, dy + 50, dx + 50, dy + 92, "PARED CAMARA", 10, "end")
-h.dimH(dy - 26, dx + 132, dx + 202, "(*)", ext=dy - 6, c=OR)
-h.txt(dx + 180, dy + 60, "TAPA A NIVEL", 10, 400, K); h.txt(dx + 180, dy + 74, "DEL SOLADO", 10, 400, K)
+# =============== 3. D1 MARCO Y TAPA ===============
+subt(h, 40, 560, "D1 - MARCO Y TAPA DE BRONCE «A.P.»", "ESC. 1:1,6 · ANGULO 30 × 30 × 4 (*) · TAPA 6 CON NERVIO (*)")
+kd = 2.6; dx0, dy0 = 140, 610
+def DX(y): return dx0 + (y + a + mc["ala"] + 10) * kd
+def DY(z): return dy0 - z * kd
+h.rect(DX(-a - mc["ala"] - 10), DY(0), 60 * kd, 20 * kd + 1, "url(#CERAM)", K, .6)
+h.rect(DX(-a - mc["ala"] - 10), DY(zb), 60 * kd, 18 * kd, "url(#MORT)", K, .5)
+h.path(f"M{DX(-a - mc['ala'])},{DY(0)} H{DX(-a)} V{DY(-mc['ala'])} H{DX(-a - mc['e'])} V{DY(-mc['e'])} H{DX(-a - mc['ala'])} Z", "url(#BRZ)", K, 1.2)
+h.path(f"M{DX(-a + mc['e'])},{DY(-tp['e'])} H{DX(-a + mc['e'] + 8)} V{DY(-tp['e'] - 4)} H{DX(-a + mc['e'])} Z", "url(#BRZ)", K, .9)
+h.rect(DX(-a + mc["e"] + tp["juego"]), DY(0), 26 * kd, tp["e"] * kd, "url(#BRZ)", K, 1.2)
+h.rect(DX(-a + mc["e"] + tp["juego"] + 8), DY(-tp["e"]), 4 * kd, tp["nervio"] * kd, "url(#BRZ)", K, .9)
+h.rect(DX(-a - mc["ala"] - 4), DY(-mc["ala"]) , (mc["ala"] + 4 - 0) * kd - 1, 6 * kd, "url(#PVCr)", K, .5) if False else None
+h.dimH(DY(0) - 12, DX(-a - mc["ala"]), DX(-a), "30 (*)", ext=DY(0), c=OR)
+h.dimV(DX(-a - mc["ala"]) - 12, DY(0), DY(-mc["ala"]), "30 (*)", ext=DX(-a - mc["ala"]), c=OR)
+h.dimV(DX(-a + mc["e"] + tp["juego"] + 26) + 12, DY(0), DY(-tp["e"]), "6 (*)", ext=DX(-a + 30), c=OR)
+llamada(h, DX(-a - 2), DY(-20), DX(-a - 20), DY(-50), "ANGULO DE BRONCE (MARCO)", sz=9, anc="end")
+llamada(h, DX(-a + mc["e"] + 4), DY(-tp["e"] - 2), DX(-a + 30), DY(-30), "ASIENTO DE LA TAPA (*)", sz=9)
+llamada(h, DX(-a + 22), DY(-3), DX(-a + 34), DY(-46), "TAPA (*) · «A.P.» EN RELIEVE", sz=9)
 
-# ============ CODIGOS / DATOS
-EX = {5003: "40 × 40 · h ≤ 50", 5016: "bronce · «A.P.»", 5017: "1 por boca"}
-y = h.codigos(40, 590, COD, (46, 0, 34), wtot=800, rowh=19, titulo="VARIANTES Y CODIGOS DEL PAÑOL", extra_col=("MEDIDA", EX, 150))
+# =============== 4. D2 BOCA CON MASILLA ===============
+subt(h, 470, 560, "D2 - BOCA DEL CAÑO DE TRABAJO", "ESC. 1:4 · MASILLA 5017 ALREDEDOR DEL CABLE")
+k2 = .9; qx, qy = 560, 680; ri = ro - 3.2
+h.rect(qx - 20, qy - ro * k2 - 26, 20, 2 * ro * k2 + 52, "url(#PVCr)", K, 1.0)
+h.path(f"M{qx},{qy - ro * k2} H{qx + 200} V{qy - ri * k2} H{qx} Z M{qx},{qy + ri * k2} H{qx + 200} V{qy + ro * k2} H{qx} Z", "url(#PVCr)", K, .9)
+h.rect(qx - 24, qy - ri * k2, 40, 2 * ri * k2, "url(#MORT)", K, .9)
+h.rect(qx - 120, qy - 10 * k2, 330, 20 * k2, "#555", K, .8)
+h.dimV(qx + 236, qy - ro * k2, qy + ro * k2, "Ø110", ext=qx + 200)
+llamada(h, qx - 10, qy - ri * k2 + 10, qx - 60, qy - ro * k2 - 34, "MASILLA 5017 (*)", sz=9, anc="end")
+llamada(h, qx + 120, qy, qx + 140, qy + ro * k2 + 22, "CABLE", sz=9)
+llamada(h, qx - 10, qy + ro * k2 + 20, qx - 60, qy + ro * k2 + 40, "PARED DE LA CAMARA", sz=9, anc="end")
+
+# =============== TABLAS Y NOTAS ===============
+EX = {5003: "40 × 40 · h ≤ 50", 5016: "BRONCE · «A.P.»", 5017: "1 POR BOCA (*)"}
+yt = tablaCod(h, 40, 800, [5003, 5016, 5017], EX, w=800, rowh=15, tit_extra="MEDIDA", wext=150)
 cols = [(330, "l", False), (150, "c", True), (320, "l", False)]
-fil = [["CONCEPTO (POR CRUCE DE CALZADA)", "CANTIDAD", "DE DONDE SALE"],
+fil = [["COMPUTO (POR CRUCE DE CALZADA)", "CANTIDAD", "DE DONDE SALE"],
        ["CAMARAS 40 × 40 (5003)", "2 u", "CRUCE_AP_TC_002: camaras = 2"],
        ["MARCO Y TAPA DE BRONCE (5016)", "2 u", "1 POR CAMARA"],
-       ["MASILLA EN LAS BOCAS (5017)", "4 u (*)", "2 BOCAS POR CAMARA (*)"]]
-y = h.tablaM(40, y + 30, cols, fil, 19, "COMPUTO POR CRUCE")
-h.notasM(40, 860, [
-    "DATOS: FICHA DE LA APP (PLIEGO LP 21478, PLANO AP-TC-002) Y CRUCE_AP_TC_002: «40 × 40 cm, ALTURA MAXIMA 50 cm», PROFUNDIDAD MAXIMA 0,60 m.",
-    "40 cm ES MEDIDA INTERIOR (DIBUJO DE LA APP). LA CAMARA ES TIPO DESAGÜE CLOACAL, DE PVC.",
-    "(*) ESPESOR DE PARED, ARENA DE ASIENTO, PERFIL DEL MARCO Y TAPA: A CONFIRMAR CON EL FABRICANTE / PLANO OFICIAL.",
-    "(*) CANTIDAD DE MASILLA: SE CUENTA 1 POR BOCA DE CONDUCTO; CONFIRMAR SI EL CAÑO DE RESERVA LLEVA TAPA EN VEZ DE MASILLA.",
-    "UNA CAMARA A CADA LADO DEL CRUCE, EN LA VEREDA. EL CAÑO DE TRABAJO SE SELLA A AMBOS LADOS.",
-], 800, 10.5)
+       ["MASILLA EN LAS BOCAS (5017)", "4 u (*)", "2 BOCAS POR CAMARA (*)"],
+       ["HORMIGON POBRE DE CONFINACION", "(*)", "LA APP LO PIDE; NO DICE ESPESOR"]]
+yt = tablaG(h, 40, yt + 22, cols, fil, rowh=15, titulo="COMPUTO")
+yr = rayadosC(h, 40, yt + 22, ["PVCr", "BRZ", "CONCP", "MORT", "CERAM", "ANSI37"], cols=3, dx=260)
+notasW(h, 40, yr + 12, [
+    "COTAS EN mm. CRUCE_AP_TC_002: «40 × 40 cm, ALTURA MAXIMA 50 cm», PROFUNDIDAD MAXIMA 0,60 m. 40 cm ES MEDIDA INTERIOR. CAMARA DE PVC TIPO DESAGÜE CLOACAL.",
+    "(*) ESPESOR DE PARED, HORMIGON POBRE (100), ALTURA DE LOS CAÑOS, PERFIL DEL MARCO Y DE LA TAPA: PROPORCIONALES, A CONFIRMAR CON EL PLANO OFICIAL.",
+    "(*) LA APP: «LAS PIDE EL PLANO AP-TC-002 PERO NO TIENEN ITEM EN EL ANEXO I»: PRECIO PROPIO O RESOLVER CON LA INSPECCION.",
+    "(*) MASILLA: 1 POR BOCA; EL CAÑO DE RESERVA LLEVA TAPA 5030 Y CORDON. FUENTES: r3d/FUENTES_civil.md."], w=800, lh=14)
 
-# ============ 3D
-h.titulo(890, 62, "VISTA 3D · CAMARA CORTADA A UN CUARTO Y TAPA LEVANTADA", "PVC GRIS CLARO · MARCO Y TAPA DE BRONCE · MASILLA EN LAS BOCAS · ARENA")
-h.iso(.42, 1240, 560)
-A = 200; ZC_ = HC - ZC
-h.caja(-280, 280, -280, 280, -60, 0, C_ARENA, "arenaT", "#8a6a2a", .6)
-# caño izquierdo (atrás) y pared trasera / izquierda
-h.cano3("x", -560, -A - T, -100, ZC_, 55, 3.2, C_PVC)
-h.caja(-A - T, A + T, -A - T, -A, 0, HC, C_PVC, None, "#666", .6)
-h.caja(-A - T, -A, -A, A + T, 0, HC, C_PVC, None, "#666", .6)
-# masilla de la boca izquierda (cara interior)
-h.cil("x", -A, -A + 6, -100, ZC_, 62, "#b98a52", tapa="#c99a62", borde="#6b4a22", bw=.5, agujero=(52, "#7d838c"))
-h.cil("x", -A + 6, -A + 30, -100, ZC_, 55, C_PVC, tapa=sombra(C_PVC, 1.1), borde="#555", bw=.5, agujero=(52, C_PVC_IN))
-# pared derecha (solo la mitad de atrás) y frente (solo la mitad izquierda)
-h.caja(A, A + T, -A, 0, 0, HC, C_PVC, None, "#666", .6)
-h.F3([(A + T, -A, 0), (A + T, 0, 0), (A + T, 0, HC), (A + T, -A, HC)], sombra(C_PVC, .64), "#666", .6)
-h.cil("x", A + T, A + T + 6, -100, ZC_, 62, "#b98a52", tapa="#c99a62", borde="#6b4a22", bw=.5, agujero=(55, C_PVC))
-h.cano3("x", A + T + 6, 520, -100, ZC_, 55, 3.2, C_PVC)
-h.caja(-A, 0, A, A + T, 0, HC, C_PVC, None, "#666", .6)
-# canto de corte de las paredes
-h.F3([(0, A, 0), (0, A + T, 0), (0, A + T, HC), (0, A, HC)], "#555", "#333", .5)
-h.F3([(A, 0, 0), (A + T, 0, 0), (A + T, 0, HC), (A, 0, HC)], "#555", "#333", .5)
-# marco y tapa (levantados)
-zm = HC + 160
-for (x0, x1, y0_, y1) in ((-A - 20, A + 20, -A - 20, -A), (-A - 20, -A, -A, A + 20), (A, A + 20, -A, A + 20), (-A, A, A, A + 20)):
-    h.caja(x0, x1, y0_, y1, zm, zm + 14, C_BRONCE, None, "#6b4a12", .6)
-zt = zm + 150
-h.caja(-A + 4, A - 4, -A + 4, A - 4, zt, zt + 8, C_BRONCE, None, "#6b4a12", .7)
-h.txtZ(0, 0, zt + 8, "A.P.", 40, 800, "#6b4a12", "middle")
-for xx in (-A - 20, A + 20):
-    a = h.P(xx, A + 20, HC + 4); b = h.P(xx, A + 20, zm); h.ln(a[0], a[1], b[0], b[1], NV, .6, 'stroke-dasharray="4 3"')
-h.g3b("1", (-A - T, 120, 300), 1450, 230, "CAMARA PVC 40 × 40 (5003)")
-h.g3b("2", (A - 4, 0, zt + 4), 1450, 150, "MARCO Y TAPA «A.P.» (5016)")
-h.g3b("3", (A + T + 3, -100, ZC_ + 60), 1450, 300, "MASILLA EN LA BOCA (5017)")
-h.g3b("4", (420, -100, ZC_ + 55), 1450, 360, "CAÑO Ø110 DEL CRUCE")
-h.g3b("5", (200, 260, -30), 1450, 640, "ARENA DE ASIENTO (*)")
-h.cota3((-A, A + T, 0), (-A, A + T, HC), "≤ 500", off=(-60, 0, 0), c=NV, sz=10, lado=-1)
-
-h.bloque(890, 730, "DATOS TECNICOS", [
+# =============== 3D ===============
+h.titulo(890, 62, "VISTA 3D - CAMARA EN LA VEREDA, MEDIO CORTE", "SE SACO LA MITAD DE ADELANTE · TAPA DE BRONCE LEVANTADA PARA VER EL ASIENTO")
+A = img3d(h, "civil_camara", 884, 90, 600)
+columna(h, A, [("tapa", "4", "TAPA DE BRONCE"), ("leyenda", "", "«A.P.» EN RELIEVE"), ("marco", "3", "MARCO (ANGULO)"), ("baldosa", "", "BALDOSA"), ("asiento", "", "ASIENTO DE LA TAPA"),
+               ("contrapiso", "9", "CONTRAPISO"), ("reserva", "", "RESERVA CON TAPA 5030"), ("trabajo", "5", "CAÑO Ø110"), ("masilla", "6", "MASILLA 5017"), ("relleno", "8", "RELLENO"),
+               ("pared", "1", "PARED PVC"), ("pobre", "2", "H° POBRE (*)"), ("cable", "7", "CABLE"), ("fondo", "", "FONDO (*)")],
+        1490, 112, 690, paso=25)
+bloque(h, 890, 715, "DATOS TECNICOS", [
     "CAMARA DE PVC TIPO DESAGÜE CLOACAL, 40 × 40 cm INTERIOR",
     "ALTURA MAXIMA 50 cm · PROFUNDIDAD MAXIMA 0,60 m",
     "MARCO DE BRONCE CON TAPA «A.P.», A NIVEL DEL SOLADO",
-    "BOCAS DE LOS CONDUCTOS OBTURADAS CON MASILLA O ESPUMA",
-], 370)
-h.bloque(1270, 730, "DONDE SE USA", [
-    "AP-TC-002 CRUCE DE CALZADA: 2 CAMARAS, UNA A CADA LADO",
+    "BOCAS DE LOS CONDUCTOS OBTURADAS CON MASILLA O ESPUMA"], w=360, sz=10, lh=13.5)
+bloque(h, 1270, 715, "DONDE SE USA", [
+    "AP-TC-002 CRUCE DE CALZADA: 2 CAMARAS, UNA A CADA LADO, EN LA VEREDA",
     "LOS 2 CAÑOS Ø110 LLEGAN DE CAMARA A CAMARA",
-    "GUIA «ZANJEO Y TENDIDO»",
-], 370)
-h.rotuloM("MAT-CAMARAS-1", "CAMARA DE INSPECCION", "PVC 40 × 40 CON TAPA «A.P.»", "CORTE, PLANTA, DETALLE DEL MARCO Y VISTA 3D", "1:8 / 1:2", "3D S/E")
-guardar(h, "mat_camaras_1")
+    "GUIA «ZANJEO Y TENDIDO»"], w=360, sz=10, lh=13.5)
+nota3d(h, 890, 1022, "RENDER: three.js (r3d/escenas/civil_camara.mjs) CON LAS MISMAS MEDIDAS DEL PLANO. FUENTES: r3d/FUENTES_civil.md")
+rotuloMat(h, "MAT-CAMARAS-1", "CAMARA DE INSPECCION", "PVC 40 × 40 CON TAPA «A.P.»", "CORTE A-A, PLANTA, D1, D2 Y 3D", "VARIAS", "INDICADAS · 3D S/E", rev="B", fecha=FECHA)
+guardarC(h, "mat_camaras_1")

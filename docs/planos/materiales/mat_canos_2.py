@@ -1,154 +1,134 @@
-import math, sys, os
+"""MAT-CAÑOS-2 (rev. B) · Caño PEAD Ø50 PN6 (5005), corrugado 3/4" (5006) y grampa de sujeción (5015).
+Plano y 3D con las mismas medidas (perfiles_civil.json). 3D: r3d/out/civil_pead.png, civil_pead_rollo.png, civil_corr.png.
+Fuentes: ficha de la app (familia «Caños y conductos»), AP-TC-007, r3d/FUENTES_civil.md. Lo que no está: naranja (*)."""
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from mk_obra import *
-from mk_obra import _circ
-from matkit import M3
+from civilkit import *
 
-h = HojaO()
-COD = [5005, 5006, 5015]
-h.check_codigos(COD)
+PE = PC["PEAD"]; CR = PC["CORR"]; GR = PC["GRAMPA"]; CP = PE["cupla"]
+h = nuevaC()
+ro, e = PE["D"] / 2, PE["e"]; ri = ro - e
 
-# ============ A · PEAD Ø50
-h.titulo(40, 62, "CORTE A-A · CAÑO PEAD Ø50 PN6", "ESC. 1:1 · POLIETILENO NEGRO")
-k = 2.0; cx, cy = 150, 210; R = 25 * k; e = 3.0 * k
-h.circ(cx, cy, R, "url(#ANSI31)", K, 1.4); h.circ(cx, cy, R - e, "#fff", K, .9)
-h.ln(cx - R - 14, cy, cx + R + 14, cy, K, .4, h.EJE); h.ln(cx, cy - R - 14, cx, cy + R + 14, K, .4, h.EJE)
-h.dimH(cy + R + 30, cx - R, cx + R, "Ø50", ext=cy)
-h.flecha_llamada(cx + R * .72, cy - R * .72, cx + 80, cy - R - 20, "e (*) SEGUN PN6", 10.5, "start", OR)
-h.txt(cx, cy + R + 56, "5005 · PEAD Ø50 PN6", 11, 700, K, "middle")
-# corte longitudinal con cable adentro
-h.titulo(330, 62, "CORTE B-B · CON EL CABLE ADENTRO", "ESC. 1:1 · EJ. CABLE 4 × 2,5 (Ø12)")
-x0, x1 = 340, 820
-h.rect(x0, cy - R, x1 - x0, e, "url(#ANSI31)", K, 1); h.rect(x0, cy + R - e, x1 - x0, e, "url(#ANSI31)", K, 1)
-h.rect(x0 - 40, cy + R - e - 24, x1 - x0 + 80, 24, "#fff", K, 1)
-h.txt(x0 + 200, cy + R - e - 8, "CABLE (APOYADO EN EL FONDO DEL CAÑO)", 10, 400, G, "middle")
-for xx in (x0, x1): h.path(f"M{xx},{cy-R-8} l-5,10 l10,8 l-5,10 V{cy+R+8}", "none", K, .7)
-h.ln(x0 - 50, cy, x1 + 50, cy, K, .4, h.EJE)
-h.dimV(x1 + 36, cy - R, cy + R, "Ø50", ext=x1)
-h.globo("1", x0 + 60, cy - R + 3, x0 + 40, cy - R - 30); h.globo("2", x0 + 310, cy + R - 14, x0 + 330, cy - R - 30)
+# =============== 1. CORTE A-A · PEAD Ø50 ===============
+h.titulo(40, 62, "CORTE A-A · PEAD Ø50", "ESC. 2:1 · PEAD NEGRO")
+k = 2.0; cx, cy = 140, 190
+anillo(h, cx, cy, ro * k, ri * k, "PE", 1.3)
+h.ln(cx - ro * k - 12, cy, cx + ro * k + 12, cy, K, .4, h.EJE); h.ln(cx, cy - ro * k - 12, cx, cy + ro * k + 12, K, .4, h.EJE)
+h.dimH(cy + ro * k + 24, cx - ro * k, cx + ro * k, "Ø50", ext=cy)
+h.dimH(cy + ro * k + 44, cx - ri * k, cx + ri * k, "Ø44 (*)", ext=cy, c=OR)
+h.dimV(cx + ro * k + 22, cy - ro * k, cy - ri * k, "3,0 (*)", ext=cx, c=OR)
+h.txt(40, 318, "PN6 EN PE100 (SDR 26) DARIA ≈ 2,0: CONFIRMAR LA PARED REAL", 9.5, 400, OR)
 
-# ============ B · CORRUGADO 3/4"
-h.titulo(40, 360, "VISTA Y MEDIO CORTE · CAÑO PVC CORRUGADO 3/4\"", "ESC. 2:1 · PARA PASAR EL CABLE DE PAT 1 × 10 · PASO Y Ø EXTERIOR (*)")
-k2 = 2.6; yc = 470; Re = 11 * k2; Ri = 8.4 * k2; paso = 5 * k2 / 1.0 * 1.2   # (*) medidas típicas, ilustrativas
-x0, x1 = 60, 560
-# arriba en corte (diente de sierra redondeado), abajo en vista
-d = f"M{x0},{yc-Ri}"; xx = x0
-while xx < x1:
-    d += f" Q{xx+paso*.25},{yc-Re-2} {xx+paso*.5},{yc-Re} Q{xx+paso*.75},{yc-Re-2} {xx+paso},{yc-Ri}"; xx += paso
-h.path(d, "none", K, 1.2)
-d2 = d.replace(f"M{x0},{yc-Ri}", f"M{x0},{yc-Ri+2.2}")
-for xx in [x0 + i * paso for i in range(int((x1 - x0) / paso))]:
-    h.rect(xx + paso * .3, yc - Re + 1, paso * .4, Re - Ri - 1, K, K, .2)
-xx = x0
-while xx < x1:
-    h.path(f"M{xx},{yc+Ri} Q{xx+paso*.25},{yc+Re+2} {xx+paso*.5},{yc+Re} Q{xx+paso*.75},{yc+Re+2} {xx+paso},{yc+Ri}", "none", K, 1.1)
-    h.ln(xx + paso * .5, yc + Re - 1, xx + paso * .5, yc + Ri + 2, K, .4); xx += paso
-h.ln(x0, yc + Ri, x0, yc - Ri, K, 1); h.ln(x0 - 20, yc, x1 + 20, yc, K, .4, h.EJE)
-# cable de PAT adentro
-rc = 3.6 * k2 / 1.0 * 1.0
-h.rect(x0 + 30, yc - rc, x1 - x0 - 10, 2 * rc, "#fff", K, .9)
-h.txt(x0 + 260, yc + 4, "CABLE 1 × 10 V/A (PAT)", 9.5, 400, G, "middle")
-h.dimV(x1 + 40, yc - Re, yc + Re, "Ø EXT. (*)", ext=x1, c=OR)
-h.dimV(x1 + 80, yc - Ri, yc + Ri, "Ø INT. (*)", ext=x1 + 10, c=OR)
-h.dimH(yc - Re - 22, x0 + 4 * paso, x0 + 5 * paso, "PASO (*)", ext=yc - Ri, c=OR)
-h.globo("3", x0 + 240, yc - Re, x0 + 270, yc - Re - 34)
+# =============== 2. UNION A COMPRESION · MEDIO CORTE ===============
+h.titulo(330, 62, "UNION A COMPRESION (*) · MEDIO CORTE B-B", "ESC. 1:0,75 · SIN CODIGO EN EL PAÑOL (A VINCULAR)")
+kb = 1.35; X0 = 595; Y0 = 205
+def bx(x): return X0 + x * kb
+def by(r): return Y0 - r * kb
+L2 = CP["L"] / 2; Lt = CP["Lt"]; Rc = CP["Dc"] / 2; Rt = CP["tuerca"] / 2
+# caños (arriba en corte, abajo vista)
+for s in (-1, 1):
+    xx0, xx1 = (bx(-170), bx(-4)) if s < 0 else (bx(4), bx(170))
+    h.rect(xx0, by(ro), xx1 - xx0, e * kb, "url(#PE)", K, 1.0)
+    h.ln(xx0, by(-ro), xx1, by(-ro), K, 1.1)
+# cuerpo
+h.path(f"M{bx(-L2 + Lt - 6)},{by(Rc)} H{bx(L2 - Lt + 6)} V{by(ro + .5)} H{bx(-L2 + Lt - 6)} Z", "url(#PVCr)", K, 1.1)
+# tuercas
+for s in (-1, 1):
+    a, b = (-L2, -L2 + Lt) if s < 0 else (L2 - Lt, L2)
+    h.path(f"M{bx(a)},{by(Rt)} H{bx(b)} V{by(Rc - 2.5)} H{bx(a + (6 if s < 0 else 0))} V{by(ro + .8)} H{bx(a)} Z" if s < 0 else
+           f"M{bx(a)},{by(Rt)} H{bx(b)} V{by(ro + .8)} H{bx(b - 6)} V{by(Rc - 2.5)} H{bx(a)} Z", "url(#PLAS)", K, 1.1)
+    xo = s * (L2 - Lt - 10); h.circ(bx(xo), by(ro + .3 + CP["oring"]), CP["oring"] * kb, "url(#GOMA)", K, .8)
+    xa = s * (L2 - Lt + 8)
+    h.path(f"M{bx(xa - 6)},{by(ro + 6)} H{bx(xa + 6)} V{by(ro + .2)} " + " ".join(f"L{bx(xa + 6 - 3 * i - 1.5)},{by(ro + 1.4)} L{bx(xa + 6 - 3 * (i + 1))},{by(ro + .2)}" for i in range(4)) + " Z", "url(#CERAM)", K, .8)
+    h.ln(bx(s * 250) - 0, by(-Rt), bx(s * L2), by(-Rt), K, 0)
+# vista abajo (contorno de tuercas y cuerpo)
+h.path(f"M{bx(-L2)},{by(-ro)} V{by(-Rt)} H{bx(-L2 + Lt)} V{by(-Rc)} H{bx(L2 - Lt)} V{by(-Rt)} H{bx(L2)} V{by(-ro)}", "none", K, 1.1)
+h.ln(bx(-178), Y0, bx(178), Y0, K, .45, h.EJE)
+h.ln(bx(-4), by(ro), bx(-4), by(ri), K, 1.2); h.ln(bx(4), by(ro), bx(4), by(ri), K, 1.2)
+h.dimH(by(Rt) - 14, bx(-L2), bx(L2), "150 (*)", ext=by(Rt), c=OR)
+h.dimV(bx(L2) + 18, by(Rt), by(-Rt), "Ø96 (*)", ext=bx(L2), c=OR)
+for n, (x, r), (gx, gy) in [("1", (-140, ro - e / 2), (bx(-140), by(Rt) - 22)), ("2", (0, Rc - 3), (bx(-30), by(Rt) - 22)), ("3", (-L2 + Lt / 2, Rt - 4), (bx(-L2 + 8), by(Rt) - 22)),
+                            ("4", (L2 - Lt - 10, ro + 3.8), (bx(30), by(Rt) - 22)), ("5", (L2 - Lt + 8, ro + 4), (bx(L2 - 10), by(Rt) - 22)), ("6", (0, ro - e / 2), (bx(60), Y0 + 26))]:
+    h.globo(n, bx(x), by(r), gx, gy, r=9)
+h.txt(bx(-170), by(-Rt) + 24, "1 CAÑO · 2 CUERPO · 3 TUERCA · 4 JUNTA TORICA · 5 ANILLO DE AGARRE · 6 TOPE (*)", 9.5, 400, OR)
 
-# ============ C · GRAMPA
-h.titulo(40, 580, "GRAMPA DE SUJECION (5015) · FRENTE Y LATERAL", "ESC. 1:1 · TIPO «OMEGA» CON 2 AGUJEROS (*) · SE ELIGE POR EL Ø DEL CAÑO")
-gx, gy, kg = 200, 720, 3.2
-rr = 11 * kg; ala = 14 * kg; t = 1.2 * kg
-h.path(f"M{gx-rr-ala},{gy} H{gx-rr} V{gy-rr*0.2} A{rr},{rr} 0 0 1 {gx+rr},{gy-rr*0.2} V{gy} H{gx+rr+ala} V{gy-t} H{gx+rr+t} V{gy-rr*0.2} A{rr+t},{rr+t} 0 0 0 {gx-rr-t},{gy-rr*0.2} V{gy-t} H{gx-rr-ala} Z", "url(#ANSI31)", K, 1)
-h.ln(gx - rr - ala - 20, gy, gx + rr + ala + 20, gy, K, 1.4)
-h.txt(gx + rr + ala + 24, gy + 4, "PARED / PISO", 10, 400, G)
-h.circ(gx, gy - rr * .55, rr * .78, "#fff", K, .9, 'stroke-dasharray="5 3"')
-h.txt(gx, gy - rr * .55 + 4, "CAÑO", 9, 400, G, "middle")
-for sx in (-1, 1): h.ln(gx + sx * (rr + ala / 2), gy - t - 6, gx + sx * (rr + ala / 2), gy + 14, K, .5, h.EJE)
-h.dimH(gy + 30, gx - rr - ala, gx + rr + ala, "LARGO (*)", ext=gy, c=OR)
-# lateral (vista superior de la grampa)
-lx, ly = 470, 650
-h.rect(lx, ly, 2 * (rr + ala), 14 * kg / 1.6, "#fff", K, 1.2)
-for sx in (lx + ala / 2, lx + 2 * rr + 1.5 * ala): h.circ(sx, ly + 14 * kg / 3.2, 4, "#fff", K, .8)
-h.dimV(lx - 14, ly, ly + 14 * kg / 1.6, "ANCHO (*)", ext=lx, c=OR)
-h.txt(lx, ly - 10, "VISTA DE ARRIBA", 10, 400, G)
-h.txt(lx + 2 * (rr + ala) + 12, ly + 16, "2 AGUJEROS PARA TORNILLO", 10, 400, G)
-h.txt(lx + 2 * (rr + ala) + 12, ly + 30, "CON FISHER (VER MAT-FIJACION-1)", 10, 400, G)
-h.globo("4", gx + rr * .7, gy - rr * .9, gx + 70, gy - rr - 44)
+# =============== 3. CURVADO EN FRIO ===============
+subt(h, 40, 360, "CURVA EN FRIO", "ESC. 1:25 · SIN ACCESORIO · R ≥ 20 × D (*)")
+kc = .04 * 1.0; ox, oy = 60, 560; Rr = PE["Rcurva"]
 
-# ============ CODIGOS + COMPARACION
-EX = {5005: "Ø50 · e (*) · NEGRO", 5006: "3/4\" · Ø (*)", 5015: "medida (*)"}
-y = h.codigos(40, 790, COD, (46, 0, 34), wtot=800, rowh=19, titulo="VARIANTES Y CODIGOS DEL PAÑOL", extra_col=("MEDIDA", EX, 150))
+cxa, cya = ox + Rr * kc * 4.2, oy
+for rr, sw in ((Rr * kc * 4.2 + ro * kc * 4.2, 1.2), (Rr * kc * 4.2 - ro * kc * 4.2, 1.2)):
+    h.path(arcoPath(cxa, cya, rr, 180, 270), "none", K, sw)
+h.path(arcoPath(cxa, cya, Rr * kc * 4.2, 180, 270), "none", K, .45, h.EJE)
+h.ln(cxa, cya, cxa - Rr * kc * 4.2, cya, K, .4, h.OCULTA); h.ln(cxa, cya, cxa, cya - Rr * kc * 4.2, K, .4, h.OCULTA)
+h.txt(cxa - Rr * kc * 2.1, cya + 14, "R ≥ 1000 (*)", 10, 700, OR, "middle")
+h.txt(40, 595, "NO SE CALIENTA CON SOPLETE · SI SE APLASTA, SE CORTA EL TRAMO (*)", 9.5, 400, OR)
+
+# =============== 4. CORRUGADO 3/4" · MEDIO CORTE ===============
+subt(h, 300, 360, "CORRUGADO 3/4\" · MEDIO CORTE", "ESC. 4:1 · Ø Y PASO (*)")
+k4 = 4.0; X4, Y4 = 330, 470
+def cz(x): return CR["De"] / 2 - CR["cresta"] * (.5 - .5 * math.cos(x / CR["paso"] * 2 * math.pi))
+xs = [i * .25 for i in range(0, int(48 / .25) + 1)]
+top_o = [(X4 + x * k4, Y4 - cz(x) * k4) for x in xs]; top_i = [(X4 + x * k4, Y4 - (cz(x) - .55) * k4) for x in xs]
+h.path("M" + " L".join(f"{a:.1f},{b:.1f}" for a, b in top_o) + " L" + " L".join(f"{a:.1f},{b:.1f}" for a, b in reversed(top_i)) + " Z", "url(#PVCr)", K, .9)
+h.path("M" + " L".join(f"{a:.1f},{2 * Y4 - b:.1f}" for a, b in top_o), "none", K, 1.0)
+h.ln(X4 - 10, Y4, X4 + 48 * k4 + 10, Y4, K, .45, h.EJE)
+h.dimV(X4 + 48 * k4 + 18, Y4 - CR["De"] / 2 * k4, Y4 + CR["De"] / 2 * k4, "Ø25 (*)", ext=X4 + 48 * k4, c=OR)
+h.dimV(X4 - 16, Y4 - (CR["De"] / 2 - CR["cresta"] - .55) * k4, Y4 + (CR["De"] / 2 - CR["cresta"] - .55) * k4, "Ø19,5 (*)", ext=X4, c=OR)
+h.dimH(Y4 - CR["De"] / 2 * k4 - 14, X4 + CR["paso"] * 2 * k4, X4 + CR["paso"] * 3 * k4, "4,2 (*)", ext=Y4 - CR["De"] / 2 * k4, c=OR)
+
+# =============== 5. GRAMPA 5015 ===============
+subt(h, 590, 360, "GRAMPA 5015 · Ø50", "ESC. 1:1,25 · VISTA DE FRENTE (*)")
+k5 = 1.25; gx, gy = 650, 530; rc = ro + GR["chapa"] / 2
+h.ln(gx - 80, gy + ro * k5, gx + 80, gy + ro * k5, K, 1.4); h.rect(gx - 80, gy + ro * k5, 160, 12, "url(#CONC)", "none", 0)
+anillo(h, gx, gy, ro * k5, ri * k5, "PE", 1.0)
+Ro, Ri = (rc + GR["chapa"] / 2) * k5, (rc - GR["chapa"] / 2) * k5
+h.path(f"M{gx - Ro - GR['ala'] * k5},{gy + ro * k5} V{gy + ro * k5 - GR['chapa'] * k5} H{gx - Ro} V{gy} " + f"A{Ro},{Ro} 0 0,1 {gx + Ro},{gy} V{gy + ro * k5 - GR['chapa'] * k5} H{gx + Ro + GR['ala'] * k5} V{gy + ro * k5} H{gx + Ri} V{gy} A{Ri},{Ri} 0 0,0 {gx - Ri},{gy} V{gy + ro * k5} Z", "url(#MET)", K, 1.0)
+for s in (-1, 1):
+    xx = gx + s * (Ro + GR["ala"] * k5 / 2); h.ln(xx, gy + ro * k5 - 6, xx, gy + ro * k5 + 22, K, .8, h.OCULTA); h.rect(xx - 4, gy + ro * k5 - GR["chapa"] * k5 - 3, 8, 3, "#fff", K, .8)
+h.dimH(gy - Ro - 14, gx - Ro - GR["ala"] * k5, gx + Ro + GR["ala"] * k5, "≈ 100 (*)", ext=gy - Ro, c=OR)
+h.txt(gx, gy + ro * k5 + 36, "CHAPA H°G° 1,2 × 20 (*) · 2 TORNILLOS CON FISHER", 9, 400, OR, "middle")
+
+# =============== TABLAS Y NOTAS ===============
+EX = {5005: "Ø50 · e 3,0 (*) · NEGRO", 5006: "3/4\" · Ø25 (*)", 5015: "PARA Ø50 (*)"}
+yt = tablaCod(h, 40, 640, [5005, 5006, 5015], EX, w=800, rowh=15, tit_extra="MEDIDA", wext=170)
 cols = [(150, "l", False), (210, "c", False), (220, "c", False), (220, "c", False)]
 fil = [["", "PEAD Ø50 (5005)", "PVC RIGIDO Ø50 (5009)", "CORRUGADO 3/4\" (5006)"],
-       ["SE CURVA", "SI, SIN ACCESORIOS (*)", "NO: CON CURVAS", "SI"],
+       ["SE CURVA", "SI, EN FRIO (R ≥ 20 D (*))", "NO: CON CURVAS", "SI, A MANO"],
+       ["UNION", "A COMPRESION (*)", "ENCHUFE PEGADO", "CUPLA (*)"],
        ["USO EN LA APP", "VEREDA, HORMIGON, CANAL", "CONDUCTO DE PAT", "CABLE DE PAT"],
        ["UNIDAD DEL PAÑOL", "Un. (*)", "m", "Un. (*)"]]
-y = h.tablaM(40, y + 30, cols, fil, 19, "CUAL USAR")
-h.notasM(40, 1030, [
-    "DATOS: FICHA DE LA APP (FAMILIA «CAÑOS Y CONDUCTOS») Y AP-TC-007 (UN PEAD Ø50 POR CIRCUITO A LA ZANJA).",
-    "(*) ESPESOR DEL PEAD PN6, Ø Y PASO DEL CORRUGADO, MEDIDAS DE LA GRAMPA: A CONFIRMAR CON EL FABRICANTE.",
-    "(*) 5005 Y 5006 SE DAN POR «Un.»: CONFIRMAR SI ES ROLLO O TRAMO Y CUANTOS METROS TRAE.",
-], 800, 10.5)
+yt = tablaG(h, 40, yt + 24, cols, fil, rowh=15, titulo="CUAL USAR")
+yr = rayadosC(h, 40, yt + 24, ["PE", "PVCr", "PLAS", "GOMA", "MET", "CERAM"], cols=3, dx=260)
 
-# ============ 3D
-h.titulo(890, 62, "VISTA 3D · PEAD Ø50, CORRUGADO 3/4\" Y GRAMPA", "PEAD NEGRO · CORRUGADO GRIS OSCURO · GRAMPA GALVANIZADA")
-# PEAD saliendo curvo con el cable
-h.iso(1.25, 1080, 330)
-Rb = 80; pts = [(-160, 0, 0), (-60, 0, 0)] + [(-60 + Rb * math.sin(a), 0, Rb - Rb * math.cos(a)) for a in [math.pi / 2 * j / 12 for j in range(1, 13)]]
-barrido(h, pts, 25, "negro", 40)
-h.cil("z", Rb, Rb + 40, -60 + Rb, 0, 25, C_PEAD, tapa="#3a3d42", metal=True, borde="#000", bw=.5, agujero=(22, "#0b0b0c"))
-h.cil("z", Rb + 40, Rb + 100, -60 + Rb, 0, 6, C_VAINA, tapa="#3a3d42", borde="#000", bw=.4)
-h.g3b("1", (-120, 0, 25), 1420, 130, "PEAD Ø50 NEGRO (5005)")
-h.g3b("2", (-60 + Rb, 0, Rb + 90), 1420, 175, "CABLE QUE SALE POR EL CAÑO")
-h.txt(900, 400, "PEAD: SE CURVA, VA SIN UNIONES EN EL TRAMO (*)", 10.5, 400, OR, "start", INT)
+notasW(h, 40, yr + 14, [
+    "COTAS EN mm. DATOS: FICHA DE LA APP (FAMILIA «CAÑOS Y CONDUCTOS») Y AP-TC-007 (UN PEAD Ø50 POR CIRCUITO DEL TABLERO A LA ZANJA).",
+    "(*) PARED DEL PEAD: SE DIBUJO 3,0 (TRITUBO PEAD 50 × 3); PN6 EN PE100 SERIA ≈ 2,0. CONFIRMAR CON EL PROVEEDOR.",
+    "(*) LA APP NO DICE COMO SE UNE EL PEAD: SE DIBUJO LA UNION A COMPRESION COMUN (CUERPO, TUERCAS, JUNTA, ANILLO). SIN CODIGO: A VINCULAR.",
+    "(*) Ø Y PASO DEL CORRUGADO, MEDIDAS DE LA GRAMPA, RADIO DE CURVADO: PROPORCIONALES, A CONFIRMAR.",
+    "(*) 5005 Y 5006 SE DAN POR «Un.»: CONFIRMAR SI ES ROLLO O TRAMO Y CUANTOS METROS TRAE. FUENTES: r3d/FUENTES_civil.md."], w=800, lh=14)
 
-# corrugado + grampa sobre una pared
-h.iso(1.0, 1110, 520)
-h.BOX(-60, 260, -40, -34, -60, 60, "#d6d9dc", "#b9bec4", "#c3c8cc", "#555", .6)
-m = M3(h)
-Re, Ri = 11, 8.4
-n = 0; xx = -40
-while xx < 230:
-    h.cil("x", xx, xx + 3, -22, 0, Re, C_CORR, tapa=None, metal=False, borde=None)
-    h.cil("x", xx + 3, xx + 6, -22, 0, Ri + .8, sombra(C_CORR, .85), tapa=None, borde=None)
-    xx += 6
-h.cil("x", xx, xx + 3, -22, 0, Re, C_CORR, tapa=sombra(C_CORR, 1.25), borde="#111", bw=.4, agujero=(Ri, "#0d0d0d"))
-# cable PAT verde-amarillo saliendo
-h.cil("x", xx + 3, xx + 50, -22, 0, 3.6, "#2f9e44", tapa="#2f9e44", borde="#111", bw=.4)
-for q in range(4):
-    p0 = h.P(xx + 8 + q * 11, -22, 3.6); p1 = h.P(xx + 13 + q * 11, -22, -3.6)
-    h.ln(p0[0], p0[1], p1[0], p1[1], "#f2c200", 2.2)
-# grampa omega (galvanizada) en x = 90..104
-t = 1.2; w = 14
-for xg in (40, 150):
-    poly = [(-Re - w, 0), (-Re, 0)] + [(-Re * math.cos(math.radians(a)), Re * math.sin(math.radians(a))) for a in range(0, 181, 12)] + [(Re, 0), (Re + w, 0), (Re + w, t), (Re + t, t)] + \
-           [((Re + t) * math.cos(math.radians(a)), (Re + t) * math.sin(math.radians(a))) for a in range(0, 181, 12)][::-1][::-1] + [(-Re - t, t), (-Re - w, t)]
-    # contorno exterior bien ordenado
-    ext = [((Re + t) * math.cos(math.radians(a)), (Re + t) * math.sin(math.radians(a))) for a in range(0, 181, 12)]
-    inn = [(Re * math.cos(math.radians(a)), Re * math.sin(math.radians(a))) for a in range(180, -1, -12)]
-    poly = [(-Re - w, 0)] + inn + [(Re + w, 0), (Re + w, t)] + ext + [(-Re - w, t)]
-    poly = [(-Re - w, 0)] + [(-Re, 0)] + [(Re * math.cos(math.radians(a)), Re * math.sin(math.radians(a))) for a in range(180, -1, -12)] + [(Re + w, 0), (Re + w, t)] + \
-           [((Re + t) * math.cos(math.radians(a)), (Re + t) * math.sin(math.radians(a))) for a in range(0, 181, 12)] + [(-Re - w, t)]
-    # plano y–z (u = y relativo al caño, v = distancia desde la pared, hacia +y); extruido en x
-    m.prism([(u, v) for u, v in poly], [xg, -34, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0], 14, "galv", edge="#555")
-    m.render()
-    for zz in (-Re - w / 2, Re + w / 2):
-        h.cil("y", -34 + t, -34 + t + 1.5, xg + 7, zz, 3.2, "#9aa3ab", tapa="#c3c9ce", metal=True, borde="#444", bw=.4)
-        X, Y = h.P(xg + 7, -34 + t + 1.6, zz); h.ln(X - 2.2, Y, X + 2.2, Y, "#333", .8)
-h.g3b("3", (100, -22, Re), 1420, 470, "CORRUGADO 3/4\" (5006)")
-h.g3b("4", (150 + 7, -34 + 1, Re + 6), 1420, 515, "GRAMPA (5015) CON TORNILLO")
-h.g3b("5", (xx + 40, -22, 3.6), 1420, 560, "CABLE 1 × 10 V/A (PAT)")
-h.txt(900, 690, "Montaje de ejemplo sobre una pared. Medidas del corrugado y la grampa: ilustrativas (*).", 10.5, 400, OR, "start", INT)
-
-h.bloque(890, 730, "DATOS TECNICOS", [
+# =============== 3D ===============
+h.titulo(890, 62, "VISTA 3D - UNION A COMPRESION (*) CORTADA A CUARTO", "PEAD NEGRO · CUERPO Y TUERCAS (COLOR (*)) · JUNTA TORICA Y ANILLO DE AGARRE ADENTRO")
+A = img3d(h, "civil_pead", 884, 96, 600)
+columna(h, A, [("pared", "1", "PARED PEAD 3,0 (*)"), ("cuerpo", "2", "CUERPO"), ("tuerca", "3", "TUERCA"), ("oring2", "4", "JUNTA TORICA"),
+               ("agarre2", "5", "ANILLO DE AGARRE"), ("tope", "6", "TOPE (*)")], 1500, 120, 380, paso=28)
+h.txt(890, 430, "ROLLO DE PEAD Ø50", 11, 700, NV, "start", INT); h.txt(1200, 430, "CORRUGADO 3/4\" Y GRAMPA 5015", 11, 700, NV, "start", INT)
+A3 = img3d(h, "civil_corr", 1195, 438, 300)
+globo3d(h, A3("cresta"), "", 1520, 650, "CORRUGADO"); globo3d(h, A3("grampa"), "", 1520, 560, "GRAMPA 5015"); globo3d(h, A3("tornillo"), "", 1520, 590, "TORNILLO + FISHER")
+globo3d(h, A3("cano"), "", 1520, 470, "CAÑO Ø50")
+A2 = img3d(h, "civil_pead_rollo", 884, 438, 300)
+globo3d(h, A2("rollo"), "", 1110, 470, "ROLLO (*)"); globo3d(h, A2("punta"), "", 1110, 640, "PUNTA CORTADA")
+bloque(h, 890, 700, "DATOS TECNICOS", [
     "PEAD Ø50 PN6: POLIETILENO DE ALTA DENSIDAD, NEGRO",
-    "CORRUGADO 3/4\": PVC FLEXIBLE, PARA EL CABLE DE PAT",
-    "GRAMPA: SUJETA EL CAÑO A PARED / ESTRUCTURA",
-], 370)
-h.bloque(1270, 730, "DONDE SE USA", [
+    "SE CURVA EN FRIO; LAS UNIONES VAN FUERA DE LOS CRUCES (*)",
+    "CORRUGADO 3/4\": PVC FLEXIBLE PARA EL CABLE DE PAT",
+    "GRAMPA: SUJETA EL CAÑO A PARED O ESTRUCTURA"], w=360, sz=10, lh=13.5)
+bloque(h, 1270, 700, "DONDE SE USA", [
     "PEAD: BAJO VEREDA U HORMIGON, CANAL Y ACOMETIDA SUBTERRANEA",
     "AP-TC-007: 1 PEAD Ø50 POR CIRCUITO, DEL TABLERO A LA ZANJA",
-    "AP-TC-003: VARIANTE DE LA ACOMETIDA DE LA FUNDACION (EN LUGAR DEL TELGOPOR)",
-    "CORRUGADO: CABLE DE PAT · GUIA «ZANJEO Y TENDIDO»",
-], 370)
-h.rotuloM("MAT-CAÑOS-2", "PEAD Ø50, CORRUGADO 3/4\"", "Y GRAMPA DE SUJECION", "CORTES, VISTAS, TABLA DE USO Y VISTA 3D", "1:1 / 2:1", "3D S/E")
-guardar(h, "mat_canos_2")
+    "AP-TC-003: VARIANTE DE LA ACOMETIDA DE LA FUNDACION (HOY: TELGOPOR)",
+    "CORRUGADO: CABLE DE PAT · GUIA «ZANJEO Y TENDIDO»"], w=360, sz=10, lh=13.5)
+nota3d(h, 890, 1022, "RENDER: three.js (r3d/escenas/civil_pead*.mjs, civil_corr.mjs) CON LAS MISMAS MEDIDAS DEL PLANO. FUENTES: r3d/FUENTES_civil.md")
+rotuloMat(h, "MAT-CAÑOS-2", "PEAD Ø50, CORRUGADO 3/4\"", "Y GRAMPA DE SUJECION", "CORTES, UNION, CURVA, CORRUGADO, GRAMPA Y 3D", "VARIAS", "INDICADAS · 3D S/E", rev="B", fecha=FECHA)
+guardarC(h, "mat_canos_2")

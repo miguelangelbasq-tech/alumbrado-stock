@@ -1,127 +1,95 @@
-import math, sys, os, random
+"""MAT-ARIDOS_HORMIGON-2 (rev. B) · Hormigones H-13 (8013), H-21 (8014), pobre (8015), morteros (8020, 8021, 8019) y revoques (8024, 8025).
+Plano y 3D con las mismas medidas (perfiles_civil.json: ARIDO, H13). 3D: r3d/out/civil_hormigones.png y civil_sello.png.
+Fuentes: ficha de la app (LP 21478 y ETG Córdoba: H-13 para bases; pliego Malargüe: H-21, CIRSOC 201), CRUCE_AP_TC_002,
+TABLERO_NIVEL, probeta normal Ø15 × 30. Ver r3d/FUENTES_civil.md. Lo que no está: naranja (*)."""
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from mk_obra import *
+from civilkit import *
 
-h = HojaO()
-COD = [8013, 8014, 8015, 8020, 8021, 8019, 8024, 8025]
-h.check_codigos(COD)
+AR = PC["ARIDO"]; H = PC["H13"]
+h = nuevaC()
 
-# ============ A · DOSAJE H-13 EN VOLUMEN
-h.titulo(40, 62, "DOSAJE H-13 · 1 : 2,5 : 4 EN VOLUMEN", "PARTES DE CEMENTO, ARENA Y PIEDRA (MEDIDAS CON EL MISMO BALDE O CAJON)")
-bx, by, u = 70, 260, 34      # 1 parte = 34 px de alto
-for i, (n, t, pat, cod) in enumerate([(1, "CEMENTO", "PLAS", "8008"), (2.5, "ARENA", "SAND", "8003"), (4, "PIEDRA 6–20", "CONC", "8022")]):
-    x = bx + i * 130
-    h.rect(x, by - n * u, 80, n * u, f"url(#{pat})", K, 1.2)
-    for q in range(1, int(math.ceil(n))):
-        if q < n: h.ln(x, by - q * u, x + 80, by - q * u, K, .5, h.OCULTA)
-    h.txt(x + 40, by + 18, t, 10.5, 700, K, "middle"); h.txt(x + 40, by + 32, cod, 10, 400, K, "middle", MONO)
-    h.txt(x + 40, by - n * u - 8, ("1" if n == 1 else str(n).replace(".", ",")) + (" PARTE" if n == 1 else " PARTES"), 11, 700, K, "middle")
-h.ln(bx - 10, by, bx + 3 * 130 - 30, by, K, 1.4)
-h.bloque(470, 110, "POR m³ DE H-13 (FICHA DE LA APP)", [
-    "CEMENTO: 5,2 BOLSAS (260 kg)",
-    "ARENA GRUESA: 0,55 m³",
-    "PIEDRA 6–20: 0,80 m³",
-    "AGUA: 170 LITROS",
-    "NO SE AGREGA AGUA DESPUES DE HECHO EL PASTON",
-    "SE HORMIGONA EN CAPAS Y SE APISONA CON VARILLA · FRAGÜE 72 h ANTES DE MONTAR LA COLUMNA",
-], 360, 10.5)
+# =============== 1. DOSAJE EN VOLUMEN ===============
+h.titulo(40, 62, "DOSAJE H-13 · 1 : 2,5 : 4 EN VOLUMEN", "PARTES MEDIDAS CON EL MISMO BALDE O CAJON · AGUA 170 L POR m³")
+u = 30; bx0, by0 = 70, 250
+for i, (n, t, pat, cod) in enumerate([(1, "CEMENTO", "PVCr", "8008"), (2.5, "ARENA", "SAND", "8003"), (4, "PIEDRA 6-20", "CONC", "8022")]):
+    x = bx0 + i * 110
+    for j in range(math.ceil(n)):
+        f = min(1, n - j); h.rect(x, by0 - (j + f) * u, 70, f * u, f"url(#{pat})", K, 1.0)
+    h.txt(x + 35, by0 + 16, t, 10, 700, K, "middle"); h.txt(x + 35, by0 + 30, f"{str(n).replace('.', ',')} PARTE" + ("S" if n > 1 else ""), 9.5, 400, K, "middle")
+    h.txt(x + 35, by0 + 44, cod, 9.5, 700, K, "middle", MONO)
+h.dimV(bx0 - 14, by0 - 4 * u, by0, "4 BALDES", ext=bx0 + 220)
+bloque(h, 420, 100, "POR m³ DE H-13 (FICHA DE LA APP)", [
+    "CEMENTO: 5,2 BOLSAS DE 50 kg (260 kg)",
+    "ARENA GRUESA: 0,55 m³ · PIEDRA 6-20: 0,80 m³",
+    "AGUA: 170 LITROS (NO SE AGREGA AGUA AL PASTON HECHO)",
+    "EN CAPAS, APISONADO CON VARILLA · FRAGÜE 72 h ANTES DE MONTAR"], w=420, sz=10, lh=13.5)
 
-# ============ B · DONDE VA CADA UNO (cortes chicos)
-h.titulo(40, 330, "DONDE VA CADA UNO · CORTES TIPO", "S/E · MEDIDAS DE LOS PLANOS AP-TC (VER CADA PLANO)")
-# B1 fundación H-13
-x0, y0 = 60, 390
-h.rect(x0, y0, 220, 150, "url(#EARTH)", K, .5)
-h.rect(x0 + 60, y0, 100, 130, "url(#CONC)", K, 1.3); h.rect(x0 + 96, y0 - 12, 28, 122, "#fff", K, 1)
-h.txt(x0 + 110, y0 + 168, "FUNDACION · H-13 (8013)", 10.5, 700, K, "middle"); h.txt(x0 + 110, y0 + 182, "AP-TC-003: 0,60 × 0,60 × 1,20 (7 m)", 9.5, 400, G, "middle")
-# B2 cruce de calzada: H-21 200 + hormigón pobre 150 sobre los caños
-x0 = 330
-h.rect(x0, y0, 220, 150, "url(#EARTH)", K, .5)
-h.rect(x0 + 40, y0, 140, 20, "url(#CONC)", K, 1.3); h.rect(x0 + 40, y0 + 20, 140, 90, "url(#ANSI37)", K, .8)
-h.rect(x0 + 40, y0 + 110, 140, 30, "url(#CONCP)", K, 1.1)
-for cx in (x0 + 85, x0 + 135): h.circ(cx, y0 + 125, 11, "#fff", K, 1)
-h.dimV(x0 + 200, y0, y0 + 20, "200", ext=x0 + 180); h.dimV(x0 + 200, y0 + 110, y0 + 140, "150", ext=x0 + 180)
-h.txt(x0 + 110, y0 + 168, "CRUCE · H-21 (8014) + POBRE (8015)", 10.5, 700, K, "middle"); h.txt(x0 + 110, y0 + 182, "AP-TC-002 · CRUCE_AP_TC_002", 9.5, 400, G, "middle")
-# B3 pegote sobre el cable
-x0 = 600
-h.rect(x0, y0, 220, 150, "url(#EARTH)", K, .5)
-h.rect(x0 + 70, y0 + 40, 80, 100, "url(#ANSI37)", K, .8); h.rect(x0 + 70, y0 + 100, 80, 40, "url(#SAND)", K, .8)
-h.rect(x0 + 70, y0 + 92, 80, 10, "url(#CONCP)", K, 1.2); h.circ(x0 + 110, y0 + 120, 8, "#fff", K, 1)
-h.flecha_llamada(x0 + 140, y0 + 96, x0 + 175, y0 + 60, "PEGOTE", 10, "start")
-h.txt(x0 + 110, y0 + 168, "PEGOTE · H° POBRE (8015)", 10.5, 700, K, "middle"); h.txt(x0 + 110, y0 + 182, "1,00 × 0,20 × 0,05 (AP-TC-001)", 9.5, 400, G, "middle")
+# =============== 2. CORTES TIPO (CUBOS DE 150) ===============
+subt(h, 40, 340, "CORTES TIPO · CUBOS DE 150 Y PROBETA Ø150 × 300", "ESC. 1:2,5 · SE VE EL ARIDO DE CADA MEZCLA (DIBUJO, NO GRANULOMETRIA EXACTA)")
+kc = .4; cy0 = 390; L = 150 * kc
+specs = [("H-13", "8013", 70, 3, 9, 1, "CONC"), ("H-21", "8014", 90, 3, 9, 2, "CONC"), ("H° POBRE", "8015", 35, 3, 8, 3, "CONCP"),
+         ("MORTERO 1:3", "8021", 160, .6, 2, 4, "MORT"), ("CALCAREO", "8019", 120, .5, 1.6, 5, "MORT")]
+for i, (t, cod, n, d0, d1, sem, pat) in enumerate(specs):
+    x = 300 + i * 105
+    h.rect(x, cy0, L, L, "#fff", K, 1.2)
+    piedras2d(h, x, cy0, L, L, n, d0 * kc * 2.5, d1 * kc * 2.5, semilla=sem, fill="url(#CONC)" if pat == "CONC" else "#fff", sw=.5)
+    h.rect(x, cy0, L, L, "none", K, 1.2)
+    h.txt(x + L / 2, cy0 + L + 16, t, 10, 700, K, "middle"); h.txt(x + L / 2, cy0 + L + 29, cod, 9.5, 700, K, "middle", MONO)
+h.dimH(cy0 - 10, 300, 300 + L, "150", ext=cy0)
+# probeta
+px, py = 70, 380; kp = .5
+h.rect(px, py, 150 * kp, 300 * kp, "#fff", K, 1.3); piedras2d(h, px, py, 150 * kp, 300 * kp, 120, 3.5, 9, semilla=7, fill="url(#CONC)", sw=.5); h.rect(px, py, 150 * kp, 300 * kp, "none", K, 1.3)
+h.dimH(py + 300 * kp + 14, px, px + 150 * kp, "Ø150", ext=py + 300 * kp)
+h.dimV(px + 150 * kp + 14, py, py + 300 * kp, "300", ext=px + 150 * kp)
+h.txt(px + 75 * kp, py + 300 * kp + 40, "PROBETA (ENSAYO)", 9.5, 700, K, "middle")
+# revoque sobre ladrillo
+rx, ry = 300, 520
+h.rect(rx + 40, ry, 400 - 40, 50 * .5, "url(#LAD)", K, 1.0); h.rect(rx + 40, ry + 25 + 7.5, 360, 25, "url(#LAD)", K, 1.0)
+h.rect(rx + 40, ry + 25, 360, 7.5, "url(#MORT)", K, .6)
+h.rect(rx + 26, ry, 14, 57.5, "url(#MORT)", K, .9); h.rect(rx + 22, ry, 4, 57.5, "#fff", K, .9)
+h.dimH(ry - 10, rx + 26, rx + 40, "15 (*)", ext=ry, c=OR); h.dimH(ry + 70, rx + 22, rx + 26, "5 (*)", ext=ry + 57.5, c=OR)
+llamada(h, rx + 33, ry + 40, rx + 0, ry + 90, "REVOQUE GRUESO 8024", sz=9, anc="start")
+llamada(h, rx + 24, ry + 12, rx + 120, ry - 18, "FINO / IGNIFUGO + CALCAREO 8025 (*)", c=OR, sz=9)
+llamada(h, rx + 200, ry + 12, rx + 300, ry - 18, "LADRILLO", sz=9)
 
-# ============ C · TABLAS
-cols = [(110, "l", False), (150, "c", False), (190, "l", False), (350, "l", False)]
-fil = [["HORMIGON", "RESISTENCIA", "USO", "DATOS"],
-       ["H-13 (8013)", "13 MPa (130 kg/cm²)", "FUNDACION DE COLUMNA", "1 : 2,5 : 4 · 5,2 BOLSAS/m³"],
-       ["H-21 (8014)", "21 MPa (210 kg/cm²)", "REPOSICION DE CALZADA", "CEMENTO 320 ± 15 kg/m³ · a/c ≤ 0,50 · e = 0,20"],
-       ["POBRE (8015)", "—", "PEGOTES DEL TENDIDO", "DOSAJE (*) · e = 0,15 EN EL CRUCE"]]
-y = h.tablaM(40, 610, cols, fil, 19, "HORMIGONES")
-cols = [(70, "c", True), (250, "l", False), (60, "c", False), (420, "l", False)]
-fil = [["COD.", "MORTERO / REVOQUE", "UN.", "DONDE (DATOS DE LA APP)"],
-       ["8020", "CEMENTICIO PARA CONTRABASE / TORTA", "Un.", "TORTA DE COLUMNA METALICA · DOSAJE (*)"],
-       ["8021", "JUNTA CEMENTICIA REFORZADA 1:3", "m³", "BASE DE TABLERO AP-TC-007: MAMPOSTERIA × 0,25"],
-       ["8019", "CALCAREO DE RELLENO", "m³", "RELLENOS · DOSAJE (*)"],
-       ["8024", "REVOQUE GRUESO EXTERIOR", "m³", "BASE DE TABLERO: REVOQUE EXT. e = 10"],
-       ["8025", "REVOQUE IGNIFUGO + CALCAREO", "m²", "DONDE SE USA (*)"]]
-y = h.tablaM(40, y + 30, cols, fil, 19, "MORTEROS Y REVOQUES")
-y = h.codigos(40, y + 30, COD, (46, 0, 46), wtot=800, rowh=17, titulo="VARIANTES Y CODIGOS DEL PAÑOL")
-h.notasM(40, y + 26, [
+# =============== 3. TABLA DE MEZCLAS ===============
+cols = [(110, "l", False), (54, "c", True), (240, "l", False), (196, "l", False), (200, "l", False)]
+fil = [["MEZCLA", "COD.", "DOSAJE / RESISTENCIA", "DONDE VA", "DE DONDE SALE"],
+       ["H-13", "8013", "1 : 2,5 : 4 · 5,2 BOLSAS/m³ · 13 MPa", "FUNDACIONES", "APP · ETG CORDOBA"],
+       ["H-21", "8014", "320 ± 15 kg CEMENTO/m³ · a/c ≤ 0,50", "CRUCE: 0,20 (ESTIMADO)", "APP · CIRSOC 201"],
+       ["H° POBRE", "8015", "DOSAJE (*)", "PEGOTES · CAPA DEL CRUCE", "AP-TC-001 / 002"],
+       ["MORT. TORTA", "8020", "DOSAJE (*)", "TORTA COLUMNA METALICA", "APP (Un.)"],
+       ["MORT. JUNTA", "8021", "1 : 3 (CEMENTO : ARENA)", "BASE DE TABLERO", "TABLERO_NIVEL"],
+       ["CALCAREO", "8019", "DOSAJE (*)", "RELLENO", "APP"],
+       ["REV. GRUESO", "8024", "DOSAJE (*) · 1 cm (NOTA 3)", "BASE DE TABLERO", "AP-TC-007"],
+       ["IGNIF.+CALC.", "8025", "DOSAJE (*) · USO (*)", "(*)", "APP (m²)"]]
+yt = tablaG(h, 40, 680, cols, fil, rowh=15, titulo="MEZCLAS")
+yt = tablaCod(h, 40, yt + 20, [8013, 8014, 8015, 8020, 8021, 8019, 8024, 8025], None, w=800, rowh=14.5)
+notasW(h, 40, yt + 20, [
     "DATOS: FICHA DE LA APP (PLIEGO LP 21478 Y ETG CORDOBA: H-13 PARA BASES; PLIEGO MALARGÜE: H-21, CIRSOC 201), CRUCE_AP_TC_002 Y TABLERO_NIVEL.",
-    "(*) DOSAJE DEL HORMIGON POBRE, DEL MORTERO DE TORTA Y DEL CALCAREO; USO DEL REVOQUE IGNIFUGO: A CONFIRMAR.",
-    "(*) H-21: «0,20 m (ESTIMADO)» SEGUN LA APP. LA METALICA LLEVA TORTA; EL PRFV NO (SOLO SELLADO DE BASE).",
-], 800, 10.5)
+    "(*) DOSAJE DEL POBRE, DEL MORTERO DE TORTA Y DEL CALCAREO; USO DEL REVOQUE IGNIFUGO; ESPESORES DEL REVOQUE: A CONFIRMAR.",
+    "(*) H-21 «0,20 m (ESTIMADO)» SEGUN LA APP. LA METALICA LLEVA TORTA; EL PRFV NO (SOLO SELLADO DE BASE). FUENTES: r3d/FUENTES_civil.md."], w=800, lh=14)
 
-# ============ 3D
-h.titulo(890, 62, "VISTA 3D · MUESTRAS DE CADA MATERIAL", "H-13 CON ARIDO GRUESO · H-21 · H° POBRE (BEIGE) · MAMPOSTERIA CON JUNTA 1:3 Y REVOQUE")
-# A · H-13 (dado de fundación con el poste)
-h.iso(.22, 1040, 270)
-h.caja(-600, 0, -600, 0, -600, 0, "#b9bdc2", "concT", "#555", .7)
-rnd = random.Random(2)
-for _ in range(60):
-    x, y = h.P(0, rnd.uniform(-590, -10), rnd.uniform(-590, -10)); r = rnd.uniform(1.2, 2.6)
-    h.a(f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{r:.1f}" ry="{r*.8:.1f}" fill="#8d9298" stroke="#6b7076" stroke-width=".3"/>')
-h.tuboZ(0, 500, -300, -300, 98, 94, "url(#prfv)", "#333")
-h.g3b("1", (0, -150, -300), 1180, 190, "H-13 (8013)")
-# B · H-21 (losa de calzada)
-h.iso(.22, 1300, 190)
-h.caja(0, 700, -500, 0, -200, 0, "#b9bdc2", "concT", "#555", .7)
-h.caja(0, 700, -500, 0, 0, 12, "#4b4c4e", "asfT", "#333", .5)
-h.cota3((700, 0, -200), (700, 0, 0), "200", off=(60, 0, 0), c=NV, sz=9.5)
-h.g3b("2", (350, 0, -100), 1500, 330, "H-21 (8014)")
-h.txt(1518, 350, "CALZADA · e = 200", 10, 400, G, "start", INT)
-# C · pegote de H° pobre sobre el cable
-h.iso(.24, 1050, 455)
-h.caja(-200, 1100, -100, 300, -80, 0, C_ARENA, "arenaT", "#8a6a2a", .6)
-h.cil("x", -200, 1100, 100, 25, 20, C_VAINA, tapa="#3a3d42", borde="#000", bw=.4)
-h.caja(0, 1000, 0, 200, 50, 100, "#cfcabf", "concPT", "#7a7466", .7)
-h.cota3((0, 200, 100), (1000, 200, 100), "1000", off=(0, 80, 0), c=NV, sz=9.5)
-h.g3b("3", (1000, 100, 75), 1150, 400, "H° POBRE (8015)")
-h.txt(1168, 420, "PEGOTE 1,00 × 0,20 × 0,05", 10, 400, G, "start", INT)
-# D · mampostería con junta 1:3 y revoque
-h.iso(.34, 1420, 500)
-LX0, LY0 = 0, 0
-for fila in range(4):
-    z0 = fila * 75; off = 0 if fila % 2 == 0 else 130
-    h.caja(LX0, LX0 + 520, LY0, LY0 + 120, z0, z0 + 25, "#a9a59c", "morT", "#666", .5)
-    for xx in [LX0 - off + 260 * q for q in range(0, 4)]:
-        a, b = max(LX0, xx), min(LX0 + 520, xx + 250)
-        if b - a > 20: h.caja(a, b, LY0, LY0 + 120, z0 + 25, z0 + 75, C_LAD, "ladT", "#7a3418", .5)
-h.caja(LX0, LX0 + 250, LY0 + 120, LY0 + 130, 0, 300, "#bdb8ad", "morT", "#666", .6)
-h.g3b("4", (LX0 + 520, LY0 + 60, 112), 1530, 420, "JUNTA 1:3 (8021)")
-h.g3b("5", (LX0 + 120, LY0 + 130, 150), 1530, 630, "REVOQUE (8024)")
-h.txt(900, 684, "Muestras sin escala entre sí. Ladrillo: MAT-MAMPOSTERIA-1.", 10.5, 400, G, "start", INT)
-
-h.bloque(890, 712, "DATOS TECNICOS", [
+# =============== 3D ===============
+h.titulo(890, 62, "VISTA 3D - PROBETAS Y CUBOS CORTADOS", "EL ARIDO SE VE EN LA CARA CORTADA DE CADA MEZCLA")
+A = img3d(h, "civil_hormigones", 884, 92, 620)
+columna(h, A, [("h13", "1", "H-13 (PROBETA Ø150)"), ("h21", "2", "H-21"), ("pobre", "3", "H° POBRE"), ("m13", "4", "MORTERO 1:3"), ("cal", "5", "MORTERO CALCAREO"),
+               ("revoque", "6", "REVOQUE GRUESO"), ("fino", "7", "REVOQUE FINO (*)"), ("ladrillo", "", "LADRILLO")], 1515, 110, 400, paso=26)
+h.txt(890, 430, "H-13 EN LA FUNDACION DEL POSTE PRFV (AP-TC-003-A)", 11, 700, NV, "start", INT)
+A2 = img3d(h, "civil_sello", 884, 440, 400)
+globo3d(h, A2("horm"), "", 1300, 600, "H-13"); globo3d(h, A2("arena"), "", 1300, 520, "ARENA FINA SECA"); globo3d(h, A2("sello"), "", 1300, 480, "SELLO 50 (*)")
+globo3d(h, A2("molde"), "", 1300, 640, "MOLDE PVC Ø247"); globo3d(h, A2("poste"), "", 1300, 450, "POSTE PRFV")
+bloque(h, 890, 790, "DATOS TECNICOS", [
     "H-13: 13 MPa · 1 : 2,5 : 4 · 5,2 BOLSAS/m³",
     "H-21: 21 MPa · 320 ± 15 kg DE CEMENTO/m³ · a/c ≤ 0,50",
     "H° POBRE: PEGOTES Y CAPA SOBRE LOS CAÑOS DEL CRUCE",
-    "JUNTA 1:3 (CEMENTO : ARENA) EN LA BASE DE TABLERO",
-], 370)
-h.bloque(1270, 712, "DONDE SE USA", [
-    "AP-TC-003 / AP-TC-005-006: FUNDACIONES (H-13)",
+    "JUNTA 1:3 (CEMENTO : ARENA) EN LA BASE DE TABLERO"], w=360, sz=10, lh=13.5)
+bloque(h, 1270, 790, "DONDE SE USA", [
+    "AP-TC-003 / 005-006: FUNDACIONES (H-13)",
     "AP-TC-002: CRUCE (H-21 + POBRE)",
     "AP-TC-001: PEGOTES DE LA ZANJA",
-    "AP-TC-007: BASE DE TABLERO (JUNTA Y REVOQUE)",
-], 370)
-h.rotuloM("MAT-ARIDOS_HORMIGON-2", "HORMIGONES, MORTEROS", "Y REVOQUES", "DOSAJE, CORTES TIPO, TABLAS Y VISTA 3D", "S/E", "")
-guardar(h, "mat_aridos_hormigon_2")
+    "AP-TC-007: BASE DE TABLERO (JUNTA Y REVOQUE)"], w=360, sz=10, lh=13.5)
+nota3d(h, 890, 1022, "RENDER: three.js (r3d/escenas/civil_hormigones.mjs, civil_sello.mjs): EL ARIDO ES UN VORONOI 3D EN EL MATERIAL. FUENTES: r3d/FUENTES_civil.md")
+rotuloMat(h, "MAT-ARIDOS_HORMIGON-2", "HORMIGONES, MORTEROS", "Y REVOQUES", "DOSAJE, CORTES TIPO, MEZCLAS Y 3D", "VARIAS", "INDICADAS · 3D S/E", rev="B", fecha=FECHA)
+guardarC(h, "mat_aridos_hormigon_2")

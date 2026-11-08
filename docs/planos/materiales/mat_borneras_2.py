@@ -1,157 +1,127 @@
-"""MAT-BORNERAS-2 · Separadores, topes y puentes peine (accesorios de los bornes BPN).
-Datos: FICHAS_TEC.borneras pieza 2 (descripciones + Zoloda JSSB-10-xx/BPN, PSB3/10/4), FAMILIAS_MAT.borneras,
-catálogo del pañol, TC-PRFV-01/02, AP-T-007/008 (TT / TN-S), CLAUDE.md §11.3. Paso BPN-06 = 8,2 (ficha pieza 1)."""
-import sys, os, math
+"""MAT-BORNERAS-2 (rev. B) · Separadores, topes, tapa final y puentes peine (accesorios de los bornes BPN), armados y explotados.
+Plano con los perfiles de r3d/piezas/perfiles.mjs del piloto (BPN, PEINE, SEPARADOR, TOPE, TAPA: no se modifican);
+3D: r3d/out/protab_bor2.png y protab_bor2_acc.png (escena protab_bor2.mjs que usa piezas/bpn.mjs).
+Datos: FICHAS_TEC.borneras pieza 2, catálogo del pañol, TC-PRFV-01/02, AP-T-007/008, r3d/FUENTES.md (Phoenix FBS / D-UT, Weidmüller). """
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from matbfc import *
+from protabkit import *
 
-h = nueva()
-SEPC = "#3b3d41"
-# ================= VISTA DE ARRIBA de una tira armada · esc 2:1 =================
-e = 3.6; VX, VY = 80, 150; e2 = 2.2
-h.titulo(40, 62, "VISTA DE ARRIBA - TIRA ARMADA", "ESC. 3:1 - COTAS EN mm - EJEMPLO TC-PRFV-02")
-# orden: tope | PE | N | separador | R | S | T | tope   (como el tablerito de abajo del TC-PRFV-02, dibujado a lo largo del riel)
-items = [("tope", 6), ("PE", 8.2), ("N", 8.2), ("sep", 2.5), ("R", 8.2), ("S", 8.2), ("T", 8.2), ("tope", 6)]
-L = 53
-xx = VX; pos = {}
-for n, w in items:
-    fill = "#fff"
-    h.rect(xx, VY, w * e, L * e, "url(#ANSI31)" if n == "sep" else fill, K, 1.2 if n != "tope" else 1)
-    if n in ("PE", "N", "R", "S", "T"):
-        for yc in (17, 36): h.circ(xx + w * e / 2, VY + yc * e, 2.3 * e, "#fff", K, .7)
-        h.txt(xx + w * e / 2, VY + 47 * e + 4, n, 10, 700, K, "middle")
+B, PE_, SEP, TOPE = PERF["BPN"], PERF["PEINE"], PERF["SEPARADOR"], PERF["TOPE"]
+h = nueva3()
+P = 8.2
+GRIS, CEL, VER, NEG = "#b4b8ba", "#1f78c0", "#13843a", "#3b3d41"
+
+# =============== VISTA DE ARRIBA · TIRA ARMADA ===============
+e = 3.0; VX, VY = 92, 128
+h.titulo(40, 62, "VISTA DE ARRIBA - TIRA ARMADA", "ESC. 3:1 · TABLERITO DE ABAJO CON JABALINA (TC-PRFV-02)")
+orden = [("tope", TOPE["esp"]), ("PE", P), ("N", P), ("sep", SEP["esp"]), ("R", P), ("S", P), ("T", P), ("tapa", 2.2), ("tope", TOPE["esp"])]
+X = lambda x: VX + x * e; Y = lambda y: VY + y * e
+x = 0; pos = {}
+for n, w in orden:
     if n == "tope":
-        h.ln(xx, VY + 9 * e, xx + w * e, VY + 9 * e, K, .4); h.ln(xx, VY + 44 * e, xx + w * e, VY + 44 * e, K, .4)
-    pos.setdefault(n, []).append((xx, w))
-    xx += w * e
-XF = xx
-# peine PE-N (el «puente» que une neutro y tierra; nunca la fase)
-xpe = pos["PE"][0][0]; xn = pos["N"][0][0]
-h.rect(xpe + 2, VY + 24 * e, (8.2 * 2) * e - 4, 4 * e, "url(#cuH)", K, 1)
-h.ln(VX - 14, VY + 26 * e, XF + 14, VY + 26 * e, K, .4, h.EJE)
-# riel oculto
-h.ln(VX - 18, VY + 9 * e, XF + 18, VY + 9 * e, K, .5, h.OCULTA); h.ln(VX - 18, VY + 44 * e, XF + 18, VY + 44 * e, K, .5, h.OCULTA)
-h.txt(XF + 22, VY + 9 * e + 4, "RIEL NS35", 9.5, 400, G)
-# línea de corte B-B por el separador
-xs = pos["sep"][0][0] + 2.5 * e / 2
-h.ln(xs, VY - 26, xs, VY + L * e + 26, K, 1, h.EJE)
-for yy in (VY - 26, VY + L * e + 26): h.ln(xs - 8, yy, xs + 8, yy, K, 1.8)
-h.txt(xs + 6, VY - 30, "B", 13, 700); h.txt(xs + 6, VY + L * e + 40, "B", 13, 700)
-# cotas
-h.dimH(VY + L * e + 22, xpe, xpe + 8.2 * e, "8,2", ext=VY + L * e + 2)
-h.dimH(VY + L * e + 22, pos["sep"][0][0], pos["sep"][0][0] + 2.5 * e, "", ext=VY + L * e + 2)
-h.txt(pos["sep"][0][0] + 2.5 * e / 2 + 4, VY + L * e + 52, "2,5 (*)", 11, 400, OR, "middle")
-h.dimV(VX - 22, VY, VY + L * e, "53", ext=VX - 2)
-h.dimH(VY - 14, pos["tope"][0][0], pos["tope"][0][0] + 6 * e, "", ext=VY - 2)
-h.txt(VX + 3 * e, VY - 20, "6 (*)", 10.5, 400, OR, "middle")
-# globos (los números del 3D)
-h.globo("1", xs, VY + 6 * e, xs + 30, VY - 40 + 8)
-h.globo("2", pos["tope"][0][0] + 3 * e, VY + 50 * e, VX - 10, VY + L * e + 60)
-h.globo("3", xpe + 8 * e, VY + 26 * e, XF + 70, VY + 26 * e - 40)
+        h.rect(X(x), Y(5), w * e, 43 * e, "#fff", K, 1.1); h.circ(X(x + w / 2), Y(TOPE["yT"]), 3.5 * e, "#fff", K, .8)
+        h.ln(X(x + w / 2) - 2.6 * e, Y(TOPE["yT"]) - 1 * e, X(x + w / 2) + 2.6 * e, Y(TOPE["yT"]) + 1 * e, K, .8)
+    elif n == "sep": h.rect(X(x), Y(-1.5), w * e, 56 * e, "#555", K, .9)
+    elif n == "tapa": h.rect(X(x), Y(0), w * e, 53 * e, "url(#PLAS)", K, .9)
+    else:
+        h.rect(X(x), Y(0), w * e, 53 * e, "#fff", K, 1.1)
+        for yy in B["yT"]: h.circ(X(x + w / 2), Y(yy), 3.4 * e, "#fff", K, .7); h.ln(X(x + w / 2) - 2.4 * e, Y(yy) + .9 * e, X(x + w / 2) + 2.4 * e, Y(yy) - .9 * e, K, .8)
+        h.rect(X(x + 1.25), Y(24.5), (w - 1.7) * e, 9 * e, "#fff", K, .5); h.txt(X(x + w / 2), Y(30.6), n, 8.5, 700, K, "middle")
+    pos.setdefault(n, []).append(x); x += w
+XF = x
+# peine PE-N (lomo arriba del canal)
+h.rect(X(pos["PE"][0] + 1.35), Y(18.8), 14.7 * e, 4.4 * e, "url(#CU)", K, 1.1)
+h.ln(X(-3), Y(9), X(XF + 3), Y(9), K, .5, h.OCULTA); h.ln(X(-3), Y(44), X(XF + 3), Y(44), K, .5, h.OCULTA)
+h.txt(X(XF + 4), Y(9) + 4, "RIEL NS35", 9, 400, G)
+xs = X(pos["sep"][0] + .75); lineaCorte(h, xs, Y(-1.5) - 12, xs, Y(54.5) + 10, "B")
+h.dimH(Y(53) + 22, X(pos["R"][0]), X(pos["R"][0] + P), "8,2", ext=Y(53) + 2)
+h.dimH(Y(53) + 46, X(0), X(XF), f"{XF:.1f}".replace(".", ","), ext=Y(53) + 2)
+h.dimV(X(0) - 18, Y(0), Y(53), "53", ext=X(0) - 2)
+h.dimV(X(XF) + 50, Y(-1.5), Y(54.5), "56 (*)", ext=X(pos["sep"][0]) , c=OR)
+for n_, (xx, yy), (gx, gy) in [("1", (pos["sep"][0] + .75, 52), (X(pos["sep"][0]) + 34, VY - 30)), ("2", (4.7, 46), (X(0) - 30, Y(53) + 52)),
+                                ("3", (pos["PE"][0] + 8, 21), (X(pos["PE"][0]) - 4, VY - 28)), ("4", (pos["tapa"][0] + 1.1, 50), (X(XF) + 20, Y(53) + 52))]:
+    h.globo(n_, X(xx), Y(yy), gx, gy, r=9)
 
-# ================= CORTE B-B (por el separador) · esc 2:1 =================
-CX, CY = 460, 250
-h.titulo(CX, 62, "CORTE B-B (SEPARADOR)", "ESC. 2:1 - SOBRESALE DEL BORNE (*)")
-per = perfilBPN()
-sep = [(-3, -3), (56, -3), (56, 33), (44, 55), (9, 55), (-3, 33)]       # separador: más grande que el borne (*)
-d = "M" + " L".join(f"{CX + 20 + y * e2:.1f},{CY - z * e2:.1f}" for y, z in sep) + " Z"
-h.path(d, "url(#ANSI31)", K, 1.4)
-d2 = "M" + " L".join(f"{CX + 20 + y * e2:.1f},{CY - z * e2:.1f}" for y, z in per) + " Z"
-h.path(d2, "none", K, .7, h.OCULTA)
-rielCorte(h, CX + 20 + 9 * e2, CY, e2)
-h.dimV(CX + 20 + 56 * e2 + 26, CY, CY - 50 * e2, "50 (BORNE)", ext=CX + 20 + 53 * e2)
-h.dimV(CX + 20 + 56 * e2 + 52, CY, CY - 55 * e2, "55 (*)", ext=CX + 20 + 44 * e2, c=OR)
-h.dimH(CY + 8.5 * e2 + 26, CX + 20 - 3 * e2, CX + 20 + 56 * e2, "59 (*)", ext=CY, c=OR)
-h.txt(CX + 20, CY + 8.5 * e2 + 60, "EN LINEA DE PUNTOS: EL BORNE BPN-06 DE ATRAS.", 10, 400, G)
+# =============== CORTE B-B (SEPARADOR) ===============
+ec = 2.5; vb = Vista(h, 530, 286, ec)
+h.titulo(470, 62, "CORTE B-B (POR EL SEPARADOR)", "ESC. 2,5:1 · SOBRESALE DEL BORNE (*)")
+vb.poly(B["contorno"], "none", .7, K, h.OCULTA)
+vb.seccion([[SEP["contorno"] + [SEP["contorno"][0]]]], "PLAS2")
+vb.poly([[9 + u, w - 7.5] for u, w in PERF["NS35"]["perfil"]], "url(#MET)", .9)
+vb.cotaV(58, 0, 53.5, "53,5 (*)", yext=37, c=OR); vb.cotaV(66, 0, 50, "50 (BORNE)", yext=55)
+vb.cotaH(-1.5, 54.5, -14, "56 (*)", zext=-3, c=OR)
+vb.cotaH(9, 44, -24, "35 (RIEL)", zext=-8)
+h.txt(470, 368, "EN LINEA DE PUNTOS: EL BORNE BPN-06 DE ATRAS (A = 50, C = 53).", 9, 400, G)
+h.txt(470, 381, "EL SEPARADOR CORTA LA LINEA DE FUGA ENTRE N Y LA FASE.", 9, 400, G)
 
-# ================= D1 · PUENTE PEINE 10 ELEMENTOS · esc 2:1 =================
-DX, DY = 460, 362
-h.titulo(DX, DY, "D1 - PUENTE PEINE 10 ELEM. P/BPN 6 (2027)", "ESC. 2:1 - SE CORTA A LA MEDIDA: UNE N Y PE, NUNCA LA FASE")
-py = DY + 50; pk = 1.75
-h.rect(DX + 10, py, 82 * pk, 4 * pk, "url(#cuH)", K, 1)
+# =============== D1 · PEINE 2027 ===============
+DX, DY = 470, 404
+h.titulo(DX, DY, "D1 - PEINE 2027 (10 POLOS)", "ESC. 2:1 · VISTA DE FRENTE · SE CORTA A MEDIDA")
+k = 2.0; px, py = DX + 14, DY + 50; L = PE_["anchos"]["10"]
+h.rect(px, py, L * k, 3.2 * k, "url(#PLAS2)", K, 1)
 for i in range(10):
-    xp = DX + 10 + (4.1 + i * 8.2) * pk
-    h.rect(xp - 1.4 * pk, py + 4 * pk, 2.8 * pk, 9 * pk, "url(#cuH)", K, .7)
-h.ln(DX + 10 + 3 * 8.2 * pk, py - 10, DX + 10 + 3 * 8.2 * pk, py + 14 * pk + 6, OR, 1, 'stroke-dasharray="4 2"')
-h.txt(DX + 10 + 3 * 8.2 * pk + 4, py - 12, "CORTE (3 ELEM. EN C2)", 9.5, 400, OR)
-h.dimH(py + 13 * pk + 24, DX + 10, DX + 10 + 82 * pk, "82 = 10 x 8,2 (*)", ext=py + 13 * pk, c=OR)
-h.dimH(py - 14, DX + 10 + 4.1 * pk, DX + 10 + 12.3 * pk, "", ext=py - 2)
-h.txt(DX + 10 + 8.2 * pk, py - 20, "8,2", 10.5, 400, K, "middle")
-h.dimV(DX + 10 + 82 * pk + 22, py, py + 13 * pk, "13 (*)", ext=DX + 10 + 82 * pk, c=OR)
+    xc = px + (4.1 + i * P - .85 + .45) * k
+    h.rect(xc - 1.5 * k, py + 3.2 * k, 3 * k, (PE_["alto"] - 3.2) * k, "url(#CU)", K, .6)
+h.ln(px + (3 * P - .85 + 1.35) * k, py - 10, px + (3 * P - .85 + 1.35) * k, py + 34 * k, OR, 1, 'stroke-dasharray="4 2"')
+h.txt(px + (3 * P) * k + 6, py - 12, "CORTE: TROZO DE 3 (PE · PE · N)", 9, 400, OR)
+h.dimH(py + PE_["alto"] * k + 18, px, px + L * k, "80,3 = 10 x 8,2 - 1,7", ext=py + PE_["alto"] * k + 2)
+h.dimV(px + L * k + 18, py, py + PE_["alto"] * k, "29,6", ext=px + L * k + 2)
+h.dimH(py - 10, px + (4.55 - 1.5) * k, px + (4.55 - 1.5 + P) * k, "8,2", ext=py - 2)
 
-# ================= TABLA DE CODIGOS =================
-uso = {"2041": "ENTRE FASE Y N / PE", "2021": "TOPE EN LA PUNTA", "2059": "TOPE EN LA PUNTA", "2027": "PEINE BPN 6 · EN USO",
-       "2023": "PEINE BPN 4", "2024": "PEINE BPN 6 (UN.: m (*))", "2025": "PEINE BPN 16", "2026": "PUENTE BPN 4", "2039": "CENTRAL TB 16",
-       "2040": "CENTRAL TB 35", "2042": "ADAPTADOR 1 MODULO", "2011": "BORNERA FIJA (*)", "2012": "BORNERA DIVISIBLE (*)", "2002": "BARRA DE NEUTRO (*)"}
+# =============== D2 · TOPE CON TORNILLO ===============
+TX, TY = 40, 404
+h.titulo(TX, TY, "D2 - TOPE (2021 / 2059) EN CORTE", "ESC. 2,6:1 · EL TORNILLO APRIETA CONTRA EL RIEL (*)")
+vt = Vista(h, TX + 30, TY + 136, 2.6)
+vt.seccion([[TOPE["contorno"] + [TOPE["contorno"][0]]]], "PLAS")
+vt.rect(TOPE["yT"] - 4, TOPE["yT"] + 4, 18, 31, "#fff", .6)
+tornilloCorte(vt, TOPE["yT"], 30.5, 7, 2.6, 4, 12)
+vt.poly([[9 + u, w - 7.5] for u, w in PERF["NS35"]["perfil"]], "url(#MET)", .9)
+vt.cotaH(5, 48, -14, "43 (*)", zext=-3, c=OR); vt.cotaV(52, 0, 30, "30 (*)", yext=48, c=OR)
+h.txt(TX + 200, TY + 70, "ANCHO 9,5 (*)", 9, 400, OR); h.txt(TX + 200, TY + 84, "TORNILLO M4 (*)", 9, 400, OR)
+h.txt(TX + 200, TY + 98, "UNO EN CADA PUNTA:", 9, 400); h.txt(TX + 200, TY + 112, "LA TIRA NO SE CORRE", 9, 400)
+
+# =============== COMO SE USA EL PEINE ===============
+UY = 600
+h.titulo(40, UY, "COMO SE USA EL PEINE", "NUNCA EN LAS FASES")
+def fila(ox, oy, lst, peines, t1, t2):
+    xx = ox; cs = {"PE": VER, "N": CEL, "R": GRIS, "S": GRIS, "T": GRIS, "|": NEG}; xs_ = []
+    for t in lst:
+        w = 7 if t == "|" else 26
+        h.rect(xx, oy, w, 38, cs[t], "#333", .7)
+        if t != "|": h.txt(xx + w / 2, oy + 24, t, 10, 700, "#fff" if t in ("PE", "N") else K, "middle", INT)
+        xs_.append((xx, w)); xx += w
+    for a, b in peines: h.rect(xs_[a][0] + 3, oy - 6, xs_[b][0] + xs_[b][1] - xs_[a][0] - 6, 5, "#c8302c", "#6c1a10", .6)
+    h.txt(xx + 12, oy + 16, t1, 9.5, 700, K, "start", INT); h.txt(xx + 12, oy + 30, t2, 9, 400, G, "start", INT)
+fila(48, UY + 34, ["PE", "PE", "N"], [(0, 2)], "TN-S (AP-T-008): PE · PE · N CON PEINE", "NEUTRO Y TIERRA EN UNA SOLA TIRA")
+fila(48, UY + 80, ["PE", "PE", "N"], [(0, 1)], "TT (AP-T-007): PEINE CORTADO", "PE CON PE · EL N QUEDA SOLO (*)")
+fila(470, UY + 34, ["N", "|", "R", "S", "T"], [], "FASES: SIN PEINE", "SEPARADOR ENTRE N Y R")
+fila(470, UY + 80, ["PE", "N", "|", "R", "S", "T"], [(0, 1)], "TC-PRFV-02 (CON JABALINA)", "PEINE PE-N + SEPARADOR")
+
+# =============== TABLA ===============
+uso = {"2041": "ENTRE FASE Y N / PE", "2021": "TOPE EN LA PUNTA (*)", "2059": "TOPE EN LA PUNTA", "2027": "PEINE BPN 6 · EN USO",
+       "2023": "PEINE BPN 4", "2024": "PEINE BPN 6 (UN.: m (*))", "2025": "PEINE BPN 16", "2026": "PUENTE BPN 4", "2039": "CENTRAL TB 16 (*)",
+       "2040": "CENTRAL TB 35 (*)", "2042": "ADAPTADOR 1 MODULO (*)", "2011": "BORNERA FIJA (*)", "2012": "BORNERA DIVISIBLE (*)", "2002": "BARRA DE NEUTRO (*)"}
 filas = [["CODIGO", "DESCRIPCION (CATALOGO DEL PAÑOL)", "UN.", "PARA QUE"]]
 for c in [2041, 2021, 2059, 2027, 2023, 2024, 2025, 2026, 2039, 2040, 2042, 2011, 2012, 2002]:
-    r = cat(c, 66); filas.append([r[0], r[1], r[2], uso[str(c)]])
-TY = 520
-yt = h.tabla(40, TY, [(52, "c", True), (470, "l", False), (40, "c", False), (238, "l", False)], filas, rowh=17, titulo="CODIGOS DEL PAÑOL (14)", colores=colorOR)
-ydat = bloque(h, 40, yt + 26, "DATOS TECNICOS", [
-    "SEPARADOR: PLACA AISLANTE QUE VA ENTRE LA FASE Y EL NEUTRO / TIERRA.",
-    "TOPES (2021, 2059): EN LAS DOS PUNTAS, EVITAN QUE LOS BORNES SE CORRAN EN EL RIEL.",
-    "PUENTE PEINE: UNE BORNES IGUALES DE PASO; SE CORTA A LA CANTIDAD DE ELEMENTOS (2027 = 10 ELEM., BPN 6).",
-    "PUENTES CENTRALES ZOLODA JSSB-10-xx/BPN Y PEINE PSB3/10/4 (FICHA).",
-    "MATERIAL, COLOR Y MEDIDAS DEL SEPARADOR, DEL TOPE Y DEL PEINE: (*)"], w=380)
-yu = bloque(h, 440, yt + 26, "DONDE SE USA", [
-    "TC-PRFV-01: ABAJO N · SEPARADOR · R · S · T; ARRIBA PE · PE · N CON PEINE (3 ELEM.).",
-    "TC-PRFV-02 (CON JABALINA): ABAJO PE · N · R · S · T, PEINE PE-N Y SEPARADOR ENTRE N Y R.",
-    "AP-T-007 (TT): EL PUENTE SE CORTA EN DOS TIRAS (NEUTRO Y TIERRA SEPARADOS).",
-    "AP-T-008 (TN-S): NEUTRO Y TIERRA PUENTEADOS EN UNA SOLA TIRA."], w=390)
-notasW(h, 40, max(ydat, yu) + 12, [
-    "COTAS EN mm. PASO 8,2 = BPN-06 (TABLA ZOLODA, MAT-BORNERAS-1). EL LARGO DEL PEINE ES 10 x 8,2, CALCULADO.",
-    "(*) ESPESOR Y ALTO DEL SEPARADOR, ANCHO DEL TOPE Y ALTO/MATERIAL DEL PEINE: A CONFIRMAR CON EL FABRICANTE.",
-    "(*) 2024 FIGURA EN EL CATALOGO CON UNIDAD «m»: REVISAR SI ES «Un.».",
-    "(*) 2011, 2012, 2002, 2039, 2040 Y 2042 NO SE DIBUJAN: LA FICHA NO TRAE MEDIDAS NI FORMA.",
-    "(*) EN ESQUEMA TT EL PEINE N-PE NO VA (REVISION B2 DE TC-PRFV): A CONFIRMAR CON EL PROYECTO DE LA PLAZA."], w=800)
+    r = cat(c, 62); filas.append([r[0], r[1], r[2], uso[str(c)]])
+yt = h.tabla(40, 748, [(52, "c", True), (452, "l", False), (40, "c", False), (256, "l", False)], filas, rowh=14.5, titulo="CODIGOS DEL PAÑOL (14)", colores=colorOR)
+notasW(h, 40, yt + 18, [
+    "COTAS EN mm. PASO 8,2, A = 50, C = 53: BPN-06 (TABLA ZOLODA, MAT-BORNERAS-1). PEINE 80,3 x 29,6 = PHOENIX FBS 10-8 (REFERENCIA).",
+    "(*) SEPARADOR (1,5 x 56 x 53,5), TOPE (9,5 x 43 x 30, M4) Y TAPA FINAL (2,2): PROPORCIONALES A PHOENIX D-UT / E/UK; A CONFIRMAR.",
+    "(*) 2024 FIGURA EN «m». 2021 PUEDE SER TAPA FINAL O TOPE. 2011, 2012, 2002, 2039, 2040, 2042: SIN MEDIDAS EN LA FICHA (NO SE DIBUJAN).",
+    "(*) TT: EL PEINE N-PE NO VA (REV. B2 DE TC-PRFV). CONFIRMAR CON EL PROYECTO DE LA PLAZA."], w=800, lh=14)
 
-# ================= 3D =================
-h.titulo(890, 62, "VISTA 3D - TIRA CON TOPES, SEPARADOR Y PEINE", "TABLERITO DE ABAJO CON JABALINA (TC-PRFV-02): PE · N · SEPARADOR · R · S · T")
-h.iso(4.6, 1245, 380)
-riel3d(h, -16, 70, 9, -7.5)
-x = 0
-order = [("tope", 6, "#2b2d31"), ("PE", 8.2, VER_BPN), ("N", 8.2, CEL_BPN), ("sep", 2.5, SEPC), ("R", 8.2, GRIS_BPN), ("S", 8.2, GRIS_BPN), ("T", 8.2, GRIS_BPN), ("tope", 6, "#2b2d31")]
-x = -8
-for n, w, col in order:
-    if n == "tope":
-        per = [(9 + y, z) for y, z in [(-1, -3), (36, -3), (36, 12), (30, 22), (5, 22), (-1, 12)]]
-        prisma(h, per, x, x + w, (sh(col, 1.5), col, sh(col, .8)), "#111", .5)
-        tornilloZ(h, x + w / 2, 26.5, 22, 2.2)
-    elif n == "sep":
-        per = [(y, z) for y, z in [(-3, -3), (56, -3), (56, 33), (44, 55), (9, 55), (-3, 33)]]
-        prisma(h, per, x, x + w, (sh(col, 1.5), col, sh(col, .8)), "#111", .5)
-    else:
-        borne3d(h, x, w, 0, 0, col)
-    x += w
-# peine sobre PE y N
-xp0 = -8 + 6
-prisma(h, [(24, 46), (28, 46), (28, 51), (24, 51)], xp0 + 1, xp0 + 16.4 - 1, ("#f0b070", "#c87a35", "#9c5a1c"), "#6c3210", .5)
-# cables: el troncal entra por las bocas
-for xc, col in ((-8 + 6 + 8.2 + 4.1, "#4fa3d9"), (-8 + 6 + 16.4 + 2.5 + 4.1, "#7b3f1d"), (-8 + 6 + 16.4 + 2.5 + 12.3, "#1a1a1a"), (-8 + 6 + 16.4 + 2.5 + 20.5, "#c62828"), (-8 + 6 + 4.1, "#2e9d4a")):
-    cilY(h, 88, 60, xc, 13, 2.8, col, col); cilY(h, 60, 53.2, xc, 13, 1.7, "url(#cobre)", "#d08a3f")
-h.g3("1", (-8 + 6 + 16.4 + 1.2, 40, 52), 1430, 140, "SEPARADOR (2041)")
-h.g3("2", (47.5, 36, 14), 1430, 420, "TOPE (2021 / 2059)")
-h.g3("3", (xp0 + 8, 26, 54), 1430, 190, "PUENTE PEINE PE-N (2027)")
-h.g3("4", (60, 22, 0), 1430, 470, "RIEL DIN NS35 (2038)")
-h.g3("5", (-8 + 6 + 16.4 + 2.5 + 12.3, 40, 48), 1430, 240, "BORNES BPN 6 (2009 · 2008 · 2010)")
-# esquema de uso del peine (TT / TN-S)
-h.txt(890, 720, "COMO SE USA EL PEINE", 12, 700, NV, "start", INT)
-def fila(ox, oy, lst, peines, tit):
-    xx = ox
-    cs = {"PE": VER_BPN, "N": CEL_BPN, "R": GRIS_BPN, "S": GRIS_BPN, "T": GRIS_BPN, "|": SEPC}
-    xs = []
-    for t in lst:
-        w = 8 if t == "|" else 30
-        h.rect(xx, oy, w, 50, cs[t], "#333", .7)
-        if t != "|": h.txt(xx + w / 2, oy + 31, t, 11, 700, "#fff" if t in ("PE", "N") else K, "middle", INT)
-        xs.append((xx, w)); xx += w
-    for a, b in peines:
-        h.rect(xs[a][0] + 3, oy + 40, xs[b][0] + xs[b][1] - xs[a][0] - 6, 5, "url(#cobre)", "#6c3210", .5)
-    h.txt(xx + 16, oy + 22, tit[0], 11, 700, K, "start", INT); h.txt(xx + 16, oy + 40, tit[1], 10.5, 400, G, "start", INT)
-fila(900, 740, ["PE", "PE", "N"], [(0, 2)], ("TN-S (AP-T-008): PE · PE · N CON PEINE", "NEUTRO Y TIERRA EN UNA SOLA TIRA"))
-fila(900, 810, ["PE", "PE", "N"], [(0, 1)], ("TT (AP-T-007): EL PEINE SE CORTA EN DOS", "PE CON PE · EL N QUEDA SOLO"))
-fila(900, 880, ["N", "|", "R", "S", "T"], [], ("FASES: NUNCA CON PEINE", "SEPARADOR ENTRE N Y LA FASE"))
-h.txt(890, 970, "FUENTE: FICHA TECNICA DE LA APP (ZOLODA JSSB-10-xx/BPN, PSB3/10/4), TC-PRFV-01/02, AP-T-007/008 Y CATALOGO.", 10.5, 400, G, "start", INT)
-rotuloMat(h, "MAT-BORNERAS-2", "SEPARADORES, TOPES", "Y PUENTES PEINE", "VISTA DE ARRIBA, CORTE, DETALLE, CODIGOS Y 3D", "3:1 · 2:1", "3D S/E")
+# =============== 3D ===============
+h.titulo(890, 62, "VISTA 3D - TIRA ARMADA (TC-PRFV-02)", "PE · N CON PEINE · SEPARADOR · R · S · T · TAPA FINAL · TOPES EN LAS PUNTAS")
+A = img3d(h, "protab_bor2", 900, 84, 560)
+columna(h, A, [("peine", "3", "PEINE PE-N (2027)"), ("sep", "1", "SEPARADOR (2041)"), ("pe", "", "BPN 6 VERDE (2010)"), ("n", "", "BPN 6 CELESTE (2008)"),
+               ("fase", "", "BPN 6 GRIS (2009)"), ("topeD", "2", "TOPE (2021 / 2059)"), ("tornTope", "", "TORNILLO DEL TOPE (*)"), ("riel", "", "RIEL NS35 (2038)"),
+               ("cablePE", "", "TIERRA VERDE-AMARILLO"), ("cable", "", "FASE CON PUNTERA")], 1480, 100, 500, paso=30)
+h.titulo(890, 528, "LA MISMA TIRA EXPLOTADA", "ASI SE ARMA, DE IZQUIERDA A DERECHA EN EL RIEL")
+A2 = img3d(h, "protab_bor2_acc", 890, 560, 600)
+columna(h, A2, [("peine", "3", "PEINE (SE ENCHUFA)"), ("dientes", "", "DIENTES"), ("sep", "1", "SEPARADOR"), ("tapa", "4", "TAPA FINAL (*)"),
+               ("topeI", "2", "TOPE"), ("riel", "", "RIEL NS35")], 1500, 580, 860, paso=28)
+rayadosRef(h, 890, 880, ["PLAS", "PLAS2", "CU", "MET"], cols=4, dx=190)
+bloque(h, 890, 940, "DONDE SE USA", ["TC-PRFV-01: ABAJO N · SEP · R · S · T; ARRIBA PE · PE · N CON PEINE (3). TC-PRFV-02: PE · N · SEP · R · S · T."], w=740, sz=9.5, lh=12.5)
+rotuloMat(h, "MAT-BORNERAS-2", "SEPARADORES, TOPES", "Y PUENTES PEINE", "VISTA DE ARRIBA, CORTE B-B, D1, D2, CODIGOS Y 3D", "VARIAS", "INDICADAS · 3D S/E", rev="B", fecha="08/11/2026")
 h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_borneras_2.svg"))

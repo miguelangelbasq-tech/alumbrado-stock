@@ -1,119 +1,123 @@
-import math, sys, os
+"""MAT-TERMINALES-1 (rev. B) · Terminal tubular de ojal de Cu estañado, a compresión (2049, 2045, 2046, 2047, 2048, 2043, 2044).
+Plano y 3D con los mismos números: r3d/piezas/perfiles_conex.mjs (OJAL). 3D: r3d/out/conex_ojal.png y conex_ojal_bulon.png.
+Datos: FICHAS_TEC.terminales (Lapp: L, d, W, palma), Cimco (Øe 8,5), Weidmüller (agujero 10,5). Fuentes: r3d/FUENTES_conex.md."""
+import sys, os, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from mk_cab import *
-from mk_cab import _circ
+from conexkit import *
 
-h = HojaMat()
-COD = [2049, 2045, 2046, 2047, 2048, 2043, 2044]
-h.check_codigos(COD)
-# modelo: 16 mm² / M10 (ficha): L 39 · d 5,5 · W 16 · palma 2,2
-L, d, W, e = 39, 5.5, 16, 2.2
-DT = 8.0       # (*) Ø exterior de la caña: no está en la ficha
-LC = 22.0      # (*) largo de la caña
-DA = 10.5      # (*) agujero para M10
-XP = L - W / 2  # centro del agujero
+h = nueva3()
+O = PC["OJAL"]; L, d, De, W, ep, hole, Lb, tr = O["L"], O["d"], O["De"], O["W"], O["e"], O["hole"], O["Lb"], O["trans"]
+re_, ri = De / 2, d / 2
+xc = L - W / 2; Wm = W * .62 / 2; xp = Lb + tr
 
-# ============ PLANTA
-h.titulo(40, 62, "PLANTA", "MODELO 16 mm² / M10 · ESC. 5:1 · COTAS EN mm")
-k = 5.0; x0, yc = 80, 210
-X = lambda mm: x0 + mm * k
-h.path(f"M{X(0)},{yc-DT/2*k} H{X(LC)} L{X(LC+5)},{yc-W/2*k} H{X(XP)} A{W/2*k},{W/2*k} 0 0 1 {X(XP)},{yc+W/2*k} H{X(LC+5)} L{X(LC)},{yc+DT/2*k} H{X(0)} Z", "#fff", K, 1.5)
-h.circ(X(XP), yc, DA / 2 * k, "#fff", K, 1.2)
-h.ln(X(XP) - DA / 2 * k - 8, yc, X(XP) + DA / 2 * k + 8, yc, K, .5, h.EJE); h.ln(X(XP), yc - W / 2 * k - 8, X(XP), yc + W / 2 * k + 8, K, .5, h.EJE)
-h.ln(X(0), yc - d / 2 * k, X(LC - 3), yc - d / 2 * k, K, .6, h.OCULTA); h.ln(X(0), yc + d / 2 * k, X(LC - 3), yc + d / 2 * k, K, .6, h.OCULTA)
-h.dimH(yc + W / 2 * k + 30, X(0), X(L), "L = 39", ext=yc + DT / 2 * k)
-h.dimV(X(L) + 26, yc - W / 2 * k, yc + W / 2 * k, "W = 16", ext=X(XP))
-h.dimV(X(0) - 18, yc - d / 2 * k, yc + d / 2 * k, "d = 5,5", ext=X(0))
-h.dimH(yc - W / 2 * k - 18, X(0), X(LC), "CAÑA (*)", ext=yc - DT / 2 * k, c=OR)
-h.txt(X(XP), yc - W / 2 * k - 30, "M10 (Ø AGUJERO (*))", 10.5, 400, OR, "middle")
-xs = X(LC * .55); h.ln(xs, yc - DT / 2 * k - 14, xs, yc + DT / 2 * k + 14, K, .6, h.EJE)
-h.txt(xs, yc - DT / 2 * k - 18, "A", 12, 700, K, "middle"); h.txt(xs, yc + DT / 2 * k + 28, "A", 12, 700, K, "middle")
-h.globo("1", X(8), yc - DT / 2 * k, X(8), 108); h.globo("2", X(XP + 5), yc - W / 2 * k + 6, 470, 140); h.globo("3", X(XP) + DA / 2 * k * .7, yc + DA / 2 * k * .7, 470, 300)
+# ================= 1. PLANTA · ESC. 6:1 =================
+e = 7.9; v = Vista(h, 104, 200, e)
+h.titulo(40, 62, "PLANTA", "MODELO 16 mm² / M10 (2046) · ESC. 8:1")
+pl = [[0, re_ - .3], [.3, re_], [Lb, re_], [xp, Wm]]
+for i in range(0, 25): a_ = math.pi / 2 - math.pi * i / 24; pl.append([xc + W / 2 * math.cos(a_ - math.pi / 2 + math.pi / 2) if False else xc + W / 2 * math.sin(math.pi * i / 24), W / 2 * math.cos(math.pi * i / 24)])
+pl += [[xp, -Wm], [Lb, -re_], [.3, -re_], [0, -(re_ - .3)]]
+v.poly(pl, "#fff", 1.5)
+v.linea([[Lb, re_], [Lb, -re_]], .6); v.linea([[xp, Wm], [xp, -Wm]], .6)
+v.circ(xc, 0, hole / 2, "#fff", 1.2)
+v.oculta([[0, ri], [Lb - 1.6, ri], [Lb - 1.2, 0]]); v.oculta([[0, -ri], [Lb - 1.6, -ri], [Lb - 1.2, 0]])
+v.eje(-3, 0, L + 3, 0); v.eje(xc, -W / 2 - 2.5, xc, W / 2 + 2.5)
+v.cotaH(0, L, -W / 2 - 4.2, "39 (L)", zext=-re_)
+v.cotaH(0, Lb, W / 2 + 2.4, "19 (*) BARRIL", zext=re_, c=OR)
+v.cotaV(L + 4, -W / 2, W / 2, "16 (W)", yext=xc)
+v.cotaV(-3.4, -re_, re_, "Ø8,5", yext=0)
+llamada(h, *v.p(xc + 3.7, 3.7), *v.p(L + 5, 12.5), "Ø10,5 PARA M10", sz=9.5)
+a_, b_ = v.p(9, re_ + 2.6), v.p(9, -re_ - 2.6); lineaCorte(h, a_[0], a_[1] - 6, b_[0], b_[1] + 6, "B")
+for n, (y, z), (gx, gy) in [("1", (5, re_), (64, 130)), ("2", (Lb + 3, 3.4), (300, 102)), ("3", (L - 4, -5.5), (300, 300))]:
+    h.globo(n, *v.p(y, z), gx, gy, r=9)
+a_, b_ = v.p(-5, 0), v.p(L + 7, 0)
 
-# ============ LATERAL
-h.titulo(40, 372, "VISTA LATERAL", "ESC. 5:1")
-yl = 450
-h.path(f"M{X(0)},{yl-DT/2*k} H{X(LC)} L{X(LC+5)},{yl+DT/2*k-e*k} H{X(L)} V{yl+DT/2*k} H{X(0)} Z", "#fff", K, 1.5)
-h.ln(X(0), yl - d / 2 * k, X(LC - 3), yl - d / 2 * k, K, .6, h.OCULTA); h.ln(X(0), yl + d / 2 * k, X(LC - 3), yl + d / 2 * k, K, .6, h.OCULTA)
-h.ln(X(XP) - DA / 2 * k, yl + DT / 2 * k - e * k, X(XP) - DA / 2 * k, yl + DT / 2 * k, K, .6, h.OCULTA); h.ln(X(XP) + DA / 2 * k, yl + DT / 2 * k - e * k, X(XP) + DA / 2 * k, yl + DT / 2 * k, K, .6, h.OCULTA)
-h.dimV(X(L) + 26, yl + DT / 2 * k - e * k, yl + DT / 2 * k, "e 2,2", ext=X(L))
-h.dimV(X(0) - 18, yl - DT / 2 * k, yl + DT / 2 * k, "Ø (*)", ext=X(0), c=OR)
+# ================= 2. CORTE A-A (elevación, mitad en corte) · ESC. 6:1 =================
+v2 = Vista(h, 104, 448, e)
+h.titulo(40, 330, "CORTE A-A", "POR EL EJE · ARRIBA CORTE, ABAJO VISTA · ESC. 8:1")
+secRT(v2, [[ri + .5, 0], [re_ - .3, 0], [re_, .3], [re_, Lb], [ep / 2, xp], [ep / 2, xc - hole / 2], [0, xc - hole / 2], [0, Lb - 1.2], [ri, Lb - 1.6], [ri, .5]], "CU", 1.2)
+secRT(v2, [[ep / 2, xc + hole / 2], [ep / 2, L], [0, L], [0, xc + hole / 2]], "CU", 1.2)
+v2.poly([[0, 0], [0, -(re_ - .3)], [.3, -re_], [Lb, -re_], [xp, -ep / 2], [L, -ep / 2], [L, 0]], "#fff", 1.2)
+v2.oculta([[0, -ri], [Lb - 1.6, -ri]]); v2.oculta([[xc - hole / 2, 0], [xc - hole / 2, -ep / 2]]); v2.oculta([[xc + hole / 2, 0], [xc + hole / 2, -ep / 2]])
+v2.eje(-3, 0, L + 3, 0)
+v2.cotaV(L + 4, -ep / 2, ep / 2, "2,2", yext=L)
+v2.cotaV(-3.4, -ri, ri, "Ø5,5 (d)", yext=0)
+v2.cotaH(Lb, xp, re_ + 2, "6 (*)", zext=re_, c=OR)
+llamada(h, *v2.p(Lb - .8, .6), *v2.p(Lb + 6, -re_ - 3.4), "FONDO CERRADO", sz=9)
+llamada(h, *v2.p(.2, -ri - .5), *v2.p(5, -re_ - 5.6), "CHAFLAN DE ENTRADA", sz=9)
 
-# ============ CORTE A-A y D1 engarzado
-h.titulo(500, 62, "CORTE A-A (CAÑA)", "ESC. 10:1")
-cx, cy, kc = 620, 200, 10
-h.circ(cx, cy, DT / 2 * kc, "url(#ANSI31)", K, 1.2); h.circ(cx, cy, d / 2 * kc, "#fff", K, 1)
-h.cobre2d(cx, cy, d / 2 * kc * .93, False, 7)
-h.dimH(cy + DT / 2 * kc + 22, cx - d / 2 * kc, cx + d / 2 * kc, "d 5,5", ext=cy)
-h.flecha_llamada(cx + DT / 2 * kc * .7, cy - DT / 2 * kc * .7, 700, 120, "TUBO Cu ESTAÑADO")
-h.flecha_llamada(cx + 8, cy + 6, 700, 250, "CONDUCTOR 16 mm²")
-h.titulo(500, 372, "DETALLE D1 - ENGARZADO", "S/E · MATRIZ HEXAGONAL DE LA SECCION DEL CABLE")
-hx, hy, hr = 620, 470, 52
-pts = " ".join(f"{hx+hr*math.cos(math.radians(60*q)):.1f},{hy+hr*math.sin(math.radians(60*q)):.1f}" for q in range(6))
-h.a(f'<polygon points="{pts}" fill="{C_EST}" stroke="{K}" stroke-width="1.3"/>')
-pts2 = " ".join(f"{hx+hr*.66*math.cos(math.radians(60*q)):.1f},{hy+hr*.66*math.sin(math.radians(60*q)):.1f}" for q in range(6))
-h.a(f'<polygon points="{pts2}" fill="#c8743a" stroke="{K}" stroke-width=".8"/>')
-for q in range(7):
-    a = 2 * math.pi * q / 6; rr = 0 if q == 6 else 20
-    h.circ(hx + rr * math.cos(a), hy + rr * math.sin(a), 10.5, "#e9a466", "#6a3510", .4)
-h.parrafo(690, 440, "LA CAÑA QUEDA HEXAGONAL Y LOS HILOS COMPACTADOS, SIN HUECOS.", 150, 10)
+# ================= 3. SECCION B-B: ANTES Y DESPUES · ESC. 10:1 =================
+h.titulo(452, 62, "SECCION B-B", "BARRIL · 16 mm² CLASE 2 (7 HILOS Ø1,7 (*)) · ESC. 10:1")
+k = 10; cx, cy = 548, 196
+anillo(h, cx, cy, re_, ri, "CU", k, 1.1); hilos(h, cx, cy, 7, 1.7, ri - .02, k)
+h.txt(cx, cy + 62, "ANTES", 10, 700, K, "middle")
+h.dimH(cy - re_ * k - 12, cx - re_ * k, cx + re_ * k, "Ø8,5", ext=cy)
+cx2 = 768; s_out = O["hexEntre"]; s_in = math.sqrt(16 * 1.05 / (math.sqrt(3) / 2))
+def hexp(cx, cy, s, rot=0):
+    r = s / math.sqrt(3); return [(cx + r * k * math.cos(math.pi / 3 * i + rot), cy - r * k * math.sin(math.pi / 3 * i + rot)) for i in range(6)]
+po, pi_ = hexp(cx2, cy, s_out), hexp(cx2, cy, s_in)
+h.path("M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in po) + " Z M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in pi_) + " Z", "url(#CU)", K, 1.1, 'fill-rule="evenodd"')
+pc = hexp(cx2, cy, s_in / 3)
+h.path("M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in pi_) + " Z", "#e9a466", "#6a3510", .5)
+h.path("M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in pc) + " Z", "#eeb27a", "#6a3510", .5)
+for (x1, y1), (x2, y2) in zip(pc, pi_): h.ln(x1, y1, x2, y2, "#6a3510", .5)
+h.txt(cx2, cy + 62, "DESPUES (HEXAGONAL)", 10, 700, K, "middle")
+h.dimH(cy - s_out / math.sqrt(3) * k - 12, cx2 - s_out / 2 * k, cx2 + s_out / 2 * k, "7,4 (*) E/C", ext=cy, c=OR)
+h.path(f"M{cx + 56},{cy} H{cx2 - 56}", "none", K, 1.2); h.path(f"M{cx2 - 64},{cy - 5} L{cx2 - 54},{cy} L{cx2 - 64},{cy + 5}", "none", K, 1.2)
+h.txt((cx + cx2) / 2, cy - 8, "MATRIZ 16 mm²", 9.5, 700, K, "middle"); h.txt((cx + cx2) / 2, cy + 16, "HEXAGONAL", 9.5, 400, K, "middle")
+h.txt(452, cy + 84, "LOS 7 HILOS SE DEFORMAN Y LLENAN EL HUECO: UNION SIN AIRE, NO SE AFLOJA.", 9.5, 400, G)
 
-# ============ tabla de la ficha y códigos
-cols = [(150, "l", False), (60, "c", True), (60, "c", True), (60, "c", True), (110, "c", True)]
-fil = [["SECCION / AGUJERO", "L", "d", "W", "PALMA"]] + [[a, b, c, dd, ee] for a, b, c, dd, ee in [
-    ("10 mm² / M8", "34", "4,5", "13", "1,8"), ("10 mm² / M10", "34", "4,5", "16", "1,5"), ("16 mm² / M8", "39", "5,5", "15", "2,4"),
-    ("16 mm² / M10", "39", "5,5", "16", "2,2"), ("25 mm² / M8", "43", "7", "15", "2,9"), ("25 mm² / M10", "43", "7", "16", "2,7"),
-    ("25 mm² / M12", "48", "7", "19", "2,7"), ("50 mm² / M10", "53", "10", "20", "4"), ("50 mm² / M12", "56", "10", "22", "3,5")]]
-h.tablaM(40, 560, cols, fil, 19, "MEDIDAS (LAPP, IEC 61238-1)")
-SEC = {2049: "6 mm²", 2045: "10 mm²", 2046: "16 mm² · 3/8\"", 2047: "25 mm²", 2048: "50 mm²", 2043: "10 mm² (ACC)", 2044: "25 mm² · 3/8\" (ACC)"}
-y = h.codigos(500, 574, COD, (46, 0, 34), extra_col=("SECCION", SEC, 100), wtot=340, rowh=19, titulo=None)
-h.txt(500, 560, "CODIGOS DEL PAÑOL", 13, 700); h.ln(500, 564, 500 + 140, 564, K, 1)
+# ================= 4. D1 · ENGARCE (vista lateral) · ESC. 4:1 =================
+h.titulo(470, 330, "D1 - DOS PASADAS DE MATRIZ", "VISTA · ESC. 6:1 · DE LA PALMA HACIA LA BOCA")
+e4 = 6.2; v4 = Vista(h, 572, 418, e4)
+h0 = 3.5; zonas = [(0, h0, re_), (h0, h0 + O["hexL"], O["hexEntre"] / 2), (h0 + O["hexL"], h0 + O["hexL"] + 1.5, re_ - .4), (h0 + O["hexL"] + 1.5, h0 + 2 * O["hexL"] + 1.5, O["hexEntre"] / 2), (h0 + 2 * O["hexL"] + 1.5, Lb, re_)]
+for a, b, r in zonas: v4.rect(a, b, -r, r, "#fff", 1.1)
+for a, b, r in zonas:
+    if r == O["hexEntre"] / 2: v4.linea([[a, r * .5], [b, r * .5]], .5); v4.linea([[a, -r * .5], [b, -r * .5]], .5)
+v4.poly([[Lb, re_], [xp, Wm], [L - W / 2, Wm], [L - W / 2, -Wm], [xp, -Wm], [Lb, -re_]], "#fff", 1.1)
+v4.rect(-14, 0, -3.65, 3.65, "url(#PLAS2)", 1.0)
+v4.eje(-16, 0, L - 4, 0)
+v4.cotaH(h0, h0 + O["hexL"], re_ + 2.4, "7 (*)", zext=re_, c=OR)
+v4.cotaH(h0 + O["hexL"] + 1.5, h0 + 2 * O["hexL"] + 1.5, re_ + 2.4, "7 (*)", zext=re_, c=OR)
+h.txt(470, 476, "1.º PASADA CERCA DE LA PALMA, 2.º HACIA LA BOCA. LA MATRIZ", 9, 400, K)
+h.txt(470, 489, "LLEVA EL NUMERO DE LA SECCION (16): QUEDA GRABADO (*).", 9, 400, OR)
 
-h.notasM(40, 790, [
-    "COTAS EN mm. L, d, W Y PALMA: TABLA DE LA FICHA DE LA APP (LAPP, TERMINALES TUBULARES DE Cu ESTAÑADO, IEC 61238-1).",
-    "(*) Ø EXTERIOR Y LARGO DE LA CAÑA Y Ø DEL AGUJERO: NO ESTAN EN LA FICHA. A CONFIRMAR CON EL FABRICANTE.",
-    "(*) 6 mm² (2049) Y LOS ACC 10/3 Y 25/3 (2043 / 2044): MEDIDAS NO ESTAN EN LA FICHA. A CONFIRMAR CON EL FABRICANTE.",
-    "SE COMPRIME CON MATRIZ HEXAGONAL DE LA SECCION DEL CABLE Y SE CUBRE CON TERMOCONTRAIBLE (2057).",
-    "PAT: BULON RW 1/2\" CON OJAL 5/16\" NO ENTRA (REVISION DE TIPOS CONSTRUCTIVOS, PUNTO 11): ELEGIR EL AGUJERO DEL BULON.",
-], 790)
+# ================= TABLAS =================
+TY = 512
+fil = [["SECCION / AGUJERO", "L", "d (Ø INT.)", "W", "PALMA"]] + [[r[0], f"{r[1]:g}", f"{r[2]:g}".replace(".", ","), f"{r[3]:g}", f"{r[4]:g}".replace(".", ",")] for r in PC["OJAL_TABLA"]]
+yt = h.tabla(40, TY, [(140, "l", False), (50, "c", True), (78, "c", True), (50, "c", True), (66, "c", True)], fil, rowh=14,
+             titulo="MEDIDAS (LAPP, IEC 61238-1 · FICHA DE LA APP)", colores=lambda i, j, t: NV if i == 4 else K)
+h.txt(40, yt + 13, "EN AZUL: 16 mm² / M10, EL DIBUJADO.", 9.5, 400, NV)
+SEC = {2049: "6 mm² (*)", 2045: "10 mm²", 2046: "16 · 3/8\" ACOMETIDA", 2047: "25 mm²", 2048: "50 mm²", 2043: "10 mm² · ACC (*)", 2044: "25 · 3/8\" · ACC (*)"}
+fc = [["CODIGO", "DESCRIPCION (CATALOGO DEL PAÑOL)", "UN.", "SECCION / USO"]]
+for c in [2049, 2045, 2046, 2047, 2048, 2043, 2044]:
+    r = cat(c, 33); fc.append([r[0], r[1], r[2], SEC[c]])
+yc_ = h.tabla(440, TY, [(44, "c", True), (240, "l", False), (30, "c", False), (106, "l", False)], fc, rowh=14, titulo="CODIGOS DEL PAÑOL (7)", colores=colorOR)
+yr = rayados3(h, 440, yc_ + 22, ["CU", "HIL", "PLAS2"], cols=2, dx=200)
+bloque(h, 40, yt + 40, "DATOS TECNICOS", [
+    "TUBO DE COBRE ELECTROLITICO ESTAÑADO, PALMA APLASTADA Y PERFORADA.",
+    "SE ELIGE POR LA SECCION DEL CABLE Y EL Ø DEL BULON (M8 / M10 / M12).",
+    "COMPRESION CON MATRIZ HEXAGONAL DE LA SECCION; NUNCA CON MARTILLO.",
+    "PELAR EL LARGO DEL BARRIL: EL CABLE LLEGA AL FONDO, SIN COBRE A LA VISTA."], w=380, sz=10, lh=13.5)
+bloque(h, 440, yr + 16, "DONDE SE USA", [
+    "ACOMETIDA Cu 4 x 16 AL SECCIONADOR NH: OJAL 2046 (3/8\"), UNO POR CONDUCTOR.",
+    "TABLERO: 5 POR TABLERO (PLANILLA EMA). PAT: CABLE AL BORNE O BULON."], w=400, sz=10, lh=13.5)
+notasW(h, 40, 850, [
+    "COTAS EN mm. L, d, W Y PALMA: TABLA DE LA FICHA DE LA APP (LAPP). Ø EXTERIOR 8,5: CIMCO 16 mm² (DIN 46235). AGUJERO 10,5 PARA M10: WEIDMULLER.",
+    "(*) LARGO DEL BARRIL, TRANSICION, ENTRE CARAS DE LA MATRIZ Y CANTIDAD DE PASADAS: PROPORCIONALES, A CONFIRMAR CON EL FABRICANTE Y LA PINZA.",
+    "(*) 6 mm² (2049) Y «ACC 10/3» / «ACC 25/3 3/8» (2043 / 2044): LA FICHA NO TRAE SUS MEDIDAS NI QUE ES «ACC».",
+    "(*) EL TERMOCONTRAIBLE 2057 (5,0 / 2,5 mm) NO ENTRA EN UN CABLE DE 16 mm² (Ø ≈ 7,3): LA CALCULADORA LO PIDE PARA LOS OJALES DE LA ACOMETIDA. REVISAR.",
+    "PAT: BULON RW 1/2\" CON OJAL 5/16\" NO ENTRA (REVISION DE TIPOS CONSTRUCTIVOS, PUNTO 11): ELEGIR EL AGUJERO POR EL BULON."], w=800, lh=13.5)
 
-# ============ 3D: puesto en su lugar (cable + termocontraíble + terminal + bulón)
-h.titulo(890, 62, "VISTA 3D - OJAL ENGARZADO EN EL CABLE", "CABLE 16 mm² · TERMOCONTRAIBLE · TERMINAL Cu ESTAÑADO PARA M10")
-h.iso(10, 1060, 215)
-RCB = 4.0   # cable 16 mm² unipolar (*) ilustrativo
-h.cil("x", -10, 14, 0, 0, RCB, "#202226", borde="#000", bw=.5)
-h.cil("x", 0, 22, 0, 0, DT / 2, C_EST, metal=True, borde="#555", bw=.5)
-h.hexa("x", 8, 16, 0, 0, DT * .92, sombra(C_EST, .95), metal=True, borde="#555", bw=.5, rot=30)
-h.cil("x", 10, 18, 0, 0, RCB + .6, "#2b2d33", tapa=None, borde="#000", bw=.4, op=.92) if False else None
-# palma
-pal = [(LC + 5 + (XP - LC - 5) * t, -W / 2) for t in (0, 1)] + [(XP + W / 2 * math.cos(math.radians(a)), W / 2 * math.sin(math.radians(a))) for a in range(-90, 91, 10)] + [(LC + 5, W / 2)]
-pal = pal[:1] + pal[1:]
-h.solido("x", 22, LC + 5, _circ(DT / 2, 24), [(W / 2 * math.cos(t) * .9, e / 2 * math.sin(t) * 1.6) for t in [2 * math.pi * q / 24 for q in range(24)]], 0, 0, C_EST, metal=True, borde="#555", bw=.4, cb1=-DT / 2 + e / 2 + .4)
-h.solido("z", -DT / 2 + .4, -DT / 2 + .4 + e, [(px, py) for px, py in pal], [(px, py) for px, py in pal], 0, 0, C_EST, tapa=sombra(C_EST, 1.12), metal=True, borde="#555", bw=.5)
-zt = -DT / 2 + .4 + e
-# termocontraíble sobre caña y cable
-h.cil("x", -6, 5, 0, 0, DT / 2 + .5, "#1e3a8a", tapa=sombra("#1e3a8a", 1.3), borde="#000", bw=.5)
-# agujero (se ve el fondo a través)
-h.F3([(XP + DA / 2 * math.cos(2 * math.pi * q / 36), DA / 2 * math.sin(2 * math.pi * q / 36), zt + .01) for q in range(36)], "#fff", "#555", .6)
-h.g3b("1", (12, 0, DT / 2 * .9), 1440, 150, "CAÑA (ENGARZADA HEXAGONAL)")
-h.g3b("2", (LC + 9, -W / 2 + 1, zt), 1440, 220, "PALMA Cu ESTAÑADO")
-h.g3b("3", (XP + DA / 2, 0, zt), 1440, 290, "AGUJERO PARA BULON M10 (*)")
-h.g3b("4", (-2, 0, -DT / 2 - .5), 945, 330, "TERMOCONTR. (2057)")
-h.g3b("5", (-9, 0, RCB), 1110, 122, "CABLE 16 mm²")
-h.txt(890, 620, "Termocontraíble dibujado azul para distinguirlo (*); su color real según el que se compre.", 11, 400, OR, "start", INT)
-
-h.bloque(890, 670, "DATOS TECNICOS", [
-    "MATERIAL: COBRE ESTAÑADO · TUBULAR CON PALMA",
-    "NORMA DE REFERENCIA: IEC 61238-1 (LAPP)",
-    "SE ELIGE POR LA SECCION DEL CABLE Y EL Ø DEL BULON (M8 / M10 / M12)",
-    "COMPRESION CON MATRIZ HEXAGONAL",
-    "UNIDAD: Un.",
-], 360)
-h.bloque(1270, 670, "DONDE SE USA", [
-    "ACOMETIDA Cu 4 x 16 AL PORTAFUSIBLE NH: OJAL 16 mm² (2046, 3/8\") CON TERMOCONTRAIBLE, UNO POR CONDUCTOR",
-    "TABLEROS (5 POR TABLERO EN LA PLANILLA EMA) · GUIA «CAJA DE COLUMNA PRFV»",
-    "PUESTA A TIERRA: CABLE AL BORNE O BULON",
-], 370)
-h.rotuloM("MAT-TERMINALES-1", "TERMINAL DE OJAL", "Cu ESTAÑADO A COMPRESION", "PLANTA, LATERAL, CORTE A-A, DETALLE Y VISTA 3D", "5:1 / 10:1", "D1, 3D S/E")
-h.guardar(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mat_terminales_1.svg"))
-print("ok")
+# ================= 3D =================
+h.titulo(890, 62, "VISTA 3D - OJAL 16 mm² / M10 DE Cu ESTAÑADO", "ADELANTE: ENGARZADO EN EL CABLE, CORTADO A CUARTO · ATRAS: NUEVO, SE VE EL BARRIL")
+A = img3d(h, "conex_ojal", 880, 84, 610)
+columna(h, A, [("nuevo", "1", "BARRIL (TUBO Cu ESTAÑADO)"), ("boca", "", "CHAFLAN DE ENTRADA"), ("palma", "2", "PALMA APLASTADA"), ("agujero", "3", "AGUJERO Ø10,5 (M10)"),
+               ("transicion", "", "TRANSICION (*)"), ("hex", "", "ENGARCE HEXAGONAL (*)"), ("cable", "", "CABLE 16 mm² (L1)"), ("hilos", "", "7 HILOS EN EL BARRIL"), ("barril", "", "BARRIL CORTADO")], 1476, 104, 490, paso=25)
+h.titulo(890, 520, "COMO VA: ABULONADO", "PLANCHUELA · OJAL · ARANDELA PLANA · GROWER · TUERCA M10")
+A2 = img3d(h, "conex_ojal_bulon", 880, 540, 560)
+columna(h, A2, [("bulon", "", "BULON M10"), ("tuerca", "", "TUERCA"), ("grower", "", "ARANDELA GROWER"), ("arandela", "", "ARANDELA PLANA"),
+                ("ojal", "", "OJAL 2046"), ("planchuela", "", "PLANCHUELA / BARRA"), ("cable", "", "CABLE 16 mm²")], 1460, 560, 860, paso=28)
+h.txt(890, 1000, "Planchuela, bulón y arandelas: ilustrativos (*), ver la barra y el seccionador de cada tablero.", 10, 400, OR, "start", INT)
+h.txt(890, 1022, "RENDER: three.js (r3d/escenas/conex_ojal*.mjs) CON LOS MISMOS PERFILES DEL PLANO. FUENTES: r3d/FUENTES_conex.md", 9.5, 400, G, "start", INT)
+rotuloB(h, "MAT-TERMINALES-1", "TERMINAL DE OJAL", "Cu ESTAÑADO A COMPRESION", "PLANTA, CORTE A-A, SECCION B-B, D1 Y 3D", "8:1 · 10:1", "INDICADAS · 3D S/E")
+guardar(h, "mat_terminales_1")

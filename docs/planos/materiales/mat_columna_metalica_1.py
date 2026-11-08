@@ -1,141 +1,149 @@
-"""MAT-COLUMNA_METALICA-1 · Columna metálica recta 7 m (6006) y 10 m (6005) + caño PVC Ø75 de la acometida (6004).
-Datos: FICHAS_TEC.columna_metalica (tabla de tramos de un fabricante de referencia: C 80 / C 110 ASV-4), plano() de la ficha (ETG: SAE 1010,
-espesores, empotramiento 1/10, entrada 150 × 76 a ≥ 300 bajo el piso, manguito Ø60,3 × 300, caja a 2,50 m), FAMILIAS_MAT.columna_metalica,
-ficha de Normas AP-C-005 (tipos C y F: Ht, empotramiento, Ø del pie, fundación). ORIGINAL v130."""
-from ilukit import *
-h = nueva(); m = h.m
+"""MAT-COLUMNA_METALICA-1 (rev. B) · Columna metálica recta de tramos 7 m (6006) y 10 m (6005) + caño PVC Ø75 (6004).
+Geometría: r3d/piezas/perfiles_col.mjs (MET) → perfiles_col.json; 3D: r3d/out/col_met_puerta.png y col_met_base.png.
+Datos: FICHAS_TEC.columna_metalica (tabla de tramos de un fabricante de referencia, ETG: SAE 1010, espesores, empotramiento 1/10, entrada 150 × 76
+a ≥ 300 bajo el piso, manguito Ø60,3 × 300, caja a 2,50 m, bulón de bronce PAT), Normas AP-C-005 (Ht, empotramiento, Ø pie, fundación AP-TC-003).
+Web: IRAM 2619 / 2620, ventana 95 × 160 / 100 × 170 (pliego Trenque Lauquen), soldadura sólo en las uniones (FEM). Fuentes: r3d/FUENTES_col.md"""
+from colkit import *
 
-# ======================= ELEVACIONES (tramos del fabricante de referencia) · k = 0,036 (1:110)
-k = .036; YG = 480; ex = 1.6
-h.titulo(40, 62, "ELEVACION - COLUMNA RECTA DE TRAMOS", "ESC. 1:110 - COTAS EN mm - Ø 1,6× - TRAMOS DE REF. (*)")
-C7 = dict(x=150, HT=8000, EMP=800, tr=[(114, 3200, "3,6"), (90, 2000, "3,2"), (76, 1500, "3,2"), (60, 1300, "3,2")], nom="7 m · 6006", ref="C 80 ASV-4")
-C10 = dict(x=355, HT=11000, EMP=1100, tr=[(140, 4200, "4,7"), (114, 3000, "3,6"), (90, 2000, "3,2"), (76, 1800, "3,2")], nom="10 m · 6005", ref="C 110 ASV-4")
-h.ln(40, YG, 450, YG, K, 1.4); h.nivel(432, YG, "±0,00")
-for xx in range(44, 450, 9): h.ln(xx, YG + 1, xx - 6, YG + 7, K, .4)
-for C in (C7, C10):
-    x = C["x"]; yb = YG + C["EMP"] * k; z = 0
-    for (d, L, e) in C["tr"]:
-        r = d / 2 * k * ex; y0 = yb - z * k; y1 = yb - (z + L) * k
-        h.rect(x - r, y1, 2 * r, y0 - y1, "#fff", K, 1.3)
-        h.txt(x + r + 4 + (14 if C is C7 else 0), (y0 + y1) / 2 + 4, f"Ø{d} × {L:,} (e {e})".replace(",", "."), 9.5, 400, OR)
-        z += L
-    yt = yb - C["HT"] * k
-    h.ln(x, yt - 10, x, yb + 10, K, .4, h.EJE)
-    h.dimV(x - 58, yt, yb, f"TOTAL {C['HT']:,}".replace(",", "."), ext=x - 4)
-    h.dimV(x - 38, yt, YG, f"LIBRE {C['HT'] - C['EMP']:,}".replace(",", "."), ext=x - 4)
-    h.dimV(x - 38, YG, yb, f"{C['EMP']:,}".replace(",", "."), ext=x - 8)
-    yc = YG - 2500 * k; h.rect(x - 2.4, yc - 3, 4.8, 6, "#111", K, .4)
-    h.dimV(x - 18, yc, YG, "2.500", ext=x - 3)
-    yv = YG + 300 * k; h.rect(x - 1.5, yv - 2.7, 3, 5.4, OR, OR, .4)
-    h.txt(x, yb + 20, C["nom"], 11, 700, K, "middle"); h.txt(x, yb + 33, C["ref"] + " (REF.) (*)", 9, 400, OR, "middle")
-h.globo("1", C7["x"] - 2, YG - 120, 62, 300); h.globo("2", C7["x"] - 2, YG - 2500 * k, 62, 380); h.globo("3", C7["x"], YG + 300 * k, 62, YG + 40, OR)
-h.globo("4", C7["x"], YG - 7200 * k, 62, 210)
-corteMarca(h, C7["x"] - 24, YG + 300 * k, C7["x"] + 24, YG + 300 * k, "A")
+h = nueva3()
+c7, c10, M = MET["c7"], MET["c10"], MET
+Pu, Rd, En = M["puerta"], M["red"], M["entrada"]
 
-# ======================= D1 · ENTRADA DE CABLE 150 × 76 (1:5 → 0,8 px/mm)
-s = .8; X0, Y0 = 520, 120
-h.titulo(475, 62, "D1 · ENTRADA DE CABLE Y CAÑO", "CORTE POR EL EJE - ESC. 1:10 (7 m, TRAMO Ø114)")
-s = .5; px = 600; ypiso = 150
-h.rect(475, ypiso, 360, 12, "url(#CONC)", K, .3)
-h.ln(475, ypiso, 835, ypiso, K, 1.4); h.nivel(820, ypiso, "±0,00")
-r = 57 * s; e = 3.6 * s
-for xx in (px - r, px + r - e): h.rect(xx, 95, e, 317, "#111", K, .3)
-h.rect(px - r - 120, ypiso + 12, 120, 250, "url(#EARTH)", K, 0)
-h.rect(px + r, ypiso + 12, 240 - r + 0, 250, "url(#EARTH)", K, 0)
-yv = ypiso + 300 * s; hv = 150 * s
-h.rect(px + r - e - 1, yv - hv / 2, e + 2, hv, "#fff", K, .8)                         # ventana (corte del tubo)
-h.ln(px - 30, yv, px + r + 20, yv, K, .4, h.EJE)
-# caño PVC Ø75 desde la ventana hacia la zanja (en corte: pared rayada)
-rp = 75 / 2 * s
-h.path(f"M{px+r},{yv-rp} L{px+225},{yv-rp} M{px+r},{yv+rp} L{px+225},{yv+rp}", "none", K, 1)
-h.rect(px + r, yv - rp, 225 - r, 2.5, "url(#PLAS)", K, .5); h.rect(px + r, yv + rp - 2.5, 225 - r, 2.5, "url(#PLAS)", K, .5)
-for dy_, col in ((-6, "#111"), (0, "#111"), (6, "#111")):
-    h.path(f"M{px+222},{yv+dy_} L{px+r+2},{yv+dy_} Q{px+8},{yv+dy_} {px+6 + dy_},{yv-60} L{px+6+dy_},{95}", "none", col, 1.6)
-h.dimV(px + r + 30, yv - hv / 2, yv + hv / 2, "150", ext=px + r + 2)
-h.dimV(px - r - 20, ypiso, yv, "MIN. 300", ext=px - r - 2)
-h.dimV(px + 238, yv - rp, yv + rp, "Ø75", ext=px + 226)
-h.dimH(108, px - r, px + r, "Ø114", ext=120)
-h.txt(px + 150, yv + rp + 16, "CAÑO PVC Ø75 (6004) A LA ZANJA", 9.5, 700, K, "middle")
-h.txt(px - r - 8, 130, "TRONCAL + 1×10 SUBEN", 9, 700, K, "end")
-h.globo("3", px + r, yv - hv / 2 + 6, 700, 235, OR); h.globo("5", px + 200, yv + rp, 790, 380)
-h.txt(480, 440, "SUBEN POR ADENTRO HASTA LA CAJA DE 2.500 (AP-CC-001 / 004).", 9.5, 400, G)
+# ======================= 1. ELEVACIONES (1:110, Ø ×1,6)
+k = .036; YG = 470; ex = 1.6
+h.titulo(40, 62, "ELEVACIONES - TRAMOS", "ESC. 1:110 · Ø DIBUJADOS 1,6× · TRAMOS DE REF. (*)")
+suelo(h, 40, 340, YG); h.nivel(200, YG, "±0,00")
+for (x, c, nom) in ((120, c7, "7 m · 6006"), (285, c10, "10 m · 6005")):
+    Y = lambda z: YG - z * k; z = -c["emp"]
+    for i, (D, e, L) in enumerate(c["tr"]):
+        z1 = min(z + L, c["Ht"] - c["emp"]); r = D / 2 * k * ex
+        h.rect(x - r, Y(z1), 2 * r, (z1 - z) * k, "#fff", K, 1.2)
+        if i: h.ln(x - r - 1.5, Y(z), x + r + 1.5, Y(z), K, 1.6)
+        h.txt(x + 9, (Y(z) + Y(z1)) / 2 + 3, f"Ø{D}·{mm(e)}", 8, 400, OR)
+        z = z1
+    zt = c["Ht"] - c["emp"]
+    h.rect(x - 60.3 / 2 * k * ex, Y(zt + 300), 60.3 * k * ex, 300 * k, "url(#MET)", K, .7)
+    h.ln(x, Y(zt + 300) - 8, x, Y(-c["emp"]) + 8, K, .4, h.EJE)
+    h.rect(x - 2.6, Y(Pu["z"]) - 3, 5.2, 6, "#111", K, .3); h.rect(x - 2.6, Y(En["z"]) - 2.7, 5.2, 5.4, OR, OR, .3)
+    h.dimV(x - 50, Y(zt), Y(-c["emp"]), f"Ht {mm(c['Ht'])}", ext=x - 4)
+    h.dimV(x - 32, Y(zt), YG, f"LIBRE {mm(zt)}", ext=x - 4)
+    h.dimV(x - 32, YG, Y(-c["emp"]), mm(c["emp"]), ext=x - 6)
+    h.dimV(x + 64, Y(Pu["z"]), YG, "2.500", ext=x + 4)
+    h.txt(x, Y(-c["emp"]) + 16, nom, 11, 700, K, "middle")
+x = 120; Y = lambda z: YG - z * k
+lineaCorte(h, x - 24, Y(En["z"]), x + 22, Y(En["z"]), "A")
+h.globo("1", x, Y(1200), 52, 290, r=9); h.globo("2", x - 2, Y(Pu["z"]), 52, 245, r=9); h.globo("3", x, Y(2700), 52, 200, r=9)
+h.globo("4", x, Y(7100), 52, 150, r=9); h.globo("5", x - 2, Y(En["z"]), 52, 520, OR, r=9)
 
-# ======================= CORTE A-A por la entrada (1:5)
-s = .8; cx, cy = 560, 575
-h.titulo(475, 495, "CORTE A-A", "POR LA ENTRADA - ESC. 1:5 - TRAMO Ø114 e 3,6")
-R = 57 * s
-h.circ(cx, cy, R, "#111", K, 1.2); h.circ(cx, cy, R - 3.6 * s * 1.5, "#fff", K, .6)
-a = math.asin(38 / 57)
-h.path(f"M{cx + R*math.cos(a):.1f},{cy - R*math.sin(a):.1f} L{cx+R+4},{cy-30} L{cx+R+4},{cy+30} L{cx + R*math.cos(a):.1f},{cy + R*math.sin(a):.1f}", "#fff", "#fff", 0)
-h.ln(cx + R * math.cos(a), cy - R * math.sin(a), cx + R * math.cos(a), cy + R * math.sin(a), K, .4, h.OCULTA)
-h.dimV(cx + R + 26, cy - 38 * s, cy + 38 * s, "76", ext=cx + R - 2)
-h.txt(cx - R - 8, cy + 4, "Ø114", 10.5, 700, K, "end")
-h.ln(cx - R - 12, cy, cx + R + 12, cy, K, .4, h.EJE)
+# ======================= 2. D1 · REDUCCION Ø114 → Ø90 (corte por el eje, 1:1,6)
+e = .62; cx, zr = 445, 250          # zr = y de la hoja en la base de la reducción
+h.titulo(360, 62, "D1 · REDUCCION SOLDADA", "CORTE POR EL EJE · ESC. 1:1,6")
+(D1, e1, _), (D2, e2, _) = c7["tr"][0], c7["tr"][1]
+for s in (-1, 1):
+    poly(h, [(cx + s * D1 / 2 * e, zr + 70), (cx + s * D1 / 2 * e, zr), (cx + s * (D1 / 2 - e1) * e, zr), (cx + s * (D1 / 2 - e1) * e, zr + 70)], "url(#MET)", 1.1)
+    poly(h, [(cx + s * D1 / 2 * e, zr), (cx + s * (D2 / 2 + 1) * e, zr - Rd["L"] * .8 * e), (cx + s * (D2 / 2 + 1) * e, zr - Rd["L"] * e), (cx + s * (D2 / 2 + 1 - e1) * e, zr - Rd["L"] * e),
+             (cx + s * (D2 / 2 + 1 - e1) * e, zr - Rd["L"] * .8 * e), (cx + s * (D1 / 2 - e1) * e, zr)], "url(#MET)", 1.1)
+    poly(h, [(cx + s * D2 / 2 * e, zr - Rd["L"] * .55 * e), (cx + s * D2 / 2 * e, zr - Rd["L"] * e - 70), (cx + s * (D2 / 2 - e2) * e, zr - Rd["L"] * e - 70), (cx + s * (D2 / 2 - e2) * e, zr - Rd["L"] * .55 * e)], "url(#MET)", 1.1)
+    for (yy, xx, w) in ((zr, D1 / 2 * e, 5), (zr - Rd["L"] * e, (D2 / 2 + 1) * e, 4)):
+        poly(h, [(cx + s * xx, yy - w), (cx + s * (xx + w), yy), (cx + s * xx, yy + w * .2)], "#111", .5)
+rotura(h, cx - D1 / 2 * e, cx + D1 / 2 * e, zr + 72); rotura(h, cx - D2 / 2 * e, cx + D2 / 2 * e, zr - Rd["L"] * e - 72)
+h.ln(cx, zr - Rd["L"] * e - 80, cx, zr + 80, K, .4, h.EJE)
+h.dimH(zr + 88, cx - D1 / 2 * e, cx + D1 / 2 * e, "Ø114", ext=zr + 74)
+h.dimH(zr - Rd["L"] * e - 86, cx - D2 / 2 * e, cx + D2 / 2 * e, "Ø90", ext=zr - Rd["L"] * e - 74)
+h.dimV(cx + D1 / 2 * e + 26, zr - Rd["L"] * e, zr, "60 (*)", ext=cx + D2 / 2 * e + 4, c=OR)
+llamada(h, cx + D1 / 2 * e + 3, zr - 1, 525, zr + 40, "CORDON ≥ 1,5 e (FEM)", sz=8.5)
+llamada(h, cx - (D2 / 2 + 1) * e - 2, zr - Rd["L"] * e + 2, 362, zr - 60, "ABOCARDADO (*)", c=OR, sz=8.5)
+h.txt(cx - D1 / 2 * e - 4, zr + 40, "e 3,6", 8.5, 700, K, "end"); h.txt(cx - D2 / 2 * e - 4, zr - Rd["L"] * e - 50, "e 3,2", 8.5, 700, K, "end")
+h.globo("3", cx + 20, zr - Rd["L"] * .5 * e, 560, 120, r=9)
+
+# ======================= 3. D2 · PUERTA DE INSPECCION (frente) Y CORTE B-B
+h.titulo(600, 62, "D2 · PUERTA A 2,50 m", "FRENTE Y CORTE B-B · ESC. 1:2,5")
+e3 = .62; fx, fy = 680, 232; r1 = D1 / 2
+h.rect(fx - r1 * e3, fy - 105, 2 * r1 * e3, 210, "#fff", K, 1.2)
+rotura(h, fx - r1 * e3, fx + r1 * e3, fy - 105); rotura(h, fx - r1 * e3, fx + r1 * e3, fy + 105)
+h.rect(fx - (Pu["w"] / 2 + 8) * e3, fy - (Pu["h"] / 2 + 8) * e3, (Pu["w"] + 16) * e3, (Pu["h"] + 16) * e3, "url(#MET)", K, .7)
+h.rect(fx - Pu["w"] / 2 * e3, fy - Pu["h"] / 2 * e3, Pu["w"] * e3, Pu["h"] * e3, "#fff", K, 1.2)
+h.rect(fx - 12 * e3, fy - (Pu["h"] / 2 + 14) * e3, 24 * e3, 16 * e3, "#fff", K, .6, h.OCULTA)
+h.circ(fx, fy + (Pu["h"] / 2 - 3) * e3, 4, "#fff", K, .7)
+h.rect(fx - 18 * e3, fy - 20 * e3, 50 * e3, 66 * e3, "#fff", K, .6); h.rect(fx - 22 * e3, fy - 5, 58 * e3, 35 * e3 * .3, "url(#MET)", K, .4)
+h.circ(fx - 30 * e3, fy + (Pu["h"] / 2 - 20) * e3, 3.5, "url(#CU)", K, .6)
+h.dimH(fy - 105 - 8, fx - Pu["w"] / 2 * e3, fx + Pu["w"] / 2 * e3, "100", ext=fy - Pu["h"] / 2 * e3)
+h.dimV(fx + r1 * e3 + 16, fy - Pu["h"] / 2 * e3, fy + Pu["h"] / 2 * e3, "170", ext=fx + Pu["w"] / 2 * e3 + 2)
+llamada(h, fx, fy - (Pu["h"] / 2 + 10) * e3, 735, 104, "TRABA (*)", c=OR, sz=8.5)
+llamada(h, fx, fy + (Pu["h"] / 2 - 3) * e3, 735, 330, "BULON ANTIVANDALICO (*)", c=OR, sz=8.5)
+llamada(h, fx - 30 * e3, fy + (Pu["h"] / 2 - 20) * e3, 610, 330, "PAT BRONCE", sz=8.5)
+llamada(h, fx + 10, fy - 2, 735, 160, "TABLERITO AP-CC-014", sz=8.5)
+lineaCorte(h, fx - r1 * e3 - 18, fy + 20, fx + r1 * e3 + 18, fy + 20, "B")
+# corte B-B (horizontal) a la derecha
+bx, by = 790, 215; rb = r1 * .62; aa = math.degrees(math.asin(Pu["w"] / 2 / r1))
+arc = lambda r, a0, a1: [(bx + r * math.cos(math.radians(t)), by + r * math.sin(math.radians(t))) for t in [a0 + (a1 - a0) * i / 40 for i in range(41)]]
+hatchPoly(h, arc(rb, 90 + aa, 450 - aa) + arc(rb - e1 * .62 * 1.5, 450 - aa, 90 + aa), "MET", 1)
+h.path("M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in arc(rb + 22, 90 - aa - 4, 90 + aa + 4)), "none", K, 2.2)
+h.txt(bx, by + rb + 38, "TAPA AFUERA", 8, 400, G, "middle"); h.txt(bx, by - rb - 6, "B-B", 9, 700, K, "middle")
+
+# ======================= 4. D3 · ENTRADA 150 × 76 Y CAÑO Ø75 (corte por el eje, 1:10)
+q = .2; px, yp = 470, 505
+h.titulo(360, 365, "D3 · ENTRADA Y CAÑO Ø75", "CORTE POR EL EJE · ESC. 1:10 · AP-TC-003 (7 m)")
+Yz = lambda z: yp - z * q
+h.rect(px - 300 * q, Yz(0), 600 * q, M["fund"]["h7"] * q * .62, "url(#CONC)", K, 1)
+rotura(h, px - 300 * q, px + 300 * q, Yz(0) + M["fund"]["h7"] * q * .62 + 1)
+h.ln(px - 140, Yz(0), px + 140, Yz(0), K, 1.4); h.nivel(px + 70, Yz(0), "±0,00")
+for s in (-1, 1): h.rect(px + s * 57 * q - (3.6 * q * 1.5 if s > 0 else 0), Yz(400), 3.6 * q * 1.5, (400 + 560) * q, "#111", K, .2)
+h.rect(px - 57 * q - 1, Yz(En["z"] + En["h"] / 2), 3.6 * q * 1.5 + 2, En["h"] * q, "#fff", K, .6)
+rp = 37.5 * q
+h.rect(px - 140, Yz(En["z"]) - rp, 140 - 57 * q, 2 * rp, "#fff", K, .5)
+h.rect(px - 140, Yz(En["z"]) - rp, 140 - 57 * q, 2.2, "url(#PLAS)", K, .4); h.rect(px - 140, Yz(En["z"]) + rp - 2.2, 140 - 57 * q, 2.2, "url(#PLAS)", K, .4)
+h.path(f"M{px-140},{Yz(En['z'])} L{px-57*q-4},{Yz(En['z'])} Q{px-8},{Yz(En['z'])} {px-8},{Yz(En['z']+120)} L{px-8},{Yz(400)}", "none", K, 2)
+h.dimV(px + 57 * q + 18, Yz(0), Yz(En["z"]), "≥ 300", ext=px + 57 * q + 2)
+h.dimV(px - 57 * q - 14, Yz(En["z"] + En["h"] / 2), Yz(En["z"] - En["h"] / 2), "150", ext=px - 57 * q - 2)
+h.dimH(Yz(400) - 8, px - 57 * q, px + 57 * q, "Ø114", ext=Yz(400))
+h.txt(px - 138, Yz(En["z"]) - rp - 5, "CAÑO PVC Ø75 (6004)", 8.5, 700)
+h.globo("5", px - 57 * q, Yz(En["z"] - 40), px + 90, Yz(-480), OR, r=9)
+# corte A-A por la entrada
+ax_, ay_ = 650, 500
+h.txt(610, 440, "A-A", 10, 700); R_ = 57 * .7
+a2 = math.degrees(math.asin(38 / 57))
+hatchPoly(h, [(ax_ + R_ * math.cos(math.radians(t)), ay_ - R_ * math.sin(math.radians(t))) for t in [a2 + (360 - 2 * a2) * i / 40 for i in range(41)]] +
+          [(ax_ + (R_ - 3.6) * math.cos(math.radians(t)), ay_ - (R_ - 3.6) * math.sin(math.radians(t))) for t in [360 - a2 - (360 - 2 * a2) * i / 40 for i in range(41)]], "MET", 1)
+h.dimV(ax_ + R_ + 18, ay_ - 38 * .7, ay_ + 38 * .7, "76", ext=ax_ + R_ * math.cos(math.radians(a2)) + 2)
+h.ln(ax_ - R_ - 10, ay_, ax_ + R_ + 10, ay_, K, .4, h.EJE)
+h.txt(ax_, ay_ + R_ + 16, "ESC. 1:2,5", 8.5, 400, G, "middle")
+
 # ======================= TABLAS
-h.tabla(40, 640, [(62, "c", True), (165, "l", False), (78, "c", True), (78, "c", True), (78, "c", True), (78, "c", True), (251, "l", False)],
-        [("CODIGO", "MODELO (AP-C-005)", "Ht", "LIBRE", "EMPOTR.", "Ø PIE", "FUNDACION (AP-TC-003)"),
-         ("6006", "TIPO C · 7 m", "7,70 m", "7,00 m", "0,70 m", "114", "0,60 × 0,60 × 0,90"),
-         ("6005", "TIPO F · 10 m", "11,00 m", "10,00 m", "1,00 m", "140", "0,60 × 0,60 × 1,20")],
-        rowh=20, titulo="VARIANTES (CUADRO DEL PLANO AP-C-005: MANDA SOBRE LA TABLA DEL FABRICANTE)")
-y2 = h.codigos(40, 734, [6006, 6005, 6004])
-h.datos(40, y2 + 30, [("MATERIAL", "tubo de acero SAE 1010 en tramos"), ("ESPESOR", "≥ 3,2 mm (Ø ≤ 76) · ≥ 4 mm (mayor)"),
-        ("ENTRADA", "150 × 76, centro ≥ 300 bajo el piso"),
-        ("CAJA CONEXION", "a 2,50 m del piso terminado"), ("MANGUITO", "Ø60,3 × 300 (o Ø42,6 × 150)"),
-        ("PAT", "bulón de bronce en la caja + jabalina")], w=410, c1=130)
-textoBloque(h, 475, y2 + 30, "DONDE SE USA", [
-    "· AP-C-005: columna recta, acometida subt.",
-    "   Ítems 1 a 4 (metálica 1/2/3 brazos, 10 m)",
-    "   y provisión 83.1 / 83.2.",
-    "· AP-TC-003: fundación metálica (cuadro).",
-    "· AP-CC-001 (Ø ≤ 114) / AP-CC-004 (Ø140):",
-    "   caja; tablerito AP-CC-014 / 015.",
-    "· AP-TC-005: PAT, 1 jabalina por columna.",
-    "· Calculadora: subida = altura − 2,50 + ...",
-    "   ganancia del troncal 5 m por subida."])
-h.notas(40, 1040, [
-    "COTAS EN mm. Ht ES LO QUE SE PIDE AL FABRICANTE; EL PLIEGO HABLA DE ALTURA LIBRE: NO MEZCLARLAS.",
-    "(*) LOS TRAMOS SON DE UN FABRICANTE DE REFERENCIA (Ht 8,0 / 11,0); EL AP-C-005 PIDE 7,70 / 11,00: MANDA EL PLANO.",
-    "(*) EMPOTRAMIENTO: ETG 1/10 (0,70 / 1,00) · TABLA DEL FABRICANTE 0,8 / 1,1: A CONFIRMAR CON EL PROVEEDOR.",
-    "6004 SE PIDE EN METROS: DE LA ENTRADA A LA ZANJA. LA COLUMNA NUEVA TRAE EL BULON PAT EN LA CAJA.",
-    "FUENTE: ETG MUNICIPALIDAD DE CORDOBA (2014), PLANO AP-C-005 (D.G.A.P. 2022), BAEL (COLUMNAS DE TRAMOS)."])
+TY = 645
+yv = tablaD(h, 40, TY, [("COD.", "MODELO (AP-C-005)", "Ht", "LIBRE", "EMPOTR.", "Ø PIE", "FUNDACION", "TRAMOS DE REF. Ø × e × L (*)"),
+        ("6006", "TIPO C · 7 m", "7.700", "7.000", "700", "114", "0,60 × 0,60 × 0,90", "114×3,6×3400 · 90×3,2×2000 · 76×3,2×1500 · 60×3,2×800"),
+        ("6005", "TIPO F · 10 m", "11.000", "10.000", "1.000", "140", "0,60 × 0,60 × 1,20", "140×4,7×4200 · 114×3,6×3000 · 90×3,2×2000 · 76×3,2×1800")],
+        [(40, "c", True), (100, "l", False), (48, "c", True), (48, "c", True), (52, "c", True), (44, "c", True), (106, "l", False), (362, "l", False)],
+        "VARIANTES (CUADRO AP-C-005 · mm) Y TRAMOS DEL FABRICANTE DE REFERENCIA")
+yc_ = codTabla(h, 40, yv + 22, [6006, 6005, 6004], {6006: "ITEMS 1-3 · PROV. 83.1", 6005: "ITEM 4 · PROV. 83.2", 6004: "DE LA ENTRADA A LA ZANJA"}, wd=170)
+yd = tablaD(h, 40, yc_ + 22, [("DATO", "VALOR"), ("MATERIAL", "TUBO DE ACERO SAE 1010, EN TRAMOS"), ("ESPESOR (ETG)", "≥ 3,2 (Ø ≤ 76) · ≥ 4 (MAYOR)"),
+        ("UNIONES", "SOLDADAS SOLO ENTRE TRAMOS (FEM)"), ("NORMAS", "IRAM 2619 / 2620"), ("TERMINACION", "GALVANIZADO EN CALIENTE ≥ 75 µm (*)"),
+        ("PUERTA", "100 × 170 A 2,50 m · TAPA + TRABA (*)"), ("ENTRADA", "150 × 76 · CENTRO ≥ 300 BAJO EL PISO"), ("MANGUITO", "Ø60,3 × 300 (O Ø42,6 × 150)"),
+        ("PAT", "BULON DE BRONCE EN LA CAJA + JABALINA")], [(100, "l", False), (300, "l", False)], "DATOS TECNICOS", rowh=14)
+ry = rayadosRef(h, 470, yc_ + 22, ["MET", "PLAS", "CONC", "CU", "EARTH"], cols=2, dx=180)
+yu = bloque(h, 470, ry + 8, "DONDE SE USA", [
+    "AP-C-005: COLUMNA RECTA, ACOMETIDA SUBTERRANEA.",
+    "ITEMS 1-4 (METALICA 1/2/3 BRAZOS, 10 m) Y 83.1 / 83.2.",
+    "AP-CC-001 (Ø ≤ 114) / AP-CC-004: CAJA; TABLERITO AP-CC-014.",
+    "AP-TC-005: PAT, 1 JABALINA POR COLUMNA.",
+    "CALCULADORA: GANANCIA DEL TRONCAL 5 m POR SUBIDA."], w=420, sz=9.5, lh=12)
+notasW(h, 40, max(yd, yu) + 20, [
+    "COTAS EN mm. Ht ES LO QUE SE PIDE AL FABRICANTE; EL PLIEGO HABLA DE ALTURA LIBRE: NO MEZCLARLAS. MANDA EL CUADRO DEL AP-C-005.",
+    "(*) CONTRADICCION: CON LOS TRAMOS DE REF. (1.ER TRAMO 3.200 + EMPOTR. 700) LA REDUCCION CAE A 2.500, JUSTO EN LA CAJA. SE DIBUJO 3.400.",
+    "(*) EMPOTRAMIENTO: ETG 1/10 (0,70 / 1,00) · FABRICANTE 0,8 / 1,1. REDUCCION (60), TAPA, TRABA Y BULON: PROPORCIONALES, A CONFIRMAR.",
+    "(*) PUERTA 100 × 170: MEDIDA DE IRAM 2620 SEGUN UN PLIEGO MUNICIPAL (LA OTRA ES 95 × 160). FEM SUELDA LA TUERCA PAT A 50 DEL PISO."], w=800, lh=13.5)
 
-# ======================= 3D: COLUMNA 7 m EN SU LUGAR
-h.titulo(890, 62, "VISTA 3D - COLUMNA METALICA 7 m EN SU LUGAR", "GALVANIZADA EN CALIENTE (*) · FUNDACION CORTADA A UN CUARTO · CAÑO PVC Ø75")
-h.iso(.08, 1000, 840)
-B = 300
-m.box(-B, 0, -B, B, -900, 0, "hormigon", pat="conc3", edge="#6d7277"); m.box(0, B, -B, 0, -900, 0, "hormigon", pat="conc3", edge="#6d7277")
-m.render()
-ringZ(m, 57 - 3.6, 57, -700, 0, "galv", bias=60); m.render()
-m.cyl([0, 300 + 400, -300], [0, 50, -300], 37.5, "pvc", n=20, seg=6, bias=300); m.render()
-for (gx0, gx1, gy0, gy1) in ((-B - 260, -B, -B - 260, B + 260), (-B, B + 260, -B - 260, -B)):
-    m.box(gx0, gx1, gy0, gy1, -50, 0, "#c9c3b8", pat="concP3", edge="#8a857a")
-m.render()
-z = -700
-for (d, L, e) in C7["tr"]:
-    z0 = max(z, 0); z1 = z + L
-    if z1 > 0: m.cyl([0, 0, z0], [0, 0, z1], d / 2, "galv", n=30, seg=8, capmat="#8d98a2"); m.render()
-    z = z1
-ventanaZ(m, 57, 45, 1800, 76, 100, "#20242a"); m.render()                 # tapa de la caja a 2,50 m del piso (*)
-m.cyl([0, 0, 7300], [0, 0, 7600], 30.15, "galv", n=20, capmat="#8d98a2"); m.render()
-h.g3("4", (0, 0, 7450), 1110, 260, "MANGUITO Ø60,3 × 300")
-h.g3("1", (0, 0, 5400), 1110, 300, "COLUMNA METALICA 7 m (6006)")
-h.g3("2", (40, 40, 1800), 1110, 560, "CAJA DE CONEXION A 2.500 (*)")
-h.g3("3", (0, 60, -300), 1110, 800, "ENTRADA 150 × 76 (≥ 300 BAJO PISO)", OR)
-h.g3("5", (0, 400, -300), 1110, 840, "CAÑO PVC Ø75 A LA ZANJA (6004)")
-h.g3("6", (-150, 300, -500), 1110, 880, "FUNDACION 0,60 × 0,60 × 0,90")
-# ampliado de la base: tramo Ø114 cortado a un cuarto, ventana y caño
-h.titulo(1400, 380, "AMPLIADO: ENTRADA", "TUBO Ø114 CORTADO A UN CUARTO")
-h.iso(.42, 1540, 640)
-ringZ(m, 57 - 3.6, 57, -500, 200, "galv", a0=90, a1=360, bias=0); m.render()
-for i, col in enumerate(("negro", "negro", "verde")):
-    dy_ = (i - 1) * 14
-    m.cyl([0, 330, -300 + dy_ * .2], [dy_, 12, -300], 6, col, n=10, seg=3, bias=40)
-    m.cyl([dy_, 12, -300], [dy_, 0, 150], 6, col, n=10, seg=4, bias=40)
-m.render()
-m.cyl([0, 330, -300], [0, 57, -300], 37.5, "pvc", n=24, seg=3, bias=20); m.render()
-m.render()
-h.g3("3", (0, 57, -300 + 75), 1620, 520, "", OR); h.g3("5", (0, 250, -300), 1620, 760, "")
-h.txt(1420, 880, "CABLES: TRONCAL (NEGRO) Y 1×10 PE", 10, 400, G, "start", INT)
-h.rotulo(890, h.H - 150, 750, "MAT-COLUMNA_METALICA-1", "COLUMNA METALICA RECTA", "7 m (6006) · 10 m (6005)", "ELEVACION, ENTRADA, CORTE, DATOS Y 3D + CAÑO 6004",
-         "1:110 / 1:10", "A-A 1:5 · 3D S/E")
-guardar(h, "mat_columna_metalica_1")
+# ======================= 3D
+h.titulo(890, 62, "VISTA 3D - COLUMNA METALICA 7 m (6006)", "ARRIBA: PUERTA A 2,50 m, REDUCCION A UN CUARTO Y CIMA · ABAJO: BASE EN LA FUNDACION A UN CUARTO")
+A = img3d(h, "col_met_puerta", 895, 88, 355)
+columna(h, A, [("manguito", "4", "MANGUITO Ø60,3 × 300"), ("cima", "", "TRAMO Ø60"), ("tramo2", "", "TRAMO Ø90 × 3,2"), ("reduccion", "3", "REDUCCION (ABOCARDADO) (*)"),
+               ("soldadura", "", "CORDON DE SOLDADURA"), ("traba", "", "TRABA DE LA TAPA (*)"), ("tab", "", "TABAQUERA EN RIEL"), ("tapa", "", "TAPA CURVA (*)"),
+               ("abertura", "2", "PUERTA 100 × 170"), ("pat", "", "BULON PAT DE BRONCE"), ("bulonT", "", "BULON ANTIVANDALICO (*)"), ("galv", "1", "GALVANIZADO EN CALIENTE")], 1290, 100, 505, paso=26)
+B_ = img3d(h, "col_met_base", 920, 520, 330)
+columna(h, B_, [("tubo", "1", "TRAMO Ø114 × 3,6"), ("pared", "", "PARED e 3,6"), ("entrada", "5", "ENTRADA 150 × 76"), ("troncal", "", "TRONCAL Cu"),
+                ("pe", "", "PE 1×10 V/A"), ("cano", "", "CAÑO PVC Ø75 (6004)"), ("horm", "", "FUNDACION 0,60×0,60×0,90"), ("relleno", "", "RELLENO INTERIOR (*)")], 1290, 560, 995, paso=27)
+pie3d(h, "", "RENDER three.js: r3d/escenas/col_met_puerta.mjs y col_met_base.mjs · MISMA GEOMETRIA DEL PLANO · FUENTES: r3d/FUENTES_col.md")
+rotuloMat(h, "MAT-COLUMNA_METALICA-1", "COLUMNA METALICA RECTA", "7 m (6006) · 10 m (6005)", "ELEVACIONES, D1, D2, D3 Y 3D",
+          "VARIAS", "INDICADAS · 3D S/E", rev="B", fecha="08/11/2026")
+guardarCol(h, "mat_columna_metalica_1")
