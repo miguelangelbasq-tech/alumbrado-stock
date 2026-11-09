@@ -32,9 +32,15 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas**
 - `t_v134` (nueva) en PC y celular, con el Worker y la voz simulados: Oficina edita una OT (suma a Rolando y 4 → 6 de fundaciones) con tarjeta antes → después; «No» no guarda nada; «Sí» guarda `personal`/`personalNombres`, el aviso de Rolando y la auditoría `asistente_editar`; `proponer_editar` respeta permisos (Oficina sin gastos, usuarios solo admin, auditoría nunca); la cuadrilla no recibe herramientas de acción; «las 16 de 10 m» → cómputo nuevo guardado sin tocar el viejo, materiales e itemizado previsto en la tarjeta, «Pasar este cálculo a la obra»; vale de salida con número S-0001; mínimo del catálogo; dirección y situación de la obra; `presencia.disp` con el sello; modo charla: escucha, responde, lee en voz alta, vuelve a escuchar, «sí, hacelo» manda el aviso, nunca escucha mientras habla, corta con «terminar» y con el botón.
-- Batería completa en PC y celular: RESULTADOS_BATERIA
+- `t_v133` cambiada: la tarjeta de «Corregir el itemizado» ahora muestra cada ítem con ~~antes~~ → después (diseño A), sin los «:»; se ajustó la expresión que la lee. El resto igual.
+- Batería completa en PC y celular (135 pruebas × 2, de a 4 a la vez): todo OK salvo `t_v083` (reemplazada por `t_v084`, como siempre). Diez dieron mal con la máquina cargada (`t_cargador`, `t_v024`, `t_v026`, `t_v028_dbg`, `t_v064`, `t_v067`, `t_v073` PC y celu, `t_v092`, `t_v108b`) y `t_v086` se pasó de tiempo: repetidas solas, todas OK. `t_v134` 30/30 en PC y 31/31 en celular; `t_v133` 29/29 y 31/31; `t_v132` 29/29; `t_circuito` OK.
+- Capturas del panel en el celular (chat, confirmación, charla y opciones) para mostrarle a Ángel.
 
-**Huellas** HUELLAS
+**Huellas** (sello «2026-11-09 06:56 · 6cf78a», hora de Argentina al armarla)
+- `index.html`: `ec1e4db67d684102518c6bea4e5735336b571b11e68f9d3f5857844d91bf00d1`
+- `134_2026-11-09_app-EMA_ORIGINAL.html`: `eca5fd45542f023e8afd6ee5609ea12f2efadc68466a1a2717a78528b773010d`
+- `patch_v134.py` (base: ORIGINAL 133 `44965d07…ec23ef39`): `aa5740e8d43930a597f04932c94ba7848b8c00e2498f8a9e310c25f2f0fb436e`
+- `asistenteIa.html` (módulo completo que reemplaza el de la 133, con `datosCelu`): `dd558ac4eb3875709e727706b2b83b2abbcd1fada16d09330ca1c13c3e1cc6e5`
 
 ## v133 — 09/11/2026 · «✨ Asistente EMA» pro: ve todo, cruza las fuentes, mira planos y fotos
 
