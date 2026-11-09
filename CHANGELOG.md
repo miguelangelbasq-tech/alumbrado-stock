@@ -2,6 +2,42 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v132 — 09/11/2026 · «✨ Asistente EMA»: una IA dentro de la app
+
+**Pedido de Ángel**
+- «Asistente para todas las cosas, informes, preguntas, que te cree una orden rápido… cosas que ya hace la app pero que se lo tenga que decir rápido y le llegue a los empleados rápido, porque por ahí estoy en obra.»
+- Ejemplos: «cerrame las OT si están completas», «qué me falta de esta obra», «cuántas columnas tengo en esta obra», «pasame la ubi de esta obra».
+
+**Cambios** (`asistenteIa`)
+- **Botón «✨ Asistente»** abajo a la derecha (respeta el borde del celu). Lo ven **solo Administración y Oficina**. Para habilitarlo a otros roles: ⚙ en el panel (solo admin) → guarda `configEquipo/personal.asistente.roles` (doc que ya existe y ya se lee: no hacen falta reglas nuevas ni lecturas nuevas). La cuadrilla no ve el botón ni baja el código: el asistente está «dormido» (`<script type="text/plain" id="asistenteIaCod">`) y se carga al tocar el botón.
+- **Panel**: chat, campo de texto, 🎤 (dictado `es-AR` si el celu lo permite; si no, «usá el micrófono del teclado») y sugerencias en chips. En el celu, pantalla completa; en la PC, panel al costado.
+- **Cómo piensa**: la app manda cada pedido al Worker `ema-ia` (con el token de Firebase; la clave de Claude vive solo en el Worker). Si Claude pide una herramienta, **la corre la app**, con los permisos de quien pregunta y con lo que ya tiene en memoria (obras, órdenes, pañol, nómina): **no hace lecturas nuevas a Firestore**. Tope de 6 vueltas por pregunta.
+  - Modelo: Haiku para preguntas (effort low); Sonnet (effort medium) si la persona escribe «armá / hacé / cerrá / orden» o si Haiku pide una acción (en ese caso se repite el pedido con Sonnet). System + herramientas con `cache_control`.
+  - System en rioplatense: corto, primero la respuesta, nunca inventar datos, acciones siempre con propuesta y Sí; lleva la fecha, quién pregunta y la pantalla abierta (si es el legajo de una obra, «esta obra» es esa).
+  - `stop_reason: "refusal"`: no se corre ninguna herramienta de ese turno y avisa «No puedo ayudarte con eso». `max_tokens` con herramienta a medias: no la corre.
+- **Herramientas de lectura** (se corren solas): `buscar_obra`, `datos_obra` (columnas por tipo y altura del itemizado —o del cálculo si no hay itemizado—, hechas y totales, avance %, «Quedan N de T» de cada tarea con `saldoObra`, lo que falta según el itemizado, material calculado contra entregado, dirección, coordenadas, órdenes abiertas), `ubicacion_obra` (link `https://maps.google.com/?q=lat,lng`; en el chat «📍 Abrir mapa», «Compartir por WhatsApp» y «🗺 En el mapa de la app»), `ordenes` (por obra / estado / fecha / persona; hechas contra previstas, si mandaron todo, fotos), `ordenes_completas` (todo mandado, sin fotos faltantes y con horas; las otras con el motivo), `stock` (stock, reservado y disponible), `personal` (rol, vehículo, si le llegan las órdenes al celu), `puntos` (ranking de la quincena con `__quincenas.calcular`), `resumen_dia`.
+- **Acciones** (nunca se hacen solas): devuelven a Claude una «propuesta pendiente» y la app muestra una **tarjeta** con exactamente lo que va a hacer y **[Sí, hacelo] / [No]**. Con el Sí:
+  - `proponer_orden`: valida obra, fecha, gente de la nómina, vehículo y tareas del catálogo (si no existe, ofrece las parecidas), avisa si pide más de lo que queda, si ya hay otra orden de esa obra ese día o si a alguien no le llega al celu, y muestra los puntos estimados (los mismos de «Llenar orden»). Con el Sí **carga «Llenar orden» y toca Emitir** (`emitirOrdenTrabajo` con todas sus envolturas): sale igual que si la armara la oficina (número OT, `personalNombres`, vehículos, aviso al celu de cada uno, «una orden por obra y día»). «Revisarla antes» la deja cargada sin emitir.
+  - `proponer_cierre`: con el Sí abre **el cierre de siempre** de cada orden, una por una, ya cargado con lo que mandó la cuadrilla, y la persona toca «✅ Aprobar todo y cerrar» (barra «Cierre 1 de N» con «Terminar»). Los puntos y el avance salen del cierre de siempre; el asistente nunca cierra solo.
+  - `proponer_aviso`: `__pushAvisos.dejarAviso` a cada persona (o «todos»).
+  - Todo queda en `auditoria` con `porAsistente: true` (`asistente_orden`, `asistente_cierre`, `asistente_aviso`, `asistente_roles`). Lo que pasó con la tarjeta se le cuenta a Claude en el próximo mensaje («[Nota de la app: …]»).
+- `abrir` (legajo, orden, mapa centrado en la obra, tablero, Llenar orden, informes, pañol, producción, Mis tareas) e `informe` (mensual con fotos o avance de obra, con la obra elegida y el botón «📄 Armarlo ahora» → hoja A4 con Compartir PDF): solo navegan.
+- **Gasto**: `localStorage ema.ia.gasto` por día y por mes (con el `ema.costoUsd` que devuelve el Worker); menú › Versión: «✨ Asistente: US$ X hoy · US$ Y este mes». Errores del Worker: se muestra su mensaje (ej. 429 «Llegaste a 20 pedidos por minuto…»). Sin señal: «Sin señal: el asistente necesita internet».
+
+**Qué tiene que hacer Ángel**
+1. Subir `index.html` a GitHub.
+2. Nada más: no hay reglas nuevas ni APK nuevo. El Worker `ema-ia` ya está andando (si cambia la dirección, avisar).
+
+**Pruebas**
+- `t_v132` en PC y celular (Worker simulado interceptando `/ia`): botón para admin y oculto para la cuadrilla (operario y cuadrilla), panel, pregunta «¿cuántas columnas…?» → `tool_use datos_obra` → `tool_result` → respuesta (Haiku, effort low, token, cache_control, sin temperature), ubicación con los links, `proponer_orden` con tarjeta sin escribir nada; «No» no escribe; «Sí» emite la orden (número, `personalNombres`, tarea, cantidad, vehículo), aviso a Juan y auditoría; la nota llega en el próximo pedido; `ordenes_completas` (lista y con motivo); cierre con «Sí» abre el cierre sin cerrarlo; Haiku → Sonnet al pedir una acción y aviso con «Sí»; error 429; `refusal`; sin señal; gasto del día/mes y la línea de menú › Versión; sin scroll de costado en el celu.
+- Batería completa en PC y celular: todo OK salvo `t_v083` (reemplazada por `t_v084`). `t_v132` 29/29 en PC y 30/30 en celular; `t_circuito` 16/16 en los dos.
+- Prueba vieja cambiada: ninguna.
+
+**Huellas** (sello «2026-11-08 21:36 · 1b9b4d», hora de Argentina al armarla)
+- `index.html`: `4fd6d2365174b8df44a48799de8e9acfdca02825134d64c2863d9ef133a1a46f`
+- `132_2026-11-09_app-EMA_ORIGINAL.html`: `7eafe4c843acf2a9401b7203ae6db2d79629ead1765d6e0bcb82a2dfe30a1db5`
+- `patch_v132.py` (base: ORIGINAL 131 `1ee4cf6a…b15b8`): `f58668f1b9778f6ea3e20072ec76dbddfe65c2bb706388835f8efe735ceac1d1`
+
 ## v131 — 08/11/2026 · «🔧 Revisar el catálogo» del pañol y carrusel foto → 3D → plano en cada material y herramienta
 
 **Pedido de Ángel**
