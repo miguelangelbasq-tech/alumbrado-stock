@@ -25,7 +25,29 @@ const URL_IA = 'https://ema-ia.mdiaz-60f.workers.dev/ia';
   d.db.gastosObra = { g1: { plazaId: 'p2', categoria: 'Materiales', monto: 1000, fecha: hoy } };
   const MOD = { cel, espera: 3500, ofPasos: true, mtNuevo: true, porPartes: true, reglas: true, https: true, tarjetas: true };
   const A = await abrir(Object.assign({ sesion: 'admin', datos: d }, MOD)), p = A.page;
+  let r0 = null;
   p.on('dialog', (x) => x.accept());
+  // ======= 0) lengüeta B2 al borde derecho (en lugar del botón «✨ Asistente»; queda el id #iaFab)
+  await p.waitForTimeout(1600);
+  const tab = () => p.evaluate(() => { const b = document.getElementById('iaFab'), t = b && b.querySelector('.ia-tab'), r1 = b ? b.getBoundingClientRect() : {}, r2 = t ? t.getBoundingClientRect() : {}; return { vis: !!(b && !b.hidden && r1.width > 0), w: r1.width, h: r1.height, tw: r2.width, der: Math.round(innerWidth - r1.right), top: Math.round(r1.top), alto: innerHeight, panel: !!(document.getElementById('iaPanel') && !document.getElementById('iaPanel').hidden), ls: (() => { try { return localStorage.getItem('ema.ia.tab'); } catch (e) { return 'x'; } })() }; });
+  let tb = await tab();
+  c(tb.vis && tb.w >= 44 && tb.h >= 56 && tb.tw >= 28 && tb.tw <= 34 && tb.der <= 1 && Math.abs(tb.top + 34 - 0.6 * tb.alto) < 70, 'lengüeta de vidrio pegada al borde derecho, a ~60 % de la altura: se ve de ' + tb.tw + ' px y se toca en ' + tb.w + ' × ' + tb.h + ' · ' + JSON.stringify(tb));
+  if (cel) { await p.screenshot({ path: __dirname + '/v134_tab_inicio_cel.png' }); await p.evaluate(() => window.mostrarVista('stock')); await p.waitForTimeout(1200); await p.screenshot({ path: __dirname + '/v134_tab_panol_cel.png' }); await p.evaluate(() => window.mostrarVista('inicio')); await p.waitForTimeout(600); }
+  const arrastrar = async (dy) => { const b = await p.evaluate(() => { const r = document.querySelector('#iaFab .ia-fab-b').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }); await p.mouse.move(b.x, b.y); await p.mouse.down(); for (let i = 1; i <= 10; i++) await p.mouse.move(b.x - i * 0.3, b.y + dy * i / 10); await p.mouse.up(); await p.waitForTimeout(500); };
+  const t0 = tb.top; await arrastrar(-150); tb = await tab();
+  c(Math.abs(tb.top - (t0 - 150)) < 12 && tb.der <= 1 && !tb.panel && tb.ls && Math.abs(parseFloat(tb.ls) - (tb.top + 34) / tb.alto) < 0.03, 'se arrastra solo en vertical (150 px más arriba), queda guardada en ema.ia.tab y arrastrarla no abre el panel · ' + JSON.stringify(tb));
+  await p.click('#iaFab .ia-fab-b'); await p.waitForTimeout(700);
+  r0 = await p.evaluate(() => !!(document.getElementById('iaPanel') && !document.getElementById('iaPanel').hidden) && !!window.__asistente);
+  c(r0, 'tocarla abre el panel del asistente');
+  await p.evaluate(() => window.__asistente.cerrar()); await p.waitForTimeout(300);
+  if (cel) {   // en «Llenar orden», abajo de todo, no tapa la barra fija: se corre arriba
+    await p.evaluate(() => { window.mostrarVista('parte'); window.irSubOrdenes && window.irSubOrdenes('nueva'); }); await p.waitForTimeout(1500);
+    await arrastrar(900); await p.waitForTimeout(1700);
+    const z = await p.evaluate(() => { const bar = [...document.querySelectorAll('#ofBarra, .of-barra')].find((x) => x.getBoundingClientRect().height > 0 && getComputedStyle(x).display !== 'none'), rb = bar ? bar.getBoundingClientRect() : null, rt = document.getElementById('iaFab').getBoundingClientRect(); return { bar: rb ? Math.round(rb.top) : null, tabAbajo: Math.round(rt.bottom), alto: innerHeight }; });
+    c(z.bar != null && z.tabAbajo <= z.bar, 'en «Llenar orden» la lengüeta no tapa la barra de abajo: se corre arriba de la barra · ' + JSON.stringify(z));
+    await p.screenshot({ path: __dirname + '/v134_tab_llenar_cel.png' });
+    await arrastrar(-260); await p.evaluate(() => window.mostrarVista('inicio')); await p.waitForTimeout(500);
+  }
   // ---- el Worker simulado (por página)
   let n = 0;
   const usa = (name, input) => ({ id: 'msg_' + (++n), type: 'message', role: 'assistant', content: [{ type: 'text', text: 'Me fijo.' }, { type: 'tool_use', id: 'tu_' + n, name, input }], stop_reason: 'tool_use', usage: { input_tokens: 900, output_tokens: 40 }, ema: { costoUsd: 0.02 } });
