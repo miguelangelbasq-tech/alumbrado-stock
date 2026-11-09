@@ -2,6 +2,51 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v133 — 09/11/2026 · «✨ Asistente EMA» pro: ve todo, cruza las fuentes, mira planos y fotos
+
+**Pedido de Ángel**
+- Le preguntó por GEORG NICOLAI: el asistente dijo «8 PRFV de 7 m (ítem 6) y 8 de 10 m (ítem 8)» y, al pedirle la calculadora, «no tengo acceso al historial de la calculadora».
+- «Tiene que ser más pro… tener acceso absolutamente a cada punto de la calculadora… analizar todo, leer los planos que subo de cada obra, comparar si la calculadora sacó bien o no, analizar errores de la calculadora, de la obra, de la app de los chicos, si algún celular o usuario está fallando.»
+- «Que ubique las fotos en la obra correcta según el GPS» (caso: Rolando Velázquez, 06/11, fotos cargadas en otra plaza).
+
+**Cambios** (`asistenteIa`, solo el asistente; el resto de la app no cambia de comportamiento)
+- **Sonnet 5.5 para todo** (effort `medium`, `max_tokens` 4000), tope de **10 vueltas** por pregunta. System + herramientas con `cache_control`.
+- **Lectura de todo lo que la app tiene en memoria** (sin lecturas nuevas a Firestore, salvo a pedido: la imagen de un plano y las fichas de fotos de una obra o de un día):
+  - `obra_completa(obraId)`: registro, itemizado (ítem, cant, K, hechas), **todos los cómputos de la Calculadora** de la obra (fecha, quién, formulario completo: columnas por tipo y altura, vínculos, circuitos, tableros, tramos, zanja, campos; y la lista de materiales), etapas, órdenes con cierres, material entregado/reservado/devuelto, gastos (con permiso), fotos por categoría, planos, Gantt, notas y **«diferencias»**: columnas del cómputo contra los ítems 1–8 por altura, ítem por ítem del cómputo (`epecPreviaDe`) contra el itemizado, itemizado contra lo hecho en órdenes (`__diferenciasObra`) y material calculado contra entregado. Cada diferencia dice de dónde sale («cómputo del 05/11/2026 (Ana) contra el itemizado»).
+  - `historial_calculos(obra/texto/desde/hasta/detalle)`.
+  - `consultar(coleccion, texto, filtro, campos, desde, limite)`: cualquier colección en memoria (obras, cálculos, órdenes, movimientos, catálogo, reservas, herramientas y sus movimientos, gastos, plan, etapas, planos, puntos del mapa, cierres de quincena, nómina, baremo, precios, reinicios; y para Administración: usuarios, presencia, ubicación en vivo y su horario), paginado, ≈30 KB por respuesta y «hay más: pedí desde=N». Respeta el permiso de cada hoja (sin «gastos» no hay gastos; usuarios/presencia/ubicación solo admin). **Nunca manda mails, tokens ni imágenes** (los mails se cambian por el nombre).
+  - `describir_datos()`: cada colección con qué significa (de CLAUDE.md §7), cuántos registros, campos y un ejemplo.
+  - `revisar_calculo(obraId)`: **vuelve a calcular** el último cómputo con la Calculadora de hoy (`actRecalcular`, el mismo «¿cambió algo?» del Historial, sin guardar y dejando la pantalla como estaba), lo compara (`actComparar`), revisa reglas (columnas del formulario contra el listado, jabalinas = circuitos + tableros en PRFV / columnas + tableros en metálica), itemizado, diferencias y avisa si hay planos.
+  - `ver_plano(obraId, planoId?, pagina?)`: arma la imagen del plano por el mismo camino del visor (`planosImg` en pedazos), la achica a 1600 px / JPEG 0,8 / < 1,5 MB y la manda **como imagen dentro del `tool_result`**. Consigna: contar columnas, tableros y circuitos y comparar con el cómputo y el itemizado; decir qué no se lee.
+  - `ver_fotos(obraId | otId, categoria?, n ≤ 6)`: miniaturas como imágenes, con quién, cuándo, lat/lng, **distancia a la obra** y la otra obra que está cerca.
+  - `ubicar_fotos(obraId?, fecha?, persona?)`: cada ficha de `fotosObra` con GPS contra su obra y las demás (lejos = más de 150 m o el radio de la obra si lo tuviera); propone la más cercana a menos de 150 m o «sin obra». Devuelve grupos: «2 foto(s) de Rolando Velázquez del 06/11/2026 están en PLAZA X pero se sacaron en PLAZA Y, a 17–20 m». Pide obra o fecha (para no bajar todas las fotos).
+  - `diagnostico_equipo(persona?)`: usuarios pendientes, desactivados, sin persona vinculada o con persona fuera de la nómina; última vez en la app y tipo de aparato (presencia); ubicación en vivo (sin actualizar, cortes, celu bloqueado); órdenes con envíos trabados o fotos anotadas sin imagen; a quién no le llegan las órdenes; y de este aparato: cola de fotos, rechazadas por permiso, lecturas del día. La versión de la app de cada celular **no se guarda en ningún lado** (lo dice).
+- **Acciones nuevas (con tarjeta y «Sí», como las de la v132):**
+  - `proponer_corregir_itemizado(obraId, cambios[{item, cantNueva}], motivo)`: tarjeta «🧾 Corregir el itemizado» con antes → después y las hechas. Con el Sí guarda como «Avance de obra» (si el itemizado está fijado, por `CO.aplicarAjuste` con el motivo, igual que «Diferencias con lo hecho»; si no, cambia la cantidad como el total del ítem), `avanceAutoEtapas`, `fbAvanceGuardar`. Las hechas no se tocan, salvo que queden más altas que el total nuevo (se avisa en la tarjeta). Conforme cerrado: no deja. Auditoría `asistente_itemizado` con los cambios.
+  - `proponer_mover_fotos(fotos[], obraDestino | "sin_obra", motivo)`: tarjeta «📷 Mover N fotos» con las miniaturas y un solo Sí. Cambia `fotosObra.plazaId/plazaNombre` y el `adjuntos` de la foto, con `movidaDe {plazaId, plazaNombre, ts, por, motivo}`; si la foto está en una orden, la orden no se toca. El legajo vuelve a pedir las fotos (`__lgFotosOlvidar`). Auditoría `asistente_mover_fotos`. Si la base lo niega: «falta publicar las reglas…».
+- **«📷 Fotos sin obra»** en Obras (Administración, Oficina y quien ve Avance/Registro; no la cuadrilla): las fotos con `plazaId: "__sinObra"`, con quién, fecha, de qué obra venían y la obra más cercana; «✨ Ubicarlas con el asistente».
+- El system pide: buscar con `describir_datos`/`consultar` antes de decir «no tengo acceso»; decir de dónde sale cada número; tabla de diferencias y **proponer el arreglo**; lo que afirma la persona («en obra son todas de 10 m») es un dato, no se discute; con plano, contar y comparar; diagnóstico del equipo con causas probables y qué hacer.
+- **Costo:** cada pregunta con Sonnet sale unos 2 a 6 centavos de dólar (más si mira planos o fotos). Las imágenes viajan una sola vez: en los turnos siguientes van como «[imagen que ya miraste antes]»; dentro de un turno, como mucho 12 imágenes y 3,5 MB (el Worker corta en 5 MB). Las herramientas resumen (agregados y los primeros N). El contador de gasto sigue igual (menú › Versión).
+- Chips nuevos: «🔎 Revisar una obra a fondo», «🧮 ¿La calculadora sacó bien?», «🩺 ¿Algún celu fallando?», «📍 Fotos en otra obra».
+- Para que el asistente los lea, quedan a la vista (solo lectura) datos que ya estaban cargados dentro de otros módulos: `__planosObra`, `__planoImg`, `__herramientasLista`, `__herramientasMovs`, `__cierresQuincena`, `__mapaPuntos`, `__presenciaDatos`.
+
+**Reglas de Firebase:** no cambian. Las v128 ya dejan a quien edita Avance o Registro (Administración y Oficina) actualizar `fotosObra` y `adjuntos`.
+
+**Qué tiene que hacer Ángel**
+1. Subir `index.html` a GitHub.
+2. Nada más: ni reglas ni APK. El Worker `ema-ia` no cambia (acepta Sonnet, `max_tokens` 4000 e imágenes).
+
+**Pruebas**
+- `t_v133` (nueva) en PC y celular con el Worker simulado: obra con cómputo «16 PRFV de 10 m» e itemizado «8 del ítem 6 + 8 del ítem 8» → `obra_completa` trae las dos fuentes y la diferencia (10 m: 16 contra 8; 7 m: 0 contra 8) con la fuente; `historial_calculos`; `consultar` pagina y Oficina sin permiso de gastos no recibe gastos ni usuarios (y nunca mails); `describir_datos`; `revisar_calculo` recalcula de verdad (16 columnas) y revisa jabalinas; `ver_plano` lleva la imagen JPEG en el `tool_result` y no se repite en el turno siguiente; `ver_fotos` con la distancia y la obra cercana; `ubicar_fotos` agrupa las de Rolando del 06/11; `proponer_mover_fotos` no mueve nada hasta el Sí y con el Sí mueve ficha y adjunto con `movidaDe` + auditoría; la foto lejos de todo va a «Fotos sin obra» y se ve en Obras; `diagnostico_equipo` (Rolando sin persona vinculada); `proponer_corregir_itemizado` no escribe hasta el Sí y con el Sí queda ítem 6 = 0 e ítem 8 = 16 + auditoría; todo con Sonnet/medium/4000; tope 10.
+- `t_v132` cambiada: esperaba Haiku/effort low en las preguntas y el paso de Haiku a Sonnet al pedir una acción; ahora todo va con Sonnet (pedido de esta versión).
+- Batería completa en PC y celular (134 pruebas × 2): todo OK salvo `t_v083` (reemplazada por `t_v084`, como siempre). `t_v133` 29/29 en PC y 31/31 en celular; `t_v132` 29/29 y 30/30; `t_circuito` 16/16 en los dos.
+
+**Huellas** (sello «2026-11-08 23:52 · 638b69», hora de Argentina al armarla)
+- `index.html`: `6880b0fada79a3e629a938f70addf45fee20124fb6069e96998dd147825eecba`
+- `133_2026-11-09_app-EMA_ORIGINAL.html`: `44965d0747c180d33f8ba94f93ade778344eeb58b9878fad1d3e7ae0ec23ef39`
+- `patch_v133.py` (base: ORIGINAL 132 `7eafe4c8…0a1db5`): `9af8504ee47f3491f6292f0f55023d891e63964c37ba472274beccfb06cce8f1`
+- `asistenteIa.html` (módulo completo que reemplaza el de la 132): `7b4879d90a80a5d6208b07169b3b851c6eb19280ddcb92573ca7313ec5d63ad1`
+
 ## v132 — 09/11/2026 · «✨ Asistente EMA»: una IA dentro de la app
 
 **Pedido de Ángel**
