@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v135 — 09/11/2026 · Diseño nuevo: Inicio «Ejecutivo», Inicio del pañolero, barra de abajo con «Perfil» y la pantalla Perfil
+## v135 — 09/11/2026 (publicada en GitHub, commit af633cf) · Diseño nuevo: Inicio «Ejecutivo», Inicio del pañolero, barra de abajo con «Perfil» y la pantalla Perfil
 
 **Pedido de Ángel** (diseños aprobados con imágenes el 09/11/2026)
 - Inicio «Ejecutivo» (P1) para Administración y Oficina, con datos reales; Inicio propio del pañolero; la cuadrilla sigue igual.
