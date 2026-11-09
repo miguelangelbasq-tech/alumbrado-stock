@@ -122,10 +122,11 @@ function png(w, h, rgb) {
   const tr6 = ps[1] && ps[1].b.messages[ps[1].b.messages.length - 1].content[0];
   const img6 = tr6 && Array.isArray(tr6.content) ? tr6.content.find((x) => x.type === 'image') : null, txt6 = tr6 && Array.isArray(tr6.content) ? JSON.parse(tr6.content[0].text) : {};
   c(img6 && img6.source.type === 'base64' && img6.source.media_type === 'image/jpeg' && img6.source.data.length > 500 && img6.source.data.length * 0.75 < 1.5e6 && txt6.plano === 'Planta general' && /Contá/.test(txt6.consigna), 'ver_plano: el tool_result lleva el plano como imagen JPEG base64 (< 1,5 MB) y la consigna · ' + JSON.stringify({ px: txt6.px, kb: img6 ? Math.round(img6.source.data.length * 0.75 / 1024) : 0 }));
-  // en la pregunta siguiente, la imagen vieja ya no viaja (ahorra)
+  // v136: la historia va TAL CUAL (solo se agrega: con Opus 5.5 / Fable 5.2 no se pueden editar los mensajes de antes);
+  // antes de la v136 la imagen vieja se cambiaba por un texto. El peso lo controla «compactar» (conversación nueva desde un resumen).
   ps = await preguntar('gracias', [fin('De nada.')]);
   const viejas = JSON.stringify(ps[0].b.messages).match(/"type":"image"/g);
-  c(!viejas && /ya miraste/.test(JSON.stringify(ps[0].b.messages)), 'en el turno siguiente la imagen del plano no se vuelve a mandar');
+  c(viejas && viejas.length === 1 && !/ya miraste/.test(JSON.stringify(ps[0].b.messages)), 'en el turno siguiente la historia va tal cual, con la imagen del plano (solo se agrega)');
 
   // ---- 7) ver_fotos con la distancia a la obra
   ps = await preguntar('mostrame las fotos de san martin', [usa('ver_fotos', { obraId: 'p1', n: 6 }), fin('Hay fotos que parecen de otra obra.')]);

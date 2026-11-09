@@ -2,6 +2,59 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v136 — 09/11/2026 (lista para subir, NO publicada) · Arreglos del Inicio, campanita de línea, barra de abajo deslizable, Asistente con Opus 5.5 (PDF y cierre rápido), «🩺 Supervisor» y Guías nuevas
+
+**Pedido de Ángel** (diseños aprobados el 09/11/2026)
+- Inicio: «Para atender» se encimaba sobre la portada azul; en el APK la portada quedaba debajo del reloj; el buscador cortaba «Buscar obra o barri…».
+- Campana de línea (la del Inicio) en todas las pantallas, en vez de la 🔔 amarilla.
+- Barra de abajo que se guarda: opción B (lengüeta al borde izquierdo).
+- Asistente «la más pro» (decisión final con Ángel: **Opus 5.5 para todo**; Fable 5.2 y Sonnet 5.5 como opción), PDF de todo y cierre rápido de órdenes.
+- Supervisor de la app (sin IA siempre + revisión con IA a las 12 y 18 h).
+- Guías con el formato nuevo.
+
+**Cambios** (módulos nuevos `v136Ui`, `supervisor`, `guiasNuevas`; reemplazos chicos en `inicioPro`, `navBarra`, `avisosApp`, `materialesFichas` y `asistenteIa`)
+- **Inicio Ejecutivo:** las tarjetas empiezan debajo de la portada (antes subían 40 px encima) y son blancas (86 %); la portada suma el borde de arriba del celu (`env(safe-area-inset-top)`, y `--safe-area-inset-top` por si el WebView no lo da) y una franja fija `#ieReloj` tapa el reloj cuando la portada sube; en ≤ 420 px el buscador y el botón Asistente se achican lo justo (entra «Buscar obra o barrio…»). `#iniPan` no lo necesita: tiene el header de la app.
+- **Campanita:** `#avCampana` dibuja la campana de línea (mismo SVG del Inicio y del Perfil), navy, con el globito rojo. Mismo botón, id y comportamiento. El título «🔔 Avisos» de la tarjeta del inicio de la cuadrilla quedó como estaba (es texto, como «📋 Tus tareas»).
+- **Barra de abajo (B):** flechita ‹ a la derecha; tocarla o deslizar la barra a la izquierda la guarda con animación y queda una lengüeta de vidrio (44 × 68 px, sin desenfoque) al borde izquierdo con el globito del total de pendientes; tocarla o deslizarla a la derecha la trae. `ema.nav.guardada` lo recuerda. Guardada, el contenido no reserva lugar abajo. Respeta los bordes del celu; si aparece el cartel de fotos sin señal, la lengüeta se corre arriba.
+- **Asistente:**
+  - Modelo: **Opus 5.5** (`claude-opus-5-5`) para todo: chat effort «medium», cierre rápido «low», supervisor y «revisá todo» «high». En ⚙ (solo Administración) «Modelo» del asistente y del supervisor: Opus 5.5 (recomendado) · Fable 5.2 (el más pro) · Sonnet 5.5 (el más barato), con el costo aproximado por pregunta (≈ US$ 0,09 / 0,17 / 0,04). Se guarda en `configEquipo/personal.asistente.{modelo, modeloSupervisor}` (las reglas de hoy lo dejan; si no, queda en el aparato).
+  - Reglas de la API: sin `temperature`/`top_p`/`top_k`, sin `thinking`, `tool_choice` auto, sin prefill, `refusal` se mira antes del contenido, `fallbacks: "default"` + beta `server-side-fallback-2026-07-01` (no en Haiku), 16.000 tokens con Opus/Fable, caché automática al final.
+  - **La historia solo se agrega:** los bloques de pensamiento (y los de respaldo) vuelven tal cual; ya no se sacan ni se recortan turnos ni se cambian imágenes viejas. Las imágenes nuevas tienen cupo al agregarse (12 / 3,5 MB por pedido). Charla larga (12 turnos o más de 3 MB) → **conversación nueva desde un resumen** (también en el modo charla).
+  - Worker viejo: si contesta «modelo no permitido», sigue con Sonnet 5.5, avisa una vez «Para usar la IA más pro, actualizá el Worker (ver instructivo)» y durante 12 h va directo con Sonnet.
+  - **`armar_pdf`**: orden (la planilla de siempre), comprobante (vale/entrada/devolución de siempre), reserva (la hoja de reservas), stock (filtrado), lista de compras, puntos de la quincena, resumen de obra (registro, itemizado, avance, órdenes, material), informe de avance y mensual con fotos (los de Informes) y documento libre (la IA escribe en markdown). Abre la hoja de la app (logo, A4, firmas si se pide) con Imprimir / Compartir PDF / Bajar PDF; en el chat queda «📄 …» para volver a abrirla. No cambia datos: sin tarjeta.
+  - **Cierre rápido:** «cerrá la OT-…» / «cerrá las de hoy» → `proponer_cierre` (con `otIds` o `fecha`) revisa cada orden en una sola vuelta: tareas mandadas o no, fotos que faltan y por qué, horas, tareas que no se hicieron, gente que no mandó nada, cantidades contra lo previsto, la misma tarea en otra orden sin cerrar y tareas que no avanzan el itemizado. Tarjeta «✅ Lista» / «⚠ Le falta: …» con «Cerrar» (las listas), «Cerrar igual» y «No». Con el Sí abre el cierre de siempre, contesta «No, se hizo lo previsto» a la pregunta del itemizado y toca «✅ Aprobar todo y cerrar»; si algo frena, el cierre queda abierto para la persona.
+  - Herramienta `supervisor` para «revisá todo» / «revisá la obra X».
+- **🩺 Supervisor** (sin IA, en los aparatos de Administración y Oficina, al abrir y cada 15 min, con lo que hay en memoria): hechas de más (rojo), columnas del cálculo ≠ ítems 1–8, cálculo ≠ itemizado, órdenes cerradas que no movieron el avance, lo hecho ≠ avance cargado; obras en obra sin avance hace N días (7, se cambia en la hoja), órdenes de días anteriores sin cerrar (rojo desde 3 días), tareas en 3+ órdenes sin terminarse; atrasada contra su Gantt o fin estimado (y «N obras sin Gantt: no puedo decir si van al día»); celulares con la app vieja, fotos de órdenes sin subir, usuarios de obra sin persona vinculada, ubicación cortada, lecturas cerca del cupo. Bloque en el Inicio Ejecutivo debajo de «Para atender» (4 primeros, rojo/ámbar) y hoja «Ver todo» con «Ir» a donde se arregla. Nada se arregla solo.
+  - **Revisión con IA a las 12 y 18 h:** el primer aparato de admin/oficina con la app abierta pasada la hora toma el turno (transacción en `configEquipo/salud.supervisor.slots`, que ya se puede escribir: **sin reglas nuevas**; si la base no deja, el control queda en el aparato), le pasa al asistente los hallazgos y los datos de las obras marcadas, y el parte («Acá hay algo raro…», con propuestas de arreglo en tarjeta antes → después) queda en el chat, en el Inicio y en `salud.supervisor.ultimo` para los demás. Si hay algo rojo avisa al celular de Administración («🩺 El supervisor encontró N cosas raras»).
+- **Guías nuevas** (carpeta `guias/` junto al index): Procesos con la tapa y el paso a paso nuevo (hojas con el visor claro y zoom, «📄 PDF · Compartir» y «⬇ Bajar PDF»); Materiales con las hojas de `materiales/` por familia y «Más hojas de materiales»; Tipos constructivos con la hoja nueva (3D, plano, hoja completa); Láminas: las nuevas cuando están en el índice. Lo de antes queda plegado («Ver los dibujos de antes»). Todo se baja recién al abrirse, también en la app de Android; sin señal, «se ve cuando vuelva la señal».
+  - Láminas de barrio sin dibujo nuevo completo (`col_aerea_h1`, `col_aerea_h2`, `tablero_barrio`, `apoyo_pat`, marcadas «parcial» en el índice): muestran las hojas nuevas que las cubren y el botón «🗂 Ver la lámina de antes». AP-C-017-a/b no están en el índice: quedan como antes.
+- **Worker `ema-ia` v2-ia** (`workers/ema-ia.js`): Opus 5.5 y Fable 5.2 con sus precios (y los de los modelos de respaldo), `fallbacks: "default"` y su beta, 16.000 tokens para Opus/Fable, thinking/fallback tal cual, costo que suma los intentos del respaldo. `workers/probar_ema_ia.mjs` 58/58.
+
+**Decisiones**
+- Opus 5.5 para todo (Ángel); Fable 5.2 solo si se elige en ⚙.
+- La revisión de las 12/18 h no necesita reglas nuevas: usa `configEquipo/salud`, que ya escriben todos los confirmados.
+- Cierre rápido contesta «No» a la pregunta del itemizado: lo dice la tarjeta; si hubo cambios, se cierra a mano.
+
+**Reglas de Firebase:** no cambian.
+
+**Qué tiene que hacer Ángel**
+1. Subir `index.html` y la carpeta **`guias/`** completa (≈ 36 MB, 194 archivos) a la raíz de GitHub, junto al index.
+2. Pegar el Worker nuevo `workers/ema-ia.js` en Cloudflare (`ema-ia` › Edit code › Deploy) y mirar `/salud` (`v2-ia`). Ver «Actualizar el Worker para la v136» en el instructivo. Mientras no lo pegue, el asistente anda con Sonnet 5.5.
+3. Revisar el tope de gasto de platform.claude.com (hoy USD 30/mes): Opus cuesta más que Sonnet.
+
+**Pruebas**
+- `t_v136` (nueva): 45/45 en PC y 55/55 en celular.
+- Batería completa en PC y celular (137 pruebas × 2, de a 3): todo OK salvo `t_v083` (reemplazada por `t_v084`, como siempre). Después del último retoque (la lengüeta se corre arriba del cartel de fotos sin señal) se volvieron a correr `t_v136`, `t_v135` (43/43, 59/59) y `t_nav` (6/6, 6/6). `workers/probar_ema_ia.mjs` 58/58.
+- Pruebas viejas: `h.js` suma `__iaCompat` (Sonnet y el cierre de antes) salvo `iaPro:true`, `__supNoIA` salvo `supervisor:true` y `__guiasNo` (guías de antes) salvo `guias:true`. `t_v133` cambió una comprobación: antes la imagen del plano no se volvía a mandar; ahora la historia va tal cual (solo se agrega), por las reglas de Opus 5.5 / Fable 5.2.
+- Capturas 390 × 844 (×2): inicio arriba con la barra, barra guardada (B), supervisor, Guías (procesos y un tipo), tarjeta de cierre rápido y hoja PDF armada por la IA.
+
+**Huellas**
+(sello «2026-11-09 20:07 · 8fe332»)
+- `index.html`: `b9b19ec4e2b669d65afc7fa70537507b61d12e1548a42beee108fbb6ce1c1f8f`
+- `136_2026-11-09_app-EMA_ORIGINAL.html`: `534a298cb1e93f81c31c469ae02468ea405ed4a19bc253e8b33636c3e0e01a69`
+- `patch_v136.py` (base: ORIGINAL 135 `dae95cf0…9806b3e`): `93198038b7a83901482978853cfabf46a02ba41e9652f067144ea8704a852c7f`
+- carpeta `guias/` (194 archivos, ≈ 36 MB; sha256 de la lista ordenada de huellas): `28b4e15b07bdb31fbaa4c32a7d9b873db9186d4a2d52ec73402f798f14d004d2`
+
 ## v135 — 09/11/2026 (publicada en GitHub, commit af633cf) · Diseño nuevo: Inicio «Ejecutivo», Inicio del pañolero, barra de abajo con «Perfil» y la pantalla Perfil
 
 **Pedido de Ángel** (diseños aprobados con imágenes el 09/11/2026)

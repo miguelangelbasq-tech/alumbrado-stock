@@ -40,6 +40,12 @@ async function abrir(op = {}) {
         if (global.__matSinRed) return r.abort('internetdisconnected');
         return dir && fs.existsSync(f) ? r.fulfill({ body: fs.readFileSync(f), contentType: /\.json$/.test(f) ? 'application/json' : /\.webp$/.test(f) ? 'image/webp' : 'image/png' }) : r.fulfill({ status: 404, body: 'no' });
       }
+      if (/^https?:\/\/app\.test\/guias\//.test(u)) {   // v136: guías nuevas junto a la app (op.guiasDir; si no, APPDIR/guias)
+        const dir = op.guiasDir || (process.env.APPDIR ? process.env.APPDIR + '/guias' : ''), f = dir + new URL(u).pathname.replace(/^\/guias/, '');
+        if (global.__guiasPedidos) global.__guiasPedidos.push(new URL(u).pathname);
+        if (global.__guiasSinRed) return r.abort('internetdisconnected');
+        return dir && fs.existsSync(f) ? r.fulfill({ body: fs.readFileSync(f), contentType: /\.json$/.test(f) ? 'application/json' : /\.webp$/.test(f) ? 'image/webp' : /\.pdf$/.test(f) ? 'application/pdf' : 'image/png' }) : r.fulfill({ status: 404, body: 'no' });
+      }
       if (/^https?:\/\/app\.test\//.test(u)) return r.fulfill({ body: html, contentType: 'text/html; charset=utf-8' });
       if (/firebase-app-compat/.test(u)) return r.fulfill({ body: STUB, contentType: 'application/javascript' });
       if (/firebase-.*\.js/.test(u)) return r.fulfill({ body: '', contentType: 'application/javascript' });
@@ -71,6 +77,9 @@ async function abrir(op = {}) {
   if (!op.tarjetas) await page.addInitScript(() => { window.__mtTarjetasNo = true; });   // v130: las pruebas viejas ven todas las tareas de Mis tareas juntas; tarjetas:true prueba una tarjeta por tarea con flechas
   if (!op.nav) await page.addInitScript(() => { window.__navNo = true; });   // v135: las pruebas viejas no ven la barra de abajo N1; nav:true la prueba
   if (!op.inicio) await page.addInitScript(() => { window.__inicioViejo = true; });   // v135: las pruebas viejas ven el Inicio de antes (admin/oficina/pañol); inicio:true prueba el «Ejecutivo» y el del pañolero
+  if (!op.iaPro) await page.addInitScript(() => { window.__iaCompat = true; });   // v136: las pruebas viejas del asistente siguen con Sonnet y el cierre de antes; iaPro:true prueba Opus/Fable, el cierre rápido, etc.
+  if (!op.guias) await page.addInitScript(() => { window.__guiasNo = true; });   // v136: las pruebas viejas ven las guías de antes; guias:true prueba las nuevas (carpeta guias/)
+  if (!op.supervisor) await page.addInitScript(() => { window.__supNoIA = true; });   // v136: las pruebas viejas no disparan la revisión con IA de las 12/18 h; supervisor:true la prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];

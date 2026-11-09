@@ -6,6 +6,21 @@ Tardás unos 10 minutos.
 
 ---
 
+## ⚡ Actualizar el Worker para la v136 (5 minutos)
+
+La app v136 usa **Opus 5.5** (y deja elegir Fable 5.2). El Worker viejo solo conoce Haiku y Sonnet: hasta que lo actualices, la app sigue con Sonnet 5.5 y te avisa una vez «Para usar la IA más pro, actualizá el Worker».
+
+1. Entrá a **dash.cloudflare.com** › **Workers & Pages** › **`ema-ia`** › **Edit code**.
+2. Borrá todo y pegá el contenido completo del archivo nuevo **`workers/ema-ia.js`** (tu carpeta o GitHub).
+3. Tocá **Deploy**. La clave (`ANTHROPIC_API_KEY`) y el KV quedan como estaban: no hay que volver a cargarlos.
+4. Abrí **https://ema-ia.mdiaz-60f.workers.dev/salud**: tiene que decir `"version":"v2-ia"` y, en `modelos`, `claude-opus-5-5` y `claude-fable-5-2`.
+
+Qué cambia en el Worker: acepta Opus 5.5 y Fable 5.2 (respuestas de hasta 16.000 tokens), el «respaldo del servidor» (si Claude rechaza un pedido por sus filtros, lo reintenta solo con el modelo recomendado) y deja pasar tal cual los bloques de «pensamiento». Sigue sin dejar pasar `temperature` ni `thinking`.
+
+**Gasto:** una pregunta común cuesta más o menos US$ 0,09 con Opus 5.5, US$ 0,17 con Fable 5.2 y US$ 0,04 con Sonnet 5.5. El supervisor hace 2 revisiones por día (12 y 18 h). Revisá el tope de gasto en platform.claude.com › Gasto › Límites de gasto (hoy USD 30 por mes): con mucho uso de Opus puede quedar corto.
+
+---
+
 ## 1. Sacar la clave de Claude
 
 > ✅ **Esto ya lo hiciste** (08/11/2026): organización «EMA Servicios», créditos del plan Max (USD 100 por mes) vinculados, límite de gasto de USD 30 por mes, clave `ema-ia` creada. Si ya tenés la clave guardada, pasá directo al paso 2.
@@ -63,7 +78,7 @@ Abrí en el navegador:
 Tiene que decir algo así:
 
 ```
-{"ok":true,"version":"v1-ia","clave":true,"kv":true}
+{"ok":true,"version":"v2-ia","modelos":["claude-haiku-5-5","claude-sonnet-5-5","claude-opus-5-5","claude-fable-5-2"],"respaldo":true,"clave":true,"kv":true}
 ```
 
 - `clave: true` → la clave está cargada. Si dice `false`, revisá el paso 3 (el nombre tiene que ser exacto: `ANTHROPIC_API_KEY`).
@@ -80,9 +95,9 @@ Tiene que decir algo así:
 
 ## Qué modelos usa
 
-Solo dos, para que no se dispare el gasto:
+- **claude-opus-5-5** (Opus 5.5): el de todos los días desde la v136 (chat, PDF, cierres y el supervisor).
+- **claude-fable-5-2** (Fable 5.2): el más pro y el más caro; se elige en el asistente › ⚙ › Modelo (solo Administración).
+- **claude-sonnet-5-5** (Sonnet 5.5): el más barato; también se elige ahí. Es al que vuelve la app si el Worker es el viejo.
+- **claude-haiku-5-5**: queda permitido, la app ya no lo usa.
 
-- **claude-haiku-5-5**: el rápido y barato, para casi todo.
-- **claude-sonnet-5-5**: el más capaz, para lo difícil.
-
-Cada respuesta trae cuánto costó en dólares, así la app puede llevar la cuenta.
+Cada respuesta trae cuánto costó en dólares (si hubo respaldo, suma los dos intentos), así la app puede llevar la cuenta.
