@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="ema-version" content="2026-11-08 20:14 · ab52be">
+<meta name="ema-version" content="2026-11-08 21:36 · 1b9b4d">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script id="relojitosAhorro">(function(){if(!window.__relojitosAhorro){var r=window.setInterval,n=6e4;window.setInterval=function(i,t){if(typeof i!="function"||!(+t<n))return r.apply(window,arguments);var o=0,a=Array.prototype.slice.call(arguments,2);return r.call(window,function(){if(document.hidden){var e=Date.now();if(e-o<n)return;o=e}else o=0;return i.apply(this,a)},t)},window.__relojitosAhorro={original:r,minimoEscondida:n}}})();</script>
 <script id="envolturasUnaVez">window.__heredar=function(f,c){try{typeof f=="function"&&typeof c=="function"&&f!==c&&Object.keys(c).forEach(function(t){/^__/.test(t)&&!(t in f)&&(f[t]=c[t])})}catch{}};</script>
@@ -80,7 +80,7 @@
 <div class="header-divider"></div>
 <div class="header-text">
 <h1>Alumbrado Público</h1>
-<div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-11-08 20:14 · ab52be</span></div>
+<div class="header-sub"><span id="hdrHoja">Inicio</span> <span id="appVersion" style="font-weight:500; letter-spacing:0; text-transform:none; opacity:.7;" title="Versión de la herramienta que está cargada en este navegador">· v 2026-11-08 21:36 · 1b9b4d</span></div>
 <p>Calculadora de materiales y gestión de cuadrillas · EMA Servicios</p>
 </div>
 </div>
@@ -8535,7 +8535,922 @@ ${Math.abs(n)>.05?`<div class="ct-aviso">${n>0?`Te quedan <b>${q(n)}</b> puntos 
 <script id="catalogoArreglos">(function(){"use strict";var y=function(a){return document.getElementById(a)},t=function(a){return typeof escHtml=="function"?escHtml(a):String(a??"").replace(/[&<>"']/g,function(o){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[o]})},g=function(a){return typeof fmt=="function"?fmt(a,2):String(a)},h=function(a){return String(a||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[×]/g,"x").replace(/[^a-z0-9]+/g," ").trim()},q={UN:"Un.",un:"Un.",Un:"Un.",UNIDAD:"Un.",unidad:"Un.",u:"Un.",U:"Un.",M:"m",METRO:"m",metro:"m",mts:"m",Mts:"m",KG:"kg",Kg:"kg"},I=["Un.","m","kg","m³","m²","L","bolsa","bolsa 50kg"],O=function(a){return q[a]||a},R=[[8039,8008,"cemento CPN 40/50, bolsa de 50 kg"],[8042,8005,"bloque de telgopor para el ingreso del cable"],[8043,8009,"elastómero de sellado"]],z={para:1,con:1,sin:1,por:1,del:1,los:1,las:1,una:1,uno:1,que:1,tipo:1,mts:1},j=function(a){var o={};return h(a).split(" ").forEach(function(n){n.length>=3&&!z[n]&&(o[n]=1)}),o},r={lista:[],conf:!1,ocupado:!1,msg:"",msgMal:!1};function P(){try{if(!window.__fbUser)return!1;var a=window.PERMISOS;if(!a)return!1;if(a.esAdmin&&a.esAdmin())return!0;var o=a.yo&&a.yo();return!!o&&o.activo!==!1&&!o.pendiente&&(o.rol==="admin"||o.rol==="oficina")}catch{return!1}}function k(a){return(typeof STOCK_CATALOGO_BASE<"u"?STOCK_CATALOGO_BASE:[]).find(function(o){return Number(o.codigo)===Number(a)})||null}function _(){try{return(typeof catalogo=="function"?catalogo():[]).filter(function(a){return a&&a.activo!==!1})}catch{return[]}}function m(a){try{return typeof stockActual=="function"?stockActual(a):0}catch{return 0}}function D(){var a={};try{(typeof catalogoCompleto=="function"?catalogoCompleto():[]).forEach(function(o){a[Number(o.codigo)]=1})}catch{}try{(typeof codigosConMovimientos=="function"?codigosConMovimientos():new Set).forEach(function(o){a[Number(o)]=1})}catch{}return a}function x(a,o){var n=D(),c=a*1e3,i=c;Object.keys(n).forEach(function(s){s=Number(s),s>c&&s<=c+499&&s>i&&(i=s)});for(var e=i+1;e<=c+499;e++)if(!n[e]&&!(o&&o[e]))return e;for(e=c+1;e<=c+499;e++)if(!n[e]&&!(o&&o[e]))return e;return""}function E(a,o){if(!/^\d{4}$/.test(String(a||"")))return"El código nuevo tiene que tener 4 cifras.";var n=Number(a),c=n%1e3;return c<1||c>499?"El código "+n+" no sirve: para las altas del equipo van del "+(Math.floor(n/1e3)*1e3+1)+" al "+(Math.floor(n/1e3)*1e3+499)+".":D()[n]?"El código "+n+" ya existe o tiene movimientos: elegí otro.":o&&o[n]?"El código "+n+" está repetido en esta lista.":""}function A(){var a=[],o=_();o.forEach(function(e){var s=e.un==null?"":String(e.un);q[s]?a.push({id:"un:"+e.codigo,tipo:"un",cod:e.codigo,desc:e.desc,de:s,a:q[s],on:!0}):I.indexOf(s)<0&&a.push({id:"unr:"+e.codigo,tipo:"unr",cod:e.codigo,desc:e.desc,de:s,a:"",on:!1})}),o.forEach(function(e){var s=k(e.codigo);if(!(!s||!e.desc||!s.desc||h(e.desc)===h(s.desc))){var d=j(e.desc),f=j(s.desc);Object.keys(d).some(function(p){return f[p]})||a.push({id:"reu:"+e.codigo,tipo:"reu",cod:e.codigo,desc:e.desc,un:O(e.un||"Un."),baseDesc:s.desc,baseUn:s.un,stock:m(e.codigo),on:!0,alta:!0,nuevo:"",pasar:!1})}});var n={},c={};o.forEach(function(e){var s=h(e.desc)+"|"+O(e.un||"");h(e.desc)&&(n[s]=n[s]||[]).push(e)}),Object.keys(n).forEach(function(e){var s=n[e];s.length<2||(s.sort(function(d,f){return(k(f.codigo)?1:0)-(k(d.codigo)?1:0)||d.codigo-f.codigo}),s.forEach(function(d){c[d.codigo]=1}),a.push({id:"rep:"+s.map(function(d){return d.codigo}).join("-"),tipo:"rep",igual:!0,cods:s.map(function(d){return d.codigo}),queda:s[0].codigo,on:!0}))}),R.forEach(function(e){var s=o.find(function(f){return Number(f.codigo)===e[0]}),d=o.find(function(f){return Number(f.codigo)===e[1]});!s||!d||c[e[0]]&&c[e[1]]||a.push({id:"rep:"+e[1]+"-"+e[0],tipo:"rep",igual:!1,cods:[e[1],e[0]],queda:e[1],que:e[2],on:!1})});var i={};return a.forEach(function(e){e.tipo==="reu"&&(e.nuevo=x(9,i),e.nuevo&&(i[e.nuevo]=1))}),a}function C(a){return _().find(function(o){return Number(o.codigo)===Number(a)})||(typeof catalogoCompleto=="function"?catalogoCompleto():[]).find(function(o){return Number(o.codigo)===Number(a)})||{codigo:a,desc:"",un:""}}function V(a){var o='<input type="checkbox" data-ca-chk="'+t(a.id)+'"'+(a.on?" checked":"")+' aria-label="Arreglar este">';if(a.tipo==="un")return'<div class="ca-it'+(a.on?" on":"")+'" data-ca="'+t(a.id)+'">'+o+'<div class="ca-tx"><div class="c">'+t(a.cod)+' · unidad <span class="ca-flecha">«'+t(a.de)+"» → «"+t(a.a)+'»</span></div><div class="d">'+t(a.desc)+"</div></div></div>";if(a.tipo==="unr")return'<div class="ca-it'+(a.on?" on":"")+'" data-ca="'+t(a.id)+'">'+o+'<div class="ca-tx"><div class="c">'+t(a.cod)+" · unidad «"+t(a.de||"sin unidad")+'»</div><div class="d">'+t(a.desc)+'</div><div class="ca-campos"><label>¿Cuál es? <select data-ca-un="'+t(a.id)+'"><option value="">— Elegí —</option>'+["Un.","m","kg"].map(function(e){return'<option value="'+e+'"'+(a.a===e?" selected":"")+">"+e+"</option>"}).join("")+'<option value="otra"'+(a.a&&["Un.","m","kg"].indexOf(a.a)<0?" selected":"")+">Otra…</option></select></label>"+(a.a&&["Un.","m","kg"].indexOf(a.a)<0?'<input type="text" data-ca-unotra="'+t(a.id)+'" value="'+t(a.a==="otra"?"":a.a)+'" placeholder="Ej: rollo, L, m²" style="width:140px;">':"")+'</div><div class="ca-nota">La app no la elige sola: decí vos cuál es.</div></div></div>';if(a.tipo==="reu")return'<div class="ca-it'+(a.on?" on":"")+'" data-ca="'+t(a.id)+'">'+o+'<div class="ca-tx"><div class="c">'+t(a.cod)+' · ¿código reutilizado?</div><div class="d">Hoy dice: <b>'+t(a.desc)+'</b></div><div class="d">En el catálogo original es: <b>'+t(a.baseDesc)+"</b> ("+t(a.baseUn)+')</div><div class="ca-nota">Arreglo: el '+t(a.cod)+" vuelve a ser «"+t(a.baseDesc)+'».</div><div class="ca-campos"><label><input type="checkbox" data-ca-alta="'+t(a.id)+'"'+(a.alta?" checked":"")+"> Dar de alta «"+t(a.desc)+'» con el código</label><input type="text" class="ca-cod" inputmode="numeric" maxlength="4" data-ca-cod="'+t(a.id)+'" value="'+t(a.nuevo)+'" aria-label="Código nuevo"></div><div class="ca-campos"><input type="text" class="ca-desc" data-ca-desc="'+t(a.id)+'" value="'+t(a.descNueva!=null?a.descNueva:a.desc)+'" aria-label="Nombre del producto nuevo"></div><div class="ca-nota">Sugerido: el siguiente libre de la familia 9 (Varios). Confirmalo o escribí otro de 4 cifras que no exista.</div>'+(Math.abs(a.stock)>1e-4?'<div class="ca-campos"><label><input type="checkbox" data-ca-pasar="'+t(a.id)+'"'+(a.pasar?" checked":"")+"> Pasar también lo que hay en stock del "+t(a.cod)+" ("+t(g(a.stock))+") al código nuevo</label></div>":"")+'<div class="ca-nota ojo">Los movimientos viejos del '+t(a.cod)+" quedan donde están (no se tocan).</div></div></div>";var n=a.cods.map(C),c=a.cods.filter(function(e){return Number(e)!==Number(a.queda)}),i=c.filter(function(e){return Math.abs(m(e))>1e-4});return'<div class="ca-it'+(a.on?" on":"")+'" data-ca="'+t(a.id)+'">'+o+'<div class="ca-tx"><div class="c">'+(a.igual?"repetidos (mismo nombre y unidad)":"parecen el mismo, confirmá")+(a.que?" · "+t(a.que):"")+"</div>"+n.map(function(e){return'<div class="d"><span class="mono" style="font-weight:700;">'+t(e.codigo)+"</span> · "+t(e.desc)+' <span style="color:var(--text-3);">('+t(e.un||"")+" · stock "+t(g(m(e.codigo)))+")</span></div>"}).join("")+'<div class="ca-campos"><label>Queda el <select data-ca-queda="'+t(a.id)+'">'+a.cods.map(function(e){return'<option value="'+t(e)+'"'+(Number(e)===Number(a.queda)?" selected":"")+">"+t(e)+"</option>"}).join("")+'</select></label></div><div class="ca-nota">El '+c.map(t).join(", ")+" queda de baja (no se borra ni se vuelve a usar)"+(i.length?" y su stock pasa al "+t(a.queda)+" con una corrección de código":"")+".</div></div></div>"}function S(a,o,n){return n.length?'<div class="ca-sec"><h3>'+a+" ("+n.length+')</h3><div class="hint">'+o+"</div>"+n.map(V).join("")+"</div>":""}function l(){var a=y("cardCatArreglos");if(a){var o=P();if(a.classList.toggle("ca-oculto",!o),!o){a.innerHTML="";return}y("caCuerpo")||(a.innerHTML='<div class="card-header-row"><h2><span class="dot"></span>🔧 Revisar el catálogo <span class="h2-sub">unidades mal escritas, códigos reutilizados y productos repetidos</span></h2><button type="button" class="btn-ghost" id="caRevisar" style="white-space:nowrap;">🔎 Revisar de nuevo</button></div><div class="hint" style="margin-top:4px;">La app <b>no cambia nada sola</b>: te muestra lo que encontró, marcás lo que querés arreglar y confirmás. Cada cambio queda en la Auditoría.</div><div id="caCuerpo"></div>');var n=r.lista,c=y("caCuerpo"),i=n.filter(function(e){return e.on}).length;if(!n.length){c.innerHTML='<div class="ca-vacio" style="margin-top:12px;">✅ No encontré nada para arreglar en el catálogo.</div>'+(r.msg?'<div class="ca-msg '+(r.msgMal?"mal":"bien")+'">'+r.msg+"</div>":"");return}c.innerHTML=S("📏 Unidades","Unidades escritas de otra forma. Se guardan como Un., m o kg.",n.filter(function(e){return e.tipo==="un"||e.tipo==="unr"}))+S("♻ Códigos reutilizados","Un código del catálogo original que hoy tiene un producto que no tiene nada que ver.",n.filter(function(e){return e.tipo==="reu"}))+S("👯 Repetidos","El mismo producto con dos códigos. Al unificar, el que sobra queda de baja: nunca se borra ni se reutiliza.",n.filter(function(e){return e.tipo==="rep"}))+(r.conf?F():'<div class="ca-pie"><button type="button" class="btn-primary" id="caAplicar"'+(i&&!r.ocupado?"":" disabled")+">Arreglar lo marcado ("+i+')</button><span class="hint" style="margin:0;">Nada se guarda hasta que confirmes.</span></div>')+(r.msg?'<div class="ca-msg '+(r.msgMal?"mal":"bien")+'">'+r.msg+"</div>":"")}}function M(){r.lista=A(),r.conf=!1,l()}function N(){r.lista.forEach(function(a){var o=function(v){return document.querySelector("#cardCatArreglos ["+v+'="'+a.id+'"]')},n=o("data-ca-chk");if(n&&(a.on=n.checked),a.tipo==="unr"){var c=o("data-ca-un"),i=o("data-ca-unotra");c&&(a.a=c.value==="otra"?i&&i.value.trim()||"otra":c.value)}if(a.tipo==="reu"){var e=o("data-ca-alta"),s=o("data-ca-cod"),d=o("data-ca-desc"),f=o("data-ca-pasar");e&&(a.alta=e.checked),s&&(a.nuevo=s.value.trim()),d&&(a.descNueva=d.value.trim()),f&&(a.pasar=f.checked)}if(a.tipo==="rep"){var p=o("data-ca-queda");p&&(a.queda=Number(p.value))}})}function K(){for(var a={},o=0;o<r.lista.length;o++){var n=r.lista[o];if(n.on){if(n.tipo==="unr"&&(!n.a||n.a==="otra"))return"Elegí la unidad del "+n.cod+" (o desmarcalo).";if(n.tipo==="reu"&&n.alta){var c=E(n.nuevo,a);if(c)return c;if(Math.floor(Number(n.nuevo)/1e3)===Math.floor(Number(n.cod)/1e3)&&Number(n.nuevo)===Number(n.cod))return"El código nuevo no puede ser el mismo.";if(!(n.descNueva||n.desc))return"Poné el nombre del producto nuevo.";a[Number(n.nuevo)]=1}}}return""}function B(){var a=[];return r.lista.filter(function(o){return o.on}).forEach(function(o){o.tipo==="un"||o.tipo==="unr"?a.push(o.cod+": la unidad «"+(o.de||"sin unidad")+"» pasa a «"+o.a+"»."):o.tipo==="reu"?(a.push(o.cod+" vuelve a ser «"+o.baseDesc+"» ("+o.baseUn+")."),o.alta&&a.push("Alta del código "+o.nuevo+": «"+(o.descNueva||o.desc)+"» ("+o.un+")"+(o.pasar&&Math.abs(o.stock)>1e-4?" con "+g(o.stock)+" que pasan desde el "+o.cod:"")+".")):o.cods.filter(function(n){return Number(n)!==Number(o.queda)}).forEach(function(n){var c=m(n);a.push("Unificar "+n+" → "+o.queda+": el "+n+" queda de baja"+(c>1e-4?" y sus "+g(c)+" pasan al "+o.queda:c<-1e-4?" (tiene "+g(c)+" en stock: pasalo a mano)":"")+".")})}),a}function F(){var a=B();return'<div class="ca-conf" id="caConf"><b style="font:800 16px var(--disp);">¿Guardo estos '+a.length+" cambios?</b><ol>"+a.map(function(o){return"<li>"+t(o)+"</li>"}).join("")+'</ol><div class="hint" style="margin:0 0 10px;">Es para todo el equipo y queda en la Auditoría.</div><div class="hist-actions" style="margin:0;"><button type="button" class="btn-primary" id="caSi"'+(r.ocupado?" disabled":"")+">"+(r.ocupado?"Guardando…":"✅ Sí, guardar")+'</button><button type="button" class="btn-ghost" id="caNo"'+(r.ocupado?" disabled":"")+">Volver</button></div></div>"}var U=function(){return window.__fbUser&&window.__fbUser.email||""},T=function(){return typeof fechaAISO=="function"?fechaAISO(new Date):new Date().toISOString().slice(0,10)};function L(a,o,n){try{window.fbAuditar&&window.fbAuditar(a,o,{ref:String(n),arreglo:"catalogo"})}catch{}}async function w(a){a.editadoPor=U(),a.editadoTs=Date.now(),await window.fbGuardarProductoCatalogo(a)}async function G(a,o,n,c){var i=Date.now(),e="corr-"+i,s=C(a),d=C(o);await window.fbAddMovimiento({tipo:"salida",correccion:!0,correccionHacia:String(o),correccionGrupo:e,codigo:Number(a),desc:s.desc||"",un:s.un||"",cantidad:Math.round(n*1e4)/1e4,fecha:T(),ts:i,usuario:U(),destino:"Corrección de código → "+o+" ("+c+")",nota:c}),await window.fbAddMovimiento({tipo:"entrada",correccion:!0,correccionDesde:String(a),correccionGrupo:e,codigo:Number(o),desc:d.desc||"",un:d.un||"",cantidad:Math.round(n*1e4)/1e4,fecha:T(),ts:i+1,usuario:U(),proveedor:"",remito:"",nota:c})}async function $(){if(!r.ocupado){if(typeof window.fbGuardarProductoCatalogo!="function"||typeof window.fbAddMovimiento!="function"){r.msg="⚠ No hay conexión con la base compartida.",r.msgMal=!0,r.conf=!1,l();return}r.ocupado=!0,l();for(var a=[],o=[],n=[],c=r.lista.filter(function(u){return u.on}),i=0;i<c.length;i++){var e=c[i];try{if(e.tipo==="un"||e.tipo==="unr")await w({codigo:Number(e.cod),un:e.a}),L("catalogo_unidad",e.cod+": unidad «"+(e.de||"")+"» → «"+e.a+"»",e.cod),a.push(e.cod+" en "+e.a);else if(e.tipo==="reu"){if(e.alta){var s=E(e.nuevo);if(s)throw new Error(s)}var d=m(e.cod);e.alta&&await w({codigo:Number(e.nuevo),desc:e.descNueva||e.desc,un:e.un,sector:"pañol",stock:0,costo:0,minimo:0,activo:!0,origenAlta:"arreglo",vieneDe:String(e.cod)}),await w({codigo:Number(e.cod),desc:e.baseDesc,un:e.baseUn}),L("catalogo_reutilizado",e.cod+" vuelve a ser «"+e.baseDesc+"»"+(e.alta?" · «"+(e.descNueva||e.desc)+"» pasa al código "+e.nuevo:""),e.cod),e.alta&&e.pasar&&d>1e-4?await G(e.cod,Number(e.nuevo),d,"arreglo del catálogo "+e.cod+"→"+e.nuevo):e.alta&&e.pasar&&d<-1e-4&&n.push("el "+e.cod+" tiene "+g(d)+" en stock: pasalo a mano"),a.push(e.cod+" arreglado"+(e.alta?" (nuevo "+e.nuevo+")":""))}else for(var f=e.cods.filter(function(u){return Number(u)!==Number(e.queda)}),p=0;p<f.length;p++){var v=Number(f[p]),b=m(v),H="unificación "+v+"→"+e.queda;b>1e-4?await G(v,Number(e.queda),b,H):b<-1e-4&&n.push("el "+v+" tiene "+g(b)+" en stock: pasalo a mano"),await w({codigo:v,activo:!1,unidoEn:String(e.queda)}),L("catalogo_unificar",H+(b>1e-4?" · pasó "+g(b):""),v),a.push(v+" → "+e.queda)}}catch(u){o.push(e.cod||e.cods.join("/")),console.warn("arreglo del catálogo:",u),u&&u.message&&/código/.test(u.message)&&n.push(u.message),u&&u.code==="permission-denied"&&n.push("tu usuario no puede cambiar el pañol")}}try{typeof invalidarCatalogo=="function"&&invalidarCatalogo()}catch{}r.ocupado=!1,r.conf=!1,r.msg=(a.length?"✓ Listo: "+a.length+" arreglo"+(a.length===1?"":"s")+" guardado"+(a.length===1?"":"s")+".":"")+(o.length?" ⚠ No se pudieron guardar: "+t(o.join(", "))+".":"")+(n.length?" Ojo: "+t(n.join(" · "))+".":""),r.msgMal=!!o.length;var Q=r.msg;r.lista=r.lista.filter(function(u){return!u.on||o.indexOf(u.cod||(u.cods||[]).join("/"))>=0}),l(),setTimeout(function(){!r.conf&&!r.ocupado&&(r.lista=A(),l())},1500);try{window.__alertNativo&&window.alert(Q.replace(/<[^>]*>/g,""))}catch{}}}document.addEventListener("click",function(a){var o=a.target;if(!(!o.closest||!o.closest("#cardCatArreglos"))){if(o.closest("#caRevisar")){r.msg="",M();return}if(o.closest("#caAplicar")){N();var n=K();if(n){r.msg="⚠ "+t(n),r.msgMal=!0,l();return}if(!window.__fbUser){r.msg="⚠ Iniciá sesión para arreglar el catálogo.",r.msgMal=!0,l();return}r.msg="",r.conf=!0,l();var c=y("caConf");c&&c.scrollIntoView&&c.scrollIntoView({block:"nearest",behavior:"smooth"});return}if(o.closest("#caNo")){r.conf=!1,l();return}if(o.closest("#caSi")){$();return}}}),document.addEventListener("click",function(a){var o=a.target;o.closest&&o.closest('#subtabsStock [data-sub="acceso"]')&&setTimeout(function(){!r.conf&&!r.ocupado&&(r.msg="",M())},30)},!0),document.addEventListener("change",function(a){var o=a.target;if(!(!o.closest||!o.closest("#cardCatArreglos"))){if(r.conf&&(r.conf=!1),o.matches("[data-ca-un]")){var n=o.getAttribute("data-ca-un"),c=document.querySelector('#cardCatArreglos [data-ca-chk="'+n+'"]');c&&o.value&&(c.checked=!0),N(),l();return}o.matches("[data-ca-chk], [data-ca-alta], [data-ca-pasar], [data-ca-queda]")&&(N(),l())}}),document.addEventListener("input",function(a){var o=a.target;o.matches&&o.matches("#cardCatArreglos input[type=text]")&&N()}),document.addEventListener("permisos-listos",l),document.readyState==="loading"?document.addEventListener("DOMContentLoaded",l):l(),window.__catalogoArreglos={detectar:A,revisar:M,pintar:l,sugerirCodigo:x,codigoValido:E,estado:function(){return r}}})();</script>
 <style id="materialesFichasCss">.mfc-host{position:relative}@supports not (aspect-ratio: 1 / 1){.mfc-host{height:0!important;padding-top:100%}}.mfc{position:absolute;top:0;left:0;right:0;bottom:0;background:#fff;border-radius:inherit;overflow:hidden}.mfc-pista{display:flex;width:100%;height:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}.mfc-pista::-webkit-scrollbar{display:none}.mfc-sl{flex:0 0 100%;width:100%;height:100%;scroll-snap-align:start;position:relative;display:flex;align-items:center;justify-content:center;background:#fff;cursor:zoom-in}.mfc-sl img{display:block;width:100%;height:100%;object-fit:contain}.mfc-sl.foto{cursor:default}.mfc-sl.foto img{object-fit:cover}.mfc-et{position:absolute;top:8px;left:8px;padding:4px 10px;border-radius:999px;background:#ffffffeb;border:1px solid var(--border);color:var(--navy);font:700 12px var(--fuente);box-shadow:var(--sombra-sm);pointer-events:none;max-width:calc(100% - 16px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mfc-sin{padding:16px;text-align:center;color:var(--text-soft);font-size:13.5px;line-height:1.4}.mfc-fl{position:absolute;top:50%;margin-top:-22px;width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:#ffffffeb;color:var(--navy);font:700 22px/1 var(--fuente);display:flex;align-items:center;justify-content:center;box-shadow:var(--sombra-sm);cursor:pointer;padding:0;min-height:0}.mfc-fl.iz{left:6px}.mfc-fl.de{right:6px}.mfc-fl[disabled]{opacity:.35}.mfc-pt{position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:center;gap:2px}.mfc-pt button{width:26px;height:26px;min-height:0;border:0;padding:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer}.mfc-pt button i{display:block;width:8px;height:8px;border-radius:999px;background:#28285e40}.mfc-pt button.on i{background:var(--navy);width:18px}#mfVisor{position:fixed;top:0;left:0;right:0;bottom:0;z-index:10070;background:var(--bg);display:flex;flex-direction:column}#mfVisor .mfv-bar{flex:none;display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px;background:var(--navy);color:#fff}#mfVisor .mfv-bar b{flex:1 1 auto;min-width:0;font:700 15px var(--disp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#mfVisor .mfv-bar button{flex:none;width:44px;height:44px;min-height:0;border:0;border-radius:12px;background:#ffffff24;color:#fff;font:700 20px/1 var(--fuente);cursor:pointer;padding:0}#mfVisor .mfv-cuerpo{flex:1 1 auto;position:relative;overflow:hidden;touch-action:none;background:var(--bg)}#mfVisor .mfv-cuerpo img{position:absolute;top:0;left:0;transform-origin:0 0;max-width:none;background:#fff;box-shadow:var(--sombra-md);user-select:none;-webkit-user-drag:none}#mfVisor .mfv-ayuda{position:absolute;left:50%;bottom:calc(12px + env(safe-area-inset-bottom,0px));transform:translate(-50%);padding:6px 12px;border-radius:999px;background:#ffffffeb;color:var(--text-soft);font-size:12.5px;box-shadow:var(--sombra-sm);white-space:nowrap;pointer-events:none}#mfVisor .mfc-sin{position:absolute;top:40%;left:16px;right:16px}@media print{.mfc-fl,.mfc-pt,#mfVisor{display:none!important}}</style>
 <script id="materialesFichas">(function(){"use strict";var y=function(t){return String(t??"").replace(/[&<>"']/g,function(e){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[e]})},j=function(t){return String(t||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()},f={ind:null,prom:null,revisado:!1};function w(){try{if(window.__cargador&&window.__cargador.url)return String(window.__cargador.url).replace(/[^/]*$/,"")+"materiales/"}catch{}try{return new URL("materiales/",location.href).href}catch{return"materiales/"}}function L(){if(!f.ind)try{var t=JSON.parse(localStorage.getItem("ema.mat.indice")||"null");t&&t.codigos&&(f.ind=t)}catch{}return!f.revisado&&!f.prom&&(f.prom=fetch(w()+"indice.json",{cache:"no-cache"}).then(function(e){if(!e.ok)throw new Error("http "+e.status);return e.json()}).then(function(e){if(e&&e.codigos){f.ind=e,f.revisado=!0;try{localStorage.setItem("ema.mat.indice",JSON.stringify(e))}catch{}}return f.ind}).catch(function(){return f.ind}).then(function(e){return f.prom=null,e})),f.ind?Promise.resolve(f.ind):f.prom||Promise.resolve(null)}function M(t,e){return t&&t.codigos?(t.codigos[String(e)]||[]).slice():[]}function H(t,e){var l=j(e).split(" "),i=0,o=[],r=function(m){var u=j(m).split(" ");if(!u[0])return 0;for(var g=0;g+u.length<=l.length;g++){for(var c=!0,n=0;n<u.length;n++)if(l[g+n].indexOf(u[n])!==0){c=!1;break}if(c)return u.join(" ").length}return 0};return(t&&t.herramientas||[]).forEach(function(m){var u=0;(m.palabras||[]).forEach(function(g){u=Math.max(u,r(g))}),u&&(u>i?(i=u,o=[m.hoja]):u===i&&o.indexOf(m.hoja)<0&&o.push(m.hoja))}),o}function T(t,e,l){var i=[];return e.forEach(function(o){i.push({tipo:"foto",src:o})}),l.forEach(function(o){var r=t&&t.titulos&&t.titulos[o]||"";i.push({tipo:"3d",hoja:o,tit:r,src:w()+o+"_3d.webp"}),i.push({tipo:"plano",hoja:o,tit:r,src:w()+o+"_plano.webp"})}),i}var V=function(t){return'<div class="mfc-sin">📶 Sin señal: '+(t==="3d"?"el 3D":"el plano")+" se ve cuando vuelva</div>"};function B(t,e,l,i){var o=T(e,l,i),r=o.length,m='<div class="mfc" data-mfc-n="'+r+'"><div class="mfc-pista">'+o.map(function(c,n){return c.tipo==="foto"?'<div class="mfc-sl foto" data-mfc-i="'+n+'"><img class="mfc-foto" src="'+y(c.src)+'" alt="Foto"></div>':'<div class="mfc-sl" data-mfc-i="'+n+'" data-mfc-hoja="'+y(c.hoja)+'" data-mfc-tipo="'+c.tipo+'" role="button" aria-label="Ver la hoja completa"><img src="'+y(c.src)+'" alt="'+(c.tipo==="3d"?"3D":"Plano")+'" loading="lazy" data-mfc-src="'+y(c.src)+'"><span class="mfc-et">'+(c.tipo==="3d"?"🧊 3D":"📐 Plano")+(c.tit?" · "+y(c.tit):"")+"</span></div>"}).join("")+"</div>"+(r>1?'<button type="button" class="mfc-fl iz" data-mfc-ir="-1" aria-label="Anterior" disabled>‹</button><button type="button" class="mfc-fl de" data-mfc-ir="1" aria-label="Siguiente">›</button><div class="mfc-pt">'+o.map(function(c,n){return'<button type="button" data-mfc-pt="'+n+'" class="'+(n?"":"on")+'" aria-label="'+(n+1)+" de "+r+'"><i></i></button>'}).join("")+"</div>":"")+"</div>";t.classList.add("mfc-host"),t.innerHTML=m;var u=t.querySelector(".mfc"),g=u.querySelector(".mfc-pista");return u.querySelectorAll("img[data-mfc-src]").forEach(function(c){c.addEventListener("error",function(){var n=c.closest(".mfc-sl");n&&(n.setAttribute("data-mfc-mal","1"),c.style.display="none",n.querySelector(".mfc-sin")||n.insertAdjacentHTML("afterbegin",V(n.getAttribute("data-mfc-tipo"))))})}),g.addEventListener("scroll",function(){_(u)},{passive:!0}),u.addEventListener("click",function(c){var n=c.target,A=n.closest("[data-mfc-ir]"),p=n.closest("[data-mfc-pt]"),b=n.closest(".mfc-sl");if(A){c.stopPropagation(),Y(u,D(u)+Number(A.getAttribute("data-mfc-ir")));return}if(p){c.stopPropagation(),Y(u,Number(p.getAttribute("data-mfc-pt")));return}if(b&&b.getAttribute("data-mfc-hoja")){if(c.stopPropagation(),b.getAttribute("data-mfc-mal")){X(b);return}C(b.getAttribute("data-mfc-hoja"),e&&e.titulos&&e.titulos[b.getAttribute("data-mfc-hoja")]||"");return}}),u}function D(t){var e=t.querySelector(".mfc-pista");return e.clientWidth?Math.round(e.scrollLeft/e.clientWidth):Number(t.getAttribute("data-mfc-cur")||0)}function Y(t,e){var l=Number(t.getAttribute("data-mfc-n"))||1,i=t.querySelector(".mfc-pista");e=Math.max(0,Math.min(l-1,e)),t.setAttribute("data-mfc-cur",e);try{i.scrollTo({left:e*i.clientWidth,behavior:"smooth"})}catch{i.scrollLeft=e*i.clientWidth}_(t,e)}function _(t,e){e==null&&(e=D(t));var l=Number(t.getAttribute("data-mfc-n"))||1;t.setAttribute("data-mfc-cur",e),t.querySelectorAll("[data-mfc-pt]").forEach(function(r){r.classList.toggle("on",Number(r.getAttribute("data-mfc-pt"))===e)});var i=t.querySelector('[data-mfc-ir="-1"]'),o=t.querySelector('[data-mfc-ir="1"]');i&&(i.disabled=e<=0),o&&(o.disabled=e>=l-1)}function X(t){var e=t.querySelector("img[data-mfc-src]");if(e){t.removeAttribute("data-mfc-mal");var l=t.querySelector(".mfc-sin");l&&l.remove(),e.style.display="",e.src=e.getAttribute("data-mfc-src")+(e.getAttribute("data-mfc-src").indexOf("?")<0?"?r=":"&r=")+Date.now()}}window.addEventListener("online",function(){document.querySelectorAll(".mfc-sl[data-mfc-mal]").forEach(X),f.revisado||L().then(function(){document.querySelectorAll('[data-mfc="sinind"]').forEach(function(t){var e=t.querySelector(".mfc-sin");e&&e.remove(),W(t)})})});function O(t){var e=t.querySelector("img.mfc-foto")||t.querySelector("img");return e&&e.getAttribute("src")?[e.getAttribute("src")]:[]}function W(t){t.setAttribute("data-mfc","cargando"),L().then(function(e){if(t.isConnected){var l=t.getAttribute("data-cod"),i=t.getAttribute("data-hrq"),o=l!=null?M(e,l):H(e,i||""),r=t.querySelector(".mfc")?[].slice.call(t.querySelectorAll("img.mfc-foto")).map(function(m){return m.getAttribute("src")}):O(t);if(!e){t.setAttribute("data-mfc","sinind"),t.querySelector(".mfc-sin")||t.insertAdjacentHTML("beforeend",'<div class="mfc-sin" style="position:absolute;left:0;right:0;bottom:4px;padding:4px 8px;font-size:12px;">📶 Sin señal: el plano se ve cuando vuelva</div>'),t.classList.add("mfc-host");return}if(!o.length){t.setAttribute("data-mfc","nada");return}B(t,e,r,o),t.setAttribute("data-mfc","ok")}})}var F="#pfFoto[data-cod], #hrModal .hr-foto[data-hrq]";function z(){q=!1,document.querySelectorAll(F).forEach(function(t){var e=t.getAttribute("data-mfc");(!e||e==="ok"&&!t.querySelector(".mfc")||e==="sinind"&&f.ind&&!f.prom)&&W(t)})}var q=!1;try{new MutationObserver(function(){q||(q=!0,setTimeout(z,30))}).observe(document.documentElement,{childList:!0,subtree:!0})}catch{}function C(t,e){E();var l=document.createElement("div");l.id="mfVisor",l.setAttribute("role","dialog"),l.setAttribute("aria-label","Hoja del material"),l.innerHTML='<div class="mfv-bar"><button type="button" data-mfv="cerrar" aria-label="Volver">‹</button><b>'+y(e||"Hoja del material")+'</b><button type="button" data-mfv="menos" aria-label="Alejar">−</button><button type="button" data-mfv="mas" aria-label="Acercar">＋</button><button type="button" data-mfv="cerrar" aria-label="Cerrar">✕</button></div><div class="mfv-cuerpo"><img alt="Hoja completa" src="'+y(w()+t+"_hoja.webp")+'"><div class="mfv-ayuda">Dos dedos o la rueda para acercar · doble toque</div></div>',document.body.appendChild(l);var i=l.querySelector(".mfv-cuerpo"),o=i.querySelector("img"),r={s:1,x:0,y:0,s0:1,w:0,h:0};function m(){var a=i.clientWidth,s=i.clientHeight;o.naturalWidth&&(r.w=o.naturalWidth,r.h=o.naturalHeight,r.s0=Math.min(a/r.w,s/r.h),o.style.width=r.w+"px",o.style.height=r.h+"px",r.s=1,u())}function u(){var a=i.clientWidth,s=i.clientHeight,d=r.s0*r.s,v=r.w*d,h=r.h*d;r.x=v<=a?(a-v)/2:Math.min(0,Math.max(a-v,r.x)),r.y=h<=s?(s-h)/2:Math.min(0,Math.max(s-h,r.y)),g()}function g(){o.style.transform="translate("+r.x+"px,"+r.y+"px) scale("+r.s0*r.s+")",l.setAttribute("data-zoom",r.s.toFixed(2))}function c(a,s,d){var v=i.clientWidth,h=i.clientHeight;s==null&&(s=v/2,d=h/2);var x=Math.max(1,Math.min(8,r.s*a)),S=x/r.s;r.x=s-(s-r.x)*S,r.y=d-(d-r.y)*S,r.s=x,u()}o.addEventListener("load",m),o.complete&&o.naturalWidth&&m(),o.addEventListener("error",function(){o.style.display="none",i.insertAdjacentHTML("beforeend",'<div class="mfc-sin">📶 Sin señal: el plano se ve cuando vuelva</div>')});var n=null,A=0;i.addEventListener("touchstart",function(a){if(a.touches.length===2){var s=a.touches[0],d=a.touches[1];n={d:Math.hypot(s.clientX-d.clientX,s.clientY-d.clientY),s:r.s,x:r.x,y:r.y,cx:(s.clientX+d.clientX)/2,cy:(s.clientY+d.clientY)/2}}else if(a.touches.length===1){var v=Date.now();if(v-A<300){var h=i.getBoundingClientRect();c(r.s>1.2?1/r.s:2.5,a.touches[0].clientX-h.left,a.touches[0].clientY-h.top),A=0}else A=v;n={p:1,x0:a.touches[0].clientX,y0:a.touches[0].clientY,x:r.x,y:r.y}}},{passive:!0}),i.addEventListener("touchmove",function(a){if(n){a.preventDefault();var s=i.getBoundingClientRect();if(a.touches.length===2&&n.d){var d=a.touches[0],v=a.touches[1],h=Math.hypot(d.clientX-v.clientX,d.clientY-v.clientY),x=Math.max(1,Math.min(8,n.s*h/n.d)),S=x/n.s,k=n.cx-s.left,P=n.cy-s.top;r.s=x,r.x=k-(k-n.x)*S,r.y=P-(P-n.y)*S,u()}else a.touches.length===1&&n.p&&(r.x=n.x+a.touches[0].clientX-n.x0,r.y=n.y+a.touches[0].clientY-n.y0,u())}},{passive:!1}),i.addEventListener("touchend",function(a){a.touches.length?a.touches.length===1&&(n={p:1,x0:a.touches[0].clientX,y0:a.touches[0].clientY,x:r.x,y:r.y}):n=null}),i.addEventListener("wheel",function(a){a.preventDefault();var s=i.getBoundingClientRect();c(a.deltaY<0?1.2:1/1.2,a.clientX-s.left,a.clientY-s.top)},{passive:!1});var p=null;i.addEventListener("mousedown",function(a){p={x0:a.clientX,y0:a.clientY,x:r.x,y:r.y},a.preventDefault()}),window.addEventListener("mousemove",b),window.addEventListener("mouseup",N);function b(a){!p||!document.getElementById("mfVisor")||(r.x=p.x+a.clientX-p.x0,r.y=p.y+a.clientY-p.y0,u())}function N(){p=null}i.addEventListener("dblclick",function(a){var s=i.getBoundingClientRect();c(r.s>1.2?1/r.s:2.5,a.clientX-s.left,a.clientY-s.top)}),l.addEventListener("click",function(a){var s=a.target.closest("[data-mfv]");if(s){var d=s.getAttribute("data-mfv");d==="cerrar"?E():c(d==="mas"?1.5:1/1.5)}}),l._fin=function(){window.removeEventListener("mousemove",b),window.removeEventListener("mouseup",N),window.removeEventListener("resize",m)},window.addEventListener("resize",m)}function E(){var t=document.getElementById("mfVisor");t&&(t._fin&&t._fin(),t.remove())}document.addEventListener("keydown",function(t){t.key==="Escape"&&document.getElementById("mfVisor")&&(t.stopPropagation(),E())},!0),window.__matFichas={indice:L,base:w,hojasDeCodigo:M,hojasDeHerramienta:H,visor:C,cerrarVisor:E,revisar:z,_mf:f}})();</script>
-<script id="revisarAppDiag">window.revisarApp=function(){var o=function(r){return document.getElementById(r)},i=String((o("appVersion")||{}).textContent||"").replace(/^\s*·?\s*v\s*/,"").trim(),e=null;try{e=window.PERMISOS&&PERMISOS.yo&&PERMISOS.yo()}catch{}var a="";try{a=e&&(PERMISOS.ROLES&&PERMISOS.ROLES[e.rol]&&PERMISOS.ROLES[e.rol].nombre||e.rol)||""}catch{a=e&&e.rol||""}var s=function(r){try{return!!r()}catch{return!1}},u=[["Mis tareas (botón en el menú)",function(){return o("menuMisTareas")&&o("viewMisTareas")}],["Órdenes en hojas (tablero / llenar / historial / buscar)",function(){return o("subtabsOrdenes")||typeof window.irSubOrdenes=="function"}],["Calculadoras rápidas + caída de tensión Muni",function(){return o("subtabsCalc")||window.__caidaMuni}],["Pañol: ficha, fotos y por sector",function(){return window.__panolFicha}],["Pañol: control de stock negativo",function(){return window.__stockNegativo&&typeof window.resolverFaltante=="function"}],["Pañol: reservas de material",function(){return typeof window.abrirNuevaReserva=="function"&&document.getElementById("cardStockReservas")}],["Base de datos conectada",function(){return window.firebase&&firebase.apps&&firebase.apps.length}]],n=["Versión: "+(i||"¿?"),"Autor: Miguel Ángel Díaz · © 2026","Usuario: "+(e?e.nombre||e.usuario||e.email||"":"(sin entrar)")+(a?" · rol "+a:""),"En la nómina: "+(e&&e.persona?e.persona:"— sin vincular —"),""];u.forEach(function(r){n.push((s(r[1])?"✓ ":"✗ ")+r[0])});var t=window.__erroresApp||[];n.push(""),n.push(t.length?"⚠ Errores ("+t.length+"):":"Sin errores."),t.slice(-6).forEach(function(r){n.push("• "+String(r.m).slice(0,120)+(r.d?" ["+r.d+"]":""))}),n.push(""),window.__lecturas&&n.push(window.__lecturas.texto()),window.__fotoTiempos&&n.push(window.__fotoTiempos()),n.push(""),n.push("Si algo no aparece, mandale una captura de esto a quien arma la app."),alert(n.join(`
+<style id="asistenteIaCss">#iaFab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:970}#iaFab[hidden]{display:none!important}#iaFab .ia-fab-b{width:auto!important;margin:0!important;min-height:52px;padding:0 20px;font-size:15px;display:flex;align-items:center;gap:6px;position:relative}#iaFab .ia-fab-b i{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:999px;background:var(--danger,#FF3B30);color:#fff;font:700 11px/18px var(--fuente,inherit);font-style:normal;padding:0 5px;box-shadow:0 0 0 2px #fff}body.ia-abierto #iaFab{display:none!important}body.of-activo #iaFab{bottom:calc(84px + env(safe-area-inset-bottom,0px))}@media (max-width:640px){body[data-vista=calc] #iaFab{bottom:calc(84px + env(safe-area-inset-bottom,0px))}#iaFab .ia-fab-b{min-height:48px;padding:0 16px;font-size:14.5px}}#iaPanel{position:fixed;z-index:980;display:flex;flex-direction:column;background:var(--bg,#ECEFF7);color:var(--text,#0D1424);font-family:var(--fuente,inherit);overflow:hidden}#iaPanel[hidden]{display:none!important}@media (min-width:641px){#iaPanel{top:calc(76px + env(safe-area-inset-top,0px));right:16px;bottom:16px;width:420px;max-width:calc(100vw - 32px);border-radius:24px;border:1px solid var(--canto,rgba(255,255,255,.8));box-shadow:0 30px 70px -30px #28285e8c}}@media (max-width:640px){#iaPanel{top:0;left:0;right:0;bottom:0}}#iaPanel .ia-cab{flex:none;display:flex;align-items:center;gap:6px;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px 14px;background:var(--navy,#28285E);color:#fff}@media (min-width:641px){#iaPanel .ia-cab{padding-top:8px}}#iaPanel .ia-tit{flex:1 1 auto;min-width:0;font:800 16px var(--disp,inherit);letter-spacing:-.01em}#iaPanel .ia-tit small{display:block;font:500 12px var(--fuente,inherit);opacity:.8}#iaPanel .ia-cab button{flex:none;width:44px;min-width:44px;height:44px;margin:0;padding:0;border-radius:12px;background:#ffffff24;color:#fff;font-size:18px;box-shadow:none;border:0}#iaPanel .ia-cfg{flex:none;padding:12px 14px;background:#fff;border-bottom:1px solid var(--border,rgba(40,40,94,.1));font-size:13.5px}#iaPanel .ia-cfg label{display:inline-flex;align-items:center;gap:6px;margin:4px 10px 4px 0;font-weight:600;color:var(--text-soft,#4B5670)}#iaPanel .ia-cfg input{width:auto;min-height:0;margin:0}#iaPanel .ia-cfg .btn-primary{width:auto;margin:8px 0 0}#iaPanel .ia-chat{flex:1 1 auto;overflow-y:auto;padding:14px 12px 6px;-webkit-overflow-scrolling:touch}#iaPanel .ia-b{max-width:88%;margin:0 0 10px;padding:10px 13px;border-radius:18px;font-size:14.5px;line-height:1.42;overflow-wrap:anywhere;word-break:break-word}#iaPanel .ia-b.yo{margin-left:auto;background:var(--navy,#28285E);color:#fff;border-bottom-right-radius:6px}#iaPanel .ia-b.ia{background:#ffffffd9;border:1px solid var(--canto,rgba(255,255,255,.8));box-shadow:var(--sombra-sm,0 1px 2px rgba(40,40,94,.06));border-bottom-left-radius:6px}#iaPanel .ia-b.ia ul{margin:4px 0;padding-left:18px}#iaPanel .ia-b.mal{background:#fdecec;border:1px solid rgba(255,59,48,.35);color:#7a1b14}#iaPanel .ia-b.nota{background:#e9f8ee;border:1px solid rgba(52,199,89,.4);color:#14532d}#iaPanel .ia-b a{color:inherit;font-weight:700}#iaPanel .ia-est{font-size:12.5px;color:var(--text-3,#7C879D);margin:0 0 10px 4px;font-family:var(--mono,monospace)}#iaPanel .ia-acc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}#iaPanel .ia-acc a,#iaPanel .ia-acc button{width:auto!important;margin:0;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 16px;font-size:14px;text-decoration:none;border-radius:999px}#iaPanel .ia-acc .btn-ghost{background:#ffffffb8;border:1px solid rgba(40,40,94,.14);color:var(--navy,#28285E);font-weight:600}#iaPanel .ia-conf{margin:0 0 12px;padding:14px 14px 12px;border-radius:20px;background:#fff;border:2px solid var(--navy,#28285E);box-shadow:var(--sombra-md,0 18px 44px -26px rgba(40,40,94,.45))}#iaPanel .ia-conf-t{font:800 15px var(--disp,inherit);margin:0 0 6px;color:var(--navy,#28285E)}#iaPanel .ia-conf-f{font-size:14px;line-height:1.4;margin:4px 0;overflow-wrap:anywhere}#iaPanel .ia-conf-f small{color:var(--text-soft,#4B5670)}#iaPanel .ia-conf-av{margin:6px 0 0;padding:8px 10px;border-radius:12px;background:#ff9f0a1a;border:1px solid rgba(255,159,10,.28);color:#6b3a00;font-size:13px;line-height:1.35}#iaPanel .ia-conf-pie{font-size:12.5px;color:var(--text-3,#7C879D);margin:8px 0 0}#iaPanel .ia-conf .ia-acc{margin:12px 0 0}#iaPanel .ia-conf .ia-acc button{flex:1 1 auto}#iaPanel .ia-conf-msg{font-size:13.5px;margin-top:8px;font-weight:700}#iaPanel .ia-conf.hecha{border-color:var(--verde,#34C759)}#iaPanel .ia-conf.cancelada{border-color:#28285e2e;opacity:.75}#iaPanel .ia-chips{flex:none;display:flex;gap:8px;overflow-x:auto;padding:6px 12px 4px;scrollbar-width:none}#iaPanel .ia-chips::-webkit-scrollbar{display:none}#iaPanel .ia-chips .chip{flex:none;width:auto;margin:0;min-height:40px;padding:0 14px;border-radius:999px;font-size:13px;white-space:nowrap}#iaPanel .ia-pie{flex:none;display:flex;align-items:flex-end;gap:8px;padding:8px 10px calc(10px + env(safe-area-inset-bottom,0px));background:#ffffffb3;border-top:1px solid var(--border,rgba(40,40,94,.1));margin:0}#iaPanel .ia-pie textarea{flex:1 1 auto;min-width:0;margin:0;min-height:46px;max-height:120px;resize:none;font-size:16px;line-height:1.35;padding:11px 14px;border-radius:22px}#iaPanel .ia-pie .ia-mic{flex:none;width:46px;min-width:46px;height:46px;margin:0;padding:0;border-radius:50%;background:#fff;border:1px solid rgba(40,40,94,.14);font-size:19px;box-shadow:none}#iaPanel .ia-pie .ia-mic.on{background:var(--danger,#FF3B30);color:#fff;border-color:var(--danger,#FF3B30)}#iaPanel .ia-pie .btn-primary{flex:none;width:auto!important;margin:0;min-height:46px;padding:0 16px}#iaPanel .ia-ayuda{flex:none;margin:0 12px 8px;padding:8px 12px;border-radius:14px;background:#28285e0f;font-size:13px;color:var(--text-soft,#4B5670)}#iaPanel .ia-vacio{color:var(--text-soft,#4B5670);font-size:14px;line-height:1.45;padding:6px 4px 12px}#iaPanel .ia-vacio b{color:var(--text,#0D1424)}#iaCola{position:fixed;left:50%;top:calc(8px + env(safe-area-inset-top,0px));transform:translate(-50%);z-index:1002;width:min(94vw,520px);display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;background:var(--navy,#28285E);color:#fff;font-size:13.5px;box-shadow:0 18px 40px -16px #0d142499}#iaCola span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}#iaCola button{flex:none;width:auto;margin:0;min-height:40px;padding:0 12px;border-radius:999px;background:#ffffff29;color:#fff;border:0;font-size:13px}@media print{#iaFab,#iaPanel,#iaCola{display:none!important}}</style>
+<script id="asistenteIa">(function(){"use strict";const a=t=>document.getElementById(t),r="ema.ia.gasto",s=t=>t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");function d(){try{const t=JSON.parse(localStorage.getItem(r)||"null");if(t&&t.d&&t.m)return t}catch{}return{d:{},m:{}}}function _(t){const e=Number(t);if(!(e>0))return;const n=d(),o=s(new Date),w=o.slice(0,7);n.d[o]=Math.round(((n.d[o]||0)+e)*1e6)/1e6,n.m[w]=Math.round(((n.m[w]||0)+e)*1e6)/1e6,Object.keys(n.d).sort().slice(0,-40).forEach(i=>{delete n.d[i]}),Object.keys(n.m).sort().slice(0,-24).forEach(i=>{delete n.m[i]});try{localStorage.setItem(r,JSON.stringify(n))}catch{}}const c=t=>{t=Number(t)||0;const e=t>0&&t<.01?4:2;return t.toLocaleString("es-AR",{minimumFractionDigits:e,maximumFractionDigits:e})};window.__iaSumarGasto=_,window.__iaGasto=()=>{const t=d(),e=s(new Date);return{hoy:t.d[e]||0,mes:t.m[e.slice(0,7)]||0}},window.__iaGastoTexto=()=>{const t=window.__iaGasto();return`✨ Asistente: US$ ${c(t.hoy)} hoy · US$ ${c(t.mes)} este mes`};const m=["admin","oficina"];window.__iaRoles=function(){const t=window.__personalNube,e=t&&t.asistente&&Array.isArray(t.asistente.roles)?t.asistente.roles.filter(Boolean):null;return e&&e.length?e:m.slice()},window.__iaPuede=function(){if(window.__iaForzar)return!0;if(!window.__fbUser||!document.body||document.body.classList.contains("rol-pendiente"))return!1;let t=null;try{t=window.PERMISOS&&PERMISOS.yo?PERMISOS.yo():null}catch{t=null}if(!t||t.activo===!1||t.pendiente)return!1;const e=String(t.rol||"");return e==="admin"||window.__iaRoles().indexOf(e)>=0};const f=()=>{const t=window.abrirLegajo;if(typeof t!="function"||t.__ia)return!!t;const e=function(n){return window.__iaObraLegajo=String(n||""),t.apply(this,arguments)};return window.__heredar&&window.__heredar(e,window.abrirLegajo),e.__ia=1,window.abrirLegajo=e,!0};function u(){let t=a("iaFab");t||(t=document.createElement("div"),t.id="iaFab",t.className="no-print",t.hidden=!0,t.innerHTML='<button type="button" class="btn-primary ia-fab-b" aria-label="Abrir el Asistente EMA">✨ Asistente</button>',document.body.appendChild(t));const e=window.__iaPuede();t.hidden===e&&(t.hidden=!e),!e&&window.__asistente&&window.__asistente.abierto&&window.__asistente.abierto()&&window.__asistente.cerrar()}function b(){if(window.__asistente)return window.__asistente;const t=a("asistenteIaCod");if(!t)return null;const e=document.createElement("script");return e.textContent=t.textContent,e.dataset.cargado="asistenteIaCod",document.body.appendChild(e),window.__asistente||null}window.__asistenteAbrir=function(t){if(!window.__iaPuede())return!1;const e=b();return e?(e.abrir(t),!0):!1},document.addEventListener("click",t=>{t.target&&t.target.closest&&t.target.closest("#iaFab .ia-fab-b")&&(t.preventDefault(),window.__asistenteAbrir())}),document.addEventListener("permisos-listos",()=>setTimeout(u,50));const l=()=>{try{document.body&&u(),f()}catch{}};setInterval(l,1500),setTimeout(l,300)})();</script>
+<script type="text/plain" id="asistenteIaCod">
+(function () {
+  "use strict";
+  // v132 · Asistente EMA — código dormido (se carga al tocar «✨ Asistente»). Escrito compatible con Chrome 80 a mano
+  // (compactar80 no transpila el text/plain): sin «?.», sin «??», sin «||=».
+  //
+  // Cómo funciona:
+  //  · Cada pregunta va al Worker «ema-ia» (POST /ia con el token de Firebase). La clave de Claude vive solo en el Worker.
+  //  · Si Claude pide una herramienta, la app la corre ACÁ, con los permisos de quien pregunta, sobre lo que ya tiene en
+  //    memoria (obras, órdenes, pañol, nómina): no hace lecturas nuevas a la base. Devuelve el resultado y repite (tope 6).
+  //  · Las herramientas que cambian algo (emitir orden, cerrar órdenes, mandar aviso) NO se ejecutan: quedan como propuesta
+  //    con una tarjeta «Sí, hacelo» / «No». Con el Sí se usan los caminos de siempre de la app:
+  //      - orden: se carga «Llenar orden» (obra, fecha, gente, vehículo, tareas, cantidades, quién) y se toca Emitir
+  //        (window.emitirOrdenTrabajo, con todas sus envolturas: número OT, personalNombres, avisos, «una orden por obra»…);
+  //      - cierre: se abre el cierre de cada orden, una por una, ya cargado con lo que mandó la cuadrilla, y la persona toca
+  //        «✅ Aprobar todo y cerrar» o «Guardar lo hecho» (puntos y avance salen del cierre de siempre);
+  //      - aviso: __pushAvisos.dejarAviso a cada persona.
+  //    Todo queda en «auditoria» con porAsistente: true.
+  //  · Modelo: Haiku para preguntas; Sonnet si la persona pide armar/hacer/cerrar/orden o si Haiku pide una acción.
+  const VERSION = "v132";
+  const URL_IA = window.__iaUrl || "https://ema-ia.mdiaz-60f.workers.dev/ia";
+  const HAIKU = "claude-haiku-5-5", SONNET = "claude-sonnet-5-5";
+  const TOPE_VUELTAS = 6;
+  const SIN_SENAL = "Sin señal: el asistente necesita internet.";
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (a) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[a]);
+  const nk = (s) => String(s == null ? "" : s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9ñ°/.,\- ]+/g, " ").replace(/\s+/g, " ").trim();
+  const claveDe = (s) => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();   // = personalNombres
+  const Lk = (s) => String(s || "").replace(/[~*\/\[\].`]/g, "_").slice(0, 120) || "_";
+  const num = (v) => { const x = parseFloat(String(v == null ? "" : v).replace(",", ".")); return isFinite(x) ? x : 0; };
+  const r2 = (n) => Math.round(n * 100) / 100;
+  const pl = (n, u) => (!u || n === 1 || /^(m|ml|m²|m³|kg|h)$/i.test(u) ? u || "" : /[aeiouáéíóú]$/i.test(u) ? u + "s" : /[ln]$/i.test(u) ? u.replace(/ó(n)$/, "o$1") + "es" : u + "es");
+  const fN = (n) => { try { return typeof fmt == "function" ? fmt(n, Number.isInteger(n) ? 0 : 2) : String(n); } catch (e) { return String(n); } };
+  const espera = (ms) => new Promise((ok) => setTimeout(ok, ms));
+  const esCel = () => window.innerWidth <= 640;
+  const isoDe = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const hoy = () => isoDe(new Date());
+  const masDias = (f, n) => { const d = new Date(f + "T12:00:00"); d.setDate(d.getDate() + n); return isoDe(d); };
+  const DIAS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  const fLarga = (f) => { const d = new Date(String(f) + "T12:00:00"); if (isNaN(d)) return String(f || ""); return DIAS[d.getDay()] + " " + String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear(); };
+  const fCorta = (f) => { const p = String(f || "").split("-"); return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : String(f || ""); };
+
+  // ---------- lo que la app ya tiene en memoria
+  const obras = () => { try { return (window.avanceObrasTodas || (typeof avanceObras != "undefined" ? avanceObras : [])) || []; } catch (e) { return []; } };
+  const obrasVisibles = () => obras().filter((o) => o && o.oculta !== true);
+  const ots = () => { try { return Array.isArray(ordenesTrabajo) ? ordenesTrabajo.filter((o) => o && typeof o == "object") : []; } catch (e) { return []; } };
+  const otDe = (id) => ots().find((o) => o.id === id) || null;
+  const catalogoTareas = () => { try { return typeof ACTIVIDADES_CATALOGO != "undefined" ? ACTIVIDADES_CATALOGO : []; } catch (e) { return []; } };
+  const labelTarea = (k) => { const a = catalogoTareas().find((x) => x.id === k); return a ? a.label : String(k).replace(/^m:/, ""); };
+  const unTarea = (k) => { try { return typeof unidadDeTarea == "function" ? unidadDeTarea(k) : ""; } catch (e) { return ""; } };
+  const nomina = () => { const p = window.__personalNube || {}; return (Array.isArray(p.lista) ? p.lista : []).filter((x) => x && String(x.nombre || "").trim() && x.activo !== false); };
+  const permiso = (h) => { try { return window.PERMISOS && PERMISOS.permiso ? PERMISOS.permiso(h) : "ver"; } catch (e) { return "oculto"; } };
+  const ve = function () { for (let i = 0; i < arguments.length; i++) if (permiso(arguments[i]) !== "oculto") return true; return false; };
+  const edita = (h) => permiso(h) === "editar";
+  const yo = () => { try { return (window.PERMISOS && PERMISOS.yo && PERMISOS.yo()) || {}; } catch (e) { return {}; } };
+  const yoNombre = () => { const y = yo(); return y.nombre || y.persona || y.usuario || String((window.__fbUser || {}).email || "").split("@")[0]; };
+  const ROL_TXT = { admin: "Administración", oficina: "Oficina", panol: "Pañol", cuadrilla: "Cuadrilla", operario: "Operario", mirar: "Solo mirar" };
+  const cerradaOt = (o) => !!(o && ((o.cierre && o.cierre.cerradoTs) || o.estado === "Terminada"));
+  const abiertaOt = (o) => !!(o && o.estado !== "Anulada" && !cerradaOt(o));
+  const auditar = (acc, det, extra) => { try { window.fbAuditar && window.fbAuditar(acc, det, Object.assign({ porAsistente: true }, extra || {})); } catch (e) { } };
+
+  // =====================================================================================================================
+  // Obras
+  // =====================================================================================================================
+  const VACIAS = ["plaza", "plazoleta", "la", "el", "de", "del", "los", "las", "obra", "barrio", "en", "y", "id"];
+  function buscarObras(texto) {
+    const q = nk(texto); if (!q) return [];
+    const pal = q.split(" ").filter((w) => w && VACIAS.indexOf(w) < 0);
+    const usar = pal.length ? pal : q.split(" ");
+    const l = [];
+    obrasVisibles().forEach((o) => {
+      const nom = nk(o.nombre || o.plazaNombre), todo = nk([o.nombre, o.plazaNombre, o.barrio, o.direccion, o.obraId].join(" "));
+      let p = 0;
+      if (String(o.id) === String(texto).trim()) p = 100;
+      else if (o.obraId && String(o.obraId).trim() === String(texto).replace(/^\s*id\s*/i, "").trim()) p = 95;
+      else if (nom === q || nom === usar.join(" ")) p = 90;
+      else if (nom.indexOf(usar.join(" ")) >= 0) p = 75;
+      else if (usar.every((w) => todo.indexOf(w) >= 0)) p = 60;
+      else { const n = usar.filter((w) => w.length > 2 && todo.indexOf(w) >= 0).length; if (n) p = 20 + Math.round(30 * n / usar.length); }
+      if (p) l.push({ o, p });
+    });
+    return l.sort((a, b) => b.p - a.p || String(a.o.nombre).localeCompare(String(b.o.nombre), "es"));
+  }
+  function resolverObra(ref) {
+    const s = String(ref == null ? "" : ref).trim();
+    if (!s) return { err: "Falta decir de qué obra." };
+    const exacta = obras().find((o) => String(o.id) === s); if (exacta) return { obra: exacta };
+    const l = buscarObras(s);
+    if (!l.length) return { err: `No encontré ninguna obra que se parezca a «${s}».` };
+    if (l.length === 1 || l[0].p >= 90 || (l[0].p >= 60 && l[0].p > l[1].p)) return { obra: l[0].o };
+    return { err: `Hay varias obras que se parecen a «${s}»: preguntá cuál es.`, candidatos: l.slice(0, 6).map((x) => fichaObra(x.o)) };
+  }
+  const pctObra = (o) => { try { return typeof calcularAvanceEtapasPct == "function" ? calcularAvanceEtapasPct(o) : null; } catch (e) { return null; } };
+  const tipoObra = (o) => o.tipoObra || o.tipo || "";
+  function fichaObra(o) { return { obraId: o.id, nombre: o.nombre || o.plazaNombre || "", ID: o.obraId || "", tipo: tipoObra(o), barrio: o.barrio || "", avancePct: pctObra(o) }; }
+  const descItem = (id) => { try { const d = typeof window.epecItemDesc == "function" ? window.epecItemDesc(String(id)) : ""; return String(d || "Ítem " + id).replace(/\s+/g, " ").slice(0, 110); } catch (e) { return "Ítem " + id; } };
+  function filasItems(o) {
+    const l = [];
+    (o.valorItems || []).forEach((r) => { if (r && r.itemPliego) l.push({ id: String(r.itemPliego), cant: num(r.cantidad), hecho: num(r.cantidadAvanzada) }); });
+    (o.valorItemsEpec || []).forEach((r) => { if (r && r.itemEpec) l.push({ id: String(r.itemEpec), cant: num(r.cantidad), hecho: num(r.cantidadAvanzada) }); });
+    return l;
+  }
+  const COLS = ["1", "2", "3", "4", "5", "6", "7", "8"];
+  function columnasDe(o) {
+    const g = {}; let fuente = "itemizado de la obra";
+    filasItems(o).forEach((f) => { if (COLS.indexOf(f.id) < 0 || !(f.cant > 0)) return; const x = g[f.id] || (g[f.id] = { item: f.id, tipo: descItem(f.id), total: 0, hechas: 0 }); x.total += f.cant; x.hechas += Math.min(f.hecho, f.cant); });
+    if (!Object.keys(g).length) {
+      let pv = null; try { pv = typeof window.epecPreviaDe == "function" ? window.epecPreviaDe(o) : null; } catch (e) { pv = null; }
+      ((pv && pv.filas) || []).forEach((f) => { const id = String(f.item); if (COLS.indexOf(id) < 0 || !(num(f.cantidad) > 0)) return; const x = g[id] || (g[id] = { item: id, tipo: descItem(id), total: 0, hechas: null }); x.total += num(f.cantidad); });
+      fuente = Object.keys(g).length ? "cálculo de materiales (sin itemizado cargado: no sé cuántas están hechas)" : "";
+    }
+    const l = Object.keys(g).sort((a, b) => +a - +b).map((k) => g[k]).map((x) => ({ item: x.item, tipo: x.tipo, total: r2(x.total), hechas: x.hechas == null ? null : r2(x.hechas) }));
+    const total = r2(l.reduce((s, x) => s + x.total, 0)), hechas = l.some((x) => x.hechas == null) ? null : r2(l.reduce((s, x) => s + x.hechas, 0));
+    return { fuente: fuente || "no hay itemizado ni cálculo con columnas", total, hechas, porTipo: l, nombradas: Array.isArray(o.puntos) ? o.puntos.length : 0 };
+  }
+  function tareasQueFaltan(o) {
+    let sd = null; try { sd = typeof window.saldoObra == "function" ? window.saldoObra(o.id) : null; } catch (e) { sd = null; }
+    if (!sd) return { sinCalculo: true, tareas: [] };
+    const viejas = window.DICC_VIEJAS || [];
+    const l = Object.keys(sd.tareas).filter((k) => sd.tareas[k].total > 0 && viejas.indexOf(k) < 0).map((k) => { const t = sd.tareas[k]; return { tarea: labelTarea(k), clave: k, un: t.un || "", total: t.total, hecho: t.hecho, enOrdenesAbiertas: t.asignado, quedan: t.queda }; });
+    return { sinCalculo: !!sd.sinCalculo && !l.length, cuentaDesde: sd.desde, tareas: l };
+  }
+  function materialDe(o) {
+    let b = null; try { b = typeof calcularBalancePlaza == "function" ? calcularBalancePlaza(o) : null; } catch (e) { b = null; }
+    const f = ((b && b.filas) || []).filter((x) => x && num(x.calc) > 0);
+    if (!f.length) return null;
+    const l = f.map((x) => ({ codigo: x.codigo == null ? "" : String(x.codigo), material: String(x.desc || "").slice(0, 80), un: x.un || "", calculado: r2(num(x.calc)), entregado: x.entr == null ? 0 : r2(num(x.entr)) })).map((x) => Object.assign(x, { falta: r2(Math.max(0, x.calculado - x.entregado)) }));
+    l.sort((a, b) => b.falta - a.falta);
+    return { materiales: l.length, conFaltante: l.filter((x) => x.falta > 0).length, detalle: l.slice(0, 20) };
+  }
+
+  // =====================================================================================================================
+  // Órdenes
+  // =====================================================================================================================
+  const OC = () => window.__ordenesCampo || null;
+  function tareasOt(o) {
+    try { if (OC() && OC().tareasDe) return OC().tareasDe(o); } catch (e) { }
+    const prev = o.previsto || {};
+    return (o.actividades || []).filter((k) => typeof k == "string").map((k) => ({ k, label: labelTarea(k), un: unTarea(k), prev: num(prev[k]), manual: false }))
+      .concat((o.actividadesManuales || []).filter((t) => t && String(t.actividad || "").trim()).map((t) => ({ k: "m:" + String(t.actividad).trim(), label: String(t.actividad).trim(), un: "", prev: 0, manual: true })));
+  }
+  const campoDe = (o) => (o && o.campo && typeof o.campo == "object" ? o.campo : {});
+  function envioDe(o, k) {
+    const x = (campoDe(o).tareaEnv || {})[Lk(k)]; if (!x || typeof x != "object") return null;
+    const l = Object.keys(x).map((p) => x[p]).filter((v) => v && v.estado); if (!l.length) return null;
+    return l.sort((a, b) => (b.ts || 0) - (a.ts || 0))[0];
+  }
+  const nombresOt = (o) => (Array.isArray(o.personal) ? o.personal : []).map((p) => (typeof p == "string" ? p : p && p.nombre)).filter(Boolean);
+  const grupoTxt = { revisar: "mandada: para revisar y cerrar", obra: "hoy en obra", atras: "de días anteriores, sin cerrar", prox: "próxima", cerr: "cerrada", anulada: "anulada" };
+  const grupoDe = (o) => { try { return OC() && OC().grupoDe ? OC().grupoDe(o) : ""; } catch (e) { return ""; } };
+  function fotosDeTarea(o, k) { const f = campoDe(o).fotos || {}; return Object.keys(f).map((i) => f[i]).filter((x) => x && !x.borrada && x.k === k).length; }
+  function resumenOt(o, corto) {
+    const c = campoDe(o), cer = o.cierre && o.cierre.cerradoTs ? (o.cierre.cantidades || {}) : null;
+    const ts = tareasOt(o).map((t) => {
+      const m = (c.marcas || {})[Lk(t.k)], env = envioDe(o, t.k), sf = (c.sinFotos || {})[Lk(t.k)];
+      const hecho = cer ? num(cer[t.k]) : m && m.hecho ? (num(m.cant) || t.prev || 1) : 0;
+      const x = { tarea: t.label, un: t.un || "", previsto: t.prev || null, hecho, enviada: env ? (env.estado === "no" ? "no se hizo" : "se hizo") : null };
+      if (env && env.estado === "no" && m && m.motivo) x.porque = m.motivo;
+      if (!corto) { x.fotos = fotosDeTarea(o, t.k); if (sf) x.mandadaSinFotos = true; const h = (c.horasTarea || {})[t.k]; if (h && (h.ini || h.fin)) x.horas = (h.ini || "?") + " a " + (h.fin || "?"); }
+      return x;
+    });
+    const enviados = Object.keys(c.enviados || {}).length > 0, todas = ts.length > 0 && ts.every((t) => t.enviada);
+    const g = grupoDe(o);
+    return { otId: o.id, numero: o.numero || "", fecha: o.fecha || "", obra: o.plazaNombre || "(sin obra)", estado: o.estado || "", situacion: grupoTxt[g] || g || "", gente: nombresOt(o), tareas: ts, hechas: ts.filter((t) => t.hecho > 0).length + " de " + ts.length, mandoTodo: enviados || todas, cerrada: cerradaOt(o) };
+  }
+  function fechaDe(s) {
+    const t = nk(s); if (!t) return "";
+    if (/^(hoy)$/.test(t)) return hoy();
+    if (/^manana$/.test(t)) return masDias(hoy(), 1);
+    if (/^pasado manana$/.test(t)) return masDias(hoy(), 2);
+    if (/^ayer$/.test(t)) return masDias(hoy(), -1);
+    let m = String(s).trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/); if (m) return m[1] + "-" + m[2].padStart(2, "0") + "-" + m[3].padStart(2, "0");
+    m = String(s).trim().match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+    if (m) { const a = m[3] ? (m[3].length === 2 ? "20" + m[3] : m[3]) : String(new Date().getFullYear()); return a + "-" + m[2].padStart(2, "0") + "-" + m[1].padStart(2, "0"); }
+    const d = DIAS.map(nk).indexOf(t);
+    if (d >= 0) { let f = hoy(); for (let i = 0; i < 7; i++) { if (new Date(f + "T12:00:00").getDay() === d) return f; f = masDias(f, 1); } }
+    return "";
+  }
+  // ¿la orden está lista para cerrar? (todo mandado, sin fotos faltantes, con las horas)
+  function revisarParaCerrar(o) {
+    const c = campoDe(o), mot = [], ts = tareasOt(o);
+    const enviados = Object.keys(c.enviados || {}).length > 0;
+    const sinMandar = ts.filter((t) => !envioDe(o, t.k));
+    if (!ts.length) mot.push("no tiene tareas");
+    else if (!enviados && sinMandar.length === ts.length) mot.push("la cuadrilla todavía no mandó nada");
+    else if (!enviados && sinMandar.length) mot.push("falta mandar: " + sinMandar.map((t) => t.label).join(", "));
+    Object.keys(c.sinFotos || {}).forEach((k) => {
+      const x = c.sinFotos[k] || {}; Object.keys(x).forEach((p) => { const v = x[p] || {}; const t = ts.find((y) => Lk(y.k) === k); mot.push(`«${t ? t.label : k}» se mandó sin ${(v.faltan || []).length || "algunas"} foto(s)${v.motivo ? " (" + v.motivo + (v.nota ? ": " + v.nota : "") + ")" : ""}`); });
+    });
+    const hechas = ts.filter((t) => { const e = envioDe(o, t.k); if (e) return e.estado !== "no"; const m = (c.marcas || {})[Lk(t.k)]; return !!(m && m.hecho); });
+    const horasViejas = c.horas && Object.keys(c.horas).some((p) => c.horas[p] && num(c.horas[p].horas) > 0);
+    const sinHoras = hechas.filter((t) => { const h = (c.horasTarea || {})[t.k] || (c.horasTarea || {})[Lk(t.k)]; return !(h && h.ini && h.fin); });
+    if (sinHoras.length && !horasViejas) mot.push("faltan las horas de: " + sinHoras.map((t) => t.label).join(", "));
+    return mot;
+  }
+
+  // =====================================================================================================================
+  // Las herramientas (lo que Claude puede pedir)
+  // =====================================================================================================================
+  const S = (props, req) => ({ type: "object", properties: props, required: req || [] });
+  const TXT = (d) => ({ type: "string", description: d });
+  const TOOLS = [
+    { name: "buscar_obra", description: "Busca obras (plazas, barrios, otras) por nombre, ID del pliego, barrio o dirección. Devuelve obraId (interno), nombre, ID, tipo, barrio y avance %. Usala antes de las otras herramientas si no tenés el obraId.", input_schema: S({ texto: TXT("Lo que escribió la persona, ej. «san martin» o «4026»") }, ["texto"]) },
+    { name: "datos_obra", description: "Todo lo de una obra: columnas por tipo y altura (total y hechas), avance %, tareas que faltan con «quedan N de T», qué le falta según el itemizado, material calculado contra entregado, dirección, coordenadas y órdenes abiertas.", input_schema: S({ obraId: TXT("obraId de buscar_obra (o el nombre si no lo tenés)") }, ["obraId"]) },
+    { name: "ubicacion_obra", description: "Link de Google Maps de una obra y un texto listo para compartir. La app le muestra a la persona los botones «📍 Abrir mapa» y «Compartir por WhatsApp».", input_schema: S({ obraId: TXT("obraId o nombre de la obra") }, ["obraId"]) },
+    { name: "ordenes", description: "Lista órdenes de trabajo con su resumen (tareas hechas contra previstas, si mandaron todo, fotos). Se puede filtrar por obra, estado, fecha o persona. Máximo 25, de la más nueva a la más vieja.", input_schema: S({ obra: TXT("nombre u obraId (opcional)"), estado: { type: "string", enum: ["abiertas", "para_cerrar", "emitida", "en_curso", "terminada", "anulada", "todas"], description: "de entrada: todas menos las anuladas" }, fecha: TXT("hoy, mañana, ayer, AAAA-MM-DD o DD/MM (opcional)"), desde: TXT("AAAA-MM-DD (opcional)"), hasta: TXT("AAAA-MM-DD (opcional)"), persona: TXT("nombre de alguien de la cuadrilla (opcional)") }) },
+    { name: "ordenes_completas", description: "Las órdenes abiertas que están listas para cerrar (la cuadrilla mandó todo, sin fotos faltantes y con las horas cargadas) y las que no, con el motivo.", input_schema: S({}) },
+    { name: "stock", description: "Busca productos del pañol por código o palabras y dice stock actual, reservado y disponible.", input_schema: S({ texto: TXT("código (ej. 2009) o palabras (ej. «fusible 2 A»)") }, ["texto"]) },
+    { name: "personal", description: "La nómina del personal: nombre, rol, vehículo a cargo y si le llegan las órdenes al celular.", input_schema: S({ texto: TXT("nombre o parte (vacío = todos)") }) },
+    { name: "puntos", description: "Ranking de puntos por persona de una quincena (solo órdenes cerradas).", input_schema: S({ periodo: TXT("«actual» (de entrada), «anterior» o AAAA-MM-1 / AAAA-MM-2") }) },
+    { name: "resumen_dia", description: "Resumen de un día: órdenes (en qué están), gente, tareas hechas y movimientos del pañol.", input_schema: S({ fecha: TXT("hoy (de entrada), ayer, AAAA-MM-DD o DD/MM") }) },
+    { name: "proponer_orden", description: "ARMA una orden de trabajo para que la persona la confirme (NO la emite). La app muestra una tarjeta con el resumen y los puntos estimados; con «Sí, hacelo» se emite por «Llenar orden» como siempre (número OT y aviso al celular de cada uno).", input_schema: S({ obra: TXT("obraId o nombre"), fecha: TXT("hoy, mañana, AAAA-MM-DD o DD/MM"), personas: { type: "array", items: { type: "string" }, description: "nombres de la nómina" }, vehiculo: TXT("nombre o patente (opcional; si no, el que tienen a cargo)"), hora_inicio: TXT("HH:MM (opcional)"), tareas: { type: "array", items: S({ tarea: TXT("nombre de la tarea del catálogo"), cantidad: { type: "number" }, quien: TXT("una persona de la orden (opcional; si no, toda la cuadrilla)") }, ["tarea", "cantidad"]) } }, ["obra", "fecha", "personas", "tareas"]) },
+    { name: "proponer_cierre", description: "PROPONE cerrar órdenes (NO las cierra). Con «Sí, hacelo» la app abre el cierre de cada una, ya cargado con lo que mandó la cuadrilla, y la persona aprueba. Usá antes ordenes_completas.", input_schema: S({ otIds: { type: "array", items: { type: "string" }, description: "otId o número (OT-AAAA-NNN)" } }, ["otIds"]) },
+    { name: "proponer_aviso", description: "PROPONE mandar un aviso al celular de una o varias personas (NO lo manda). Con «Sí, hacelo» se manda.", input_schema: S({ personas: { type: "array", items: { type: "string" }, description: "nombres de la nómina, o «todos»" }, texto: TXT("el aviso, corto") }, ["personas", "texto"]) },
+    { name: "abrir", description: "Abre una pantalla de la app (solo navega, no cambia nada): legajo de una obra, una orden, el mapa centrado en una obra, el tablero de órdenes, Llenar orden, informes, pañol, producción o Mis tareas.", input_schema: S({ pantalla: { type: "string", enum: ["legajo", "orden", "mapa", "ordenes", "llenar_orden", "informes", "pañol", "produccion", "mis_tareas", "inicio"] }, id: TXT("obraId u otId, según la pantalla (opcional)") }, ["pantalla"]) },
+    { name: "informe", description: "Deja listo un informe de una obra para Compartir PDF: «mensual_fotos» (informe mensual con fotos del mes) o «avance» (avance de obra). Abre la pantalla con la obra elegida y le da a la persona el botón «Armarlo ahora».", input_schema: S({ obra: TXT("obraId o nombre"), tipo: { type: "string", enum: ["mensual_fotos", "avance"] } }, ["obra", "tipo"]) }
+  ];
+  const ACCIONES = ["proponer_orden", "proponer_cierre", "proponer_aviso"];
+  const ESTADOS = { buscar_obra: "🔎 Buscando la obra…", datos_obra: "📊 Mirando la obra…", ubicacion_obra: "📍 Buscando la ubicación…", ordenes: "📋 Mirando las órdenes…", ordenes_completas: "✅ Revisando qué órdenes están para cerrar…", stock: "📦 Mirando el pañol…", personal: "👷 Mirando la nómina…", puntos: "⭐ Sumando los puntos…", resumen_dia: "📅 Armando el resumen…", proponer_orden: "📝 Armando la orden…", proponer_cierre: "📝 Preparando el cierre…", proponer_aviso: "📝 Preparando el aviso…", abrir: "↪ Abriendo…", informe: "📄 Preparando el informe…" };
+
+  // cada herramienta devuelve {r: lo que ve Claude, extra?: html que se muestra al final, ir?: navegación al final}
+  const H = {};
+  H.buscar_obra = (a) => {
+    if (!ve("registro", "avance", "mapa", "parte")) return { err: "No tenés permiso para ver las obras." };
+    const l = buscarObras(a.texto);
+    return { r: { encontradas: l.length, obras: l.slice(0, 10).map((x) => fichaObra(x.o)) } };
+  };
+  H.datos_obra = (a) => {
+    if (!ve("registro", "avance", "mapa", "parte")) return { err: "No tenés permiso para ver las obras." };
+    const x = resolverObra(a.obraId); if (x.err) return { err: x.err, r: x.candidatos ? { candidatos: x.candidatos } : null };
+    const o = x.obra;
+    let faltan = null; try { faltan = typeof window.__aviFaltan == "function" ? window.__aviFaltan(o) : null; } catch (e) { faltan = null; }
+    const abiertas = ots().filter((t) => String(t.plazaId || "") === String(o.id) && abiertaOt(t)).map((t) => (t.numero || t.id) + " · " + fCorta(t.fecha));
+    const r = Object.assign(fichaObra(o), {
+      direccion: o.direccion || "", lat: o.lat == null ? null : o.lat, lng: o.lng == null ? null : o.lng,
+      situacion: o.situacion || "", columnas: columnasDe(o), faltaSegunItemizado: faltan, tareasQueFaltan: tareasQueFaltan(o),
+      material: ve("stock", "avance") ? materialDe(o) : "sin permiso para ver el pañol", ordenesAbiertas: abiertas
+    });
+    return { r, obra: o };
+  };
+  function linksUbicacion(o) {
+    const nom = String(o.nombre || o.plazaNombre || "Obra").toUpperCase(), link = "https://maps.google.com/?q=" + o.lat + "," + o.lng;
+    const txt = "📍 " + nom + (o.obraId ? " (ID " + o.obraId + ")" : "") + (o.direccion ? " · " + o.direccion : "") + (o.barrio ? " · " + o.barrio : "") + "\n" + link;
+    return { link, txt };
+  }
+  H.ubicacion_obra = (a) => {
+    if (!ve("registro", "avance", "mapa", "parte")) return { err: "No tenés permiso para ver las obras." };
+    const x = resolverObra(a.obraId); if (x.err) return { err: x.err, r: x.candidatos ? { candidatos: x.candidatos } : null };
+    const o = x.obra;
+    if (o.lat == null || o.lng == null || !isFinite(+o.lat) || !isFinite(+o.lng)) return { r: { obra: fichaObra(o), sinUbicacion: true, direccion: o.direccion || "", aviso: "La obra no tiene el punto cargado en el mapa." } };
+    const u = linksUbicacion(o);
+    const extra = `<div class="ia-acc"><a class="btn-ghost" href="${esc(u.link)}" target="_blank" rel="noopener" data-iamapa>📍 Abrir mapa</a><a class="btn-primary" href="https://wa.me/?text=${encodeURIComponent(u.txt)}" target="_blank" rel="noopener" data-iawa>Compartir por WhatsApp</a>${ve("mapa") ? `<button type="button" class="btn-ghost" data-iair="mapa" data-iaid="${esc(o.id)}">🗺 En el mapa de la app</button>` : ""}</div>`;
+    return { r: { obra: fichaObra(o), link: u.link, textoParaCompartir: u.txt, nota: "La app ya le muestra los botones de Abrir mapa y WhatsApp." }, extra };
+  };
+  H.ordenes = (a) => {
+    if (!ve("parte", "plan")) return { err: "No tenés permiso para ver las órdenes." };
+    let l = ots();
+    if (a.obra) {
+      const x = resolverObra(a.obra);
+      if (x.obra) l = l.filter((o) => String(o.plazaId || "") === String(x.obra.id));
+      else { const q = nk(a.obra); l = l.filter((o) => nk(o.plazaNombre).indexOf(q) >= 0); if (!l.length) return { err: x.err, r: x.candidatos ? { candidatos: x.candidatos } : null }; }
+    }
+    const est = a.estado || "";
+    if (est === "abiertas") l = l.filter(abiertaOt);
+    else if (est === "para_cerrar") l = l.filter((o) => abiertaOt(o) && grupoDe(o) === "revisar");
+    else if (est === "emitida") l = l.filter((o) => o.estado === "Emitida" && !cerradaOt(o));
+    else if (est === "en_curso") l = l.filter((o) => o.estado === "En curso" && !cerradaOt(o));
+    else if (est === "terminada") l = l.filter(cerradaOt);
+    else if (est === "anulada") l = l.filter((o) => o.estado === "Anulada");
+    else if (est !== "todas") l = l.filter((o) => o.estado !== "Anulada");
+    if (a.fecha) { const f = fechaDe(a.fecha); if (!f) return { err: "No entendí la fecha «" + a.fecha + "»." }; l = l.filter((o) => o.fecha === f); }
+    if (a.desde) { const f = fechaDe(a.desde); if (f) l = l.filter((o) => String(o.fecha) >= f); }
+    if (a.hasta) { const f = fechaDe(a.hasta); if (f) l = l.filter((o) => String(o.fecha) <= f); }
+    if (a.persona) { const q = nk(a.persona); l = l.filter((o) => nombresOt(o).some((n) => nk(n).indexOf(q) >= 0) || (o.personalNombres || []).some((n) => nk(n).indexOf(q) >= 0)); }
+    l = l.slice().sort((x, y) => String(y.fecha).localeCompare(String(x.fecha)) || String(y.numero).localeCompare(String(x.numero)));
+    return { r: { total: l.length, mostradas: Math.min(25, l.length), ordenes: l.slice(0, 25).map((o) => resumenOt(o, l.length > 8)) } };
+  };
+  H.ordenes_completas = () => {
+    if (!ve("parte")) return { err: "No tenés permiso para ver las órdenes." };
+    const l = ots().filter((o) => abiertaOt(o) && String(o.fecha || "") <= hoy());
+    const listas = [], no = [];
+    l.forEach((o) => {
+      const m = revisarParaCerrar(o), f = { otId: o.id, numero: o.numero || "", fecha: o.fecha || "", obra: o.plazaNombre || "", gente: nombresOt(o) };
+      if (m.length) no.push(Object.assign(f, { motivos: m })); else listas.push(f);
+    });
+    return { r: { listasParaCerrar: listas, noListas: no.slice(0, 25) } };
+  };
+  H.stock = (a) => {
+    if (!ve("stock")) return { err: "No tenés permiso para ver el pañol." };
+    let cat = []; try { cat = typeof catalogo == "function" ? catalogo() : []; } catch (e) { cat = []; }
+    const q = nk(a.texto), pal = q.split(" ").filter(Boolean);
+    let l = cat.filter((p) => String(p.codigo) === String(a.texto).trim());
+    if (!l.length) l = cat.filter((p) => { const d = nk(p.codigo + " " + p.desc); return pal.length && pal.every((w) => d.indexOf(w) >= 0); });
+    if (!l.length) l = cat.filter((p) => { const d = nk(p.desc); return pal.some((w) => w.length > 3 && d.indexOf(w) >= 0); });
+    const st = (c) => { try { return typeof stockActual == "function" ? stockActual(c) : null; } catch (e) { return null; } };
+    const rs = (c) => { try { return typeof window.stockReservado == "function" ? window.stockReservado(c) : 0; } catch (e) { return 0; } };
+    return { r: { encontrados: l.length, productos: l.slice(0, 15).map((p) => { const s = st(p.codigo), r = rs(p.codigo), mn = num(p.minimo); return { codigo: p.codigo, material: p.desc, un: p.un, stock: s, reservado: r, disponible: s == null ? null : r2(s - r), minimo: mn || null, bajoMinimo: mn > 0 && s != null && s < mn }; }) } };
+  };
+  H.personal = (a) => {
+    if (!ve("produccion", "parte", "plan")) return { err: "No tenés permiso para ver la nómina." };
+    const q = nk(a.texto || "");
+    let l = nomina(); if (q) l = l.filter((p) => nk(p.nombre).indexOf(q) >= 0 || q.split(" ").every((w) => nk(p.nombre).indexOf(w) >= 0));
+    let noLlega = []; try { noLlega = typeof window.quienNoLlegaCel == "function" ? window.quienNoLlegaCel(l.map((p) => p.nombre)) : []; } catch (e) { noLlega = []; }
+    const V = window.__vehiculos;
+    return { r: { personas: l.slice(0, 40).map((p) => { const v = V && V.dePersona ? V.dePersona(p.nombre) : null, nl = noLlega.find((x) => x.n === p.nombre); return { nombre: p.nombre, rol: p.rol || "", vehiculo: v ? v.nombre + (v.patente ? " " + v.patente : "") : "", leLleganLasOrdenes: nl ? "no: " + nl.e.por : "sí" }; }), vehiculos: V && V.lista ? V.lista().map((v) => v.nombre + (v.patente ? " " + v.patente : "")) : [] } };
+  };
+  H.puntos = (a) => {
+    if (!ve("produccion")) return { err: "No tenés permiso para ver los puntos." };
+    const Q = window.__quincenas; if (!Q || !Q.calcular) return { err: "La cuenta de puntos todavía no está lista en la app." };
+    let q = Q.qDe(hoy()); const p = nk(a.periodo || "actual");
+    if (p === "anterior") q = Q.qMover(q, -1);
+    else { const m = String(a.periodo || "").match(/^(\d{4})-(\d{1,2})-([12])$/); if (m) q = { y: +m[1], m: +m[2], n: +m[3] }; }
+    const i = Q.qInfo(q), c = Q.calcular(i.desde, i.hasta);
+    return { r: { quincena: i.label, desde: i.desde, hasta: i.hasta, totalPuntos: c.total, ordenesCerradas: c.cerradas, ordenesSinCerrar: c.sinCerrar, ranking: (c.personas || []).slice().sort((x, y) => y.pts - x.pts).slice(0, 30).map((x, k) => ({ puesto: k + 1, nombre: x.nombre, puntos: x.pts, dias: x.dias, ordenes: (x.ordenes || []).length })) } };
+  };
+  H.resumen_dia = (a) => {
+    if (!ve("parte", "plan")) return { err: "No tenés permiso para ver las órdenes." };
+    const f = a.fecha ? fechaDe(a.fecha) : hoy(); if (!f) return { err: "No entendí la fecha «" + a.fecha + "»." };
+    const l = ots().filter((o) => o.fecha === f && o.estado !== "Anulada");
+    const por = {}; l.forEach((o) => { const g = grupoTxt[grupoDe(o)] || o.estado || "—"; por[g] = (por[g] || 0) + 1; });
+    const gente = []; l.forEach((o) => nombresOt(o).forEach((n) => { if (gente.indexOf(n) < 0) gente.push(n); }));
+    const r = { fecha: f, dia: fLarga(f), ordenes: l.length, porSituacion: por, gente, detalle: l.slice(0, 20).map((o) => resumenOt(o, true)) };
+    if (ve("stock")) { const mv = (window.stockMovimientos || []).filter((m) => m && !m.anulado && m.fecha === f); r.panol = { salidas: mv.filter((m) => m.tipo === "salida").length, entradas: mv.filter((m) => m.tipo === "entrada").length }; }
+    return { r };
+  };
+
+  // ---------- acciones: solo propuestas
+  let seqP = 0; const PROPS = {};
+  function personaDe(txt, lista) {
+    const q = nk(txt); if (!q) return { err: "Falta un nombre." };
+    const l = lista || nomina();
+    let m = l.filter((p) => nk(p.nombre) === q); if (m.length === 1) return { p: m[0] };
+    m = l.filter((p) => q.split(" ").every((w) => nk(p.nombre).split(" ").some((x) => x.indexOf(w) === 0)));
+    if (m.length === 1) return { p: m[0] };
+    if (m.length > 1) return { err: `«${txt}» puede ser: ${m.map((p) => p.nombre).join(", ")}. Preguntá cuál.` };
+    return { err: `«${txt}» no está en la nómina.`, opciones: l.map((p) => p.nombre).slice(0, 40) };
+  }
+  function tareaDe(txt) {
+    const q = nk(txt), cat = catalogoTareas(), viejas = window.DICC_VIEJAS || [];
+    const exist = (k) => !!document.querySelector('#otActividades .ot-act-check[value="' + (window.CSS && CSS.escape ? CSS.escape(k) : k) + '"]') || !document.querySelector("#otActividades .ot-act-check");
+    const ok = cat.filter((a) => exist(a.id));
+    let m = ok.filter((a) => a.id === String(txt).trim() || nk(a.label) === q); if (m.length) return { t: m[0] };
+    const pal = q.split(" ").filter((w) => w.length > 2 && VACIAS.indexOf(w) < 0);
+    const sc = ok.map((a) => { const l = nk(a.label + " " + a.id.replace(/_/g, " ")); let p = 0; if (l.indexOf(q) >= 0) p += 5; pal.forEach((w) => { if (l.indexOf(w) >= 0) p += 2; else if (l.split(" ").some((x) => x.indexOf(w.slice(0, 5)) === 0)) p += 1; }); if (viejas.indexOf(a.id) >= 0) p -= 1.5; return { a, p }; }).filter((x) => x.p > 0).sort((x, y) => y.p - x.p);
+    if (sc.length && (sc.length === 1 || sc[0].p >= sc[1].p + 2) && sc[0].p >= 4) return { t: sc[0].a, aproximada: true };
+    return { err: `No hay ninguna tarea «${txt}» en el catálogo.`, parecidas: sc.slice(0, 5).map((x) => x.a.label) };
+  }
+  function vehiculoDe(txt) {
+    const V = window.__vehiculos, l = V && V.lista ? V.lista() : []; const q = nk(txt);
+    const m = l.filter((v) => nk(v.nombre) === q || nk(v.patente) === q.replace(/\s/g, "") || nk(v.nombre).indexOf(q) >= 0 || (v.patente && nk(v.patente).indexOf(q.replace(/\s/g, "")) >= 0));
+    if (m.length === 1) return { v: m[0] };
+    return { err: m.length ? `«${txt}» puede ser: ${m.map((v) => v.nombre).join(", ")}.` : `No hay ningún vehículo «${txt}».`, opciones: l.map((v) => v.nombre + (v.patente ? " " + v.patente : "")) };
+  }
+  H.proponer_orden = (a) => {
+    if (!edita("parte")) return { err: "Tu usuario no puede emitir órdenes de trabajo." };
+    const x = resolverObra(a.obra); if (x.err) return { err: x.err, r: x.candidatos ? { candidatos: x.candidatos } : null };
+    const o = x.obra, fecha = fechaDe(a.fecha || "hoy"); if (!fecha) return { err: "No entendí la fecha «" + a.fecha + "». Pasala como AAAA-MM-DD." };
+    const avisos = [];
+    if (fecha < hoy()) avisos.push("La fecha (" + fCorta(fecha) + ") ya pasó.");
+    const ps = [];
+    for (const n of (a.personas || [])) { const r = personaDe(n); if (r.err) return { err: r.err, r: r.opciones ? { nomina: r.opciones } : null }; if (!ps.some((p) => p.nombre === r.p.nombre)) ps.push(r.p); }
+    if (!ps.length) return { err: "Falta decir quiénes van (nombres de la nómina)." };
+    let veh = null; if (a.vehiculo) { const r = vehiculoDe(a.vehiculo); if (r.err) return { err: r.err, r: { vehiculos: r.opciones } }; veh = r.v; }
+    const ts = [];
+    for (const t of (a.tareas || [])) {
+      const r = tareaDe(t.tarea); if (r.err) return { err: r.err, r: { parecidas: r.parecidas } };
+      const cant = num(t.cantidad); if (!(cant > 0)) return { err: `Falta la cantidad de «${r.t.label}».` };
+      let quien = "";
+      if (t.quien) { const q = personaDe(t.quien, ps); if (q.err) return { err: `«${t.quien}» no está entre los que van a esa orden.` }; quien = q.p.nombre; }
+      if (ts.some((y) => y.k === r.t.id)) return { err: `La tarea «${r.t.label}» está dos veces.` };
+      ts.push({ k: r.t.id, label: r.t.label, un: unTarea(r.t.id), cant, quien, aproximada: !!r.aproximada, pedida: t.tarea });
+    }
+    if (!ts.length) return { err: "Falta al menos una tarea con su cantidad." };
+    // lo que queda de cada tarea
+    let sd = null; try { sd = window.saldoObra ? window.saldoObra(o.id) : null; } catch (e) { sd = null; }
+    ts.forEach((t) => { const s = sd && sd.tareas[t.k]; if (s && s.total > 0) { t.quedan = s.queda; t.total = s.total; if (s.queda != null && t.cant > s.queda) avisos.push(`${t.label}: pedís ${fN(t.cant)} y quedan ${fN(Math.max(0, s.queda))} de ${fN(s.total)}.`); } });
+    // otra orden abierta para esa obra y ese día
+    const otra = ots().filter((y) => abiertaOt(y) && String(y.plazaId || "") === String(o.id) && y.fecha === fecha);
+    if (otra.length) avisos.push(`Ya hay ${otra.map((y) => y.numero || "otra orden").join(", ")} para esa obra ese día: al emitir, la app te pregunta si sumarla ahí.`);
+    try { const nl = typeof window.quienNoLlegaCel == "function" ? window.quienNoLlegaCel(ps.map((p) => p.nombre)) : []; nl.forEach((z) => avisos.push(`A ${z.n} no le va a llegar al celu (${z.e.por}).`)); } catch (e) { }
+    // puntos estimados (los mismos de «Llenar orden»)
+    let pts = null; try {
+      const prev = {}, asig = {}; ts.forEach((t) => { prev[t.k] = t.cant; if (t.quien) asig[t.k] = t.quien; });
+      pts = window.__ordenNueva && window.__ordenNueva.puntos ? window.__ordenNueva.puntos({ plazaId: o.id, plazaNombre: o.nombre, fecha, actividades: ts.map((t) => t.k), previsto: prev, asignada: asig, personal: ps.map((p) => ({ nombre: p.nombre, rol: p.rol || "Oficial" })), personalNombres: ps.map((p) => claveDe(p.nombre)) }) : null;
+    } catch (e) { pts = null; }
+    let vehTxt = veh ? veh.nombre + (veh.patente ? " · " + veh.patente : "") : "";
+    if (!veh) { const V = window.__vehiculos; const s = []; ps.forEach((p) => { const v = V && V.dePersona ? V.dePersona(p.nombre) : null; if (v && s.indexOf(v.nombre) < 0) s.push(v.nombre); }); vehTxt = s.length ? s.join(", ") + " (el que tienen a cargo)" : "ninguno"; }
+    const P = { id: "P" + (++seqP), tipo: "orden", estado: "pendiente", datos: { obraId: o.id, obra: o.nombre, ID: o.obraId || "", fecha, horaInicio: /^\d{1,2}:\d{2}$/.test(String(a.hora_inicio || "")) ? String(a.hora_inicio).padStart(5, "0") : "", personas: ps.map((p) => p.nombre), vehiculoId: veh ? veh.id : "", vehTxt, tareas: ts, pts, avisos } };
+    PROPS[P.id] = P;
+    return { r: { estado: "pendiente_de_confirmacion", propuesta: P.id, resumen: `${o.nombre} · ${fLarga(fecha)} · ${ps.map((p) => p.nombre).join(", ")} · ` + ts.map((t) => `${t.label} ${fN(t.cant)} ${t.un}${t.quien ? " (" + t.quien + ")" : ""}`).join(" · "), avisos, tareasInterpretadas: ts.filter((t) => t.aproximada).map((t) => `«${t.pedida}» → ${t.label}`), puntosEstimados: pts && pts.porPersona ? pts.porPersona.map((p) => ({ nombre: p.nombre, pts: r2(p.pts) })) : null, instruccion: "La app ya le mostró la tarjeta: decile en una línea que la confirme con «Sí, hacelo»." }, prop: P };
+  };
+  function otPorRef(ref) {
+    const s = String(ref || "").trim(); const l = ots();
+    let o = l.find((x) => x.id === s); if (o) return o;
+    o = l.find((x) => String(x.numero || "").toUpperCase() === s.toUpperCase()); if (o) return o;
+    const m = s.match(/(\d+)\s*$/); if (m) { const n = +m[1]; const c = l.filter((x) => { const k = String(x.numero || "").match(/-(\d+)$/); return k && +k[1] === n; }); if (c.length === 1) return c[0]; }
+    return null;
+  }
+  H.proponer_cierre = (a) => {
+    if (!edita("parte")) return { err: "Tu usuario no puede cerrar órdenes." };
+    const l = [], err = [];
+    (a.otIds || []).forEach((r) => { const o = otPorRef(r); if (!o) err.push(`no encontré «${r}»`); else if (!abiertaOt(o)) err.push(`${o.numero || r} ya está ${o.estado === "Anulada" ? "anulada" : "cerrada"}`); else if (!l.some((x) => x.id === o.id)) l.push(o); });
+    if (!l.length) return { err: "No hay órdenes para cerrar" + (err.length ? ": " + err.join("; ") : ".") };
+    const P = { id: "P" + (++seqP), tipo: "cierre", estado: "pendiente", datos: { ordenes: l.map((o) => ({ id: o.id, numero: o.numero || "", obra: o.plazaNombre || "", fecha: o.fecha || "", motivos: revisarParaCerrar(o) })), avisos: err } };
+    PROPS[P.id] = P;
+    return { r: { estado: "pendiente_de_confirmacion", propuesta: P.id, ordenes: P.datos.ordenes.map((o) => o.numero + " · " + o.obra), avisos: err, instruccion: "La app ya le mostró la tarjeta: decile que confirme con «Sí, hacelo» y que después aprueba cada cierre." }, prop: P };
+  };
+  H.proponer_aviso = (a) => {
+    if (!ve("parte", "produccion", "plan")) return { err: "Tu usuario no puede mandar avisos al personal." };
+    const texto = String(a.texto || "").trim(); if (!texto) return { err: "Falta el texto del aviso." };
+    if (texto.length > 400) return { err: "El aviso es muy largo: dejalo en menos de 400 letras." };
+    let ps = [];
+    const todos = (a.personas || []).some((n) => /^(todos|todo el mundo|toda la cuadrilla|a todos)$/.test(nk(n)));
+    if (todos) ps = nomina().slice();
+    else for (const n of (a.personas || [])) { const r = personaDe(n); if (r.err) return { err: r.err, r: r.opciones ? { nomina: r.opciones } : null }; if (!ps.some((p) => p.nombre === r.p.nombre)) ps.push(r.p); }
+    if (!ps.length) return { err: "Falta a quién mandarle el aviso." };
+    const avisos = []; try { (window.quienNoLlegaCel ? window.quienNoLlegaCel(ps.map((p) => p.nombre)) : []).forEach((z) => avisos.push(`A ${z.n} no le llega (${z.e.por}).`)); } catch (e) { }
+    const P = { id: "P" + (++seqP), tipo: "aviso", estado: "pendiente", datos: { personas: ps.map((p) => p.nombre), texto, avisos } };
+    PROPS[P.id] = P;
+    return { r: { estado: "pendiente_de_confirmacion", propuesta: P.id, para: P.datos.personas, avisos, instruccion: "La app ya le mostró la tarjeta: decile que confirme con «Sí, hacelo»." }, prop: P };
+  };
+  const PANT = { legajo: ["obras", ["registro", "avance"]], orden: ["parte", ["parte"]], mapa: ["mapa", ["mapa"]], ordenes: ["parte", ["parte"]], llenar_orden: ["parte", ["parte"]], informes: ["informe", ["informe"]], "pañol": ["stock", ["stock"]], panol: ["stock", ["stock"]], produccion: ["produccion", ["produccion"]], mis_tareas: ["mistareas", ["mistareas", "inicio"]], inicio: ["inicio", ["inicio"]] };
+  H.abrir = (a) => {
+    const p = PANT[a.pantalla]; if (!p) return { err: "No conozco la pantalla «" + a.pantalla + "»." };
+    if (!ve.apply(null, p[1])) return { err: "No tenés permiso para esa pantalla." };
+    let id = a.id ? String(a.id) : "", nombre = "";
+    if (a.pantalla === "legajo" || a.pantalla === "mapa") { if (!id && a.pantalla === "legajo") return { err: "Falta de qué obra." }; if (id) { const x = resolverObra(id); if (x.err) return { err: x.err, r: x.candidatos ? { candidatos: x.candidatos } : null }; id = x.obra.id; nombre = x.obra.nombre; } }
+    if (a.pantalla === "orden") { const o = otPorRef(id); if (!o) return { err: "No encontré la orden «" + id + "»." }; id = o.id; nombre = o.numero; }
+    return { r: { ok: true, abre: a.pantalla + (nombre ? " · " + nombre : "") }, ir: { pantalla: a.pantalla, id } };
+  };
+  H.informe = (a) => {
+    if (!ve("informe")) return { err: "No tenés permiso para los informes." };
+    const x = resolverObra(a.obra); if (x.err) return { err: x.err, r: x.candidatos ? { candidatos: x.candidatos } : null };
+    const tipo = a.tipo === "avance" ? "avance" : "mensual_fotos";
+    return { r: { ok: true, informe: tipo === "avance" ? "Avance de obra" : "Informe mensual con fotos", obra: x.obra.nombre, nota: "La app abre Informes con la obra elegida y le da el botón «Armarlo ahora»; de ahí sale Compartir PDF." }, ir: { pantalla: "informe", id: x.obra.id, tipo }, extra: `<div class="ia-acc"><button type="button" class="btn-primary" data-iainf="${esc(tipo)}" data-iaid="${esc(x.obra.id)}">📄 Armarlo ahora</button></div>` };
+  };
+  async function ejecutar(nombre, entrada) {
+    const f = H[nombre]; if (!f) return { err: "No conozco la herramienta «" + nombre + "»." };
+    try { return (await f(entrada || {})) || { r: null }; } catch (e) { console.warn("[asistente]", nombre, e); return { err: "Se trabó la app al buscar eso (" + String((e && e.message) || e).slice(0, 120) + ")." }; }
+  }
+
+  // =====================================================================================================================
+  // Navegar
+  // =====================================================================================================================
+  function ir(n) {
+    if (!n) return;
+    const mv = (v) => { try { window.mostrarVista(v); } catch (e) { } };
+    const p = n.pantalla;
+    if (p === "legajo") { try { window.abrirLegajo(n.id); } catch (e) { mv("obras"); } }
+    else if (p === "orden") { mv("parte"); try { window.irSubOrdenes && window.irSubOrdenes("nueva"); verOrdenTrabajo(n.id); } catch (e) { } }
+    else if (p === "mapa") { mv("mapa"); if (n.id) setTimeout(() => { try { if (typeof mapaSeleccionId == "undefined" || mapaSeleccionId !== n.id) elegirPlazaMapa(n.id); } catch (e) { } }, 300); }
+    else if (p === "ordenes") { mv("parte"); try { window.irSubOrdenes && window.irSubOrdenes("tablero"); } catch (e) { } }
+    else if (p === "llenar_orden") { mv("parte"); try { window.irSubOrdenes && window.irSubOrdenes("nueva"); } catch (e) { } }
+    else if (p === "informe") { mv("informe"); setTimeout(() => prepararInforme(n.tipo, n.id), 400); }
+    else { const k = (PANT[p] || [])[0]; k && mv(k); }
+    if (esCel()) minimizar();
+  }
+  function prepararInforme(tipo, id) {
+    try {
+      if (tipo === "avance") {
+        const t = document.querySelector('#infTemas [data-tema="plazas"]'); t && !t.classList.contains("on") && t.click();
+        const u = document.querySelector('#infTipos [data-tipo="plazas-avance"]'); u && !u.classList.contains("on") && u.click();
+        setTimeout(() => { const b = $("infBuscar"); const o = obras().find((x) => x.id === id); if (b && o) { b.value = o.nombre || ""; b.dispatchEvent(new Event("input", { bubbles: true })); } setTimeout(() => { const c = document.querySelector('#infLista .inf-chk[data-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]'); if (c && !c.checked) c.click(); const p = $("infPasoSel"); p && p.scrollIntoView({ behavior: "smooth", block: "center" }); }, 250); }, 150);
+      } else {
+        const s = $("imPlaza"); if (s && [].slice.call(s.options).some((x) => x.value === id)) { s.value = id; s.dispatchEvent(new Event("change", { bubbles: true })); }
+        const c = $("imCard"); c && c.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    } catch (e) { console.warn("[asistente] informe", e); }
+  }
+  function armarInforme(tipo, id) {
+    if (!document.body || document.body.dataset.vista !== "informe") { try { window.mostrarVista("informe"); } catch (e) { } prepararInforme(tipo, id); }
+    if (tipo === "avance") { const g = $("infGenerar"); g && g.click(); }
+    else {
+      const s = $("imPlaza");
+      if (s && [].slice.call(s.options).some((x) => x.value === id)) s.value = id;
+      else if (s) return agregarBurbuja("mal", "Esa obra no tiene órdenes en el mes elegido: te dejé el informe con todas las del mes. Cambiá el mes en «Informe mensual con fotos» si hace falta.");
+      const b = $("imArmar"); b && b.click();
+    }
+    if (esCel()) minimizar();
+  }
+
+  // =====================================================================================================================
+  // Confirmar acciones (con el Sí)
+  // =====================================================================================================================
+  const disparar = (el, tipos) => { (tipos || ["input", "change"]).forEach((t) => { try { el.dispatchEvent(new Event(t, { bubbles: true })); } catch (e) { } }); };
+  const enTodoJunto = () => !!document.querySelector("#viewParteDiario .of-todo-modo");
+  async function cargarOrden(d) {
+    try { window.mostrarVista("parte"); } catch (e) { }
+    try { window.irSubOrdenes && window.irSubOrdenes("nueva"); } catch (e) { }
+    await espera(350);
+    try { if (typeof otEditandoId != "undefined" && otEditandoId && typeof salirDeEdicionOt == "function") salirDeEdicionOt(); } catch (e) { }
+    try { typeof poblarOtActividades == "function" && poblarOtActividades(); } catch (e) { }
+    try { typeof poblarOtPlazas == "function" && poblarOtPlazas(); } catch (e) { }
+    // de cero: sin tareas ni tareas a mano
+    document.querySelectorAll("#otActividades .ot-act-check").forEach((cb) => { if (cb.checked) { cb.checked = false; const t = cb.closest(".ot-tarea"); t && t.classList.remove("on"); } });
+    document.querySelectorAll("#otActividades .ot-act-prev").forEach((i) => { i.value = ""; });
+    try { actividades = [{ id: actividadIdSeq++, catalogoId: "", actividad: "", detalle: "", pasos: "" }]; renderActividades(); } catch (e) { }
+    // obra
+    const sel = $("otPlaza"); if (!sel) throw new Error("No encontré «Llenar orden».");
+    if (window.__ordenNueva && window.__ordenNueva.elegirObra) window.__ordenNueva.elegirObra(d.obraId);
+    if (sel.value !== d.obraId) { if ([].slice.call(sel.options).some((x) => x.value === d.obraId)) { sel.value = d.obraId; disparar(sel, ["change"]); } }
+    if (sel.value !== d.obraId) throw new Error("No pude elegir la obra en «Llenar orden».");
+    // fecha y hora
+    const fe = $("otFecha"); fe.value = d.fecha; disparar(fe); try { actualizarDiaSemana(); } catch (e) { }
+    if (d.horaInicio) { const h = $("otHoraInicio"); if (h) { h.value = d.horaInicio; disparar(h); } }
+    // gente (desde la nómina, con su rol)
+    const roles = (typeof ROLES_CUADRILLA != "undefined" && ROLES_CUADRILLA) || ["Oficial"];
+    personal = [{ id: personaIdSeq++, nombre: "", rol: roles[0] }];
+    try { renderPersonal(); } catch (e) { }
+    d.personas.forEach((n) => {
+      if (window.__ordenNueva && window.__ordenNueva.sumarPersona) window.__ordenNueva.sumarPersona(n);
+      if (!personal.some((p) => nk(p.nombre) === nk(n))) { const nm = nomina().find((x) => nk(x.nombre) === nk(n)); const rol = nm && roles.indexOf(nm.rol) >= 0 ? nm.rol : roles[0]; const v = personal.find((p) => !String(p.nombre || "").trim()); if (v) { v.nombre = n; v.rol = rol; } else personal.push({ id: personaIdSeq++, nombre: n, rol }); try { renderPersonal(); } catch (e) { } }
+    });
+    const pc = $("personalContainer"); pc && disparar(pc, ["change"]);
+    const cu = $("otCuadrilla"); if (cu) { cu.value = ""; try { window.__emitirSeguro && window.__emitirSeguro.cuadrillaSola(); } catch (e) { } if (!cu.value.trim()) { const l = d.personas.map((n) => n.split(" ")[0]); cu.value = l.length === 1 ? l[0] : l.slice(0, -1).join(", ") + " y " + l[l.length - 1]; disparar(cu); } }
+    // tareas y cantidades
+    for (const t of d.tareas) {
+      const q = window.CSS && CSS.escape ? CSS.escape(t.k) : t.k;
+      const cb = document.querySelector('#otActividades .ot-act-check[value="' + q + '"]'); if (!cb) throw new Error("La tarea «" + t.label + "» no está en «Llenar orden».");
+      if (!cb.checked) { cb.checked = true; const el = cb.closest(".ot-tarea"); el && el.classList.add("on"); disparar(cb, ["change"]); }
+      const inp = document.querySelector('#otActividades .ot-act-prev[data-id="' + q + '"]'); if (inp) { inp.value = String(t.cant); disparar(inp); }
+    }
+    await espera(80);
+    const quien = {}; d.tareas.forEach((t) => { if (t.quien) quien[t.k] = t.quien; });
+    try { window.__restaurarQuien && window.__restaurarQuien(quien); } catch (e) { }
+    // vehículo: el elegido, o el que tienen a cargo (lo pone solo la app)
+    await espera(150);
+    if (d.vehiculoId && typeof window.otVehiculosElegidos == "function") {
+      const ya = window.otVehiculosElegidos();
+      const click = (id) => { const b = document.querySelector('#otVehBox [data-otveh="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]'); b && b.click(); };
+      ya.filter((id) => id !== d.vehiculoId).forEach(click);
+      if (window.otVehiculosElegidos().indexOf(d.vehiculoId) < 0) click(d.vehiculoId);
+    }
+    try { typeof actualizarResumenTareasOt == "function" && actualizarResumenTareasOt(); } catch (e) { }
+    try { if (window.__ordenNueva && !window.__ofCompat && !enTodoJunto()) window.__ordenNueva.ir(4); } catch (e) { }
+  }
+  async function emitirOrden(P) {
+    const d = P.datos;
+    await cargarOrden(d);
+    const antes = {}; ots().forEach((o) => { antes[o.id] = 1; });
+    const m = $("otMsg"); if (m) m.textContent = "";
+    await window.emitirOrdenTrabajo();
+    const txt = String((m && m.textContent) || "").trim();
+    if (!/^✓/.test(txt)) return { ok: false, msg: txt || "La orden no salió." };
+    const numero = (txt.match(/OT-\d{4}-\d+/) || [])[0] || "";
+    let o = null;
+    for (let i = 0; i < 30 && !o; i++) { o = ots().find((x) => !antes[x.id] && (!numero || x.numero === numero)) || null; if (!o) await espera(100); }
+    return { ok: true, numero: (o && o.numero) || numero, ot: o, msg: txt };
+  }
+  async function confirmar(P, quiero, soloCargar) {
+    if (P.estado !== "pendiente") return;
+    const card = document.querySelector('[data-prop="' + P.id + '"]'), msg = card && card.querySelector(".ia-conf-msg");
+    const dis = (x) => card && card.querySelectorAll("button").forEach((b) => { b.disabled = x; });
+    const fin = (estado, txt, clase) => { P.estado = estado; if (card) { card.classList.add(clase || estado); card.querySelector(".ia-acc") && card.querySelector(".ia-acc").remove(); } if (msg) msg.textContent = txt; };
+    if (!quiero) { fin("cancelada", "✕ No se hizo nada."); notas.push(`La persona dijo que NO a la propuesta ${P.id} (${P.tipo}): no se hizo nada.`); return; }
+    dis(true); if (msg) msg.textContent = "Haciéndolo…";
+    try {
+      if (P.tipo === "orden") {
+        if (soloCargar) {
+          await cargarOrden(P.datos); fin("cargada", "↪ Te la dejé cargada en «Llenar orden»: revisala y tocá Emitir.", "cancelada");
+          notas.push(`La persona pidió revisar la propuesta ${P.id} antes: quedó cargada en «Llenar orden», sin emitir.`);
+          if (esCel()) minimizar(); return;
+        }
+        const r = await emitirOrden(P);
+        if (!r.ok) {
+          P.estado = "pendiente"; dis(false); if (msg) msg.textContent = "⚠ " + r.msg + " Quedó cargada en «Llenar orden» para que la revises.";
+          notas.push(`Se intentó emitir la propuesta ${P.id} y la app dijo: ${r.msg}`); return;
+        }
+        auditar("asistente_orden", `${r.numero} · ${P.datos.obra} · ${P.datos.fecha} · ${P.datos.personas.join(", ")}`, { ref: (r.ot && r.ot.id) || "", propuesta: P.id });
+        const nombres = P.datos.personas.map((n) => n.split(" ")[0]).join(", ");
+        fin("hecha", `✅ ${r.numero || "La orden"} emitida. Les llega el aviso al celu a ${nombres}.`);
+        notas.push(`Se emitió ${r.numero || "la orden"} (propuesta ${P.id}).`);
+        if (r.ot && card) card.insertAdjacentHTML("beforeend", `<div class="ia-acc"><button type="button" class="btn-ghost" data-iair="orden" data-iaid="${esc(r.ot.id)}">Ver la orden</button></div>`);
+      } else if (P.tipo === "aviso") {
+        if (!window.__pushAvisos || !window.__pushAvisos.dejarAviso) throw new Error("los avisos no están listos en la app");
+        const tag = "ema-ia-" + Date.now();
+        for (const n of P.datos.personas) await window.__pushAvisos.dejarAviso({ clave: claveDe(n), titulo: "📣 Aviso de " + yoNombre(), cuerpo: P.datos.texto, tipo: "aviso", tag });
+        auditar("asistente_aviso", `${P.datos.personas.join(", ")} · ${P.datos.texto}`.slice(0, 480), { propuesta: P.id });
+        fin("hecha", `✅ Aviso mandado a ${P.datos.personas.length === 1 ? P.datos.personas[0] : P.datos.personas.length + " personas"}.`);
+        notas.push(`Se mandó el aviso de la propuesta ${P.id}.`);
+      } else if (P.tipo === "cierre") {
+        fin("hecha", "↪ Abriendo el cierre de cada orden: revisalo y tocá «✅ Aprobar todo y cerrar».");
+        notas.push(`La persona aceptó la propuesta ${P.id}: se le abre el cierre de cada orden para aprobarlo.`);
+        cerrarEnSerie(P);
+      }
+    } catch (e) {
+      P.estado = "pendiente"; dis(false); if (msg) msg.textContent = "⚠ No se pudo: " + String((e && e.message) || e);
+    }
+  }
+  // cierres en serie: se abre cada uno ya cargado; la persona aprueba (o cancela) y se abre el siguiente
+  let cola = null;
+  function cerrarEnSerie(P) {
+    cola = { P, l: P.datos.ordenes.slice(), i: 0, cerradas: [], quedaron: [], abierta: false, desde: 0 };
+    try { window.mostrarVista("parte"); } catch (e) { }
+    if (esCel()) minimizar();
+    abrirSig();
+    if (!cola.iv) cola.iv = setInterval(vigilarCola, 400);
+  }
+  function barraCola() {
+    let b = $("iaCola");
+    if (!cola) { b && b.remove(); return; }
+    if (!b) { b = document.createElement("div"); b.id = "iaCola"; b.className = "no-print"; document.body.appendChild(b); }
+    const o = cola.l[cola.i];
+    b.innerHTML = `<span>✨ Cierre ${cola.i + 1} de ${cola.l.length}${o ? " · " + esc(o.numero) + " · " + esc(o.obra) : ""}: revisá y tocá «✅ Aprobar todo y cerrar».</span><button type="button" data-iacola="basta">Terminar</button>`;
+  }
+  function abrirSig() {
+    if (!cola) return;
+    if (cola.i >= cola.l.length) return terminarCola();
+    const o = cola.l[cola.i];
+    try { window.abrirCierreOt(o.id); } catch (e) { console.warn("[asistente] cierre", e); }
+    cola.abierta = true; cola.desde = Date.now(); barraCola();
+  }
+  function vigilarCola() {
+    if (!cola || !cola.abierta || Date.now() - cola.desde < 900) return;
+    const c = $("cierreOt"); if (c && c.style.display !== "none") return;
+    cola.abierta = false;
+    const it = cola.l[cola.i], o = otDe(it.id);
+    if (o && o.cierre && o.cierre.cerradoTs) { cola.cerradas.push(it.numero); auditar("asistente_cierre", `${it.numero} · ${it.obra}`, { ref: it.id, propuesta: cola.P.id }); }
+    else cola.quedaron.push(it.numero);
+    cola.i++; setTimeout(abrirSig, 450);
+  }
+  function terminarCola(cortar) {
+    if (!cola) return;
+    if (cortar) { for (let k = cola.i; k < cola.l.length; k++) cola.quedaron.push(cola.l[k].numero); }
+    clearInterval(cola.iv);
+    const t = (cola.cerradas.length ? `✅ Cerradas: ${cola.cerradas.join(", ")}.` : "No se cerró ninguna.") + (cola.quedaron.length ? ` Quedaron abiertas: ${cola.quedaron.join(", ")}.` : "");
+    notas.push(`Resultado del cierre (propuesta ${cola.P.id}): ${t}`);
+    cola = null; barraCola();
+    agregarBurbuja("nota", t); avisarFab();
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target && e.target.closest && e.target.closest("#iaCola [data-iacola]"); if (!b) return;
+    e.preventDefault(); try { const c = $("cierreOt"); if (c && c.style.display !== "none") window.cerrarCuadroCierre(); } catch (x) { } terminarCola(true);
+  });
+
+  // =====================================================================================================================
+  // Hablar con el Worker
+  // =====================================================================================================================
+  const SISTEMA = [
+    "Sos el «Asistente EMA», el ayudante que vive dentro de la app de Alumbrado Público de EMA Servicios (Córdoba, Argentina). Te usan Administración y Oficina, muchas veces desde la obra, con el celular.",
+    "",
+    "Cómo hablás:",
+    "- Castellano rioplatense, simple y directo (vos, tenés, fijate). Respuestas cortas: primero la respuesta, después el detalle si hace falta. Sin saludos ni relleno.",
+    "- Números en formato argentino (1.050,5 · 120 m · 9 Un. · 01/10/2026). Nombres de obra en MAYÚSCULAS como el pliego, con su «ID» si lo tiene.",
+    "- La persona escribe rápido y con errores de tipeo: interpretá la intención. Si de verdad no entendés, o hay dos obras o personas posibles, preguntá en una línea.",
+    "- Usá listas cortas con «- » cuando haya varios datos. Negrita con **así** solo para lo importante.",
+    "",
+    "Datos:",
+    "- Todo lo que digas sale de las herramientas, que leen lo que la app tiene cargado. Nunca inventes cantidades, ítems, medidas, nombres, fechas ni precios. Si una herramienta no lo trae, decí «eso no lo tengo en la app».",
+    "- Si no tenés el obraId de una obra, usá buscar_obra primero. El obraId y el otId son internos: no se los muestres a la persona (mostrá el nombre, el ID del pliego y el número OT).",
+    "- «Quedan N de T» = lo que falta de cada tarea según el cálculo, descontando lo hecho y lo que ya está en órdenes abiertas.",
+    "- Si te piden «esta obra» y la pantalla abierta es el legajo de una obra, es esa.",
+    "",
+    "Acciones (emitir una orden, cerrar órdenes, mandar un aviso):",
+    "- Nunca digas que hiciste algo que cambia datos. Las herramientas proponer_* solo arman una propuesta: la app le muestra a la persona una tarjeta con «Sí, hacelo» / «No», y recién con el Sí se hace. Después de proponer, decí en una línea que lo confirme en la tarjeta.",
+    "- Para una orden hacen falta obra, fecha, quiénes van y tareas con cantidad. Si no dice fecha, es para hoy. Si falta la cantidad, usá lo que queda de esa tarea en la obra (datos_obra) y aclaralo. Las tareas tienen que ser del catálogo: si la herramienta dice que no existe, ofrecé las parecidas.",
+    "- Para cerrar órdenes, primero mirá ordenes_completas y proponé cerrar solo las que están listas; contá en una línea por qué las otras no.",
+    "- abrir e informe solo navegan dentro de la app: no hace falta confirmación.",
+    "- Los mensajes que empiezan con «[Nota de la app: …]» los escribe la app: cuentan qué pasó con las tarjetas.",
+    "",
+    "Si una herramienta devuelve un error, explicalo corto y ofrecé qué hacer. No contestes cosas que no tengan que ver con el trabajo de EMA."
+  ].join("\n");
+  function contexto() {
+    const y = yo(), v = (document.body && document.body.dataset.vista) || "";
+    let pant = v;
+    try {
+      if (v === "obras" && window.__iaObraLegajo && document.querySelector("#obrasApp [data-lgvolver]")) { const o = obras().find((x) => String(x.id) === window.__iaObraLegajo); if (o) pant = `legajo de ${o.nombre}${o.obraId ? " (ID " + o.obraId + ")" : ""} · obraId ${o.id}`; }
+      else if (v === "avance" && typeof avanceActivoId != "undefined" && avanceActivoId) { const o = obras().find((x) => x.id === avanceActivoId); if (o) pant = `Avance de obra de ${o.nombre} · obraId ${o.id}`; }
+      else if (v === "mapa" && typeof mapaSeleccionId != "undefined" && mapaSeleccionId) { const o = obras().find((x) => x.id === mapaSeleccionId); if (o) pant = `Mapa con ${o.nombre} elegida · obraId ${o.id}`; }
+    } catch (e) { }
+    return `Hoy es ${fLarga(hoy())} (${hoy()}), ${new Date().toTimeString().slice(0, 5)} h.\nTe habla: ${yoNombre()} (rol: ${ROL_TXT[y.rol] || y.rol || "?"}${y.persona ? "; en la nómina: " + y.persona : ""}).\nPantalla abierta: ${pant || "inicio"}.`;
+  }
+  function cuerpo(msgs, modelo) {
+    const tools = TOOLS.map((t, i) => (i === TOOLS.length - 1 ? Object.assign({}, t, { cache_control: { type: "ephemeral" } }) : t));
+    return { model: modelo, max_tokens: modelo === SONNET ? 3000 : 1500, system: [{ type: "text", text: SISTEMA, cache_control: { type: "ephemeral" } }, { type: "text", text: contexto() }], tools, tool_choice: { type: "auto" }, output_config: { effort: modelo === SONNET ? "medium" : "low" }, messages: msgs };
+  }
+  function errIa(m, tipo) { const e = new Error(m); e.ia = true; e.tipo = tipo || ""; return e; }
+  async function pedir(msgs, modelo) {
+    if (navigator.onLine === false) throw errIa(SIN_SENAL, "red");
+    const u = window.firebase && firebase.auth && firebase.auth().currentUser;
+    if (!u) throw errIa("Tenés que entrar a la app con tu usuario.", "token");
+    let tok = ""; try { tok = await u.getIdToken(); } catch (e) { throw errIa(navigator.onLine === false ? SIN_SENAL : "No pude renovar tu sesión: cerrá y volvé a entrar.", "token"); }
+    let ctl = null, tm = null; try { ctl = new AbortController(); tm = setTimeout(() => ctl.abort(), 90000); } catch (e) { ctl = null; }
+    let r = null;
+    try { r = await fetch(URL_IA, { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok }, body: JSON.stringify(cuerpo(msgs, modelo)), signal: ctl ? ctl.signal : undefined }); }
+    catch (e) { throw errIa(navigator.onLine === false ? SIN_SENAL : (e && e.name === "AbortError" ? "El asistente tardó demasiado. Probá de nuevo." : "No pude hablar con el asistente (¿hay señal?). Probá de nuevo en un rato."), "red"); }
+    finally { clearTimeout(tm); }
+    let j = null; try { j = await r.json(); } catch (e) { j = null; }
+    if (!r.ok || !j || j.error) throw errIa((j && j.error && j.error.mensaje) || ("El asistente no respondió bien (" + r.status + "). Probá de nuevo en un rato."), (j && j.error && j.error.tipo) || String(r.status));
+    try { window.__iaSumarGasto && window.__iaSumarGasto(j.ema && j.ema.costoUsd); } catch (e) { }
+    return j;
+  }
+  const quiereSonnet = (t) => /(^|[^a-záéíóúñ])(arm[aá](me|la|las|le)?|hac[eé](me|la|lo|le)?|cerr[aá](me|la|las|le)?|orden|ot)(?![a-záéíóúñ])/i.test(String(t || ""));
+  // lo de turnos anteriores va sin los bloques de «pensamiento» (no hacen falta y ahorran)
+  function limpiarPrevio(m) {
+    if (m.role !== "assistant" || !Array.isArray(m.content)) return m;
+    const c = m.content.filter((b) => b && b.type !== "thinking" && b.type !== "redacted_thinking");
+    return { role: "assistant", content: c.length ? c : [{ type: "text", text: "…" }] };
+  }
+  let turnos = [];   // cada turno = lista de mensajes (user, assistant, user(tool_result)…, assistant)
+  let notas = [];    // lo que pasó con las tarjetas, para contarle a Claude en el próximo mensaje
+  let ocupado = false;
+  async function turno(base, userMsg, modelo) {
+    let msgs = base.concat([userMsg]); const extras = [], idas = [], props = [];
+    for (let v = 0; v < TOPE_VUELTAS; v++) {
+      const resp = await pedir(msgs, modelo);
+      const cont = Array.isArray(resp.content) ? resp.content : [];
+      if (resp.stop_reason === "refusal") return { rechazo: true };
+      const usos = cont.filter((b) => b && b.type === "tool_use");
+      if (resp.stop_reason === "max_tokens" && usos.length) return { error: "La respuesta salió cortada. Probá pedirlo más corto o por partes." };
+      if (modelo === HAIKU && usos.some((u) => ACCIONES.indexOf(u.name) >= 0)) return { escalar: true };
+      msgs = msgs.concat([{ role: "assistant", content: cont }]);
+      const textos = cont.filter((b) => b && b.type === "text" && String(b.text || "").trim()).map((b) => b.text);
+      if (resp.stop_reason !== "tool_use" || !usos.length) return { ok: true, msgs, textos, extras, idas, props };
+      textos.length && estado(textos.join("\n").slice(0, 160));
+      const res = [];
+      for (const u of usos) {
+        estado(ESTADOS[u.name] || "…");
+        const out = await ejecutar(u.name, u.input);
+        if (out.extra) extras.push(out.extra);
+        if (out.ir) idas.push(out.ir);
+        if (out.prop) props.push(out.prop);
+        const c = out.err ? JSON.stringify(Object.assign({ error: out.err }, out.r || {})) : JSON.stringify(out.r == null ? { ok: true } : out.r);
+        res.push(Object.assign({ type: "tool_result", tool_use_id: u.id, content: c.length > 14000 ? c.slice(0, 14000) + "…(cortado)" : c }, out.err ? { is_error: true } : {}));
+      }
+      msgs = msgs.concat([{ role: "user", content: res }]);
+    }
+    return { error: "Me di demasiadas vueltas con eso. Probá preguntarlo de otra forma o más concreto." };
+  }
+  async function enviar(texto) {
+    texto = String(texto || "").trim(); if (!texto || ocupado) return;
+    agregarBurbuja("yo", texto);
+    if (navigator.onLine === false) { agregarBurbuja("mal", SIN_SENAL); return; }
+    ocupado = true; pintarPie();
+    const nota = notas.splice(0, notas.length);
+    const userMsg = { role: "user", content: (nota.length ? "[Nota de la app: " + nota.join(" ") + "]\n" : "") + texto };
+    const base = []; turnos.slice(-8).forEach((t) => t.forEach((m) => base.push(limpiarPrevio(m))));
+    try {
+      let modelo = quiereSonnet(texto) ? SONNET : HAIKU;
+      let r = await turno(base, userMsg, modelo);
+      if (r.escalar) { modelo = SONNET; r = await turno(base, userMsg, SONNET); }
+      estado("");
+      if (r.rechazo) { agregarBurbuja("mal", "No puedo ayudarte con eso. Si es algo de la obra, probá pedirlo de otra forma."); notas = nota.concat(notas); return; }
+      if (r.error) { agregarBurbuja("mal", r.error); notas = nota.concat(notas); return; }
+      if (r.escalar) { agregarBurbuja("mal", "No pude armar la propuesta. Probá de nuevo."); notas = nota.concat(notas); return; }
+      turnos.push(r.msgs.slice(base.length));
+      agregarBurbuja("ia", r.textos.join("\n\n") || (r.props.length ? "Te dejé la propuesta abajo: confirmala con «Sí, hacelo»." : "Listo."));
+      r.extras.forEach((h) => agregarHtml(h));
+      r.props.forEach((P) => agregarHtml(tarjeta(P)));
+      if (r.idas.length) setTimeout(() => ir(r.idas[r.idas.length - 1]), 500);
+    } catch (e) {
+      estado(""); notas = nota.concat(notas);
+      agregarBurbuja("mal", e && e.ia ? e.message : "Algo falló en la app: " + String((e && e.message) || e).slice(0, 140));
+      if (!(e && e.ia)) console.warn("[asistente]", e);
+    } finally { ocupado = false; pintarPie(); avisarFab(); }
+  }
+
+  // =====================================================================================================================
+  // Pantalla
+  // =====================================================================================================================
+  function tarjeta(P) {
+    const d = P.datos, f = (ic, tx, sub) => `<div class="ia-conf-f">${ic} ${tx}${sub ? `<br><small>${sub}</small>` : ""}</div>`;
+    let h = "", t = "", pie = "", extra = "";
+    if (P.tipo === "orden") {
+      t = "📋 Orden nueva para confirmar";
+      h += f("📍", `<b>${esc(String(d.obra).toUpperCase())}</b>${d.ID ? " · ID " + esc(d.ID) : ""}`, esc(fLarga(d.fecha)) + (d.horaInicio ? " · " + esc(d.horaInicio) + " h" : ""));
+      h += f("👷", esc(d.personas.join(", ")), "🚚 " + esc(d.vehTxt));
+      h += d.tareas.map((x) => f("🔧", `<b>${esc(x.label)}</b> · ${esc(fN(x.cant))} ${esc(pl(x.cant, x.un))}${x.quien ? " · 👤 " + esc(x.quien.split(" ")[0]) : ""}`, x.total ? `quedan ${esc(fN(Math.max(0, x.quedan)))} de ${esc(fN(x.total))}` : "")).join("");
+      if (d.pts && d.pts.porPersona && d.pts.porPersona.length) h += f("⭐", "Si terminan todo: " + d.pts.porPersona.map((p) => esc(String(p.nombre).split(" ")[0]) + " " + esc(fN(r2(p.pts)))).join(" · ") + " pts");
+      pie = "Se emite por «Llenar orden», igual que si la armaras vos: número OT y aviso al celu de cada uno.";
+      extra = `<button type="button" class="btn-ghost" data-iarev="${P.id}">Revisarla antes</button>`;
+    } else if (P.tipo === "cierre") {
+      t = `✅ Cerrar ${d.ordenes.length === 1 ? "1 orden" : d.ordenes.length + " órdenes"}`;
+      h += d.ordenes.map((o) => f("📋", `<b>${esc(o.numero)}</b> · ${esc(o.obra)} · ${esc(fCorta(o.fecha))}`, o.motivos.length ? "⚠ " + esc(o.motivos.join(" · ")) : "lista para cerrar")).join("");
+      pie = "Se abre el cierre de cada una, ya cargado con lo que mandó la cuadrilla. Vos revisás y tocás «✅ Aprobar todo y cerrar» (los puntos y el avance salen como siempre).";
+    } else {
+      t = "📣 Aviso al celular";
+      h += f("👷", "Para: " + esc(d.personas.join(", ")));
+      h += f("💬", "«" + esc(d.texto) + "»");
+    }
+    const av = (d.avisos || []).length ? `<div class="ia-conf-av">⚠ ${d.avisos.map(esc).join("<br>⚠ ")}</div>` : "";
+    return `<div class="ia-conf" data-prop="${P.id}"><div class="ia-conf-t">${t}</div>${h}${av}<div class="ia-conf-pie">${esc(pie)}</div><div class="ia-acc"><button type="button" class="btn-primary" data-iasi="${P.id}">Sí, hacelo</button><button type="button" class="btn-ghost" data-iano="${P.id}">No</button>${extra}</div><div class="ia-conf-msg" aria-live="polite"></div></div>`;
+  }
+  function md(t) {
+    const lineas = esc(t).split("\n"); let h = "", lista = false;
+    lineas.forEach((l) => {
+      const b = l.match(/^\s*(?:[-•*]|\d+[.)])\s+(.*)$/);
+      if (b) { if (!lista) { h += "<ul>"; lista = true; } h += "<li>" + b[1] + "</li>"; return; }
+      if (lista) { h += "</ul>"; lista = false; }
+      h += l + "<br>";
+    });
+    if (lista) h += "</ul>";
+    return h.replace(/(<br>)+$/, "").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+  }
+  const chat = () => $("iaChat");
+  function bajar() { const c = chat(); if (c) c.scrollTop = c.scrollHeight; }
+  function agregarBurbuja(clase, texto) {
+    const c = chat(); if (!c) return; const v = c.querySelector(".ia-vacio"); v && v.remove();
+    const d = document.createElement("div"); d.className = "ia-b " + clase; d.innerHTML = clase === "ia" || clase === "nota" ? md(texto) : esc(texto).replace(/\n/g, "<br>");
+    c.appendChild(d); bajar();
+  }
+  function agregarHtml(h) { const c = chat(); if (!c) return; c.insertAdjacentHTML("beforeend", h); bajar(); }
+  function estado(t) {
+    const c = chat(); if (!c) return; let e = $("iaEstado");
+    if (!t) { e && e.remove(); return; }
+    if (!e) { e = document.createElement("div"); e.id = "iaEstado"; e.className = "ia-est"; }
+    e.textContent = t; c.appendChild(e); bajar();
+  }
+  const CHIPS = [["🧱 ¿Qué me falta en una obra?", "¿Qué me falta en ", false], ["✅ Órdenes para cerrar", "¿Qué órdenes están completas para cerrar?", true], ["📍 Ubicación de una obra", "Pasame la ubicación de ", false], ["📋 Armar una orden", "Armá una orden para hoy en ", false], ["⭐ Puntos de la quincena", "¿Cómo vienen los puntos de la quincena?", true], ["📅 Resumen de hoy", "Haceme un resumen de hoy.", true], ["📦 Stock", "¿Cuánto hay de ", false]];
+  function armarPanel() {
+    let p = $("iaPanel"); if (p) return p;
+    p = document.createElement("div"); p.id = "iaPanel"; p.className = "no-print"; p.hidden = true; p.setAttribute("role", "dialog"); p.setAttribute("aria-label", "Asistente EMA");
+    const admin = (() => { try { return !!(window.PERMISOS && PERMISOS.esAdmin && PERMISOS.esAdmin()); } catch (e) { return false; } })();
+    p.innerHTML = `<div class="ia-cab"><div class="ia-tit">✨ Asistente EMA<small>Preguntá o pedí algo, escrito o hablado</small></div><button type="button" data-ia="nueva" title="Empezar de nuevo" aria-label="Empezar de nuevo">↺</button>${admin ? '<button type="button" data-ia="cfg" title="Quién lo ve" aria-label="Quién ve el asistente">⚙</button>' : ""}<button type="button" data-ia="cerrar" aria-label="Cerrar el asistente">✕</button></div>
+<div class="ia-cfg" id="iaCfg" hidden></div>
+<div class="ia-chat" id="iaChat" aria-live="polite"></div>
+<div class="ia-chips" id="iaChips">${CHIPS.map((c, i) => `<button type="button" class="chip" data-iachip="${i}">${esc(c[0])}</button>`).join("")}</div>
+<div class="ia-ayuda" id="iaMicAyuda" hidden></div>
+<form class="ia-pie" id="iaForm" autocomplete="off"><button type="button" class="ia-mic" data-ia="mic" aria-label="Hablar">🎤</button><textarea id="iaTxt" rows="1" placeholder="Escribí o tocá 🎤…" aria-label="Tu pregunta"></textarea><button type="submit" class="btn-primary" id="iaEnviar">Enviar</button></form>`;
+    document.body.appendChild(p);
+    vacio();
+    return p;
+  }
+  function vacio() {
+    const c = chat(); if (!c) return;
+    c.innerHTML = `<div class="ia-vacio">Hola, ${esc(String(yoNombre()).split(" ")[0])}. Preguntame lo que necesites de la obra o pedime algo:<br>• <b>«¿cuántas columnas tiene Hípica?»</b><br>• <b>«pasame la ubi de San Martín»</b><br>• <b>«armá una orden para mañana en … con Juan, zanjeo 20 m»</b><br>• <b>«cerrame las OT que estén completas»</b><br>Lo que cambia algo (órdenes, cierres, avisos) siempre te lo muestro antes y lo hacés vos con «Sí, hacelo».</div>`;
+  }
+  function pintarPie() { const b = $("iaEnviar"); if (b) { b.disabled = ocupado; b.textContent = ocupado ? "…" : "Enviar"; } }
+  let sinLeer = 0;
+  function avisarFab() {
+    const p = $("iaPanel"), b = document.querySelector("#iaFab .ia-fab-b"); if (!b) return;
+    if (p && !p.hidden) { sinLeer = 0; } else sinLeer++;
+    let i = b.querySelector("i"); if (!sinLeer) { i && i.remove(); return; }
+    if (!i) { i = document.createElement("i"); b.appendChild(i); } i.textContent = String(sinLeer);
+  }
+  function abrir(texto) {
+    const p = armarPanel(); p.hidden = false; document.body.classList.add("ia-abierto"); sinLeer = 0; avisarFab();
+    const t = $("iaTxt"); if (texto) { t.value = texto; }
+    if (!esCel()) setTimeout(() => { try { t.focus({ preventScroll: true }); } catch (e) { } }, 50);
+    bajar();
+  }
+  function minimizar() { const p = $("iaPanel"); if (p) p.hidden = true; document.body.classList.remove("ia-abierto"); pararMic(); }
+  function cerrarPanel() { minimizar(); }
+  // ---------- configuración (solo admin): qué roles lo ven
+  function pintarCfg() {
+    const c = $("iaCfg"); if (!c) return;
+    const r = window.__iaRoles ? window.__iaRoles() : ["admin", "oficina"];
+    const OPC = [["oficina", "Oficina"], ["panol", "Pañol"], ["cuadrilla", "Cuadrilla"], ["operario", "Operario"], ["mirar", "Solo mirar"]];
+    c.innerHTML = `<b>¿Quién ve el asistente?</b> <span class="hint" style="margin:0">Administración siempre. Cada pregunta cuesta (ver menú › Versión).</span><div>${OPC.map(([k, t]) => `<label><input type="checkbox" data-iarol="${k}"${r.indexOf(k) >= 0 ? " checked" : ""}> ${t}</label>`).join("")}</div><button type="button" class="btn-primary" data-ia="cfgguardar">Guardar</button> <span id="iaCfgMsg" class="hint"></span>`;
+  }
+  async function guardarCfg() {
+    const roles = ["admin"].concat([].slice.call(document.querySelectorAll("#iaCfg [data-iarol]:checked")).map((x) => x.dataset.iarol));
+    const m = $("iaCfgMsg"), b = document.querySelector('#iaCfg [data-ia="cfgguardar"]');
+    if (b && !b.dataset.seguro) { b.dataset.seguro = "1"; b.textContent = "Sí, guardar"; if (m) m.textContent = "Lo van a ver: " + roles.map((k) => ROL_TXT[k] || k).join(", ") + ". Tocá «Sí, guardar» para confirmar."; return; }
+    if (b) { delete b.dataset.seguro; b.textContent = "Guardar"; }
+    try {
+      await firebase.firestore().collection("configEquipo").doc("personal").set({ asistente: { roles, ts: Date.now(), por: String((window.__fbUser || {}).email || "") } }, { merge: true });
+      window.__personalNube = Object.assign({}, window.__personalNube || {}, { asistente: { roles } });
+      auditar("asistente_roles", roles.join(", "));
+      if (m) m.textContent = "✓ Guardado.";
+    } catch (e) { if (m) m.textContent = "⚠ No se pudo guardar (" + ((e && e.code) || "sin conexión") + ")."; }
+  }
+  // ---------- micrófono
+  let rec = null, base0 = "";
+  function pararMic() { try { rec && rec.stop(); } catch (e) { } }
+  function mic() {
+    const ay = $("iaMicAyuda"), b = document.querySelector("#iaPanel .ia-mic"), t = $("iaTxt");
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const ayuda = (x) => { if (ay) { ay.hidden = false; ay.textContent = x; } };
+    if (!SR) { ayuda("🎤 Acá no se puede dictar directo: tocá el cuadro de texto y usá el micrófono del teclado."); try { t.focus(); } catch (e) { } return; }
+    if (rec) { pararMic(); return; }
+    try {
+      rec = new SR(); rec.lang = "es-AR"; rec.interimResults = true; rec.maxAlternatives = 1; base0 = t.value ? t.value.replace(/\s*$/, " ") : "";
+      rec.onresult = (e) => { let s = ""; for (let i = 0; i < e.results.length; i++) s += e.results[i][0].transcript; t.value = base0 + s; };
+      rec.onerror = (e) => { ayuda(e && (e.error === "not-allowed" || e.error === "service-not-allowed") ? "🎤 No hay permiso para el micrófono: usá el micrófono del teclado." : "🎤 No te escuché bien: probá de nuevo o usá el micrófono del teclado."); };
+      rec.onend = () => { rec = null; b && b.classList.remove("on"); };
+      rec.start(); b && b.classList.add("on"); if (ay) ay.hidden = true;
+    } catch (e) { rec = null; ayuda("🎤 Acá no se puede dictar directo: usá el micrófono del teclado."); }
+  }
+  // ---------- eventos
+  document.addEventListener("click", (e) => {
+    const t = e.target; if (!t || !t.closest) return;
+    const p = t.closest("#iaPanel"); if (!p) return;
+    const a = t.closest("[data-ia]");
+    if (a) {
+      e.preventDefault(); const k = a.dataset.ia;
+      if (k === "cerrar") cerrarPanel();
+      else if (k === "nueva") { if (ocupado) return; turnos = []; notas = []; vacio(); }
+      else if (k === "mic") mic();
+      else if (k === "cfg") { const c = $("iaCfg"); c.hidden = !c.hidden; if (!c.hidden) pintarCfg(); }
+      else if (k === "cfgguardar") guardarCfg();
+      return;
+    }
+    const ch = t.closest("[data-iachip]");
+    if (ch) { const c = CHIPS[+ch.dataset.iachip]; if (!c) return; if (c[2]) enviar(c[1]); else { const x = $("iaTxt"); x.value = c[1]; try { x.focus(); x.setSelectionRange(x.value.length, x.value.length); } catch (er) { } } return; }
+    const si = t.closest("[data-iasi]"), no = t.closest("[data-iano]"), rv = t.closest("[data-iarev]");
+    if (si || no || rv) { e.preventDefault(); const P = PROPS[(si || no || rv).dataset[si ? "iasi" : no ? "iano" : "iarev"]]; P && confirmar(P, !no, !!rv); return; }
+    const g = t.closest("[data-iair]"); if (g) { e.preventDefault(); ir({ pantalla: g.dataset.iair, id: g.dataset.iaid || "" }); return; }
+    const inf = t.closest("[data-iainf]"); if (inf) { e.preventDefault(); armarInforme(inf.dataset.iainf, inf.dataset.iaid); return; }
+  });
+  document.addEventListener("submit", (e) => {
+    if (!e.target || e.target.id !== "iaForm") return;
+    e.preventDefault(); pararMic(); const t = $("iaTxt"); const v = t.value; t.value = ""; t.style.height = ""; enviar(v);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.target && e.target.id === "iaTxt" && e.key === "Enter" && !e.shiftKey && !esCel()) { e.preventDefault(); const f = $("iaForm"); f && (f.requestSubmit ? f.requestSubmit() : f.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }))); }
+    if (e.key === "Escape" && $("iaPanel") && !$("iaPanel").hidden && !document.getElementById("avisoApp")) cerrarPanel();
+  });
+  document.addEventListener("input", (e) => { if (e.target && e.target.id === "iaTxt") { const t = e.target; t.style.height = "auto"; t.style.height = Math.min(120, t.scrollHeight) + "px"; } });
+
+  window.__asistente = { VERSION, abrir, cerrar: cerrarPanel, abierto: () => !!($("iaPanel") && !$("iaPanel").hidden), enviar, herramientas: H, TOOLS, props: () => PROPS, turnos: () => turnos, quiereSonnet, _cola: () => cola };
+})();
+</script>
+<script id="revisarAppDiag">window.revisarApp=function(){var o=function(r){return document.getElementById(r)},i=String((o("appVersion")||{}).textContent||"").replace(/^\s*·?\s*v\s*/,"").trim(),e=null;try{e=window.PERMISOS&&PERMISOS.yo&&PERMISOS.yo()}catch{}var a="";try{a=e&&(PERMISOS.ROLES&&PERMISOS.ROLES[e.rol]&&PERMISOS.ROLES[e.rol].nombre||e.rol)||""}catch{a=e&&e.rol||""}var s=function(r){try{return!!r()}catch{return!1}},u=[["Mis tareas (botón en el menú)",function(){return o("menuMisTareas")&&o("viewMisTareas")}],["Órdenes en hojas (tablero / llenar / historial / buscar)",function(){return o("subtabsOrdenes")||typeof window.irSubOrdenes=="function"}],["Calculadoras rápidas + caída de tensión Muni",function(){return o("subtabsCalc")||window.__caidaMuni}],["Pañol: ficha, fotos y por sector",function(){return window.__panolFicha}],["Pañol: control de stock negativo",function(){return window.__stockNegativo&&typeof window.resolverFaltante=="function"}],["Pañol: reservas de material",function(){return typeof window.abrirNuevaReserva=="function"&&document.getElementById("cardStockReservas")}],["Base de datos conectada",function(){return window.firebase&&firebase.apps&&firebase.apps.length}]],n=["Versión: "+(i||"¿?"),"Autor: Miguel Ángel Díaz · © 2026","Usuario: "+(e?e.nombre||e.usuario||e.email||"":"(sin entrar)")+(a?" · rol "+a:""),"En la nómina: "+(e&&e.persona?e.persona:"— sin vincular —"),""];u.forEach(function(r){n.push((s(r[1])?"✓ ":"✗ ")+r[0])});var t=window.__erroresApp||[];n.push(""),n.push(t.length?"⚠ Errores ("+t.length+"):":"Sin errores."),t.slice(-6).forEach(function(r){n.push("• "+String(r.m).slice(0,120)+(r.d?" ["+r.d+"]":""))}),n.push(""),window.__lecturas&&n.push(window.__lecturas.texto()),window.__fotoTiempos&&n.push(window.__fotoTiempos()),window.__iaGastoTexto&&n.push(window.__iaGastoTexto()),n.push(""),n.push("Si algo no aparece, mandale una captura de esto a quien arma la app."),alert(n.join(`
 `))};</script>
 </body>
 </html>
