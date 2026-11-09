@@ -50,7 +50,7 @@ const base = (extra = {}) => ({ model: "claude-haiku-5-5", max_tokens: 1000, mes
 // ---------- /salud
 {
   const { r, j } = await pedir("/salud", { metodo: "GET" });
-  prueba("/salud responde 200 con versión v1-ia", r.status === 200 && j.ok && j.version === "v1-ia");
+  prueba("/salud responde 200 con versión v2-ia y los modelos", r.status === 200 && j.ok && j.version === "v2-ia" && j.modelos.includes("claude-fable-5-2") && j.modelos.includes("claude-opus-5-5"));
   prueba("/salud dice clave:true y kv:false (con aviso)", j.clave === true && j.kv === false && !!j.aviso);
   const s2 = await pedir("/salud", { metodo: "GET", e: {} });
   prueba("/salud sin secret dice clave:false", s2.j.clave === false);
@@ -110,7 +110,10 @@ const base = (extra = {}) => ({ model: "claude-haiku-5-5", max_tokens: 1000, mes
   // Haiku: 1000 × 0,10 + 2000 × 0,01 + 500 × 0,50 = 100 + 20 + 250 = 370 / 1e6
   prueba("costo Haiku calculado (0,00037)", Math.abs(j.ema.costoUsd - 0.00037) < 1e-9);
   prueba("costo Sonnet: 1M entrada + 1M salida = 12", Math.abs(costoDe("claude-sonnet-5-5", { input_tokens: 1e6, output_tokens: 1e6 }) - 12) < 1e-9);
-  prueba("costo Sonnet: lectura de caché = 10 % (1M → 0,2)", Math.abs(costoDe("claude-sonnet-5-5", { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 1e6 }) - 0.2) < 1e-9);
+  prueba("costo Sonnet: lectura de caché US$ 0,10 por millón", Math.abs(costoDe("claude-sonnet-5-5", { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 1e6 }) - 0.1) < 1e-9);
+  prueba("costo Opus 5.5: 1M + 1M = 24 y caché 0,20", Math.abs(costoDe("claude-opus-5-5", { input_tokens: 1e6, output_tokens: 1e6 }) - 24) < 1e-9 && Math.abs(costoDe("claude-opus-5-5", { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 1e6 }) - 0.2) < 1e-9);
+  prueba("costo Fable 5.2: 1M + 1M = 48 y caché 0,20", Math.abs(costoDe("claude-fable-5-2", { input_tokens: 1e6, output_tokens: 1e6 }) - 48) < 1e-9 && Math.abs(costoDe("claude-fable-5-2", { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 1e6 }) - 0.2) < 1e-9);
+  prueba("costo con respaldo: suma cada intento de usage.iterations", Math.abs(costoDe("claude-fable-5-2", { input_tokens: 1, output_tokens: 1, iterations: [{ model: "claude-fable-5-2", input_tokens: 1e6, output_tokens: 0 }, { model: "claude-opus-4-8", input_tokens: 1e6, output_tokens: 0 }] }) - 13) < 1e-9);
   const sm = await pedir("/ia", { token: t, cuerpo: base({ max_tokens: 50, model: "claude-sonnet-5-5" }) });
   prueba("Sonnet permitido y max_tokens chico se respeta", sm.r.status === 200 && ultimoPedido.body.max_tokens === 50 && ultimoPedido.body.model === "claude-sonnet-5-5");
   const sinMt = await pedir("/ia", { token: t, cuerpo: { model: "claude-haiku-5-5", messages: [{ role: "user", content: "x" }] } });
@@ -119,12 +122,35 @@ const base = (extra = {}) => ({ model: "claude-haiku-5-5", max_tokens: 1000, mes
   prueba("tool_choice «none» pasa como objeto", ts.r.status === 200 && ultimoPedido.body.tool_choice.type === "none");
 }
 
+// ---------- v136: Opus 5.5 y Fable 5.2 con respaldo del servidor
+{
+  const t = await firmar(cuerpoToken("uid-pro"));
+  for (const m of ["claude-fable-5-2", "claude-opus-5-5"]) {
+    const { r } = await pedir("/ia", { token: t, cuerpo: base({ model: m, max_tokens: 99999, fallbacks: "default", betas: ["server-side-fallback-2026-07-01", "otra-beta"], temperature: 1, thinking: { type: "disabled" }, output_config: { effort: "high" }, tool_choice: { type: "auto" } }) });
+    const b = ultimoPedido.body, h = ultimoPedido.headers;
+    prueba(m + ": pasa con max_tokens hasta 16000, fallbacks «default» y la cabecera beta (sin otras betas)", r.status === 200 && b.model === m && b.max_tokens === 16000 && b.fallbacks === "default" && h["anthropic-beta"] === "server-side-fallback-2026-07-01");
+    prueba(m + ": sin thinking ni temperature, effort high", !("thinking" in b) && !("temperature" in b) && b.output_config.effort === "high");
+  }
+  await pedir("/ia", { token: t, cuerpo: base({ fallbacks: "default" }) });
+  prueba("Haiku: no lleva fallbacks ni cabecera beta (no tiene respaldo)", !("fallbacks" in ultimoPedido.body) && !ultimoPedido.headers["anthropic-beta"]);
+  await pedir("/ia", { token: t, cuerpo: base({ model: "claude-sonnet-5-5", max_tokens: 99999 }) });
+  prueba("Sonnet sigue con tope 4000 y sin cabecera beta si no pide respaldo", ultimoPedido.body.max_tokens === 4000 && !ultimoPedido.headers["anthropic-beta"]);
+  const pens = [{ type: "thinking", thinking: "", signature: "firma-xyz" }, { type: "fallback", from: { model: "claude-fable-5-2" }, to: { model: "claude-opus-4-8" } }, { type: "text", text: "ok" }];
+  respuestaClaude = () => new Response(JSON.stringify({ id: "msg_p", type: "message", role: "assistant", model: "claude-opus-4-8", content: pens, stop_reason: "end_turn", usage: { input_tokens: 10, output_tokens: 5, iterations: [{ type: "message", model: "claude-fable-5-2", input_tokens: 1000, output_tokens: 0 }, { type: "fallback_message", model: "claude-opus-4-8", input_tokens: 1000, output_tokens: 100 }] } }), { status: 200, headers: { "Content-Type": "application/json" } });
+  const { j } = await pedir("/ia", { token: t, cuerpo: base({ model: "claude-fable-5-2", fallbacks: "default", messages: [{ role: "user", content: "hola" }, { role: "assistant", content: pens }, { role: "user", content: "seguí" }] }) });
+  respuestaClaude = null;
+  prueba("los bloques thinking y fallback llegan tal cual (ida y vuelta)", JSON.stringify(j.content) === JSON.stringify(pens) && JSON.stringify(ultimoPedido.body.messages[1].content) === JSON.stringify(pens));
+  prueba("el costo suma los dos intentos del respaldo (0,0155)", Math.abs(j.ema.costoUsd - 0.0155) < 1e-9 && j.ema.modelo === "claude-opus-4-8");
+}
+
 // ---------- pedidos malos → 400 sin llamar a Claude
 {
   const t = await firmar(cuerpoToken("uid-malos"));
   const n0 = pedidosClaude;
-  const a = await pedir("/ia", { token: t, cuerpo: base({ model: "claude-opus-5-5" }) });
-  prueba("modelo fuera de lista → 400", a.r.status === 400 && a.j.error.tipo === "pedido");
+  const a = await pedir("/ia", { token: t, cuerpo: base({ model: "claude-opus-5" }) });
+  prueba("modelo fuera de lista → 400 «no está permitido»", a.r.status === 400 && a.j.error.tipo === "pedido" && /no está permitido/.test(a.j.error.mensaje));
+  const a2 = await pedir("/ia", { token: t, cuerpo: base({ fallbacks: [{ model: "claude-opus-4-8" }] }) });
+  prueba("fallbacks que no sea «default» → 400", a2.r.status === 400);
   const b = await pedir("/ia", { token: t, cuerpo: base({ model: "claude-haiku-4-5" }) });
   prueba("otro modelo viejo → 400", b.r.status === 400);
   const c = await pedir("/ia", { token: t, cuerpo: base({ tool_choice: { type: "tool", name: "x" } }) });

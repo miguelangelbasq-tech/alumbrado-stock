@@ -1,5 +1,6 @@
 // Worker «ema-ia» (Cloudflare) · Pase seguro entre la app y Claude para el «Asistente EMA» — EMA Servicios.
-// v1-ia.
+// v2-ia (v136): suma Claude Opus 5.5 y Claude Fable 5.2, el respaldo del servidor ante rechazos («fallbacks») y respuestas
+// más largas (hasta 16.000 tokens con Opus y Fable). Los bloques de «pensamiento» que devuelve Claude pasan tal cual.
 //
 // Cómo funciona:
 //  · La app manda cada pedido del asistente a  POST /ia  con su token de Firebase (Authorization: Bearer <ID token>).
@@ -17,9 +18,14 @@
 // Ligadura opcional (Settings › Bindings › KV namespace):  IA_KV  → cuenta los pedidos bien aunque Cloudflare use varias
 //  copias del Worker. Sin KV cuenta en memoria (aproximado: cada copia lleva su cuenta) y /salud lo avisa.
 // Rutas: POST /ia · GET /salud.
+// Reglas de la API para Opus 5.5 / Fable 5.2 / Sonnet 5.5 (las cumple este Worker aunque la app mande otra cosa):
+//  · nunca temperature / top_p / top_k ni «thinking» (el pensamiento va siempre prendido: se controla con output_config.effort);
+//  · tool_choice solo «auto» o «none» (forzar una herramienta da 400);
+//  · «fallbacks: "default"» + cabecera anthropic-beta server-side-fallback-2026-07-01: si Claude rechaza el pedido por sus
+//    filtros, el servidor lo reintenta solo con el modelo que recomienda. (Haiku no tiene respaldo: ahí no se manda.)
 // Sin SDK y sin streaming: es un fetch directo, para poder pegarlo a mano en el panel de Cloudflare.
 
-const VERSION = "v1-ia";
+const VERSION = "v2-ia";
 const PROYECTO = "alumbrado-stock";
 const API_URL = "https://api.anthropic.com/v1/messages";
 // Versión de la API de Claude. La skill «claude-api» usa 2026-10-21 en todos sus ejemplos de HTTP directo.
@@ -28,16 +34,27 @@ const API_VERSION = "2026-10-21";
 // Claves públicas de Google para los tokens de Firebase (las mismas que el x509 de securetoken, en formato JWK).
 const CLAVES_URL = "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
 const ORIGENES = ["https://miguelangelbasq-tech.github.io", "https://localhost"];
-const TOPE_TOKENS = 4000;
+const TOPE_TOKENS = 4000;          // Haiku y Sonnet
+const TOPE_TOKENS_PRO = 16000;     // Opus 5.5 y Fable 5.2: respuestas más largas (informes, revisiones)
+const BETA_RESPALDO = "server-side-fallback-2026-07-01";
+const BETAS_OK = [BETA_RESPALDO];
 const TOPE_CUERPO = 5 * 1024 * 1024; // 5 MB por pedido, de sobra para texto (y alguna foto chica)
 const ESFUERZOS = ["low", "medium", "high", "xhigh", "max"];
 
-// Modelos permitidos y precio en US$ por millón de tokens (entrada / salida).
-// Lectura de caché = 10 % de la entrada. Escritura de caché = 1,25 × la entrada (lo que cobra Anthropic por guardar).
+// Modelos permitidos y precio en US$ por millón de tokens: entrada / salida / lectura de caché.
+// Escritura de caché = 1,25 × la entrada (lo que cobra Anthropic por guardar).
 const MODELOS = {
   // Haiku: con más de 100.000 tokens de entrada en el pedido, Anthropic cobra 0,50 / 2,50.
-  "claude-haiku-5-5": { ent: 0.10, sal: 0.50, largo: { desde: 100000, ent: 0.50, sal: 2.50 } },
-  "claude-sonnet-5-5": { ent: 2, sal: 10 },
+  "claude-haiku-5-5": { ent: 0.10, sal: 0.50, cache: 0.01, largo: { desde: 100000, ent: 0.50, sal: 2.50, cache: 0.05 } },
+  "claude-sonnet-5-5": { ent: 2, sal: 10, cache: 0.10, respaldo: true },
+  "claude-opus-5-5": { ent: 4, sal: 20, cache: 0.20, respaldo: true, pro: true },
+  "claude-fable-5-2": { ent: 8, sal: 40, cache: 0.20, respaldo: true, pro: true },
+};
+// Modelos que puede usar el respaldo del servidor cuando rechaza (no se pueden pedir: solo para calcular el costo)
+const PRECIO_RESPALDO = {
+  "claude-opus-5": { ent: 5, sal: 25, cache: 0.50 },
+  "claude-opus-4-8": { ent: 5, sal: 25, cache: 0.50 },
+  "claude-sonnet-5": { ent: 2, sal: 10, cache: 0.20 },
 };
 
 const enc = new TextEncoder();
@@ -124,12 +141,13 @@ async function contar(env, uid) {
 // ---------- Armar el pedido para Claude: solo los campos permitidos
 function armarPedido(b) {
   if (!b || typeof b !== "object" || Array.isArray(b)) return { err: "El pedido no tiene la forma esperada." };
-  if (!MODELOS[b.model]) return { err: "Ese modelo no está permitido. Usá «claude-haiku-5-5» o «claude-sonnet-5-5»." };
+  if (!MODELOS[b.model]) return { err: "Ese modelo no está permitido. Usá " + Object.keys(MODELOS).map((m) => "«" + m + "»").join(", ") + "." };
+  const M = MODELOS[b.model], tope = M.pro ? TOPE_TOKENS_PRO : TOPE_TOKENS;
   if (!Array.isArray(b.messages) || !b.messages.length) return { err: "Falta la conversación (messages)." };
   const p = { model: b.model, messages: b.messages };
   let mt = parseInt(b.max_tokens, 10);
-  if (!(mt > 0)) mt = TOPE_TOKENS;
-  p.max_tokens = Math.min(mt, TOPE_TOKENS);
+  if (!(mt > 0)) mt = tope;
+  p.max_tokens = Math.min(mt, tope);
   if (typeof b.system === "string" || Array.isArray(b.system)) p.system = b.system;
   if (Array.isArray(b.tools)) p.tools = b.tools;
   if (b.tool_choice != null) {
@@ -144,17 +162,33 @@ function armarPedido(b) {
     p.cache_control = { type: "ephemeral" };
     if (b.cache_control.ttl === "5m" || b.cache_control.ttl === "1h") p.cache_control.ttl = b.cache_control.ttl;
   }
-  return { p };
+  // respaldo del servidor ante rechazos: solo la forma «default» y solo en los modelos que lo tienen
+  const betas = [];
+  if (b.fallbacks != null) {
+    if (b.fallbacks !== "default") return { err: "fallbacks solo puede ser «default»." };
+    if (M.respaldo) { p.fallbacks = "default"; betas.push(BETA_RESPALDO); }
+  }
+  if (Array.isArray(b.betas)) b.betas.forEach((x) => { if (BETAS_OK.includes(x) && !betas.includes(x) && (x !== BETA_RESPALDO || p.fallbacks)) betas.push(x); });
+  // «thinking», temperature, top_p, top_k, stream, metadata y todo lo demás NO pasan.
+  return { p, betas };
 }
 
 // ---------- Costo en dólares según el «usage» de la respuesta
-function costoDe(modelo, u) {
-  let pr = MODELOS[modelo];
+function costoUno(modelo, u) {
+  let pr = MODELOS[modelo] || PRECIO_RESPALDO[modelo];
   if (!pr || !u) return 0;
   const ent = +u.input_tokens || 0, sal = +u.output_tokens || 0;
   const lee = +u.cache_read_input_tokens || 0, escribe = +u.cache_creation_input_tokens || 0;
   if (pr.largo && ent + lee + escribe > pr.largo.desde) pr = pr.largo;
-  const usd = (ent * pr.ent + escribe * pr.ent * 1.25 + lee * pr.ent * 0.10 + sal * pr.sal) / 1e6;
+  const cache = pr.cache != null ? pr.cache : pr.ent * 0.10;
+  return (ent * pr.ent + escribe * pr.ent * 1.25 + lee * cache + sal * pr.sal) / 1e6;
+}
+// Con el respaldo del servidor, usage.iterations trae cada intento (el rechazado y el del modelo de respaldo).
+function costoDe(modelo, u) {
+  if (!u) return 0;
+  let usd = 0;
+  if (Array.isArray(u.iterations) && u.iterations.length) u.iterations.forEach((it) => { usd += costoUno((it && it.model) || modelo, it); });
+  else usd = costoUno(modelo, u);
   return Math.round(usd * 1e6) / 1e6; // 6 decimales
 }
 
@@ -183,7 +217,7 @@ async function pedidoIa(request, env, origen) {
   if (texto.length > TOPE_CUERPO) return error("grande", "El pedido es demasiado grande.", 413, origen);
   let cuerpo;
   try { cuerpo = JSON.parse(texto); } catch (e) { return error("pedido", "El pedido no es JSON válido.", 400, origen); }
-  const { p, err } = armarPedido(cuerpo);
+  const { p, betas, err } = armarPedido(cuerpo);
   if (err) return error("pedido", err, 400, origen);
 
   const lim = await contar(env, uid);
@@ -191,7 +225,9 @@ async function pedidoIa(request, env, origen) {
 
   let r;
   try {
-    r = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": API_VERSION }, body: JSON.stringify(p) });
+    const cab = { "Content-Type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": API_VERSION };
+    if (betas && betas.length) cab["anthropic-beta"] = betas.join(",");
+    r = await fetch(API_URL, { method: "POST", headers: cab, body: JSON.stringify(p) });
   } catch (e) { return error("red", "No se pudo hablar con Claude. Probá de nuevo en un rato.", 502, origen); }
   let j = null;
   try { j = await r.json(); } catch (e) { j = null; }
@@ -199,7 +235,8 @@ async function pedidoIa(request, env, origen) {
     const [tipo, mensaje, s] = errorClaude(r.ok ? 502 : r.status, j);
     return error(tipo, mensaje, s, origen);
   }
-  j.ema = { costoUsd: costoDe(p.model, j.usage) };
+  // la respuesta va tal cual (también los bloques «thinking» y «fallback», que la app devuelve sin tocar)
+  j.ema = { costoUsd: costoDe(j.model && (MODELOS[j.model] || PRECIO_RESPALDO[j.model]) ? j.model : p.model, j.usage), modelo: j.model || p.model };
   return json(j, 200, origen);
 }
 
@@ -209,7 +246,7 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { status: ORIGENES.includes(origen) ? 204 : 403, headers: cabCors(origen) });
     try {
       if (u.pathname === "/salud" && request.method === "GET") {
-        return json({ ok: true, version: VERSION, clave: !!env.ANTHROPIC_API_KEY, kv: !!env.IA_KV, ...(env.IA_KV ? {} : { aviso: "Sin KV: el límite por persona se cuenta en memoria (aproximado)." }) }, 200, origen);
+        return json({ ok: true, version: VERSION, modelos: Object.keys(MODELOS), respaldo: true, clave: !!env.ANTHROPIC_API_KEY, kv: !!env.IA_KV, ...(env.IA_KV ? {} : { aviso: "Sin KV: el límite por persona se cuenta en memoria (aproximado)." }) }, 200, origen);
       }
       if (u.pathname === "/ia") {
         if (request.method !== "POST") return error("metodo", "Usá POST.", 405, origen);
