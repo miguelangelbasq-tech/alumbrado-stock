@@ -175,7 +175,7 @@ function png(w, h, rgb) {
   s = await db();
   r = await ultConf();
   const vi0 = s.avanceObras.p2.valorItems;
-  c(/Corregir el itemizado/.test(r) && /Ítem 6: 8 → 0/.test(r) && /Ítem 8: 8 → 16/.test(r) && vi0.find((x) => x.itemPliego === '6').cantidad === 8 && vi0.find((x) => x.itemPliego === '8').cantidad === 8, 'tarjeta «Corregir el itemizado» (6: 8 → 0, 8: 8 → 16) y antes del Sí no cambia nada · ' + r.slice(0, 200));
+  c(/Corregir el itemizado/.test(r) && /Ítem 6 ·[^Í]*8 → 0/.test(r) && /Ítem 8 ·[^Í]*8 → 16/.test(r) && vi0.find((x) => x.itemPliego === '6').cantidad === 8 && vi0.find((x) => x.itemPliego === '8').cantidad === 8, 'tarjeta «Corregir el itemizado» (6: 8 → 0, 8: 8 → 16) y antes del Sí no cambia nada · ' + r.slice(0, 200));
   if (cel) await p.screenshot({ path: __dirname + '/v133_itemizado_cel.png' });
   await p.click('#iaPanel .ia-conf:last-of-type [data-iasi]');
   for (let i = 0; i < 20; i++) { await p.waitForTimeout(250); s = await db(); if (s.avanceObras.p2.valorItems.find((x) => x.itemPliego === '8').cantidad === 16) break; }
