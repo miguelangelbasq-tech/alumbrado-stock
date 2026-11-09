@@ -31,10 +31,15 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas**
 - `t_v135` (nueva) en PC y celular: inicio admin con datos reales (números, para atender, en obra, órdenes de hoy con «Cerrar», accesos, obras, buscador, chips, sin cuadrícula, la oficina no ve pedidos), filas que llevan a su pantalla, inicio del pañolero («Aprobar» aprueba por Reservas), la cuadrilla sin cambios, barra por rol con permisos (operario sin Mapa ni Pañol) y globitos, escondida en Llenar orden / Calculadora / Asistente / cámara / teclado / hoja de recordatorios / velo, nada tapado, sin scroll de costado, Perfil con sus números e interruptores, huella y recordatorios con los plugins simulados y sin ellos, volver tras 5 min, cerrar sesión. Las pruebas viejas no ven lo nuevo (`__navNo`, `__inicioViejo` en `h.js`, salvo `nav:true` / `inicio:true`).
-- RESULTADOS_BATERIA
+- `t_v135` 43/43 en PC y 59/59 en celular.
+- Batería completa en PC y celular (136 pruebas × 2, de a 3): todo OK salvo `t_v083` (reemplazada por `t_v084`, como siempre). `t_v078` falló en la primera pasada (el menú tenía un ítem más, «Perfil»): en el modo de las pruebas viejas (`__navNo`) el menú queda como antes; vuelta a correr 21/21 en los dos, `t_nav` 6/6. `t_circuito` 16/16, `t_v134` 33/33 y 35/35.
+- Capturas en el celular (390 × 844, ×2): inicio de la oficina arriba y abajo, inicio del pañol, Perfil, barra de la cuadrilla y «Llenar orden» sin la barra; comparadas con las maquetas aprobadas.
 
 **Huellas**
-HUELLAS
+(sello «2026-11-09 17:41 · b079ee»)
+- `index.html`: `4d961147302be8f80b4eff535318658aad1e64258e4322ccb6a4c0fe9c44bb63`
+- `135_2026-11-09_app-EMA_ORIGINAL.html`: `dae95cf06d8fd596605973dd8e318d69ab3c6a3c5f4b498de9a596695e810a38`
+- `patch_v135.py` (base: ORIGINAL 134 `544c61fc…6a5fd910`): `d821bdc2b2a87b0d9bf102e56a889b56c18278445113bde1f913537839806b3e`
 
 ## v134 — 09/11/2026 (publicada en GitHub, commit 7b2a47c) · «✨ Asistente EMA» que edita (con los permisos de cada uno) y charla por voz
 
