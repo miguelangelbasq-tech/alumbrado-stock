@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v136 — 09/11/2026 (lista para subir, NO publicada) · Arreglos del Inicio, campanita de línea, barra de abajo deslizable, Asistente con Opus 5.5 (PDF y cierre rápido), «🩺 Supervisor» y Guías nuevas
+## v136 — 09/11/2026 (publicada en GitHub, commit 5b6833d, con la carpeta guias/) · Arreglos del Inicio, campanita de línea, barra de abajo deslizable, Asistente con Opus 5.5 (PDF y cierre rápido), «🩺 Supervisor» y Guías nuevas
 
 **Pedido de Ángel** (diseños aprobados el 09/11/2026)
 - Inicio: «Para atender» se encimaba sobre la portada azul; en el APK la portada quedaba debajo del reloj; el buscador cortaba «Buscar obra o barri…».
