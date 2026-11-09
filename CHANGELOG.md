@@ -2,6 +2,40 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v135 — 09/11/2026 · Diseño nuevo: Inicio «Ejecutivo», Inicio del pañolero, barra de abajo con «Perfil» y la pantalla Perfil
+
+**Pedido de Ángel** (diseños aprobados con imágenes el 09/11/2026)
+- Inicio «Ejecutivo» (P1) para Administración y Oficina, con datos reales; Inicio propio del pañolero; la cuadrilla sigue igual.
+- Barra de abajo N1 (píldora de vidrio clara) con «Perfil» en lugar de «Menú» y el ícono «Caja» para Pañol; el ☰ de arriba queda.
+- Perfil clara (opción A, sin la parte azul), con huella y recordatorios de la app de Android 1.4.
+- Los «pedidos» de reservas los ve solo el pañolero, no la oficina.
+
+**Cambios** (módulos nuevos `v135Comun`, `inicioPro`, `navBarra`, `perfilApp`; no se tocó código existente)
+- **Inicio «Ejecutivo»** (`#iniEje`, admin y oficina): portada azul con el logo blanco de la app (la «A» sin relleno, el PNG aprobado), saludo con el nombre y la fecha, anillo del avance del contrato (K hecho ÷ módulos de la licitación), 3 números (órdenes de hoy, personas en obra, para cerrar), buscador de obras y botón Asistente (si la persona lo puede usar). Tarjetas: «Para atender» (órdenes para cerrar, órdenes sin cerrar de días anteriores, fotos sin obra, usuarios nuevos, materiales sin stock y los avisos que vivían arriba del inicio, como el del respaldo), «En obra ahora» (según las órdenes de hoy: obra, gente, desde qué hora), «Órdenes de hoy» (avance N/M, «Cerrar» en las que mandó la cuadrilla), accesos (según permisos) y obras con su avance y chips Todas / En ejecución / Finalizadas. Cada fila lleva a su pantalla. Entrada suave (y nada de movimiento si el celu lo pide). Sin cuadrícula de fondo. En la PC las tarjetas van en dos columnas.
+- **Inicio del pañolero** (`#iniPan`): saludo, buscar material (abre el catálogo filtrado), pedidos para aprobar · para preparar · sin stock · herramientas afuera, la lista de pedidos con «Aprobar» (por el mismo botón de Reservas, con su confirmación) y «Ver», stock bajo («se acabó» / «14 / mín. 50») y accesos Vale · Entrada · Herram. · Compras.
+- **Barra de abajo N1** (`#navN1`), solo en el celular (≤ 640 px) y en la app de Android; en la PC ancha no aparece (la oficina usa el menú lateral). Oficina: Inicio · Obras · Órdenes · Pañol · Perfil; cuadrilla/operario: Hoy · Cámara · Mapa · Pañol · Perfil; pañol: Inicio · Reservas · Catálogo · Herramientas · Perfil. Si una hoja está oculta para la persona, esa pestaña no va. Globitos: órdenes para cerrar, tareas de hoy, reservas por aprobar + por preparar. Se esconde en «Llenar orden», la Calculadora, la cámara, el panel del Asistente, ventanas y visores, y con el teclado abierto. Fondo blanco 92 % sin desenfoque (Chrome 80). La lengüeta del Asistente no choca.
+- **Perfil** (`mostrarVista('perfil')`): iniciales, nombre, rol y usuario; puntos de la quincena (los de Producción), órdenes que seguís (cuadrilla: tareas de hoy) y avisos sin leer; «Tus ajustes»: Entrar con huella, El asistente lee en voz alta (`ema.ia.leer`, el mismo del asistente), Avisos al celular (el alta que ya existía: Web Push en el navegador, FCM en la app), Recordatorios; «La app»: versión con «Al día» o «Actualizar», este celular (abre el diagnóstico), cambiar contraseña (correo de Firebase si tiene correo real; si no, «pedile a la oficina»); Cerrar sesión (la misma de la app). También en el menú lateral («Perfil»), porque en la PC no hay barra.
+- **Huella** (app 1.4, `NativeBiometric`): prenderla pide una verificación de prueba y guarda `ema.huella=1`; al abrir la app y al volver después de 5 minutos pide huella o PIN; si falla, velo con «Probar de nuevo» y «Cerrar sesión». Sin el plugin: «Necesita la app de Android 1.4».
+- **Recordatorios** (app 1.4, `LocalNotifications`): un aviso diario a la hora elegida (17:00 de entrada): oficina «Órdenes para cerrar», cuadrilla «¿Mandaste las tareas de hoy?», pañol «Reservas para preparar». Número sobre el ícono (`Badge`) con lo pendiente donde el celular lo muestre.
+
+**Decisiones**
+- «En obra ahora» sale de las órdenes de hoy, no del GPS (la ubicación en vivo se baja solo con el Mapa abierto desde la v117): por eso dice «hoy» y no «en vivo».
+- El nombre del rol es el de la app («Administrador», «Oficina», «Pañol»…).
+- El inicio viejo queda en la página, escondido; «solo mirar» lo sigue viendo.
+
+**Reglas de Firebase:** no cambian (todo es lectura; activar avisos usa lo que ya existía).
+
+**Qué tiene que hacer Ángel**
+1. Subir `index.html` a GitHub.
+2. Nada más. La huella y los recordatorios andan con la app de Android 1.4.
+
+**Pruebas**
+- `t_v135` (nueva) en PC y celular: inicio admin con datos reales (números, para atender, en obra, órdenes de hoy con «Cerrar», accesos, obras, buscador, chips, sin cuadrícula, la oficina no ve pedidos), filas que llevan a su pantalla, inicio del pañolero («Aprobar» aprueba por Reservas), la cuadrilla sin cambios, barra por rol con permisos (operario sin Mapa ni Pañol) y globitos, escondida en Llenar orden / Calculadora / Asistente / cámara / teclado / hoja de recordatorios / velo, nada tapado, sin scroll de costado, Perfil con sus números e interruptores, huella y recordatorios con los plugins simulados y sin ellos, volver tras 5 min, cerrar sesión. Las pruebas viejas no ven lo nuevo (`__navNo`, `__inicioViejo` en `h.js`, salvo `nav:true` / `inicio:true`).
+- RESULTADOS_BATERIA
+
+**Huellas**
+HUELLAS
+
 ## v134 — 09/11/2026 (publicada en GitHub, commit 7b2a47c) · «✨ Asistente EMA» que edita (con los permisos de cada uno) y charla por voz
 
 **Pedido de Ángel**

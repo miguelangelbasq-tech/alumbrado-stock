@@ -69,6 +69,8 @@ async function abrir(op = {}) {
   if (op.reglas || process.env.REGLAS) await page.addInitScript({ content: fs.readFileSync(__dirname + '/reglas_stub.js', 'utf8') });
   if (!op.ofPasos) await page.addInitScript(() => { window.__ofCompat = true; });   // v112: las pruebas viejas ven «Llenar orden» todo junto, sin el cartel de pendientes; ofPasos:true prueba los pasos
   if (!op.tarjetas) await page.addInitScript(() => { window.__mtTarjetasNo = true; });   // v130: las pruebas viejas ven todas las tareas de Mis tareas juntas; tarjetas:true prueba una tarjeta por tarea con flechas
+  if (!op.nav) await page.addInitScript(() => { window.__navNo = true; });   // v135: las pruebas viejas no ven la barra de abajo N1; nav:true la prueba
+  if (!op.inicio) await page.addInitScript(() => { window.__inicioViejo = true; });   // v135: las pruebas viejas ven el Inicio de antes (admin/oficina/pañol); inicio:true prueba el «Ejecutivo» y el del pañolero
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];

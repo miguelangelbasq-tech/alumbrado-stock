@@ -159,7 +159,7 @@ La navegación es **solo por el menú lateral** (botón de tres rayitas `#btnMen
 
 | Clave `mostrarVista` | Contenedor | Qué es |
 |---|---|---|
-| `inicio` | `#viewInicio` | Inicio de la oficina (tarjetas, accesos). Para la cuadrilla: `#inicioCuadrilla` (body `inicio-crew`): tus tareas, material para retirar, avisos, puntos, cálculos rápidos, accesos. |
+| `inicio` | `#viewInicio` | Inicio. **v135:** admin/oficina → «Ejecutivo» `#iniEje` (portada azul con logo blanco, saludo, anillo del contrato, órdenes de hoy / personas en obra / para cerrar, buscador, Asistente; «Para atender», «En obra ahora», «Órdenes de hoy», accesos, obras); pañol → `#iniPan` (pedidos para aprobar, para preparar, sin stock, herramientas afuera, stock bajo, accesos). El inicio viejo sigue en el DOM, escondido (`#viewInicio.ie-on`); «solo mirar» lo sigue viendo. Para la cuadrilla: `#inicioCuadrilla` (body `inicio-crew`): tus tareas, material para retirar, avisos, puntos, cálculos rápidos, accesos. |
 | `tablero` | `#viewTablero` | «Mi tablero» (por persona). |
 | `mistareas` | `#viewMisTareas` (`#mtApp`) | Mis tareas de la cuadrilla: pestañas 🟢 Hoy · ⏳ Pendientes · ✅ Terminadas, lista «Tarea 1, 2…», orden abierta con fotos/medidas/marcas, «Enviar», 📍 Cómo llegar, ⭐ Tus puntos (`#mpCard`). |
 | `calc` | `#viewCalculadora` | Cálculo de materiales: selector 🌳 Plaza / 🏘 Barrio; subíndices 🧮 Calculadora · 🗂 Historial · 📦 Material por obra; «Cálculos rápidos» (hormigón, zanja, cables, consumo, abrazaderas, caída de tensión). |
@@ -176,6 +176,7 @@ La navegación es **solo por el menú lateral** (botón de tres rayitas `#btnMen
 | `normas` | `#viewNormas` | Normas y tipos constructivos (48 planos tipo). |
 | `guias` | `#viewGuias` | Guías «cómo se hace»: Procesos, Materiales (fichas técnicas), 🗂 Láminas (23, SVG gzip+base64, diferidas). |
 | `usuarios` | `#viewUsuarios` | Usuarios y permisos (solo admin): roles, ajustes por hoja, persona/nómina, presencia (punto verde/rojo), «🔧 Arreglar vínculos», **📍 Ubicación en vivo del personal** (`#uvAdmin`). |
+| `perfil` | `#viewPerfil` (v135) | Perfil: iniciales, nombre, rol, usuario; puntos de la quincena · órdenes que seguís (cuadrilla: tareas de hoy) · avisos sin leer; ajustes (huella, el asistente lee en voz alta, avisos al celular, recordatorios); versión/actualizar, este celular, cambiar contraseña; cerrar sesión. Se abre desde la barra de abajo o el menú (`#menuPerfil`). |
 | — | `#emaCam`, `#ecElegir` | Cámara propia de la app (marca en vivo) y hoja «¿De qué obra?». Menú «📷 Cámara» debajo de Mi tablero. `?camara=1` abre directo. |
 
 ---
@@ -351,6 +352,10 @@ Los más usados (la lista completa sale con `grep -o '<script id="[^"]*"'`):
 | `compartirApp` | 116 | En la app de Android arma `navigator.share`/`canShare` sobre `Share` (+ `Filesystem` CACHE para archivos); cancelar = `AbortError`. Así todo «Compartir» con Web Share abre el menú del celular. `__compartirApp` |
 | `relojitosAhorro` | 114 | **Primer script de la página.** Envuelve `setInterval`: con `document.hidden`, cada relojito de menos de 60 s corre como mucho una vez por minuto; a la vista, normal. No toca `setTimeout` |
 | `arranqueRapido` | 084 | No dibuja `renderStockTabla`/`renderCatalogoTabla` con el pañol escondido (pendientes al abrir; `__renderSiempre` fuerza) |
+| `v135Comun` | 135 | `window.__v135`: íconos de línea (`ic`), rol/permisos, cuentas comunes (`paraCerrar`, `misTareasHoy`, `resPorPreparar`, `resPorAprobar`), a dónde lleva cada cosa (`ir`, `irStock(sub)`, `irOrdenes(sub)`, `camara`), `plug(n)` |
+| `inicioPro` + `inicioProCss` | 135 | Inicio «Ejecutivo» (`#iniEje`, `body.ie-hero` esconde el header de la app) y del pañolero (`#iniPan`). Solo lee lo que hay en memoria (más `fbFotosObraDe("__sinObra")` cada 10 min). Los `.ng-banner` del inicio (respaldo, stock negativo) pasan a «Para atender». «Aprobar» del pañolero = el botón de Reservas (`[data-rsa=aprobar]`). Pruebas viejas: `__inicioViejo` salvo `inicio:true`. `__inicioPro` |
+| `navBarra` + `navN1Css` | 135 | Barra de abajo N1 `#navN1` (`body.n1-on`): solo ≤ 640 px o con `__cargador`. Pestañas por rol y permisos (oficina Inicio·Obras·Órdenes·Pañol·Perfil · cuadrilla Hoy·Cámara·Mapa·Pañol·Perfil · pañol Inicio·Reservas·Catálogo·Herramientas·Perfil), globitos reales. Se esconde con «Llenar orden», calculadora, cámara, asistente, visores/ventanas fijas que tapan la pantalla y teclado (`tapado()`). Sin backdrop-filter. Pruebas viejas: `__navNo` salvo `nav:true`. `__navN1` |
+| `perfilApp` + `perfilCss` | 135 | Vista Perfil (`mostrarVista('perfil')`), bloqueo con huella (`ema.huella=1`, `NativeBiometric.verifyIdentity` al abrir y al volver tras 5 min, velo `#bioVelo`), recordatorio diario (`LocalNotifications` id 1351, `localStorage ema.recordatorio`, hoja `#rdHoja`), número del ícono (`Badge`). Sin plugins: «Necesita la app de Android 1.4». `__perfil` |
 | `revisarAppDiag` | — | `revisarApp()` diagnóstico (menú › Versión). **Último script: insertá antes.** |
 
 Otros globals útiles:
@@ -612,6 +617,7 @@ Ejemplos:
 | 131 | «🔧 Revisar el catálogo» del pañol (unidades, 7013 reutilizado, repetidos con unificación trazable; nada sin confirmar) y carrusel foto → 3D → plano en la ficha del material y de la herramienta, con la carpeta `materiales/` (`catalogoArreglos`, `materialesFichas`) |
 | 132 | «✨ Asistente EMA»: preguntas, ubicación, órdenes completas, puntos, informes y acciones (orden, cierre, aviso) que se proponen con tarjeta y se hacen recién con «Sí», por los caminos de siempre; Worker `ema-ia` (`asistenteIa`) |
 | 134 | El Asistente **edita** lo que cada uno puede (órdenes, cómputo nuevo de la Calculadora, datos de obra, vales/entradas/devoluciones/reservas del pañol, genérico) con tarjeta antes → después y «Sí», auditoría `asistente_editar`; la cuadrilla solo consulta. **Voz**: 🎤 dictar, 🔊 leer, 🗣 modo charla (plugins de la app 1.4 o el navegador). Datos del celular en `presencia.disp` para el diagnóstico |
+| 135 | Diseño nuevo aprobado: Inicio «Ejecutivo» (admin/oficina), Inicio del pañolero, barra de abajo N1 en el celu con «Perfil», pantalla Perfil con huella y recordatorios (app 1.4) (`inicioPro`, `navBarra`, `perfilApp`) |
 | 133 | Asistente «pro»: Sonnet para todo, lee todo lo que la app tiene (cómputos de la Calculadora con su formulario, itemizado, pañol, gastos, planos…), cruza fuentes con «diferencias», vuelve a calcular, mira planos y fotos, diagnostica usuarios y celulares, corrige el itemizado y mueve fotos a la obra correcta por el GPS (con tarjeta y «Sí»); «📷 Fotos sin obra» en Obras |
 | 128 | En el cierre, por tarea: repartir sus puntos, pasar lo que falta a otro día y «Era otra tarea» (`cierreTarea`); fotos de la tarea más rápidas (`fotoRapida`); «Asignar igual» / «⚡ Cerrar esa tarea» para lo que está en una orden sin cerrar (`tareaSinCerrar`); «Unir» que no se reabre (`unirSeguro`, reglas v128) |
 | 127 | Ver y corregir los puntos de una orden cerrada (tablero, Historial, Producción › persona › obra › orden) (`puntosEditar`) |
