@@ -2,6 +2,40 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v134 — 09/11/2026 · «✨ Asistente EMA» que edita (con los permisos de cada uno) y charla por voz
+
+**Pedido de Ángel**
+- «Que pueda editar todo, por ejemplo mandar órdenes de trabajo yo pidiéndole que mande, o editar algo en específico… puede editar todo pero no todos pueden editar todo… los de cuadrilla nada; oficina y administración pueden editar, administración más cosas, oficina lo que tiene acceso… modificar una OT, modificar cierta cosa que le pidas, modificar algo de la calculadora.»
+- «Que hable también, que podamos charlar.»
+
+**Cambios** (`asistenteIa` + `datosCelu`; dos ganchos chicos en presencia y reservas)
+- **Quién puede qué:** el asistente propone solo lo que la persona misma podría hacer en la app (`permiso(hoja) === "editar"`, con los ajustes por usuario); las reglas de Firebase lo vuelven a controlar y un «permission-denied» se explica («no tenés permiso» / «faltan publicar las reglas»). **Cuadrilla, operario y solo mirar: ninguna acción** (al modelo ni le llegan esas herramientas; si les habilitan el asistente, solo consultan). Usuarios, roles, reinicios de puntos y horario de ubicación: solo Administración.
+- **Siempre tarjeta con ANTES → DESPUÉS, campo por campo, y «Sí, hacelo» / «No».** Nada se escribe sin el Sí. Cada cambio queda en la auditoría como `asistente_editar` con colección, id, `antes`, `despues` y `porAsistente: true`.
+- Herramientas nuevas, por los caminos de la app:
+  - `proponer_editar_orden`: fecha, horas, sumar o sacar gente (con `personalNombres`), vehículo, tareas y cantidades, quién hace qué, sacar tareas, notas, responsable de oficina, anular. Se guarda con `fbOtUpdate` (el mismo de «Guardar cambios» y de Seguimiento): a la gente nueva le llega el aviso, al responsable nuevo también; si la orden está cerrada, avisa que los puntos quedaron fijados; anular una cerrada pregunta si descuenta el avance (como siempre).
+  - `proponer_calculo`: toma el formulario del último cómputo de la obra (lo que hace «Editar» del Historial), aplica los cambios («las 16 de 10 m», tipo de columna, cantidad de circuitos, metros de zanja u otro campo), recalcula y muestra qué materiales cambian y cómo queda el itemizado previsto. Con Sí se guarda por «Calcular materiales»: **cómputo NUEVO, el viejo queda**. Después ofrece «🔄 Pasar este cálculo a la obra».
+  - `proponer_editar_obra`: nombre, ID, dirección, barrio, carpeta EPEC por el formulario de Registrar obra (el nombre nuevo pasa también a órdenes, vales y cómputos, con la pregunta de siempre); ubicación y situación como en el mapa y en Avance.
+  - `proponer_movimiento_panol`: vale de salida, entrada, devolución (como «Registrar movimiento», con su número S-/E-/D-) o reserva (R-…). Revisa el stock y avisa si no alcanza.
+  - `proponer_editar`: el genérico para lo que no tiene herramienta propia (catálogo, movimientos —anular—, reservas, herramientas, gastos, plan, planos, puntos del mapa, nómina, baremo, precios; usuarios solo admin). Nunca auditoría, secretos, pushSubs, avisosPush, presencia ni ubicación; no borra (se anula o se da de baja).
+  - `proponer_orden` (de la v132) sigue emitiendo por «Llenar orden» con su número y los avisos (`t_v132`).
+- **Voz** (adaptador `window.__voz`): en la app de Android 1.4, los plugins nativos de dictado y de voz; en Chrome, `webkitSpeechRecognition` y `speechSynthesis` es-AR; si no hay, el micrófono del teclado.
+  - 🎤 dicta una frase al cuadro de texto. 🔊 en la cabecera: «leer siempre en voz alta». «🔊 Escuchar» en cada respuesta.
+  - **🗣 Modo charla:** escucha → manda → lee la respuesta → vuelve a escuchar. Mientras habla no escucha (no hay cancelación de eco). Barra a la vista «🗣 Charlando… ✋ Cortar · Terminar». Se corta con «Terminar», con «chau» / «listo» / «terminar» dichos (extra), a los 2 minutos sin hablar, al cerrar el panel o al salir de la app. «Sí, hacelo» / «no» dichos confirman o cancelan la última tarjeta (que igual se ve en pantalla). Pasadas 12 idas y vueltas resume lo anterior en un mensaje corto. La pantalla no se apaga durante la charla (KeepAwake / Wake Lock). En charla el asistente contesta corto.
+- **Datos del celular** (`datosCelu`, liviano, para todos): modelo, Android, versión de la app de Android, versión de la app (sello), batería, si carga y red; viajan cada 2 minutos en `presencia/{uid}.disp`. `diagnostico_equipo` los muestra y marca al que tiene la app desactualizada, batería baja o sin señal.
+- Diseño: el panel no cambia (lo va a elegir Ángel entre maquetas). Lo nuevo usa `.btn-primary`, `.btn-ghost` y `var(--navy)`, nada en rojo.
+
+**Reglas de Firebase:** no cambian. `presencia/{uid}` ya deja escribir cualquier campo a su dueño (v128).
+
+**Qué tiene que hacer Ángel**
+1. Subir `index.html` a GitHub.
+2. Nada más: ni reglas ni Worker. La voz nativa anda con la app de Android 1.4 (la arma el otro trabajo); con la 1.3 se dicta con el micrófono del teclado y la voz sale por el WebView.
+
+**Pruebas**
+- `t_v134` (nueva) en PC y celular, con el Worker y la voz simulados: Oficina edita una OT (suma a Rolando y 4 → 6 de fundaciones) con tarjeta antes → después; «No» no guarda nada; «Sí» guarda `personal`/`personalNombres`, el aviso de Rolando y la auditoría `asistente_editar`; `proponer_editar` respeta permisos (Oficina sin gastos, usuarios solo admin, auditoría nunca); la cuadrilla no recibe herramientas de acción; «las 16 de 10 m» → cómputo nuevo guardado sin tocar el viejo, materiales e itemizado previsto en la tarjeta, «Pasar este cálculo a la obra»; vale de salida con número S-0001; mínimo del catálogo; dirección y situación de la obra; `presencia.disp` con el sello; modo charla: escucha, responde, lee en voz alta, vuelve a escuchar, «sí, hacelo» manda el aviso, nunca escucha mientras habla, corta con «terminar» y con el botón.
+- Batería completa en PC y celular: RESULTADOS_BATERIA
+
+**Huellas** HUELLAS
+
 ## v133 — 09/11/2026 · «✨ Asistente EMA» pro: ve todo, cruza las fuentes, mira planos y fotos
 
 **Pedido de Ángel**
