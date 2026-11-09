@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v134 — 09/11/2026 · «✨ Asistente EMA» que edita (con los permisos de cada uno) y charla por voz
+## v134 — 09/11/2026 (publicada en GitHub, commit 7b2a47c) · «✨ Asistente EMA» que edita (con los permisos de cada uno) y charla por voz
 
 **Pedido de Ángel**
 - «Que pueda editar todo, por ejemplo mandar órdenes de trabajo yo pidiéndole que mande, o editar algo en específico… puede editar todo pero no todos pueden editar todo… los de cuadrilla nada; oficina y administración pueden editar, administración más cosas, oficina lo que tiene acceso… modificar una OT, modificar cierta cosa que le pidas, modificar algo de la calculadora.»
