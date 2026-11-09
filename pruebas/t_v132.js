@@ -64,7 +64,7 @@ const URL_IA = 'https://ema-ia.mdiaz-60f.workers.dev/ia';
   // ---- 2) pregunta de lectura: «¿cuántas columnas…?» → datos_obra → tool_result → respuesta
   let ps = await preguntar('¿cuántas columnas tiene san martin?', [usa('datos_obra', { obraId: 'san martin' }), (b) => { const m = b.messages[b.messages.length - 1], tr = m.content[0]; const j = JSON.parse(tr.content); return fin(`Tiene **${j.columnas.total} columnas** (${j.columnas.hechas} hechas).`); }]);
   const tr = ps[1] && ps[1].b.messages[ps[1].b.messages.length - 1].content[0], jt = tr ? JSON.parse(tr.content) : {};
-  c(ps.length === 2 && ps[0].auth === 'Bearer tok-uAdmin' && ps[0].b.model === 'claude-haiku-5-5' && ps[0].b.output_config.effort === 'low', 'pregunta con Haiku, effort low y el token de Firebase · ' + JSON.stringify(ps.map((x) => [x.b.model, x.auth])));
+  c(ps.length === 2 && ps[0].auth === 'Bearer tok-uAdmin' && ps[0].b.model === 'claude-sonnet-5-5' && ps[0].b.output_config.effort === 'medium', 'pregunta con Sonnet, effort medium (v133: Sonnet para todo; antes Haiku/low) y el token de Firebase · ' + JSON.stringify(ps.map((x) => [x.b.model, x.auth])));
   c(ps[0].b.system[0].cache_control && ps[0].b.system[0].cache_control.type === 'ephemeral' && ps[0].b.tools.length >= 14 && ps[0].b.tools[ps[0].b.tools.length - 1].cache_control && !('temperature' in ps[0].b) && /Hoy es/.test(ps[0].b.system[1].text) && /Ana Admin/.test(ps[0].b.system[1].text), 'system + tools con cache_control, sin temperature, con la fecha y quién pregunta');
   c(tr && tr.type === 'tool_result' && tr.tool_use_id === 'tu_1' && jt.columnas && jt.columnas.total === 12 && jt.columnas.hechas === 4 && jt.columnas.porTipo.length === 2 && jt.lat === -31.41, 'datos_obra devuelve las columnas por tipo (12, 4 hechas) y las coordenadas · ' + JSON.stringify(jt.columnas || jt).slice(0, 200));
   r = await ultimaB();
@@ -126,9 +126,9 @@ const URL_IA = 'https://ema-ia.mdiaz-60f.workers.dev/ia';
   c(!r.cola && !r.vis, '«Terminar» corta la serie y cierra la ventana sin guardar');
   await p.evaluate(() => window.__asistenteAbrir()); await p.waitForTimeout(400);
 
-  // ---- 7) Haiku pide una acción → se pasa a Sonnet; el aviso se manda recién con el Sí
-  ps = await preguntar('avisale a juan que mañana lleve la escalera', [usa('proponer_aviso', { personas: ['Juan'], texto: 'Mañana llevá la escalera.' }), usa('proponer_aviso', { personas: ['Juan'], texto: 'Mañana llevá la escalera.' }), fin('Confirmalo en la tarjeta.')]);
-  c(ps.map((x) => x.b.model).join(',') === 'claude-haiku-5-5,claude-sonnet-5-5,claude-sonnet-5-5', 'si Haiku pide una acción, el pedido se repite con Sonnet · ' + ps.map((x) => x.b.model).join(','));
+  // ---- 7) el aviso se manda recién con el Sí (v133: ya no hay paso de Haiku a Sonnet: todo va con Sonnet de entrada)
+  ps = await preguntar('avisale a juan que mañana lleve la escalera', [usa('proponer_aviso', { personas: ['Juan'], texto: 'Mañana llevá la escalera.' }), fin('Confirmalo en la tarjeta.')]);
+  c(ps.map((x) => x.b.model).join(',') === 'claude-sonnet-5-5,claude-sonnet-5-5', 'una acción va con Sonnet sin repetir el pedido · ' + ps.map((x) => x.b.model).join(','));
   const nAv1 = Object.values((await db()).avisosPush || {}).filter((x) => x.tipo === 'aviso').length;
   await p.click('#iaPanel .ia-conf:last-of-type [data-iasi]'); await p.waitForTimeout(1200);
   s = await db();
