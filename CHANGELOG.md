@@ -25,6 +25,8 @@ Autor: Miguel Ángel Díaz © 2026
 - **Datos del celular** (`datosCelu`, liviano, para todos): modelo, Android, versión de la app de Android, versión de la app (sello), batería, si carga y red; viajan cada 2 minutos en `presencia/{uid}.disp`. `diagnostico_equipo` los muestra y marca al que tiene la app desactualizada, batería baja o sin señal.
 - **Panel nuevo con el diseño A que eligió Ángel** (tema Cristal): header de vidrio de la app con el logo, «‹» para volver y el engranaje; la pregunta en píldora navy; la respuesta en tarjeta de vidrio con «EMA · hora», los chips de lo que miró («✓ Obra · Calculadora · Itemizado») y las tablas como tarjetas (`.tabla-tarjetas`); la confirmación con etiqueta «Para confirmar · no se hace solo», cada cambio con ~~antes~~ → después, «Sí, hacelo» (`.btn-primary`) y «No» (`.btn-ghost`); chips que se deslizan con desvanecido; barra flotante de vidrio abajo con íconos de línea (micrófono blanco sobre botón navy, ondas de charla, flecha de enviar; el micrófono activo late suave en navy, nada en rojo); placeholder «Escribí o hablá…»; la franja «🗣 Charlando… Terminar» arriba de la barra; las opciones (voz, empezar de nuevo, quién lo ve —Administración—, gasto) en una hoja aparte que no tapa el chat.
 
+- **Corregir el itemizado: las hechas pasan con las columnas** (respuesta de Ángel, 09/11). Si el asistente pasa cantidades de un ítem que tiene hechas a otro, primero pregunta cuántas de las que pasan ya estaban hechas (sin ese dato no arma la tarjeta) y las pasa (`hechasNueva` por ítem → `cantidadAvanzada`). La tarjeta muestra «hechas 2 → 0» y «hechas 0 → 2»; la auditoría guarda `hechasAntes`/`hechasDespues`. Si las hechas no suman lo mismo antes y después, avisa.
+
 **Reglas de Firebase:** no cambian. `presencia/{uid}` ya deja escribir cualquier campo a su dueño (v128).
 
 **Qué tiene que hacer Ángel**
@@ -33,13 +35,15 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas**
 - `t_v134` (nueva) en PC y celular, con el Worker y la voz simulados: Oficina edita una OT (suma a Rolando y 4 → 6 de fundaciones) con tarjeta antes → después; «No» no guarda nada; «Sí» guarda `personal`/`personalNombres`, el aviso de Rolando y la auditoría `asistente_editar`; `proponer_editar` respeta permisos (Oficina sin gastos, usuarios solo admin, auditoría nunca); la cuadrilla no recibe herramientas de acción; «las 16 de 10 m» → cómputo nuevo guardado sin tocar el viejo, materiales e itemizado previsto en la tarjeta, «Pasar este cálculo a la obra»; vale de salida con número S-0001; mínimo del catálogo; dirección y situación de la obra; `presencia.disp` con el sello; modo charla: escucha, responde, lee en voz alta, vuelve a escuchar, «sí, hacelo» manda el aviso, nunca escucha mientras habla, corta con «terminar» y con el botón.
+- `t_v133` cambiada (2): el ítem 6 de GEORG tiene 2 hechas; sin decir cuántas pasan, el asistente no arma la tarjeta y pide el dato; con `hechasNueva` quedan 0 en el 6 y 2 en el 8 (antes se perdían). 30/30 y 32/32.
 - `t_v133` cambiada: la tarjeta de «Corregir el itemizado» ahora muestra cada ítem con ~~antes~~ → después (diseño A), sin los «:»; se ajustó la expresión que la lee. El resto igual.
 - Batería completa en PC y celular (135 pruebas × 2, de a 3), con la lengüeta: todo OK salvo `t_v083` (reemplazada por `t_v084`, como siempre). `t_v134` 33/33 en PC y 35/35 en celular (ahora también prueba la lengüeta: borde, tamaño, arrastre vertical guardado, que arrastrar no abre, que tocar abre y que en «Llenar orden» no tapa la barra); `t_v133` 29/29 y 31/31; `t_v132` 29/29 y 30/30; `t_circuito` 16/16 en los dos.
 - Capturas en el celular para mostrarle a Ángel: el panel (chat, confirmación, charla y opciones) y la lengüeta en Inicio, Pañol y Llenar orden.
 
-**Huellas** (sello «2026-11-09 13:01 · b01152», hora de Argentina al armarla)
-- `index.html`: `f6198d4d8e576fdf1bb1b5dde68004bf77d4178e1ae779040858f54e02529536`
-- `134_2026-11-09_app-EMA_ORIGINAL.html`: `6015ef090bbc18ec6da668c19329cbebdff156cdfefb7fd68bbdd4feacb4d497`
+**Huellas** (sello «2026-11-09 13:50 · dc66bb», con las hechas que pasan)
+- `index.html`: `5bbaacccc34eddc2e60658107e4242bd6996e6efbceaa49dd412da5d6adda38e`
+- `134_2026-11-09_app-EMA_ORIGINAL.html`: `544c61fc0b9f076bed75498b46f86e170693252df13a5c4797bd6c700fd5a910`
+- `hechas.py` (sobre el ORIGINAL 134 `6015ef09…`, sello b01152): `3589ffbf06cecc1618cce19ee43ab85ce6dcdde1b2f945e6dec78bee170466ed`
 - `patch_v134.py` (base: ORIGINAL 133 `44965d07…ec23ef39`): `aa5740e8d43930a597f04932c94ba7848b8c00e2498f8a9e310c25f2f0fb436e`
 - `asistenteIa.html` (módulo completo que reemplaza el de la 133, con `datosCelu`): `ce08f0e1497b6db67d89db8d699ee11bbb8b9df29e93a4309d44252cb33d0ef0`
 

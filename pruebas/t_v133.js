@@ -171,18 +171,23 @@ function png(w, h, rgb) {
   c(ur && ur.problemas.some((x) => /sin persona vinculada/.test(x)) && j.esteAparato && typeof j.esteAparato.lecturasHoy === 'number' && Array.isArray(j.ordenesTrabadas) && /diagn/.test(ps[0].b.system[0].text) && !/@/.test(JSON.stringify(j.usuarios)), 'diagnostico_equipo: Rolando sin persona vinculada, lecturas y cola de este aparato, órdenes trabadas, sin mails · ' + JSON.stringify(ur));
 
   // ---- 10) proponer_corregir_itemizado: nada sin el Sí; con el Sí 6 = 0 y 8 = 16 + auditoría
-  await preguntar('en la obra son todas de 10 m, corregilo', [usa('proponer_corregir_itemizado', { obraId: 'p2', cambios: [{ item: '6', cantNueva: 0 }, { item: '8', cantNueva: 16 }], motivo: 'en obra son todas de 10 m (Ángel)' }), fin('Te dejo la corrección para confirmar.')]);
+  // el ítem 6 tiene 2 hechas: sin decir cuántas pasan, no arma la tarjeta y pide el dato (v134: las hechas pasan con las columnas)
+  const nP = pedidos.length, nC = await p.evaluate(() => document.querySelectorAll('#iaChat .ia-conf').length);
+  await preguntar('pasalas al 8', [usa('proponer_corregir_itemizado', { obraId: 'p2', cambios: [{ item: '6', cantNueva: 0 }, { item: '8', cantNueva: 16 }], motivo: 'x' }), fin('¿Cuántas estaban hechas?')]);
+  r = resultado(pedidos[nP + 1]).j;
+  c(/FALTA UN DATO/.test(r.error || '') && /2 hechas/.test(r.error) && (await p.evaluate(() => document.querySelectorAll('#iaChat .ia-conf').length)) === nC, 'si el ítem que baja tiene hechas, pide cuántas pasan antes de proponer');
+  await preguntar('las 2 hechas pasan, corregilo', [usa('proponer_corregir_itemizado', { obraId: 'p2', cambios: [{ item: '6', cantNueva: 0, hechasNueva: 0 }, { item: '8', cantNueva: 16, hechasNueva: 2 }], motivo: 'en obra son todas de 10 m (Ángel)' }), fin('Te dejo la corrección para confirmar.')]);
   s = await db();
   r = await ultConf();
   const vi0 = s.avanceObras.p2.valorItems;
-  c(/Corregir el itemizado/.test(r) && /Ítem 6 ·[^Í]*8 → 0/.test(r) && /Ítem 8 ·[^Í]*8 → 16/.test(r) && vi0.find((x) => x.itemPliego === '6').cantidad === 8 && vi0.find((x) => x.itemPliego === '8').cantidad === 8, 'tarjeta «Corregir el itemizado» (6: 8 → 0, 8: 8 → 16) y antes del Sí no cambia nada · ' + r.slice(0, 200));
+  c(/Corregir el itemizado/.test(r) && /Ítem 6 ·[^Í]*8 → 0/.test(r) && /Ítem 8 ·[^Í]*8 → 16/.test(r) && /hechas 2 → 0/.test(r) && /hechas 0 → 2/.test(r) && vi0.find((x) => x.itemPliego === '6').cantidad === 8 && vi0.find((x) => x.itemPliego === '8').cantidad === 8, 'tarjeta «Corregir el itemizado» (6: 8 → 0, 8: 8 → 16) y antes del Sí no cambia nada · ' + r.slice(0, 200));
   if (cel) await p.screenshot({ path: __dirname + '/v133_itemizado_cel.png' });
   await p.click('#iaPanel .ia-conf:last-of-type [data-iasi]');
   for (let i = 0; i < 20; i++) { await p.waitForTimeout(250); s = await db(); if (s.avanceObras.p2.valorItems.find((x) => x.itemPliego === '8').cantidad === 16) break; }
   await p.waitForTimeout(600); s = await db();
   const vi = s.avanceObras.p2.valorItems, i6 = vi.find((x) => x.itemPliego === '6'), i8 = vi.find((x) => x.itemPliego === '8');
   const au = Object.values(s.auditoria || {}).filter((x) => x.accion === 'asistente_itemizado' && x.porAsistente);
-  c(i6.cantidad === 0 && i8.cantidad === 16 && i6.cantidadAvanzada === 0 && i8.cantidadAvanzada === 0 && au.length === 1 && /ítem 6: 8→0/.test(au[0].detalle) && /10 m/.test(au[0].detalle), 'con «Sí» la obra queda con 0 en el ítem 6 y 16 en el ítem 8 (las hechas del 6 no pueden pasar el total) y la auditoría · ' + JSON.stringify({ i6, i8, au: au.map((x) => x.detalle) }));
+  c(i6.cantidad === 0 && i8.cantidad === 16 && i6.cantidadAvanzada === 0 && i8.cantidadAvanzada === 2 && /hechasDespues/.test(JSON.stringify(au[0])) && au.length === 1 && /ítem 6: 8→0/.test(au[0].detalle) && /10 m/.test(au[0].detalle), 'con «Sí» la obra queda con 0 en el ítem 6 y 16 en el ítem 8 (las hechas del 6 no pueden pasar el total) y la auditoría · ' + JSON.stringify({ i6, i8, au: au.map((x) => x.detalle) }));
   r = await ultConf();
   c(/✅ Itemizado corregido/.test(r), 'la tarjeta dice «✅ Itemizado corregido»');
 
