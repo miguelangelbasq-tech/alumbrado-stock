@@ -1,4 +1,4 @@
-// Prueba del Worker «ema-ia» en Node (sin internet): simula las claves de Google y la API de Claude.
+// Prueba del Worker «ema-ia» en Node (sin internet): simula las claves de Google, Firestore (REST) y la API de Claude.
 // Correr:  node workers/probar_ema_ia.mjs
 import worker, { costoDe } from "./ema-ia.js";
 
@@ -234,6 +234,155 @@ const base = (extra = {}) => ({ model: "claude-haiku-5-5", max_tokens: 1000, mes
   for (let i = 0; i < 3; i++) e.push((await pedir("/ia", { token: t, cuerpo: base(), e: envKv })).r.status);
   const dia = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
   prueba("con KV: 2 pasan, el 3.º da 429 (por minuto) y las cuentas quedan en el KV (día, mes, rol, límites)", e.join() === "200,200,429" && JSON.parse(kv.get("d:uid-kv:" + dia)).n === 2 && JSON.parse(kv.get("g:" + dia.slice(0, 7))).usd > 0 && kv.has("rol:uid-kv") && kv.has("cfg:limites") && puts >= 6);
+}
+
+// =====================================================================================================================
+// v3-ia (v141): rol leído de la base, topes por rol y día, remitos aparte, freno 80/95, reinicio de mes, /uso y /mio
+// =====================================================================================================================
+const nuevoKv = () => { const kv = new Map(); return { kv, IA_KV: { get: async (k) => kv.get(k) ?? null, put: async (k, v) => { kv.set(k, v); } } }; };
+const conDatos = (e, k, v) => e.IA_KV.put(k, JSON.stringify(v));
+const pregunta = (extra = {}) => base(extra);
+const vuelta = () => base({ messages: [{ role: "user", content: "hola" }, { role: "assistant", content: [{ type: "tool_use", id: "t1", name: "stock", input: {} }] }, { role: "user", content: [{ type: "tool_result", tool_use_id: "t1", content: "{}" }] }] });
+const remito = (extra = {}) => base({ model: "claude-opus-5-5", ema: { tipo: "remito" }, messages: [{ role: "user", content: [{ type: "image", source: { type: "base64", media_type: "image/jpeg", data: "AAAA" } }, { type: "image", source: { type: "base64", media_type: "image/jpeg", data: "BBBB" } }, { type: "text", text: "Transcribí" }] }], ...extra });
+Object.assign(USUARIOS, {
+  "c-1": { rol: "cuadrilla", nombre: "Juan Pérez", activo: true }, "c-2": { rol: "cuadrilla", nombre: "Pedro Gómez" }, "o-1": { rol: "oficina", nombre: "Olga" },
+  "a-1": { rol: "admin", nombre: "Ángel" }, "p-1": { rol: "panol", nombre: "Pablo Pañol" }, "m-1": { rol: "mirar", nombre: "Mira" },
+  "x-baja": { rol: "oficina", activo: false }, "x-pend": { rol: "mirar", pendiente: true }, "op-1": { rol: "operario", nombre: "Oscar" },
+});
+const tk = (uid, extra) => firmar(cuerpoToken(uid, extra));
+{
+  // ---- rol leído de Firestore con el token de la persona (y guardado 10 min)
+  const E = { ...env, IA_POR_MINUTO: "500", ...nuevoKv() };
+  const l0 = lecturasFs, t = await tk("c-1");
+  let r = await pedir("/ia", { token: t, cuerpo: pregunta(), e: E });
+  prueba("v3: el Worker lee usuarios/{uid} y configEquipo/personal por REST con el MISMO token de la persona", r.r.status === 200 && lecturasFs - l0 === 2 && tokensFs.slice(-2).every((x) => x === "Bearer " + t));
+  prueba("v3: la respuesta trae ema.version v3-ia y el uso del día (rol cuadrilla, 1 de 10)", r.j.ema.version === "v3-ia" && r.j.ema.uso.rol === "cuadrilla" && r.j.ema.uso.preguntasHoy === 1 && r.j.ema.uso.topePreguntas === 10 && r.j.ema.uso.quedanPreguntas === 9 && !("gastoMes" in r.j.ema.freno));
+  await pedir("/ia", { token: t, cuerpo: pregunta(), e: E });
+  prueba("v3: el rol y los límites quedan guardados (no vuelve a leer la base en el pedido siguiente)", lecturasFs - l0 === 2 && E.IA_KV.get && JSON.parse(E.kv.get("rol:c-1")).rol === "cuadrilla");
+  // ---- topes por rol y día: cuadrilla 10 (con 2 hechas: 8 más pasan, la 11.ª no)
+  const est = [];
+  for (let i = 0; i < 9; i++) est.push((await pedir("/ia", { token: t, cuerpo: pregunta({ ema: { rol: "admin", tipo: "pregunta" } }), e: E })).r.status);
+  r = await pedir("/ia", { token: t, cuerpo: pregunta(), e: E });
+  prueba("v3: cuadrilla tiene 10 preguntas por día: la 11.ª da tope_dia con el mensaje en castellano", est.slice(0, 8).every((s) => s === 200) && est[8] === 429 && r.r.status === 429 && r.j.error.tipo === "tope_dia" && r.j.error.mensaje === "Llegaste a tus 10 preguntas de hoy. Mañana se renuevan.");
+  prueba("v3: el rol falso que manda la app (ema.rol = admin) se ignora", est[8] === 429);
+  const n0 = pedidosClaude; await pedir("/ia", { token: t, cuerpo: pregunta(), e: E });
+  prueba("v3: pasado el tope no se llama a Claude", pedidosClaude === n0);
+  r = await pedir("/ia", { token: await tk("c-2"), cuerpo: pregunta(), e: E });
+  prueba("v3: el tope es por persona (otro de la cuadrilla sigue)", r.r.status === 200 && r.j.ema.uso.preguntasHoy === 1);
+  // vueltas de herramientas de la misma pregunta no suman
+  const to = await tk("op-1");
+  await pedir("/ia", { token: to, cuerpo: pregunta(), e: E });
+  for (let i = 0; i < 4; i++) await pedir("/ia", { token: to, cuerpo: vuelta(), e: E });
+  r = await pedir("/ia", { token: to, cuerpo: vuelta(), e: E });
+  prueba("v3: las vueltas de herramientas (último mensaje = tool_result) no cuentan como pregunta nueva (operario: 1 de 10)", r.r.status === 200 && r.j.ema.uso.preguntasHoy === 1 && r.j.ema.uso.topePreguntas === 10);
+  // admin sin tope; oficina 30; mirar 10
+  r = await pedir("/ia", { token: await tk("a-1"), cuerpo: pregunta(), e: E });
+  prueba("v3: Administración sin tope (topePreguntas null)", r.r.status === 200 && r.j.ema.uso.topePreguntas === null && r.j.ema.uso.quedanPreguntas === null && typeof r.j.ema.freno.gastoMes === "number");
+  r = await pedir("/ia", { token: await tk("o-1"), cuerpo: pregunta(), e: E });
+  prueba("v3: Oficina 30 por día y ve el gasto del mes en la respuesta", r.j.ema.uso.topePreguntas === 30 && r.j.ema.freno.tope === 100);
+  r = await pedir("/ia", { token: await tk("m-1"), cuerpo: pregunta(), e: E });
+  prueba("v3: Solo mirar 10 por día", r.j.ema.uso.topePreguntas === 10);
+  // usuario dado de baja / a confirmar
+  r = await pedir("/ia", { token: await tk("x-baja"), cuerpo: pregunta(), e: E });
+  const r2 = await pedir("/ia", { token: await tk("x-pend"), cuerpo: pregunta(), e: E });
+  prueba("v3: usuario dado de baja o «a confirmar» → 403 tipo usuario", r.r.status === 403 && r.j.error.tipo === "usuario" && r2.r.status === 403);
+  // usuario sin ficha → Solo mirar
+  r = await pedir("/ia", { token: await tk("sin-ficha"), cuerpo: pregunta(), e: E });
+  prueba("v3: sin ficha en la base → se trata como «Solo mirar» (10)", r.r.status === 200 && r.j.ema.uso.rol === "mirar" && r.j.ema.uso.topePreguntas === 10);
+}
+{
+  // ---- remitos aparte (pañol 20 preguntas + 40 remitos; con límites de la base: 2 remitos para probar)
+  CONFIG = { roles: ["admin", "oficina", "panol", "cuadrilla", "operario", "mirar"], limites: { roles: { panol: { preguntas: 3, remitos: 2 }, admin: { preguntas: 1 } }, mes: { tope: 100, pausaPct: 80, cortePct: 95 } } };
+  const E = { ...env, IA_POR_MINUTO: "500", ...nuevoKv() }, t = await tk("p-1");
+  let r = await pedir("/ia", { token: t, cuerpo: remito(), e: E });
+  prueba("v3: un remito de 2 hojas cuenta 1 remito y 0 preguntas", r.r.status === 200 && r.j.ema.uso.tipo === "remito" && r.j.ema.uso.remitosHoy === 1 && r.j.ema.uso.preguntasHoy === 0 && r.j.ema.uso.topeRemitos === 2);
+  await pedir("/ia", { token: t, cuerpo: remito(), e: E });
+  r = await pedir("/ia", { token: t, cuerpo: remito(), e: E });
+  prueba("v3: el 3.er remito (tope 2 guardado en la base) → tope_remitos", r.r.status === 429 && r.j.error.tipo === "tope_remitos" && /2 remitos de hoy/.test(r.j.error.mensaje));
+  r = await pedir("/ia", { token: t, cuerpo: pregunta(), e: E });
+  prueba("v3: con los remitos agotados las preguntas siguen (se cuentan aparte)", r.r.status === 200 && r.j.ema.uso.preguntasHoy === 1);
+  r = await pedir("/ia", { token: t, cuerpo: base({ ema: { tipo: "remito" } }), e: E });
+  prueba("v3: «remito» sin foto ni PDF cuenta como pregunta", r.r.status === 200 && r.j.ema.uso.tipo === "pregunta" && r.j.ema.uso.preguntasHoy === 2);
+  r = await pedir("/ia", { token: t, cuerpo: remito({ tools: [{ name: "x", description: "x", input_schema: { type: "object", properties: {} } }] }), e: E });
+  prueba("v3: «remito» con herramientas cuenta como pregunta", r.r.status === 200 && r.j.ema.uso.tipo === "pregunta");
+  r = await pedir("/ia", { token: await tk("a-1"), cuerpo: pregunta(), e: E });
+  const r2 = await pedir("/ia", { token: await tk("a-1"), cuerpo: pregunta(), e: E });
+  prueba("v3: Administración sigue sin tope aunque la base diga otra cosa", r2.r.status === 200 && r2.j.ema.uso.topePreguntas === null);
+  // supervisor: no cuenta para nadie pero suma al gasto (solo de admin u oficina)
+  const to = await tk("o-1");
+  r = await pedir("/ia", { token: to, cuerpo: pregunta({ ema: { tipo: "supervisor" } }), e: E });
+  const g = JSON.parse(E.kv.get("g:" + new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 7)));
+  prueba("v3: el supervisor de Oficina no cuenta como pregunta pero suma al gasto del mes (parte «supervisor»)", r.r.status === 200 && r.j.ema.uso.tipo === "supervisor" && r.j.ema.uso.preguntasHoy === 0 && g.partes.supervisor > 0 && g.partes.remitos > 0 && g.partes.preguntas > 0);
+  r = await pedir("/ia", { token: await tk("c-1"), cuerpo: pregunta({ ema: { tipo: "supervisor" } }), e: E });
+  prueba("v3: «supervisor» mandado por la cuadrilla cuenta como pregunta", r.j.ema.uso.tipo === "pregunta" && r.j.ema.uso.preguntasHoy >= 1);
+  // rol apagado por Administración
+  CONFIG = { roles: ["admin", "oficina"] };
+  const E2 = { ...env, IA_POR_MINUTO: "500", ...nuevoKv() };
+  r = await pedir("/ia", { token: await tk("c-1"), cuerpo: pregunta(), e: E2 });
+  const r3 = await pedir("/ia", { token: await tk("o-1"), cuerpo: pregunta(), e: E2 });
+  prueba("v3: rol apagado en ⚙ (solo admin y oficina) → la cuadrilla recibe rol_apagado y oficina pasa", r.r.status === 403 && r.j.error.tipo === "rol_apagado" && r3.r.status === 200);
+  CONFIG = null;
+}
+{
+  // ---- freno del mes: pausa a 80, corte a 95, aviso una vez, reinicio el día 1
+  const E = { ...env, IA_POR_MINUTO: "500", ...nuevoKv() }, mes = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 7);
+  await conDatos(E, "g:" + mes, { usd: 79.9998, partes: { preguntas: 79.9998, remitos: 0, supervisor: 0 }, personas: {}, aviso: false });
+  let r = await pedir("/ia", { token: await tk("c-1"), cuerpo: pregunta(), e: E });
+  prueba("v3: la pregunta que cruza los 80 USD pasa y trae freno.avisar (para avisar a Administración) con el gasto", r.r.status === 200 && r.j.ema.freno.nivel === "pausa" && r.j.ema.freno.avisar === true && r.j.ema.freno.gastoMes >= 80);
+  r = await pedir("/ia", { token: await tk("o-1"), cuerpo: pregunta(), e: E });
+  prueba("v3: el aviso sale una sola vez por mes", r.r.status === 200 && r.j.ema.freno.avisar === false && r.j.ema.freno.nivel === "pausa");
+  const st = [];
+  for (const u of ["c-1", "op-1", "m-1", "p-1"]) { const x = await pedir("/ia", { token: await tk(u), cuerpo: pregunta(), e: E }); st.push(x.r.status + ":" + (x.j.error ? x.j.error.tipo : "")); }
+  r = await pedir("/ia", { token: await tk("p-1"), cuerpo: remito(), e: E });
+  prueba("v3: en pausa (≥ 80) quedan frenados cuadrilla, operario, solo mirar y pañol (también sus remitos) con tope_mes", st.every((s) => s === "429:tope_mes") && r.r.status === 429 && r.j.error.tipo === "tope_mes");
+  r = await pedir("/ia", { token: await tk("o-1"), cuerpo: pregunta(), e: E });
+  prueba("v3: en pausa Oficina sigue", r.r.status === 200);
+  const g = JSON.parse(E.kv.get("g:" + mes)); g.usd = 95; await conDatos(E, "g:" + mes, g);
+  r = await pedir("/ia", { token: await tk("o-1"), cuerpo: pregunta(), e: E });
+  const ra = await pedir("/ia", { token: await tk("a-1"), cuerpo: pregunta(), e: E });
+  prueba("v3: a los 95 USD se corta para todos menos Administración («Se renueva el día 1»)", r.r.status === 429 && r.j.error.tipo === "tope_mes" && r.j.error.mensaje === "El asistente llegó al tope de gasto del mes. Se renueva el día 1." && ra.r.status === 200);
+  const s = await pedir("/salud", { metodo: "GET", e: E });
+  prueba("/salud muestra gastoMes y tope", s.j.version === "v3-ia" && s.j.gastoMes >= 95 && s.j.tope === 100 && s.j.kv === true);
+  // reinicio de mes
+  const real = Date.now, mas = 32 * 86400e3; Date.now = () => real() + mas;
+  try {
+    r = await pedir("/ia", { token: await tk("c-1"), cuerpo: pregunta(), e: E });
+    prueba("v3: el mes siguiente el gasto empieza de cero y la cuadrilla vuelve a preguntar (1 de 10)", r.r.status === 200 && r.j.ema.freno.nivel === "" && r.j.ema.uso.preguntasHoy === 1);
+  } finally { Date.now = real; }
+  // tope del mes configurable desde la base
+  CONFIG = { limites: { mes: { tope: 200, pausaPct: 80, cortePct: 95 } } };
+  const E3 = { ...env, IA_POR_MINUTO: "500", ...nuevoKv() };
+  await conDatos(E3, "g:" + mes, { usd: 120, partes: { preguntas: 120, remitos: 0, supervisor: 0 }, personas: {}, aviso: false });
+  r = await pedir("/ia", { token: await tk("c-1"), cuerpo: pregunta(), e: E3 });
+  prueba("v3: con el tope en 200 (guardado en ⚙), 120 USD no frena a nadie", r.r.status === 200 && r.j.ema.freno.nivel === "");
+  CONFIG = null;
+}
+{
+  // ---- /uso solo admin/oficina (por el rol de la base) y /mio para todos
+  const E = { ...env, IA_POR_MINUTO: "500", ...nuevoKv() };
+  await pedir("/ia", { token: await tk("c-1"), cuerpo: pregunta(), e: E });
+  await pedir("/ia", { token: await tk("p-1"), cuerpo: remito(), e: E });
+  await pedir("/ia", { token: await tk("o-1"), cuerpo: pregunta({ ema: { tipo: "supervisor" } }), e: E });
+  let r = await pedir("/uso", { metodo: "GET", token: await tk("c-1"), e: E });
+  const sin = await pedir("/uso", { metodo: "GET", e: E });
+  prueba("v3: /uso con un usuario de la cuadrilla → 403 (aunque la app diga otra cosa) y sin token → 401", r.r.status === 403 && r.j.error.tipo === "permiso" && sin.r.status === 401);
+  r = await pedir("/uso", { metodo: "GET", token: await tk("o-1"), e: E });
+  const pj = r.j && r.j.personas || [], pp = pj.find((x) => x.uid === "p-1"), pc = pj.find((x) => x.uid === "c-1");
+  prueba("v3: /uso de Oficina: gasto del mes con preguntas / remitos / supervisor y por persona hoy y en el mes", r.r.status === 200 && r.j.gastoMes > 0 && r.j.partes.preguntas > 0 && r.j.partes.remitos > 0 && r.j.partes.supervisor > 0 && pp && pp.hoy.remitos === 1 && pp.mes.remitos === 1 && pc && pc.hoy.preguntas === 1 && pc.nombre === "Juan Pérez" && pc.rolTxt === "Cuadrilla");
+  r = await pedir("/uso", { metodo: "GET", token: await tk("a-1"), e: E });
+  prueba("v3: /uso de Administración → 200", r.r.status === 200 && r.j.tope === 100);
+  r = await pedir("/mio", { metodo: "GET", token: await tk("c-1"), e: E });
+  prueba("v3: /mio dice cuánto le queda (cuadrilla: 9 de 10) sin montos", r.r.status === 200 && r.j.quedanPreguntas === 9 && r.j.topePreguntas === 10 && !("gastoMes" in r.j) && r.j.rol === "cuadrilla");
+  r = await pedir("/uso", { metodo: "GET", token: await tk("o-1"), e: E, origen: "https://malo.example" });
+  prueba("v3: /uso desde otro sitio → 403", r.r.status === 403);
+}
+{
+  // ---- la base no contesta: se usan los topes de «Solo mirar» y no se guarda el rol
+  fsCaido = true;
+  const E = { ...env, IA_POR_MINUTO: "500", ...nuevoKv() };
+  const r = await pedir("/ia", { token: await tk("a-1"), cuerpo: pregunta(), e: E });
+  fsCaido = false;
+  prueba("v3: si Firestore no contesta, se usan los topes más chicos (mirar) y no se guarda el rol", r.r.status === 200 && r.j.ema.uso.rol === "mirar" && !E.kv.has("rol:a-1"));
 }
 
 // ---------- la clave nunca aparece
