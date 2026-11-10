@@ -328,7 +328,7 @@
   const msgHtml = () => (S.msg ? `<div class="cd-msg" role="status">${esc(S.msg)}</div>` : "");
   const toastHtml = () => (S.toast && Date.now() - S.toastTs < 6000 ? `<div class="cd-toast" role="status">${ic("check")}<span>${esc(S.toast)}</span></div>` : "");
   function colaTxt() {
-    const nF = intentar(() => (window.__fotosSinSenal ? window.__fotosSinSenal.cantidad() : 0), 0) || 0, nC = intentar(() => (window.__campoCola ? window.__campoCola.estado().cola : 0), 0) || 0;
+    const nF = intentar(() => (window.__fotosSinSenal ? window.__fotosSinSenal.cantidad() : 0), 0) || 0, cq = intentar(() => (window.__campoCola ? window.__campoCola.estado() : {}), {}) || {}, nC = cq.enviando && navigator.onLine !== false ? 0 : cq.cola || 0;   // mientras se está mandando no es «esperando señal»
     return { nF, nC, off: navigator.onLine === false };
   }
   function senalCard() {
@@ -398,8 +398,7 @@ ${v || sup || o.horaInicio ? `<div class="cd-cd">${o.horaInicio ? `<div class="c
       const faltaF = its[id] && f === "oblig" && !tiene;
       return `<div class="cd-rw cd-si${ok ? " ok" : faltaF ? " am" : ""}" data-segit="${id}"><span class="cd-ico${faltaF ? " am" : ""}">${ic(i)}</span><div class="cd-tx"><b>${esc(t)}</b><small>${faltaF ? "Falta la foto" : tiene ? "Con foto" + (segMia(o).fotosTs && segMia(o).fotosTs[id] ? " · " + hhmm(segMia(o).fotosTs[id]) : "") : esc(sub)}</small></div>${f !== "no" ? `<button type="button" class="cd-fbtn${tiene ? " ya" : ""}" data-cd="segfoto" data-it="${id}">${ic("camara", "s18", 2)}${tiene ? "" : "Foto"}</button>` : ""}<button type="button" class="cd-tick${ok ? " on" : ""}" data-cd="segtick" data-it="${id}" aria-label="${esc(t)}" aria-pressed="${its[id] ? "true" : "false"}">${ic("tilde", "", 2.6)}</button></div>`;
     }).join("")}
-<div class="cd-rw cd-corte"><span class="cd-ico">${ic("rayo")}</span><div class="cd-tx"><b>Corte de energía</b><small>Si se trabaja cerca de cables con tensión, confirmado con EPEC</small><div class="cd-dos"><button type="button" class="chip${corteDe(o) === "epec" ? " activo" : ""}" data-cd="corte" data-v="epec">Confirmado con EPEC</button><button type="button" class="chip${corteDe(o) === "no" ? " activo" : ""}" data-cd="corte" data-v="no">No hace falta</button></div></div></div></div>
-<input type="file" accept="image/*" capture="environment" id="cdSegIn" style="display:none"></div>
+<div class="cd-rw cd-corte"><span class="cd-ico">${ic("rayo")}</span><div class="cd-tx"><b>Corte de energía</b><small>Si se trabaja cerca de cables con tensión, confirmado con EPEC</small><div class="cd-dos"><button type="button" class="chip${corteDe(o) === "epec" ? " activo" : ""}" data-cd="corte" data-v="epec">Confirmado con EPEC</button><button type="button" class="chip${corteDe(o) === "no" ? " activo" : ""}" data-cd="corte" data-v="no">No hace falta</button></div></div></div></div></div>
 <div class="cd-pie" data-ot="${esc(o.id)}"><button type="button" class="btn-primary cd-big${todo ? "" : " cd-off"}" data-cd="arrancar" ${todo ? "" : 'aria-disabled="true"'}>${ic("check", "s22", 2)}Arrancar el día</button>${todo ? "" : `<div class="cd-falta">${falta ? (its[falta[0]] && fotoSeg(falta[0]) === "oblig" ? "Te falta la foto de " + esc(falta[1].toLowerCase()) : "Te falta tildar: " + esc(falta[1].toLowerCase())) : "Te falta el corte de energía"}</div><button type="button" class="cd-link" data-cd="arrancarIgual">Arrancar igual (decí por qué)</button>`}</div>`;
   };
   PANT.salir = function () {
@@ -475,8 +474,7 @@ ${url ? `<a class="btn-primary cd-big cd-a" href="${esc(url)}" target="_blank" r
 <div class="cd-boton">${anillo(fr)}<button type="button" class="cd-c${vd ? " vd" : ""}" data-cd="boton" data-fase="${pa.fase}">${ic(ico, "", 1.8)}<b>${btn}</b><small>TOCÁ ACÁ</small></button></div>
 <div class="cd-pas">${pas}</div>
 <div class="cd-chicos"><button type="button" class="m" data-cd="falta">${ic("alerta", "", 2)}Falta<br>material</button><button type="button" data-cd="ayuda">${ic("ayuda", "", 1.8)}Ayuda</button><button type="button" data-cd="llamar">${ic("tel", "", 1.8)}Llamar a<br>la oficina</button></div>
-<div class="cd-links"><button type="button" class="cd-link" data-cd="lista">Ver lista completa</button><button type="button" class="cd-link" data-cd="fin">Fin del día</button></div>
-<input type="file" accept="image/*" capture="environment" id="cdFotoIn" style="display:none"></div>`;
+<div class="cd-links"><button type="button" class="cd-link" data-cd="lista">Ver lista completa</button><button type="button" class="cd-link" data-cd="fin">Fin del día</button></div></div>`;
   };
   PANT.fin = function () {
     const l = misOtsHoy(); const o0 = otActual();
@@ -671,13 +669,17 @@ ${GV.mat && GV.mat.length ? `<div class="cd-cd"><div class="cd-eti"><span>Materi
     };
     if (S.pos && Date.now() - S.posTs < 60000) fin(S.pos); else pedirGPS(fin);
   }
+  // los dos «📷» viven fuera de lo que se redibuja (si no, la foto llega a un input que ya no está en la página)
+  function entrada(id, o) {
+    let w = $("cdIns"); if (!w) { w = document.createElement("div"); w.id = "cdIns"; w.style.display = "none"; document.body.appendChild(w); }
+    if (o) w.dataset.ot = o.id;
+    let i = $(id); if (!i) { w.insertAdjacentHTML("beforeend", `<input type="file" accept="image/*" capture="environment" id="${id}">`); i = $(id); }
+    return i;
+  }
   function tomarFoto(o, pa, otra) {
-    const c = $("cdApp"); if (!c) return;
-    let inp = $("cdFotoIn");
-    if (!inp) { c.insertAdjacentHTML("beforeend", '<input type="file" accept="image/*" capture="environment" id="cdFotoIn" style="display:none">'); inp = $("cdFotoIn"); }
+    const inp = entrada("cdFotoIn", o);
     const it = pa.it || (otra && S.ultFoto ? { num: S.ultFoto.num } : null);
     inp.dataset.fln = it ? it.num : pa.p.label; inp.dataset.k = pa.p.k; inp.dataset.ot = o.id; inp.dataset.cat = pa.u.cat; inp.dataset.otra = otra ? "1" : "";
-    if (!inp.closest("[data-ot]")) c.dataset.ot = o.id;
     abrirCamara(inp, pa.u.tipo === "unidad" ? (pa.u.cat === "columna" ? "Columna entera en el cuadro" : "Que se vea " + (pa.u.cosa === "jabalina" ? "la jabalina" : "la " + pa.u.cosa) + " entera") : "Que se vea el trabajo terminado", primero(pa.p.label) + (it ? " · " + it.num : ""));
   }
   function abrirCamara(inp, guia, titulo) {
@@ -908,7 +910,7 @@ ${GV.mat && GV.mat.length ? `<div class="cd-cd"><div class="cd-eti"><span>Materi
     if (a === "seguir") return ir(mio(o, "llegada") ? "obra" : segHecha(o) ? (mio(o, "salida") ? "llegar" : "salir") : "seg");
     if (a === "empezar") { if (!o) return; return ir(mio(o, "llegada") ? "obra" : !segHecha(o) ? "seg" : !mio(o, "salida") ? "salir" : "llegar"); }
     if (a === "segtick") { if (!o) return; const id = b.dataset.it, cur = segItems(o)[id]; S.segTmp[o.id] = Object.assign({}, S.segTmp[o.id] || {}, { [id]: !cur }); guardar(o, { ["campo.seguridad." + Lk(clave()) + ".items." + id]: !cur, ["campo.seguridad." + Lk(clave()) + ".por"]: per() }); return pintar(true); }
-    if (a === "segfoto") { if (!o) return; const inp = $("cdSegIn"); if (!inp) return; inp.dataset.ot = o.id; inp.dataset.it = b.dataset.it; const it = SEG.find((x) => x[0] === b.dataset.it); inp.dataset.fln = "Seguridad / " + (it ? it[1] : ""); return abrirCamara(inp, it && it[0] === "conos" ? "Que se vean los conos alrededor" : "Que se vea entero", "Seguridad · " + (it ? it[1] : "")); }
+    if (a === "segfoto") { if (!o) return; const inp = entrada("cdSegIn", o); inp.dataset.ot = o.id; inp.dataset.it = b.dataset.it; const it = SEG.find((x) => x[0] === b.dataset.it); inp.dataset.fln = "Seguridad / " + (it ? it[1] : ""); return abrirCamara(inp, it && it[0] === "conos" ? "Que se vean los conos alrededor" : "Que se vea entero", "Seguridad · " + (it ? it[1] : "")); }
     if (a === "corte") { if (!o) return; const v = corteDe(o) === b.dataset.v ? "" : b.dataset.v; guardar(o, { "campo.seguridad.corte": v }); return pintar(true); }
     if (a === "arrancar") { if (!o) return; if (b.classList.contains("cd-off")) { S.msg = "Completá todo (con las fotos que pide) para arrancar, o tocá «Arrancar igual»."; return pintar(true); } return arrancar(o, ""); }
     if (a === "arrancarIgual") return hojaMotivo("arrancarIgual", "¿Por qué arrancás igual?", "Le avisamos a la oficina");

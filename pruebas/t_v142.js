@@ -54,6 +54,7 @@ const FOTO = __dirname + '/foto.jpg';
   let r = await q.evaluate(() => ({ cd: !!document.querySelector('#cdApp .cd-hh'), viejo: (() => { const e = document.getElementById('inicioCuadrilla'); return !e || e.offsetParent === null; })(), txt: (document.getElementById('cdApp') || {}).textContent.replace(/\s+/g, ' '), hdr: getComputedStyle(document.querySelector('body > header')).display }));
   c(r.cd && r.viejo && /PLAZA LOS ÁLAMOS · ID 4031/.test(r.txt) && /Cómo llegar/.test(r.txt) && /Tus tareas/.test(r.txt) && /Avisos nuevos/.test(r.txt) && /puntos quincena/.test(r.txt), 'Hoy: obra del día con dirección y «Cómo llegar», tareas, avisos y puntos (el Inicio viejo queda escondido) · ' + r.txt.slice(0, 160));
   c(/Montaje de columna PRFV/.test(r.txt) && /Col 5 a 8/.test(r.txt) && /OT-2026-134/.test(r.txt) && /12/.test(r.txt), 'Hoy: las 3 tareas con sus columnas (sigue de la Col 5: la 1 a 4 ya tienen foto) y los 12 puntos aprobados');
+  await q.evaluate(() => document.querySelectorAll('#avToast, .av-toast').forEach((x) => x.classList.remove('on'))); await q.waitForTimeout(600);
   await shot(q, '02_inicio_hoy');
   await q.evaluate(() => { document.querySelectorAll('#avToast, .av-toast').forEach((x) => x.remove()); const b = document.getElementById('avCampana'); b && b.click(); }); await q.waitForTimeout(900); await shot(q, '03_aviso'); await q.evaluate(() => { const p = document.getElementById('avPanel'); p && p.remove(); }); await q.waitForTimeout(400);
   // 2) la orden del día
@@ -78,6 +79,7 @@ const FOTO = __dirname + '/foto.jpg';
   await toca('#cdApp [data-cd="corte"][data-v="no"]', 500);
   await esperar(() => { const s = ((window.__stubDB().ordenesTrabajo.ot134.campo || {}).seguridad || {})['juan perez'] || {}; return s.fotos && s.fotos.conos && s.fotos.equipo; }, null, 10000);
   r = await esperar(() => { const b = document.querySelector('#cdApp [data-cd="arrancar"]'); return b && !b.classList.contains('cd-off'); }, null, 15000);
+  if (!r) console.log('   DBG seg: ' + JSON.stringify(await q.evaluate(() => { const o = ordenesTrabajo.find((x) => x.id === 'ot134') || {}; const s = (o.campo || {}).seguridad || {}; return { s, falta: (document.querySelector('#cdApp .cd-falta') || {}).textContent, pant: __cuadrillaDia.estado().pant, msg: (document.querySelector('#cdApp .cd-msg') || {}).textContent, cam: !!document.getElementById('emaCam') }; })));
   c(r, 'con las dos fotos y el corte de energía, «Arrancar el día» se prende');
   await toca('#cdApp [data-cd="arrancar"]', 1200);
   r = await db(); const sg = ((r.campo || {}).seguridad || {});

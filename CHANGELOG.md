@@ -31,7 +31,11 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Reglas:** no hacen falta nuevas (todo va en `campo` de la orden, `avisosPush` y `configEquipo/personal`; verificado con `reglas_stub`).
 
-**Pruebas:** `t_v142` nueva (PC y celu, 49/49): el recorrido completo con la sesión de la cuadrilla, la cámara de la app (simulada), GPS simulado, falta material con aviso, ayuda, asistente (Worker simulado), guía, llamar con y sin contactos, fin del día, puntos, sin señal, «atrás», «Ver lista completa» y la oficina (Avance, cierre, puntos y avance del itemizado). Las pruebas viejas ven la cuadrilla de antes (`__crewViejo`, salvo `crew:true`). Batería completa: ver abajo.
+**Pruebas:** `t_v142` nueva (PC y celu, 49/49): el recorrido completo con la sesión de la cuadrilla, la cámara de la app (simulada), GPS simulado, falta material con aviso, ayuda, asistente (Worker simulado), guía, llamar con y sin contactos, fin del día, puntos, sin señal, «atrás», «Ver lista completa» y la oficina (Avance, cierre, puntos y avance del itemizado). Las pruebas viejas ven la cuadrilla de antes (`__crewViejo`, salvo `crew:true`). `t_circuito` OK en PC y celu (y también con `crew:true`, con Mis tareas desde «Ver lista completa»). Batería completa en PC y celu, de a 3 (144 pruebas): todo OK salvo `t_v083` (reemplazada por `t_v084`, como siempre); `t_v142` falló una vez dentro de la batería por tiempos (máquina cargada) y pasó sola 49/49 en PC y celu; con eso se arregló un caso real (la foto de la seguridad se perdía si la pantalla se redibujaba con la cámara abierta: los «📷» ahora viven fuera de lo que se redibuja). Después de ese arreglo se repitieron `t_v142`, `t_circuito`, `t_humo`, `t_cuadrilla`, `t_v123`, `t_v135`, `t_v138` y `t_v141` en PC y celu: todo OK.
+
+**Huellas:** ORIGINAL `93b3ccbd882cea763f51b9ec9e55f1af2b055a699411f6ad52ccb07eef0e411d` · index `80e8f78467cff8df247f80621aeae9c0dd99b5056e6cb011a175598546be379f` · sello `2026-11-10 12:59 · b84215`.
+
+**Qué tiene que hacer Ángel:** 1) subir el `index.html` a GitHub; 2) en Producción › Personal del equipo › «👷 La cuadrilla en obra», cargar los teléfonos (y revisar las herramientas por tarea, que están «a confirmar»). No hacen falta reglas nuevas ni APK nuevo.
 
 ## v141 — 10/11/2026 (publicada en GitHub) · El Asistente por rol y topes para que los US$ 100 alcancen el mes
 
