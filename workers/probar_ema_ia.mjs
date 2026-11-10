@@ -21,6 +21,12 @@ async function firmar(cue, { kid = KID, clave = par.privateKey, alg = "RS256" } 
 const ahora = () => Math.floor(Date.now() / 1000);
 const cuerpoToken = (uid, extra = {}) => ({ iss: "https://securetoken.google.com/alumbrado-stock", aud: "alumbrado-stock", sub: uid, user_id: uid, iat: ahora() - 10, exp: ahora() + 3600, auth_time: ahora() - 100, ...extra });
 
+// ---------- Firestore simulado (usuarios/{uid} y configEquipo/personal)
+const FS_URL = "https://firestore.googleapis.com/v1/projects/alumbrado-stock/databases/(default)/documents/";
+const USUARIOS = {};   // uid → {rol, activo, pendiente, nombre}; los «uid-…» sin ficha son admin (pruebas viejas)
+let CONFIG = null, lecturasFs = 0, fsCaido = false; const tokensFs = [];
+const aFs = (v) => v === null ? { nullValue: null } : typeof v == "boolean" ? { booleanValue: v } : typeof v == "number" ? (Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v }) : typeof v == "string" ? { stringValue: v } : Array.isArray(v) ? { arrayValue: { values: v.map(aFs) } } : { mapValue: { fields: Object.fromEntries(Object.entries(v).map(([k, x]) => [k, aFs(x)])) } };
+
 // ---------- fetch simulado
 let ultimoPedido = null, respuestaClaude = null, pedidosClaude = 0;
 globalThis.fetch = async (url, init = {}) => {
@@ -31,6 +37,20 @@ globalThis.fetch = async (url, init = {}) => {
     ultimoPedido = { headers: init.headers, body: JSON.parse(init.body) };
     if (respuestaClaude) { const rc = respuestaClaude(init, ultimoPedido.body); if (rc) return rc; }
     return new Response(JSON.stringify({ id: "msg_1", type: "message", role: "assistant", model: ultimoPedido.body.model, content: [{ type: "text", text: "Hola Ángel" }], stop_reason: "end_turn", usage: { input_tokens: 1000, output_tokens: 500, cache_read_input_tokens: 2000, cache_creation_input_tokens: 0 } }), { status: 200, headers: { "Content-Type": "application/json", "request-id": "req_1" } });
+  }
+  if (url.startsWith(FS_URL)) {
+    lecturasFs++;
+    const auth = (init.headers && (init.headers.Authorization || init.headers.authorization)) || "";
+    tokensFs.push(auth);
+    if (fsCaido) return new Response(JSON.stringify({ error: { code: 503 } }), { status: 503 });
+    const ruta = decodeURIComponent(url.slice(FS_URL.length).split("?")[0]);
+    if (ruta.startsWith("usuarios/")) {
+      const uid = ruta.slice(9), u = USUARIOS[uid] || (uid.startsWith("uid-") ? { rol: "admin", nombre: "Prueba" } : null);
+      if (!u) return new Response(JSON.stringify({ error: { code: 404 } }), { status: 404 });
+      return new Response(JSON.stringify({ name: "x", fields: aFs(u).mapValue.fields }), { status: 200 });
+    }
+    if (ruta === "configEquipo/personal") return new Response(JSON.stringify({ name: "x", fields: CONFIG ? { asistente: aFs(CONFIG) } : {} }), { status: 200 });
+    return new Response("{}", { status: 404 });
   }
   throw new Error("fetch no esperado: " + url);
 };
@@ -50,7 +70,7 @@ const base = (extra = {}) => ({ model: "claude-haiku-5-5", max_tokens: 1000, mes
 // ---------- /salud
 {
   const { r, j } = await pedir("/salud", { metodo: "GET" });
-  prueba("/salud responde 200 con versión v2b-ia y los modelos", r.status === 200 && j.ok && j.version === "v2b-ia" && j.modelos.includes("claude-fable-5-2") && j.modelos.includes("claude-opus-5-5"));
+  prueba("/salud responde 200 con versión v3-ia, los modelos, gastoMes y tope", r.status === 200 && j.ok && j.version === "v3-ia" && j.gastoMes === 0 && j.tope === 100 && j.modelos.includes("claude-fable-5-2") && j.modelos.includes("claude-opus-5-5"));
   prueba("/salud dice clave:true y kv:false (con aviso)", j.clave === true && j.kv === false && !!j.aviso);
   const s2 = await pedir("/salud", { metodo: "GET", e: {} });
   prueba("/salud sin secret dice clave:false", s2.j.clave === false);
@@ -212,7 +232,8 @@ const base = (extra = {}) => ({ model: "claude-haiku-5-5", max_tokens: 1000, mes
   const t = await firmar(cuerpoToken("uid-kv"));
   const e = [];
   for (let i = 0; i < 3; i++) e.push((await pedir("/ia", { token: t, cuerpo: base(), e: envKv })).r.status);
-  prueba("con KV: 2 pasan, el 3.º da 429 y se guardó en el KV", e.join() === "200,200,429" && puts === 4);
+  const dia = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
+  prueba("con KV: 2 pasan, el 3.º da 429 (por minuto) y las cuentas quedan en el KV (día, mes, rol, límites)", e.join() === "200,200,429" && JSON.parse(kv.get("d:uid-kv:" + dia)).n === 2 && JSON.parse(kv.get("g:" + dia.slice(0, 7))).usd > 0 && kv.has("rol:uid-kv") && kv.has("cfg:limites") && puts >= 6);
 }
 
 // ---------- la clave nunca aparece

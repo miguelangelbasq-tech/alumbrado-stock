@@ -1,23 +1,42 @@
 // Worker «ema-ia» (Cloudflare) · Pase seguro entre la app y Claude para el «Asistente EMA» — EMA Servicios.
+// v3-ia (v141): topes por persona y por día según el ROL que dice la base (no el que manda la app), preguntas y remitos
+// contados aparte, freno del gasto del mes (pausa al 80 % y corte al 95 % de 100 USD, configurable) y las rutas
+// GET /uso (Administración y Oficina) y GET /mio (cuánto le queda a cada uno).
 // v2-ia (v136): suma Claude Opus 5.5 y Claude Fable 5.2, el respaldo del servidor ante rechazos («fallbacks») y respuestas
 // más largas (hasta 16.000 tokens con Opus y Fable). Los bloques de «pensamiento» que devuelve Claude pasan tal cual.
 //
 // Cómo funciona:
 //  · La app manda cada pedido del asistente a  POST /ia  con su token de Firebase (Authorization: Bearer <ID token>).
 //  · El Worker revisa el token (firma RS256 con las claves públicas de Google, aud/iss «alumbrado-stock»), saca el uid,
-//    controla el límite de pedidos de esa persona, deja pasar SOLO los campos permitidos y se lo reenvía a la API de
-//    Claude (Anthropic Messages API) con la clave que vive acá como Secret.
+//    lee con ESE MISMO token la ficha de la persona en Firestore (usuarios/{uid}: rol, activo, pendiente) y los límites
+//    (configEquipo/personal → asistente.limites y asistente.roles). Las reglas de Firebase ya dejan leer las dos cosas
+//    (cada uno su ficha; configEquipo/personal cualquier usuario confirmado). Se guardan 10 minutos (KV o memoria).
+//    El rol que mande la app NO se usa para nada.
+//  · Controla los topes de esa persona (preguntas y remitos por día, aparte) y el freno del mes, deja pasar SOLO los campos
+//    permitidos y se lo reenvía a la API de Claude (Anthropic Messages API) con la clave que vive acá como Secret.
 //  · Las herramientas (crear orden, cerrar orden, buscar obra…) NO corren acá: corren en la app, con los permisos de
 //    quien pregunta. La app arma el ida y vuelta; este Worker solo reenvía cada pedido.
-//  · Devuelve la respuesta de Claude tal cual, más  ema: {costoUsd}  (cuánto costó ese pedido, en dólares).
+//  · Devuelve la respuesta de Claude tal cual, más  ema: {costoUsd, modelo, version, uso, freno}.
+//
+// Cómo cuenta (día y mes de Argentina, UTC−3):
+//  · Pregunta = un pedido cuyo último mensaje es texto de la persona (las vueltas de herramientas de esa misma pregunta no
+//    suman). Remito = pedido con ema.tipo "remito" que trae una foto o un PDF y ninguna herramienta (varias hojas o un PDF
+//    en un pedido = 1 remito). Supervisor = ema.tipo "supervisor" de Administración u Oficina: no cuenta para nadie pero
+//    suma al gasto del mes. Todo lo demás cuenta como pregunta.
+//  · Gasto del mes = suma de ema.costoUsd de cada respuesta. Al llegar a la «pausa» (80 % del tope) se pausan Pañol,
+//    Cuadrilla, Operario y Solo mirar y la primera respuesta que lo cruza trae ema.freno.avisar = true (una vez por mes) para
+//    que la app le avise a Administración. Al llegar al «corte» (95 %) se corta para todos menos Administración. El día 1 empieza de cero.
 //
 // Variables (Settings › Variables and Secrets):
 //  · ANTHROPIC_API_KEY  (Secret, obligatoria) = la clave de platform.claude.com. Vive SOLO acá: nunca en la app ni en el repo.
 //  · IA_POR_MINUTO      (opcional, texto)     = pedidos por minuto por persona (de entrada 20).
-//  · IA_POR_DIA         (opcional, texto)     = pedidos por día por persona (de entrada 400).
-// Ligadura opcional (Settings › Bindings › KV namespace):  IA_KV  → cuenta los pedidos bien aunque Cloudflare use varias
-//  copias del Worker. Sin KV cuenta en memoria (aproximado: cada copia lleva su cuenta) y /salud lo avisa.
-// Rutas: POST /ia · GET /salud.
+//  · IA_POR_DIA         (opcional, texto)     = pedidos por día por persona, contando las vueltas (de entrada 400).
+//  · IA_TOPE_MES        (opcional, texto)     = tope de gasto del mes en US$ si la app no guardó otro (de entrada 100).
+//  · IA_PAUSA_PCT / IA_CORTE_PCT (opcionales) = % del tope para la pausa y el corte (de entrada 80 y 95).
+//  · IA_LIMITES         (opcional, JSON)      = topes por rol si la app no guardó otros, ej. {"oficina":{"preguntas":30,"remitos":40}}.
+// Ligadura recomendada (Settings › Bindings › KV namespace):  IA_KV  → cuenta bien aunque Cloudflare use varias copias del
+//  Worker. Sin KV cuenta en memoria (aproximado: cada copia lleva su cuenta) y /salud lo avisa.
+// Rutas: POST /ia · GET /salud · GET /uso (Administración y Oficina) · GET /mio.
 // Reglas de la API para Opus 5.5 / Fable 5.2 / Sonnet 5.5 (las cumple este Worker aunque la app mande otra cosa):
 //  · nunca temperature / top_p / top_k ni «thinking» (el pensamiento va siempre prendido: se controla con output_config.effort);
 //  · tool_choice solo «auto» o «none» (forzar una herramienta da 400);
@@ -25,7 +44,8 @@
 //    filtros, el servidor lo reintenta solo con el modelo que recomienda. (Haiku no tiene respaldo: ahí no se manda.)
 // Sin SDK y sin streaming: es un fetch directo, para poder pegarlo a mano en el panel de Cloudflare.
 
-const VERSION = "v2b-ia";
+const VERSION = "v3-ia";
+
 const PROYECTO = "alumbrado-stock";
 const API_URL = "https://api.anthropic.com/v1/messages";
 // Versión de la API de Claude. La skill «claude-api» usa 2026-10-21 en todos sus ejemplos de HTTP directo.
@@ -111,32 +131,127 @@ async function verificarToken(token) {
   } catch (e) { return null; }
 }
 
-// ---------- Límite de pedidos por persona (por minuto y por día, día de Argentina UTC−3)
-const memoria = new Map(); // sin KV: clave → {n, vence}
+// ---------- Fechas de Argentina (UTC−3)
+const diaAr = (ms) => new Date((ms == null ? Date.now() : ms) - 3 * 3600 * 1000).toISOString().slice(0, 10);
+const mesAr = (ms) => diaAr(ms).slice(0, 7);
 function numEnv(v, def) { const n = parseInt(v, 10); return n > 0 ? n : def; }
-async function contar(env, uid) {
-  const porMin = numEnv(env.IA_POR_MINUTO, 20), porDia = numEnv(env.IA_POR_DIA, 400);
-  const ahora = Date.now(), minuto = Math.floor(ahora / 60000);
-  const dia = new Date(ahora - 3 * 3600 * 1000).toISOString().slice(0, 10);
-  const kMin = "m:" + uid + ":" + minuto, kDia = "d:" + uid + ":" + dia;
-  if (env.IA_KV) {
-    const [a, b] = await Promise.all([env.IA_KV.get(kMin), env.IA_KV.get(kDia)]);
-    const nMin = +(a || 0), nDia = +(b || 0);
-    if (nMin >= porMin) return { ok: false, cual: "minuto", tope: porMin };
-    if (nDia >= porDia) return { ok: false, cual: "dia", tope: porDia };
-    await Promise.all([
-      env.IA_KV.put(kMin, String(nMin + 1), { expirationTtl: 120 }),
-      env.IA_KV.put(kDia, String(nDia + 1), { expirationTtl: 2 * 86400 }),
-    ]);
-    return { ok: true };
-  }
-  if (memoria.size > 5000) for (const [k, v] of memoria) if (v.vence < ahora) memoria.delete(k); // limpieza
-  const m = memoria.get(kMin) || { n: 0, vence: ahora + 120000 }, d = memoria.get(kDia) || { n: 0, vence: ahora + 2 * 86400000 };
-  if (m.n >= porMin) return { ok: false, cual: "minuto", tope: porMin };
-  if (d.n >= porDia) return { ok: false, cual: "dia", tope: porDia };
-  m.n++; d.n++; memoria.set(kMin, m); memoria.set(kDia, d);
-  return { ok: true };
+const numOk = (v) => { const n = Number(v); return isFinite(n) && n >= 0 ? n : null; };
+
+// ---------- Guardado: KV si está ligado (exacto), si no memoria de esta copia del Worker (aproximado)
+const memoria = new Map(); // clave → {v, vence}
+async function guardadoLeer(env, k) {
+  if (env.IA_KV) { const s = await env.IA_KV.get(k); if (s == null) return null; try { return JSON.parse(s); } catch (e) { return null; } }
+  const m = memoria.get(k); if (!m) return null; if (m.vence < Date.now()) { memoria.delete(k); return null; } return m.v;
 }
+async function guardadoPoner(env, k, v, seg) {
+  if (env.IA_KV) return env.IA_KV.put(k, JSON.stringify(v), { expirationTtl: Math.max(60, seg) });
+  if (memoria.size > 5000) for (const [a, b] of memoria) if (b.vence < Date.now()) memoria.delete(a); // limpieza
+  memoria.set(k, { v, vence: Date.now() + seg * 1000 });
+}
+
+// ---------- Firestore por REST con el token de la persona (las reglas deciden qué puede leer)
+const FS = "https://firestore.googleapis.com/v1/projects/" + PROYECTO + "/databases/(default)/documents/";
+function deFs(v) {
+  if (!v || typeof v != "object") return null;
+  if ("stringValue" in v) return v.stringValue;
+  if ("booleanValue" in v) return !!v.booleanValue;
+  if ("integerValue" in v) return Number(v.integerValue);
+  if ("doubleValue" in v) return Number(v.doubleValue);
+  if ("nullValue" in v) return null;
+  if ("timestampValue" in v) return v.timestampValue;
+  if ("mapValue" in v) { const o = {}, f = (v.mapValue && v.mapValue.fields) || {}; Object.keys(f).forEach((k) => { o[k] = deFs(f[k]); }); return o; }
+  if ("arrayValue" in v) return ((v.arrayValue && v.arrayValue.values) || []).map(deFs);
+  return null;
+}
+async function leerDoc(ruta, token, campos) {
+  const q = campos && campos.length ? "?" + campos.map((c) => "mask.fieldPaths=" + encodeURIComponent(c)).join("&") : "";
+  const r = await fetch(FS + ruta + q, { headers: { Authorization: "Bearer " + token } });
+  if (r.status === 404) return {};
+  if (!r.ok) throw new Error("firestore " + r.status);
+  const j = await r.json();
+  return deFs({ mapValue: { fields: (j && j.fields) || {} } }) || {};
+}
+
+// ---------- Quién es (rol leído de la base, nunca de la app). 10 min guardado.
+const ROLES = ["admin", "oficina", "panol", "cuadrilla", "operario", "mirar"];
+async function quienEs(env, uid, token) {
+  const k = "rol:" + uid, ya = await guardadoLeer(env, k);
+  if (ya && ya.rol) return ya;
+  let u = null, dudoso = false;
+  try { u = await leerDoc("usuarios/" + encodeURIComponent(uid), token, ["rol", "activo", "pendiente", "nombre", "usuario", "persona"]); }
+  catch (e) { u = {}; dudoso = true; }
+  const rol = ROLES.includes(u.rol) ? u.rol : "mirar";
+  const yo = { rol, activo: u.activo !== false, pendiente: u.pendiente === true, nombre: String(u.nombre || u.persona || u.usuario || "").slice(0, 60) };
+  if (!dudoso) await guardadoPoner(env, k, yo, 600); // si la base no contestó, no se guarda: se vuelve a probar en el próximo pedido
+  if (dudoso) yo.dudoso = true; // se usan los topes de «Solo mirar» (los más chicos) hasta que la base conteste
+  return yo;
+}
+
+// ---------- Límites: configEquipo/personal → asistente.limites / asistente.roles; si no hay, variables del Worker; si no, estos
+const LIM_DEF = {
+  // null = sin tope · 0 = no puede
+  roles: { admin: { preguntas: null, remitos: null }, oficina: { preguntas: 30, remitos: 40 }, panol: { preguntas: 20, remitos: 40 }, cuadrilla: { preguntas: 10, remitos: 0 }, operario: { preguntas: 10, remitos: 0 }, mirar: { preguntas: 10, remitos: 0 } },
+  mes: { tope: 100, pausaPct: 80, cortePct: 95 },
+};
+const PAUSADOS = ["panol", "cuadrilla", "operario", "mirar"];
+function limitesBase(env) {
+  const L = JSON.parse(JSON.stringify(LIM_DEF));
+  try { const x = env.IA_LIMITES ? JSON.parse(env.IA_LIMITES) : null; if (x && typeof x == "object") Object.keys(x).forEach((r) => { if (L.roles[r] && x[r]) Object.assign(L.roles[r], x[r]); }); } catch (e) { }
+  L.mes.tope = numEnv(env.IA_TOPE_MES, L.mes.tope); L.mes.pausaPct = numEnv(env.IA_PAUSA_PCT, L.mes.pausaPct); L.mes.cortePct = numEnv(env.IA_CORTE_PCT, L.mes.cortePct);
+  return L;
+}
+function mezclar(L, a) {
+  if (!a || typeof a != "object") return L;
+  const lim = a.limites && typeof a.limites == "object" ? a.limites : null;
+  if (lim && lim.roles && typeof lim.roles == "object") Object.keys(L.roles).forEach((r) => {
+    const x = lim.roles[r]; if (!x || typeof x != "object" || r === "admin") return; // Administración: siempre sin tope
+    ["preguntas", "remitos"].forEach((c) => { if (c in x) L.roles[r][c] = x[c] === null || x[c] === "" ? null : numOk(x[c]) == null ? L.roles[r][c] : Math.floor(numOk(x[c])); });
+  });
+  if (lim && lim.mes && typeof lim.mes == "object") {
+    const t = numOk(lim.mes.tope), p = numOk(lim.mes.pausaPct), c = numOk(lim.mes.cortePct);
+    if (t > 0) L.mes.tope = t; if (p > 0 && p <= 100) L.mes.pausaPct = p; if (c > 0 && c <= 100) L.mes.cortePct = c;
+  }
+  if (Array.isArray(a.roles) && a.roles.length) L.habilitados = a.roles.filter((r) => ROLES.includes(r)).concat(["admin"]);
+  return L;
+}
+async function limites(env, token) {
+  const ya = await guardadoLeer(env, "cfg:limites");
+  if (ya && ya.roles) return ya;
+  let a = null, ok = true;
+  try { const d = await leerDoc("configEquipo/personal", token, ["asistente"]); a = d.asistente || null; } catch (e) { ok = false; }
+  const L = mezclar(limitesBase(env), a);
+  if (ok) await guardadoPoner(env, "cfg:limites", L, 600);
+  return L;
+}
+const topeDe = (L, rol, c) => { const r = L.roles[rol] || L.roles.mirar; return r[c] == null ? null : r[c]; };
+function nivelMes(L, usd) {
+  const pausa = L.mes.tope * L.mes.pausaPct / 100, corte = L.mes.tope * L.mes.cortePct / 100;
+  return { nivel: usd >= corte ? "corte" : usd >= pausa ? "pausa" : "", pausa: Math.round(pausa * 100) / 100, corte: Math.round(corte * 100) / 100 };
+}
+
+// ---------- Cuentas: por persona y día  d:<uid>:<día> = {n pedidos, q preguntas, r remitos}
+//                     del mes          g:<mes>       = {usd, partes{preguntas, remitos, supervisor}, personas{uid:{…}}, aviso}
+const vacioMes = () => ({ usd: 0, partes: { preguntas: 0, remitos: 0, supervisor: 0 }, personas: {}, aviso: false });
+async function leerMes(env, mes) { const g = await guardadoLeer(env, "g:" + mes); return g && g.partes ? g : vacioMes(); }
+async function leerDia(env, uid, dia) { const d = await guardadoLeer(env, "d:" + uid + ":" + dia); return d && typeof d == "object" ? d : { n: 0, q: 0, r: 0 }; }
+const r6 = (n) => Math.round(n * 1e6) / 1e6;
+
+// Pregunta nueva = el último mensaje es de la persona y trae texto (no solo resultados de herramientas)
+function esNueva(p) {
+  const u = p.messages[p.messages.length - 1];
+  if (!u || u.role !== "user") return true;
+  if (!Array.isArray(u.content)) return true;
+  return !u.content.length || !u.content.every((b) => b && b.type === "tool_result");
+}
+function clasificar(cuerpo, p, rol) {
+  const t = cuerpo && cuerpo.ema && typeof cuerpo.ema == "object" ? String(cuerpo.ema.tipo || "") : "";
+  const u = p.messages[p.messages.length - 1];
+  const archivo = !!(u && Array.isArray(u.content) && u.content.some((b) => b && (b.type === "image" || b.type === "document")));
+  if (t === "remito" && archivo && !p.tools) return "remito";
+  if (t === "supervisor" && (rol === "admin" || rol === "oficina")) return "supervisor";
+  return "pregunta";
+}
+const ROL_TXT = { admin: "Administración", oficina: "Oficina", panol: "Pañol", cuadrilla: "Cuadrilla", operario: "Operario", mirar: "Solo mirar" };
 
 // ---------- Armar el pedido para Claude: solo los campos permitidos
 function armarPedido(b) {
@@ -205,14 +320,36 @@ function errorClaude(status, j) {
   return ["claude", "Claude tuvo un problema. Probá de nuevo en un rato.", 502];
 }
 
+// ---------- Pedidos por minuto (en memoria de esta copia: es solo un freno contra ráfagas)
+const porMinuto = new Map();
+function minutoOk(env, uid) {
+  const tope = numEnv(env.IA_POR_MINUTO, 20), ahora = Date.now(), k = uid + ":" + Math.floor(ahora / 60000);
+  if (porMinuto.size > 5000) for (const [a, b] of porMinuto) if (b.vence < ahora) porMinuto.delete(a);
+  const m = porMinuto.get(k) || { n: 0, vence: ahora + 120000 };
+  if (m.n >= tope) return { ok: false, tope };
+  m.n++; porMinuto.set(k, m); return { ok: true };
+}
+
+// ---------- Token + quién es (para /ia, /uso y /mio)
+async function identificar(request, env) {
+  const m = /^Bearer\s+(.+)$/i.exec(request.headers.get("Authorization") || "");
+  const token = m ? m[1].trim() : "";
+  const uid = token ? await verificarToken(token) : null;
+  if (!uid) return { err: ["token", "Tu sesión no es válida. Cerrá y volvé a entrar a la app.", 401] };
+  const yo = await quienEs(env, uid, token);
+  if (!yo.activo || yo.pendiente) return { err: ["usuario", "Tu usuario todavía no está habilitado (o está dado de baja). Pedíselo a Administración.", 403] };
+  return { uid, token, yo };
+}
+const plata = (n) => "US$ " + (Math.round((Number(n) || 0) * 100) / 100).toFixed(2).replace(".", ",");
+
 async function pedidoIa(request, env, origen) {
   if (!env.ANTHROPIC_API_KEY) return error("sin_clave", "Falta cargar la clave del asistente en el Worker.", 500, origen);
-  const m = /^Bearer\s+(.+)$/i.exec(request.headers.get("Authorization") || "");
-  const uid = m ? await verificarToken(m[1].trim()) : null;
-  if (!uid) return error("token", "Tu sesión no es válida. Cerrá y volvé a entrar a la app.", 401, origen);
-
   const largo = +(request.headers.get("Content-Length") || 0);
   if (largo > TOPE_CUERPO) return error("grande", "El pedido es demasiado grande.", 413, origen);
+  const id = await identificar(request, env);
+  if (id.err) return error(id.err[0], id.err[1], id.err[2], origen);
+  const { uid, token, yo } = id, rol = yo.rol;
+
   const texto = await request.text();
   if (texto.length > TOPE_CUERPO) return error("grande", "El pedido es demasiado grande.", 413, origen);
   let cuerpo;
@@ -220,8 +357,25 @@ async function pedidoIa(request, env, origen) {
   const { p, betas, err } = armarPedido(cuerpo);
   if (err) return error("pedido", err, 400, origen);
 
-  const lim = await contar(env, uid);
-  if (!lim.ok) return error("limite", lim.cual === "minuto" ? `Llegaste a ${lim.tope} pedidos por minuto. Esperá un ratito.` : `Llegaste a ${lim.tope} pedidos por hoy. Mañana se renueva.`, 429, origen);
+  const L = await limites(env, token);
+  if (L.habilitados && !L.habilitados.includes(rol)) return error("rol_apagado", "El asistente no está prendido para tu usuario. Si lo necesitás, pedíselo a Administración.", 403, origen);
+  const tipo = clasificar(cuerpo, p, rol), nueva = tipo === "pregunta" && esNueva(p);
+
+  const mm = minutoOk(env, uid);
+  if (!mm.ok) return error("limite", `Llegaste a ${mm.tope} pedidos por minuto. Esperá un ratito.`, 429, origen);
+  const ahora = Date.now(), dia = diaAr(ahora), mes = mesAr(ahora);
+  const [D, G] = await Promise.all([leerDia(env, uid, dia), leerMes(env, mes)]);
+  const porDia = numEnv(env.IA_POR_DIA, 400);
+  if (D.n >= porDia) return error("limite", `Llegaste a ${porDia} pedidos por hoy. Mañana se renueva.`, 429, origen);
+
+  // freno del mes
+  const nv = nivelMes(L, G.usd);
+  if (nv.nivel === "corte" && rol !== "admin") return error("tope_mes", "El asistente llegó al tope de gasto del mes. Se renueva el día 1.", 429, origen);
+  if (nv.nivel === "pausa" && PAUSADOS.includes(rol)) return error("tope_mes", "El asistente está en pausa para tu usuario hasta el día 1: se llegó al " + L.mes.pausaPct + " % del gasto del mes.", 429, origen);
+  // topes del día (preguntas y remitos aparte)
+  const tq = topeDe(L, rol, "preguntas"), tr = topeDe(L, rol, "remitos");
+  if (nueva && tq != null && D.q >= tq) return error("tope_dia", tq ? `Llegaste a tus ${tq} preguntas de hoy. Mañana se renuevan.` : "Con tu usuario el asistente no contesta preguntas. Pedíselo a Administración.", 429, origen);
+  if (tipo === "remito" && tr != null && D.r >= tr) return error("tope_remitos", tr ? `Llegaste a tus ${tr} remitos de hoy. Mañana se renuevan.` : "Con tu usuario no se pueden leer remitos con la IA.", 429, origen);
 
   // v2b: si Claude devuelve 400, se reintenta con el pedido más simple (sin respaldo del servidor, sin caché automática,
   // sin bloques de pensamiento viejos) y, si sigue, se devuelve el motivo exacto en «detalle» (nunca la clave ni las cabeceras).
@@ -234,6 +388,7 @@ async function pedidoIa(request, env, origen) {
   };
   const msj = (jj) => { let s = String((jj && jj.error && jj.error.message) || ""); if (env.ANTHROPIC_API_KEY) s = s.split(env.ANTHROPIC_API_KEY).join("[clave]"); return s.replace(/sk-ant[\w-]*/g, "[clave]").replace(/x-api-key/gi, "[cabecera]").slice(0, 400); };
   let r, j, detalle = "";
+  const contarPedido = (ok) => guardadoPoner(env, "d:" + uid + ":" + dia, { n: D.n + 1, q: D.q + (ok && nueva ? 1 : 0), r: D.r + (ok && tipo === "remito" ? 1 : 0) }, 2 * 86400);
   try {
     ({ rr: r, jj: j } = await mandar(p, betas));
     if (r.status === 400) {
@@ -248,15 +403,60 @@ async function pedidoIa(request, env, origen) {
         if (r.status === 400) { detalle = msj(j) || detalle; console.log("ema-ia 400 (3):", detalle); }
       }
     }
-  } catch (e) { return error("red", "No se pudo hablar con Claude. Probá de nuevo en un rato.", 502, origen); }
+  } catch (e) { await contarPedido(false); return error("red", "No se pudo hablar con Claude. Probá de nuevo en un rato.", 502, origen); }
   if (!r.ok || !j || j.type === "error") {
-    const [tipo, mensaje, s] = errorClaude(r.ok ? 502 : r.status, j);
-    const res = { error: { tipo, mensaje } }; if (r.status === 400 && (msj(j) || detalle)) res.error.detalle = msj(j) || detalle;
+    await contarPedido(false);
+    const [tipoE, mensaje, s] = errorClaude(r.ok ? 502 : r.status, j);
+    const res = { error: { tipo: tipoE, mensaje } }; if (r.status === 400 && (msj(j) || detalle)) res.error.detalle = msj(j) || detalle;
     return json(res, s, origen);
   }
+  // cuentas: la persona (día) y el gasto del mes (lo que costó, aunque sea el supervisor)
+  const costo = costoDe(j.model && (MODELOS[j.model] || PRECIO_RESPALDO[j.model]) ? j.model : p.model, j.usage);
+  await contarPedido(true);
+  const G2 = await leerMes(env, mes); // se vuelve a leer: puede haber cambiado mientras Claude contestaba
+  G2.usd = r6(G2.usd + costo);
+  const parte = tipo === "remito" ? "remitos" : tipo === "supervisor" ? "supervisor" : "preguntas";
+  G2.partes[parte] = r6((G2.partes[parte] || 0) + costo);
+  const P = G2.personas[uid] || { nombre: yo.nombre, rol, q: 0, r: 0, usd: 0, hoy: { dia, q: 0, r: 0 } };
+  if (!P.hoy || P.hoy.dia !== dia) P.hoy = { dia, q: 0, r: 0 };
+  P.nombre = yo.nombre || P.nombre; P.rol = rol; P.usd = r6((P.usd || 0) + costo);
+  if (nueva) { P.q = (P.q || 0) + 1; P.hoy.q++; }
+  if (tipo === "remito") { P.r = (P.r || 0) + 1; P.hoy.r++; }
+  G2.personas[uid] = P;
+  const nv2 = nivelMes(L, G2.usd);
+  let avisar = false;
+  if (nv2.nivel && !G2.aviso) { G2.aviso = true; avisar = true; } // una vez por mes: la app le avisa a Administración
+  await guardadoPoner(env, "g:" + mes, G2, 40 * 86400);
+  const qHoy = D.q + (nueva ? 1 : 0), rHoy = D.r + (tipo === "remito" ? 1 : 0);
+  const of = rol === "admin" || rol === "oficina";
   // la respuesta va tal cual (también los bloques «thinking» y «fallback», que la app devuelve sin tocar)
-  j.ema = { costoUsd: costoDe(j.model && (MODELOS[j.model] || PRECIO_RESPALDO[j.model]) ? j.model : p.model, j.usage), modelo: j.model || p.model };
+  j.ema = {
+    costoUsd: costo, modelo: j.model || p.model, version: VERSION,
+    uso: { rol, tipo, preguntasHoy: qHoy, topePreguntas: tq, remitosHoy: rHoy, topeRemitos: tr, quedanPreguntas: tq == null ? null : Math.max(0, tq - qHoy), quedanRemitos: tr == null ? null : Math.max(0, tr - rHoy) },
+    freno: Object.assign({ nivel: nv2.nivel, avisar }, of || avisar ? { gastoMes: G2.usd, tope: L.mes.tope, pausa: nv2.pausa, corte: nv2.corte } : {}),
+  };
   return json(j, 200, origen);
+}
+
+// ---------- GET /uso: el gasto del mes y por persona (solo Administración y Oficina, por el rol que dice la base)
+async function uso(request, env, origen) {
+  const id = await identificar(request, env);
+  if (id.err) return error(id.err[0], id.err[1], id.err[2], origen);
+  if (id.yo.rol !== "admin" && id.yo.rol !== "oficina") return error("permiso", "Esto lo ven solo Administración y Oficina.", 403, origen);
+  const L = await limites(env, id.token), ahora = Date.now(), dia = diaAr(ahora), mes = mesAr(ahora), G = await leerMes(env, mes), nv = nivelMes(L, G.usd);
+  const personas = Object.keys(G.personas).map((u) => { const x = G.personas[u], h = x.hoy && x.hoy.dia === dia ? x.hoy : { q: 0, r: 0 };
+    return { uid: u, nombre: x.nombre || "", rol: x.rol || "", rolTxt: ROL_TXT[x.rol] || x.rol || "", hoy: { preguntas: h.q, remitos: h.r }, mes: { preguntas: x.q || 0, remitos: x.r || 0, usd: r6(x.usd || 0) }, topes: { preguntas: topeDe(L, x.rol, "preguntas"), remitos: topeDe(L, x.rol, "remitos") } }; })
+    .sort((a, b) => b.mes.usd - a.mes.usd);
+  return json({ ok: true, version: VERSION, mes, dia, gastoMes: r6(G.usd), tope: L.mes.tope, pausa: nv.pausa, corte: nv.corte, nivel: nv.nivel, partes: { preguntas: r6(G.partes.preguntas || 0), remitos: r6(G.partes.remitos || 0), supervisor: r6(G.partes.supervisor || 0) }, personas, kv: !!env.IA_KV, texto: `Gastado este mes: ${plata(G.usd)} de ${L.mes.tope}` }, 200, origen);
+}
+// ---------- GET /mio: cuánto le queda hoy a quien pregunta (sin montos)
+async function mio(request, env, origen) {
+  const id = await identificar(request, env);
+  if (id.err) return error(id.err[0], id.err[1], id.err[2], origen);
+  const L = await limites(env, id.token), dia = diaAr(), D = await leerDia(env, id.uid, dia), G = await leerMes(env, mesAr()), nv = nivelMes(L, G.usd), rol = id.yo.rol;
+  const tq = topeDe(L, rol, "preguntas"), tr = topeDe(L, rol, "remitos");
+  const pausado = (nv.nivel === "corte" && rol !== "admin") || (nv.nivel === "pausa" && PAUSADOS.includes(rol));
+  return json({ ok: true, version: VERSION, rol, habilitado: !L.habilitados || L.habilitados.includes(rol), pausado, nivel: nv.nivel, preguntasHoy: D.q, topePreguntas: tq, quedanPreguntas: tq == null ? null : Math.max(0, tq - D.q), remitosHoy: D.r, topeRemitos: tr, quedanRemitos: tr == null ? null : Math.max(0, tr - D.r) }, 200, origen);
 }
 
 export default {
@@ -265,13 +465,16 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { status: ORIGENES.includes(origen) ? 204 : 403, headers: cabCors(origen) });
     try {
       if (u.pathname === "/salud" && request.method === "GET") {
-        return json({ ok: true, version: VERSION, modelos: Object.keys(MODELOS), respaldo: true, clave: !!env.ANTHROPIC_API_KEY, kv: !!env.IA_KV, ...(env.IA_KV ? {} : { aviso: "Sin KV: el límite por persona se cuenta en memoria (aproximado)." }) }, 200, origen);
+        const L = (await guardadoLeer(env, "cfg:limites")) || limitesBase(env), G = await leerMes(env, mesAr());
+        return json({ ok: true, version: VERSION, modelos: Object.keys(MODELOS), respaldo: true, clave: !!env.ANTHROPIC_API_KEY, kv: !!env.IA_KV, gastoMes: r6(G.usd), tope: L.mes.tope, ...(env.IA_KV ? {} : { aviso: "Sin KV: los topes y el gasto del mes se cuentan en memoria (aproximado)." }) }, 200, origen);
       }
+      if (origen && !ORIGENES.includes(origen)) return error("origen", "Origen no permitido.", 403, origen);
       if (u.pathname === "/ia") {
         if (request.method !== "POST") return error("metodo", "Usá POST.", 405, origen);
-        if (origen && !ORIGENES.includes(origen)) return error("origen", "Origen no permitido.", 403, origen);
         return await pedidoIa(request, env, origen);
       }
+      if (u.pathname === "/uso" && request.method === "GET") return await uso(request, env, origen);
+      if (u.pathname === "/mio" && request.method === "GET") return await mio(request, env, origen);
       return error("ruta", "Ruta desconocida.", 404, origen);
     } catch (e) {
       // Nunca se devuelve el detalle interno (podría arrastrar cabeceras): solo un mensaje simple.
@@ -280,4 +483,4 @@ export default {
   },
 };
 
-export { costoDe, armarPedido, MODELOS };
+export { costoDe, armarPedido, MODELOS, clasificar, esNueva, mezclar, limitesBase };
