@@ -12,8 +12,8 @@ Abrí en el navegador:
 
 **https://ema-avisos.mdiaz-60f.workers.dev/salud**
 
-- Si dice `"version":"v116-fcm"` y `"cuenta":true` → está bien, pasá al paso 3.
-- Si dice otra versión (por ejemplo `v050` o `v115-fcm`), o no dice `fcm` → hacé el paso 2.
+- Si dice `"version":"v143-hora"` y `"cuenta":true` → está bien, pasá al paso 3.
+- Si dice otra versión (por ejemplo `v116-fcm`, `v115-fcm` o `v050`) → hacé el paso 2.
 - Si dice `"cuenta":false` → falta el Secret `FB_SA_JSON` (avisame y lo vemos juntos).
 
 ## 2. Pegar el Worker nuevo (solo si el paso 1 lo pide)
@@ -22,7 +22,7 @@ Abrí en el navegador:
 2. **Workers & Pages** › **ema-avisos** › **Edit code**.
 3. Borrá todo y pegá el contenido completo del archivo **`workers/ema-avisos.js`** (te lo paso junto con esto).
 4. **Deploy**.
-5. Volvé a abrir `/salud`: tiene que decir `v116-fcm`.
+5. Volvé a abrir `/salud`: tiene que decir `v143-hora`.
 
 No hace falta tocar los Secrets ni el Cron: quedan como estaban.
 
@@ -53,3 +53,29 @@ No hace falta tocar los Secrets ni el Cron: quedan como estaban.
 - `fcm 404` o `UNREGISTERED` → ese celular tiene que volver a entrar a la app (se anota de nuevo solo).
 - `fcm 403` → falta el paso 3 (la API está apagada).
 - `429` → se terminó el cupo gratis del día de Firebase; vuelve a andar a las 4 o 5 de la mañana.
+
+
+---
+
+## Actualizar el Worker para la v143 (recordatorio de las 7:00)
+
+Desde la v143, al emitir una orden para otro día la app deja **dos avisos** para cada persona:
+
+1. el de siempre, que sale enseguida: «Tenés orden para mañana»;
+2. un **recordatorio a las 7:00 del día de la orden**: «Hoy: obra · tareas».
+
+El recordatorio lleva la hora en el aviso (`enviarDesde`). Para que el Worker lo espere hasta las 7:00 hay que pegar el Worker nuevo:
+
+1. **dash.cloudflare.com** › **Workers & Pages** › **ema-avisos** › **Edit code**.
+2. Borrá todo y pegá el contenido completo del archivo **`workers/ema-avisos.js`** nuevo.
+3. **Deploy**.
+4. Abrí `/salud`: tiene que decir `"version":"v143-hora"`.
+
+Qué hace el Worker nuevo:
+- Si ve un aviso para más adelante, lo deja «programado» y no lo vuelve a leer cada minuto (así no gasta lecturas de Firebase).
+- Los programados los revisa cada minuto entre las 6:55 y las 7:20 y cada media hora el resto del día.
+- Antes de mandar el recordatorio mira la orden: si se anuló, cambió de día o la persona ya no está, no lo manda. Si la orden cambió después de emitida, manda el último.
+
+**Mientras no pegues el Worker nuevo**, la app no deja el recordatorio (para que no llegue «Hoy: …» el día anterior): si el celular de la cuadrilla tiene la app de Android 1.4, el recordatorio de las 7 lo programa el mismo celular; si no, solo llega el aviso de siempre al emitir.
+
+No hace falta tocar los Secrets ni el Cron. La prueba sin internet es `node workers/probar_ema_avisos.mjs`.

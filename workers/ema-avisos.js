@@ -193,7 +193,7 @@ async function vuelta(env, dep = {}) {
     enviados += ok; enviadosFcm += okFcm;
     await db.actualizar("avisosPush/" + a.id, { enviado: true, enviadoTs: ahora * 1000, celulares: ok, celularesFcm: okFcm });
   }
-  return { ok: true, version: VERSION, avisos: avisos.length, enviados, enviadosFcm, borradas, errores };
+  return { ok: true, version: VERSION, avisos: avisos.length, enviados, enviadosFcm, borradas, errores, programados: futuros.length };
 }
 
 const cors = (h = {}) => ({ "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", ...h });
