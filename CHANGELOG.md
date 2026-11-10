@@ -2,6 +2,37 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v142 — 10/11/2026 (sin publicar: rama de trabajo) · La cuadrilla nueva: «Modo obra» con un solo botón y todo el recorrido del día
+
+**Pedido de Ángel** (10/11/2026): llevar a la app el recorrido de la cuadrilla que aprobó en las maquetas (opción E «un solo botón»), con datos reales.
+
+**Base:** ORIGINAL 141 (`c9266614…`).
+
+**Cambios en la app (cuadrilla y operario; celu, app de Android y compu)**
+- **Inicio «Hoy»**: portada azul con saludo, «con Pedro», tareas de hoy, avisos nuevos y puntos de la quincena; la obra del día con dirección, «📍 Cómo llegar» y «Ver la orden»; sus tareas; avisos nuevos. Reemplaza a la vista el Inicio de antes (que sigue en el DOM, escondido). «Hoy» de la barra de abajo lleva acá; Mis tareas de siempre sigue en «Ver lista completa».
+- **La orden del día**: obra, quiénes van, vehículo, quién la sigue (oficina), tareas en orden con cantidades, la nota de la oficina y «Empezar».
+- **Seguridad antes de arrancar**: casco, arnés, guantes, botines, conos y equipo revisado, con tilde y foto (de entrada foto obligatoria en conos y equipo; la oficina lo cambia por ítem) + el corte de energía de siempre. Sin todo, «Arrancar el día» no se prende, salvo «Arrancar igual (decí por qué)» (le avisa a la oficina). Se guarda en `campo.seguridad.<persona>` y llena también lo de antes (EPP, balizado, herramientas), así Mis tareas y la oficina siguen igual.
+- **Antes de salir**: el material de la reserva de esa orden (o de la obra, o de los vales) con «✅ retirado» / «⚠ falta retirar (R-xxxx lista)»; herramientas sugeridas por tarea (tabla en el código, **a confirmar**, editable por la oficina) con quién tiene cada una; aviso del asistente armado sin IA; «Salimos» o «Salir igual (decí por qué)» → `campo.salida.<persona>`.
+- **Cómo llegar**: mapa con el pin de la obra, la distancia desde el GPS y «Abrir en Google Maps».
+- **Modo obra (opción E)**: un botón redondo que cambia solo: «Llegué» (GPS: «Estás en la obra» a menos de 150 m; `campo.llegada.<persona>`) → «Foto · Col N» (la cámara de la app con el sello y la guía «Columna entera en el cuadro») → «Foto guardada» (o «Sin señal: se sube sola») → «Terminé» (hora de inicio y fin con − / +, «Se hizo» / «No se hizo (decí por qué)») → pasa sola a la columna o a la tarea siguiente. Anillo de avance, rayitas por columna y los pasos abajo; «Falta material», «Ayuda» y «Llamar a la oficina».
+- **Por dentro es lo mismo de Mis tareas**: fotos en `campo.fotos` con su columna, marcas por `__marcaEquipo`, horas en `campo.horasTarea`, envío por tarea en `campo.tareaEnv` y la orden se envía sola (`campo.enviados`, `campo.horas`). La hora de cada columna queda en `campo.pasosObra`. La oficina cierra igual (puntos y avance).
+- **Falta material**: hoja con el material de la orden, se tilda qué y cuánto → aviso al pañol y a quien sigue la orden (o a la oficina) + `campo.faltaMaterial`; «Avisado ✓».
+- **Ayuda**: «Preguntale al asistente» (se abre con «Estás en: Izaje · Col 7», el asistente lo recibe en el contexto y muestra «Te quedan N preguntas hoy» de la v141), «Ver cómo se hace» (la guía de la tarea de la carpeta `guias/`, paso 1, con ‹ ›, zoom y el material de la guía) y «Llamar a la oficina».
+- **Llamar a la oficina**: quien sigue la orden primero, Administración, Oficina y Pañol con «📞 Llamar» y «💬 WhatsApp», y «Mandar mi ubicación» (WhatsApp con el link de Maps). Sin teléfono cargado: «Pedile a la oficina que cargue su teléfono» (no se inventa ninguno).
+- **Fin del día** (lo hecho en verde, lo que no y por qué en rojo, unidades, fotos y horas, «Mandar a la oficina»), **Mis puntos** (la quincena por orden: aprobados / esperando cierre) y **Sin señal** (franja, lo que espera subir y «Probar ahora»).
+- **Oficina**: en el «📸 Avance» de la orden y en el cierre aparece «👷 La cuadrilla en obra»: seguridad (con las fotos), salida (completa o «salió igual» con el porqué), llegada con la distancia al pin y falta material. En Producción › Personal del equipo, tarjeta «👷 La cuadrilla en obra»: teléfonos para la cuadrilla, foto de la seguridad por ítem y herramientas por tarea (`configEquipo/personal`: `contactos`, `seguridadCuadrilla`, `herrPorTarea`).
+- El «atrás» del celu vuelve de cada pantalla del día; el control de permisos trata ese Inicio como Mis tareas (no salta el «🔒 no tenés permiso»).
+
+**Decisiones**
+- Contactos en `configEquipo/personal.contactos` (lo editan Producción/Órdenes): no hacen falta reglas nuevas.
+- Herramientas por tarea: tabla en el código (`HERR_DEF`, marcada «a confirmar») que la oficina reemplaza por tarea en `configEquipo/personal.herrPorTarea`.
+- La guía no tiene todavía la relación «tarea → paso»: abre la guía de la tarea en el paso 1.
+- El aviso con el celu bloqueado (pantalla 3 de la maqueta) es la notificación de Android que ya existe (FCM/Web Push); en la app se ve en la campanita.
+
+**Reglas:** no hacen falta nuevas (todo va en `campo` de la orden, `avisosPush` y `configEquipo/personal`; verificado con `reglas_stub`).
+
+**Pruebas:** `t_v142` nueva (PC y celu, 49/49): el recorrido completo con la sesión de la cuadrilla, la cámara de la app (simulada), GPS simulado, falta material con aviso, ayuda, asistente (Worker simulado), guía, llamar con y sin contactos, fin del día, puntos, sin señal, «atrás», «Ver lista completa» y la oficina (Avance, cierre, puntos y avance del itemizado). Las pruebas viejas ven la cuadrilla de antes (`__crewViejo`, salvo `crew:true`). Batería completa: ver abajo.
+
 ## v141 — 10/11/2026 (publicada en GitHub) · El Asistente por rol y topes para que los US$ 100 alcancen el mes
 
 **Pedido de Ángel** (10/11/2026): que cada rol vea y pregunte solo lo suyo (oficina todo, pañol el pañol con precios de materiales pero sin sueldos, cuadrilla solo lo suyo y sin plata, solo mirar preguntas generales) y que haya topes por persona y un freno del mes para que los US$ 100 alcancen.
