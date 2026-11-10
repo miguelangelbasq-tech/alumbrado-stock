@@ -3,6 +3,7 @@ import os, re, base64
 S = os.path.dirname(os.path.abspath(__file__))
 v1 = open(os.path.join(S, '..', 'maq_estilo', 'css', 'V1.css'), encoding='utf-8').read()
 v1 = re.sub(r'@font-face\{[^}]*\}\s*', '', v1)   # se reemplaza por las de abajo (swap)
+v1 = re.sub(r'html:root\{[^}]*\}', lambda m: re.sub(r'#[0-9A-Fa-f]{3,8}\b', lambda h: h.group(0).lower(), m.group(0)), v1)   # las variables en minúscula, como el tema (hay código que compara «#28285e»)
 b64 = lambda f: base64.b64encode(open(os.path.join(S, 'fonts', f), 'rb').read()).decode()
 caras = ('/* v144 · Estilo «V1 · Turquesa del logo» (elegido por Ángel, 10/11/2026). Letras incrustadas (andan sin internet):\n'
          '   Plus Jakarta Sans 300–800 (texto y títulos) y JetBrains Mono 400–700 (números y códigos), woff2 latín. */\n'

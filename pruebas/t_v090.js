@@ -24,7 +24,7 @@ const cel = process.argv[2] === 'cel';
   c(/btn-primary/.test(r.marcar) && /gradient/.test(r.fondoBoton) && r.radio === '999px' && r.alto >= 44, '«Marcar punto acá» es el botón principal de la app (píldora con degradé, 44 px o más): ' + r.radio);
   // v092: 8 tipos de punto (se sumó «Borde de la plaza»)
   c(r.chips === 8 && r.chipAct === 1 && r.tabs, 'tipos de punto como chips de la app y pestañas como las de la app');
-  c(/Inter/.test(r.fuente) && r.navy === '#28285e', 'misma letra (Inter) y mismo azul de la marca');
+  c(/Inter|Plus Jakarta Sans/.test(r.fuente) && r.navy === '#28285e', 'misma letra que la app (Inter; desde v144 Plus Jakarta Sans) y mismo azul de la marca');   // v144: estilo V1, letra nueva
   c(!/\.py-btn|\.py-card|\.py-tabs/.test(r.css) && /var\(--navy\)/.test(r.css), 'sin estilos propios de botones, tarjetas ni pestañas: usa los del tema');
   if (cel) { r = await p.evaluate(() => ({ sw: document.documentElement.scrollWidth, w: document.documentElement.clientWidth })); c(r.sw <= r.w + 1, 'en el celular, sin scroll de costado'); }
   c(!M.errores.length, 'sin errores de JS ' + JSON.stringify(M.errores.slice(0, 3)));

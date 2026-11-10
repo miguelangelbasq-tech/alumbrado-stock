@@ -42,7 +42,7 @@ function datos() {
     return { heroBottom: Math.round(h.bottom), tj, bg: getComputedStyle(document.getElementById('ieAtender')).backgroundColor };
   });
   c(r.tj.length >= 4 && r.tj.every((x) => x.top >= r.heroBottom + 8), 'todas las tarjetas del Inicio empiezan debajo de la portada azul (sin encimar) · hero ' + r.heroBottom + ' · ' + JSON.stringify(r.tj));
-  c(/rgba\(255, 255, 255, 0\.8/.test(r.bg), '«Para atender» es una tarjeta blanca normal · ' + r.bg);
+  c(/rgba\(255, 255, 255, 0\.[89]/.test(r.bg)   /* v144: estilo V1, tarjetas al 90 % */, '«Para atender» es una tarjeta blanca normal · ' + r.bg);
   r = await p.evaluate(async () => {
     document.documentElement.style.setProperty('--safe-area-inset-top', '30px'); await new Promise((ok) => setTimeout(ok, 50));
     const hero = getComputedStyle(document.getElementById('ieHero')).paddingTop, rel = document.getElementById('ieReloj'), rr = rel ? rel.getBoundingClientRect() : null;
