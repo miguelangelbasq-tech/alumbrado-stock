@@ -119,7 +119,7 @@ function datos() {
   const ultimaB = (sel) => p.evaluate((s) => { const l = document.querySelectorAll('#iaChat ' + s); return l.length ? l[l.length - 1].textContent.replace(/\s+/g, ' ') : ''; }, sel || '.ia-b.ia');
   await p.evaluate(() => window.mostrarVista('inicio')); await p.waitForTimeout(400);
   await p.evaluate(() => window.__asistenteAbrir()); await p.waitForTimeout(700);
-  let ps = await preguntar('¿cuántas columnas tiene san martin?', [usa('datos_obra', { obraId: 'san martin' }), fin('Tiene 10 columnas.')]);
+  let ps = await preguntar('contame de san martin', [usa('datos_obra', { obraId: 'san martin' }), fin('Tiene 10 columnas.')]);
   const b0 = ps[0] && ps[0].b, b1 = ps[1] && ps[1].b;
   c(b0 && b0.model === 'claude-opus-5-5' && b0.output_config.effort === 'medium' && b0.max_tokens === 16000 && b0.tool_choice.type === 'auto', 'por defecto el asistente usa Opus 5.5 con effort «medium», 16.000 tokens y tool_choice auto · ' + JSON.stringify(b0 && [b0.model, b0.output_config, b0.max_tokens]));
   c(b0 && !('temperature' in b0) && !('top_p' in b0) && !('top_k' in b0) && !('thinking' in b0) && b0.fallbacks === 'default' && (b0.betas || []).includes('server-side-fallback-2026-07-01') && b0.cache_control && b0.cache_control.type === 'ephemeral', 'sin temperature/top_p/top_k ni thinking; con fallbacks «default», la beta del respaldo y caché · ' + JSON.stringify(Object.keys(b0 || {})));
@@ -143,7 +143,7 @@ function datos() {
   const asis = ((s.configEquipo || {}).personal || {}).asistente || {};
   c(asis.modelo === 'claude-fable-5-2' && asis.modeloSupervisor === 'claude-sonnet-5-5' && /Guardado/.test(await p.evaluate(() => document.getElementById('iaModMsg').textContent)), 'se guarda para todo el equipo en configEquipo/personal.asistente · ' + JSON.stringify(asis));
   await p.click('#iaPanel [data-ia="volver"]'); await p.waitForTimeout(300);
-  ps = await preguntar('¿y el stock de fusibles?', [fin('Hay 10.')]);
+  ps = await preguntar('contame lo de los fusibles', [fin('Hay 10.')]);   // v137: «¿y el stock…?» es dato simple (effort low)
   const bf = ps[0] && ps[0].b;
   c(bf && bf.model === 'claude-fable-5-2' && bf.output_config.effort === 'high' && bf.max_tokens === 16000 && !('thinking' in bf) && !('temperature' in bf) && bf.fallbacks === 'default' && bf.tool_choice.type === 'auto', 'con Fable 5.2 elegido: pedido bien formado (effort high, sin thinking ni temperature, fallbacks, tool_choice auto) · ' + JSON.stringify(bf && [bf.model, bf.output_config, bf.max_tokens]));
   await p.evaluate(() => firebase.firestore().collection('configEquipo').doc('personal').set({ asistente: { modelo: 'claude-opus-5-5', modeloSupervisor: 'claude-opus-5-5' } }, { merge: true }));
@@ -217,8 +217,8 @@ function datos() {
   await p.waitForTimeout(800);
   s = await db();
   const pr = pedidos.slice(n0), sal = ((s.configEquipo || {}).salud || {}).supervisor || {};
-  const ultU = pr[0] && pr[0].b.messages[pr[0].b.messages.length - 1];
-  c(pr.length === 1 && pr[0].b.model === 'claude-opus-5-5' && pr[0].b.output_config.effort === 'high' && /Revisión automática del supervisor de las 12 h/.test(ultU.content) && /hechas de más/.test(ultU.content), 'a las 12 h: una revisión con Opus 5.5 (effort high) con los hallazgos y los datos de las obras marcadas · ' + pr.length);
+  const ultU = pr[0] && pr[0].b.messages[pr[0].b.messages.length - 1];   // v137: el mensaje lleva antes el bloque de contexto
+  c(pr.length === 1 && pr[0].b.model === 'claude-opus-5-5' && pr[0].b.output_config.effort === 'high' && /Revisión automática del supervisor de las 12 h/.test(JSON.stringify(ultU.content)) && /hechas de más/.test(JSON.stringify(ultU.content)), 'a las 12 h: una revisión con Opus 5.5 (effort high) con los hallazgos y los datos de las obras marcadas · ' + pr.length);
   c(sal.slots && sal.slots[slot] && sal.slots[slot].estado === 'hecho' && sal.ultimo && /algo raro/.test(sal.ultimo.parte), 'el parte queda en configEquipo/salud.supervisor (para los otros aparatos) · ' + JSON.stringify(sal.slots));
   const avs = Object.values(s.avisosPush || {}).filter((a) => /El supervisor encontró/.test(a.titulo || ''));
   c(Object.keys(s.avisosPush || {}).length > nAv0 && avs.length >= 1 && avs[0].email === 'admin@' + DOM, 'como hay algo rojo, avisa al celular de Administración · ' + JSON.stringify(avs.map((a) => [a.titulo, a.email])));

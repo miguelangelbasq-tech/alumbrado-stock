@@ -2,7 +2,8 @@
 // y la foto vinculada, auditoría remito_ia; remito ilegible; Worker caído), código de barras (asociar, repetido, escanear
 // con el plugin de la app simulado, desconocido → «¿A qué producto corresponde?»), etiquetas QR de herramientas, QR en el
 // vale, la orden y la reserva (se decodifican con jsQR y tienen que dar la dirección correcta) y ?doc= / ?obra= abriendo
-// cada cosa, y «No tenés permiso» para quien no puede verla.
+// cada cosa, y «No tenés permiso» para quien no puede verla. Además: dictado en vivo y onda de rayitas del Asistente
+// (navegador con nivel real en la PC y simulado en el celu; plugin de la app 1.4 y modo charla).
 const fs = require('fs');
 const path = require('path');
 const { abrir, prueba, baseDatos, DOM } = require('./h');
@@ -20,6 +21,10 @@ function datos() {
   };
   d.db.catalogoProductos = { 7015: { codigo: 7015, ean: ['7790000000015'] } };
   d.db.reservas = { r1: { numero: 'R-0001', estado: 'pendiente', plazaId: 'p1', plazaNombre: 'Plaza San Martín', obraId: '1234', para: 'Juan Pérez', items: [{ codigo: 3017, desc: 'FUSIBLE CILINDRICO 10 X 38 2 AMP', un: 'Un.', cant: 6 }], creadoPor: 'admin@' + DOM, ts: ahora - 7e5, fechaNecesaria: hoy } };
+  d.db.avanceObras.p2 = { nombre: 'PLAZA EL PUEBLITO', obraId: '4100', barrio: 'Villa Allende', creado: ahora };
+  d.db.avanceObras.p3 = { nombre: 'PLAZA PUEBLO NUEVO', obraId: '4101', barrio: 'Centro', creado: ahora };
+  d.db.avanceObras.p4 = { nombre: 'PLAZA LOS ALAMOS NORTE', obraId: '4102', creado: ahora };
+  d.db.avanceObras.p5 = { nombre: 'PLAZA LOS ALAMOS SUR', obraId: '4103', creado: ahora };
   d.db.herramientas = { h1: { codigo: 'H-001', nombre: 'Pinza amperométrica', cat: 'medicion', estado: 'libre', marca: 'Fluke', modelo: '323', creado: ahora - 864e5 }, h2: { codigo: 'H-002', nombre: 'Taladro percutor', cat: 'electrica', estado: 'libre', creado: ahora - 864e5 } };
   return d;
 }
@@ -128,6 +133,48 @@ function datos() {
   await p.fill('#iaTxt', 'cargá este remito'); const nPed = pedidos.length; await p.click('#iaEnviar'); await p.waitForTimeout(400);
   r = await p.evaluate(() => !!document.getElementById('rfFotoGal'));
   c(r && pedidos.length === nPed, '«cargá este remito» en el chat abre la hoja del remito (sin mandar nada al Worker)');
+  // ========================================================= 1d) dictado en vivo y onda de rayitas (navegador)
+  await p.evaluate(() => {
+    window.__remitoFoto.cerrar();
+    window.__ondaLog = [];
+    const snap = () => { const o = document.getElementById('iaOndaV'), tr = o ? [...o.children].map((i) => i.style.transform) : []; window.__ondaLog.push({ tx: document.getElementById('iaTxt').value, est: window.__iaOnda && window.__iaOnda.estado(), vis: !!o && !o.hidden && o.getBoundingClientRect().height > 0, n: o ? o.children.length : 0, distintas: new Set(tr).size, fuente: o ? o.dataset.fuente : '' }); };
+    function SR() { this.lang = ''; }
+    SR.prototype.start = function () { const self = this, partes = ['cargá', 'cargá diez', 'cargá diez metros de cable']; let i = 0;
+      const tick = () => { if (self._stop) return; if (i < partes.length) { const s = partes[i++]; self.onresult && self.onresult({ results: [[{ transcript: s }]] }); setTimeout(snap, 120); setTimeout(tick, 450); } else { self.onend && self.onend(); } };
+      setTimeout(tick, 500); };
+    SR.prototype.stop = function () { this._stop = true; this.onend && this.onend(); };
+    window.webkitSpeechRecognition = SR; window.SpeechRecognition = SR;
+    if (navigator.mediaDevices) navigator.mediaDevices.getUserMedia = async () => { const ac = new AudioContext(); const o = ac.createOscillator(), g = ac.createGain(), lfo = ac.createOscillator(), lg = ac.createGain(); g.gain.value = 0.5; lfo.frequency.value = 3; lg.gain.value = 0.5; lfo.connect(lg); lg.connect(g.gain); const d = ac.createMediaStreamDestination(); o.connect(g); g.connect(d); o.start(); lfo.start(); return d.stream; };
+  });
+  await p.fill('#iaTxt', '');
+  await p.click('#iaPanel [data-ia="mic"]'); await p.waitForTimeout(1050);
+  await foto(p, 'v137_7_dictado_en_vivo', 0);
+  await p.waitForTimeout(1500);
+  r = await p.evaluate(() => ({ log: window.__ondaLog, fin: document.getElementById('iaTxt').value, oculta: document.getElementById('iaOndaV').hidden, est: window.__iaOnda.estado() }));
+  const lg = r.log;
+  c(lg.length === 3 && lg[0].tx === 'cargá' && lg[1].tx === 'cargá diez' && lg[2].tx === 'cargá diez metros de cable', 'mientras dicta, el texto va apareciendo en vivo en el cuadro · ' + JSON.stringify(lg.map((x) => x.tx)));
+  c(lg.length && lg.every((x) => x.vis && x.n === 28 && x.est.on) && lg[2].distintas >= 3, 'mientras escucha se ve la onda de 28 rayitas y se mueve · ' + JSON.stringify(lg.map((x) => [x.vis, x.distintas, x.fuente])));
+  c(cel ? lg.every((x) => x.est.real === false && x.fuente === 'simulada') : lg.some((x) => x.est.real === true && x.fuente === 'real'), cel ? 'en el celu la onda es simulada (no abre el micrófono dos veces)' : 'en la compu la onda usa el nivel real del micrófono (getUserMedia + AnalyserNode) · ' + JSON.stringify(lg.map((x) => x.fuente)));
+  c(r.fin === 'cargá diez metros de cable' && r.oculta && !r.est.on, 'al terminar queda el texto dictado y la onda se apaga · ' + JSON.stringify({ fin: r.fin, oculta: r.oculta }));
+  await p.fill('#iaTxt', '');
+  // ========================================================= 1e) asistente más «vivo»: búsqueda aproximada, glosario, effort y system fijo
+  r = await p.evaluate(() => { const H = window.__asistente.herramientas, m = (x) => { const o = H.buscar_obra({ texto: x }).r; return o && o.mejor ? [o.mejor.nombre, o.mejor.puntaje] : null; };
+    const d1 = H.datos_obra({ obraId: 'sanma' }), d2 = H.datos_obra({ obraId: 'alamos' });
+    return { pueblito: m('pueblito'), sanma: m('sanma'), typo: m('puebito'), sinTilde: m('plaza san martin'), d1: !d1.err, d2: d2.err ? (d2.r && d2.r.candidatos || d2.candidatos || []).length : -1, d2err: d2.err || '' }; });
+  c(r.pueblito && r.pueblito[0] === 'PLAZA EL PUEBLITO' && r.sanma && r.sanma[0] === 'Plaza San Martín' && r.typo && r.typo[0] === 'PLAZA EL PUEBLITO' && r.sinTilde && r.sinTilde[0] === 'Plaza San Martín' && r.sanma[1] > 0, 'buscar_obra aproximado: «pueblito», «puebito» (tipeo) → PLAZA EL PUEBLITO; «sanma», «plaza san martin» → San Martín, con puntaje · ' + JSON.stringify(r));
+  c(r.d1, 'las herramientas que reciben nombre de obra la encuentran igual («sanma» en datos_obra)');
+  c(r.d2 === 2 && /varias obras/.test(r.d2err), 'solo pregunta si hay 2+ parecidas de verdad («alamos»: LOS ALAMOS NORTE y SUR) · ' + JSON.stringify([r.d2, r.d2err]));
+  const n0 = pedidos.length;
+  guion.push('Tiene 10 columnas.'); await p.fill('#iaTxt', 'cuantas columnas tiene sanma'); await p.click('#iaEnviar');
+  for (let i = 0; i < 40 && pedidos.length < n0 + 1; i++) await p.waitForTimeout(150); await p.waitForTimeout(600);
+  guion.push('Listo, te lo comparo.'); await p.fill('#iaTxt', 'revisá y compará el cómputo de sanma con el itemizado'); await p.click('#iaEnviar');
+  for (let i = 0; i < 40 && pedidos.length < n0 + 2; i++) await p.waitForTimeout(150); await p.waitForTimeout(600);
+  const q1 = pedidos[n0], q2 = pedidos[n0 + 1];
+  c(q1 && q1.system.length === 1 && /pe erre efe ve/.test(q1.system[0].text) && /PRFV/.test(q1.system[0].text) && /be pe ene/.test(q1.system[0].text) && /no lo comentes/.test(q1.system[0].text) && /ACTUÁ sin preguntar de más/.test(q1.system[0].text), 'el system trae el glosario del dictado (PRFV, PAT, BPN, OT…) y «actuá sin preguntar de más»');
+  const u1 = q1 && q1.messages[q1.messages.length - 1];
+  c(u1 && Array.isArray(u1.content) && /^\[Contexto de la app/.test(u1.content[0].text) && /Hoy es/.test(u1.content[0].text) && u1.content[1].text === 'cuantas columnas tiene sanma', 'el contexto que cambia (fecha, hora, pantalla, permisos) va al principio del mensaje de la persona, no en el system');
+  c(q1 && q1.output_config.effort === 'low' && q1.max_tokens === 4000 && q2 && q2.output_config.effort === 'medium' && q2.max_tokens === 16000, 'dato simple («cuántas…») → effort low y respuesta corta; «revisá y compará…» → medium · ' + JSON.stringify([q1 && [q1.output_config, q1.max_tokens], q2 && [q2.output_config, q2.max_tokens]]));
+  c(q1 && q2 && JSON.stringify(q1.system) === JSON.stringify(q2.system) && JSON.stringify(q2.messages.slice(0, q1.messages.length)) === JSON.stringify(q1.messages), 'el system es idéntico entre turnos y la historia solo se agrega (los bloques de pensamiento siguen valiendo)');
   await p.evaluate(() => { window.__remitoFoto.cerrar(); const x = document.querySelector('[data-ia="volver"]') || document.querySelector('[data-ia="cerrar"]'); x && x.click(); });
   await p.waitForTimeout(300);
 
@@ -181,6 +228,34 @@ function datos() {
   r = await p.evaluate(() => (document.getElementById('pfFoto') || {}).dataset ? document.getElementById('pfFoto').dataset.cod : '');
   c(JSON.stringify((D.catalogoProductos['3017'] || {}).ean) === '["7790000000039"]' && r === '3017', 'lo asocia al producto elegido y abre su ficha');
   await p.evaluate(() => { const m = document.getElementById('pfModal'); m && m.remove(); });
+
+  // ========================================================= 2b) app de Android 1.4: partialResults del plugin y modo charla
+  await p.evaluate(() => {
+    const L = {}; window.__ondaLog2 = []; window.__srModo = 'dicta';
+    const emitir = (n, x) => (L[n] || []).slice().forEach((f) => f(x));
+    window.Capacitor.Plugins.SpeechRecognition = {
+      available: async () => ({ available: true }), checkPermissions: async () => ({ speechRecognition: 'granted' }), requestPermissions: async () => ({ speechRecognition: 'granted' }),
+      addListener: async (n, cb) => { (L[n] = L[n] || []).push(cb); return { remove() { L[n] = (L[n] || []).filter((x) => x !== cb); } }; },
+      start: async () => { const ps = ['hola', 'hola che']; ps.forEach((s, i) => setTimeout(() => { emitir('partialResults', { matches: [s] }); setTimeout(() => { const o = document.getElementById('iaOndaV'); window.__ondaLog2.push({ tx: document.getElementById('iaTxt').value, est: window.__iaOnda.estado(), vis: !!o && !o.hidden, modo: o && o.dataset.modo }); }, 80); }, 300 + i * 300));
+        if (window.__srModo === 'dicta') setTimeout(() => emitir('listeningState', { state: 'stopped' }), 1100); },
+      stop: async () => { emitir('listeningState', { state: 'stopped' }); }
+    };
+  });
+  await p.evaluate(() => window.__asistenteAbrir()); await p.waitForTimeout(600);
+  await p.fill('#iaTxt', '');
+  await p.click('#iaPanel [data-ia="mic"]'); await p.waitForTimeout(1700);
+  r = await p.evaluate(() => ({ log: window.__ondaLog2, fin: document.getElementById('iaTxt').value, oculta: document.getElementById('iaOndaV').hidden }));
+  c(r.log.length === 2 && r.log[0].tx === 'hola' && r.log[1].tx === 'hola che' && r.log.every((x) => x.vis && x.est.real === false && x.modo === 'dicta') && r.fin === 'hola che' && r.oculta, 'app 1.4: los resultados parciales del plugin van apareciendo en vivo, con la onda simulada · ' + JSON.stringify(r));
+  await p.evaluate(() => { window.__ondaLog2 = []; window.__srModo = 'charla'; document.getElementById('iaTxt').value = ''; });
+  await p.click('#iaPanel [data-ia="charla"]'); await p.waitForTimeout(1000);
+  r = await p.evaluate(() => ({ log: window.__ondaLog2, viejaOculta: getComputedStyle(document.querySelector('#iaCharla .ia-onda')).display === 'none', charla: !document.getElementById('iaCharla').hidden }));
+  c(r.charla && r.log.length === 2 && r.log[1].tx === 'hola che' && r.log.every((x) => x.vis && x.modo === 'charla') && r.viejaOculta, 'modo charla: lo que dice va apareciendo en el cuadro y se mueve la onda · ' + JSON.stringify(r.log.map((x) => [x.tx, x.modo])));
+  await foto(p, 'v137_8_charla_onda', 0);
+  await p.click('#iaCharla [data-ia="charlafin"]'); await p.waitForTimeout(1200);
+  r = await p.evaluate(() => ({ oculta: document.getElementById('iaOndaV').hidden, on: window.__iaOnda.estado().on, charla: document.body.classList.contains('ia-charlando') }));
+  c(r.oculta && !r.on && !r.charla, '«Terminar» corta la charla y apaga la onda · ' + JSON.stringify(r));
+  await p.evaluate(() => { delete window.Capacitor.Plugins.SpeechRecognition; const x = document.querySelector('[data-ia="volver"]') || document.querySelector('[data-ia="cerrar"]'); x && x.click(); });
+  await p.waitForTimeout(300);
 
   // ========================================================= 3) etiquetas QR de herramientas
   await p.evaluate(() => window.__v135.irStock('herramientas')); await p.waitForTimeout(1200);
