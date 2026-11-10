@@ -2,6 +2,35 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v140 — 10/11/2026 (entregada, sin publicar) · Remito «inteligente»: sabe qué ya se cargó y propone completar lo que falta
+
+**Pedido de Ángel** (10/11/2026): «Si el remito ya está puesto, me tendría que decir: este remito o esta factura ya fue registrada antes, ¿seguir o no seguir? O que me diga: este remito fue cargado pero no todo, se cargó hasta aquí, ¿cargamos lo que no se cargó? O se cargó todo pero no el precio, ¿cargamos el precio? Hacerlo más pro.» Además (arreglo chico): en el Asistente, después de dictar con el 🎤 o en modo charla y enviar, el texto volvía a aparecer escrito en la caja.
+
+**Base:** ORIGINAL 139 (la publicada, `0b9dbaba…`).
+
+**Cambios**
+- **Remito «inteligente»** (bloque nuevo dentro de `remitoFoto`; fuente en `herramientas/v140/remito140.js` y `.css`, con ganchos chicos en el código de la v138):
+  - **Reconoce el remito ya cargado, aunque se haya cargado a mano.** Clave = proveedor + número normalizados: sin espacios, puntos, guiones ni letras, sin ceros adelante de cada parte y sin tildes («0001-00012345» = «1-12345» = «N° 0001.00012345»); proveedores parecidos cuentan como el mismo («Richetta» = «RICHETTA S.A.», sin S.A./SRL/tildes; prefijo o una o dos letras de diferencia). **El proveedor tiene que coincidir:** el mismo número de otro proveedor es otro remito (sale como nuevo).
+  - Busca en las entradas de `movimientos` (las de la IA y las de «Registrar movimiento»: campos `proveedor` y `remito`; no anuladas, sin devoluciones ni correcciones; en memoria, sin lecturas de más) y en los resúmenes `adjuntos` `tipo:"remitoRes"` (por `numN` y, los de la v138, por su `clave`). Los resúmenes nuevos guardan también `numN` y `provN`.
+  - **Renglón por renglón**, por código del pañol (después de proponer los códigos como siempre; si un código se repite, lo cargado se reparte en orden): ✅ **Ya cargado** (cantidad igual o mayor y con precio) · 🟠 **Cargado a medias** («se cargaron 40 de 100 → faltan 60») · 💲 **Cargado sin precio** (cantidad completa, `precioUnit` vacío o 0, y el precio todavía no se puso desde este remito) · 🆕 **No se cargó** · 🔴 **Sin código** (como hoy).
+  - **Cartel arriba** (`.card` de aviso, borde verde o naranja, chips de estado con color):
+    - Todo cargado: «🧾 Este remito ya se cargó completo el dd/mm por <quién> (E-0012 a E-0018)» con «Ver lo cargado» (las entradas con N°, cantidad, precio, cuándo, quién, «con la IA / a mano» y «🧾 Ver»), «Cargar igual» (la tarjeta de siempre) y «Cancelar».
+    - Falta algo: «🧾 Este remito ya se cargó en parte el dd/mm: 1 de 4 renglones. Faltan 2 renglones (1 a medias) y 1 sin precio.» con **«➕ Cargar solo lo que falta»**, «💲 Solo los precios que faltan», «Revisar renglón por renglón», «Ver lo cargado» y «Cancelar».
+  - **«➕ Cargar solo lo que falta»:** entradas solo por la diferencia de los 🟠 y por los 🆕 (mismo remito y proveedor, `completaRemito` {estado, cargadoAntes, enRemito}), y el precio de los 💲 al catálogo (`costo`, `costoFecha`, `costoFuente` como «Solo precios»; si el remito es más viejo que el precio guardado, no lo pisa). Los ✅ no se tocan: **nunca se duplica stock sin que la persona lo elija.**
+  - **«💲 Solo los precios que faltan»:** la hoja de «Solo precios» de la v138 con los 💲 tildados; el remito más viejo que el precio actual sigue avisando y queda destildado.
+  - **«Revisar renglón por renglón»:** la tarjeta editable de siempre con cada renglón marcado con su estado y tildado según la propuesta (✅ destildados, 🟠 con lo que falta, 💲 con «Poner el precio en el catálogo», 🆕 tildados); tildar un ✅ avisa «se duplica». «Sí, cargar lo tildado».
+  - Al completar: el resumen `remitoRes` se actualiza, o se crea si el remito venía de una carga a mano (`deCargaManual`), con historial «completado el dd/mm por X: +N renglones, M precios»; auditoría `remito_completar` (`porAsistente:true`). «Remito nuevo» y «💲 Solo precios» siguen igual que en la v138 (con su aviso de repetido).
+- **Dictado del Asistente** (`asistenteIaCod`): cada dictado es una «sesión». Al enviar se corta en seco (`abort()` del navegador; `stop()` + `removeAllListeners()` del plugin de la app 1.4) y cualquier resultado que llegue tarde de una sesión vieja se descarta: la caja queda vacía. En modo charla, el envío automático vacía la caja y no se vuelve a llenar. Si el reconocedor pega el texto dos veces («hola che hola che»), queda una sola vez.
+- **Reglas:** no hacen falta nuevas (verificado: `adjuntos` create/update, `movimientos` y `catalogoProductos` los edita quien edita el pañol).
+
+**Pruebas:** `t_v140` nueva (PC 39/39, celu 41/41): normalización; remito nuevo; mismo número de otro proveedor → nuevo; cargado a mano sin precio → «Solo los precios que faltan» (el más viejo avisa, sin mover stock, resumen creado con historial); cargado completo con la IA (cartel, Ver lo cargado, Cargar igual, Cancelar); cargado a mano en «Registrar movimiento» con «1-12345» y la foto «0001-00012345», a medias (✅ 🟠 💲 🆕 🔴, revisar, «Cargar solo lo que falta»: 1010 × 60 y 3053 × 10, sin duplicar, precio del 💲, resumen e historial, auditoría; leído otra vez = completo); dictado con resultados tardíos del navegador, del plugin y en modo charla (la misma prueba sobre la v139 marca el error). Batería completa en PC y celu sobre el index entregado (de a 3, 142 pruebas): todo OK salvo `t_v083` (reemplazada por `t_v084`, como siempre).
+
+**Capturas** (`v140/capturas`, celu y PC): `v140_1_completo`, `v140_2_a_medias`, `v140_3_sin_precio`, `v140_4_tarjeta_estados`.
+
+**Huellas:** ORIGINAL `43e7fc5c…53ce` · index `43301502…9a83` (sello `2026-11-10 09:18 · b51ec1`) · ver `herramientas/v140/huellas.txt`.
+
+**Qué tiene que hacer Ángel:** subir solo `index.html` a GitHub cuando decida publicarla. Sin reglas nuevas, sin APK nuevo, sin tocar los Workers.
+
 ## v139 — 10/11/2026 (publicada en GitHub, commit 8cc5ef3) · La app ocupa toda la pantalla en la compu
 
 **Pedido de Ángel** (10/11/2026): «revisá cómo se adaptan las pantallas nuevas a la compu, la idea es que ocupe toda la pantalla».
