@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v140 — 10/11/2026 (entregada, sin publicar) · Remito «inteligente»: sabe qué ya se cargó y propone completar lo que falta
+## v140 — 10/11/2026 (publicada en GitHub, commit 4f22b67) · Remito «inteligente»: sabe qué ya se cargó y propone completar lo que falta
 
 **Pedido de Ángel** (10/11/2026): «Si el remito ya está puesto, me tendría que decir: este remito o esta factura ya fue registrada antes, ¿seguir o no seguir? O que me diga: este remito fue cargado pero no todo, se cargó hasta aquí, ¿cargamos lo que no se cargó? O se cargó todo pero no el precio, ¿cargamos el precio? Hacerlo más pro.» Además (arreglo chico): en el Asistente, después de dictar con el 🎤 o en modo charla y enviar, el texto volvía a aparecer escrito en la caja.
 
@@ -30,6 +30,9 @@ Autor: Miguel Ángel Díaz © 2026
 **Huellas:** ORIGINAL `43e7fc5c…53ce` · index `43301502…9a83` (sello `2026-11-10 09:18 · b51ec1`) · ver `herramientas/v140/huellas.txt`.
 
 **Qué tiene que hacer Ángel:** subir solo `index.html` a GitHub cuando decida publicarla. Sin reglas nuevas, sin APK nuevo, sin tocar los Workers.
+
+
+**Nota (al publicar):** `t_v136b` PC fallaba desde la v139 por cómo medía (tomaba `.ie-col`, que en la compu ahora es `display:contents` y mide 0). Se ajustó para medir la primera tarjeta `.ie-tarj`: 3/3 OK. No era un error de la app.
 
 ## v139 — 10/11/2026 (publicada en GitHub, commit 8cc5ef3) · La app ocupa toda la pantalla en la compu
 
