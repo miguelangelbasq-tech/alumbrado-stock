@@ -1,0 +1,229 @@
+<script id="atrasApp">
+(function () {
+  "use strict";
+  // v138 · El botón «atrás» del celular (y la flecha del navegador / el botón del mouse) vuelve atrás (pedido de Ángel, 10/11/2026).
+  //  · Una entrada de la historia por cada «nivel»: cada pantalla después del Inicio y cada cosa abierta encima (menú, Asistente,
+  //    visores, hoja A4, ventanas y hojas, cierre de la orden, cámara, legajo abierto…). Se agregan cuando se abren (casi
+  //    siempre dentro del toque, así Chrome no las salta) y, si se cierran con su ✕ o se va al Inicio, se consumen solas
+  //    (history.go hacia atrás, en silencio): no quedan entradas fantasma.
+  //  · «Atrás» = lo de más arriba se cierra con la MISMA función que su ✕; si no hay nada encima, la pantalla anterior.
+  //    En el Inicio sin nada encima no queda historia: el APK manda la app al fondo (MainActivity: canGoBack() = false →
+  //    moveTaskToBack) y en la compu el navegador sale de la página, como cualquier sitio.
+  //  · Formularios a medio cargar: «¿Salir sin guardar?» (Sí / No, hoja Cristal) en «Llenar orden» con tareas o notas,
+  //    «Registrar movimiento» con producto o cantidad, y el cierre de la orden si se tocó algo. «No» vuelve a poner la entrada.
+  //  · Reemplaza lo que hacían por separado appCelular (pantallas y menú), el visor de planos, la hoja del celu, la cámara,
+  //    la galería y la hoja A4 (sus pushState quedaron apagados en el parche).
+  //  · Estado en la historia: { ema: { n } } (n = nivel). Respeta la dirección (?doc= / ?obra= de la v137 y su replaceState).
+  if (window.__atras) return;
+  const $ = (id) => document.getElementById(id);
+  const VISTAS = { inicio: "viewInicio", calc: "viewCalculadora", parte: "viewParteDiario", plan: "viewPlanificacion", avance: "viewAvance", mapa: "viewMapa", stock: "viewStock", informe: "viewInforme", gastos: "viewGastos", produccion: "viewProduccion", normas: "viewNormas", registro: "viewRegistro", tablero: "viewTablero", usuarios: "viewUsuarios", obras: "viewObras", mistareas: "viewMisTareas", guias: "viewGuias", perfil: "viewPerfil" };
+  const ORDEN_RAIZ = ["inicio", "registro", "calc", "parte", "plan", "avance", "mapa", "stock", "informe", "gastos", "produccion", "normas", "mistareas", "obras", "guias", "tablero"];
+  const vis = (el) => { if (!el || el.hidden) return false; const s = getComputedStyle(el); return s.display !== "none" && s.visibility !== "hidden"; };
+  const perm = (h) => { try { return window.PERMISOS && PERMISOS.permiso ? PERMISOS.permiso(h) : "ver"; } catch (e) { return "ver"; } };
+  const oculta = (v) => perm(v) === "oculto";
+  function vistaActual() { for (const k in VISTAS) { const e = $(VISTAS[k]); if (e && e.style.display !== "none" && vis(e)) return k; } return "inicio"; }
+  function raiz() { if (!oculta("inicio")) return "inicio"; return ORDEN_RAIZ.find((v) => !oculta(v)) || "tablero"; }
+  const fuera = () => { const p = $("portada"); return (p && vis(p)) || !!$("bioVelo"); };   // sin sesión o con el bloqueo de huella: no se toca la historia
+
+  // ------------------------------------------------------------------------------------------- capas (lo que se abre encima)
+  const clic = (sel, raizEl) => { const b = (raizEl || document).querySelector(sel); if (b) { b.click(); return true; } return false; };
+  const CAPAS = [
+    { id: "menu", el: () => $("menuLateral"), abierta: (e) => vis(e) && e.classList.contains("abierto"), cerrar: () => { typeof window.cerrarMenuLateral == "function" && window.cerrarMenuLateral(); } },
+    { id: "ia", el: () => $("iaPanel"), abierta: (e) => vis(e), cerrar: (e) => { clic('[data-ia="volver"]', e) || (window.__asistente && window.__asistente.cerrar && window.__asistente.cerrar()); } },
+    { id: "cam", el: () => $("emaCam"), abierta: (e) => vis(e), cerrar: (e) => { clic('[data-ec="cerrar"]', e); } },
+    { id: "galeria", el: () => $("gpVisor"), abierta: (e) => vis(e), cerrar: (e) => { clic('[data-gp="cerrar"]', e); } },
+    { id: "hoja", el: () => $("hojaOv"), abierta: (e) => vis(e), cerrar: (e) => { (window.hojaEMA && window.hojaEMA.cerrar) ? window.hojaEMA.cerrar() : clic('[data-hj="cerrar"]', e); } },
+    { id: "hojaCel", el: () => $("hojaCelOv"), abierta: (e) => vis(e), cerrar: (e) => { clic('[data-hc="cerrar"]', e); } },
+    { id: "plano", el: () => $("plnVisor"), abierta: (e) => vis(e), cerrar: () => { typeof window.cerrarPlano == "function" && window.cerrarPlano(); } },
+    { id: "cierre", el: () => $("cierreOt"), abierta: (e) => e.style.display !== "none" && vis(e), cerrar: () => { typeof window.cerrarCuadroCierre == "function" && window.cerrarCuadroCierre(); }, sucio: () => ST.tocadoCierre },
+    // subniveles dentro de una pantalla (tienen su «← Volver»)
+    { id: "legajo", sub: "obras", el: () => document.querySelector("#obrasApp [data-lgvolver]"), abierta: (e) => vis(e) && e.offsetParent !== null, cerrar: (e) => e.click() },
+    { id: "mtOrden", sub: "mistareas", el: () => document.querySelector("#viewMisTareas [data-mtvolver]"), abierta: (e) => e.offsetParent !== null, cerrar: (e) => e.click() },
+    { id: "guia", sub: "guias", el: () => [...document.querySelectorAll('#viewGuias [data-gq="volver"]')].find((b) => b.offsetParent !== null), abierta: (e) => !!e, cerrar: (e) => e.click() },
+    { id: "plazaFicha", sub: null, el: () => [...document.querySelectorAll('[data-fp="volver"]')].find((b) => b.offsetParent !== null && !b.closest("[role=dialog],.v7-ov")), abierta: (e) => !!e, cerrar: (e) => e.click() },
+    { id: "gananciaObra", sub: "gastos", el: () => [...document.querySelectorAll('#viewGastos .ga-volver')].find((b) => b.offsetParent !== null), abierta: (e) => !!e, cerrar: (e) => e.click() }
+  ];
+  // cualquier otra ventana u hoja fija que tape la pantalla (las de la app: .v7-ov, role=dialog, …Ov, …Hoja, …Modal, …Pop)
+  const NO_CAPA = /^(navN1|navTab|iaFab|ieReloj|offAviso|bioVelo|portada|rolEspera|edBanner|ofBarra|sugCaja|permToast|avisoApp|atPreg|uvPanel|iaCharla|hojaCelHoja)$/;
+  const GEN_SEL = '.v7-ov, [role="dialog"], [aria-modal="true"], [id$="Ov"], [id$="Overlay"], [id$="Modal"], [id$="Hoja"], [id$="Visor"], [id$="Pop"], [id$="Elegir"], [id$="Edit"], [id$="Conf"]';
+  const genId = new WeakMap(); let genSeq = 0;
+  function idGen(e) { if (e.id) return "#" + e.id; let i = genId.get(e); if (!i) { i = "@" + (++genSeq); genId.set(e, i); } return i; }
+  function genericas(tomadas) {
+    const l = [], vw = window.innerWidth || 1, vh = window.innerHeight || 1;
+    const cand = new Set();
+    [].forEach.call(document.body.children, (e) => { if (e.matches && e.matches(GEN_SEL)) cand.add(e); });
+    document.querySelectorAll(GEN_SEL).forEach((e) => { if (e.parentElement && e.parentElement.closest && !e.parentElement.closest(GEN_SEL)) cand.add(e); });
+    cand.forEach((e) => {
+      if (tomadas.has(e) || (e.id && NO_CAPA.test(e.id)) || /^(SCRIPT|STYLE|TEMPLATE|LINK)$/.test(e.tagName)) return;
+      if ([...tomadas].some((t) => t.contains && t.contains(e))) return;
+      if (e.closest && e.closest("#iaPanel, #menuLateral, #cierreOt, #hojaOv, #gpVisor, #emaCam, #plnVisor, #hojaCelOv")) return;
+      if (!vis(e)) return;
+      const s = getComputedStyle(e); if (s.position !== "fixed") return;
+      const r = e.getBoundingClientRect(); if (r.width < 40 || r.height < 40) return;
+      const grande = r.width * r.height >= vw * vh * 0.3;
+      if (!grande && !(e.getAttribute("role") === "dialog" || e.getAttribute("aria-modal") === "true" || e.classList.contains("v7-ov"))) return;
+      l.push({ id: idGen(e), gen: true, e });
+    });
+    return l;
+  }
+  function capasAbiertas() {
+    const l = [], tomadas = new Set(), va = vistaActual();
+    CAPAS.forEach((c) => {
+      let e = null; try { e = c.el(); } catch (er) { e = null; }
+      if (!e) return;
+      if (c.sub !== undefined && c.sub !== null && c.sub !== va) return;
+      let ab = false; try { ab = c.abierta(e); } catch (er) { ab = false; }
+      if (ab) { l.push({ id: c.id, c, e }); if (!c.sub && c.sub !== null) tomadas.add(e); }
+      else if (c.sub === undefined) tomadas.add(e);
+    });
+    genericas(tomadas).forEach((x) => l.push(x));
+    return l;
+  }
+  // el ✕ de una ventana genérica: el botón de cerrar que tenga; si no, tocar el fondo; si no, Escape
+  function cerrarGenerica(e) {
+    const bs = [...e.querySelectorAll("button, [role=button], a.btn-ghost")].filter((b) => b.offsetParent !== null || getComputedStyle(b).position === "fixed");
+    const esX = (b) => {
+      const al = (b.getAttribute("aria-label") || "").toLowerCase(), tx = (b.textContent || "").trim();
+      if (/^cerrar$|^volver$/.test(al)) return true;
+      if (/^[✕×✖]$/.test(tx) || /^(cerrar|cancelar)$/i.test(tx)) return true;
+      for (const a of b.attributes) if (/^data-/.test(a.name) && /^(cerrar|x|close)$/i.test(a.value)) return true;
+      return /(^|\s)(v7-x|menu-cerrar|hc-x|gp-b-x|cerrar|x-cerrar)(\s|$)/.test(b.className || "");
+    };
+    const b = bs.find(esX);
+    if (b) { b.click(); return; }
+    try { e.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true })); } catch (er) { }
+    if (document.contains(e) && vis(e)) { try { document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); } catch (er) { } }
+  }
+
+  // ------------------------------------------------------------------------------------------- formularios a medio cargar
+  function llenarOrdenSucio() {
+    const b = $("otEmitirBtn"); if (!b || b.offsetParent === null) return false;
+    if (document.querySelector(".ot-act-check:checked")) return true;
+    if ([...document.querySelectorAll('#actividadesContainer input[data-field="actividad"]')].some((i) => String(i.value || "").trim())) return true;
+    return ["otNotas", "otMateriales"].some((id) => { const i = $(id); return i && String(i.value || "").trim(); });
+  }
+  function movimientoSucio() {
+    const c = $("cardStockRegistrar"); if (!c || c.offsetParent === null) return false;
+    if (["stockMovProducto", "stockMovCantidad"].some((id) => { const i = $(id); return i && String(i.value || "").trim(); })) return true;
+    return [...c.querySelectorAll("#stockMasivoFilas input[type=text], #stockSalMasivoFilas input[type=text], #stockDevolFilas input[type=text]")].some((i) => i.offsetParent !== null && String(i.value || "").trim());
+  }
+  const SUCIO = { parte: llenarOrdenSucio, stock: movimientoSucio };
+  function vistaSucia(v) { if (window.__atrasNoPreguntar) return false; try { return !!(SUCIO[v] && SUCIO[v]()); } catch (e) { return false; } }
+
+  // ------------------------------------------------------------------------------------------- estado
+  const ST = { pila: [], vista: null, prof: 0, silencio: 0, abiertas: [], porAtras: false, preguntando: null, tocadoCierre: false, listo: false };
+  function nivelObjetivo() { return Math.max(0, ST.pila.length - 1) + ST.abiertas.length; }
+  function navegar(v) {
+    const r = raiz();
+    if (v === r) { ST.pila = [r]; return; }
+    if (!ST.pila.length || ST.pila[0] !== r) ST.pila = [r].concat(ST.pila.filter((x) => x !== r));
+    const i = ST.pila.indexOf(v);
+    if (i >= 0) ST.pila = ST.pila.slice(0, i + 1); else ST.pila.push(v);
+    if (ST.pila.length > 12) ST.pila.splice(1, ST.pila.length - 12);
+  }
+  function estadoDe(n) { const s = Object.assign({}, history.state || {}); delete s.emaVista; delete s.emaMenu; s.ema = { n }; return s; }
+  function nivelDe(st) { return st && st.ema && typeof st.ema.n == "number" ? st.ema.n : 0; }
+  function leerCapas() {
+    const ab = capasAbiertas(), ids = ab.map((x) => x.id);
+    ST.abiertas = ST.abiertas.filter((x) => ids.indexOf(x.id) >= 0).map((x) => ab.find((y) => y.id === x.id));
+    ab.forEach((x) => { if (!ST.abiertas.some((y) => y.id === x.id)) { ST.abiertas.push(x); alAbrir(x); } });
+  }
+  function alAbrir(x) { if (x.id === "cierre") ST.tocadoCierre = false; }
+  const mirados = new WeakSet();
+  let moAttr = null;
+  function mirar() {   // ventanas que se abren cambiando su estilo (sin agregarse a la página)
+    try {
+      if (!moAttr) moAttr = new MutationObserver(pronto);
+      ["menuLateral", "cierreOt", "iaPanel", "emaCam"].forEach((id) => { const e = $(id); if (e && !mirados.has(e)) { mirados.add(e); moAttr.observe(e, { attributes: true, attributeFilter: ["class", "style", "hidden"] }); } });
+    } catch (e) { }
+  }
+  function sync() {
+    if (!ST.listo || window.__atrasNo) return;
+    mirar();
+    if (fuera()) return;
+    try {
+      const v = vistaActual();
+      if (v !== ST.vista) { if (!ST.porAtras) navegar(v); ST.vista = v; }
+      leerCapas();
+      if (ST.preguntando || ST.silencio) return;
+      const obj = nivelObjetivo();
+      if (obj > ST.prof) { for (let n = ST.prof + 1; n <= obj; n++) history.pushState(estadoDe(n), ""); ST.prof = obj; }
+      else if (obj < ST.prof) { const d = obj - ST.prof; ST.prof = obj; ST.silencio++; history.go(d); }
+    } catch (e) { console.warn("[atrás]", e); }
+  }
+  let tSync = 0;
+  const pronto = () => { clearTimeout(tSync); tSync = setTimeout(sync, 0); };
+
+  // ------------------------------------------------------------------------------------------- «atrás»
+  function preguntar() {
+    return new Promise((ok) => {
+      cerrarPregunta(false);
+      const ov = document.createElement("div"); ov.id = "atPreg"; ov.className = "v7-ov v7-arriba no-print"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true");
+      ov.innerHTML = '<div class="v7-caja"><div class="v7-asa"></div><div class="v7-cab"><h3>¿Salir sin guardar?</h3></div><p class="v7-txt">Tenés datos cargados que todavía no guardaste. Si salís, no se guardan.</p><div class="v7-acc"><button type="button" class="btn-primary" data-atp="si">Sí, salir</button><button type="button" class="btn-ghost" data-atp="no">No, quedarme</button></div></div>';
+      const fin = (si) => { if (ST.preguntando !== fin) return; ST.preguntando = null; ov.remove(); ok(si); };
+      ov.addEventListener("click", (e) => { const b = e.target.closest("[data-atp]"); if (b) fin(b.dataset.atp === "si"); else if (e.target === ov) fin(false); });
+      ST.preguntando = fin; document.body.appendChild(ov);
+      try { ov.querySelector('[data-atp="no"]').focus({ preventScroll: true }); } catch (e) { }
+    });
+  }
+  function cerrarPregunta(si) { if (ST.preguntando) ST.preguntando(!!si); }
+  function cerrarCapa(x) {
+    try { if (x.gen) cerrarGenerica(x.e); else x.c.cerrar(x.e); } catch (e) { console.warn("[atrás] cerrar", x.id, e); }
+    if (x.id === "cierre") ST.tocadoCierre = false;
+  }
+  async function pasoAtras() {
+    if (ST.preguntando) { cerrarPregunta(false); return; }
+    const av = $("avisoApp"); if (av) { const ok = av.querySelector(".av-ok"); ok && ok.click(); }   // el aviso se cierra y «atrás» sigue (como antes)
+    leerCapas();
+    const x = ST.abiertas[ST.abiertas.length - 1];
+    if (x) {
+      if (x.c && x.c.sucio && x.c.sucio() && !window.__atrasNoPreguntar && !(await preguntar())) return;
+      cerrarCapa(x); ST.abiertas = ST.abiertas.filter((y) => y !== x); return;
+    }
+    const v = vistaActual(), r = raiz();
+    if (v === r && ST.pila.length <= 1) return;
+    if (vistaSucia(v) && !(await preguntar())) return;
+    if (ST.pila[ST.pila.length - 1] === v) ST.pila.pop();
+    while (ST.pila.length > 1 && oculta(ST.pila[ST.pila.length - 1])) ST.pila.pop();
+    const dest = ST.pila[ST.pila.length - 1] || r; if (!ST.pila.length) ST.pila = [r];
+    ST.porAtras = true;
+    try { typeof window.mostrarVista == "function" && window.mostrarVista(dest); } catch (e) { console.warn("[atrás] vista", e); }
+    finally { ST.porAtras = false; ST.vista = vistaActual(); if (ST.vista !== dest) navegar(ST.vista); }
+  }
+  let cola = Promise.resolve();
+  window.addEventListener("popstate", (ev) => {
+    if (window.__atrasNo || !ST.listo) return;
+    const n = nivelDe(ev.state);
+    if (ST.silencio > 0) { ST.silencio--; ST.prof = n; return; }
+    if (fuera()) { ST.prof = n; return; }
+    if (n >= ST.prof) { ST.prof = n; pronto(); return; }   // «adelante» o una entrada ajena: se acomoda solo
+    const pasos = ST.prof - n; ST.prof = n;
+    cola = cola.then(async () => { for (let k = 0; k < pasos; k++) await pasoAtras(); }).catch((e) => console.warn("[atrás]", e)).then(() => sync());
+  });
+
+  // ------------------------------------------------------------------------------------------- enganches
+  document.addEventListener("input", (e) => { if (e.isTrusted && e.target && e.target.closest && e.target.closest("#cierreOt")) ST.tocadoCierre = true; }, true);
+  document.addEventListener("change", (e) => { if (e.isTrusted && e.target && e.target.closest && e.target.closest("#cierreOt")) ST.tocadoCierre = true; }, true);
+  document.addEventListener("click", () => { setTimeout(sync, 0); setTimeout(sync, 350); }, true);
+  function envolver() {
+    const mv = window.mostrarVista; if (typeof mv != "function") return false; if (mv.__atr) return true;
+    const n = function () { const r = mv.apply(this, arguments); pronto(); return r; };
+    window.__heredar && window.__heredar(n, mv); n.__atr = 1; window.mostrarVista = n; return true;
+  }
+  function arrancar() {
+    if (ST.listo) return;
+    ST.listo = true; envolver();
+    const n0 = nivelDe(history.state);
+    if (n0 > 0) ST.prof = n0;   // se recargó la página parada en una entrada nuestra: sync la consume
+    else { try { history.replaceState(estadoDe(0), ""); } catch (e) { } ST.prof = 0; }
+    ST.vista = null; sync();
+    try { new MutationObserver(pronto).observe(document.body, { childList: true, attributes: true, attributeFilter: ["class"] }); } catch (e) { }
+    setInterval(sync, 1000);
+    document.addEventListener("permisos-listos", () => setTimeout(sync, 50));
+  }
+  document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", () => setTimeout(arrancar, 0)) : setTimeout(arrancar, 0);
+  setTimeout(envolver, 1500);
+
+  window.__atras = { sync, estado: () => ({ pila: ST.pila.slice(), vista: ST.vista, prof: ST.prof, capas: ST.abiertas.map((x) => x.id), silencio: ST.silencio, preguntando: !!ST.preguntando, estadoHist: history.state }), capas: () => capasAbiertas().map((x) => x.id), sucia: vistaSucia, preguntar, pasoAtras };
+})();
+</script>

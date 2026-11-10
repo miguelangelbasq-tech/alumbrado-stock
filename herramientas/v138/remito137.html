@@ -1,0 +1,434 @@
+<style id="remitoFotoCss">
+/* v137 · remito por foto con IA (diseño Cristal) */
+.rf-entrada{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:2px 0 12px;padding:12px 14px;border-radius:18px;background:var(--bg-soft,rgba(40,40,94,.04));border:1px solid var(--border,rgba(40,40,94,.1))}
+.rf-entrada .btn-ghost{width:auto;margin:0;min-height:46px;padding:0 18px;font-weight:700}
+.rf-entrada .hint{flex:1 1 220px;margin:0 !important}
+.rf-foto{display:flex;gap:12px;align-items:center;margin:0 0 12px}
+.rf-foto img{width:64px;height:64px;object-fit:cover;border-radius:12px;border:1px solid var(--border,rgba(40,40,94,.12));flex:none;background:#fff}
+.rf-foto p{margin:0;font-size:13.5px;color:var(--text-soft,#4B5670)}
+.rf-elegir{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.rf-elegir label{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:96px;border-radius:20px;background:#fff;border:1.5px solid var(--border,rgba(40,40,94,.12));color:var(--navy,#28285E);font:700 14.5px var(--fuente,inherit);cursor:pointer;text-align:center;padding:8px}
+.rf-elegir label span{font-size:28px}
+.rf-elegir input{display:none}
+.rf-cargando{display:flex;align-items:center;gap:12px;padding:18px 4px;font-size:15px;font-weight:600}
+.rf-spin{width:26px;height:26px;border-radius:50%;border:3px solid rgba(40,40,94,.15);border-top-color:var(--navy,#28285E);animation:rfGira .9s linear infinite;flex:none}
+@keyframes rfGira{to{transform:rotate(360deg)}}
+.rf-datos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 10px}
+.rf-datos label{margin-top:6px}
+.rf-datos input,.rf-datos select{margin:0;width:100%}
+.rf-precios{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:flex-end;margin-top:8px}
+.rf-precios > div{flex:1 1 120px;min-width:0}
+.rf-precios input,.rf-precios select{margin:0;width:100%}
+.rf-precios .ex-chk{flex:1 1 100%}
+.rf-ren{margin:10px 0 0;padding:12px 12px 10px;border-radius:18px;background:#fff;border:1.5px solid var(--border,rgba(40,40,94,.12))}
+.rf-ren.g-v{border-color:rgba(52,199,89,.55)}.rf-ren.g-a{border-color:rgba(255,159,10,.6)}.rf-ren.g-r{border-color:rgba(255,59,48,.45)}
+.rf-ren.rf-fuera{opacity:.55;background:#f6f7fb}
+.rf-ren-cab{display:flex;align-items:flex-start;gap:8px;justify-content:space-between}
+.rf-grado{flex:none;font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.rf-grado.v{background:#e3f6ec;color:#11683f}.rf-grado.a{background:#fff3e0;color:#7a4300}.rf-grado.r{background:#ffe9e7;color:#9b1c13}
+.rf-dice{font-size:13px;color:var(--text-soft,#4B5670);margin:0;flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.rf-dice b{color:var(--text,#0D1424)}
+.rf-flecha{font-size:12px;color:var(--text-3,#7C879D);margin:6px 0 2px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.rf-ren select,.rf-ren input{margin:0;width:100%}
+.rf-ren .rf-busca{margin-top:6px}
+.rf-fila{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;margin-top:8px;align-items:end}
+.rf-fila label{margin:0 0 2px;font-size:12px}
+.rf-fila .rf-un{font:600 13px var(--mono,monospace);color:var(--text-soft,#4B5670);padding:0 0 14px}
+.rf-nota{font-size:12.5px;margin:6px 0 0;color:#7a4300}
+.rf-nota.r{color:#9b1c13}
+.rf-sacar{width:auto !important;margin:8px 0 0 !important;min-height:40px !important;padding:0 14px !important;font-size:13px !important}
+.rf-res{margin:14px 0 0;padding:10px 12px;border-radius:14px;background:var(--bg-soft,rgba(40,40,94,.05));font-size:13.5px}
+.rf-hecho{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.rf-hecho .btn-ghost{width:auto;margin:0}
+@media (max-width:640px){.rf-datos{grid-template-columns:1fr}.rf-fila{grid-template-columns:1fr 1fr}.rf-fila .rf-un{grid-column:1 / -1;padding:0}}
+</style>
+<script id="remitoFoto">
+(function () {
+  "use strict";
+  // v137 · Remito por foto con IA (pedido de Ángel, 09/11/2026).
+  //  · «📷 Cargar remito con foto» en Pañol › Registrar movimiento (entrada) y en el panel del Asistente. Solo quien edita el pañol.
+  //  · La foto (cámara de la app de Android o galería/archivo) se achica a ≈1600 px y va al Worker «ema-ia» por el mismo
+  //    camino que el asistente (Opus 5.5, imagen en un bloque «image», effort medium; Worker viejo → Sonnet 5.5).
+  //  · La IA SOLO LEE: proveedor, número, fecha y los renglones (descripción tal cual, cantidad, unidad, precio, EAN si se ve).
+  //    Los códigos del pañol los busca la app en el catálogo (palabras + rasgos de __alternativas + EAN asociado):
+  //    🟢 seguro · 🟡 parecido · 🔴 sin código. NUNCA se inventa un código ni se da de alta un producto: un renglón sin
+  //    código queda afuera hasta que la persona elige uno del catálogo.
+  //  · Tarjeta editable (antes → después) con «Sí, cargar entrada» / «No». Con el Sí: fbAddMovimiento como «Registrar
+  //    movimiento» (número E-, precioUnit en $ sin IVA + precioOriginal, moneda, ivaPct, cotizacion), la foto en R2 o en
+  //    adjuntos (fotoId en cada renglón) y auditoría «remito_ia» con porAsistente:true.
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) => (typeof escHtml == "function" ? escHtml(String(t == null ? "" : t)) : String(t == null ? "" : t).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]));
+  const perm = (h) => { try { return window.PERMISOS && PERMISOS.permiso ? PERMISOS.permiso(h) : "editar"; } catch (e) { return "editar"; } };
+  const puede = () => !!window.__fbUser && perm("stock") === "editar" && !window.__modoEmergencia;
+  const yoEmail = () => (window.__fbUser && window.__fbUser.email) || "";
+  const plug = () => (window.Capacitor && window.Capacitor.Plugins) || {};
+  const enApp = () => !!(window.__cargador || (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()));
+  const r2 = (n) => Math.round(n * 100) / 100;
+  const num = (v) => { const n = parseFloat(String(v == null ? "" : v).replace(",", ".")); return isFinite(n) ? n : NaN; };
+  const nf = (n, d) => (typeof fmt == "function" ? fmt(n, d == null ? 2 : d) : Number(n).toLocaleString("es-AR"));
+  const plata = (n) => (typeof formatMoney == "function" ? formatMoney(n) : "$ " + nf(n, 2));
+  const hoyISO = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const URL_IA = () => window.__iaUrl || "https://ema-ia.mdiaz-60f.workers.dev/ia";
+  const SONNET = "claude-sonnet-5-5", OPUS = "claude-opus-5-5", FABLE = "claude-fable-5-2", BETA = "server-side-fallback-2026-07-01";
+  const C = () => window.__codigos || {};
+
+  // =================================================================================== la IA lee la foto
+  const SISTEMA = [
+    "Leés fotos de remitos y facturas de proveedores de materiales eléctricos para el pañol de EMA Servicios (Córdoba, Argentina).",
+    "Tu único trabajo es TRANSCRIBIR lo que está escrito. No inventes nada: lo que no se lee bien va en null. No pongas códigos del pañol: eso lo hace la app.",
+    "Contestá SOLO con un objeto JSON, sin texto antes ni después, con esta forma:",
+    '{"legible": true, "motivo": "", "proveedor": "…", "numero": "0001-00012345", "fecha": "AAAA-MM-DD", "moneda": "ARS" | "USD", "preciosConIva": true | false | null, "ivaPct": 21 | 10.5 | null,',
+    ' "renglones": [{"desc": "descripción tal cual está escrita", "cant": 10, "un": "m" | "Un." | "kg" | "rollo" | …, "precio": 1234.5 | null, "ean": "7790000000000" | null, "codigoProveedor": "…" | null}]}',
+    "- legible=false (con el motivo en castellano rioplatense, corto) si la foto no es un remito o factura, está movida, cortada, oscura o no se leen los renglones. En ese caso renglones vacío.",
+    "- precio = precio UNITARIO del renglón tal como figura (sin multiplicar). Si el documento dice que los precios incluyen IVA (o es factura B/C), preciosConIva=true y el ivaPct que diga (si no dice, null).",
+    "- Si es un remito sin precios, precio null en todos.",
+    "- fecha en formato AAAA-MM-DD (el remito suele venir como DD/MM/AAAA, argentino).",
+    "- Números con punto decimal (1.234,50 del remito → 1234.5)."
+  ].join("\n");
+  function errR(m, tipo) { const e = new Error(m); e.tipo = tipo || ""; return e; }
+  async function pedirIa(b64, modelo) {
+    if (navigator.onLine === false) throw errR("Sin señal: la IA no puede leer el remito ahora. Cargalo a mano abajo, como siempre.", "red");
+    const u = window.firebase && firebase.auth && firebase.auth().currentUser;
+    if (!u) throw errR("Tenés que entrar a la app con tu usuario.", "token");
+    let tok = ""; try { tok = await u.getIdToken(); } catch (e) { throw errR("No pude renovar tu sesión: cerrá y volvé a entrar.", "token"); }
+    const cuerpo = {
+      model: modelo, max_tokens: modelo === SONNET ? 4000 : 8000,
+      system: [{ type: "text", text: SISTEMA }],
+      messages: [{ role: "user", content: [{ type: "image", source: { type: "base64", media_type: "image/jpeg", data: b64 } }, { type: "text", text: "Transcribí este remito o factura en el JSON pedido." }] }],
+      output_config: { effort: "medium" }, fallbacks: "default", betas: [BETA]
+    };
+    let ctl = null, tm = null; try { ctl = new AbortController(); tm = setTimeout(() => ctl.abort(), 180000); } catch (e) { ctl = null; }
+    let r = null;
+    try { r = await fetch(URL_IA(), { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok }, body: JSON.stringify(cuerpo), signal: ctl ? ctl.signal : undefined }); }
+    catch (e) { throw errR(navigator.onLine === false ? "Sin señal: cargá el remito a mano, como siempre." : e && e.name === "AbortError" ? "La IA tardó demasiado en leer el remito. Probá de nuevo o cargalo a mano." : "El asistente no responde ahora (¿hay señal?). Cargá el remito a mano, como siempre.", "red"); }
+    finally { clearTimeout(tm); }
+    let j = null; try { j = await r.json(); } catch (e) { j = null; }
+    if (!r.ok || !j || j.error) {
+      const mj = (j && j.error && j.error.mensaje) || "";
+      if (r.status === 400 && /modelo no est[aá] permitido/i.test(mj) && modelo !== SONNET) {   // Worker viejo (v1-ia): el mismo respaldo que el asistente
+        try { window.__iaModelos && window.__iaModelos.marcarViejo(); } catch (e) { }
+        return pedirIa(b64, SONNET);
+      }
+      throw errR(mj ? "El asistente contestó: " + mj : "El asistente no responde ahora (" + r.status + "). Cargá el remito a mano, como siempre.", "worker");
+    }
+    if (modelo === OPUS || modelo === FABLE) { try { window.__iaModelos && window.__iaModelos.workerNuevo(); } catch (e) { } }
+    try { window.__iaSumarGasto && window.__iaSumarGasto(j.ema && j.ema.costoUsd); } catch (e) { }
+    return j;
+  }
+  function modelo() { try { return window.__iaModelos ? window.__iaModelos.chat() : OPUS; } catch (e) { return OPUS; } }
+  function interpretar(j) {
+    if (j && j.stop_reason === "refusal") return { legible: false, motivo: "La IA no quiso leer esta foto." };
+    const tx = ((j && j.content) || []).filter((b) => b && b.type === "text").map((b) => b.text || "").join("\n");
+    const i = tx.indexOf("{"), k = tx.lastIndexOf("}");
+    if (i < 0 || k <= i) return { legible: false, motivo: "No pude entender la respuesta de la IA." };
+    let o = null; try { o = JSON.parse(tx.slice(i, k + 1)); } catch (e) { o = null; }
+    if (!o || typeof o != "object") return { legible: false, motivo: "No pude entender la respuesta de la IA." };
+    const ren = (Array.isArray(o.renglones) ? o.renglones : []).map((x) => ({
+      desc: String((x && x.desc) || "").trim(), cant: num(x && x.cant), un: String((x && x.un) || "").trim(), precio: num(x && x.precio),
+      ean: x && x.ean ? String(x.ean).replace(/\D/g, "") : "", codProv: x && x.codigoProveedor ? String(x.codigoProveedor) : ""
+    })).filter((x) => x.desc);
+    if (o.legible === false || !ren.length) return { legible: false, motivo: String(o.motivo || "").trim() || "No se leen los renglones." };
+    return {
+      legible: true, proveedor: String(o.proveedor || "").trim(), numero: String(o.numero || "").trim(),
+      fecha: /^\d{4}-\d\d-\d\d$/.test(String(o.fecha || "")) ? o.fecha : "",
+      moneda: o.moneda === "USD" ? "USD" : "ARS", conIva: o.preciosConIva === true, ivaPct: num(o.ivaPct) > 0 ? num(o.ivaPct) : null, renglones: ren
+    };
+  }
+
+  // =================================================================================== buscar el código en el catálogo
+  const nrm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/×/g, "x").replace(/,/g, ".").replace(/mm²/g, "mm2").replace(/\s+/g, " ").trim();
+  const STOP = /^(para|con|sin|del|las|los|una|uno|por|tipo|que|mts|de|la|el|en|y|x)$/;
+  function rasgosDe(desc) {
+    const A = window.__alternativas;
+    if (A && A.rasgos) { try { return A.rasgos(desc); } catch (e) { } }
+    const s = nrm(desc);
+    return { s, tipo: null, pal: new Set(s.replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter((w) => w.length > 2 && !/^\d/.test(w) && !STOP.test(w))), nums: (s.replace(/(\d+)\s*x\s*(\d+)/g, "$1x$2").match(/\d+(?:\.\d+)?(?:x\d+(?:\.\d+)?)?/g) || []).sort().join(" ") };
+  }
+  function catalogoL() { let l = []; try { l = catalogo(); } catch (e) { } return l.filter((p) => p && p.activo !== false && p.desc); }
+  function puntaje(rr, rp) {
+    const a = rr.pal || new Set(), b = rp.pal || new Set();
+    let inter = 0; a.forEach((w) => { if (b.has(w)) inter++; else { for (const z of b) { if (w.length >= 4 && z.length >= 4 && (z.indexOf(w) === 0 || w.indexOf(z) === 0)) { inter += 0.7; break; } } } });
+    let s = (a.size + b.size) ? 2 * inter / (a.size + b.size) : 0;
+    const na = (rr.nums || "").split(" ").filter(Boolean), nb = (rp.nums || "").split(" ").filter(Boolean);
+    let numIgual = false;
+    if (na.length && nb.length) {
+      if (rr.nums === rp.nums) { s += 0.35; numIgual = true; }
+      else { const co = na.filter((x) => nb.indexOf(x) >= 0).length; s += 0.25 * co / Math.max(na.length, nb.length); if (co === 0) s -= 0.15; }
+    }
+    if (rr.tipo && rp.tipo) s += rr.tipo === rp.tipo ? 0.2 : -0.35;
+    let cmp = null; try { cmp = window.__alternativas && rr.tipo && rp.tipo ? window.__alternativas.comparar(rr, rp) : null; } catch (e) { cmp = null; }
+    if (cmp) s += cmp.nivel === "verde" ? 0.3 : 0.08;
+    return { s, numIgual, verde: !!(cmp && cmp.nivel === "verde") };
+  }
+  function candidatos(ren) {
+    const l = catalogoL();
+    if (ren.ean && C().codigoDeEan) {
+      const cod = C().codigoDeEan(ren.ean), p = cod != null ? l.find((x) => String(x.codigo) === String(cod)) : null;
+      if (p) return { grado: "v", porEan: true, cands: [{ p, s: 9 }] };
+    }
+    const rr = rasgosDe(ren.desc);
+    const res = l.map((p) => { const z = puntaje(rr, rasgosDe(p.desc)); return { p, s: z.s, numIgual: z.numIgual, verde: z.verde }; }).filter((x) => x.s >= 0.3).sort((x, y) => y.s - x.s).slice(0, 3);
+    if (!res.length) return { grado: "r", cands: [] };
+    const t = res[0], m = res[1] ? t.s - res[1].s : 1;
+    const grado = t.s >= 1.0 && (t.verde || t.numIgual) && m >= 0.15 ? "v" : t.s >= 0.55 ? "a" : "r";
+    return { grado, cands: res };
+  }
+  // unidad: si el remito viene en otra unidad y el pañol sabe cuántas trae (porUnidad / __factorUn), se pasa
+  const nU = (u) => { try { return window.__nU ? window.__nU(u) : nrm(u); } catch (e) { return nrm(u); } };
+  function conversion(ren, p) {
+    if (!p || !ren.un) return { f: 1, ok: true };
+    const a = nU(ren.un), b = nU(p.un);
+    if (!a || a === b) return { f: 1, ok: true };
+    let f = 0; try { f = window.__factorUn ? window.__factorUn(p.codigo, ren.un) : 0; } catch (e) { f = 0; }
+    if (f > 0) return { f: 1 / f, ok: true, txt: `el remito viene en ${ren.un}: cada ${p.un} trae ${nf(f, 2)} ${ren.un}` };
+    return { f: 1, ok: false, txt: `el remito dice «${ren.un}» y el pañol cuenta en «${p.un}»: revisá la cantidad` };
+  }
+
+  // =================================================================================== la hoja
+  let S = null;   // { foto: {dataUrl,w,h,bytes}, datos, filas[], estado }
+  function hoja(html) {
+    let ov = $("rfOv");
+    if (!ov) {
+      ov = document.createElement("div"); ov.id = "rfOv"; ov.className = "v7-ov no-print"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", "Remito con foto");
+      ov.innerHTML = '<div class="v7-caja"></div>'; document.body.appendChild(ov);
+      ov.addEventListener("click", clic); ov.addEventListener("input", entrada); ov.addEventListener("change", cambio);
+    }
+    ov.querySelector(".v7-caja").innerHTML = '<div class="v7-asa"></div><div class="v7-cab"><div><h3>📷 Remito con foto</h3><small>La IA lee el remito; vos revisás y confirmás.</small></div><button type="button" class="v7-x" data-rf="cerrar" aria-label="Cerrar">✕</button></div>' + html;
+    return ov;
+  }
+  function cerrar() { const ov = $("rfOv"); ov && ov.remove(); S = null; }
+  function abrir() {
+    if (!puede()) { window.alert("🔒 Para cargar remitos hace falta poder editar el pañol."); return; }
+    S = { estado: "elegir" };
+    const cam = enApp() && plug().Camera;
+    hoja(`<p class="v7-txt">Sacale una foto al remito o a la factura, de frente, con buena luz y que entre entero.</p>
+<div class="rf-elegir">${cam ? '<label data-rf="camara"><span>📷</span>Sacar foto</label>' : '<label><span>📷</span>Sacar foto<input type="file" accept="image/*" capture="environment" id="rfFotoCam"></label>'}<label><span>🖼</span>Elegir de la galería<input type="file" accept="image/*" id="rfFotoGal"></label></div>
+<div class="v7-msg" id="rfMsg"></div>`);
+  }
+  async function conArchivo(f) {
+    if (!f) return;
+    let foto = null;
+    try { foto = await comprimirImagen(f, 1600, 700 * 1024); }
+    catch (e) { const m = $("rfMsg"); if (m) { m.className = "v7-msg mal"; m.textContent = "No se pudo leer la imagen: probá con otra."; } return; }
+    S = { estado: "leyendo", foto };
+    hoja(`<div class="rf-foto"><img src="${foto.dataUrl}" alt="Foto del remito"><div class="rf-cargando"><span class="rf-spin"></span>Leyendo el remito… puede tardar un minuto.</div></div>`);
+    let res = null;
+    try { res = interpretar(await pedirIa(foto.dataUrl.split(",")[1], modelo())); }
+    catch (e) { if (S && S.foto === foto) error(e.message || String(e), e.tipo === "red" || e.tipo === "worker"); return; }
+    if (!S || S.foto !== foto) return;
+    if (!res.legible) return error(`No se lee bien el remito: ${res.motivo} Sacá otra foto con buena luz, de frente y que entre entero.`, false, true);
+    armar(res);
+  }
+  function error(txt, aMano, otra) {
+    if (S) S.estado = "error";
+    hoja(`${S && S.foto ? `<div class="rf-foto"><img src="${S.foto.dataUrl}" alt="Foto del remito"><p>${esc(txt)}</p></div>` : `<p class="v7-txt">${esc(txt)}</p>`}
+<div class="v7-acc"><button type="button" class="btn-primary" data-rf="otra">📷 Sacar otra foto</button><button type="button" class="btn-ghost" data-rf="cerrar">${aMano ? "Cargar a mano" : "Cerrar"}</button></div>`);
+    const ov = $("rfOv"); ov && ov.classList.add(otra ? "rf-ilegible" : "rf-falla");
+  }
+  async function sacarConApp() {
+    try {
+      const r = await plug().Camera.takePhoto({ quality: 85, targetWidth: 2048, targetHeight: 2048, correctOrientation: true, saveToGallery: false });
+      const src = r && (r.webPath || (r.uri && window.Capacitor.convertFileSrc ? window.Capacitor.convertFileSrc(r.uri) : ""));
+      let blob = null; if (src) { try { blob = await (await fetch(src)).blob(); } catch (e) { blob = null; } }
+      if ((!blob || !blob.size) && r && r.uri && plug().Filesystem) {
+        const f = await plug().Filesystem.readFile({ path: r.uri }); const bin = atob(f.data), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+        blob = new Blob([u8], { type: "image/jpeg" });
+      }
+      if (blob && blob.size) conArchivo(blob);
+    } catch (e) { const m = String((e && (e.message || e.code)) || e); if (!/cancel/i.test(m)) { const x = $("rfMsg"); if (x) { x.className = "v7-msg mal"; x.textContent = "No se pudo usar la cámara: " + m; } } }
+  }
+  function armar(res) {
+    const filas = res.renglones.map((ren) => {
+      const c = candidatos(ren), sel = c.grado === "r" ? null : c.cands[0].p;
+      const conv = conversion(ren, sel);
+      return { ren, grado: c.grado, porEan: !!c.porEan, cands: c.cands.map((x) => x.p), cod: sel ? sel.codigo : "", cant: isFinite(ren.cant) ? r2(ren.cant * conv.f) : NaN, precio: isFinite(ren.precio) ? r2(ren.precio / conv.f) : NaN, conv, fuera: !sel, otro: false };
+    });
+    S = { estado: "tarjeta", foto: S.foto, datos: { proveedor: res.proveedor, numero: res.numero, fecha: res.fecha || hoyISO(), fechaLeida: !!res.fecha, moneda: res.moneda, conIva: res.conIva, ivaPct: res.ivaPct || (res.conIva ? 21 : 0), ivaLeido: !!res.ivaPct, cotizacion: "" }, filas, alCatalogo: true };
+    pintar();
+  }
+  const prodDe = (cod) => catalogoL().find((p) => String(p.codigo) === String(cod)) || null;
+  function filaHtml(x, i) {
+    const p = x.cod !== "" ? prodDe(x.cod) : null, D = S.datos;
+    const gr = x.fuera && !p ? "r" : x.grado === "r" && p ? "a" : x.grado;
+    const et = gr === "v" ? (x.porEan ? "🟢 Seguro (código de barras)" : "🟢 Seguro") : gr === "a" ? "🟡 Parecido" : "🔴 Sin código";
+    const ops = x.cands.filter((c) => !p || String(c.codigo) !== String(p.codigo));
+    const sel = `<select data-rf="cod" data-i="${i}" aria-label="Producto del pañol">
+<option value=""${p ? "" : " selected"}>${x.cands.length ? "— sin código: elegilo o dejalo afuera —" : "— sin código: buscalo abajo o dejalo afuera —"}</option>
+${p ? `<option value="${esc(p.codigo)}" selected>${esc(p.codigo)} — ${esc(p.desc)} (${esc(p.un)})</option>` : ""}${ops.map((c) => `<option value="${esc(c.codigo)}">${esc(c.codigo)} — ${esc(c.desc)} (${esc(c.un)})</option>`).join("")}
+<option value="__otro">🔎 Buscar otro en el catálogo…</option></select>`;
+    const notas = [];
+    if (p && x.conv && x.conv.txt) notas.push(`<p class="rf-nota${x.conv.ok ? "" : " r"}">⚠ ${esc(x.conv.txt)}</p>`);
+    if (gr === "a" && p) notas.push('<p class="rf-nota">Revisá que sea el mismo material: la descripción no es igual.</p>');
+    if (!p && !x.fuera) notas.push('<p class="rf-nota r">Elegí el producto o sacá el renglón.</p>');
+    return `<div class="rf-ren g-${gr}${x.fuera ? " rf-fuera" : ""}" data-ren="${i}">
+<div class="rf-ren-cab"><p class="rf-dice">Dice el remito: <b>«${esc(x.ren.desc)}»</b>${isFinite(x.ren.cant) ? ` · ${esc(nf(x.ren.cant, 2))} ${esc(x.ren.un || "")}` : ""}${isFinite(x.ren.precio) ? ` · ${esc(plata(x.ren.precio))}` : ""}${x.ren.ean ? ` · EAN ${esc(x.ren.ean)}` : ""}</p><span class="rf-grado ${gr}">${et}</span></div>
+${x.fuera ? `<p class="rf-nota r">${p ? "Queda afuera: no se carga." : "Sin código: queda afuera, no se carga."}</p><button type="button" class="btn-ghost rf-sacar" data-rf="volver" data-i="${i}">↩ Volver a ponerlo</button>${p ? "" : `<div class="rf-flecha">→ Producto del pañol</div>${sel}${x.otro ? `<input type="text" class="rf-busca" data-rf="busca" data-i="${i}" list="stockDatalist" placeholder="Escribí el código o el nombre…" autocomplete="off">` : ""}`}` : `<div class="rf-flecha">→ Producto del pañol</div>${sel}${x.otro ? `<input type="text" class="rf-busca" data-rf="busca" data-i="${i}" list="stockDatalist" placeholder="Escribí el código o el nombre…" autocomplete="off">` : ""}
+<div class="rf-fila"><div><label>Cantidad</label><input type="number" inputmode="decimal" min="0" step="0.01" data-rf="cant" data-i="${i}" value="${isFinite(x.cant) ? x.cant : ""}"></div><div><label>Precio unit. (${D.moneda === "USD" ? "U$S" : "$"}${D.conIva ? ", con IVA" : ", sin IVA"})</label><input type="number" inputmode="decimal" min="0" step="0.01" data-rf="precio" data-i="${i}" value="${isFinite(x.precio) ? x.precio : ""}" placeholder="sin precio"></div><div class="rf-un">${p ? esc(p.un) : ""}</div></div>
+${notas.join("")}<button type="button" class="btn-ghost rf-sacar" data-rf="sacar" data-i="${i}">✕ Sacar este renglón</button>`}
+</div>`;
+  }
+  function resumen() {
+    const va = S.filas.filter((x) => !x.fuera && x.cod !== ""), fu = S.filas.length - va.length;
+    const tot = va.reduce((s, x) => s + (isFinite(x.precio) && isFinite(x.cant) ? x.precio * x.cant : 0), 0);
+    return `Se cargan <b>${va.length}</b> ${va.length === 1 ? "renglón" : "renglones"} como entrada${fu ? ` · <b>${fu}</b> queda${fu === 1 ? "" : "n"} afuera` : ""}${tot ? ` · total ${S.datos.moneda === "USD" ? "U$S " + nf(tot, 2) : plata(tot)}${S.datos.conIva ? " con IVA" : " sin IVA"}` : ""}.`;
+  }
+  function pintar() {
+    const D = S.datos;
+    hoja(`<div class="rf-foto"><img src="${S.foto.dataUrl}" alt="Foto del remito"><p>Revisá cada renglón: lo que dice el remito → el producto del pañol. Corregí lo que haga falta.</p></div>
+<div class="rf-datos"><div><label for="rfProv">Proveedor</label><input type="text" id="rfProv" data-rf="prov" value="${esc(D.proveedor)}" list="stockProveedoresList" autocomplete="off"></div>
+<div><label for="rfNum">Remito / factura N°</label><input type="text" id="rfNum" data-rf="num" value="${esc(D.numero)}" autocomplete="off"></div>
+<div><label for="rfFecha">Fecha</label><input type="date" id="rfFecha" data-rf="fecha" value="${esc(D.fecha)}"></div></div>
+<div class="rf-precios"><div><label for="rfMon">Moneda</label><select id="rfMon" data-rf="mon"><option value="ARS"${D.moneda === "ARS" ? " selected" : ""}>Pesos ($)</option><option value="USD"${D.moneda === "USD" ? " selected" : ""}>Dólares (U$S)</option></select></div>
+<div><label for="rfIva">IVA incluido en los precios</label><select id="rfIva" data-rf="iva"><option value="0"${!D.conIva ? " selected" : ""}>Sin IVA</option><option value="21"${D.conIva && D.ivaPct === 21 ? " selected" : ""}>Con IVA 21 %</option><option value="10.5"${D.conIva && D.ivaPct === 10.5 ? " selected" : ""}>Con IVA 10,5 %</option>${D.conIva && D.ivaPct !== 21 && D.ivaPct !== 10.5 ? `<option value="${D.ivaPct}" selected>Con IVA ${esc(nf(D.ivaPct, 1))} %</option>` : ""}</select></div>
+${D.moneda === "USD" ? `<div><label for="rfDolar">Dólar del día ($)</label><input type="number" id="rfDolar" data-rf="dolar" inputmode="decimal" min="0" step="0.01" value="${esc(D.cotizacion)}"></div>` : ""}
+${D.conIva && !D.ivaLeido ? '<p class="rf-nota ex-chk">⚠ El remito trae precios con IVA pero no dice cuánto: revisá el porcentaje.</p>' : ""}</div>
+<div id="rfFilas">${S.filas.map(filaHtml).join("")}</div>
+<label class="ex-chk" style="margin-top:12px;"><input type="checkbox" id="rfCat" data-rf="cat"${S.alCatalogo ? " checked" : ""}> <span>Dejar estos precios como <b>costo actual</b> de cada producto (valoriza el stock y los gastos)</span></label>
+<div class="rf-res" id="rfRes">${resumen()}</div>
+<div class="v7-acc"><button type="button" class="btn-primary" data-rf="si">Sí, cargar entrada</button><button type="button" class="btn-ghost" data-rf="no">No</button></div>
+<div class="v7-msg" id="rfMsg"></div>`);
+  }
+  function repintarFila(i) {
+    const el = document.querySelector('#rfFilas [data-ren="' + i + '"]'); if (!el) return pintar();
+    const t = document.createElement("div"); t.innerHTML = filaHtml(S.filas[i], i); el.replaceWith(t.firstChild);
+    const r = $("rfRes"); r && (r.innerHTML = resumen());
+  }
+  function ponerCodigo(i, cod) {
+    const x = S.filas[i], p = cod !== "" ? prodDe(cod) : null;
+    x.cod = p ? p.codigo : ""; x.fuera = !p; x.otro = false;
+    if (p) {
+      if (x.cands.every((c) => String(c.codigo) !== String(p.codigo))) x.cands.unshift(p);
+      const conv = conversion(x.ren, p); x.conv = conv;
+      x.cant = isFinite(x.ren.cant) ? r2(x.ren.cant * conv.f) : x.cant; x.precio = isFinite(x.ren.precio) ? r2(x.ren.precio / conv.f) : x.precio;
+      if (x.grado === "r") x.grado = "a";
+    }
+    repintarFila(i);
+  }
+  function clic(e) {
+    const b = e.target.closest("[data-rf]"); if (!b) { if (e.target.id === "rfOv" && S && S.estado !== "guardando") cerrar(); return; }
+    const k = b.dataset.rf, i = +b.dataset.i;
+    if (k === "cerrar" || k === "no") { if (S && S.estado === "guardando") return; cerrar(); return; }
+    if (k === "otra") return abrir();
+    if (k === "camara") return sacarConApp();
+    if (k === "sacar") { S.filas[i].fuera = true; return repintarFila(i); }
+    if (k === "volver") { const x = S.filas[i]; if (x.cod !== "") { x.fuera = false; repintarFila(i); } else { x.otro = true; repintarFila(i); } return; }
+    if (k === "si") return guardar(b);
+    if (k === "ver") { try { window.verComprobanteMovimiento(b.dataset.id); } catch (er) { } return; }
+  }
+  function entrada(e) {
+    const t = e.target, k = t.dataset && t.dataset.rf; if (!k || !S || !S.datos) return;
+    const i = +t.dataset.i, D = S.datos;
+    if (k === "prov") D.proveedor = t.value; else if (k === "num") D.numero = t.value; else if (k === "fecha") D.fecha = t.value;
+    else if (k === "dolar") D.cotizacion = t.value;
+    else if (k === "cant") { S.filas[i].cant = num(t.value); const r = $("rfRes"); r && (r.innerHTML = resumen()); }
+    else if (k === "precio") { S.filas[i].precio = num(t.value); const r = $("rfRes"); r && (r.innerHTML = resumen()); }
+  }
+  function cambio(e) {
+    const t = e.target, k = t.dataset && t.dataset.rf;
+    if (t.id === "rfFotoCam" || t.id === "rfFotoGal") { const f = t.files && t.files[0]; t.value = ""; f && conArchivo(f); return; }
+    if (!k || !S) return;
+    if (!S.datos) return;
+    const i = +t.dataset.i, D = S.datos;
+    if (k === "cod") { if (t.value === "__otro") { S.filas[i].otro = true; repintarFila(i); setTimeout(() => { const q = document.querySelector('#rfFilas [data-rf="busca"][data-i="' + i + '"]'); q && q.focus(); }, 30); } else ponerCodigo(i, t.value); return; }
+    if (k === "busca") { const p = typeof stockParsearProducto == "function" ? stockParsearProducto(t.value) : null; if (p) ponerCodigo(i, p.codigo); return; }
+    if (k === "mon") { D.moneda = t.value; pintar(); return; }
+    if (k === "iva") { const v = num(t.value); D.conIva = v > 0; D.ivaPct = v > 0 ? v : 0; D.ivaLeido = true; pintar(); return; }
+    if (k === "cat") { S.alCatalogo = t.checked; return; }
+  }
+  // de cómo vino el precio a $ sin IVA (igual que «Registrar movimiento»)
+  function aPesosSinIva(precio, D) { let p = precio; if (D.conIva && D.ivaPct > 0) p = p / (1 + D.ivaPct / 100); if (D.moneda === "USD") p = p * num(D.cotizacion); return r2(p); }
+  async function guardar(btn) {
+    const D = S.datos, m = $("rfMsg");
+    const mal = (t) => { m.className = "v7-msg mal"; m.textContent = t; };
+    const va = S.filas.filter((x) => !x.fuera && x.cod !== "");
+    if (!va.length) return mal("No hay renglones para cargar: elegí el producto de alguno.");
+    if (!D.fecha) return mal("Poné la fecha del remito.");
+    const sinCant = va.filter((x) => !(x.cant > 0));
+    if (sinCant.length) return mal(`Revisá la cantidad de «${sinCant[0].ren.desc}».`);
+    if (D.moneda === "USD" && va.some((x) => isFinite(x.precio)) && !(num(D.cotizacion) > 0)) return mal("Los precios están en dólares: poné el dólar del día.");
+    if (typeof window.fbAddMovimiento != "function") return mal("No hay conexión con la base del pañol.");
+    S.estado = "guardando"; btn.disabled = true; m.className = "v7-msg"; m.textContent = "Cargando la entrada…";
+    // 1) la foto del remito (R2 por fotosNube si se puede; si no, en adjuntos)
+    let fotoId = "";
+    try {
+      if (typeof window.fbAdjuntoGuardar == "function") fotoId = await window.fbAdjuntoGuardar({ tipo: "remito", remito: D.numero || "", proveedor: D.proveedor || "", fecha: D.fecha, dataUrl: S.foto.dataUrl, w: S.foto.w, h: S.foto.h, bytes: S.foto.bytes, nombre: "remito.jpg", ts: Date.now(), usuario: yoEmail(), porAsistente: true }) || "";
+    } catch (e) { console.warn("[remito] foto:", e); fotoId = ""; }
+    // 2) un movimiento por renglón, como «Registrar movimiento»
+    const ids = [], nums = [], fallas = [];
+    let sector = "alumbrado"; try { sector = typeof sectorElegido == "function" ? sectorElegido() : "alumbrado"; } catch (e) { }
+    for (let k = 0; k < va.length; k++) {
+      const x = va[k], p = prodDe(x.cod);
+      const mov = { tipo: "entrada", codigo: p.codigo, desc: p.desc, un: p.un, cantidad: r2(x.cant), fecha: D.fecha, ts: Date.now() + k, usuario: yoEmail(), proveedor: (D.proveedor || "").trim(), remito: (D.numero || "").trim(), sector, porAsistente: true, remitoIa: { desc: x.ren.desc, cant: isFinite(x.ren.cant) ? x.ren.cant : null, un: x.ren.un || "", grado: x.grado } };
+      if (fotoId) mov.fotoId = fotoId;
+      if (isFinite(x.precio) && x.precio >= 0) {
+        mov.precioOriginal = r2(x.precio); mov.moneda = D.moneda; mov.ivaPct = D.conIva ? D.ivaPct : 0; mov.ivaIncluido = !!D.conIva;
+        if (D.moneda === "USD") mov.cotizacion = num(D.cotizacion);
+        mov.precioUnit = aPesosSinIva(x.precio, D);
+      }
+      try { Object.defineProperty(mov, "__precioOk", { value: true, enumerable: false }); } catch (e) { }
+      try {
+        const id = await window.fbAddMovimiento(mov);
+        if (id) { ids.push(id); window.__ultimoMovLocal = Object.assign({ id }, mov); }
+        x.movId = id;
+        if (S.alCatalogo && mov.precioUnit != null && typeof window.stockActualizarCostoCatalogo == "function") { try { await window.stockActualizarCostoCatalogo(p.codigo, mov.precioUnit); } catch (e) { } }
+      } catch (e) {
+        fallas.push(x.ren.desc);
+        if (e && e.code === "permission-denied") { mal("🔒 Tu usuario no tiene permiso para cargar en el pañol. No se registró nada más."); break; }
+      }
+    }
+    await new Promise((ok) => setTimeout(ok, 200));
+    (window.stockMovimientos || []).forEach((s) => { if (ids.indexOf(s.id) >= 0 && s.numero) nums.push(s.numero); });
+    try { window.fbAuditar && window.fbAuditar("remito_ia", `Remito ${D.numero || "(sin número)"}${D.proveedor ? " de " + D.proveedor : ""}: ${ids.length} renglón(es) cargados como entrada con la IA${fallas.length ? ", " + fallas.length + " fallaron" : ""}.`, { ref: D.numero || "", porAsistente: true, proveedor: D.proveedor || "", movIds: ids, fotoId: fotoId || "", renglones: S.filas.length, cargados: ids.length, afuera: S.filas.length - va.length }); } catch (e) { }
+    try { typeof window.renderStockTabla == "function" && window.renderStockTabla(); } catch (e) { }
+    const fuera = S.filas.filter((x) => x.fuera || x.cod === "");
+    S.estado = "hecho"; S.ids = ids;
+    hoja(`<div class="rf-foto"><img src="${S.foto.dataUrl}" alt="Foto del remito"><p class="v7-msg bien" style="margin:0;">✓ Entrada cargada: ${ids.length} ${ids.length === 1 ? "renglón" : "renglones"}${nums.length ? " (" + esc(nums.join(", ")) + ")" : ""}${fotoId ? " · con la foto del remito" : " · ⚠ la foto no se pudo guardar"}.</p></div>
+${fallas.length ? `<p class="rf-nota r">No se pudieron cargar: ${esc(fallas.join(" · "))}. Cargalos a mano.</p>` : ""}
+${fuera.length ? `<p class="rf-nota">Quedaron afuera (no se cargaron): ${esc(fuera.map((x) => x.ren.desc).join(" · "))}.</p>` : ""}
+<div class="rf-hecho">${ids.slice(0, 6).map((id, k) => `<button type="button" class="btn-ghost" data-rf="ver" data-id="${esc(id)}">🧾 Ver ${esc(nums[k] || "comprobante " + (k + 1))}</button>`).join("")}</div>
+<div class="v7-acc"><button type="button" class="btn-primary" data-rf="cerrar">Listo</button></div>`);
+    const ov = $("rfOv"); ov && ov.classList.add("rf-listo");
+  }
+
+  // =================================================================================== botones
+  function botonEntrada() {
+    const card = $("cardStockRegistrar"); if (!card) return;
+    let b = $("rfEntrada");
+    if (!b) {
+      b = document.createElement("div"); b.id = "rfEntrada"; b.className = "rf-entrada no-print";
+      b.innerHTML = '<button type="button" class="btn-ghost" id="rfBtn" data-rfabrir="1">📷 Cargar remito con foto</button><div class="hint">La IA lee el remito y te arma la entrada para que la revises. Nada se carga sin tu «Sí».</div>';
+      const t = $("stockMovTipo"), lab = t && card.querySelector('label[for="stockMovTipo"]');
+      const ref = (t && t.nextSibling) || null; if (ref) t.parentNode.insertBefore(b, ref); else card.appendChild(b);
+      void lab;
+    }
+    const t = $("stockMovTipo");
+    b.style.display = puede() && (!t || t.value === "entrada") ? "" : "none";
+  }
+  document.addEventListener("change", (e) => { if (e.target && e.target.id === "stockMovTipo") botonEntrada(); });
+  document.addEventListener("permisos-listos", () => setTimeout(botonEntrada, 200));
+  botonEntrada(); setTimeout(botonEntrada, 1500); setTimeout(botonEntrada, 5000);
+  document.addEventListener("click", (e) => {
+    const t = e.target; if (!t || !t.closest) return;
+    const a = t.closest("[data-rfabrir]"); if (a) { e.preventDefault(); abrir(); }
+  });
+  // en el panel del asistente: chip «📷 Cargar remito» y «cargá este remito»
+  function chipAsistente() {
+    const ch = $("iaChips"); if (!ch || ch.querySelector("[data-rfabrir]") || !puede()) return;
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.setAttribute("data-rfabrir", "1"); b.textContent = "📷 Cargar remito con foto";
+    ch.insertBefore(b, ch.firstChild);
+  }
+  new MutationObserver(() => { if ($("iaChips")) chipAsistente(); }).observe(document.body, { childList: true });
+  setInterval(() => { try { const p = $("iaPanel"); if (p && !p.hidden) chipAsistente(); } catch (e) { } }, 4000);
+  const pideRemito = (s) => /remito|factura/i.test(s) && /(carg|pas|ingres|entr|le[eé]|met)/i.test(s);
+  function interceptar(e) {
+    const tx = $("iaTxt"); if (!tx || !puede()) return false;
+    const v = String(tx.value || "").trim(); if (!v || !pideRemito(v)) return false;
+    e.preventDefault(); e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    tx.value = ""; abrir(); return true;
+  }
+  document.addEventListener("click", (e) => { const t = e.target; if (t && t.closest && t.closest("#iaEnviar")) interceptar(e); }, true);
+  document.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey && e.target && e.target.id === "iaTxt") interceptar(e); }, true);
+
+  window.__remitoFoto = { abrir, cerrar, conArchivo, interpretar, candidatos, conversion, estado: () => S, SISTEMA };
+})();
+</script>

@@ -2,6 +2,33 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v138 — 10/11/2026 (en la rama, sin publicar en main) · El botón «atrás» vuelve atrás + remito en PDF y de varias páginas
+
+**Pedido de Ángel** (10/11/2026)
+- Que el botón «atrás» del celular (y la flecha del navegador / el botón del mouse) vuelva atrás como en cualquier app.
+- Remito con IA: aceptar también PDF (los que llegan por mail/WhatsApp), varias fotos de un mismo remito en un solo pedido y remitos largos (20–40 renglones) sin cortarse.
+
+**Base:** ORIGINAL 137 (la publicada, `cbe62a3b…`).
+
+**Cambios**
+- **Módulo nuevo `atrasApp`** (antes de `revisarAppDiag`). Una entrada de la historia por nivel: cada pantalla después del Inicio y cada cosa abierta encima. `history.pushState({ema:{n}})` al abrir (casi siempre dentro del toque); si se cierra con su ✕ o se va al Inicio por otro lado, se consume sola (`history.go(-k)` en silencio): no quedan entradas fantasma.
+  - «Atrás» cierra lo de más arriba con la **misma función que su ✕**: menú lateral (`cerrarMenuLateral`), Asistente (`[data-ia=volver]`: primero las Opciones, después el panel), cámara, galería (`emaGaleria`), hoja A4 (`hojaEMA.cerrar`), hoja del celu, visor de planos (`cerrarPlano`), cierre de la orden (`cerrarCuadroCierre`), legajo abierto (← Todas las obras), orden abierta de Mis tareas, guía abierta, ficha de plaza, ganancia de una obra; y **cualquier otra ventana u hoja fija** (`.v7-ov`, `role=dialog`, ids …Ov/…Hoja/…Visor/…Modal/…Pop/…Edit: `#mfVisor`, `#spHoja`, `#rfOv`, `#esOv`, `#etOv`, `#v7Preg`, `#ecElegir`, `#sgEdit`, `#peOv`…) por su botón ✕/Cerrar, o tocando el fondo, o Escape.
+  - Sin nada encima, vuelve a la pantalla anterior (`mostrarVista`), en orden. Ir y volver a una pantalla que ya estaba no apila (Obras → Pañol → Obras = Obras). Las pantallas vuelven como se dejaron (con su subpestaña; las subpestañas no son entradas de la historia).
+  - En el Inicio sin nada encima no queda historia: en el APK `canGoBack()` da falso y `MainActivity` manda la app al fondo como hoy; en la compu el navegador sale de la página. **No hace falta APK nuevo.**
+  - **«¿Salir sin guardar?»** (hoja Cristal propia `#atPreg`, Sí / No, nunca `confirm()`): en «Llenar orden» con alguna tarea tildada, tarea a mano, notas o materiales; en «Registrar movimiento» con producto, cantidad o filas cargadas; en el cierre de la orden si la persona tocó algo. «No» se queda y vuelve a poner la entrada. **Calculadora: no pregunta** (el formulario siempre tiene valores y no hay forma segura de saber si el cálculo ya se guardó).
+  - Se apagaron los `pushState`/`popstate` sueltos de `appCelular` (pantallas y menú), visor de planos, hoja del celu, cámara, galería y hoja A4: ahora todo pasa por `atrasApp`. La dirección se respeta (`?doc=`/`?obra=` de la v137 siguen andando y limpian la dirección con `replaceState`).
+  - `window.__atras` {sync, estado, capas, sucia, preguntar, pasoAtras}. `window.__atrasNo` lo apaga; `__atrasNoPreguntar` saca la pregunta.
+- **Remito con IA (`remitoFoto`):**
+  - «Elegir fotos o PDF» (`accept="image/*,application/pdf"`, varias). El PDF va a Claude como bloque `document` (base64, `application/pdf`); tope 3,5 MB y 20 páginas (el Worker acepta pedidos de hasta 5 MB y el base64 suma un tercio); si es más, «mandalo en partes» y no se manda nada. En el Asistente, «cargá este remito» abre la misma hoja.
+  - Varias fotos del mismo remito (hasta 4) en **un solo pedido** → una sola tarjeta con todos los renglones; la IA junta las páginas en un JSON.
+  - `max_tokens` 16.000 con Opus/Fable (antes 8.000; Sonnet sigue en 4.000, el tope del Worker). Si igual se corta (`stop_reason: max_tokens`), pide mandarlo en partes.
+  - Tarjeta con resumen arriba («30 renglones · 20 🟢 · 0 🟡 · 10 🔴», páginas o PDF) y «Sí, cargar entrada» **pegado abajo** (sticky), siempre a la vista.
+  - Al guardar: cada foto queda como adjunto (`fotoId` = la primera, `fotoIds` todas); el PDF se guarda como adjunto si pesa hasta 650 KB (un documento de Firestore); si no, se avisa que queda en el mail o WhatsApp.
+  - Los códigos siguen saliendo solo del catálogo: nada se inventa.
+- **Worker `ema-ia`: no se tocó** (deja pasar los bloques de `messages` tal cual; el tope de 5 MB por pedido manda el límite del PDF).
+
+**Pruebas:** `t_v138` (PC 47/47, celu 48/48): cada tipo de capa se cierra con «atrás», pantallas en orden, Inicio sin historia, «¿Salir sin guardar?» (Sí/No) en Llenar orden y el cierre, ✕ sin entradas fantasma, `?doc=`, remito en PDF, 3 fotos, 30 renglones, botón pegado abajo, PDF grande/largo. Batería completa: ver abajo.
+
 ## v137 — 09/11/2026 (publicada en GitHub, commit ed8ecaa) · Remito por foto con IA, lector de códigos (EAN y QR) y QR en los comprobantes
 
 **Pedido de Ángel** (09/11/2026)
