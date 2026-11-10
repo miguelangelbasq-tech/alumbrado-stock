@@ -1,0 +1,56 @@
+/* v139 · La app aprovecha toda la pantalla en la compu (solo con más de 900 px; en el celular no cambia nada). */
+@media (min-width:901px){
+ :root{--pc-max:1960px;--pc-lado:32px}
+ /* el resto de las pantallas: más ancho y con aire a los costados */
+ .wrap{max-width:var(--pc-max);padding-left:var(--pc-lado);padding-right:var(--pc-lado)}
+ header .header-inner,footer,.tabbar{max-width:var(--pc-max)}
+ header{padding-left:var(--pc-lado);padding-right:var(--pc-lado)}
+ /* ---- Inicio «Ejecutivo» a todo lo ancho */
+ #viewInicio > #iniEje{max-width:2200px;padding:0 28px;box-sizing:border-box}
+ #iniEje .ie-hero{padding-left:32px;padding-right:32px;padding-bottom:30px}
+ #iniEje .ie-hero::after{left:32px;right:32px}
+ #iniEje .ie-in{max-width:none;display:grid;grid-template-columns:minmax(240px,1fr) minmax(0,2.4fr) auto;column-gap:40px;align-items:center}
+ #iniEje .ie-top{grid-column:1/-1;grid-row:1}
+ #iniEje .ie-saludo{display:contents}
+ #iniEje .ie-saludo > .ent:first-child{grid-column:1;grid-row:2;margin-top:22px;min-width:0}
+ #iniEje .ie-kpis{grid-column:2;grid-row:2;margin:22px 0 0}
+ #iniEje .ie-anillo{grid-column:3;grid-row:2;margin-top:22px;width:104px;height:104px}
+ #iniEje .ie-anillo svg{width:104px;height:104px}
+ #iniEje .ie-kpi{padding:20px 0 19px 22px}
+ #iniEje .ie-kpi b{font-size:38px}
+ #iniEje .ie-kpi span{font-size:12.5px}
+ #iniEje .ie-busca{grid-column:1/-1;grid-row:3;margin-top:24px}
+ /* tarjetas: columnas tipo masonry (sin huecos) */
+ #iniEje .ie-cuerpo{display:block;column-count:2;column-gap:20px;max-width:none;margin-top:20px}
+ #iniEje .ie-col{display:contents}
+ #iniEje .ie-tarj{break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;display:block;margin:0 0 20px}
+ /* ---- Perfil en columnas */
+ #viewPerfil{max-width:1400px !important;padding-left:var(--pc-lado) !important;padding-right:var(--pc-lado) !important;column-count:2;column-gap:24px}
+ #viewPerfil .pf-top{column-span:all;-webkit-column-span:all;margin:0 calc(-1 * var(--pc-lado));padding-left:var(--pc-lado);padding-right:var(--pc-lado)}
+ #viewPerfil .pf-ver{column-span:all;-webkit-column-span:all;margin-top:8px}
+ #viewPerfil > *{break-inside:avoid;-webkit-column-break-inside:avoid}
+ #viewPerfil .pf-yo{margin-top:0}
+ #viewPerfil .pf-msg + .pf-tarj{break-before:column;-webkit-column-break-before:always}
+ #viewPerfil .pf-tarj{display:block}
+ #viewPerfil .pf-top{margin-bottom:22px;background:transparent}
+ /* ---- Asistente: panel lateral derecho de alto completo */
+ #iaPanel{top:0;right:0;bottom:0;width:var(--ia-w,480px);max-width:calc(100vw - 320px);border-radius:28px 0 0 28px;border-right:0}
+ #iaPanel header.ia-cab{padding-top:14px !important;border-radius:28px 0 0 0}
+ body.ia-anchando{cursor:ew-resize;-webkit-user-select:none;user-select:none}
+ #iaPanel .ia-chat{padding-left:20px;padding-right:20px}
+ #iaPanel .ia-ancho{position:absolute;left:-4px;top:28px;bottom:28px;width:10px;cursor:ew-resize;z-index:6;touch-action:none}
+ #iaPanel .ia-ancho::after{content:"";position:absolute;left:3px;top:50%;width:4px;height:44px;margin-top:-22px;border-radius:4px;background:rgba(40,40,94,.18);transition:background .15s}
+ #iaPanel .ia-ancho:hover::after,#iaPanel .ia-ancho.on::after{background:var(--navy)}
+}
+@media (min-width:1200px){
+ #iniEje .ie-cuerpo{column-count:3}
+ #viewPerfil{column-count:3}
+ #viewPerfil .pf-tarj + .pf-tarj{break-before:column;-webkit-column-break-before:always}
+}
+/* con lugar, el contenido de la app se corre a la izquierda y queda a la vista al lado del Asistente */
+@media (min-width:1240px){
+ body.ia-abierto{padding-right:var(--ia-w,480px);box-sizing:border-box}
+}
+@media (min-width:1700px){
+ #iniEje .ie-cuerpo{column-count:4}
+}

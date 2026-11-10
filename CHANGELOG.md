@@ -2,6 +2,28 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v139 — 10/11/2026 (en la rama `claude/new-session-3hwmc9`, sin publicar) · La app ocupa toda la pantalla en la compu
+
+**Pedido de Ángel** (10/11/2026): «revisá cómo se adaptan las pantallas nuevas a la compu, la idea es que ocupe toda la pantalla».
+
+**Base:** ORIGINAL 138 (la publicada, `a52024ac…`).
+
+**Cambios** (solo con más de 900 px de ancho; en el celular y hasta 900 px no cambia nada). Hoja nueva `<style id="v139PcCss">` y script chico `<script id="v139Pc">`, antes de `revisarAppDiag`. No cambian ids, clases ni el JS de antes.
+- **Inicio Ejecutivo a todo lo ancho:** la portada azul ocupa el área de contenido con 28 px de margen y puntas redondeadas (tope 2200 px). Adentro: saludo a la izquierda, los 3 KPIs más anchos al medio, el anillo del contrato a la derecha y el buscador abajo. Las tarjetas (Para atender · Supervisor · En obra ahora · Órdenes de hoy · Accesos · Obras) van en columnas tipo masonry, sin huecos: 2 hasta 1200 px, 3 entre 1200 y 1700 px y 4 desde 1700 px.
+- **Perfil en columnas:** a la izquierda la persona y los KPIs; al medio «Tus ajustes»; a la derecha «La app» y «Cerrar sesión» (2 columnas entre 900 y 1200 px). Tope 1400 px.
+- **Asistente:** panel lateral derecho de alto completo, de 480 px. Se puede ensanchar o angostar arrastrando su borde izquierdo (entre 420 y 760 px; doble clic vuelve a 480; queda guardado en el aparato). Desde 1240 px el contenido de la app se corre a la izquierda y queda a la vista; entre 901 y 1239 px el panel flota encima. En el celular sigue a pantalla completa. El menú lateral se sigue abriendo por encima.
+- **El resto de las pantallas** (Pañol, Producción, Órdenes, Avance, Informes, Gastos, Obras…): ancho de hasta 1960 px con 32 px a los costados (antes el tope era 1280 px). El header, el footer y la barra de pestañas van con el mismo ancho. Las tablas y las filas de KPIs ocupan todo ese ancho.
+- **Formularios:** «Llenar orden» y la Calculadora ya iban en 2 columnas (formulario + resumen/resultado): quedan igual. «Registrar movimiento» quedó en una columna: sus campos están sueltos en el HTML y para partirlos en 2 columnas habría que agruparlos con JS/HTML (anotado, no se tocó).
+- Sin scroll horizontal en 1024, 1280, 1440, 1600, 1920 y 2560 px. Compatible con Chrome 80: sin `:has()` y sin `gap` en flex (se usó grid y `column-count`).
+
+**Pruebas:** `t_v139` nueva. En PC (44/44): sin scroll horizontal en las 12 pantallas a los 6 anchos; el Inicio usa el 96,5 % del ancho a 1600 y el 97,1 % a 1920, con 3 y 4 columnas (2 a 1024); la portada en una fila; tope 2200; Perfil en 2 y 3 columnas; `.wrap` de Pañol de 1600 px a 1600 y de 1960 px a 2560; Asistente de alto completo a la derecha, 480 px, sin tapar el botón del menú, el contenido al lado, arrastre y doble clic, tope, menú por encima, flota a 1024; a 900 px el Inicio y el Perfil miden igual que antes. En el celu (9/9): el Inicio, el Perfil, el Pañol y el Asistente abierto miden igual con la hoja nueva prendida y apagada. Batería completa en PC y celu sobre el index entregado: ver más abajo.
+
+**Capturas** (antes y después, 1600×900 y 1920×1080): inicio, perfil, el asistente abierto sobre Obras, pañol, producción, órdenes (tablero y «Llenar orden») y avance, más el montaje `antes_despues.jpg`.
+
+**Huellas:** ORIGINAL `0b9dbaba…eb66` · index `24fac20b…eb1f` (sello `2026-11-10 00:17 · 57fb3c`) · ver `herramientas/v139/huellas.txt`.
+
+**Qué tiene que hacer Ángel:** subir solo `index.html` a GitHub cuando decida publicarla. Sin reglas nuevas, sin APK nuevo, sin tocar los Workers.
+
 ## v138 — 10/11/2026 (publicada en GitHub, commit f01a0a8) · El botón «atrás» vuelve atrás + remito en PDF, de varias páginas, «Solo precios» y «Remitos cargados»
 
 **Pedido de Ángel** (10/11/2026)
