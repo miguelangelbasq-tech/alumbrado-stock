@@ -2,11 +2,12 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v138 — 10/11/2026 (en la rama, sin publicar en main) · El botón «atrás» vuelve atrás + remito en PDF y de varias páginas
+## v138 — 10/11/2026 (en la rama, sin publicar en main) · El botón «atrás» vuelve atrás + remito en PDF, de varias páginas, «Solo precios» y «Remitos cargados»
 
 **Pedido de Ángel** (10/11/2026)
 - Que el botón «atrás» del celular (y la flecha del navegador / el botón del mouse) vuelva atrás como en cualquier app.
 - Remito con IA: aceptar también PDF (los que llegan por mail/WhatsApp), varias fotos de un mismo remito en un solo pedido y remitos largos (20–40 renglones) sin cortarse.
+- Remito con IA: modo «Solo precios» (sacar precios de remitos viejos sin mover stock) y un historial «📜 Remitos cargados», con aviso si se repite un remito.
 
 **Base:** ORIGINAL 137 (la publicada, `cbe62a3b…`).
 
@@ -25,6 +26,11 @@ Autor: Miguel Ángel Díaz © 2026
   - Tarjeta con resumen arriba («30 renglones · 20 🟢 · 0 🟡 · 10 🔴», páginas o PDF) y «Sí, cargar entrada» **pegado abajo** (sticky), siempre a la vista.
   - Al guardar: cada foto queda como adjunto (`fotoId` = la primera, `fotoIds` todas); el PDF se guarda como adjunto si pesa hasta 650 KB (un documento de Firestore); si no, se avisa que queda en el mail o WhatsApp.
   - Los códigos siguen saliendo solo del catálogo: nada se inventa.
+  - **«💲 Solo precios»** (se elige al abrir el remito, junto a «📦 Cargar entrada»): para remitos viejos que nunca se cargaron. Misma lectura y misma propuesta de códigos (🟢/🟡/🔴). Por renglón: código del pañol, precio actual (costo del catálogo con su fecha: `costoFecha`, o la de la última entrada con ese precio, o la del último cambio) → precio nuevo **sin IVA** (con la moneda, el IVA y, en U$S, el dólar del día, igual que «Registrar movimiento»), con casilla. Si el remito es más viejo que el precio guardado: aviso amarillo y destildado. Si cambia más de 50 %: «revisá». Con «Sí, actualizar precios» → `fbGuardarProductoCatalogo` con `costo`, `costoFecha` (= fecha del remito), `costoFuente` («remito <proveedor> <número>»), `editadoPor`/`editadoTs` (+ `costoTs`, para saber si después el costo se cambió por otro lado). **Sin movimientos** (el stock no se mueve). Auditoría `remito_precios` con `porAsistente:true`. Nota: «Pañol › Precios» además anota un movimiento «solo precio» de cantidad 0; acá no se hace, como pidió Ángel.
+  - **«📜 Remitos cargados»** (Pañol › Registrar movimiento, al lado de «📷 Cargar remito con foto», y en la hoja del remito): fecha del remito, proveedor, número, modo, renglones, total, quién y cuándo. Filtros: buscar (proveedor, N°, producto, E-…), proveedor y fechas. Tocar uno: los renglones con su código, los E- de las entradas o el precio antes → después, lo que quedó afuera, «🖼 Ver foto» / «📄 Ver PDF» y «🖨 Imprimir / PDF» (hoja A4 de la app).
+    - **Sin colección ni reglas nuevas:** cada remito deja un **resumen liviano en `adjuntos`** con `tipo:"remitoRes"` (sin imagen: proveedor, numero, fecha, modo, moneda, conIva, total, renglones [{desc, cant, un, precio, codigo, grado, mov | precioAntes, precioDespues}], movimientos, fotoIds, por, ts, `mes` y `clave`). Va aparte de la foto (que sigue como `tipo:"remito"`, como en la v137) para que la lista no baje ninguna imagen y ningún documento se acerque a 1 MB.
+    - Se lee **por mes** (`where tipo == "remitoRes"` + `where mes == "AAAA-MM"`, 3 meses y «Ver más»): solo igualdades, así **no hace falta crear un índice compuesto** en Firebase (un `orderBy ts` con `where tipo` sí lo pediría). Los remitos cargados con la v137 no tienen resumen y no aparecen.
+    - **Remito repetido:** si el mismo proveedor + número ya se cargó (`clave`), «Este remito ya lo cargaste el dd/mm (Entrada/Solo precios)» con «Ver» / «Cargar igual» / «Cancelar» (al leerlo y otra vez al confirmar si se cambió el número).
 - **Worker `ema-ia`: no se tocó** (deja pasar los bloques de `messages` tal cual; el tope de 5 MB por pedido manda el límite del PDF).
 
 **Pruebas:** `t_v138` (PC 47/47, celu 48/48): cada tipo de capa se cierra con «atrás», pantallas en orden, Inicio sin historia, «¿Salir sin guardar?» (Sí/No) en Llenar orden y el cierre, ✕ sin entradas fantasma, `?doc=`, remito en PDF, 3 fotos, 30 renglones, botón pegado abajo, PDF grande/largo. Batería completa: ver abajo.

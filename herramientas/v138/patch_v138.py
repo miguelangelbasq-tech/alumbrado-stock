@@ -6,6 +6,9 @@
     cámara, galería y hoja A4 (ahora los maneja todos atrasApp).
  2) Remito con IA: también PDF (bloque «document») y varias fotos del mismo remito en un solo pedido → una tarjeta;
     remitos largos: 16.000 tokens con Opus/Fable, resumen arriba y «Sí, cargar entrada» pegado abajo.
+    Modo «💲 Solo precios» (costo del catálogo sin IVA, sin movimientos), «📜 Remitos cargados» (resumen liviano en
+    adjuntos tipo «remitoRes», leído por mes) y aviso de remito repetido. El bloque nuevo sale de remito138_armar.py +
+    remito138_b.py sobre remito137.html (ver armar.sh).
 Base: ORIGINAL 137 (la publicada)."""
 import sys, os, re, hashlib, datetime
 SRC = os.path.dirname(os.path.abspath(__file__))
