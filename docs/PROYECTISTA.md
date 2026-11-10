@@ -230,3 +230,9 @@ Referencias que pasó Ángel: Li.PAD, GridGIS (Merytronic), DIRED-CAD, ArcGIS Fi
 - **↶ Deshacer:** vuelve atrás lo último que se movió, borró o cambió.
 - Los largos de las cotas, la planilla, el DXF (polilínea) y el cable del cálculo eléctrico van por el camino dibujado.
 - Datos: `punto.via = [{la, lo}]`, los quiebres desde el punto anterior hasta ese punto.
+
+## Idea anotada: medición con láser (Ángel, 10/11/2026) — NO hacer todavía
+- Usar un medidor láser (distanciómetro con Bluetooth) para que la medida pase sola a la app, exacta y sin caminar: distancias entre columnas, a la línea municipal, largo de tramos, alturas.
+- Complementa al GPS (que da la posición caminando) y al GPS RTK charlado antes.
+- A pensar cuando se encare: qué modelos de láser tienen Bluetooth y si se conectan desde la app de Android (plugin nativo → APK nuevo); dónde se carga cada medida (Proyectista: tramo/punto; Mis tareas: medidas de la orden); cómo se combina con los puntos GPS.
+- Ángel: «tenerlo anotado nada más, pensarla bien».
