@@ -2,6 +2,51 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v141 — 10/11/2026 (entregada, sin publicar) · El Asistente por rol y topes para que los US$ 100 alcancen el mes
+
+**Pedido de Ángel** (10/11/2026): que cada rol vea y pregunte solo lo suyo (oficina todo, pañol el pañol con precios de materiales pero sin sueldos, cuadrilla solo lo suyo y sin plata, solo mirar preguntas generales) y que haya topes por persona y un freno del mes para que los US$ 100 alcancen.
+
+**Base:** ORIGINAL 140 (la publicada, `43e7fc5c…`).
+
+**Cambios en la app**
+- **De entrada el Asistente lo ven todos los roles** (Administración lo apaga por rol en ⚙ › Límites; con el modo de compatibilidad de las pruebas viejas sigue solo admin/oficina).
+- **El filtro está en la app, no en el texto para la IA** (`alcance()` en el código dormido del asistente):
+  - **Herramientas por rol** (lista cerrada): admin y oficina todas (como hasta ahora; oficina también ve sueldos y valor hora); pañol: el pañol (stock, movimientos, reservas, herramientas, catálogo con precios de materiales, cómputos), obras en general, PDFs de stock/compras/comprobantes/reservas y sus propuestas del pañol; cuadrilla y operario: sus órdenes (sin los nombres de los demás), los datos, planos y cómo llegar a SUS obras, el stock sin precios, SUS puntos y «cómo se hace»; solo mirar: obras en general (avance, ubicación), «cómo se hace» y normas.
+  - **Cada resultado se limpia antes de ir al modelo:** sin valor hora, sueldos, valor del punto, K/módulo, importes, gastos ni ganancia (y sin costos ni precios para la cuadrilla y solo mirar); lo que no puede ver vuelve como «Eso no lo puedo ver con tu usuario, preguntale a la oficina.».
+  - **System por rol** con lo que no ve y esa respuesta exacta (no inventa).
+  - **Herramienta nueva `como_se_hace`**: busca en las guías «Cómo se hace» (paso a paso, EPP, materiales con código, control, normas) y en Normas y tipos constructivos.
+  - Atajos y ejemplos del panel según el rol.
+- **Modelo por rol:** pañol, cuadrilla, operario y solo mirar → Sonnet 5.5 con effort «low»; admin y oficina siguen con Opus 5.5 (dato simple → low). Los remitos siguen con Opus.
+- **Topes (los controla el Worker; la app solo los muestra):**
+  - chip **«Te quedan N preguntas hoy»** en el panel (de `/mio` al abrir y de cada respuesta);
+  - **cartel** «Por hoy, listo» / «Asistente en pausa» cuando el Worker dice `tope_dia`, `tope_remitos`, `tope_mes` o `rol_apagado` (no un error rojo); el remito con IA también lo muestra y ofrece cargarlo a mano;
+  - **⚙ › Límites** (solo Administración): prender/apagar por rol, preguntas y remitos por día por rol (vacío = sin tope), freno del mes (tope US$, pausa %, corte %), el detalle por persona (hoy y mes) — se guarda en `configEquipo/personal.asistente.limites` y `.roles` (auditoría `asistente_limites`);
+  - **«Gastado este mes: US$ 23,40 de 100 · preguntas … · remitos … · supervisor …»** en ⚙ (Administración y Oficina) y en menú › Versión, del Worker (`/uso`);
+  - al cruzar el freno del mes, **aviso al celular de Administración** (una vez por mes);
+  - si el Worker es el viejo, la app no se rompe: avisa una vez a admin/oficina que hay que pegar el nuevo.
+- Cada pedido lleva `ema.tipo` (`pregunta`, `remito`, `supervisor`) para que el Worker los cuente aparte.
+
+**Worker `ema-ia` v3-ia** (`workers/ema-ia.js`):
+- **El rol lo lee el Worker de la base**, con el mismo token de la persona (`usuarios/{uid}`: rol, activo, pendiente) y los límites de `configEquipo/personal` (por REST, guardados 10 min). El rol que mande la app se ignora. Usuario dado de baja o «a confirmar» → no pasa.
+- **Topes por persona y día** (Argentina): admin sin tope · oficina 30 (+ 40 remitos) · pañol 20 + 40 remitos · cuadrilla, operario y mirar 10. Pregunta = el último mensaje es texto de la persona (las vueltas de herramientas de esa pregunta no suman). Remito = foto/PDF sin herramientas con `ema.tipo:"remito"` (varias hojas = 1). Supervisor de admin/oficina: no cuenta, suma al gasto.
+- **Freno del mes** (suma de `ema.costoUsd`): al 80 % de US$ 100 se pausan pañol, cuadrilla, operario y mirar (y la respuesta trae `freno.avisar` una vez); al 95 % se corta para todos menos admin; el día 1 empieza de cero.
+- Errores en castellano: `tope_dia` («Llegaste a tus 10 preguntas de hoy. Mañana se renuevan.»), `tope_remitos`, `tope_mes` («El asistente llegó al tope de gasto del mes. Se renueva el día 1.»), `rol_apagado`, `usuario`.
+- Rutas nuevas: `GET /uso` (solo admin u oficina según la base) y `GET /mio`; `/salud` con `version:"v3-ia"`, `gastoMes`, `tope`, `kv`.
+- Se mantiene todo lo de la v2b (reintento ante 400 con `detalle`, modelos, respaldo, la clave nunca aparece). Sin KV cuenta en memoria (lo dice `/salud`); si el KV se queda sin escrituras, sigue con la memoria.
+- Instructivo: sección nueva «⚡ Actualizar el Worker para la v141» en `workers/EMA-IA_INSTRUCCIONES.md`.
+
+**Reglas:** no hacen falta nuevas (verificado en `Reglas_Firestore_v128`: `usuarios/{uid}` lo lee cada uno; `configEquipo/personal` lo leen los confirmados y lo escribe quien edita Producción u Órdenes, o sea Administración; `avisosPush` lo crea cualquier confirmado).
+
+**Pruebas:** `t_v141` nueva (PC 44/44, celu 44/44): cada rol con el Worker simulado — cuadrilla (lengüeta de entrada, chip «Te quedan 9/7 preguntas hoy» de `/mio` y de la respuesta, solo sus herramientas, Sonnet low con `ema.tipo`, pregunta el valor hora y la nómina nunca va al modelo, responde «Eso no lo puedo ver…», solo sus órdenes sin nombres ajenos, stock sin precios, obra ajena no / la suya sí, solo sus puntos, «cómo se hace», cartel de `tope_dia`, aviso del freno a Administración una sola vez), pañol (sus herramientas y colecciones, no ve la nómina pero sí precios de materiales, sin precios del itemizado ni gastos, remito con Opus y `ema.tipo:"remito"` y cartel de `tope_remitos`), solo mirar (solo lo general, sin pañol ni órdenes), oficina (todo, ve el valor hora, «Gastado este mes» sin Límites), admin (todas las herramientas, aviso del Worker viejo una vez, ⚙ Límites con los valores de entrada, detalle por persona, guarda roles y límites sin tocar la nómina, no deja pausa > corte, menú › Versión). Worker: `node workers/probar_ema_ia.mjs` 97/97 OK (rol leído de Firestore con el token de la persona y guardado, topes por rol y día, vueltas de herramientas que no suman, remitos aparte, supervisor, rol apagado, usuario de baja, freno 80/95 con aviso una vez, reinicio de mes, tope configurable, `/uso` solo admin/oficina, `/mio`, rol falso ignorado, Firestore caído, KV sin escrituras, la clave nunca aparece). Batería completa en PC y celu sobre el index entregado (de a 3, 143 pruebas): todo OK salvo `t_v083` (reemplazada por `t_v084`, como siempre).
+
+**Capturas** (`v141/capturas`, celu y PC): `v141_queda` (chip «Te quedan»), `v141_cuadrilla_no_ve` («Eso no lo puedo ver…»), `v141_tope` (cartel de tope), `v141_limites` (⚙ Límites).
+
+**Huellas:** ORIGINAL `c9266614…c4` · index `a51fc6b9…bc1d` (sello `2026-11-10 10:34 · 006512`) · Worker `d06a9b21…ab04` · ver `herramientas/v141/huellas.txt`.
+
+**Qué tiene que hacer Ángel:** 1) pegar el Worker nuevo `ema-ia` (v3-ia) y ver `/salud` → `"version":"v3-ia"` (instructivo, «Actualizar el Worker para la v141»); 2) subir solo `index.html` a GitHub cuando decida publicarla. Sin reglas nuevas, sin APK nuevo. Conviene dejar el tope de Anthropic un poco arriba del de la app (ej. US$ 110).
+
+**A confirmar con Ángel:** los remitos por día de Oficina (puse 40, igual que Pañol; el pedido no lo decía) y si la cuadrilla debe poder ver el avance general de obras que no son suyas (hoy: solo `buscar_obra` con el %; datos, planos y ubicación solo de sus obras).
+
 ## v140 — 10/11/2026 (publicada en GitHub, commit 4f22b67) · Remito «inteligente»: sabe qué ya se cargó y propone completar lo que falta
 
 **Pedido de Ángel** (10/11/2026): «Si el remito ya está puesto, me tendría que decir: este remito o esta factura ya fue registrada antes, ¿seguir o no seguir? O que me diga: este remito fue cargado pero no todo, se cargó hasta aquí, ¿cargamos lo que no se cargó? O se cargó todo pero no el precio, ¿cargamos el precio? Hacerlo más pro.» Además (arreglo chico): en el Asistente, después de dictar con el 🎤 o en modo charla y enviar, el texto volvía a aparecer escrito en la caja.
