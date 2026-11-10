@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v141 — 10/11/2026 (entregada, sin publicar) · El Asistente por rol y topes para que los US$ 100 alcancen el mes
+## v141 — 10/11/2026 (publicada en GitHub) · El Asistente por rol y topes para que los US$ 100 alcancen el mes
 
 **Pedido de Ángel** (10/11/2026): que cada rol vea y pregunte solo lo suyo (oficina todo, pañol el pañol con precios de materiales pero sin sueldos, cuadrilla solo lo suyo y sin plata, solo mirar preguntas generales) y que haya topes por persona y un freno del mes para que los US$ 100 alcancen.
 
