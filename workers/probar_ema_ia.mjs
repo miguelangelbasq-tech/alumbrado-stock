@@ -29,7 +29,7 @@ globalThis.fetch = async (url, init = {}) => {
   if (url === "https://api.anthropic.com/v1/messages") {
     pedidosClaude++;
     ultimoPedido = { headers: init.headers, body: JSON.parse(init.body) };
-    if (respuestaClaude) return respuestaClaude();
+    if (respuestaClaude) { const rc = respuestaClaude(init, ultimoPedido.body); if (rc) return rc; }
     return new Response(JSON.stringify({ id: "msg_1", type: "message", role: "assistant", model: ultimoPedido.body.model, content: [{ type: "text", text: "Hola Ángel" }], stop_reason: "end_turn", usage: { input_tokens: 1000, output_tokens: 500, cache_read_input_tokens: 2000, cache_creation_input_tokens: 0 } }), { status: 200, headers: { "Content-Type": "application/json", "request-id": "req_1" } });
   }
   throw new Error("fetch no esperado: " + url);
@@ -50,7 +50,7 @@ const base = (extra = {}) => ({ model: "claude-haiku-5-5", max_tokens: 1000, mes
 // ---------- /salud
 {
   const { r, j } = await pedir("/salud", { metodo: "GET" });
-  prueba("/salud responde 200 con versión v2-ia y los modelos", r.status === 200 && j.ok && j.version === "v2-ia" && j.modelos.includes("claude-fable-5-2") && j.modelos.includes("claude-opus-5-5"));
+  prueba("/salud responde 200 con versión v2b-ia y los modelos", r.status === 200 && j.ok && j.version === "v2b-ia" && j.modelos.includes("claude-fable-5-2") && j.modelos.includes("claude-opus-5-5"));
   prueba("/salud dice clave:true y kv:false (con aviso)", j.clave === true && j.kv === false && !!j.aviso);
   const s2 = await pedir("/salud", { metodo: "GET", e: {} });
   prueba("/salud sin secret dice clave:false", s2.j.clave === false);
@@ -172,6 +172,19 @@ const base = (extra = {}) => ({ model: "claude-haiku-5-5", max_tokens: 1000, mes
   respuestaClaude = () => { throw new Error("sin red " + CLAVE_FALSA); };
   const red = await pedir("/ia", { token: t, cuerpo: base() });
   prueba("sin red hacia Claude → 502", red.r.status === 502 && red.j.error.tipo === "red");
+  respuestaClaude = null;
+}
+
+// ---------- v2b: 400 de Claude → reintenta más simple y devuelve el motivo
+{
+  const t = await firmar(cuerpoToken("uid-reintento"));
+  const vistos = [];
+  respuestaClaude = (req, body) => { vistos.push(body); return ("fallbacks" in body) ? new Response(JSON.stringify({ type: "error", error: { type: "invalid_request_error", message: "fallbacks: no habilitado" } }), { status: 400, headers: { "Content-Type": "application/json" } }) : null; };
+  const a = await pedir("/ia", { token: t, cuerpo: base({ model: "claude-opus-5-5", fallbacks: "default", cache_control: { type: "ephemeral" } }) });
+  prueba("v2b: 400 con respaldo → reintenta sin respaldo ni caché automática y contesta 200", a.r.status === 200 && vistos.length === 2 && !("fallbacks" in vistos[1]) && !("cache_control" in vistos[1]));
+  respuestaClaude = () => new Response(JSON.stringify({ type: "error", error: { type: "invalid_request_error", message: "messages.0: algo mal " + CLAVE_FALSA } }), { status: 400, headers: { "Content-Type": "application/json" } });
+  const b = await pedir("/ia", { token: t, cuerpo: base({ model: "claude-opus-5-5" }) });
+  prueba("v2b: 400 que sigue → «detalle» con el motivo y sin la clave", b.r.status === 400 && /messages\.0: algo mal/.test(b.j.error.detalle || "") && !(b.j.error.detalle || "").includes("sk-ant"));
   respuestaClaude = null;
 }
 

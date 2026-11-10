@@ -2,6 +2,21 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v136b — 09/11/2026 (publicada en GitHub, commit 333bdd6) · Inicio bien en la compu y el asistente no se traba con «no entendió el pedido»
+
+**Pedido de Ángel:** en la compu el Inicio se veía con «Plazas» arriba y las tarjetas más angostas que la portada; el Asistente contestaba «Claude no entendió el pedido» en muchas preguntas.
+
+**Cambios**
+- `<style id="v136bCss">`: sin el título viejo «Plazas» (`#viewInicio:before`) con el Inicio Ejecutivo; en pantallas > 640 px la portada con bordes redondeados y las tarjetas al ancho de la portada. En el celu no cambia.
+- Asistente: si el Worker manda `error.detalle`, se muestra «(Motivo: …)» debajo del mensaje.
+- Worker `ema-ia` **v2b-ia**: si Claude responde 400, reintenta solo (1.º sin respaldo del servidor ni caché automática, 2.º además sin bloques de pensamiento viejos) y, si sigue, devuelve el motivo en `detalle` (sin la clave). Sospecha: el contexto cambia en cada pregunta y Claude rechaza los bloques de pensamiento de la respuesta anterior.
+
+**Qué hace Ángel:** pegar `workers/ema-ia.js` en Cloudflare (ema-ia › Edit code › Deploy) y ver en `/salud` «v2b-ia».
+
+**Pruebas:** `t_v136` 45/45 y 55/55, `t_v135` 43/43 y 59/59, `t_v133`, `t_v134`, `t_nav`, `t_humo` OK en PC y celu; `workers/probar_ema_ia.mjs` 60/60.
+
+**Huellas:** ORIGINAL `c3e7f02b…` · index `84ff066f…` · sello «2026-11-09 20:54 · 115b45».
+
 ## v136 — 09/11/2026 (publicada en GitHub, commit 5b6833d, con la carpeta guias/) · Arreglos del Inicio, campanita de línea, barra de abajo deslizable, Asistente con Opus 5.5 (PDF y cierre rápido), «🩺 Supervisor» y Guías nuevas
 
 **Pedido de Ángel** (diseños aprobados el 09/11/2026)

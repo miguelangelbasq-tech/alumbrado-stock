@@ -25,7 +25,7 @@
 //    filtros, el servidor lo reintenta solo con el modelo que recomienda. (Haiku no tiene respaldo: ahí no se manda.)
 // Sin SDK y sin streaming: es un fetch directo, para poder pegarlo a mano en el panel de Cloudflare.
 
-const VERSION = "v2-ia";
+const VERSION = "v2b-ia";
 const PROYECTO = "alumbrado-stock";
 const API_URL = "https://api.anthropic.com/v1/messages";
 // Versión de la API de Claude. La skill «claude-api» usa 2026-10-21 en todos sus ejemplos de HTTP directo.
@@ -223,17 +223,36 @@ async function pedidoIa(request, env, origen) {
   const lim = await contar(env, uid);
   if (!lim.ok) return error("limite", lim.cual === "minuto" ? `Llegaste a ${lim.tope} pedidos por minuto. Esperá un ratito.` : `Llegaste a ${lim.tope} pedidos por hoy. Mañana se renueva.`, 429, origen);
 
-  let r;
-  try {
+  // v2b: si Claude devuelve 400, se reintenta con el pedido más simple (sin respaldo del servidor, sin caché automática,
+  // sin bloques de pensamiento viejos) y, si sigue, se devuelve el motivo exacto en «detalle» (nunca la clave ni las cabeceras).
+  const mandar = async (pp, bb) => {
     const cab = { "Content-Type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": API_VERSION };
-    if (betas && betas.length) cab["anthropic-beta"] = betas.join(",");
-    r = await fetch(API_URL, { method: "POST", headers: cab, body: JSON.stringify(p) });
+    if (bb && bb.length) cab["anthropic-beta"] = bb.join(",");
+    const rr = await fetch(API_URL, { method: "POST", headers: cab, body: JSON.stringify(pp) });
+    let jj = null; try { jj = await rr.json(); } catch (e) { jj = null; }
+    return { rr, jj };
+  };
+  const msj = (jj) => { let s = String((jj && jj.error && jj.error.message) || ""); if (env.ANTHROPIC_API_KEY) s = s.split(env.ANTHROPIC_API_KEY).join("[clave]"); return s.replace(/sk-ant[\w-]*/g, "[clave]").replace(/x-api-key/gi, "[cabecera]").slice(0, 400); };
+  let r, j, detalle = "";
+  try {
+    ({ rr: r, jj: j } = await mandar(p, betas));
+    if (r.status === 400) {
+      detalle = msj(j); console.log("ema-ia 400 (1):", detalle);
+      const p2 = Object.assign({}, p); delete p2.fallbacks; delete p2.cache_control;
+      ({ rr: r, jj: j } = await mandar(p2, []));
+      if (r.status === 400) {
+        detalle = msj(j) || detalle; console.log("ema-ia 400 (2):", detalle);
+        const p3 = Object.assign({}, p2);
+        p3.messages = (p2.messages || []).map((m) => Array.isArray(m.content) ? Object.assign({}, m, { content: m.content.filter((b) => !b || (b.type !== "thinking" && b.type !== "redacted_thinking" && b.type !== "fallback")) }) : m).filter((m) => !Array.isArray(m.content) || m.content.length);
+        ({ rr: r, jj: j } = await mandar(p3, []));
+        if (r.status === 400) { detalle = msj(j) || detalle; console.log("ema-ia 400 (3):", detalle); }
+      }
+    }
   } catch (e) { return error("red", "No se pudo hablar con Claude. Probá de nuevo en un rato.", 502, origen); }
-  let j = null;
-  try { j = await r.json(); } catch (e) { j = null; }
   if (!r.ok || !j || j.type === "error") {
     const [tipo, mensaje, s] = errorClaude(r.ok ? 502 : r.status, j);
-    return error(tipo, mensaje, s, origen);
+    const res = { error: { tipo, mensaje } }; if (r.status === 400 && (msj(j) || detalle)) res.error.detalle = msj(j) || detalle;
+    return json(res, s, origen);
   }
   // la respuesta va tal cual (también los bloques «thinking» y «fallback», que la app devuelve sin tocar)
   j.ema = { costoUsd: costoDe(j.model && (MODELOS[j.model] || PRECIO_RESPALDO[j.model]) ? j.model : p.model, j.usage), modelo: j.model || p.model };

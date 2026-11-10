@@ -13,7 +13,7 @@ La app v136 usa **Opus 5.5** (y deja elegir Fable 5.2). El Worker viejo solo con
 1. Entrá a **dash.cloudflare.com** › **Workers & Pages** › **`ema-ia`** › **Edit code**.
 2. Borrá todo y pegá el contenido completo del archivo nuevo **`workers/ema-ia.js`** (tu carpeta o GitHub).
 3. Tocá **Deploy**. La clave (`ANTHROPIC_API_KEY`) y el KV quedan como estaban: no hay que volver a cargarlos.
-4. Abrí **https://ema-ia.mdiaz-60f.workers.dev/salud**: tiene que decir `"version":"v2-ia"` y, en `modelos`, `claude-opus-5-5` y `claude-fable-5-2`.
+4. Abrí **https://ema-ia.mdiaz-60f.workers.dev/salud**: tiene que decir `"version":"v2b-ia"` y, en `modelos`, `claude-opus-5-5` y `claude-fable-5-2`.
 
 Qué cambia en el Worker: acepta Opus 5.5 y Fable 5.2 (respuestas de hasta 16.000 tokens), el «respaldo del servidor» (si Claude rechaza un pedido por sus filtros, lo reintenta solo con el modelo recomendado) y deja pasar tal cual los bloques de «pensamiento». Sigue sin dejar pasar `temperature` ni `thinking`.
 
