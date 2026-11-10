@@ -693,6 +693,8 @@ Ejemplos:
 
 ## 16. Pendientes conocidos (preguntar a Ángel antes de encarar)
 
+- **v146 (pedido de Ángel, 10/11/2026, quedó afuera de la v145):** «lo que no se terminó hoy pasa solo a mañana y la semana se actualiza»: pasar lo no terminado a la orden ya emitida de mañana a las 18:00 (por `cierreTarea` «Lo que falta, a otro día» / `ot.pasadoA`, o borrador en la sugerida si no hay orden), aviso a la oficina con «Deshacer», ajuste automático / preguntarme / no, auditoría `sugerida_pasar`, sin duplicar y respetando el mínimo de 2 y los rendimientos; cartel «Actualizado HH:MM · N tareas pasaron a mañana» en el borrador.
+
 - Confirmar en celulares reales el APK 1.1 (Moto g24 power: pantalla negra/velocidad). Si el login falla en el APK, revisar si la API key de Firebase tiene restricción por dominio (`https://localhost`).
 - Push nativo (FCM), v115: el Worker `ema-avisos` v115 (`workers/ema-avisos.js`) manda por FCM HTTP v1 y el index lo tiene prendido. Falta confirmar en celulares reales que Ángel pegó el Worker (en `/salud`, `v115-fcm`) y que la API FCM V1 está habilitada.
 - Lista de compras cortada en el celular (tabla `#cardStockCompras` con min-width 620 px).

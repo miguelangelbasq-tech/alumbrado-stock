@@ -1,5 +1,5 @@
 /* v145 · Ángel: todo lo que tenía fondo azul sólido (botones, subpestañas y chips activos, insignias, barras, botones redondos)
-   pasa al mismo degradé del botón «Calcular materiales» (navy → turquesa hondo). Letra blanca: pasa AA en los dos extremos.
+   pasa al mismo degradé del botón «Calcular materiales» (navy → turquesa hondo). Letra blanca (también donde antes era navy sobre blanco activo): pasa AA en los dos extremos.
    No se tocan: textos navy sobre blanco, las portadas (ya tienen su degradé), la cámara (oscura) ni la impresión A4.
    La lista sale de buscar en todo el CSS los fondos var(--navy) / #28285E / #3D3F8A / navy-2 (herramientas/v145/acciones.py). */
 :root{--grad-accion:linear-gradient(135deg,#28285E 0%,#1F5F86 100%)}
@@ -112,8 +112,8 @@
 .sg-ini-ic,
 .cb-op.sel,
 .cb-tipo.sel,
-.st-pn i{background-image:var(--grad-accion) !important;background-color:#28285E}
+.st-pn i{background-image:var(--grad-accion) !important;background-color:#28285E;color:#fff !important}
 @media (max-width: 640px){
-.ayuda-btn .i{background-image:var(--grad-accion) !important;background-color:#28285E}
+.ayuda-btn .i{background-image:var(--grad-accion) !important;background-color:#28285E;color:#fff !important}
 }
 @media print{:root{--grad-accion:none}}
