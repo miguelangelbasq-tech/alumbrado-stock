@@ -12,7 +12,7 @@
 Base: ORIGINAL 136b (la publicada: 136 + v136bCss + el motivo del rechazo del Worker)."""
 import sys, os, re, hashlib, datetime
 SRC = os.path.dirname(os.path.abspath(__file__))
-BASE_SHA = 'c3e7f02bc8e21c071b643726cf9a86caf44da3d3f572a282a7c72e3483ae78db'   # ORIGINAL 136b (la publicada)
+BASE_SHA = 'd802980d29d2c7be87e9d5a9daf6baf8fa627a9648f6a064e50dbcaf7bb1f386'   # ORIGINAL 136b (la publicada)
 ent, sal = sys.argv[1], sys.argv[2]
 t = open(ent, encoding='utf-8').read()
 assert hashlib.sha256(t.encode()).hexdigest() == BASE_SHA, 'no es el ORIGINAL de la 136b'
