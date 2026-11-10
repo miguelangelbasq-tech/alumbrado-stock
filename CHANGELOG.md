@@ -2,6 +2,66 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v137 — 09/11/2026 (en la rama `claude/new-session-3hwmc9`, sin publicar) · Remito por foto con IA, lector de códigos (EAN y QR) y QR en los comprobantes
+
+**Pedido de Ángel** (09/11/2026)
+- Cargar un remito o una factura sacándole una foto: la IA lo lee y arma la entrada para revisar.
+- Lector de códigos de barras (EAN) y QR; asociar el código de barras a cada producto; QR en las herramientas.
+- QR en todos los comprobantes e informes, que abra el documento en la app.
+
+**Base:** ORIGINAL 136b (la publicada). Después Ángel sumó: dictado en vivo con la onda de rayitas y un Asistente más «vivo».
+
+**Cambios** (módulos nuevos `qrLib`, `codigosQr`, `remitoFoto`, `iaOndaCss`; reemplazos chicos: `hojaPdf.abrir` llama a `__qrHoja`, `hojaReserva` pone `__qrReserva`, y en el código dormido del asistente `asistenteIaCod` la voz, la búsqueda de obras, el system y el effort)
+- **📷 Cargar remito con foto** (Pañol › Registrar movimiento con «Entrada», y en el panel del Asistente: chip y «cargá este remito»). Solo quien edita el pañol (admin, oficina, pañol).
+  - Foto con la cámara (en la app de Android por el plugin `Camera`) o de la galería; se achica a 1600 px JPEG.
+  - Va al Worker `ema-ia` como el asistente: Opus 5.5, la imagen en un bloque `image`, effort «medium», con el respaldo del servidor. Con el Worker viejo, Sonnet 5.5 (el mismo respaldo de la v136).
+  - La IA **solo transcribe**: proveedor, número, fecha, moneda, si los precios traen IVA y cuánto, y por renglón la descripción tal cual, cantidad, unidad, precio unitario y EAN si se ve.
+  - Los códigos los busca la app en el catálogo (palabras + rasgos de `__alternativas` + EAN asociado), hasta 3 candidatos: 🟢 seguro · 🟡 parecido · 🔴 sin código. **No inventa códigos ni da de alta productos**: el renglón sin código queda afuera («sin código: elegilo o dejalo afuera») con el desplegable y «🔎 Buscar otro en el catálogo…». Si el remito viene en otra unidad y el pañol sabe cuánto trae cada unidad (`porUnidad`), se pasa; si no, avisa «revisá la cantidad».
+  - Tarjeta editable (lo que dice el remito → el producto del pañol): proveedor, remito, fecha, moneda/IVA/dólar, y por renglón código, cantidad y precio; «✕ Sacar este renglón»; «Sí, cargar entrada» / «No».
+  - Con el Sí: una entrada por renglón por `fbAddMovimiento` (cada una con su número E-, como «Registrar todas las filas»), precioUnit en $ sin IVA + `precioOriginal`, `moneda`, `ivaPct`, `cotizacion`; la foto del remito por `fbAdjuntoGuardar` (R2 si se puede, si no `adjuntos`) con `fotoId` en cada renglón; costo al catálogo si se deja tildado; auditoría `remito_ia` con `porAsistente:true`.
+  - Foto que no se lee: lo dice y pide otra (no llena nada). Sin señal o Worker caído: mensaje claro y la carga a mano sigue igual.
+- **Lector de códigos:** el de la app de Android (ML Kit, `__escanear`, app 1.3+); en el navegador, `BarcodeDetector` con la cámara si existe; si no, escribir el número.
+  - «📷 Escanear» en Pañol › Catálogo y en Herramientas. Producto conocido → su ficha (stock, «➖ Hacer vale de salida», «➕ Entrada»). Desconocido → «¿A qué producto corresponde?» con el buscador del catálogo, y lo asocia. QR de herramienta → su ficha con «Asignar» (entregar) / «Devolver». QR de comprobante → el comprobante.
+  - Ficha del material: bloque «🔗 Código de barras» con los asociados (✕ para sacar) y «🔗 Asociar código de barras».
+  - Se guarda en `catalogoProductos/{codigo}.ean` (lista) con `editadoPor` y `editadoTs`, por `fbGuardarProductoCatalogo`. Un EAN no queda en dos productos: avisa y pregunta «¿Lo pasás?». Auditoría `producto_ean`.
+- **🏷 Imprimir etiquetas QR** (Herramientas): se eligen cuáles; hoja A4 con QR, código H-xxx y nombre.
+- **QR en los comprobantes:** QR chico arriba a la derecha (solo QR, sin código de barras) en vales S-, entradas E-, devoluciones D-, remitos de herramientas RH- e ingresos RI-, reservas R- (uno en cada hoja) y órdenes OT-; en los informes de una obra, al legajo. Se arma en el aparato (qrcode-generator 1.4.4 de Kazuhiko Arase, MIT, adentro de la app) como imagen: sale en pantalla, impreso y en el PDF. El formato de los comprobantes no cambia.
+- **`?doc=` / `?obra=`:** `…/alumbrado-stock/?doc=S-0001` (y `OT-…`, `R-…`, `H-…`, `RH-…`, `RI-…`, `?obra=<id>`) abre, después de entrar y con los permisos de cada uno, el comprobante en su hoja, la orden (la cuadrilla: Mis tareas si la orden es suya), la reserva, la herramienta, el remito o el legajo. Sin permiso: «🔒 No tenés permiso para ver esto». La dirección se limpia al abrir.
+
+- **Asistente · dictado en vivo y onda:** mientras se dicta con el 🎤 o en el modo charla, el texto va apareciendo en el cuadro a medida que se habla (resultados parciales: `interimResults` del navegador y `partialResults` del plugin de la app 1.4, que ahora acepta `matches`/`value`/`accumulatedText` según la versión). Arriba del cuadro, una onda de 28 rayitas que corre como el grabador de WhatsApp (`#iaOndaV`, `window.__iaOnda`): en la compu con el navegador mide el nivel REAL del micrófono (getUserMedia + AnalyserNode, a la par del reconocimiento); en el celu y en la app la onda es simulada y salta con cada palabra que llega (no abre el micrófono dos veces, que cortaría el dictado). En la charla reemplaza a las 5 barritas de antes. Se apaga al terminar, con «Terminar» o al cerrar.
+- **Asistente más «vivo»:**
+  - Actúa sin preguntar de más: «dame la info de la plaza X», «avance del pueblito» → busca la obra más parecida y contesta; pregunta solo si hay 2+ candidatas parecidas de verdad (las ofrece en una línea). Entiende mensajes abreviados, cortados o mal dictados.
+  - Glosario del dictado en el system (corrige solo y no lo comenta): «pe erre efe ve / prfv / fb / pr fb / perfv» = PRFV · «pat / pe a te» = PAT · «be pe ene» = BPN · «o te / ot» = orden de trabajo · jabalina, tablerito, vínculo, capuchón, pañol, vale, remito, itemizado, legajo, cuadrilla.
+  - `buscar_obra` y todas las herramientas que reciben nombre de obra buscan aproximado: sin tildes ni «plaza/barrio/el/la», palabras parciales («sanma» → San Martín), palabra entera antes que pedazo, y distancia de edición chica («puebito» → PLAZA EL PUEBLITO); devuelven la mejor con su puntaje. Elige sola si la mejor le saca 10 puntos a la segunda.
+  - Velocidad: preguntas de un dato (cuántas, avance de, dónde está, quién está, stock de, qué falta) → effort «low» y respuesta corta (4.000 tokens); lo complejo (revisá, armá, cerrá, corregí, compará, PDF…) sigue en medium/high.
+  - **El system ya no cambia entre turnos:** la fecha, la hora, la pantalla, los permisos y «está charlando por voz» van como un bloque «[Contexto de la app …]» al principio de cada mensaje de la persona. Antes el contexto iba en el system y cambiaba en cada pregunta, y eso invalida los bloques de pensamiento anteriores (la API devolvía 400 en charlas largas).
+
+**Decisiones**
+- Cada renglón del remito es una entrada con su número E- (igual que «Registrar todas las filas» del pañol).
+- La IA no elige códigos: los propone la app; 🟡 queda elegido pero marcado «revisá»; 🔴 queda afuera hasta que la persona elija.
+- «Entregar» una herramienta = «👷 Asignar a una persona» de su ficha (ya existía).
+- La onda real solo en la compu: en Android abrir el micrófono para medir mientras el reconocedor escucha corta el dictado.
+- Los QR apuntan siempre a la dirección pública de GitHub Pages (también los que se imprimen desde el APK).
+
+**Reglas de Firebase:** no cambian (`catalogoProductos` ya deja escribir cualquier campo a quien edita el pañol; `movimientos`, `adjuntos` y `auditoria` como siempre).
+
+**Qué tiene que hacer Ángel**
+1. Subir `index.html` a GitHub (nada más: sin reglas ni APK nuevos; el lector de la app usa el plugin que ya trae la 1.3).
+2. El remito por foto usa el Worker `ema-ia` de la v136 (si todavía está el viejo, anda con Sonnet 5.5).
+3. Si pegaron el Worker v2b-ia (v136b), nada más; el lector de códigos en la app de Android usa el plugin que ya trae la 1.3; el dictado en vivo usa el de la 1.4.
+
+**Pruebas**
+- `t_v137` (nueva): 62/62 en PC y 63/63 en celular (remito con la IA simulada: tarjeta, corregir, sin código que no se carga, Sí → E- con precio sin IVA y foto, auditoría; ilegible; Worker caído; chip y «cargá este remito»; EAN asociar / repetido / escanear con el plugin simulado / desconocido; etiquetas QR; QR del vale, la OT y la reserva decodificados con jsQR; `?doc=` S-/OT-/R-/H- y `?obra=`; sin permiso; dictado en vivo y onda real en PC / simulada en el celu; plugin 1.4 y modo charla; búsqueda aproximada, glosario, effort por tipo de pregunta y system idéntico entre turnos).
+- Batería completa en PC y celular (139 pruebas × 2, de a 3) sobre el index final: todo OK salvo `t_v083` (reemplazada por `t_v084`, como siempre).
+- Pruebas viejas: `t_v136` cambió dos preguntas («¿cuántas columnas…?» y «¿y el stock de fusibles?» ahora son datos simples con effort «low»: se usan «contame de san martin» / «contame lo de los fusibles» para seguir probando el effort por defecto) y la revisión de las 12 h lee el mensaje con el bloque de contexto. `h.js` no cambió (`__iaCompat` mantiene el comportamiento de antes en las pruebas viejas).
+- Capturas 390 × 844 (×2): botón y tarjeta del remito, asociar EAN, etiquetas QR, vale con QR, `?doc=` abriendo el vale, dictado en vivo con la onda y modo charla.
+
+**Huellas**
+(sello «2026-11-09 21:31 · ad5aaf»)
+- `index.html`: `eed8e34aba5a9661dc15786ab4b54b4ce29a9533cd5a07063d01ceb38088e8fc`
+- `137_2026-11-09_app-EMA_ORIGINAL.html`: `cbe62a3bebff8ddbdf8122bae961fd1e1282669536a44179319bab4811f69729`
+- `patch_v137.py` (base: ORIGINAL 136b `d802980d…dbcaf7bb1f386`): `d48b9085981ff8cbb2cbb4d5f8ddfa2b400a73410daf3b8fa3a5b50fdad1eb97`
+
 ## v136b — 09/11/2026 (publicada en GitHub, commit 333bdd6) · Inicio bien en la compu y el asistente no se traba con «no entendió el pedido»
 
 **Pedido de Ángel:** en la compu el Inicio se veía con «Plazas» arriba y las tarjetas más angostas que la portada; el Asistente contestaba «Claude no entendió el pedido» en muchas preguntas.
