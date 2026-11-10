@@ -55,6 +55,7 @@ function datos() {
   c(r.cls.some((x) => /^rs-ok:✓ hay 100/.test(x)) && r.cls.some((x) => /^rs-parte:hay 4 · faltan 6/.test(x)) && r.cls.some((x) => /^rs-no:✕ no hay en pañol/.test(x)) && /1\s*hay en el pañol/.test(r.res), 'en la reserva cada material sale en verde (hay), amarillo (hay una parte) o rojo (no hay), con el resumen · ' + r.cls.join(' | '));
   await p.screenshot({ path: __dirname + '/v056_reserva' + (cel ? '_cel' : '') + '.png' });
   await p.evaluate(() => { const m = document.getElementById('rsModal'); m && m.remove(); });
+  await p.waitForTimeout(400);   // v138: al cerrar la ventana, «atrás» consume su entrada de la historia (history.go en silencio); recargar justo en ese instante aborta la recarga
   await p.reload(); await p.waitForTimeout(5000); await p.evaluate(() => mostrarVista('calc')); await p.waitForTimeout(700);
   r = await tabs();
   c(/^mat\*/.test(r[2]) && (await vis('#cardMatObra .cor-bal')), 'al volver a entrar recuerda el subíndice y la obra elegida');
