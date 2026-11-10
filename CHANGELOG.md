@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v139 — 10/11/2026 (en la rama `claude/new-session-3hwmc9`, sin publicar) · La app ocupa toda la pantalla en la compu
+## v139 — 10/11/2026 (publicada en GitHub, commit 8cc5ef3) · La app ocupa toda la pantalla en la compu
 
 **Pedido de Ángel** (10/11/2026): «revisá cómo se adaptan las pantallas nuevas a la compu, la idea es que ocupe toda la pantalla».
 
