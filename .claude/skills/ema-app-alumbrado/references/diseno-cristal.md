@@ -20,17 +20,18 @@ El tema salió de la skill UI UX Pro Max (receta «Operaciones / Legible / Indus
 |---|---|---|
 | `--navy` | `#28285e` | color de la marca: botón principal, activo, títulos |
 | `--navy-dark` | `#1c1c45` | sombras y fondos oscuros (velos) |
-| `--navy-2` | `#3d3f8a` | segundo tono del degradé del botón principal |
-| `--teal` | `#84c3da` | celeste del logo: **solo detalles** (líneas, íconos, marcas chicas) |
-| `--bg` | `#eceff7` | fondo general |
+| `--navy-2` | `#1f5f86` (v144; antes `#3d3f8a`) | segundo tono del degradé del botón principal (navy → azul petróleo) |
+| `--teal` | `#89c2db` (v144; antes `#84c3da`) | turquesa del logo: **solo detalles** (líneas, íconos, marcas chicas, arco del anillo). **Nunca con letra blanca encima** (no da contraste) |
+| (sin variable) | `#1e6f91` | turquesa hondo (v144): acentos de las tarjetas del Inicio (eyebrow, links «Ver todo», íconos), barras de avance |
+| `--bg` | `#eaf2f7` (v144; antes `#eceff7`) | fondo general |
 | `--card` / `--vidrio` | `rgba(255,255,255,.7)` | tarjetas de vidrio |
 | `--vidrio-2` / `--panel` | `rgba(255,255,255,.55)` | vidrio más transparente |
 | `--canto` | `rgba(255,255,255,.8)` | borde de las tarjetas |
 | `--border` / `--line` | `rgba(40,40,94,.1)` | separadores |
 | `--bg-soft` | `rgba(40,40,94,.04)` | fondos suaves de bloques |
 | `--text` | `#0d1424` | texto |
-| `--text-soft` | `#4b5670` | texto secundario, etiquetas |
-| `--text-3` | `#7c879d` | ayudas, encabezados de tabla |
+| `--text-soft` | `#475569` (v144; antes `#4b5670`) | texto secundario, etiquetas |
+| `--text-3` | `#6e7c93` (v144; antes `#7c879d`) | ayudas, encabezados de tabla |
 | `--verde` | `#34c759` | bien, hecho, en línea |
 | `--amber` | `#ff9f0a` | atención, pendiente |
 | `--danger` | `#ff3b30` | error, sin stock, borrar |
@@ -38,11 +39,17 @@ El tema salió de la skill UI UX Pro Max (receta «Operaciones / Legible / Indus
 | `--radius` | `24px` | radio de tarjetas |
 | `--sombra-sm` | `0 1px 2px rgba(40,40,94,.06)` | |
 | `--sombra-md` | `0 18px 44px -26px rgba(40,40,94,.45), inset 0 1px 0 rgba(255,255,255,.9)` | sombra de tarjeta |
-| `--fuente` | `"Inter","Inter Display",-apple-system,"Segoe UI",Roboto,Arial,sans-serif` | texto (14,5 px; 15 px en el celular) |
-| `--disp` | `"Inter Display","Inter",…` | títulos (700–800, `letter-spacing: -.02em`) |
+| `--fuente` | `"Plus Jakarta Sans",-apple-system,"Segoe UI",Roboto,Arial,sans-serif` (v144; antes Inter) | texto (14,5 px; 15 px en el celular) |
+| `--disp` | `"Plus Jakarta Sans",…` (v144; antes Inter Display) | títulos (700–800, `letter-spacing: -.02em`; el saludo grande de la portada en 400) |
 | `--mono` | `"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace` | números, códigos, encabezados de tabla (`font-variant-numeric: tabular-nums`) |
 
-Fondo: `html` en `#eceff7` y, por detrás, manchas radiales celestes (`#9fb0de`, `#c3cdea`, `#aebbe4`, `#e2e7f5`) que se mueven despacio. Ya lo pone la app: una pantalla nueva no lo repite.
+Fondo: `html` en `#eaf2f7` y, por detrás, manchas radiales turquesa claro (`#bfe0ee`, `#d5e3f2`, `#c9dff0`) quietas (v144). Ya lo pone la app: una pantalla nueva no lo repite.
+
+**Estilo «V1 · Turquesa del logo» (v144, elegido por Ángel el 10/11/2026)** — `<style id="estiloV1Css">`, después de todo el resto:
+- **Portadas** (Inicio Ejecutivo `#iniEje .ie-hero` y el «Hoy» de la cuadrilla `.cd-hh` / `.cd-hero`): degradé `158deg` `#17173D → #222459 → #1F4C78 → #1F6F91` con un brillo turquesa `rgba(137,194,219,.42)` arriba a la derecha; franja del reloj del celu `#17173D`. El Inicio del pañolero no tiene portada: lleva los mismos acentos `#1E6F91`.
+- **Botones principales** siguen navy (degradé `#28285E → #1F5F86`, contraste AA con letra blanca).
+- **Letras incrustadas** en la app (andan sin internet, `font-display: swap`): Plus Jakarta Sans 300–800 y JetBrains Mono 400–700, woff2 latín en base64 (≈ 58 KB). A Google Fonts solo se le pide Inter, para el sello de las fotos (que no cambia) y las hojas A4 que se abren aparte.
+- Plus Jakarta es más ancha que Inter: en el celu el título de la barra va en 13,5 px y sin partirse.
 
 Dentro de un **SVG** (planos, láminas, íconos) poné los colores con su valor real (`#28285e`), no con `var(--navy)`: dentro del mapa y al imprimir las variables no siempre llegan.
 

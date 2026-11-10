@@ -82,6 +82,8 @@ async function abrir(op = {}) {
   if (!op.supervisor) await page.addInitScript(() => { window.__supNoIA = true; });   // v136: las pruebas viejas no disparan la revisión con IA de las 12/18 h; supervisor:true la prueba
   if (!op.crew) await page.addInitScript(() => { window.__crewViejo = true; });   // v142: las pruebas viejas ven la cuadrilla de antes (Inicio y Mis tareas); crew:true prueba el «Modo obra» y el recorrido del día
   if (!op.sugerida) await page.addInitScript(() => { window.__sugNo = true; });   // v143: las pruebas viejas no ven la orden sugerida (tarjeta, tablero, recordatorio de las 7, ausencias); sugerida:true la prueba
+  if (!op.obraGps) await page.addInitScript(() => { window.__obraGpsNo = true; });   // v144: las pruebas viejas no ven la obra elegida por el GPS (fotos, Llegué en otra obra, supervisor de fotos, nuestra zona igual); obraGps:true la prueba
+  if (!op.camaraB) await page.addInitScript(() => { window.__camViejaNo = true; });   // v144: las pruebas viejas ven la hoja «¿De qué obra?» de antes; camaraB:true prueba la cámara primero (opción B)
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];
