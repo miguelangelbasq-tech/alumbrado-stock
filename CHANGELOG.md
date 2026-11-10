@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v138 — 10/11/2026 (en la rama, sin publicar en main) · El botón «atrás» vuelve atrás + remito en PDF, de varias páginas, «Solo precios» y «Remitos cargados»
+## v138 — 10/11/2026 (publicada en GitHub, commit f01a0a8) · El botón «atrás» vuelve atrás + remito en PDF, de varias páginas, «Solo precios» y «Remitos cargados»
 
 **Pedido de Ángel** (10/11/2026)
 - Que el botón «atrás» del celular (y la flecha del navegador / el botón del mouse) vuelva atrás como en cualquier app.
