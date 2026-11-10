@@ -84,6 +84,7 @@ async function abrir(op = {}) {
   if (!op.sugerida) await page.addInitScript(() => { window.__sugNo = true; });   // v143: las pruebas viejas no ven la orden sugerida (tarjeta, tablero, recordatorio de las 7, ausencias); sugerida:true la prueba
   if (!op.obraGps) await page.addInitScript(() => { window.__obraGpsNo = true; });   // v144: las pruebas viejas no ven la obra elegida por el GPS (fotos, Llegué en otra obra, supervisor de fotos, nuestra zona igual); obraGps:true la prueba
   if (!op.camaraB) await page.addInitScript(() => { window.__camViejaNo = true; });   // v144: las pruebas viejas ven la hoja «¿De qué obra?» de antes; camaraB:true prueba la cámara primero (opción B)
+  if (!op.v145) await page.addInitScript(() => { window.__v145No = true; });   // v145: las pruebas viejas no ven la certificación, el material contra avance ni la gente sin tarea; v145:true los prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];
