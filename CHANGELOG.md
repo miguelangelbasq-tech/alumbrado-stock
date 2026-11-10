@@ -33,7 +33,11 @@ Autor: Miguel Ángel Díaz © 2026
     - **Remito repetido:** si el mismo proveedor + número ya se cargó (`clave`), «Este remito ya lo cargaste el dd/mm (Entrada/Solo precios)» con «Ver» / «Cargar igual» / «Cancelar» (al leerlo y otra vez al confirmar si se cambió el número).
 - **Worker `ema-ia`: no se tocó** (deja pasar los bloques de `messages` tal cual; el tope de 5 MB por pedido manda el límite del PDF).
 
-**Pruebas:** `t_v138` (PC 47/47, celu 48/48): cada tipo de capa se cierra con «atrás», pantallas en orden, Inicio sin historia, «¿Salir sin guardar?» (Sí/No) en Llenar orden y el cierre, ✕ sin entradas fantasma, `?doc=`, remito en PDF, 3 fotos, 30 renglones, botón pegado abajo, PDF grande/largo. Batería completa: ver abajo.
+**Pruebas:** `t_v138` (PC 68/68, celu 69/69; también con las reglas simuladas): cada tipo de capa se cierra con «atrás», pantallas en orden, Inicio sin historia, «¿Salir sin guardar?» (Sí/No) en Llenar orden y el cierre, ✕ sin entradas fantasma, `?doc=`; remito en PDF, 3 fotos, 30 renglones, botón pegado abajo, PDF grande/largo; «Solo precios» (pesos y U$S, más viejo, «revisá», sin movimientos, auditoría), remito repetido (Ver / Cargar igual / Cancelar) y «Remitos cargados» (lista, filtros, detalle, imprimir). Batería completa en PC y celu sobre el index entregado: todo OK salvo `t_v083` (reemplazada por `t_v084`, como siempre) y `t_v056` PC, que recargaba la página en el mismo instante en que «atrás» consumía la entrada de la ventana recién cerrada: se le agregó una espera de 0,4 s antes de recargar y da 14/14 en PC y celu.
+
+**Huellas:** ORIGINAL `a52024ac…2de6` · index `3bafe31a…4597` (sello `2026-11-09 23:22 · f6e469`) · ver `herramientas/v138/huellas.txt`.
+
+**Qué tiene que hacer Ángel:** subir solo `index.html` a GitHub cuando decida publicarla. Sin reglas nuevas, sin APK nuevo, sin tocar el Worker.
 
 ## v137 — 09/11/2026 (publicada en GitHub, commit ed8ecaa) · Remito por foto con IA, lector de códigos (EAN y QR) y QR en los comprobantes
 
