@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v143 — 10/11/2026 (armada y probada, SIN publicar) · Orden sugerida: la app arma las órdenes de mañana (y de la semana)
+## v143 — 10/11/2026 (publicada en GitHub) · Orden sugerida: la app arma las órdenes de mañana (y de la semana)
 
 **Pedido de Ángel** (10/11/2026, maquetas aprobadas): que la app arme sola las órdenes del día siguiente, que «cubra y mejore todo lo que ya veníamos haciendo con el personal, los puntos y todo eso» y que quede exacto. Después sumó: las tres vistas (por obra, por persona y semana), sus rendimientos reales, sábado medio día, fraguado 72 h igual en metálica y PRFV, equipo civil, vehículos por tipo y lugares, ausencias, misma cuadrilla hasta terminar la obra, estudio de tiempos («🧠 Lo que aprende la app»), recordatorio a las 7:00, plan para la inspección y la IA como capa encima (revisa y propone, no arma).
 
