@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v144 — 10/11/2026 (armada y probada, sin publicar) · Las fotos caen en la obra donde están parados + cámara «cámara primero» + nuestra zona + estilo «Turquesa del logo»
+## v144 — 10/11/2026 (publicada en GitHub) · Las fotos caen en la obra donde están parados + cámara «cámara primero» + nuestra zona + estilo «Turquesa del logo»
 
 **Pedido de Ángel** (10/11/2026): «me pasó que una cuadrilla puso la ubicación de otra plaza y la foto la subió a esa plaza. Eso no debería pasar». Después eligió la cámara **opción B «Cámara primero»** (maquetas B1–B3, hoja de cambiar con el estilo de la D), corrigió el anillo del Inicio (el contrato es **solo la Zona A · Este**) y eligió el estilo **«V1 · Turquesa del logo»**.
 

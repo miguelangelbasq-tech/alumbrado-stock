@@ -16,7 +16,7 @@ const URL_IA = 'https://ema-ia.mdiaz-60f.workers.dev/ia';
   await p.waitForTimeout(1500);
   // Inicio en la compu
   if (!cel) {
-    const r = await p.evaluate(() => { const v = document.getElementById('viewInicio'), b = getComputedStyle(v, '::before'); const h = document.querySelector('#iniEje .ie-hero').getBoundingClientRect(), k = (document.querySelector('#iniEje .ie-tarj') || document.querySelector('#iniEje .ie-col')).getBoundingClientRect(); return { antes: b.content, hx: Math.round(h.x), kx: Math.round(k.x), top: Math.round(h.y) }; });
+    const r = await p.evaluate(() => { const v = document.getElementById('viewInicio'), b = getComputedStyle(v, '::before'); const h = document.querySelector('#iniEje .ie-hero').getBoundingClientRect(), k = ([...document.querySelectorAll('#iniEje .ie-tarj')].find((e) => e.getBoundingClientRect().width > 0) || document.querySelector('#iniEje .ie-col')).getBoundingClientRect(); /* v144: la primera tarjeta visible (#ieSug vacía queda escondida) */ return { antes: b.content, hx: Math.round(h.x), kx: Math.round(k.x), top: Math.round(h.y) }; });
     c((r.antes === 'none' || r.antes === 'normal') && r.hx === r.kx && r.top < 40, 'compu: sin «Plazas» arriba y tarjetas alineadas con la portada · ' + JSON.stringify(r));
   }
   await p.evaluate(() => window.__asistenteAbrir()); await p.waitForTimeout(1500);
