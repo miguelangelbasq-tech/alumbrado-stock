@@ -1,0 +1,472 @@
+<style id="codigosQrCss">
+/* v137 · lector de códigos, código de barras en la ficha, etiquetas QR, hojas «¿seguro?» (diseño Cristal) */
+.v7-ov{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9700;background:rgba(13,20,36,.45);display:flex;align-items:flex-end;justify-content:center}
+.v7-ov.v7-arriba{z-index:9800}
+.v7-ov.v7-esc{z-index:9900}
+.v7-caja{background:var(--bg,#ECEFF7);width:100%;max-width:640px;max-height:92vh;max-height:92dvh;overflow-y:auto;overflow-x:hidden;border-radius:26px 26px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -12px 40px rgba(13,20,36,.25);font-family:var(--fuente,inherit);color:var(--text,#0D1424);box-sizing:border-box}
+@media (min-width:641px){.v7-ov{align-items:center}.v7-caja{border-radius:26px;max-height:88vh}}
+.v7-asa{width:44px;height:5px;border-radius:3px;background:#d5dae8;margin:0 auto 10px}
+.v7-cab{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:0 0 10px}
+.v7-cab h3{margin:0;font:800 18px/1.25 var(--disp,inherit);letter-spacing:-.01em}
+.v7-cab small{display:block;font-size:13px;color:var(--text-soft,#4B5670);font-weight:500;margin-top:2px}
+.v7-x{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--border,rgba(40,40,94,.1));background:#fff;color:var(--navy,#28285E);font-size:18px;cursor:pointer}
+.v7-acc{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.v7-acc .btn-primary,.v7-acc .btn-ghost{width:auto;flex:1 1 160px;margin:0}
+.v7-msg{min-height:1em;margin-top:10px;font-size:13.5px;font-weight:600;color:var(--text-soft,#4B5670)}
+.v7-msg.mal{color:#b3261e}.v7-msg.bien{color:#11683f}
+.v7-txt{font-size:15px;line-height:1.45;margin:0 0 6px}
+.v7-sub{font-size:13.5px;color:var(--text-soft,#4B5670);margin:0}
+/* lector */
+.es-video{position:relative;width:100%;height:62vw;max-height:360px;min-height:220px;background:#0d1424;border-radius:18px;overflow:hidden;margin:4px 0 10px}
+.es-video video{width:100%;height:100%;object-fit:cover;display:block}
+.es-video .es-mira{position:absolute;left:12%;right:12%;top:22%;bottom:22%;border:3px solid rgba(255,255,255,.85);border-radius:16px}
+.es-manual{display:flex;gap:8px;align-items:stretch}
+.es-manual input{flex:1 1 auto;min-width:0;margin:0;font-family:var(--mono,monospace)}
+.es-manual .btn-primary{width:auto;margin:0;flex:none;padding:0 18px}
+/* botones del pañol */
+.v7-barra{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.v7-barra .btn-ghost{width:auto;margin:0;min-height:44px;padding:0 16px}
+/* código de barras en la ficha del material */
+.ean-box{margin:12px 0 4px;padding:12px 14px;border-radius:18px;background:var(--bg-soft,rgba(40,40,94,.04));border:1px solid var(--border,rgba(40,40,94,.1))}
+.ean-box b.t{display:block;font:800 14.5px var(--disp,inherit);margin-bottom:6px}
+.ean-lista{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.ean-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 8px 6px 12px;border-radius:999px;background:#fff;border:1px solid var(--border,rgba(40,40,94,.12));font:600 13px var(--mono,monospace);font-variant-numeric:tabular-nums}
+.ean-chip button{border:0;background:transparent;color:var(--text-3,#7C879D);font-size:15px;cursor:pointer;min-width:28px;min-height:28px;padding:0}
+.ean-nada{font-size:13px;color:var(--text-3,#7C879D)}
+.ean-box .v7-barra{margin:6px 0 0}
+/* etiquetas */
+.et-lista{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow:auto;margin:8px 0}
+.et-fila{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 10px;border-radius:14px;background:#fff;border:1px solid var(--border,rgba(40,40,94,.1));font-size:14.5px;cursor:pointer}
+.et-fila input{width:20px;height:20px;min-height:0;margin:0;flex:none}
+.et-fila .mono{font-family:var(--mono,monospace);font-weight:700;color:var(--navy,#28285E);flex:none}
+.et-fila span.n{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style>
+<script id="codigosQr">
+(function () {
+  "use strict";
+  // v137 · Códigos (pedido de Ángel, 09/11/2026):
+  //  1) QR chico arriba a la derecha en todos los comprobantes (vales S-, entradas E-, devoluciones D-, remitos de herramientas
+  //     RH- / RI-, reservas R-, órdenes OT-) y en los informes de una obra (QR al legajo). Se arma en el aparato, sin internet,
+  //     con qrcode-generator (MIT) como imagen PNG: sale igual en pantalla, impreso y en el PDF (html2canvas).
+  //     Lleva la dirección de la app: …/alumbrado-stock/?doc=S-0001 · ?doc=OT-2026-012 · ?doc=H-003 · ?obra=<id>.
+  //  2) Al abrir esa dirección (o escanearla desde la app) se abre el documento, después de entrar y con los permisos de cada uno.
+  //  3) Lector de códigos: el de la app de Android (ML Kit, __escanear); en el navegador, BarcodeDetector si existe; si no, a mano.
+  //  4) Código de barras (EAN) de cada producto: catalogoProductos/{codigo}.ean = [..] por fbGuardarProductoCatalogo.
+  //     Un EAN no queda en dos productos (avisa y pregunta). Al escanear: ficha con stock, «Hacer vale de salida» y «Entrada».
+  //  5) Herramientas: QR por herramienta (H-xxx) y «🏷 Imprimir etiquetas QR».
+  //  Nada se escribe en la base sin que la persona toque «Sí» / «Asociar».
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) => (typeof escHtml == "function" ? escHtml(String(t == null ? "" : t)) : String(t == null ? "" : t).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]));
+  const BASE = "https://miguelangelbasq-tech.github.io/alumbrado-stock/";
+  const nrm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+  const perm = (h) => { try { return window.PERMISOS && PERMISOS.permiso ? PERMISOS.permiso(h) : "editar"; } catch (e) { return "editar"; } };
+  const soloCat = () => { try { return !!(window.__panolSoloCatalogo && window.__panolSoloCatalogo()); } catch (e) { return false; } };
+  const editaStock = () => !!window.__fbUser && perm("stock") === "editar";
+  const veStock = () => perm("stock") !== "oculto" && !soloCat();
+  const yoEmail = () => (window.__fbUser && window.__fbUser.email) || "";
+  const espera = (ms) => new Promise((ok) => setTimeout(ok, ms));
+  async function hasta(fn, ms) { const t0 = Date.now(); for (;;) { let v = null; try { v = fn(); } catch (e) { v = null; } if (v) return v; if (Date.now() - t0 > ms) return null; await espera(250); } }
+  const plug = () => (window.Capacitor && window.Capacitor.Plugins) || {};
+  const avisar = (t) => { try { window.alert(t); } catch (e) { } };
+
+  // =================================================================================== QR
+  const cacheQr = new Map();
+  function matriz(texto) {
+    const q = window.__qrcodeLib(0, "M"); q.addData(String(texto), "Byte"); q.make();
+    const n = q.getModuleCount(), m = [];
+    for (let r = 0; r < n; r++) { const f = []; for (let c = 0; c < n; c++) f.push(q.isDark(r, c) ? 1 : 0); m.push(f); }
+    return m;
+  }
+  function dataUrl(texto) {
+    const k = String(texto); if (cacheQr.has(k)) return cacheQr.get(k);
+    const m = matriz(k), n = m.length, s = 6, borde = 4, lado = (n + borde * 2) * s;
+    const cv = document.createElement("canvas"); cv.width = lado; cv.height = lado;
+    const g = cv.getContext("2d"); g.fillStyle = "#ffffff"; g.fillRect(0, 0, lado, lado); g.fillStyle = "#000000";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (m[r][c]) g.fillRect((c + borde) * s, (r + borde) * s, s, s);
+    const u = cv.toDataURL("image/png"); cacheQr.set(k, u);
+    if (cacheQr.size > 300) cacheQr.delete(cacheQr.keys().next().value);
+    return u;
+  }
+  const urlDoc = (doc) => BASE + "?doc=" + encodeURIComponent(String(doc).toUpperCase());
+  const urlObra = (id) => BASE + "?obra=" + encodeURIComponent(String(id));
+  const obras = () => (typeof avanceObras != "undefined" && Array.isArray(avanceObras) ? avanceObras : []);
+  const ots = () => (typeof ordenesTrabajo != "undefined" && Array.isArray(ordenesTrabajo) ? ordenesTrabajo : []);
+  // qué documento es la hoja, por su título
+  function docDeTitulo(t) {
+    let m;
+    if ((m = t.match(/N°\s*([SED]-\d{3,})/))) return { doc: m[1] };
+    if ((m = t.match(/\b(OT-\d{4}-\d+)/))) return { doc: m[1] };
+    if ((m = t.match(/\b(R[HI]-[0-9A-Z][0-9A-Z-]*)/i))) return { doc: m[1].toUpperCase() };
+    if ((m = t.match(/^Reserva\s+(R-\d+)/))) return { doc: m[1] };
+    if (/informe|avance|balance|material|itemizado|legajo|c[oó]mputo|historial/i.test(t)) {   // informes de una obra: QR al legajo
+      const tt = nrm(t); let best = null;
+      obras().forEach((o) => { const nn = nrm(o.nombre || o.plazaNombre); if (nn.length >= 4 && tt.indexOf(nn) >= 0 && (!best || nn.length > best.l)) best = { id: o.id, l: nn.length }; });
+      if (best) return { obra: best.id };
+    }
+    return null;
+  }
+  const bloqueQr = (url, et) => `<div class="ema-qr" style="position:absolute;top:14px;right:22px;width:72px;text-align:center;font:700 8.5px/1.2 ui-monospace,Menlo,monospace;color:#28285e;background:#fff"><img src="${dataUrl(url)}" width="68" height="68" alt="QR ${esc(et)}" style="display:block;width:68px;height:68px;margin:0 auto 1px"><div>${esc(et)}</div></div>`;
+  // lo llama la hoja de impresión (hojaPdf) antes de mostrar cada hoja
+  window.__qrHoja = function (titulo, doc) {
+    try {
+      if (!doc || /class="ema-qr/.test(doc) || !window.__qrcodeLib) return doc;
+      const d = docDeTitulo(String(titulo || "")); if (!d) return doc;
+      const url = d.doc ? urlDoc(d.doc) : urlObra(d.obra), et = d.doc || "Legajo";
+      const b = `<style>.membrete{padding-right:86px}</style>` + bloqueQr(url, et);
+      return /<body[^>]*>/i.test(doc) ? doc.replace(/<body[^>]*>/i, (x) => x + b) : b + doc;
+    } catch (e) { console.warn("[qr] hoja:", e); return doc; }
+  };
+  // reservas: un QR en cada hoja (se imprimen varias juntas)
+  window.__qrReserva = function (r) {
+    try { return r && r.numero && window.__qrcodeLib ? `<span class="ema-qr-r" style="float:right;margin:0 0 6px 12px;text-align:center"><img src="${dataUrl(urlDoc(r.numero))}" width="64" height="64" alt="QR ${esc(r.numero)}" style="display:block;width:64px;height:64px"></span>` : ""; } catch (e) { return ""; }
+  };
+
+  // =================================================================================== hojas propias
+  function hoja(id, html, cls) {
+    cerrarHoja(id);
+    const ov = document.createElement("div"); ov.id = id; ov.className = "v7-ov no-print" + (cls ? " " + cls : ""); ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true");
+    ov.innerHTML = `<div class="v7-caja"><div class="v7-asa"></div>${html}</div>`;
+    ov.addEventListener("click", (e) => { if (e.target === ov) cerrarHoja(id); });
+    document.body.appendChild(ov); return ov;
+  }
+  function cerrarHoja(id) { const o = $(id); if (o) { o.remove(); if (o.__fin) try { o.__fin(); } catch (e) { } } }
+  // «¿seguro?» con Sí / No (sin confirm() del navegador)
+  function preguntar(titulo, texto, si, no) {
+    return new Promise((ok) => {
+      const ov = hoja("v7Preg", `<div class="v7-cab"><h3>${esc(titulo)}</h3></div><p class="v7-txt">${esc(texto)}</p><div class="v7-acc"><button type="button" class="btn-primary" data-v7p="si">${esc(si || "Sí")}</button><button type="button" class="btn-ghost" data-v7p="no">${esc(no || "No")}</button></div>`, "v7-arriba");
+      let listo = false; const fin = (v) => { if (listo) return; listo = true; ov.__fin = null; ov.remove(); ok(v); };
+      ov.__fin = () => fin(false);
+      ov.addEventListener("click", (e) => { const b = e.target.closest("[data-v7p]"); if (b) fin(b.dataset.v7p === "si"); });
+    });
+  }
+
+  // =================================================================================== lector de códigos
+  let escaneando = false;
+  async function escanear(titulo, ayuda) {
+    if (escaneando) return "";
+    escaneando = true;
+    try {
+      if (plug().BarcodeScanner && typeof window.__escanear == "function") {
+        try { const c = await window.__escanear(); return String(c || "").trim(); }
+        catch (e) { console.warn("[lector] app:", e); }
+      }
+      return await ventanaLector(titulo, ayuda);
+    } finally { escaneando = false; }
+  }
+  function ventanaLector(titulo, ayuda) {
+    return new Promise((ok) => {
+      const hayBD = typeof window.BarcodeDetector == "function" && navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+      const ov = hoja("esOv", `<div class="v7-cab"><div><h3>${esc(titulo || "📷 Escanear")}</h3><small>${esc(ayuda || "Apuntá al código de barras o al QR.")}</small></div><button type="button" class="v7-x" data-es="x" aria-label="Cerrar">✕</button></div>
+${hayBD ? '<div class="es-video"><video playsinline muted autoplay></video><div class="es-mira"></div></div>' : '<p class="v7-sub" style="margin-bottom:10px;">Este aparato no puede leer códigos con la cámara: escribí el número que está abajo del código de barras (o el que trae el QR, por ejemplo H-003).</p>'}
+<label for="esManual">${hayBD ? "¿No lo lee? Escribí el número" : "Número del código"}</label>
+<div class="es-manual"><input type="text" id="esManual" inputmode="text" autocomplete="off" placeholder="Ej: 7790123456789"><button type="button" class="btn-primary" data-es="ok">Listo</button></div>
+<div class="v7-msg" id="esMsg"></div>`, "v7-esc");
+      let fin = false, stream = null, tm = null;
+      const terminar = (v) => { if (fin) return; fin = true; clearTimeout(tm); try { stream && stream.getTracks().forEach((t) => t.stop()); } catch (e) { } ov.__fin = null; ov.remove(); ok(String(v || "").trim()); };
+      ov.__fin = () => terminar("");
+      ov.addEventListener("click", (e) => { const b = e.target.closest("[data-es]"); if (!b) return; if (b.dataset.es === "x") terminar(""); else terminar(($("esManual") || {}).value); });
+      ov.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.id === "esManual") { e.preventDefault(); terminar(e.target.value); } });
+      if (!hayBD) { setTimeout(() => { const i = $("esManual"); i && i.focus(); }, 60); return; }
+      (async () => {
+        try {
+          let fmts = ["qr_code", "ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39"];
+          try { const sop = await window.BarcodeDetector.getSupportedFormats(); fmts = fmts.filter((f) => sop.indexOf(f) >= 0); } catch (e) { }
+          const det = new window.BarcodeDetector(fmts.length ? { formats: fmts } : undefined);
+          stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+          if (fin) { stream.getTracks().forEach((t) => t.stop()); return; }
+          const v = ov.querySelector("video"); v.srcObject = stream; try { await v.play(); } catch (e) { }
+          const mirar = async () => {
+            if (fin) return;
+            try { const r = await det.detect(v); if (r && r[0] && r[0].rawValue) return terminar(r[0].rawValue); } catch (e) { }
+            tm = setTimeout(mirar, 300);
+          };
+          mirar();
+        } catch (e) {
+          const m = $("esMsg"); if (m) { m.className = "v7-msg mal"; m.textContent = "No se pudo abrir la cámara: escribí el número a mano."; }
+        }
+      })();
+    });
+  }
+
+  // =================================================================================== qué es lo escaneado
+  function refDeTexto(c) {
+    c = String(c || "").trim();
+    if (/^https?:\/\//i.test(c)) {
+      try { const u = new URL(c), d = u.searchParams.get("doc"), o = u.searchParams.get("obra"); if (d) return { doc: d }; if (o) return { obra: o }; } catch (e) { }
+      return null;
+    }
+    const m = c.toUpperCase().match(/^(H-\d+|[SED]-\d+|OT-\d{4}-\d+|R-\d+|R[HI]-[0-9A-Z][0-9A-Z-]*)$/);
+    return m ? { doc: m[1] } : null;
+  }
+  async function alEscanear(c, codigoPara) {
+    c = String(c || "").trim(); if (!c) return;
+    const ref = refDeTexto(c);
+    if (ref) return abrirRef(ref);
+    const ean = c.replace(/\s+/g, "");
+    if (/^\d{6,14}$/.test(ean)) return codigoPara ? asociarYAbrir(codigoPara, ean) : productoPorEan(ean);
+    avisar(`No reconozco ese código: «${c}».`);
+  }
+  async function escanearYAbrir() { const c = await escanear("📷 Escanear", "Código de barras de un producto, QR de una herramienta o de un comprobante."); if (c) await alEscanear(c); }
+
+  // =================================================================================== abrir un documento (?doc= / QR)
+  const noPerm = () => avisar("🔒 No tenés permiso para ver esto.");
+  const movs = () => (Array.isArray(window.stockMovimientos) ? window.stockMovimientos : []);
+  function movPorNumero(d) {
+    const l = movs(); let m = l.find((x) => String(x.numero || "").toUpperCase() === d);
+    if (!m && typeof window.numeroComprobante == "function") m = l.find((x) => !x.numero && (x.tipo === "entrada" || x.tipo === "salida") && String(window.numeroComprobante(x) || "").toUpperCase() === d);
+    return m || null;
+  }
+  function clickCon(attrs, cls) { const b = document.createElement("button"); b.type = "button"; if (cls) b.className = cls; Object.keys(attrs).forEach((k) => b.setAttribute(k, attrs[k])); b.style.display = "none"; document.body.appendChild(b); try { b.click(); } finally { b.remove(); } }
+  const irStock = (sub) => { try { if (window.__v135 && window.__v135.irStock) window.__v135.irStock(sub); else { window.mostrarVista("stock"); setTimeout(() => { const b = document.querySelector('#subtabsStock .subtab[data-sub="' + sub + '"]'); b && !b.classList.contains("activo") && b.click(); }, 60); } } catch (e) { } };
+  async function abrirHerramienta(cod) {
+    irStock("herramientas");
+    const h = await hasta(() => (window.__herramientasLista || []).find((x) => String(x.codigo || "").toUpperCase() === cod), 12000);
+    if (!h) return avisar(`No encontré la herramienta ${cod}.`);
+    await espera(150); clickCon({ "data-hrabrir": h.id });
+  }
+  async function abrirRef(ref) {
+    if (ref.obra) {
+      if (perm("obras") === "oculto") return noPerm();
+      const o = await hasta(() => obras().find((x) => x.id === ref.obra), 12000);
+      if (!o) return avisar("No encontré esa obra.");
+      try { window.mostrarVista("obras"); } catch (e) { }
+      if (typeof window.abrirLegajo == "function") window.abrirLegajo(o.id);
+      return;
+    }
+    const d = String(ref.doc || "").toUpperCase().trim();
+    if (/^OT-/.test(d)) {
+      const de = (o) => String(o.numero || "").toUpperCase() === d;
+      if (perm("parte") !== "oculto") {
+        const o = await hasta(() => ots().find(de), 12000);
+        if (!o) return avisar(`No encontré la orden ${d}.`);
+        if (typeof window.verOrdenTrabajo == "function") window.verOrdenTrabajo(o.id);
+        return;
+      }
+      const o = await hasta(() => ots().find(de), 8000), yo = (window.PERMISOS && PERMISOS.yo && PERMISOS.yo()) || {};
+      if (o && yo.personaClave && (o.personalNombres || []).indexOf(yo.personaClave) >= 0) { try { window.mostrarVista("mistareas"); } catch (e) { } return; }
+      return noPerm();
+    }
+    if (!veStock()) return noPerm();
+    if (/^[SED]-\d+$/.test(d)) {
+      const m = await hasta(() => movPorNumero(d), 15000);
+      if (!m) return avisar(`No encontré el comprobante ${d}.`);
+      if (typeof window.verComprobanteMovimiento == "function") window.verComprobanteMovimiento(m.id);
+      return;
+    }
+    if (/^R-\d+$/.test(d)) {
+      const r = await hasta(() => (window.reservasMaterial || []).find((x) => String(x.numero || "").toUpperCase() === d), 12000);
+      if (!r) return avisar(`No encontré la reserva ${d}.`);
+      if (typeof window.irAReservas == "function") window.irAReservas(r.id);
+      return;
+    }
+    if (/^H-\d+$/.test(d)) return abrirHerramienta(d);
+    if (/^RH-/.test(d)) {
+      irStock("herramientas");
+      const hr = await hasta(() => window.__herrRemito, 5000);
+      const ref = hr && await hasta(() => {
+        const l = hr.movs().map((m) => "mov:" + m.id).concat((window.__herramientasLista || []).filter((h) => h.asignada).map((h) => "asig:" + h.id));
+        return l.find((x) => { const z = hr.remitoDatos(x); return z && String(z.num).toUpperCase() === d; });
+      }, 12000);
+      if (!ref) return avisar(`No encontré el remito ${d}.`);
+      hr.imprimirRemito(ref); return;
+    }
+    if (/^RI-/.test(d)) {
+      irStock("herramientas");
+      const hi = await hasta(() => window.__herrIngreso, 5000);
+      const ref = hi && await hasta(() => {
+        const l = (window.__herramientasLista || []).map((h) => (h.ingreso && h.ingreso.lote ? "lote:" + h.ingreso.lote : "h:" + h.id));
+        return l.find((x) => { const z = hi.datos(x); return z && String(z.num).toUpperCase() === d; });
+      }, 12000);
+      if (!ref) return avisar(`No encontré el remito ${d}.`);
+      hi.imprimir(ref); return;
+    }
+    avisar(`No reconozco «${d}».`);
+  }
+  // la dirección con ?doc= / ?obra=: se guarda hasta que la persona entra
+  (function pendiente() {
+    let p = null;
+    try {
+      const u = new URL(location.href), d = u.searchParams.get("doc"), o = u.searchParams.get("obra");
+      if (d || o) {
+        p = d ? { doc: d } : { obra: o };
+        try { sessionStorage.setItem("ema.doc.pend", JSON.stringify(p)); } catch (e) { }
+        u.searchParams.delete("doc"); u.searchParams.delete("obra");
+        try { history.replaceState(history.state, "", u.pathname + u.search + u.hash); } catch (e) { }
+      } else { const s = sessionStorage.getItem("ema.doc.pend"); if (s) p = JSON.parse(s); }
+    } catch (e) { p = null; }
+    if (!p) return;
+    hasta(() => window.__fbUser && window.PERMISOS && PERMISOS.yo && PERMISOS.yo() && (typeof PERMISOS.listo != "function" || PERMISOS.listo()), 30 * 60 * 1000).then(async (ok) => {
+      if (!ok) return;
+      await espera(1200);
+      try { sessionStorage.removeItem("ema.doc.pend"); } catch (e) { }
+      abrirRef(p);
+    });
+  })();
+
+  // =================================================================================== código de barras (EAN) de los productos
+  const cambios = () => (Array.isArray(window.catalogoCambios) ? window.catalogoCambios : []);
+  function eanDe(cod) { const c = cambios().find((x) => String(x.codigo) === String(cod)); return c && Array.isArray(c.ean) ? c.ean.map(String) : []; }
+  function codigoDeEan(e) { e = String(e); const c = cambios().find((x) => x.activo !== false && Array.isArray(x.ean) && x.ean.map(String).indexOf(e) >= 0); return c ? c.codigo : null; }
+  function prod(cod) { let l = []; try { l = typeof catalogoCompleto == "function" ? catalogoCompleto() : catalogo(); } catch (e) { } return l.find((p) => String(p.codigo) === String(cod)) || null; }
+  function local(cod, campos) {
+    const l = window.catalogoCambios = cambios(); let c = l.find((x) => String(x.codigo) === String(cod));
+    if (!c) { c = { id: String(cod), codigo: Number(cod) || cod }; l.push(c); }
+    Object.assign(c, campos);
+    try { typeof window.invalidarCatalogo == "function" && window.invalidarCatalogo(); } catch (e) { }
+  }
+  const guardarEan = (cod, lista) => window.fbGuardarProductoCatalogo({ codigo: Number(cod) || cod, ean: lista, editadoPor: yoEmail(), editadoTs: Date.now() });
+  async function asociarEan(cod, ean) {
+    ean = String(ean || "").replace(/\s+/g, "");
+    if (!/^\d{6,14}$/.test(ean)) { avisar("Ese no parece un código de barras: tiene que ser solo números (los de los productos traen 8 o 13)."); return false; }
+    if (!editaStock()) { avisar("🔒 Tu usuario no puede cambiar el pañol."); return false; }
+    if (typeof window.fbGuardarProductoCatalogo != "function") { avisar("No hay conexión con la base."); return false; }
+    const p = prod(cod); if (!p) { avisar("No encontré ese producto en el catálogo."); return false; }
+    const ya = codigoDeEan(ean);
+    if (ya != null && String(ya) === String(p.codigo)) { avisar(`El código ${ean} ya está asociado a ${p.codigo}.`); return true; }
+    try {
+      if (ya != null) {
+        const q = prod(ya) || { codigo: ya, desc: "" };
+        const si = await preguntar("Ese código de barras ya está en otro producto", `El ${ean} está en ${q.codigo} «${q.desc}». Un código de barras no puede quedar en dos productos. ¿Lo pasás a ${p.codigo} «${p.desc}»?`, "Sí, pasarlo", "No");
+        if (!si) return false;
+        const resto = eanDe(ya).filter((x) => x !== ean);
+        await guardarEan(ya, resto); local(ya, { ean: resto });
+      }
+      const lista = eanDe(p.codigo).concat([ean]).filter((x, i, a) => a.indexOf(x) === i);
+      await guardarEan(p.codigo, lista); local(p.codigo, { ean: lista });
+      try { window.fbAuditar && window.fbAuditar("producto_ean", `${p.codigo}: código de barras ${ean}${ya != null ? " (pasado desde " + ya + ")" : ""}`, { ref: String(p.codigo), ean, desde: ya != null ? String(ya) : "" }); } catch (e) { }
+      return true;
+    } catch (e) {
+      avisar(e && e.code === "permission-denied" ? "🔒 La base no dejó guardar: tu usuario no puede cambiar el pañol." : "⚠ No se pudo guardar (¿hay señal?). Probá de nuevo.");
+      return false;
+    }
+  }
+  async function quitarEan(cod, ean) {
+    if (!editaStock()) return;
+    if (!(await preguntar("¿Sacar el código de barras?", `Se saca el ${ean} de ${cod}. El producto no cambia.`, "Sí, sacarlo", "No"))) return;
+    try { const l = eanDe(cod).filter((x) => x !== String(ean)); await guardarEan(cod, l); local(cod, { ean: l }); pintarFicha(); }
+    catch (e) { avisar("⚠ No se pudo guardar (¿hay señal?)."); }
+  }
+  function abrirFicha(cod) { clickCon({ "data-cod": String(cod) }, "pf-link"); }
+  async function productoPorEan(ean) {
+    const cod = codigoDeEan(ean);
+    if (cod != null && prod(cod)) { if (perm("stock") === "oculto") return noPerm(); abrirFicha(cod); return; }
+    if (!editaStock()) return avisar(`No conozco el código de barras ${ean}. Pedile al pañol que lo asocie a su producto.`);
+    preguntarProducto(ean);
+  }
+  function preguntarProducto(ean) {
+    const ov = hoja("eanPreg", `<div class="v7-cab"><div><h3>¿A qué producto corresponde?</h3><small>Código de barras <b class="mono">${esc(ean)}</b>: todavía no está asociado a ningún producto del pañol.</small></div><button type="button" class="v7-x" data-ep="x" aria-label="Cerrar">✕</button></div>
+<label for="eanProd">Producto (código o nombre)</label><input type="text" id="eanProd" list="stockDatalist" autocomplete="off" placeholder="Escribí el código o el nombre…">
+<div class="v7-acc"><button type="button" class="btn-primary" data-ep="ok">🔗 Asociar</button><button type="button" class="btn-ghost" data-ep="x">Cancelar</button></div><div class="v7-msg" id="eanMsg"></div>`);
+    ov.addEventListener("click", async (e) => {
+      const b = e.target.closest("[data-ep]"); if (!b) return;
+      if (b.dataset.ep === "x") return cerrarHoja("eanPreg");
+      const p = typeof stockParsearProducto == "function" ? stockParsearProducto(($("eanProd") || {}).value) : null, m = $("eanMsg");
+      if (!p) { m.className = "v7-msg mal"; m.textContent = "Elegí un producto de la lista."; return; }
+      b.disabled = true;
+      const ok = await asociarEan(p.codigo, ean); b.disabled = false;
+      if (ok) { cerrarHoja("eanPreg"); abrirFicha(p.codigo); }
+    });
+    setTimeout(() => { const i = $("eanProd"); i && i.focus(); }, 60);
+  }
+  async function asociarYAbrir(cod, ean) { const ok = await asociarEan(cod, ean); if (ok) pintarFicha(); }
+
+  // la ficha del material (#pfModal): bloque «🔗 Código de barras» y accesos a vale / entrada
+  function irRegistrar(tipo, cod) {
+    const p = prod(cod); cerrarHoja("eanPreg");
+    const m = $("pfModal"); m && m.remove();
+    irStock("registrar");
+    setTimeout(() => {
+      const s = $("stockMovTipo"); if (s && s.value !== tipo) { s.value = tipo; s.dispatchEvent(new Event("change", { bubbles: true })); }
+      const i = $("stockMovProducto"); if (i && p) { i.value = `${p.codigo} — ${p.desc}`; i.dispatchEvent(new Event("input", { bubbles: true })); i.dispatchEvent(new Event("change", { bubbles: true })); }
+      const c = $("stockMovCantidad"); c && setTimeout(() => { try { c.focus(); c.select(); } catch (e) { } }, 150);
+      const card = $("cardStockRegistrar"); card && card.scrollIntoView({ block: "start", behavior: "smooth" });
+    }, 220);
+  }
+  function pintarFicha() {
+    const m = $("pfModal"), f = $("pfFoto"); if (!m || !f) return;
+    const cod = f.dataset.cod; if (!cod) return;
+    let box = $("eanBox");
+    if (!box) {
+      box = document.createElement("div"); box.id = "eanBox"; box.className = "ean-box";
+      const ref = m.querySelector(".pf-form"); if (!ref) return;
+      ref.parentNode.insertBefore(box, ref);
+    }
+    const l = eanDe(cod), ed = editaStock();
+    box.innerHTML = `<b class="t">🔗 Código de barras</b><div class="ean-lista">${l.length ? l.map((e) => `<span class="ean-chip">${esc(e)}${ed ? `<button type="button" data-ean-q="${esc(e)}" aria-label="Sacar ${esc(e)}">✕</button>` : ""}</span>`).join("") : '<span class="ean-nada">Sin código de barras asociado.</span>'}</div>
+${ed ? `<div class="v7-barra"><button type="button" class="btn-ghost" data-ean="asociar">🔗 Asociar código de barras</button><button type="button" class="btn-ghost" data-ean="vale">➖ Hacer vale de salida</button><button type="button" class="btn-ghost" data-ean="entrada">➕ Entrada</button></div>` : ""}`;
+  }
+  document.addEventListener("click", async (e) => {
+    const t = e.target; if (!t || !t.closest) return;
+    const a = t.closest("#eanBox [data-ean]");
+    if (a) {
+      const cod = ($("pfFoto") || {}).dataset ? $("pfFoto").dataset.cod : "";
+      if (a.dataset.ean === "asociar") {
+        const c = await escanear("🔗 Asociar código de barras", "Escaneá el código de barras de la caja o del producto.");
+        if (c) await asociarYAbrir(cod, c);
+      } else irRegistrar(a.dataset.ean === "vale" ? "salida" : "entrada", cod);
+      return;
+    }
+    const q = t.closest("#eanBox [data-ean-q]");
+    if (q) { quitarEan(($("pfFoto") || {}).dataset.cod, q.dataset.eanQ); return; }
+    const b = t.closest("[data-v7esc]");
+    if (b) { e.preventDefault(); escanearYAbrir(); return; }
+    const et = t.closest("[data-v7et]");
+    if (et) { e.preventDefault(); elegirEtiquetas(); return; }
+  });
+  new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n && n.id === "pfModal") { try { pintarFicha(); } catch (er) { console.warn("[ean] ficha:", er); } return; } }).observe(document.body, { childList: true });
+
+  // =================================================================================== botones en el pañol
+  function botones() {
+    try {
+      const sb = $("stockBuscar");
+      if (sb && !$("esBtnPanol") && perm("stock") !== "oculto") {
+        const d = document.createElement("div"); d.className = "v7-barra no-print"; d.id = "esBarraPanol";
+        d.innerHTML = '<button type="button" class="btn-ghost" id="esBtnPanol" data-v7esc="1">📷 Escanear</button>';
+        const lugar = sb.closest(".row2") || sb.parentNode; lugar.parentNode.insertBefore(d, lugar.nextSibling);
+      }
+      const hc = $("cardStockHerramientas");
+      if (hc && !$("etBarra") && veStock()) {
+        const d = document.createElement("div"); d.className = "v7-barra no-print"; d.id = "etBarra";
+        d.innerHTML = '<button type="button" class="btn-ghost" data-v7esc="1">📷 Escanear</button><button type="button" class="btn-ghost" id="etBtn" data-v7et="1">🏷 Imprimir etiquetas QR</button>';
+        hc.insertBefore(d, hc.firstChild);
+      }
+    } catch (e) { console.warn("[lector] botones:", e); }
+  }
+  botones(); setTimeout(botones, 1500); setTimeout(botones, 5000);
+  document.addEventListener("permisos-listos", () => setTimeout(botones, 200));
+  { const mv = window.mostrarVista; if (typeof mv == "function" && !mv.__v137) { const n = function (v) { const r = mv.apply(this, arguments); if (v === "stock") setTimeout(botones, 120); return r; }; window.__heredar && window.__heredar(n, mv); n.__v137 = 1; window.mostrarVista = n; } }
+
+  // =================================================================================== etiquetas QR de las herramientas
+  function herrs() { return (window.__herramientasLista || []).filter((h) => h && h.codigo && h.estado !== "baja").sort((a, b) => String(a.codigo).localeCompare(String(b.codigo), "es", { numeric: true })); }
+  function elegirEtiquetas() {
+    const l = herrs();
+    if (!l.length) return avisar("Todavía no hay herramientas cargadas (o se están cargando): probá en unos segundos.");
+    const ov = hoja("etOv", `<div class="v7-cab"><div><h3>🏷 Etiquetas QR</h3><small>Elegí qué herramientas. Sale una hoja A4 con el QR, el código y el nombre para pegar en cada una.</small></div><button type="button" class="v7-x" data-et="x" aria-label="Cerrar">✕</button></div>
+<div class="v7-barra"><button type="button" class="chip" data-et="todas">Todas</button><button type="button" class="chip" data-et="ninguna">Ninguna</button></div>
+<div class="et-lista">${l.map((h) => `<label class="et-fila"><input type="checkbox" class="et-ch" value="${esc(h.id)}" checked><span class="mono">${esc(h.codigo)}</span><span class="n">${esc(h.nombre || "")}</span></label>`).join("")}</div>
+<div class="v7-acc"><button type="button" class="btn-primary" data-et="imp">🏷 Imprimir <span id="etN">${l.length}</span> etiquetas</button><button type="button" class="btn-ghost" data-et="x">Cancelar</button></div>`);
+    const cuenta = () => { const n = ov.querySelectorAll(".et-ch:checked").length, s = $("etN"); s && (s.textContent = n); };
+    ov.addEventListener("change", cuenta);
+    ov.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-et]"); if (!b) return;
+      const k = b.dataset.et;
+      if (k === "x") return cerrarHoja("etOv");
+      if (k === "todas" || k === "ninguna") { ov.querySelectorAll(".et-ch").forEach((c) => { c.checked = k === "todas"; }); cuenta(); return; }
+      const ids = [...ov.querySelectorAll(".et-ch:checked")].map((c) => c.value);
+      if (!ids.length) return avisar("Tildá al menos una herramienta.");
+      cerrarHoja("etOv"); imprimirEtiquetas(l.filter((h) => ids.indexOf(h.id) >= 0));
+    });
+  }
+  function htmlEtiquetas(l) {
+    return `<style>.et-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.et{border:1px dashed #9aa3b5;border-radius:8px;padding:8px;display:flex;gap:8px;align-items:center;break-inside:avoid;page-break-inside:avoid;min-height:30mm}.et img{width:24mm;height:24mm;flex:none}.et b{display:block;font:800 15px ui-monospace,Menlo,monospace;color:#28285e}.et span{display:block;font-size:11px;line-height:1.25;color:#0d1424;overflow:hidden;max-height:4.2em}.et small{display:block;font-size:8.5px;color:#4b5670;margin-top:2px}</style>
+<div class="sub">${l.length} etiqueta${l.length === 1 ? "" : "s"} · cortalas por la línea punteada. Al escanear el QR desde la app se abre la ficha de la herramienta.</div>
+<div class="et-g">${l.map((h) => `<div class="et"><img src="${dataUrl(urlDoc(h.codigo))}" alt="QR ${esc(h.codigo)}"><div><b>${esc(h.codigo)}</b><span>${esc(h.nombre || "")}</span><small>${esc([h.marca, h.modelo].filter(Boolean).join(" "))}</small></div></div>`).join("")}</div>`;
+  }
+  function imprimirEtiquetas(l) {
+    if (typeof abrirHojaImpresion != "function") return avisar("No se pudo abrir la hoja de impresión.");
+    abrirHojaImpresion("Etiquetas QR de herramientas", htmlEtiquetas(l), "PAÑOL · HERRAMIENTAS");
+  }
+
+  window.__codigos = { escanear, alEscanear, escanearYAbrir, abrirRef, refDeTexto, docDeTitulo, urlDoc, urlObra, dataUrl, matriz, eanDe, codigoDeEan, asociarEan, productoPorEan, preguntar, elegirEtiquetas, imprimirEtiquetas, htmlEtiquetas, BASE, hasta };
+})();
+</script>

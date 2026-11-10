@@ -1,0 +1,10 @@
+<style id="iaOndaCss">
+/* v137 · onda de rayitas del dictado y la charla del Asistente (como el grabador de WhatsApp) */
+#iaPanel .ia-ondav{flex:none;display:flex;align-items:center;justify-content:space-between;gap:3px;height:34px;margin:0 16px 6px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid var(--canto,rgba(255,255,255,.8));box-shadow:0 8px 22px -16px rgba(40,40,94,.55)}
+#iaPanel .ia-ondav[hidden]{display:none !important}
+#iaPanel .ia-ondav i{display:block;flex:1 1 0;max-width:5px;min-width:2px;height:24px;border-radius:3px;background:var(--navy,#28285E);transform:scaleY(.08);transform-origin:50% 50%;transition:transform 80ms linear}
+#iaPanel .ia-ondav i:nth-child(3n){background:var(--navy-2,#3D3F8A)}
+#iaPanel .ia-ondav[data-modo=charla] i:nth-child(4n){background:var(--teal,#84C3DA)}
+body.ia-ondando #iaPanel .ia-charla .ia-onda{display:none}
+@media (prefers-reduced-motion:reduce){#iaPanel .ia-ondav i{transition:none}}
+</style>
