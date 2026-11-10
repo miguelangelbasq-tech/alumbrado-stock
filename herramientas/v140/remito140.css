@@ -1,0 +1,22 @@
+/* v140 · remito «inteligente»: cartel de lo ya cargado y chips de estado por renglón */
+.rf-cartel{margin:0 0 12px !important;padding:14px 16px !important;border-left:5px solid var(--amber,#FF9F0A) !important}
+.rf-cartel.completo{border-left-color:var(--verde,#34C759) !important}
+.rf-cartel h4{margin:0 0 4px;font:800 15.5px/1.3 var(--disp,inherit);color:var(--text,#0D1424)}
+.rf-cartel p{margin:0;font-size:13.5px;color:var(--text-soft,#4B5670)}
+.rf-cartel .v7-acc{margin-top:12px}
+.rf-cartel .v7-acc .btn-primary,.rf-cartel .v7-acc .btn-ghost{width:auto;margin:0;min-height:44px}
+.rf-cnt{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.rf-est{flex:none;display:inline-block;font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap;line-height:1.3}
+.rf-est.ok{background:#e3f6ec;color:#11683f}
+.rf-est.med{background:#fff3e0;color:#7a4300}
+.rf-est.sp{background:#e8eaf6;color:var(--navy,#28285E)}
+.rf-est.nu{background:#e4f2f8;color:#0f5a78}
+.rf-est.sc{background:#ffe9e7;color:#9b1c13}
+.rf-er{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 12px;margin:8px 0 0;border-radius:16px;background:#fff;border:1.5px solid var(--border,rgba(40,40,94,.12))}
+.rf-er.e-ok{border-color:rgba(52,199,89,.45)}.rf-er.e-med{border-color:rgba(255,159,10,.6)}.rf-er.e-sp{border-color:rgba(40,40,94,.3)}.rf-er.e-nu{border-color:rgba(132,195,218,.9)}.rf-er.e-sc{border-color:rgba(255,59,48,.4)}
+.rf-er-tx{min-width:0;flex:1 1 auto;font-size:13.5px;overflow-wrap:anywhere}
+.rf-er-tx small{display:block;color:var(--text-soft,#4B5670);font-size:12.5px;margin-top:2px}
+.rf-er-tx small.mono{font-family:var(--mono,monospace)}
+.rf-estado{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 0 0;font-size:13px;color:var(--text-soft,#4B5670)}
+.rf-chico{width:auto !important;min-height:40px !important;padding:0 14px !important;font-size:13px !important;margin:0 !important}
+@media (max-width:640px){.rf-cartel .v7-acc .btn-primary,.rf-cartel .v7-acc .btn-ghost{flex:1 1 100%}.rf-er{flex-direction:column}.rf-er .rf-est{order:-1}#rfPrevOv .rh-tabla td:last-child{padding-top:6px}}
