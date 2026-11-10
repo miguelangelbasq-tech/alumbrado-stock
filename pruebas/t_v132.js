@@ -58,7 +58,7 @@ const URL_IA = 'https://ema-ia.mdiaz-60f.workers.dev/ia';
   // ---- abrir el panel
   await p.click('#iaFab .ia-fab-b'); await p.waitForTimeout(600);
   r = await p.evaluate(() => { const x = document.getElementById('iaPanel'), b = x && x.getBoundingClientRect(); return { vis: !!(x && !x.hidden), w: b ? Math.round(b.width) : 0, chips: document.querySelectorAll('#iaChips .chip').length, mic: !!document.querySelector('#iaPanel .ia-mic') }; });
-  c(r.vis && r.chips >= 5 && r.mic && (cel ? r.w >= 389 : r.w <= 440), 'se abre el panel (' + (cel ? 'pantalla completa' : 'al costado') + ') con sugerencias y micrófono · ' + JSON.stringify(r));
+  c(r.vis && r.chips >= 5 && r.mic && (cel ? r.w >= 389 : r.w >= 420 && r.w <= 760)   /* v139: en la compu el panel es lateral de alto completo, 480 px y se puede ensanchar (antes ≤ 440) */, 'se abre el panel (' + (cel ? 'pantalla completa' : 'al costado') + ') con sugerencias y micrófono · ' + JSON.stringify(r));
   if (cel) await p.screenshot({ path: __dirname + '/v132_panel_cel.png' });
 
   // ---- 2) pregunta de lectura: «¿cuántas columnas…?» → datos_obra → tool_result → respuesta
