@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v137 — 09/11/2026 (en la rama `claude/new-session-3hwmc9`, sin publicar) · Remito por foto con IA, lector de códigos (EAN y QR) y QR en los comprobantes
+## v137 — 09/11/2026 (publicada en GitHub, commit ed8ecaa) · Remito por foto con IA, lector de códigos (EAN y QR) y QR en los comprobantes
 
 **Pedido de Ángel** (09/11/2026)
 - Cargar un remito o una factura sacándole una foto: la IA lo lee y arma la entrada para revisar.
