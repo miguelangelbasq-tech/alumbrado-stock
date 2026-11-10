@@ -1,6 +1,10 @@
 // Worker «ema-avisos» (Cloudflare) · Avisos al celular con la app CERRADA — EMA Servicios.
 // v050: Web Push (navegador / PWA). v115: también FCM (la app de Android 1.3).
 // v116: lee menos de Firestore (la clave VAPID una sola vez y solo si hay avisos) y explica el «429» (límite gratis del día).
+// v143: avisos con hora («enviarDesde», el recordatorio de las 7:00 del día de la orden). Cuando ve uno para más adelante lo
+//       marca enviado:"programado" (así no se vuelve a leer cada minuto) y los programados se revisan cada minuto de 06:55 a
+//       07:20 de Argentina y cada media hora el resto del día. Antes de mandar un recordatorio mira la orden: si se anuló,
+//       cambió de día o la persona ya no está, no lo manda; de varios recordatorios iguales (mismo «tag») manda el último.
 //
 // Cómo funciona:
 //  · La app, cuando pasa algo (orden nueva para una persona, material listo para retirar), deja un aviso en Firestore
@@ -19,7 +23,7 @@
 // Cron Trigger (Settings › Triggers › Cron): * * * * *   (cada minuto)
 // Rutas: /salud (estado), /vapid (clave pública), /probar (fuerza una vuelta ahora).
 
-const VERSION = "v116-fcm";
+const VERSION = "v143-hora";
 const PROYECTO_DEF = "alumbrado-stock";
 const MAX_AVISOS = 40;
 const enc = new TextEncoder();
@@ -146,8 +150,28 @@ async function vuelta(env, dep = {}) {
   const token = dep.token || await tokenGoogle(sa, ahora, fetchFn);
   const db = dep.db || firestore(proyecto, token, fetchFn);
   const contacto = env.CONTACTO || "mailto:avisos@ema-alumbrado.app";
-  const avisos = (await db.consulta("avisosPush", ["enviado", "EQUAL", false], MAX_AVISOS)).sort((a, b) => (a.ts || 0) - (b.ts || 0));
-  if (!avisos.length) return { ok: true, version: VERSION, avisos: 0, enviados: 0 };
+  let avisos = (await db.consulta("avisosPush", ["enviado", "EQUAL", false], MAX_AVISOS)).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+  // v143: los que tienen hora para más adelante quedan «programados» (no se leen cada minuto)
+  const ms = ahora * 1000, futuros = avisos.filter((a) => Number(a.enviarDesde) > ms);
+  for (const a of futuros) await db.actualizar("avisosPush/" + a.id, { enviado: "programado" });
+  avisos = avisos.filter((a) => !(Number(a.enviarDesde) > ms));
+  const minDia = Math.floor(ahora / 60) % 1440, ventana = minDia >= 595 && minDia <= 620;   // 09:55–10:20 UTC = 06:55–07:20 de Argentina
+  if (dep.programados || ventana || minDia % 30 === 0) {
+    const pr = (await db.consulta("avisosPush", ["enviado", "EQUAL", "programado"], 300)).filter((a) => !(Number(a.enviarDesde) > ms));
+    const ult = {}; pr.forEach((a) => { const k = a.tag || a.id; if (!ult[k] || (a.ts || 0) > (ult[k].ts || 0)) ult[k] = a; });
+    const otCache = {};
+    for (const a of pr) {
+      if (ult[a.tag || a.id] !== a) { await db.actualizar("avisosPush/" + a.id, { enviado: true, enviadoTs: ms, reemplazado: true }); continue; }
+      if (a.otId) {
+        if (!(a.otId in otCache)) { try { otCache[a.otId] = await db.get("ordenesTrabajo/" + a.otId); } catch (e) { otCache[a.otId] = undefined; } }
+        const ot = otCache[a.otId];
+        const vale = ot === undefined || (ot && ot.estado !== "Anulada" && (!a.fecha || ot.fecha === a.fecha) && (!a.clave || !Array.isArray(ot.personalNombres) || ot.personalNombres.map(norm).includes(norm(a.clave))));
+        if (!vale) { await db.actualizar("avisosPush/" + a.id, { enviado: true, enviadoTs: ms, noVale: true }); continue; }
+      }
+      avisos.push(a);
+    }
+  }
+  if (!avisos.length) return { ok: true, version: VERSION, avisos: 0, enviados: 0, programados: futuros.length };
   const subs = await db.consulta("pushSubs", null, 500);
   // la clave VAPID solo hace falta para los celulares de navegador (Web Push), y se lee una sola vez
   let vapid = null; const vapidDe = async () => vapid || (vapid = await clavesVapid(db));
@@ -179,7 +203,7 @@ export default {
     const u = new URL(request.url);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors() });
     try {
-      if (u.pathname === "/salud") return json({ ok: true, version: VERSION, cuenta: !!env.FB_SA_JSON, cron: "cada minuto", fcm: true });
+      if (u.pathname === "/salud") return json({ ok: true, version: VERSION, cuenta: !!env.FB_SA_JSON, cron: "cada minuto", fcm: true, conHora: true });
       if (u.pathname === "/vapid") {
         if (!env.FB_SA_JSON) return json({ ok: false, error: "falta FB_SA_JSON" }, 500);
         const sa = JSON.parse(env.FB_SA_JSON), db = firestore(sa.project_id || PROYECTO_DEF, await tokenGoogle(sa, Math.floor(Date.now() / 1000), fetch), fetch);
@@ -193,4 +217,4 @@ export default {
   async scheduled(event, env, ctx) { ctx.waitUntil(vuelta(env).catch((e) => console.log("vuelta: " + e.message))); }
 };
 
-export { vuelta, mensajeFcm, enviarFcm, VISTA_DE };
+export { vuelta, mensajeFcm, enviarFcm, VISTA_DE, VERSION };
