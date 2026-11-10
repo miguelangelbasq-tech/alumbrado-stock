@@ -385,6 +385,15 @@ const tk = (uid, extra) => firmar(cuerpoToken(uid, extra));
   prueba("v3: si Firestore no contesta, se usan los topes más chicos (mirar) y no se guarda el rol", r.r.status === 200 && r.j.ema.uso.rol === "mirar" && !E.kv.has("rol:a-1"));
 }
 
+{
+  // ---- el KV se queda sin escrituras: el asistente sigue (cuenta en memoria)
+  const kv = new Map(), IA_KV = { get: async (k) => kv.get(k) ?? null, put: async () => { throw new Error("KV put() limit exceeded for the day"); } };
+  const E = { ...env, IA_POR_MINUTO: "500", IA_KV };
+  const t = await tk("c-2");
+  const a = await pedir("/ia", { token: t, cuerpo: pregunta(), e: E }), b = await pedir("/ia", { token: t, cuerpo: pregunta(), e: E });
+  prueba("v3: si el KV no deja escribir, el asistente contesta igual y cuenta en memoria", a.r.status === 200 && b.r.status === 200 && b.j.ema.uso.preguntasHoy === a.j.ema.uso.preguntasHoy + 1);
+}
+
 // ---------- la clave nunca aparece
 prueba("la clave no aparece en ninguna respuesta (" + todas.length + " revisadas)", todas.every((x) => !x.includes(CLAVE_FALSA) && !x.includes("sk-ant")));
 {

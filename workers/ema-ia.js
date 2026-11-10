@@ -138,15 +138,19 @@ function numEnv(v, def) { const n = parseInt(v, 10); return n > 0 ? n : def; }
 const numOk = (v) => { const n = Number(v); return isFinite(n) && n >= 0 ? n : null; };
 
 // ---------- Guardado: KV si está ligado (exacto), si no memoria de esta copia del Worker (aproximado)
-const memoria = new Map(); // clave → {v, vence}
+const memoria = new Map(); // sin KV: clave → {v, vence}
+const respaldoKv = new Map(); // con KV que falló al escribir: lo de acá manda hasta que el KV vuelva a aceptar
+// Si el KV falla (p. ej. se pasó de las escrituras gratis del día), se sigue con la memoria: el asistente no se corta.
 async function guardadoLeer(env, k) {
-  if (env.IA_KV) { const s = await env.IA_KV.get(k); if (s == null) return null; try { return JSON.parse(s); } catch (e) { return null; } }
-  const m = memoria.get(k); if (!m) return null; if (m.vence < Date.now()) { memoria.delete(k); return null; } return m.v;
+  const mem = env.IA_KV ? respaldoKv : memoria;
+  if (env.IA_KV) { try { const s = await env.IA_KV.get(k); if (s != null && !respaldoKv.has(k)) { try { return JSON.parse(s); } catch (e) { return null; } } } catch (e) { } }
+  const m = mem.get(k); if (!m) return null; if (m.vence < Date.now()) { mem.delete(k); return null; } return m.v;
 }
 async function guardadoPoner(env, k, v, seg) {
-  if (env.IA_KV) return env.IA_KV.put(k, JSON.stringify(v), { expirationTtl: Math.max(60, seg) });
-  if (memoria.size > 5000) for (const [a, b] of memoria) if (b.vence < Date.now()) memoria.delete(a); // limpieza
-  memoria.set(k, { v, vence: Date.now() + seg * 1000 });
+  if (env.IA_KV) { try { await env.IA_KV.put(k, JSON.stringify(v), { expirationTtl: Math.max(60, seg) }); respaldoKv.delete(k); return; } catch (e) { } }
+  const mem = env.IA_KV ? respaldoKv : memoria;
+  if (mem.size > 5000) for (const [a, b] of mem) if (b.vence < Date.now()) mem.delete(a); // limpieza
+  mem.set(k, { v, vence: Date.now() + seg * 1000 });
 }
 
 // ---------- Firestore por REST con el token de la persona (las reglas deciden qué puede leer)

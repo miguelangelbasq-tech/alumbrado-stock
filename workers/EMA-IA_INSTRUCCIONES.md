@@ -6,6 +6,27 @@ Tardás unos 10 minutos.
 
 ---
 
+## ⚡ Actualizar el Worker para la v141 (5 minutos)
+
+La app v141 abre el asistente para **todos los roles**, cada uno con lo suyo, y pone **topes** para que los US$ 100 alcancen el mes. Los topes los controla **el Worker**: hasta que pegues el nuevo, el asistente anda igual pero **sin topes** (a Administración le aparece una vez «El Worker del asistente todavía es el de antes…»).
+
+1. Entrá a **dash.cloudflare.com** › **Workers & Pages** › **`ema-ia`** › **Edit code**.
+2. Borrá todo y pegá el contenido completo del archivo nuevo **`workers/ema-ia.js`** (tu carpeta o GitHub).
+3. Tocá **Deploy**. La clave (`ANTHROPIC_API_KEY`) y el KV quedan como estaban: no hay que volver a cargarlos.
+4. Abrí **https://ema-ia.mdiaz-60f.workers.dev/salud**: tiene que decir `"version":"v3-ia"`, `"gastoMes"` (lo gastado este mes, en US$), `"tope":100` y `"kv":true`.
+   - Si dice `"kv":false`, hacé el paso 4 de más abajo (el KV): **con los topes conviene tenerlo**, si no cada copia del Worker cuenta por su lado.
+
+Qué hace el Worker nuevo:
+- **El rol lo saca de la base, no de la app.** Con el mismo usuario de la persona lee su ficha (rol, activo) y los límites que guardes en la app. No hace falta ninguna clave nueva ni reglas nuevas de Firebase.
+- **Topes por persona y por día** (preguntas y remitos aparte; un remito de varias hojas o un PDF cuenta 1): Administración sin tope · Oficina 30 · Pañol 20 + 40 remitos · Cuadrilla, Operario y Solo mirar 10. Se cambian en la app: asistente › ⚙ › **Límites** (tarda hasta 10 minutos en llegar al Worker).
+- **Freno del mes** (sobre US$ 100, se cambia ahí mismo): a los **US$ 80** se pausan Pañol, Cuadrilla, Operario y Solo mirar y te llega un aviso al celular; a los **US$ 95** se corta para todos menos Administración. El día 1 empieza de cero. Las revisiones automáticas del supervisor (12 y 18 h) no le cuentan a nadie, pero suman al gasto.
+- **Cuánto se gastó:** en la app, asistente › ⚙ (Administración y Oficina) y menú › Versión: «Gastado este mes: US$ 23,40 de 100 · preguntas … · remitos … · supervisor …», y en ⚙ › Límites lo de cada persona.
+- El tope de Anthropic (platform.claude.com › Gasto › Límites de gasto) sigue siendo el freno de fondo: dejalo **un poco arriba** del tope de la app (por ejemplo US$ 110), así la app frena antes.
+
+**KV gratis de Cloudflare:** hasta 1.000 escrituras por día. Cada pedido al asistente escribe 2 veces (la cuenta de la persona y la del mes); una pregunta con búsquedas son 2 a 5 pedidos. Alcanza para unas 100 a 200 preguntas por día; si se pasa, el Worker sigue andando pero cuenta en memoria hasta el otro día.
+
+---
+
 ## ⚡ Actualizar el Worker para la v136 (5 minutos)
 
 La app v136 usa **Opus 5.5** (y deja elegir Fable 5.2). El Worker viejo solo conoce Haiku y Sonnet: hasta que lo actualices, la app sigue con Sonnet 5.5 y te avisa una vez «Para usar la IA más pro, actualizá el Worker».
@@ -78,7 +99,7 @@ Abrí en el navegador:
 Tiene que decir algo así:
 
 ```
-{"ok":true,"version":"v2-ia","modelos":["claude-haiku-5-5","claude-sonnet-5-5","claude-opus-5-5","claude-fable-5-2"],"respaldo":true,"clave":true,"kv":true}
+{"ok":true,"version":"v3-ia","modelos":["claude-haiku-5-5","claude-sonnet-5-5","claude-opus-5-5","claude-fable-5-2"],"respaldo":true,"clave":true,"kv":true,"gastoMes":0,"tope":100}
 ```
 
 - `clave: true` → la clave está cargada. Si dice `false`, revisá el paso 3 (el nombre tiene que ser exacto: `ANTHROPIC_API_KEY`).
@@ -89,6 +110,9 @@ Tiene que decir algo así:
 
 - **«Tu sesión no es válida»**: la persona tiene que cerrar y volver a entrar a la app.
 - **«Llegaste a N pedidos…»**: es el límite por persona. Esperá un minuto, o hasta mañana si es el del día.
+- **«Llegaste a tus N preguntas de hoy» / «… remitos de hoy»** (v141): es el tope por día de ese rol. Se cambia en el asistente › ⚙ › Límites.
+- **«El asistente llegó al tope de gasto del mes»** o **«está en pausa para tu usuario»** (v141): es el freno del mes. Se renueva el día 1; si hace falta antes, subí el tope del mes en ⚙ › Límites.
+- **«El asistente no está prendido para tu usuario»** (v141): ese rol está apagado en ⚙ › Límites.
 - **«La clave del asistente no funciona»**: la clave se borró o está mal. Creá una nueva (paso 1), cargala de nuevo (paso 3) y borrá la vieja en platform.claude.com.
 - **«Se quedó sin saldo»**: se gastaron los créditos del mes o se llegó al tope de USD 30. Se renueva el 1 de cada mes; si hace falta antes, subí el tope en platform.claude.com › Gasto › Límites de gasto.
 - **Si pegaste la clave en otro lado por error** (chat, mensaje, archivo): borrala en platform.claude.com › Claves y acceso, creá una nueva y cargala en el paso 3.

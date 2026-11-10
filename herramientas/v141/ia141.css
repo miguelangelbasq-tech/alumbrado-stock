@@ -1,0 +1,30 @@
+/* v141 · el asistente por rol: «Te quedan N preguntas hoy», cartel de tope, ⚙ Límites y «Gastado este mes» */
+#iaPanel .ia-queda{flex:none;align-self:flex-start;margin:0 16px 6px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid var(--canto,rgba(255,255,255,.8));box-shadow:var(--sombra-sm,0 1px 2px rgba(40,40,94,.06));font:600 12.5px/1.3 var(--fuente,inherit);color:var(--text-soft,#4B5670)}
+#iaPanel .ia-queda[hidden]{display:none !important}
+#iaPanel .ia-queda.ia-queda-0{background:#ff9f0a1a;border-color:rgba(255,159,10,.32);color:#6b3a00}
+body.ia-charlando #iaPanel .ia-queda{display:none}
+#iaPanel .ia-tope{position:relative;overflow:hidden;display:flex;align-items:flex-start;margin:0 0 14px;padding:16px 16px 16px 20px;border-radius:24px;background:rgba(255,255,255,.82);border:1px solid var(--canto,rgba(255,255,255,.8));box-shadow:var(--sombra-md,0 18px 44px -26px rgba(40,40,94,.45))}
+#iaPanel .ia-tope:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--amber,#FF9F0A)}
+#iaPanel .ia-tope-ic{flex:none;width:40px;height:40px;margin-right:12px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ff9f0a1f;font-size:18px}
+#iaPanel .ia-tope-tx{flex:1 1 auto;min-width:0}
+#iaPanel .ia-tope-tx b{display:block;font:800 17px/1.25 var(--disp,inherit);letter-spacing:-.02em;color:var(--navy,#28285E)}
+#iaPanel .ia-tope-tx p{margin:4px 0 0;font-size:14.5px;line-height:1.45;color:var(--text,#0D1424)}
+#iaPanel .ia-tope-tx small{display:block;margin-top:6px;font-size:12.5px;color:var(--text-3,#7C879D)}
+#iaPanel .ia-gmes{margin:10px 0 0;padding:10px 12px;border-radius:16px;background:rgba(40,40,94,.05);font:600 13.5px/1.45 var(--fuente,inherit);color:var(--navy,#28285E)}
+#iaPanel .ia-lim-f{display:grid;grid-template-columns:1fr 1fr;grid-gap:8px 12px;gap:8px 12px;align-items:end;padding:10px 0;border-top:1px solid rgba(40,40,94,.07)}
+#iaPanel .ia-lim-f .t{align-self:center;font-weight:600;font-size:15px;color:var(--text,#0D1424)}
+#iaPanel .ia-lim-f .t small{display:block;font-weight:500;font-size:12.5px;color:var(--text-3,#7C879D)}
+#iaPanel .ia-lim-f .ia-sw{justify-self:end;align-self:center}
+#iaPanel .ia-lim-f label,#iaPanel .ia-lim-mes label{display:block;margin:0;min-width:0}
+#iaPanel .ia-lim-f label span,#iaPanel .ia-lim-mes label span{display:block;margin:0 0 3px;font:600 11px var(--mono,monospace);letter-spacing:.04em;text-transform:uppercase;color:var(--text-3,#7C879D)}
+#iaPanel .ia-lim-f label input,#iaPanel .ia-lim-mes input{display:block;width:100%;box-sizing:border-box;min-height:44px;margin:0;padding:8px 12px;font:600 16px var(--mono,monospace);font-variant-numeric:tabular-nums}
+#iaPanel .ia-lim-f label input:disabled{opacity:.6}
+#iaPanel .ia-lim-h{font:700 15px var(--disp,inherit);letter-spacing:-.01em;color:var(--text,#0D1424);margin:18px 0 6px}
+#iaPanel .ia-lim-mes{display:grid;grid-template-columns:1fr 1fr 1fr;grid-gap:10px;gap:10px}
+#iaPanel .ia-lim-pers{margin:4px 0 0}
+#iaPanel .ia-lim-t{width:100%;border-collapse:collapse;font-size:13.5px}
+#iaPanel .ia-lim-t th{font:600 11px var(--mono,monospace);letter-spacing:.04em;text-transform:uppercase;color:var(--text-3,#7C879D);text-align:left;padding:6px 6px 6px 0}
+#iaPanel .ia-lim-t td{padding:8px 6px 8px 0;border-top:1px solid rgba(40,40,94,.07);vertical-align:top;font-variant-numeric:tabular-nums}
+#iaPanel .ia-lim-t td small{display:block;color:var(--text-3,#7C879D);font-size:12px}
+#iaPanel .ia-lim-t td:last-child{font-family:var(--mono,monospace);text-align:right}
+@media (max-width:640px){#iaPanel .ia-lim-mes{grid-template-columns:1fr 1fr}#iaPanel .ia-lim-mes label:first-child{grid-column:1 / -1}}
