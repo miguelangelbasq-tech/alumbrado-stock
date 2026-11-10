@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **10/11/2026**, última versión entregada: **v145** sobre la v144 (ver `CHANGELOG.md`; armada y probada, **sin publicar** todavía: la v144 es la publicada).
+> Estado al **10/11/2026**, última versión entregada: **v145** sobre la v144 (ver `CHANGELOG.md`; publicada en GitHub).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
@@ -573,6 +573,7 @@ Ejemplos:
 - **v138:** `t_v138` prueba el «atrás» con `page.goBack()` y el remito en PDF / 3 fotos / 30 renglones.
 - **v137:** `t_v137` decodifica los QR con jsQR (`pruebas/lib/jsQR.js`, licencia Apache-2.0, solo para las pruebas; `npm i jsqr@1.4.0`) y simula el lector de la app con `window.Capacitor.Plugins.BarcodeScanner`.
 - **Señal lenta simulada (v086):** `window.__stubKbps = 2000` (en `firebase_stub.js`): cada consulta tarda lo que tarda bajar sus datos por un caño compartido. Lo usa `t_v086`.
+- **Hora del contenedor (v145):** la nube corre en UTC; después de las 23 h UTC `t_v142` falla en cadena (la cuadrilla queda en «mañana»). En los celus la hora es la de Argentina. Corré la batería con `TZ=America/Argentina/Cordoba` (con eso pasa 49/49).
 - **`t_circuito`** (v120, v123): el circuito completo con todo lo nuevo prendido (oficina arma por pasos → cuadrilla en el celu: seguridad, fotos por columna, «📤 Listo, enviar esta tarea» con la hora → la orden se envía sola → oficina cierra → puntos y avance). Correrlo siempre.
 - `t_v083` quedó reemplazada por `t_v084` (buscaba el cartel viejo de ubicación).
 - **Cada versión nueva suma su `t_vNNN.js`.** Si cambia un comportamiento probado, actualizá la prueba vieja y decí por qué.

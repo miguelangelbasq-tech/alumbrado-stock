@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v145 — 10/11/2026 (armada y probada, sin publicar) · Certificación mensual automática + material contra avance + gente sin tarea + reglas de las cuadrillas + degradé de las acciones + mayúsculas prolijas
+## v145 — 10/11/2026 (publicada en GitHub) · Certificación mensual automática + material contra avance + gente sin tarea + reglas de las cuadrillas + degradé de las acciones + mayúsculas prolijas
 
 **Pedido de Ángel** (10/11/2026, maquetas i1 e i2 aprobadas) y sus agregados del mismo día: «todo el personal de alumbrado tiene que tener una tarea cada día hábil, salvo ausencia o enfermedad»; el degradé de «Calcular materiales» en todo lo que era azul sólido; los nombres en mayúsculas prolijas; mínimo 2 personas en obra, equipos habituales y vínculos sin grúa.
 
