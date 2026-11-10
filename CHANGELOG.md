@@ -8,6 +8,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Cambios**
 - `<style id="v136bCss">`: sin el título viejo «Plazas» (`#viewInicio:before`) con el Inicio Ejecutivo; en pantallas > 640 px la portada con bordes redondeados y las tarjetas al ancho de la portada. En el celu no cambia.
+- **La nómina real** está en `configEquipo/personal.nomina` (las pruebas usaban `lista`): el asistente (`personal`, `proponer_aviso`), «＋ Agregar a alguien que también fue» (`cierreIntegrante`) y la gente rápida de «Llenar orden» (`ordenNueva`) la veían vacía. Ahora leen `nomina`, después `lista` y si no `nominaEquipo()`. Prueba nueva `t_v136b` (falla con la v136, pasa con la v136b).
 - Asistente: si el Worker manda `error.detalle`, se muestra «(Motivo: …)» debajo del mensaje.
 - Worker `ema-ia` **v2b-ia**: si Claude responde 400, reintenta solo (1.º sin respaldo del servidor ni caché automática, 2.º además sin bloques de pensamiento viejos) y, si sigue, devuelve el motivo en `detalle` (sin la clave). Sospecha: el contexto cambia en cada pregunta y Claude rechaza los bloques de pensamiento de la respuesta anterior.
 
@@ -15,7 +16,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas:** `t_v136` 45/45 y 55/55, `t_v135` 43/43 y 59/59, `t_v133`, `t_v134`, `t_nav`, `t_humo` OK en PC y celu; `workers/probar_ema_ia.mjs` 60/60.
 
-**Huellas:** ORIGINAL `c3e7f02b…` · index `84ff066f…` · sello «2026-11-09 20:54 · 115b45».
+**Huellas:** ORIGINAL `d802980d…` · index `bc545630…` · sello «2026-11-09 21:22 · 89eae5». (`t_v106`, `t_v112`, `t_v132`–`t_v136`, `t_circuito`, `t_v136b` OK en PC y celu.)
 
 ## v136 — 09/11/2026 (publicada en GitHub, commit 5b6833d, con la carpeta guias/) · Arreglos del Inicio, campanita de línea, barra de abajo deslizable, Asistente con Opus 5.5 (PDF y cierre rápido), «🩺 Supervisor» y Guías nuevas
 

@@ -15,6 +15,9 @@ css = '''<style id="v136bCss">
 </style>
 '''
 R('<script id="revisarAppDiag">', css + '<script id="revisarAppDiag">')
+# v136c: la nómina está en configEquipo/personal.nomina (no «lista»): el asistente, «Agregar a alguien que también fue» y la gente rápida de Llenar orden la veían vacía
+R('const nomina = () => { const p = window.__personalNube || {}; return (Array.isArray(p.lista) ? p.lista : []).filter((x) => x && String(x.nombre || "").trim() && x.activo !== false); };',
+  'const nomina = () => { const p = window.__personalNube || {}; let l = Array.isArray(p.nomina) && p.nomina.length ? p.nomina : Array.isArray(p.lista) ? p.lista : []; if (!l.length) { try { l = (typeof window.nominaEquipo == "function" ? window.nominaEquipo() : []) || []; } catch (e) { l = []; } } return l.filter((x) => x && String(x.nombre || "").trim() && x.activo !== false); };', 3)
 # el motivo exacto del rechazo (Worker v2b: error.detalle) se muestra debajo del mensaje
 R('const mj = (j && j.error && j.error.mensaje) || "";', 'const mj = ((j && j.error && j.error.mensaje) || "") + ((j && j.error && j.error.detalle) ? "\\n(Motivo: " + j.error.detalle + ")" : "");')
 
