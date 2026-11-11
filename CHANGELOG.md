@@ -2,6 +2,39 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v147 — 11/11/2026 (armada en la rama, sin publicar) · Movimiento entre pantallas (opción B) + Mapa de guerra + paso a paso en el celu + informe semanal
+
+**Pedido de Ángel** (11/11/2026): eligió la opción **B «como app de banco»** de los 3 videos de movimiento; y sumó tres agregados para la misma versión: «🗺 Mapa de guerra» (maqueta compu opción A + celu), que el **paso a paso** de cada tarea le llegue a la cuadrilla, y el **📰 informe semanal automático**.
+
+**Base:** ORIGINAL 146 (publicada, `70bf1c4a…`).
+
+**Movimiento entre pantallas, opción B** (`movCss` + `movPantallas`)
+- Celu: la pantalla nueva entra desde la derecha con sombra, la anterior se corre un 30 % a la izquierda y se oscurece; con «atrás» (el del celu de la v138 o una flecha ‹ Volver) es al revés. 280 ms. Igual en el legajo, en las pantallas de la cuadrilla, en las subpestañas y en las hojas (suben al abrir, bajan al cerrar). Tarjetas escalonadas (40 ms, hasta 8).
+- La dirección sale del orden de la barra de abajo: más a la derecha o fuera de la barra = más adentro = desde la derecha.
+- **Sin copiar la pantalla que se va**: se ve la real (fija donde estaba) y se esconde al terminar; nunca hay `id` repetidos. Solo `transform`/`opacity`; `overflow-x:hidden` solo durante el movimiento.
+- Sin movimiento: cámara de la app (y Modo obra con la cámara), Mapa, Asistente, visores/galería, hoja A4, lo que no viene de un toque y el «reducir movimiento» del celu. En la compu: fundido de 150 ms.
+- Perfil › Tus ajustes › «Movimiento entre pantallas: Sí / No». Si el celu tarda más de 250 ms en dibujar el primer cambio, pasa solo a un fundido corto (opción A) y el ajuste lo dice.
+- No cambia nada de lo que hace cada pantalla: no envuelve funciones (mira la página), el «atrás» de la v138 y «¿Salir sin guardar?» siguen igual (atrasApp solo anota cuándo da un paso atrás y no cuenta como abierta una hoja que se está yendo).
+
+**🗺 Mapa de guerra** (`mapaControl`): modo «🎯 Control» del mismo Mapa, solo para quien edita Órdenes (el Mapa de siempre queda igual). Números de hoy, panel de alertas (Hoy · Alertas · Cuadrillas · Avance; urgente / revisar hoy / para saber) a la derecha en la compu y abajo en el celu, pines de cuadrilla con iniciales y vehículo y línea punteada a la obra de su orden de hoy, íconos de alerta sobre cada obra, ficha rápida (avance, Gantt, quién está, qué falta, falta material mañana; Legajo / Orden / Llamar). Alertas sin IA juntando lo que ya existe (obra trabada, falta material para mañana, fotos dudosas, órdenes sin cerrar, gente sin tarea, fraguado, obra sin ubicación), cada una con su acción de siempre. «Llamar» usa los contactos cargados; si no hay, «sin teléfono cargado». Se recuerda el modo; acceso en Inicio Ejecutivo y Tablero del dueño. Sin lecturas nuevas.
+
+**📋 El paso a paso en el celu de la cuadrilla** (`pasosTarea`)
+- Modo obra: «📋 Cómo se hace» debajo del botón grande (un paso por pantalla, letra grande, deslizar, la lámina de la guía abajo, «🔊 Escuchar los pasos» con la voz del celu y «Parar»). También en «La orden del día» (ver pasos en cada tarea), en «Ayuda» (primero) y en Mis tareas clásica (en la cabecera de cada tarjeta + «📄 Ver la orden completa»). Anda sin señal.
+- Avisos de orden nueva y recordatorio de las 7: «Tocá para ver la orden y los pasos» y al tocar abren la orden.
+- Al emitir, la orden guarda la copia de los pasos que se dieron (`ot.pasos`); la hoja de la orden usa esa copia.
+- **Bug arreglado:** los pasos editados de las tareas del catálogo original no se guardaban; ahora van a `configEquipo/baremo.pasos` y se aplican al abrir la app.
+- Borrador de las 28 tareas sin pasos (`herramientas/v147/pasos_borrador.md`, todo «a confirmar»): Producción › Cuánto vale cada tarea › «Revisar borrador» → «Guardar» → «Sí». Hasta entonces la cuadrilla no lo ve.
+
+**📰 Informe de la semana** (`informeSemanal`): lunes a sábado; lo arma la app sin IA (módulos de la semana contra la anterior por la fecha de la orden cerrada, solo nuestra zona; avance de la zona; órdenes; por obra; gente; pañol con compras sugeridas sin precios; fotos; gasto de la IA del mes; lo que viene de la orden sugerida). «Resumen del asistente» opcional (un pedido corto; interruptor en ⚙, solo Administración). El primer aparato de admin/oficina desde el sábado 14:00 toma el turno (transacción en `configEquipo/salud`), lo guarda en `adjuntos` y deja el aviso a Administración para el lunes 07:30. Pantalla con semanas anteriores, Compartir / Bajar PDF (2 hojas A4 con QR). **El gasto de la IA por semana necesita un Worker nuevo (no se tocó el Worker en esta versión): hoy muestra el del mes.**
+
+**Sin reglas nuevas** (todo pasa con `REGLAS=1`). No hace falta APK nuevo (la voz usa el TextToSpeech de la app 1.4 o la del navegador).
+
+**Pruebas:** `t_v147` PC 53/53 y celu 110/110 (también con `REGLAS=1`); `t_circuito`, `t_v138`, `t_v142` OK; batería completa de a 3: 293 de 296 OK en la primera pasada; t_v083 PC y celu (reemplazada por t_v084, de siempre), t_v137 PC (la onda del dictado, por tiempos: OK sola) y t_v143 PC y celu («lo que propone el asistente sale igual que a mano»: `vehiculoPersona` a veces sale vacío; **pasa igual con la v146**, es una carrera de tiempos de esa prueba, OK sola en PC y 2 de 3 en PC, falla a veces en celu con las dos versiones). Batería con `TZ=America/Argentina/Cordoba` (hora de Córdoba 07:30–09:30). Video real `herramientas/v147/` → `capturas/B_real.mp4` (se arma con `grabar147.js` + `armar_video147.py`).
+
+**Huellas (SHA-256):** ORIGINAL `147_2026-11-11_app-EMA_ORIGINAL.html` `ead13effd4bcce9fafc3d0b4a10adab27a3c53f75c480d1e34656c3b11107fa6` · `index.html` `7ac07978ba105eb8a9789af9e64d6fc5e923ff7c755771b6cff5a491894c1027` · sello `2026-11-11 07:20 · e4eb1d` (meta `ema-version` y `#appVersion`). Detalle en `herramientas/v147/huellas.txt`.
+
+**Qué tiene que hacer Ángel:** subir `index.html` a GitHub (cuando decida publicarla; sw.js y carpetas no cambian). Nada de reglas ni APK. Revisar el borrador de los pasos (Producción › Cuánto vale cada tarea › Revisar borrador).
+
 ## v146 — 10/11/2026 (publicada en GitHub) · Cierre del día por voz + pedido de compras automático + tablero del dueño + lo no terminado pasa solo a mañana
 
 **Pedido de Ángel** (10/11/2026, maquetas i3, i4 e i5 aprobadas) y el agregado que pasó de la v145: «durante el día cambian las tareas; lo que no se terminó hoy tiene que pasar al día siguiente y toda la semana se tiene que ir actualizando, automático».

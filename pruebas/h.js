@@ -86,6 +86,8 @@ async function abrir(op = {}) {
   if (!op.camaraB) await page.addInitScript(() => { window.__camViejaNo = true; });   // v144: las pruebas viejas ven la hoja «¿De qué obra?» de antes; camaraB:true prueba la cámara primero (opción B)
   if (!op.v145) await page.addInitScript(() => { window.__v145No = true; });   // v145: las pruebas viejas no ven la certificación, el material contra avance ni la gente sin tarea; v145:true los prueba
   if (!op.v146) await page.addInitScript(() => { window.__v146No = true; });   // v146: las pruebas viejas no ven el cierre por voz, el pedido de compras, el tablero del dueño ni el pase automático a mañana; v146:true los prueba
+  if (!op.mov) await page.addInitScript(() => { window.__movNo = true; });   // v147: las pruebas viejas no ven el movimiento entre pantallas (cambio al instante, mismos tiempos); mov:true lo prueba
+  if (!op.v147) await page.addInitScript(() => { window.__v147No = true; });   // v147: las pruebas viejas no ven el Mapa de guerra, el informe semanal ni los pasos nuevos de la cuadrilla; v147:true los prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];

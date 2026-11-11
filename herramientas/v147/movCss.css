@@ -1,0 +1,16 @@
+/* v147 · Movimiento entre pantallas (opción B): lo usa <script id="movPantallas">. Solo transform/opacity; sin has ni gap en flex. */
+html.mov-anim{overflow-x:hidden}
+/* la entrada mínima de appCelular (.wrap.entra, 220 ms) la reemplaza esta */
+html.mov-on .wrap.entra{animation:none !important}
+.mov-sale{display:var(--mov-d,block) !important;position:fixed !important;top:var(--mov-t) !important;left:var(--mov-l) !important;width:var(--mov-w) !important;height:var(--mov-h) !important;right:auto !important;bottom:auto !important;max-width:none !important;min-height:0 !important;margin:0 !important;overflow:hidden !important;pointer-events:none !important;box-sizing:border-box !important;will-change:transform}
+.mov-sale.mov-bg{background:var(--bg,#EAF2F7)}
+.mov-entra{position:relative !important;background:var(--bg,#EAF2F7);min-height:100vh;will-change:transform}
+.mov-el{position:relative;will-change:transform}
+.mov-z1{z-index:1 !important}.mov-z3{z-index:3 !important}
+.mov-sombra{box-shadow:-10px 0 28px -8px rgba(13,20,36,.28) !important}
+.mov-velo{position:fixed;left:0;top:0;right:0;bottom:0;background:#0D1424;opacity:0;pointer-events:none}
+.mov-fantasma{position:fixed;overflow:hidden;pointer-events:none;background:var(--bg,#EAF2F7);box-sizing:border-box;will-change:transform}
+.mov-fantasma-in{box-sizing:border-box}
+.mov-fondo{position:fixed;left:0;top:0;right:0;bottom:0;background:var(--bg,#EAF2F7);pointer-events:none;z-index:2;will-change:transform}
+.mov-cierra{pointer-events:none !important}
+@media (prefers-reduced-motion:reduce){.mov-sale,.mov-fantasma,.mov-velo,.mov-fondo{display:none !important}}
