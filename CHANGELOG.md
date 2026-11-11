@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v146 — 10/11/2026 (lista, sin publicar) · Cierre del día por voz + pedido de compras automático + tablero del dueño + lo no terminado pasa solo a mañana
+## v146 — 10/11/2026 (publicada en GitHub) · Cierre del día por voz + pedido de compras automático + tablero del dueño + lo no terminado pasa solo a mañana
 
 **Pedido de Ángel** (10/11/2026, maquetas i3, i4 e i5 aprobadas) y el agregado que pasó de la v145: «durante el día cambian las tareas; lo que no se terminó hoy tiene que pasar al día siguiente y toda la semana se tiene que ir actualizando, automático».
 
