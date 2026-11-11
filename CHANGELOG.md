@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v148 — 11/11/2026 (armada, sin publicar) · Parpadeos en los celus + fotos de la cuadrilla más rápidas
+## v148 — 11/11/2026 (publicada en GitHub) · Parpadeos en los celus + fotos de la cuadrilla más rápidas
 
 **Pedido de Ángel** (11/11/2026, después de publicar la v147): «En varios celulares hay un problema de titileo: la barra de abajo titila, algunos botones cuando recibís una notificación se agrandan y se achican solos». Mandó 2 videos del celu de Marcos (cuadrilla, «Antes de arrancar» 6/6): la barra aparece y desaparece cada ~1 s y «Arrancar el día» salta entre dos alturas. Agregado en la misma versión: «hay que arreglar la velocidad de sacar fotos para la cuadrilla: tiene 11 segundos hasta que carga».
 
