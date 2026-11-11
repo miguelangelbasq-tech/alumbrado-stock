@@ -181,6 +181,13 @@ ${H.msg ? `<div class="pst-msg">${esc(H.msg)}</div>` : ""}${img}</div>`;
     else intentar(() => window.verOrdenTrabajo(o.id), null);
     return true;
   }
+  // la campanita (aviso de orden nueva → «mistareas»): para la cuadrilla nueva, la orden en «Hoy»
+  function irOrden(otId) {
+    if (no() || !window.__cuadrillaDia || !intentar(() => window.__cdOn && window.__cdOn(), false)) return false;
+    intentar(() => window.mostrarVista("inicio"), null);
+    if (otId && window.__cuadrillaDia.elegirOt) window.__cuadrillaDia.elegirOt(otId);
+    window.__cuadrillaDia.ir("orden"); return true;
+  }
   function probarPend() { if (!pend) return; let n = 0; const t = setInterval(() => { if (abrirPend() || ++n > 40) clearInterval(t); }, 500); }
 
   // ------------------------------------------------------------------------------------------- Producción: el borrador para que Ángel lo revise
@@ -234,5 +241,5 @@ ${conf ? `<div class="pb-conf"><b>¿Guardo los pasos de ${nSel} ${nSel === 1 ? "
   document.addEventListener("permisos-listos", () => { probarPend(); tarjetaBorrador(); });
   const mv = window.mostrarVista;
   if (typeof mv == "function") { const n = function (v) { const r = mv.apply(this, arguments); if (v === "produccion") setTimeout(tarjetaBorrador, 50); return r; }; window.__heredar && window.__heredar(n, mv); window.mostrarVista = n; }
-  window.__pasosTarea = { textoDe, lista, abrir, cerrar, escuchar, parar, botonObra, linkFila, opAyuda, ordenCompleta, copiaPasos, abrirPend, BORRADOR, faltan, tarjetaBorrador, hojaBorrador, guardarBorrador, estado: () => ({ abierta: !!st.h, k: st.h && st.h.k, n: st.h && st.h.n, total: st.h && st.h.l.length, voz: VZ.on }) };
+  window.__pasosTarea = { textoDe, lista, abrir, cerrar, escuchar, parar, botonObra, linkFila, opAyuda, ordenCompleta, copiaPasos, abrirPend, irOrden, BORRADOR, faltan, tarjetaBorrador, hojaBorrador, guardarBorrador, estado: () => ({ abierta: !!st.h, k: st.h && st.h.k, n: st.h && st.h.n, total: st.h && st.h.l.length, voz: VZ.on }) };
 })();

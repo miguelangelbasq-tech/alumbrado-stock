@@ -242,6 +242,7 @@ const camaraFalsa = () => {
   await mapaGuerra(c);
   await pasosCuadrilla(c);
   await informeSemanal(c);
+  if (cel) await cuadrillaBarra(c);
   const mal = c.fin();
   process.exit(mal ? 1 : 0);
 })().catch((e) => { console.error(e); console.log('RESULTADO v147' + (cel ? ' cel' : '') + ': ERROR'); process.exit(2); });
@@ -403,4 +404,41 @@ async function informeSemanal(c) {
   c(await p.evaluate(() => !!document.querySelector('#iniEje [data-isabrir]') && !!document.getElementById('menuInformeSemanal')), 'acceso en el Inicio Ejecutivo y en el menú');
   c(!A.errores.length && !B.errores.length, 'informe semanal sin errores' + (A.errores.concat(B.errores).length ? ': ' + A.errores.concat(B.errores).slice(0, 3).join(' | ') : ''));
   await A.browser.close();
+}
+
+// ======================================================================================= cuadrilla: la barra no se guarda y no titila
+async function cuadrillaBarra(c) {
+  console.log('— Cuadrilla: barra fija y sin parpadeo');
+  const guardadaAntes = () => { try { localStorage.setItem('ema.nav.guardada', '1'); } catch (e) { } };
+  const J = await abrir(Object.assign({ datos: datos147(), sesion: 'juan', espera: 6000, antes: guardadaAntes }, { v147: true, mov: true, crew: true, mtNuevo: true, tarjetas: true, nav: true, inicio: true, cel: true })), q = J.page;
+  for (const v of ['inicio', 'mistareas']) {
+    if (v !== 'inicio') { await q.evaluate((x) => window.mostrarVista(x), v); await q.waitForTimeout(2500); }
+    const r = await q.evaluate(() => ({ g: document.body.classList.contains('n1-guardada'), ls: localStorage.getItem('ema.nav.guardada'), n1g: !!document.querySelector('#navN1 [data-n1g]'), tab: !!document.getElementById('navTab'), nav: !!document.querySelector('#navN1 [data-n1]') && getComputedStyle(document.getElementById('navN1')).display !== 'none' }));
+    c(r.nav && !r.g && !r.n1g && !r.tab && r.ls === '1', `cuadrilla (${v}): la barra de abajo no se puede guardar (sin flechita ni lengüeta) y lo guardado de antes se ignora sin borrarlo`);
+    const m = await q.evaluate(() => new Promise((ok) => {
+      const L = []; const mo = new MutationObserver((ms) => ms.forEach((x) => { const t = x.target; if (t === document.body || (t.closest && t.closest('#navN1, #cdApp'))) L.push((t.id || t.nodeName) + ':' + (x.attributeName || x.type)); }));
+      mo.observe(document.body, { attributes: true, subtree: true, childList: true, characterData: true });
+      setTimeout(() => { mo.disconnect(); ok(L); }, 10000);
+    }));
+    c(m.length === 0, `cuadrilla (${v}): 10 s quieto, 0 cambios en body, #navN1 y #cdApp (no titila)` + (m.length ? ' · ' + m.slice(0, 6).join(', ') : ''));
+  }
+  // el aviso de la campanita («te asignaron una orden») lleva a la orden en «Hoy»
+  await q.evaluate(() => window.mostrarVista('mistareas')); await q.waitForTimeout(800);
+  const A = await abrir(Object.assign({ datos: null, sesion: 'admin', espera: 4000, ctx: J.ctx, browser: J.browser }, { v147: true, nav: true, inicio: true, cel: true }));
+  const id = await A.page.evaluate(async () => window.fbOtAdd({ numero: 'OT-2026-310', fecha: window.__v135.hoy(), plazaId: 'p2', plazaNombre: 'Plaza San Pablo', personal: [{ nombre: 'Juan Pérez', rol: 'Oficial' }], personalNombres: ['juan perez'], actividades: ['replanteo'], actividadesManuales: [], estado: 'Emitida', ts: Date.now(), creado: Date.now() }));
+  await A.page.close();
+  let hay = false; for (let i = 0; i < 30 && !hay; i++) { await q.waitForTimeout(500); hay = await q.evaluate(() => { const b = document.getElementById('avCampana'); return !!b && /\d/.test(b.textContent || ''); }); }
+  await q.click('#avCampana'); await q.waitForTimeout(500);
+  const it = await q.evaluate(() => { const l = [...document.querySelectorAll('#avPanel [data-avi]')]; const x = l.find((e) => /orden de trabajo/i.test(e.textContent)); if (x) { x.click(); return true; } return false; });
+  await q.waitForTimeout(900);
+  const e = await q.evaluate(() => ({ e: window.__cuadrillaDia.estado(), v: document.body.dataset.vista || '' }));
+  c(hay && it && e.e.pant === 'orden' && e.e.otId === id, 'campanita: «Te asignaron una orden» lleva a esa orden en «Hoy» (' + JSON.stringify([hay, it, e.e.pant, e.e.otId === id]) + ')');
+  await q.evaluate(() => window.__cuadrillaDia.ir('orden')); await q.waitForTimeout(400);
+  await q.evaluate(() => { const b = document.querySelector('#cdApp [data-cd="lista"]'); b && b.click(); }); await q.waitForTimeout(900);
+  c(await q.evaluate(() => { const v = document.getElementById('viewMisTareas'); return !!v && v.style.display !== 'none'; }), 'Mis tareas clásica sigue estando desde «Ver lista completa»');
+  c(!J.errores.length, 'cuadrilla sin errores' + (J.errores.length ? ': ' + J.errores.slice(0, 3).join(' | ') : ''));
+  await J.browser.close();
+  const O = await abrir({ datos: datos147(), sesion: 'lucia', espera: 5000, v147: true, nav: true, inicio: true, cel: true });
+  c(await O.page.evaluate(() => !!document.querySelector('#navN1 [data-n1g]')), 'la oficina sigue pudiendo guardar la barra');
+  await O.browser.close();
 }

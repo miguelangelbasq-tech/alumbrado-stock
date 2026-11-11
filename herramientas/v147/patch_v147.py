@@ -37,6 +37,33 @@ R('    if (k === "rec") { if (!LN()) return msg(NECESITA + "."); return hoja(); 
 R('      if (tomadas.has(e) || (e.id && NO_CAPA.test(e.id)) || /^(SCRIPT|STYLE|TEMPLATE|LINK)$/.test(e.tagName)) return;',
   '      if (tomadas.has(e) || (e.id && NO_CAPA.test(e.id)) || /^(SCRIPT|STYLE|TEMPLATE|LINK)$/.test(e.tagName)) return;\n      if (e.classList && (e.classList.contains("mov-cierra") || e.closest(".mov-fantasma, .mov-sale"))) return;   // v147: se está yendo (movimiento)')
 R('  async function pasoAtras() {', '  async function pasoAtras() {\n    window.__atrasTs = Date.now();   // v147: el movimiento entre pantallas sabe que es «atrás» (va al revés)')
+# --- cuadrilla (pedido de Ángel por las fotos del celu): la barra de abajo fija para cuadrilla/operario y sin parpadeo
+CREW = '(window.__cdOn && window.__cdOn())'
+R("""      + '<button type="button" class="n1-gu" data-n1g="1" aria-label="Guardar la barra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 6.5L9 12l5.5 5.5"/></svg></button>';   // v136: guardarla (opción B)""",
+  """      + (""" + CREW + """ ? "" : '<button type="button" class="n1-gu" data-n1g="1" aria-label="Guardar la barra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 6.5L9 12l5.5 5.5"/></svg></button>');   // v136: guardarla (opción B) · v147: la cuadrilla no la guarda""")
+R('function aplicar() { if (!document.body) return; document.body.classList.toggle("n1-guardada", guardada); bd0 = null; pintarTab(); }',
+  'const guardadaYa = () => guardada && !' + CREW + ';   // v147: para la cuadrilla la barra no se guarda (se ignora lo guardado, no se borra)\n  function aplicar() { if (!document.body) return; document.body.classList.toggle("n1-guardada", guardadaYa()); bd0 = null; pintarTab(); }')
+R('if (document.body.classList.contains("n1-guardada") !== guardada) aplicar();', 'if (document.body.classList.contains("n1-guardada") !== guardadaYa()) aplicar();')
+R("""  function tab() {
+    let t = $("navTab");
+    if (!t && document.body) {""", """  function tab() {
+    let t = $("navTab");
+    if (""" + CREW + """) { t && t.remove(); return null; }   // v147: la cuadrilla no tiene lengüeta
+    if (!t && document.body) {""")
+R('    const n = guardada ? pendientes() : 0, h = n ? (n > 99 ? "99+" : String(n)) : "";', '    const n = guardadaYa() ? pendientes() : 0, h = n ? (n > 99 ? "99+" : String(n)) : "";')
+# el parpadeo: escribir solo si cambia (classList.toggle con fuerza no toca el atributo si ya está así)
+R('document.body.classList.remove("cd-portada")', 'document.body.classList.toggle("cd-portada", false)', 3)
+R('document.body.classList.remove("ie-hero")', 'document.body.classList.toggle("ie-hero", false)', 3)
+R('document.body.classList.remove("con-offaviso")', 'document.body.classList.toggle("con-offaviso", false)')
+R('document.body.classList.add("con-offaviso")', 'document.body.classList.toggle("con-offaviso", true)')
+R('document.body.classList.add("pf-on")', 'document.body.classList.toggle("pf-on", true)')
+R('b.style.top = Math.max(8, Math.min(y + 6, 180)) + "px";', 'const tp = Math.max(8, Math.min(y + 6, 180)) + "px"; if (b.style.top !== tp) b.style.top = tp;')
+R('if (c.innerHTML !== h) c.innerHTML = h;', 'if (c.__h !== h) { c.innerHTML = h; c.__h = h; }   // v147: el innerHTML leído nunca es igual al armado (redibujaba siempre)', 4)
+R('if (b.innerHTML !== h) b.innerHTML = h;   // v136: campana de línea (antes 🔔)', 'if (b.__h !== h) { b.innerHTML = h; b.__h = h; }   // v136: campana de línea (antes 🔔) · v147: solo si cambió')
+R('b.textContent = activo() ? "🏗 Por obra ✓" : "🏗 Por obra";', 'const tx = activo() ? "🏗 Por obra ✓" : "🏗 Por obra"; if (b.textContent !== tx) b.textContent = tx;')
+# la campanita: el aviso de orden nueva lleva a la orden en «Hoy» (cuadrilla nueva)
+R('      if (d.v === "mistareas") { typeof mostrarVista == "function"', '      if (d.v === "mistareas" && window.__pasosTarea && window.__pasosTarea.irOrden(d.ot)) return;   // v147\n      if (d.v === "mistareas") { typeof mostrarVista == "function"')
+R('${o.horaInicio ? " a las " + o.horaInicio : ""}`, ir: { v: "mistareas" } });', '${o.horaInicio ? " a las " + o.horaInicio : ""}`, ir: { v: "mistareas", ot: o.id } });')
 # 3) los módulos nuevos (antes del último script)
 extra = ''.join('<style id="%s">\n%s</style>\n<script id="%s">\n%s</script>\n' % (ci, e[0], sc, e[2]) for (ci, c, sc, j), e in zip(MOD, EXTRA))
 R('<script id="revisarAppDiag">', '<style id="movCss">\n' + css + '</style>\n<script id="movPantallas">\n' + js + '</script>\n' + extra + '<script id="revisarAppDiag">')
