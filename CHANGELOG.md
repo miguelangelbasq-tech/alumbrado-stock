@@ -2,6 +2,49 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v146 — 10/11/2026 (lista, sin publicar) · Cierre del día por voz + pedido de compras automático + tablero del dueño + lo no terminado pasa solo a mañana
+
+**Pedido de Ángel** (10/11/2026, maquetas i3, i4 e i5 aprobadas) y el agregado que pasó de la v145: «durante el día cambian las tareas; lo que no se terminó hoy tiene que pasar al día siguiente y toda la semana se tiene que ir actualizando, automático».
+
+**Base:** ORIGINAL 145 (publicada, `07f40d93…`).
+
+**🎙 Cierre del día por voz** (`cierreVoz` + herramienta `proponer_cierre_dia` en el código dormido del Asistente)
+- Para la oficina o el supervisor (quien edita Órdenes). La cuadrilla no lo tiene: ya manda lo suyo en el Modo obra.
+- Botón «✨ Cerrar el día por voz» en Órdenes › Para revisar y cerrar (y en Hoy) y chip «🎙 Cerrar el día» en el Asistente: abre el Asistente de siempre (dictado en vivo, onda) en «modo cierre», con la franja «🎙 Cierre del día · N órdenes abiertas».
+- Al contexto se le suman las órdenes del día **ya prellenadas** con lo que mandó la cuadrilla (marcas, «no se hizo», pasosObra, horasTarea): la voz solo corrige. Ej.: «Los Álamos se hicieron 4 izajes, Juan 8 horas, Pedro 6, faltó un vínculo, lo pasamos al jueves».
+- La IA llama una sola vez a `proponer_cierre_dia` (por orden: cantidades por tarea, horas por persona, «lo que falta a otro día» con fecha); la app valida y arma la tarjeta **antes → después** con las personas y lo de cada tarea, botón «Sí, cerrar».
+- Con «Sí»: «lo que falta» va por el camino de la v128 (se suma a la orden de ese día de la obra o se arma una nueva con `vieneDe`; `ot.pasadoA`) y cada orden se cierra con el cierre de siempre (`abrirCierreOt` + «Aprobar todo y cerrar» / `guardarCierreOt`: puntos, avance del itemizado, avisos), horas en `cierre.horasPersona`. Lo que no se dijo queda como lo mandó la cuadrilla. Auditoría `asistente_editar` y `ot_pasar_tarea`.
+
+**🧾 Pedido de compras automático** (`pedidoCompras`)
+- Pañol › Lista de compras › tarjeta «🧾 Pedido de compras sugerido» (se arma sola cada día y al abrir) → «Ver el pedido».
+- Entra: lo que está **bajo el mínimo**, lo que **se acabó** (la lista de compras de siempre) y lo que van a necesitar **las obras programadas en los próximos 7 días** (órdenes emitidas y, para la oficina, las sugeridas de la v143): cómputo − max(lo que ya salió, lo que justifica el avance de la v145) − lo apartado para esa obra, contra el **stock libre** (sin lo apartado). Menos lo ya pedido y sin recibir.
+- Por material: cantidad sugerida (editable) con el porqué («para PLAZA LOS ÁLAMOS el jueves 12/11: 8 Un.; hay 0»), último proveedor y último precio **de las entradas** (sin entrada con precio = «sin precio»; no se inventan proveedores ni precios), la unidad con `porUnidad` y la alternativa 🟢 de la v101 si tiene stock.
+- Agrupado por proveedor (y «Sin proveedor anterior»): «📤 Pedido a <proveedor>» = hoja A4 (`hojaPdf`, con QR de la app de siempre) con o sin precios, para mandar por WhatsApp o mail con Compartir. «💾 Guardar el pedido» con «Sí»: resumen en `adjuntos` (`tipo:"pedidoCompra"`, sin precios, como el `remitoRes` de la v138). Cuando entra el remito (entradas del mismo proveedor después del pedido) se ve lo recibido: «📜 Pedidos guardados» ✅ / 🟠 / ⏳.
+- Permisos: quien edita el pañol (pañol, oficina, administración). **Precios solo Administración y Oficina** (el pañol lo ve sin precios).
+
+**📊 Tablero del dueño** (`tableroDueno`)
+- Menú «📊 Tablero del dueño» e Inicio Ejecutivo › Accesos. Solo Administración y quien Ángel habilite («¿Quién más lo ve?» en el mismo tablero, con «Sí, guardar» → `configEquipo/personal.tableroDueno.habilitados`).
+- **La plata y el avance son solo de nuestra zona del contrato** (v144). Portada con el anillo del contrato, obras en curso / atrasadas / terminadas, personas en obra y órdenes de hoy.
+- Tarjetas: certificado (meses cerrados, v145), hecho por certificar, lo que falta del contrato (módulos y $), borrador del mes; ganancia por obra y total (`gastosPro`, sin IVA); plata en material entregado sin avance (v145, con el último precio); órdenes de hoy y mañana, personas en obra, ausencias; avance por obra; módulos del mes por día (órdenes cerradas, sin provisiones); alertas: obras atrasadas (Supervisor / Gantt), fotos dudosas (v144), material sin explicar, órdenes para cerrar, rendimientos que cambiaron (v143) y el gasto del asistente en el mes (v141). Cada tarjeta lleva a su pantalla.
+- Compu (v139): a todo lo ancho, grilla de 3 columnas (2 hasta 1199 px). Celu: tarjetas una abajo de otra, sin scroll de costado.
+- «✨ Resumen de la semana» (solo Administración): pedido corto al asistente con los datos ya calculados (tipo `pregunta`: cuenta para el gasto); la respuesta queda en la tarjeta y en el chat.
+
+**📅 Lo no terminado de hoy pasa solo a mañana** (`pasarManana`)
+- Qué: de cada orden del día, las tareas que «no se hicieron», que no se marcaron o que quedaron a medias (marca, pasosObra o cierre con menos de lo previsto).
+- A dónde: se suma (tarea y cantidad, la gente no cambia) a la **orden ya emitida** de esa obra del próximo día hábil, con `pasadoDe` en la de mañana y `pasadoA` (auto) en la de hoy. Si mañana no hay orden de esa obra → **borrador de la orden sugerida** (no se emite sola). Si la orden de mañana ya está llena según los rendimientos (HH) → «no entra: queda para el <día>» y va al borrador de ese día.
+- Sin duplicar: lo ya pasado (a mano, por voz o antes), lo que ya está en la orden de mañana, lo que sacaron a mano de esa orden y lo deshecho no se vuelve a sumar.
+- Cuándo: a la hora del ajuste (de entrada 18:00) o apenas la oficina cierra la orden de hoy; si nadie abrió la app, la próxima vez que alguien de la oficina la abra (lo del día hábil anterior). El primer aparato de Administración u Oficina toma el turno con una transacción en `configEquipo/salud.pasarManana.<día>` (como el supervisor de la v136): una sola vez.
+- Aviso «📅 Se pasaron N tareas de hoy a mañana: … · ↶ Deshacer · Listo» (y al celu de la oficina); «Deshacer» vuelve todo atrás. Auditoría `sugerida_pasar` (al pasar y al deshacer).
+- Ajuste en Órdenes sugeridas › Ajustes: «Pasar lo no terminado a mañana: automático / preguntarme / no» y la hora (de entrada automático, 18:00). «Preguntarme» muestra la lista con «Sí, pasarlas» / «Ahora no».
+
+**Datos:** `adjuntos` `tipo:"pedidoCompra"`, `configEquipo/personal.tableroDueno.habilitados`, `configEquipo/salud.pasarManana.<día>`, `configEquipo/baremo.sugerida.{pasarModo, pasarHora}`, `ordenesTrabajo.pasadoDe` / `pasadoA.<tarea>.auto`. **Sin reglas nuevas** (verificado con `reglas_stub`: `t_v146` con `REGLAS=1`, 64/64).
+
+**Pruebas:** `t_v146` nueva (PC y celu, 64/64; datos en `datos146.js`, Worker del asistente simulado): cierre por voz (botón y chip, contexto prellenado, tarjeta, dos órdenes cerradas con cantidades y horas por persona, «lo que falta» al jueves en orden nueva; la cuadrilla no lo tiene); pedido de compras (bajo mínimo, obra programada con lo apartado, alternativa 🟢, sin precio sin entrada, por proveedor, hoja A4 con y sin precios, guardar con «Sí», lo recibido con la entrada, lo ya pedido no se repite, pañol sin precios); tablero (datos de la zona, certificado, órdenes hoy y mañana, gente, ausencia, gasto del asistente, el barrio afuera, tarjetas que llevan a su pantalla, resumen de la semana, permisos: oficina habilitada sí / sin habilitar no / pañol y cuadrilla no, sin scroll de costado); lo no terminado (18:00 a la emitida de mañana, borrador sin orden, mañana llena, sin duplicar, aviso, Deshacer, preguntarme, dos aparatos a la vez = una sola vez). Pruebas viejas: `__v146No` (salvo `v146:true` en h.js). Capturas al lado de las maquetas: `capturas/real.jpg` (`herramientas/v146/montar146.py`). **Batería completa** de a 3 con `TZ=America/Argentina/Cordoba` (PC y celu; se cortó por un reinicio del contenedor y se retomó con `correr146b.sh`): todo OK salvo `t_v083` (reemplazada por `t_v084`, como siempre) y `t_v105`, `t_v142`, `t_v143` corridas después de las 21 h de Córdoba (= medianoche UTC): **dan lo mismo con el index de la v145** a la misma hora (7/10, 39/49, 77/78): los datos de esas pruebas arman las fechas en UTC; no es de esta versión. `t_circuito` 16/16 en PC y celu.
+
+**Huellas:** ORIGINAL `70bf1c4a183de6fe0729ecc802cf7bbf0a1b49a10c382c637b46b3069c59d692` · index `3953476ce860db242597c39f36d4449a772942f967f77afe9a2c9bec846f1380` · sello `2026-11-10 21:06 · 213dc6` (todas en `herramientas/v146/huellas.txt`).
+
+**Qué tiene que hacer Ángel:** subir el `index.html` a GitHub. Sin reglas nuevas, sin Worker ni APK nuevo. En Órdenes sugeridas › Ajustes está el modo del pase a mañana (de entrada automático a las 18:00). Si querés que otro vea el tablero del dueño, habilitalo desde el mismo tablero.
+
 ## v145 — 10/11/2026 (publicada en GitHub) · Certificación mensual automática + material contra avance + gente sin tarea + reglas de las cuadrillas + degradé de las acciones + mayúsculas prolijas
 
 **Pedido de Ángel** (10/11/2026, maquetas i1 e i2 aprobadas) y sus agregados del mismo día: «todo el personal de alumbrado tiene que tener una tarea cada día hábil, salvo ausencia o enfermedad»; el degradé de «Calcular materiales» en todo lo que era azul sólido; los nombres en mayúsculas prolijas; mínimo 2 personas en obra, equipos habituales y vínculos sin grúa.
