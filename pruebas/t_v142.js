@@ -143,6 +143,8 @@ const FOTO = __dirname + '/foto.jpg';
     }
   }
   await esperar(() => { const o = window.__stubDB().ordenesTrabajo.ot134, cp = o.campo || {}; return ((cp.tareaEnv || {}).montaje_prfv || {})['Juan Pérez']; }, null, 10000);
+  // v148: las fotos de Modo obra se guardan por atrás (de a una, con la cámara cerrada y sin toques): se espera a que lleguen las 4
+  await esperar(() => { const o = window.__stubDB().ordenesTrabajo.ot134, cp = o.campo || {}; return Object.values(cp.fotos || {}).filter((f) => f.k === 'montaje_prfv').length >= 4; }, null, 60000);
   r = await db(); let cp = r.campo || {};
   const fotosCol = Object.values(cp.fotos || {}).filter((f) => f.k === 'montaje_prfv').map((f) => f.num).sort();
   c(fotosCol.join() === 'Col 5,Col 6,Col 7,Col 8', 'las 4 fotos quedan en campo.fotos con su columna (como Mis tareas) · ' + fotosCol.join());
