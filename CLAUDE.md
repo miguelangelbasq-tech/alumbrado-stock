@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **11/11/2026**, última versión entregada: **v147** sobre la v146 (ver `CHANGELOG.md`; armada en la rama `claude/new-session-3hwmc9`, **todavía no publicada en GitHub Pages**).
+> Estado al **11/11/2026**, última versión entregada: **v147** sobre la v146 (ver `CHANGELOG.md`; **publicada en GitHub Pages** el 11/11 09:53, sello `2026-11-11 08:37 · ce00ac`).
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.

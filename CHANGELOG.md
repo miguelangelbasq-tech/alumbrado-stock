@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v147 — 11/11/2026 (armada en la rama, sin publicar) · Movimiento entre pantallas (opción B) + Mapa de guerra + paso a paso en el celu + informe semanal
+## v147 — 11/11/2026 (publicada en GitHub) · Movimiento entre pantallas (opción B) + Mapa de guerra + paso a paso en el celu + informe semanal
 
 **Pedido de Ángel** (11/11/2026): eligió la opción **B «como app de banco»** de los 3 videos de movimiento; y sumó tres agregados para la misma versión: «🗺 Mapa de guerra» (maqueta compu opción A + celu), que el **paso a paso** de cada tarea le llegue a la cuadrilla, y el **📰 informe semanal automático**.
 
