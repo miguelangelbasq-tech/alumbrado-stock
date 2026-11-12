@@ -1,0 +1,59 @@
+/* v150 · «Lo hecho, verificado»: verificación de la orden, avisos de trabajo repetido y planilla de columnas (diseño V1) */
+.hv-linea{margin:6px 0 2px;padding:7px 10px;border-radius:12px;font-size:12.5px;line-height:1.45;background:rgba(255,159,10,.10);border:1px solid rgba(255,159,10,.25);color:#5c3400}
+.hv-linea.info{background:rgba(30,111,145,.07);border-color:rgba(30,111,145,.2);color:#16384f}
+.hv-linea b{font-weight:800}
+.hv-linea .hv-l{display:block}
+.hv-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700;line-height:1.3;white-space:nowrap}
+.hv-chip.ok{background:rgba(52,199,89,.14);color:#14632b}
+.hv-chip.parcial{background:rgba(255,159,10,.16);color:#6b3a00}
+.hv-chip.nada{background:rgba(255,59,48,.12);color:#a51d15}
+.hv-chip.duda{background:rgba(255,159,10,.22);color:#6b3a00;border:1px dashed rgba(255,159,10,.6)}
+.hv-chip.pend{background:rgba(110,124,147,.14);color:#475569}
+.hv-chip.ver{background:rgba(52,199,89,.2);color:#14632b}
+.hv-tb{margin:8px 0 4px;padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.75);border:1px solid rgba(40,40,94,.08);font-size:12.5px;line-height:1.45;color:var(--text,#0D1424)}
+.hv-tb.rep{background:rgba(255,159,10,.10);border-color:rgba(255,159,10,.3);color:#5c3400}
+.hv-tb .hv-tx{display:block;margin-top:4px;color:var(--text-soft,#475569)}
+.hv-tb.rep .hv-tx{color:#5c3400}
+.hv-acc{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.hv-acc button{width:auto;margin:0;min-height:40px;padding:0 12px;font-size:12.5px}
+.hv-acc .hv-ok{background:var(--verde,#34C759);border-color:var(--verde,#34C759);color:#fff}
+.hv-ta{margin:0 0 10px;padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.8);border:1px solid rgba(40,40,94,.08)}
+.hv-ta h4{margin:0 0 4px;font:800 14.5px/1.3 var(--disp,inherit);display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:space-between}
+.hv-ta .hv-tx{font-size:13px;line-height:1.5;color:var(--text-soft,#475569)}
+.hv-ta .hv-du{margin-top:6px;font-size:12.5px;color:#6b3a00}
+.hv-us{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.hv-u{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:12px;font-weight:700;font-family:var(--mono,inherit)}
+.hv-u.si{background:rgba(52,199,89,.14);color:#14632b}.hv-u.no{background:rgba(255,59,48,.1);color:#a51d15}.hv-u.du{background:rgba(255,159,10,.18);color:#6b3a00}
+.hv-res{margin:0 0 12px;padding:10px 12px;border-radius:16px;font-size:13.5px;line-height:1.45}
+.hv-res.ok{background:rgba(52,199,89,.1);color:#14632b}.hv-res.parcial,.hv-res.duda{background:rgba(255,159,10,.12);color:#6b3a00}.hv-res.nada{background:rgba(255,59,48,.09);color:#a51d15}.hv-res.pend{background:rgba(110,124,147,.1);color:#475569}
+.hv-pie{font-size:12px;color:var(--text-3,#6E7C93);margin-top:8px;line-height:1.4}
+tr.hv-cie>td{padding-top:0!important}
+.hv-cie{margin:0 0 6px;padding:7px 10px;border-radius:12px;background:rgba(30,111,145,.07);border:1px solid rgba(30,111,145,.18);font-size:12.5px;line-height:1.45;color:#16384f}
+/* planilla de columnas */
+.hv-pl{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0 4px;max-width:100%}
+.hv-grid{border-collapse:separate;border-spacing:3px;font-size:12px;min-width:100%}
+.hv-grid th{font:700 11px/1.2 var(--mono,inherit);color:var(--text-3,#6E7C93);text-transform:uppercase;letter-spacing:.02em;padding:2px 3px;text-align:center;white-space:nowrap}
+.hv-grid th.col{text-align:left}
+.hv-grid td{padding:0}
+.hv-c{display:block;width:100%;min-width:34px;min-height:34px;margin:0;padding:0;border-radius:8px;border:1px solid rgba(40,40,94,.08);background:rgba(110,124,147,.10);cursor:pointer;font:700 11px var(--mono,inherit);color:#475569}
+.hv-c.ver{background:#34C759;border-color:#2aa84a;color:#fff}
+.hv-c.sinver{background:rgba(30,111,145,.18);border-color:rgba(30,111,145,.45);color:#16384f}
+.hv-c.no{background:rgba(255,59,48,.16);border-color:rgba(255,59,48,.5);color:#a51d15}
+.hv-c.asig{background:rgba(255,159,10,.18);border-color:rgba(255,159,10,.5);color:#6b3a00}
+.hv-c:focus-visible{outline:3px solid var(--navy-2,#1F5F86);outline-offset:1px}
+.hv-ley{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--text-soft,#475569);margin:6px 0 2px}
+.hv-ley i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-2px;margin-right:4px;border:1px solid rgba(40,40,94,.12)}
+.hv-ley i.ver{background:#34C759}.hv-ley i.sinver{background:rgba(30,111,145,.3)}.hv-ley i.no{background:rgba(255,59,48,.3)}.hv-ley i.asig{background:rgba(255,159,10,.35)}.hv-ley i.falta{background:rgba(110,124,147,.14)}
+.hv-det{margin-top:8px;padding:10px 12px;border-radius:14px;background:#fff;border:1px solid rgba(40,40,94,.1);font-size:13px;line-height:1.5}
+.hv-det img{display:block;max-width:140px;border-radius:10px;margin-top:6px}
+.hv-sd{font-size:12px;color:var(--text-soft,#475569);margin-top:4px}
+.mg-hv{margin:8px 0 2px}
+.mg-hv .hv-c{min-width:22px;min-height:22px;border-radius:6px;font-size:0}
+/* Modo obra de la cuadrilla */
+.cd-hv{margin:8px 16px 0;padding:10px 12px;border-radius:16px;background:rgba(255,159,10,.14);border:1px solid rgba(255,159,10,.35);color:#5c3400;font-size:13.5px;line-height:1.45}
+#cdApp .cd-hv button{display:inline-block;width:auto;margin:8px 0 0;min-height:40px;padding:0 12px;border-radius:12px;border:1px solid rgba(107,58,0,.3);background:#fff;color:#5c3400;font:inherit;font-weight:700;cursor:pointer}
+/* aviso del parte del día */
+#hvParte{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:9600;max-width:520px;margin:0 auto;padding:12px 14px;border-radius:18px;background:#fff;box-shadow:0 10px 34px rgba(13,20,36,.22);border:1px solid rgba(40,40,94,.1);font-size:13.5px;line-height:1.45;display:flex;gap:10px;align-items:center}
+#hvParte .tx{flex:1;min-width:0}
+#hvParte button{width:auto;margin:0;min-height:40px;padding:0 12px;flex:none}
+@media (max-width:640px){.hv-acc button{flex:1 1 auto}#hvParte{bottom:calc(92px + env(safe-area-inset-bottom,0px))}}
