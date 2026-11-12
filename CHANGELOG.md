@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v149b — 12/11/2026 (urgente, armada, sin publicar) · Las fotos de la cuadrilla no se pierden nunca + copia en el celu + mandar lo hecho
+## v149b — 12/11/2026 (urgente, publicada en GitHub) · Las fotos de la cuadrilla no se pierden nunca + copia en el celu + mandar lo hecho
 
 **Pedido de Ángel** (12/11/2026): «los chicos están teniendo problemas con las fotos: no pueden enviar y entonces se les pierden. Aparte de enviarse en la app, tendría que poder hacer que se les descarguen en el cel automáticamente al mismo tiempo». Capturas: Bruno (11/11 16:36, con 4G) con «Esperando señal · 11 fotos + 23 cambios» y «⏳ 11 fotos esperando señal»; Franco (OT-2026-218 LAS TABLITAS) con «1 de 10 hechas · Todavía nadie envió» que «no puede cerrar la orden».
 
