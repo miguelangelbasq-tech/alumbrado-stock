@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v149 — 12/11/2026 (armada, sin publicar) · El micrófono del Asistente ya no se apaga solo + el Asistente más rápido
+## v149 — 12/11/2026 (publicada en GitHub) · El micrófono del Asistente ya no se apaga solo + el Asistente más rápido
 
 **Pedido de Ángel** (12/11/2026, hablándole al Asistente desde el celu): «cuando pongo el micrófono, así como estoy hablando ahora, al ratito se destilda. No sé por qué pasa. Y está muy lenta, no sé si se puede hacer algo». Precisión después: «tendría que ser como el micrófono de Claude: yo hablo y se va escribiendo, y se destilda recién cuando yo aprieto».
 
