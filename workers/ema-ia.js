@@ -1,4 +1,8 @@
 // Worker «ema-ia» (Cloudflare) · Pase seguro entre la app y Claude para el «Asistente EMA» — EMA Servicios.
+// v4-ia (v149): respuesta que se va mostrando mientras llega («stream»). Si la app manda  stream: true, el pedido va a
+// Claude con stream y el Worker reenvía los eventos (SSE) tal cual, a medida que llegan. Al terminar suma el costo igual que
+// siempre (con el «usage» que viene en los eventos) y agrega un último evento  «event: ema»  con {costoUsd, modelo, version,
+// uso, freno}. Mismos topes, roles y freno del mes que la v3. Sin stream, todo igual que antes. /salud dice stream:true.
 // v3-ia (v141): topes por persona y por día según el ROL que dice la base (no el que manda la app), preguntas y remitos
 // contados aparte, freno del gasto del mes (pausa al 80 % y corte al 95 % de 100 USD, configurable) y las rutas
 // GET /uso (Administración y Oficina) y GET /mio (cuánto le queda a cada uno).
@@ -42,9 +46,9 @@
 //  · tool_choice solo «auto» o «none» (forzar una herramienta da 400);
 //  · «fallbacks: "default"» + cabecera anthropic-beta server-side-fallback-2026-07-01: si Claude rechaza el pedido por sus
 //    filtros, el servidor lo reintenta solo con el modelo que recomienda. (Haiku no tiene respaldo: ahí no se manda.)
-// Sin SDK y sin streaming: es un fetch directo, para poder pegarlo a mano en el panel de Cloudflare.
+// Sin SDK: es un fetch directo, para poder pegarlo a mano en el panel de Cloudflare (desde la v4 con stream opcional).
 
-const VERSION = "v3-ia";
+const VERSION = "v4-ia";
 
 const PROYECTO = "alumbrado-stock";
 const API_URL = "https://api.anthropic.com/v1/messages";
@@ -288,7 +292,9 @@ function armarPedido(b) {
     if (M.respaldo) { p.fallbacks = "default"; betas.push(BETA_RESPALDO); }
   }
   if (Array.isArray(b.betas)) b.betas.forEach((x) => { if (BETAS_OK.includes(x) && !betas.includes(x) && (x !== BETA_RESPALDO || p.fallbacks)) betas.push(x); });
-  // «thinking», temperature, top_p, top_k, stream, metadata y todo lo demás NO pasan.
+  // v4: stream solo si viene exactamente true (la respuesta se reenvía como eventos SSE)
+  if (b.stream === true) p.stream = true;
+  // «thinking», temperature, top_p, top_k, metadata y todo lo demás NO pasan.
   return { p, betas };
 }
 
@@ -387,6 +393,7 @@ async function pedidoIa(request, env, origen) {
     const cab = { "Content-Type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": API_VERSION };
     if (bb && bb.length) cab["anthropic-beta"] = bb.join(",");
     const rr = await fetch(API_URL, { method: "POST", headers: cab, body: JSON.stringify(pp) });
+    if (pp.stream && rr.ok && /event-stream/i.test(rr.headers.get("Content-Type") || "")) return { rr, jj: { __stream: true } };   // v4: se reenvía tal cual
     let jj = null; try { jj = await rr.json(); } catch (e) { jj = null; }
     return { rr, jj };
   };
@@ -415,8 +422,9 @@ async function pedidoIa(request, env, origen) {
     return json(res, s, origen);
   }
   // cuentas: la persona (día) y el gasto del mes (lo que costó, aunque sea el supervisor)
-  const costo = costoDe(j.model && (MODELOS[j.model] || PRECIO_RESPALDO[j.model]) ? j.model : p.model, j.usage);
   await contarPedido(true);
+  const cuentas = async (modeloResp, usage) => {
+  const costo = costoDe(modeloResp && (MODELOS[modeloResp] || PRECIO_RESPALDO[modeloResp]) ? modeloResp : p.model, usage);
   const G2 = await leerMes(env, mes); // se vuelve a leer: puede haber cambiado mientras Claude contestaba
   G2.usd = r6(G2.usd + costo);
   const parte = tipo === "remito" ? "remitos" : tipo === "supervisor" ? "supervisor" : "preguntas";
@@ -433,13 +441,57 @@ async function pedidoIa(request, env, origen) {
   await guardadoPoner(env, "g:" + mes, G2, 40 * 86400);
   const qHoy = D.q + (nueva ? 1 : 0), rHoy = D.r + (tipo === "remito" ? 1 : 0);
   const of = rol === "admin" || rol === "oficina";
-  // la respuesta va tal cual (también los bloques «thinking» y «fallback», que la app devuelve sin tocar)
-  j.ema = {
-    costoUsd: costo, modelo: j.model || p.model, version: VERSION,
+  return {
+    costoUsd: costo, modelo: modeloResp || p.model, version: VERSION,
     uso: { rol, tipo, preguntasHoy: qHoy, topePreguntas: tq, remitosHoy: rHoy, topeRemitos: tr, quedanPreguntas: tq == null ? null : Math.max(0, tq - qHoy), quedanRemitos: tr == null ? null : Math.max(0, tr - rHoy) },
     freno: Object.assign({ nivel: nv2.nivel, avisar }, of || avisar ? { gastoMes: G2.usd, tope: L.mes.tope, pausa: nv2.pausa, corte: nv2.corte } : {}),
   };
+  };
+  if (j.__stream) return reenviarStream(r, cuentas, origen);   // v4
+  // la respuesta va tal cual (también los bloques «thinking» y «fallback», que la app devuelve sin tocar)
+  j.ema = await cuentas(j.model, j.usage);
   return json(j, 200, origen);
+}
+
+// ---------- v4: reenviar los eventos de Claude (SSE) tal cual y, al final, sumar el costo y mandar «event: ema»
+// El «usage» llega repartido: message_start trae la entrada (y la caché) y message_delta la salida (y, con el respaldo del
+// servidor, iterations). Se van juntando; si llega un segundo message_start (reintento del respaldo) se suma aparte.
+function juntarUsage(a, b) {
+  if (!b) return a;
+  const o = Object.assign({}, a);
+  ["input_tokens", "output_tokens", "cache_read_input_tokens", "cache_creation_input_tokens"].forEach((k) => { if (b[k] != null) o[k] = +b[k] || 0; });
+  if (Array.isArray(b.iterations) && b.iterations.length) o.iterations = b.iterations;
+  return o;
+}
+function reenviarStream(r, cuentas, origen) {
+  const dec = new TextDecoder();
+  let resto = "", modelo = "", usage = {}, previos = [];
+  const leerLinea = (l) => {
+    if (l.indexOf("data:") !== 0) return;
+    let d = null; try { d = JSON.parse(l.slice(5).trim()); } catch (e) { return; }
+    if (!d || typeof d != "object") return;
+    if (d.type === "message_start" && d.message) {
+      if (usage.input_tokens != null || usage.output_tokens != null) previos.push({ model: modelo, u: usage });   // reintento: lo anterior también se cobra
+      modelo = d.message.model || modelo; usage = juntarUsage({}, d.message.usage);
+    } else if (d.type === "message_delta" && d.usage) usage = juntarUsage(usage, d.usage);
+  };
+  const ts = new TransformStream({
+    transform(chunk, ctl) {
+      ctl.enqueue(chunk);
+      resto += dec.decode(chunk, { stream: true });
+      const ls = resto.split(/\r?\n/); resto = ls.pop();
+      ls.forEach(leerLinea);
+    },
+    async flush(ctl) {
+      if (resto) leerLinea(resto);
+      let u = usage;
+      if (previos.length && !(Array.isArray(u.iterations) && u.iterations.length)) u = Object.assign({}, u, { iterations: previos.map((x) => Object.assign({ model: x.model }, x.u)).concat([Object.assign({ model: modelo }, usage)]) });
+      let ema = null;
+      try { ema = await cuentas(modelo, u); } catch (e) { ema = { version: VERSION, costoUsd: 0, error: "no se pudo contar" }; }
+      ctl.enqueue(enc.encode("event: ema\ndata: " + JSON.stringify(ema) + "\n\n"));
+    },
+  });
+  return new Response(r.body.pipeThrough(ts), { status: 200, headers: { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-store", "X-Accel-Buffering": "no", ...cabCors(origen) } });
 }
 
 // ---------- GET /uso: el gasto del mes y por persona (solo Administración y Oficina, por el rol que dice la base)
@@ -470,7 +522,7 @@ export default {
     try {
       if (u.pathname === "/salud" && request.method === "GET") {
         const L = (await guardadoLeer(env, "cfg:limites")) || limitesBase(env), G = await leerMes(env, mesAr());
-        return json({ ok: true, version: VERSION, modelos: Object.keys(MODELOS), respaldo: true, clave: !!env.ANTHROPIC_API_KEY, kv: !!env.IA_KV, gastoMes: r6(G.usd), tope: L.mes.tope, ...(env.IA_KV ? {} : { aviso: "Sin KV: los topes y el gasto del mes se cuentan en memoria (aproximado)." }) }, 200, origen);
+        return json({ ok: true, version: VERSION, stream: true, modelos: Object.keys(MODELOS), respaldo: true, clave: !!env.ANTHROPIC_API_KEY, kv: !!env.IA_KV, gastoMes: r6(G.usd), tope: L.mes.tope, ...(env.IA_KV ? {} : { aviso: "Sin KV: los topes y el gasto del mes se cuentan en memoria (aproximado)." }) }, 200, origen);
       }
       if (origen && !ORIGENES.includes(origen)) return error("origen", "Origen no permitido.", 403, origen);
       if (u.pathname === "/ia") {
@@ -487,4 +539,4 @@ export default {
   },
 };
 
-export { costoDe, armarPedido, MODELOS, clasificar, esNueva, mezclar, limitesBase };
+export { costoDe, juntarUsage, armarPedido, MODELOS, clasificar, esNueva, mezclar, limitesBase };

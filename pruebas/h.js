@@ -88,6 +88,7 @@ async function abrir(op = {}) {
   if (!op.v146) await page.addInitScript(() => { window.__v146No = true; });   // v146: las pruebas viejas no ven el cierre por voz, el pedido de compras, el tablero del dueño ni el pase automático a mañana; v146:true los prueba
   if (!op.mov) await page.addInitScript(() => { window.__movNo = true; });   // v147: las pruebas viejas no ven el movimiento entre pantallas (cambio al instante, mismos tiempos); mov:true lo prueba
   if (!op.v147) await page.addInitScript(() => { window.__v147No = true; });   // v147: las pruebas viejas no ven el Mapa de guerra, el informe semanal ni los pasos nuevos de la cuadrilla; v147:true los prueba
+  if (!op.v149) await page.addInitScript(() => { window.__v149No = true; });   // v149: las pruebas viejas tienen el micrófono de antes (termina con el motor), sin respuesta en vivo ni effort más liviano; v149:true los prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];

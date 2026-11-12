@@ -1,6 +1,6 @@
 // Prueba del Worker «ema-ia» en Node (sin internet): simula las claves de Google, Firestore (REST) y la API de Claude.
 // Correr:  node workers/probar_ema_ia.mjs
-import worker, { costoDe } from "./ema-ia.js";
+import worker, { costoDe, juntarUsage } from "./ema-ia.js";
 
 const CLAVE_FALSA = "sk-ant-PRUEBA-no-es-real-1234567890";
 const ORIGEN = "https://miguelangelbasq-tech.github.io";
@@ -70,7 +70,7 @@ const base = (extra = {}) => ({ model: "claude-haiku-5-5", max_tokens: 1000, mes
 // ---------- /salud
 {
   const { r, j } = await pedir("/salud", { metodo: "GET" });
-  prueba("/salud responde 200 con versión v3-ia, los modelos, gastoMes y tope", r.status === 200 && j.ok && j.version === "v3-ia" && j.gastoMes === 0 && j.tope === 100 && j.modelos.includes("claude-fable-5-2") && j.modelos.includes("claude-opus-5-5"));
+  prueba("/salud responde 200 con versión v4-ia, stream:true, los modelos, gastoMes y tope", r.status === 200 && j.ok && j.version === "v4-ia" && j.stream === true && j.gastoMes === 0 && j.tope === 100 && j.modelos.includes("claude-fable-5-2") && j.modelos.includes("claude-opus-5-5"));
   prueba("/salud dice clave:true y kv:false (con aviso)", j.clave === true && j.kv === false && !!j.aviso);
   const s2 = await pedir("/salud", { metodo: "GET", e: {} });
   prueba("/salud sin secret dice clave:false", s2.j.clave === false);
@@ -115,14 +115,14 @@ const base = (extra = {}) => ({ model: "claude-haiku-5-5", max_tokens: 1000, mes
 {
   const t = await firmar(cuerpoToken("uid-bueno"));
   const { r, j } = await pedir("/ia", { token: t, cuerpo: base({
-    max_tokens: 99999, temperature: 0.2, top_p: 0.9, stream: true, metadata: { user_id: "x" }, thinking: { type: "disabled" }, betas: ["x"],
+    max_tokens: 99999, temperature: 0.2, top_p: 0.9, stream: "si", metadata: { user_id: "x" }, thinking: { type: "disabled" }, betas: ["x"],
     system: "Sos el asistente de EMA.", tools: [{ name: "buscar_obra", description: "Busca", input_schema: { type: "object", properties: {} } }],
     tool_choice: { type: "auto" }, output_config: { effort: "low", format: { type: "json_schema" } }, cache_control: { type: "ephemeral" },
   }) });
   prueba("pedido bueno → 200 con la respuesta de Claude", r.status === 200 && j.content[0].text === "Hola Ángel" && j.id === "msg_1");
   const b = ultimoPedido.body;
   prueba("max_tokens recortado a 4000", b.max_tokens === 4000);
-  prueba("campos extra descartados (temperature, top_p, stream, metadata, thinking, betas)", ["temperature", "top_p", "stream", "metadata", "thinking", "betas"].every((k) => !(k in b)));
+  prueba("campos extra descartados (temperature, top_p, stream que no sea true, metadata, thinking, betas)", ["temperature", "top_p", "stream", "metadata", "thinking", "betas"].every((k) => !(k in b)));
   prueba("output_config solo con effort", JSON.stringify(b.output_config) === JSON.stringify({ effort: "low" }));
   prueba("pasan model, system, messages, tools, tool_choice, cache_control", b.model === "claude-haiku-5-5" && b.system && b.messages.length === 1 && b.tools.length === 1 && b.tool_choice.type === "auto" && b.cache_control.type === "ephemeral");
   prueba("solo campos permitidos en el pedido", Object.keys(b).every((k) => ["model", "system", "messages", "tools", "tool_choice", "max_tokens", "output_config", "cache_control"].includes(k)));
@@ -256,7 +256,7 @@ const tk = (uid, extra) => firmar(cuerpoToken(uid, extra));
   const l0 = lecturasFs, t = await tk("c-1");
   let r = await pedir("/ia", { token: t, cuerpo: pregunta(), e: E });
   prueba("v3: el Worker lee usuarios/{uid} y configEquipo/personal por REST con el MISMO token de la persona", r.r.status === 200 && lecturasFs - l0 === 2 && tokensFs.slice(-2).every((x) => x === "Bearer " + t));
-  prueba("v3: la respuesta trae ema.version v3-ia y el uso del día (rol cuadrilla, 1 de 10)", r.j.ema.version === "v3-ia" && r.j.ema.uso.rol === "cuadrilla" && r.j.ema.uso.preguntasHoy === 1 && r.j.ema.uso.topePreguntas === 10 && r.j.ema.uso.quedanPreguntas === 9 && !("gastoMes" in r.j.ema.freno));
+  prueba("v3: la respuesta trae ema.version v4-ia y el uso del día (rol cuadrilla, 1 de 10)", r.j.ema.version === "v4-ia" && r.j.ema.uso.rol === "cuadrilla" && r.j.ema.uso.preguntasHoy === 1 && r.j.ema.uso.topePreguntas === 10 && r.j.ema.uso.quedanPreguntas === 9 && !("gastoMes" in r.j.ema.freno));
   await pedir("/ia", { token: t, cuerpo: pregunta(), e: E });
   prueba("v3: el rol y los límites quedan guardados (no vuelve a leer la base en el pedido siguiente)", lecturasFs - l0 === 2 && E.IA_KV.get && JSON.parse(E.kv.get("rol:c-1")).rol === "cuadrilla");
   // ---- topes por rol y día: cuadrilla 10 (con 2 hechas: 8 más pasan, la 11.ª no)
@@ -342,7 +342,7 @@ const tk = (uid, extra) => firmar(cuerpoToken(uid, extra));
   const ra = await pedir("/ia", { token: await tk("a-1"), cuerpo: pregunta(), e: E });
   prueba("v3: a los 95 USD se corta para todos menos Administración («Se renueva el día 1»)", r.r.status === 429 && r.j.error.tipo === "tope_mes" && r.j.error.mensaje === "El asistente llegó al tope de gasto del mes. Se renueva el día 1." && ra.r.status === 200);
   const s = await pedir("/salud", { metodo: "GET", e: E });
-  prueba("/salud muestra gastoMes y tope", s.j.version === "v3-ia" && s.j.gastoMes >= 95 && s.j.tope === 100 && s.j.kv === true);
+  prueba("/salud muestra gastoMes y tope", s.j.version === "v4-ia" && s.j.gastoMes >= 95 && s.j.tope === 100 && s.j.kv === true);
   // reinicio de mes
   const real = Date.now, mas = 32 * 86400e3; Date.now = () => real() + mas;
   try {
@@ -392,6 +392,48 @@ const tk = (uid, extra) => firmar(cuerpoToken(uid, extra));
   const t = await tk("c-2");
   const a = await pedir("/ia", { token: t, cuerpo: pregunta(), e: E }), b = await pedir("/ia", { token: t, cuerpo: pregunta(), e: E });
   prueba("v3: si el KV no deja escribir, el asistente contesta igual y cuenta en memoria", a.r.status === 200 && b.r.status === 200 && b.j.ema.uso.preguntasHoy === a.j.ema.uso.preguntasHoy + 1);
+}
+
+// ---------- v4-ia (v149): stream
+{
+  const E = { ...env, IA_POR_MINUTO: "500" };
+  const ev = (o) => "event: " + o.type + "\ndata: " + JSON.stringify(o) + "\n\n";
+  const sse = (partes, cortes) => {
+    const tx = partes.map(ev).join(""), enc = new TextEncoder();
+    const trozos = []; let i = 0; for (const n of cortes) { trozos.push(tx.slice(i, i + n)); i += n; } trozos.push(tx.slice(i));
+    return new Response(new ReadableStream({ async start(c) { for (const x of trozos) { c.enqueue(enc.encode(x)); await new Promise((ok) => setTimeout(ok, 2)); } c.close(); } }), { status: 200, headers: { "Content-Type": "text/event-stream" } });
+  };
+  const EVS = (model) => [
+    { type: "message_start", message: { id: "msg_s", type: "message", role: "assistant", model, content: [], stop_reason: null, usage: { input_tokens: 1000, cache_read_input_tokens: 2000, cache_creation_input_tokens: 0, output_tokens: 1 } } },
+    { type: "content_block_start", index: 0, content_block: { type: "text", text: "" } },
+    { type: "ping" },
+    { type: "content_block_delta", index: 0, delta: { type: "text_delta", text: "Hola " } },
+    { type: "content_block_delta", index: 0, delta: { type: "text_delta", text: "Ángel" } },
+    { type: "content_block_stop", index: 0 },
+    { type: "message_delta", delta: { stop_reason: "end_turn", stop_sequence: null }, usage: { output_tokens: 500 } },
+    { type: "message_stop" },
+  ];
+  let visto = null;
+  respuestaClaude = (init, b) => { visto = b; return b.stream ? sse(EVS(b.model), [7, 50, 3, 120]) : null; };
+  const t = await tk("uid-stream");
+  const { r, tx } = await pedir("/ia", { token: t, cuerpo: base({ stream: true }), e: E });
+  prueba("v4: stream:true pasa a Claude", visto && visto.stream === true);
+  prueba("v4: la respuesta es text/event-stream con los eventos de Claude tal cual (en orden)", r.status === 200 && /event-stream/.test(r.headers.get("Content-Type")) && tx.indexOf(ev(EVS("claude-haiku-5-5")[3])) > 0 && tx.indexOf("message_stop") < tx.indexOf("event: ema") && r.headers.get("Access-Control-Allow-Origin") === ORIGEN);
+  const m = /event: ema\ndata: (.+)\n\n$/.exec(tx), ema = m ? JSON.parse(m[1]) : null;
+  prueba("v4: al final, «event: ema» con el costo calculado igual que sin stream (0,00037) y la versión", ema && Math.abs(ema.costoUsd - 0.00037) < 1e-9 && ema.version === "v4-ia" && ema.uso && ema.uso.preguntasHoy === 1 && ema.modelo === "claude-haiku-5-5");
+  const r2 = await pedir("/ia", { token: t, cuerpo: base({ stream: true }), e: E });
+  respuestaClaude = null;
+  const m2 = /event: ema\ndata: (.+)\n\n$/.exec(r2.tx), e2 = m2 ? JSON.parse(m2[1]) : null;
+  prueba("v4: con stream también cuenta las preguntas del día (2.ª)", e2 && e2.uso.preguntasHoy === 2);
+  // error 400 con stream: JSON como siempre (con los reintentos de la v2b)
+  respuestaClaude = () => new Response(JSON.stringify({ type: "error", error: { type: "invalid_request_error", message: "algo mal" } }), { status: 400, headers: { "Content-Type": "application/json" } });
+  const r3 = await pedir("/ia", { token: t, cuerpo: base({ stream: true }), e: E });
+  respuestaClaude = null;
+  prueba("v4: un error con stream vuelve como JSON {error:{tipo, mensaje}}", r3.r.status === 400 && r3.j && r3.j.error && r3.j.error.tipo === "pedido");
+  prueba("v4: juntarUsage junta la entrada de message_start con la salida de message_delta", JSON.stringify(juntarUsage(juntarUsage({}, { input_tokens: 5, output_tokens: 1 }), { output_tokens: 9 })) === JSON.stringify({ input_tokens: 5, output_tokens: 9 }));
+  // sin stream, igual que antes
+  const r4 = await pedir("/ia", { token: t, cuerpo: base(), e: E });
+  prueba("v4: sin stream la respuesta sigue siendo JSON con ema", r4.r.status === 200 && r4.j.content[0].text === "Hola Ángel" && r4.j.ema.version === "v4-ia");
 }
 
 // ---------- la clave nunca aparece
