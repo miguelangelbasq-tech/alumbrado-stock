@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v150 — 12/11/2026 (armada, sin publicar) · «Lo hecho, verificado»: la app sabe qué se hizo en cada columna y avisa antes de repetirlo
+## v150 — 12/11/2026 (publicada en GitHub) · «Lo hecho, verificado»: la app sabe qué se hizo en cada columna y avisa antes de repetirlo
 
 **Pedido de Ángel** (12/11/2026): «yo hoy doy una OT, los chicos la hacen; por ahí son tres columnas y hacen dos. La IA lo ve, me dice "está bien, esta tarea está cumplida (2 de 3)". Y si mañana hago otra orden de la misma obra me tiene que decir "eso ya se hizo", que ya lo haya verificado. Y hoy puse una tarea en una plaza que ya la habían hecho ayer: si lo hubiera verificado, me lo hubiera dicho». Agregado: «si podés aportar y mejorar lo que busco, mejor».
 

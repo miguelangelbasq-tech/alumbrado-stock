@@ -1,7 +1,7 @@
 # CLAUDE.md — App «Alumbrado Público» de EMA Servicios
 
 > Contexto completo para Claude Code. Leelo entero antes de tocar nada.
-> Estado al **12/11/2026**: **v150** («Lo hecho, verificado») sobre la v149b, **armada, sin publicar** (ver `CHANGELOG.md`; `herramientas/v150/`, sello `2026-11-12 11:24 · 42ca6e`). La **v149b** (fotos de la cuadrilla) está **publicada en GitHub Pages** (sello `2026-11-12 09:45 · 58ccbe`); el Worker `ema-ia` v4-ia lo tiene que pegar Ángel. La v150 se arma con `herramientas/v150/patch_v150.py` (reemplazos chicos + un módulo antes de `revisarAppDiag`): se reaplica sobre otra base con `--otra-base`.
+> Estado al **12/11/2026**: **v150** («Lo hecho, verificado») sobre la v149b, **publicada en GitHub (12/11 11:40)** (ver `CHANGELOG.md`; `herramientas/v150/`, sello `2026-11-12 11:24 · 42ca6e`). La **v149b** (fotos de la cuadrilla) estaba publicada (sello `2026-11-12 09:45 · 58ccbe`); el Worker `ema-ia` v4-ia lo tiene que pegar Ángel. La v150 se arma con `herramientas/v150/patch_v150.py` (reemplazos chicos + un módulo antes de `revisarAppDiag`): se reaplica sobre otra base con `--otra-base`.
 > Autor de la app: Miguel Ángel Díaz («Ángel»), de EMA Servicios. En la pantalla de la app el autor queda oculto.
 > Si algo de este archivo no coincide con el código, **manda el código**. Avisale a Ángel y corregí este archivo.
 > **Skill del proyecto:** `.claude/skills/ema-app-alumbrado/` (forma de trabajar + diseño «Cristal» con los valores reales). Para pantallas nuevas, usá las piezas del tema (`.card`, `.btn-primary`, `.btn-ghost`, `.chip`, `.subtabs`) y las variables: ver `references/diseno-cristal.md`.
