@@ -231,7 +231,7 @@ const FOTO = __dirname + '/foto.jpg';
   c(/Sin señal/.test(r), 'sin señal: la tarjeta naranja aparece arriba (Modo obra / fin del día) · ' + r);
   await toca('#cdApp [data-cd="senal"]', 1200);
   r = await tx('#cdApp');
-  c(/Sin señal: todo se guarda en el celu/.test(r) && /Podés seguir trabajando/.test(r) && /Probar ahora/.test(r), 'pantalla «Sin señal»: franja, cola de lo que espera y «Probar ahora»');
+  c(/Sin señal: todo se guarda en el celu/.test(r) && /Podés seguir trabajando/.test(r) && /Reintentar ahora/.test(r), 'pantalla «Sin señal»: franja, cola de lo que espera y «Reintentar ahora» (v149b: antes «Probar ahora»)');
   await shot(q, '22_sin_senal');
   await J.ctx.setOffline(false); await q.evaluate(() => window.dispatchEvent(new Event('online')));
   r = await q.evaluate(() => window.__permToasts);

@@ -2,6 +2,48 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v149b — 12/11/2026 (urgente, armada, sin publicar) · Las fotos de la cuadrilla no se pierden nunca + copia en el celu + mandar lo hecho
+
+**Pedido de Ángel** (12/11/2026): «los chicos están teniendo problemas con las fotos: no pueden enviar y entonces se les pierden. Aparte de enviarse en la app, tendría que poder hacer que se les descarguen en el cel automáticamente al mismo tiempo». Capturas: Bruno (11/11 16:36, con 4G) con «Esperando señal · 11 fotos + 23 cambios» y «⏳ 11 fotos esperando señal»; Franco (OT-2026-218 LAS TABLITAS) con «1 de 10 hechas · Todavía nadie envió» que «no puede cerrar la orden».
+
+**Base:** ORIGINAL 149 (publicada, `982151ad…`). Es una versión aparte de la v150 (que se arma sobre la v149): la v150 tiene que reaplicarse sobre la v149b (`--otra-base`).
+
+**Por qué no se enviaban (con internet decía «esperando señal»)** — la captura de Bruno es de las 16:36 del 11/11, **antes de la v148**:
+- Cuando la base (plan gratis Spark) llega al **cupo del día**, Firestore **no rechaza** las escrituras: las deja pendientes y las reintenta solo para siempre. La app solo sabía «se guardó» o «tardó» y todo lo que tarda lo mostraba como «sin señal» (`fotosSinSenal`, la cola de cambios y la franja de la cuadrilla).
+- Encima, la cola de fotos **volvía a mandar cada minuto TODAS las fotos pendientes** (una escritura nueva por foto por minuto, con la imagen adentro si la nube había fallado): una tormenta que se suma al cupo, que hace que al día siguiente vuelva a agotarse rápido y que llena la memoria del celu. (La cola de cambios ya no repetía: tenía su candado desde la v102.)
+
+**Por qué se perdían**
+- **v148, Modo obra por atrás:** ante cualquier error que no fuera de permiso o de señal (la base contestó otra cosa, el celu no pudo procesar la imagen, la orden no estaba en memoria) **borraba la copia del celu** y decía «sacala de nuevo»; había **un solo intento**, sin reintentos; y una foto que se colgaba **frenaba a todas las de atrás** (la fila era de a una y sin tope).
+- **Cámara de la barra y Mis tareas clásica:** no tenían ninguna copia: un error así = foto perdida («⚠ No se pudo guardar la foto: probá de nuevo»).
+- Con el usuario **sin vincular** (o la orden de otro) las fotos sí quedaban en el celu, pero Modo obra no decía nada y la oficina no se enteraba.
+- Reproducido con el arnés: error de la base 2 veces (antes: 2 de 3 perdidas), cerrar la app antes de subir, sin señal, nube caída, usuario sin vincular con las reglas reales, orden cerca de 1 MB, cupo agotado (REST 429 + escrituras colgadas).
+
+**Arreglo: ninguna foto se pierde** (módulo nuevo `fotosSeguras`, `window.__fotoBandeja`)
+- Cada foto que pasa por `guardarFotoObra` (Modo obra, cámara de la barra, Mis tareas, seguridad, legajo) queda **copiada en el celu** (IndexedDB `ema-fotos-crudas`) antes de intentar subirla, con su número (`adjId`) fijado de entrada (viaja hasta la cola `ema-fotos-cola`: reintentar no duplica la foto). La copia se borra **recién** cuando la ficha está en la base (ya no está en la cola de fotos) y la orden la tiene anotada (ya no está en la cola de cambios).
+- Si algo falla: «📥 La foto quedó guardada en el celu y se sube sola», **reintentos sin fin** con espera creciente (30 s → 10 min), al volver la señal, al abrir la app y al volver a la app; nunca se descarta. Las que quedaron cuando Android cerró la app se suben solas al abrir y se anotan en su orden (con la miniatura).
+- Modo obra: la fila de «por atrás» espera como mucho 90 s a que la cámara esté cerrada y una foto trabada no frena a las demás (tope 160 s). «Foto guardada» dice «Guardada · subiendo…» y recién «✓ Subida» cuando está en la base.
+- La cola de fotos **no vuelve a mandar** lo que ya está en camino.
+
+**El motivo real** (`window.__senalReal`)
+- Con cosas esperando y «internet», la app pregunta por su cuenta (1 lectura pública + 1 escritura en tu presencia, por REST, cada 2 min como mucho) y al servidor de fotos: **sin señal de verdad · la base llegó al cupo gratis de hoy · falta permiso · sesión vencida · el servidor de fotos no responde**. Lo dice en la franja de Hoy / Modo obra («La base no acepta más por hoy», «Falta permiso», «Fotos por subir»…), en el aviso de abajo («🛑 11 fotos esperando: la base no acepta más por hoy · se suben solas a las 05:05») y en la pantalla de las fotos.
+- **Cupo agotado:** la app deja de golpear la base hasta que se renueva (medianoche del Pacífico = 04:00/05:00 de Argentina); con las lecturas agotadas apaga los pedidos de la base (`disableNetwork`) y prueba cada 30 min por si se levantó antes (p. ej. si se pasa a Blaze). Las fotos y los cambios quedan en el celu.
+- **Contador:** «📤 N fotos esperando para subir» en la cámara; la tarjeta de Hoy / Modo obra con N fotos + N cambios y el motivo; la pantalla de las fotos con la lista (miniatura, obra, columna, motivo), «Reintentar ahora» y, cuando quedan 0, «✓ Todas las fotos subidas».
+- **La oficina lo ve:** el latido de presencia lleva `disp.fotosPend`, `colaMotivo`, `colaDesde`; el Supervisor muestra «N foto(s) esperando en N celular(es): Bruno 11 (cupo de la base)…» y, si la base llegó al cupo, una línea roja con la hora en que se renueva.
+
+**Copia en el celu** («que se descarguen al mismo tiempo»)
+- App de Android (1.3+, plugin `Filesystem`, sin permisos nuevos): cada foto **con su marca** se guarda también en **Documentos › EMA › Fotos › AAAA-MM-DD › OBRA_Col_N_hora.jpg**, sin preguntar, apenas la app le pone la marca (con Modo obra, al cerrar la cámara). Es la misma carpeta que usa «Bajar PDF» desde la v109. Se ve desde la app **«Archivos»** del celu; **a confirmar en un celu real si aparece en la Galería** (para que aparezca seguro haría falta guardarlas en «Imágenes» con un plugin de galería: APK nuevo; no se hizo).
+- Perfil › «Guardar copia de las fotos en el celu: Sí/No» (de entrada Sí para cuadrilla/operario; dice cuántas se copiaron hoy). No reemplaza la subida.
+- En el navegador no se puede guardar sola: Perfil y la pantalla de fotos ofrecen **«⬇ Bajar mis fotos de hoy»** (ZIP con las fotos propias de hoy).
+
+**Mis tareas clásica: mandar lo hecho** (Franco)
+- Desde la v123 la orden se envía sola recién con **todas** las tareas mandadas; con 1 de 10 no había forma de mandarla. Ahora, con al menos una mandada: **«📤 Mandar lo que hice (1 de 10) · lo demás queda pendiente»** → dice qué queda pendiente → manda la orden (`campo.enviados.<persona>` con `parcial`, `hechas`, `de`, `pendientes`, y las horas de lo hecho) y avisa a la oficina; lo que falta queda para la oficina (y el pase a mañana de la v146). Después: «Ya mandaste lo que hiciste».
+
+**Pruebas:** `t_v149b` (PC 37/37 · celu 37/37): normal, error de la base, cerrar la app, sin vincular (reglas reales + Supervisor), cupo (motivo, sin tormenta, suben al levantarse), cámara de la barra con error, copia con Filesystem simulado (carpeta, nombre, una sola vez, Sí/No), ZIP sin plugin, mandar lo hecho. `t_v142` actualizada («Reintentar ahora» en vez de «Probar ahora»). **Batería completa** de a 3 en PC y celu (TZ Córdoba): todo OK salvo `t_v083` (reemplazada) y `t_v150` (es de la otra versión); las que fallaron por tiempos con la máquina cargada (`t_circuito` pc, `t_v143` pc, `t_v147` pc, `t_v149` pc/cel, `t_v146` cel) dan OK solas, y `t_v148`, `t_v144`, `t_v142`, `t_circuito`, `t_v149`, `t_v149b` OK en PC y celu con el armado final.
+
+**Huellas:** ORIGINAL `149b_2026-11-12_app-EMA_ORIGINAL.html` `91285a26…f527d394` · `index.html` `b548d15a…6033c6b333` · sello `2026-11-12 09:45 · 58ccbe` (las dos marcas). Parche y módulo en `herramientas/v149b/` (`huellas.txt`).
+
+**Sin reglas nuevas.** No hace falta APK nuevo. **Ángel:** subir `index.html`. Si en el Supervisor aparece «La base llegó al cupo gratis de hoy», hay que bajar lecturas o pasar a Blaze (lo decidís vos).
+
 ## v149 — 12/11/2026 (publicada en GitHub) · El micrófono del Asistente ya no se apaga solo + el Asistente más rápido
 
 **Pedido de Ángel** (12/11/2026, hablándole al Asistente desde el celu): «cuando pongo el micrófono, así como estoy hablando ahora, al ratito se destilda. No sé por qué pasa. Y está muy lenta, no sé si se puede hacer algo». Precisión después: «tendría que ser como el micrófono de Claude: yo hablo y se va escribiendo, y se destilda recién cuando yo aprieto».
