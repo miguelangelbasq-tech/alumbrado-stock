@@ -2,6 +2,38 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v149 — 12/11/2026 (armada, sin publicar) · El micrófono del Asistente ya no se apaga solo + el Asistente más rápido
+
+**Pedido de Ángel** (12/11/2026, hablándole al Asistente desde el celu): «cuando pongo el micrófono, así como estoy hablando ahora, al ratito se destilda. No sé por qué pasa. Y está muy lenta, no sé si se puede hacer algo». Precisión después: «tendría que ser como el micrófono de Claude: yo hablo y se va escribiendo, y se destilda recién cuando yo aprieto».
+
+**Base:** ORIGINAL 148 (publicada, `2e812f74…`).
+
+**Por qué se cortaba el micrófono**
+- El reconocedor de voz de Android (el plugin de la app 1.4 y el Chrome del celu) termina solo al primer silencio (1–2 s) o a los 5–10 s. La app tomaba ese final como «terminé de dictar» y apagaba el 🎤 y la onda. No era un error: así funciona el motor, y la app no lo volvía a prender.
+
+**Micrófono (🎤 dictar y 🗣 charla)**
+- **Dictar:** queda prendido escribiendo en vivo hasta que la persona toca el 🎤 de nuevo, envía, cierra el panel o sale de la app. Cada corte del motor se vuelve a prender solo (en ~60 ms) y el texto se junta **sin repetir** lo que el motor repite al volver y sin perder lo dicho. El botón y la onda quedan prendidos todo el tiempo.
+- En la app 1.4 el plugin además se vuelve a prender **adentro** (`continuousPTT`) y **sin el pitido** de Android en cada vuelta (`muteRecognizerBeep`); si un celu no lo acepta, la app lo encadena sola. En el navegador de la compu, una sola sesión larga; en Chrome de Android se encadena (ahí `continuous` repite el texto).
+- **Tope por batería:** 5 minutos sin ninguna palabra → se apaga con el aviso «Apagué el micrófono porque no escuché nada» (**a confirmar** con Ángel).
+- **Charla:** el turno ya no termina cuando el motor corta (a veces a mitad de frase): termina con ~1,5 s de silencio después de lo último que se escuchó. Lo demás igual (2 min sin hablar pausa, «chau/terminar», nunca escucha mientras habla).
+- Enviar sigue cortando en seco: nada vuelve a escribirse en la caja (v140).
+
+**Velocidad**
+- «💭 Pensando…» aparece al instante al mandar la pregunta (antes no se veía nada hasta la primera herramienta o la respuesta).
+- **Respuesta que se va escribiendo** mientras llega y **voz desde la primera frase** (en charla y con «leer siempre»). Necesita el Worker `ema-ia` **v4-ia** (`workers/ema-ia.js`, también `ema-ia_v4.js`): reenvía la respuesta de Claude de a pedazos y al final cuenta el costo igual que siempre (mismos topes, roles y freno del mes). La app lo usa solo si `/salud` dice v4-ia; con el Worker de hoy, todo como antes.
+- **Effort «low»** (y respuesta corta) en la charla por voz y en preguntas cortas (≤ 80 letras) que no piden revisar, comparar, armar, cerrar, cargar ni cambiar nada; lo que revisa o propone cambios sigue en medium/high (Opus 5.5 como hasta ahora).
+- **Medido** (Worker y Claude simulados en 1,8 s para una pregunta con una búsqueda, dos vueltas): **antes** el primer texto aparecía a los 1.813 ms en la compu y 1.843 ms en el celu con CPU ×4 (todo junto al final); **ahora** el primer texto aparece a los **307 ms (compu) / 335 ms (celu ×4)** y el total queda igual (1.814 / 1.890 ms). Lo que pone la app es poco: armar el pedido 1–5 ms, herramientas 0–1 ms, dibujar 1–4 ms, pedido de 82 KB (con datos de prueba; en la base real las herramientas devuelven más). **El resto es de Claude** (pensar y escribir): no se puede medir sin el Worker real; el effort «low» lo baja en las preguntas cortas y la charla. No se recortaron herramientas ni contexto: cambiarlos entre preguntas rompe la caché (sale más lento y más caro); la caché ya estaba bien puesta (herramientas, system y conversación).
+- Los tiempos de las últimas 20 preguntas quedan en el aparato (`window.__iaMedidas`) para medir en celus reales.
+- Las versiones del Worker se comparan por número (v3-ia o más nuevo), así el v4-ia no dispara el aviso del «Worker viejo».
+
+**Sin reglas nuevas.** No hace falta APK nuevo. **Ángel:** subir `index.html` y, para la respuesta en vivo, pegar el Worker nuevo (instructivo «Actualizar el Worker para la v149»).
+
+**Pruebas:** `t_v149` (PC 34/34 · celu 35/35): dictado 30 s con el motor cortando solo cada 3–8 s en el navegador y con el plugin de la app 1.4 (cortes adentro y del todo) — el botón y la onda prendidos en las 150 muestras, el texto completo sin repetidos (99 palabras), hueco máx. 62 ms —, apagar a mano, silencio largo (con y sin algo dicho), enviar dictando, charla con corte a mitad de frase (se manda la frase entera, turno a 1,67 s del final), respuesta en vivo (pensamiento con su firma, herramienta con su input partido, burbuja que se va escribiendo, voz desde la primera frase 2,2 s antes del final, nada repetido), effort por pregunta, sin v4 / con JSON entero, tiempos. Worker: `node workers/probar_ema_ia.mjs` 104/104 (stream: eventos tal cual, costo al final igual que sin stream, errores en JSON). Batería completa de a 3 (`TZ=UTC`, después de las 21 de Córdoba): 300 de 302 sin contar `t_v083`; repetidas solas `t_v146` PC 64/64 (dos aparatos a la vez, de tiempos) y `t_v142` celu 49/49. `t_v134`, `t_v137`, `t_v140`, `t_v141`, `t_v146`, `t_circuito` OK en PC y celu. Las pruebas viejas corren con `__v149No` (micrófono de antes).
+
+**Pendientes / para saber:** probar en un celu real que el plugin acepte `continuousPTT` (si no, igual se encadena, quizás con el pitido de Android en cada vuelta); el tope de 5 min a confirmar.
+
+**Huellas (SHA-256):** ORIGINAL `149_2026-11-12_app-EMA_ORIGINAL.html` `982151addb666fc5d930a154e4b63ddea7f9e917b66505e5d8cfbf2c58d01435` · `index.html` `52b49e6f16a6d6c877edf4a18afc93b84751f8becc6ae870eef2b501a9f5d76d` · Worker `ema-ia_v4.js` `70e37be4724404b06266bafa824aba66aa9bf287de59cde94a8e5919a9a11993` · sello `2026-11-11 22:24 · f8c244` (meta `ema-version` y `#appVersion`). Detalle en `herramientas/v149/huellas.txt`.
+
 ## v148 — 11/11/2026 (publicada en GitHub) · Parpadeos en los celus + fotos de la cuadrilla más rápidas
 
 **Pedido de Ángel** (11/11/2026, después de publicar la v147): «En varios celulares hay un problema de titileo: la barra de abajo titila, algunos botones cuando recibís una notificación se agrandan y se achican solos». Mandó 2 videos del celu de Marcos (cuadrilla, «Antes de arrancar» 6/6): la barra aparece y desaparece cada ~1 s y «Arrancar el día» salta entre dos alturas. Agregado en la misma versión: «hay que arreglar la velocidad de sacar fotos para la cuadrilla: tiene 11 segundos hasta que carga».

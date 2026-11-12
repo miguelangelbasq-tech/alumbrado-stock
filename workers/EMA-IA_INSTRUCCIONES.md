@@ -6,6 +6,20 @@ Tardás unos 10 minutos.
 
 ---
 
+## ⚡ Actualizar el Worker para la v149 (5 minutos)
+
+La app v149 puede mostrar la respuesta del asistente **mientras se va escribiendo** (como en Claude) y empezar a leerla en voz alta desde la primera frase. Para eso el Worker tiene que pasar la respuesta de a pedazos. Hasta que pegues el nuevo, el asistente anda **igual que hoy** (la respuesta aparece entera al final); el resto de la v149 (el micrófono que no se apaga solo, «Pensando…» al instante, preguntas cortas más livianas) anda sin tocar nada.
+
+1. Entrá a **dash.cloudflare.com** › **Workers & Pages** › **`ema-ia`** › **Edit code**.
+2. Borrá todo y pegá el contenido completo del archivo nuevo **`workers/ema-ia.js`** (en tu carpeta está también como `ema-ia_v4.js`).
+3. Tocá **Deploy**. La clave (`ANTHROPIC_API_KEY`) y el KV quedan como estaban: no hay que volver a cargar nada.
+4. Abrí **https://ema-ia.mdiaz-60f.workers.dev/salud**: tiene que decir `"version":"v4-ia"` y `"stream":true`.
+5. En la app, abrí el asistente y preguntá algo: la respuesta tiene que irse escribiendo de a poco (la app pregunta `/salud` al abrir el panel; si no lo ve enseguida, cerrá y abrí la app).
+
+Qué cambia en el Worker: si la app pide `stream: true`, el pedido va a Claude «de a pedazos» y el Worker los reenvía tal cual. Al terminar suma el costo **igual que siempre** (topes por persona, freno del mes, gasto en «Gastado este mes»: nada cambia) y manda un último aviso con lo gastado. Sin `stream` contesta igual que la v3.
+
+---
+
 ## ⚡ Actualizar el Worker para la v141 (5 minutos)
 
 La app v141 abre el asistente para **todos los roles**, cada uno con lo suyo, y pone **topes** para que los US$ 100 alcancen el mes. Los topes los controla **el Worker**: hasta que pegues el nuevo, el asistente anda igual pero **sin topes** (a Administración le aparece una vez «El Worker del asistente todavía es el de antes…»).
