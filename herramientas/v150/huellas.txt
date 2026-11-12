@@ -1,0 +1,8 @@
+b9cadafdbd833dd569e60012bebf730dc000d068e2b47e5e5a65e7a4cfbdc291  150_2026-11-12_app-EMA_ORIGINAL.html
+43af21f4f7c4e8cf7b73b2a9e1a1f15dc17d014e9ea0c5d9e357ff6d97a19ee4  fijo/index.html
+b4f16710804b248fea8dff7c873acbd19d2ed3c42bfb66fa7542a6a6c013a88b  patch_v150.py
+8ec82f860ea0fb77fbf91703a9a8df44bacae69f2aefb15abf625bf7dcb6686f  verifObra.js
+b283be33245c4a5047d939b9211dbcea9939b51e38bc7bb44cd7d0b34e0dcb0c  verifObra.css
+3d6cf757faea31275f365b6d94503176f1f330ee6830cf86c4d5294374a58588  ia150.js
+base: 149b_2026-11-12_app-EMA_ORIGINAL.html 91285a26b8883c819e803d6319f664059406f6f63bf03ce8c1b5ee22f527d394
+sello: 2026-11-12 11:24 · 42ca6e (meta ema-version y #appVersion)

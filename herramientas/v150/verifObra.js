@@ -729,7 +729,7 @@ ${t.dudas.length ? `<div class="hv-du">⚠ ${t.dudas.map(esc).join(" · ")}</div
   });
 
   // ============================================================== arranque
-  function enganchar() { envolverSaldo(); envolverCierre(); envolverOficina(); }
+  function enganchar() { if (off()) return; envolverSaldo(); envolverCierre(); envolverOficina(); }   // apagado (__v150No): no envuelve nada
   enganchar();
   setInterval(enganchar, 3000);
   setInterval(() => {

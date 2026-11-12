@@ -2,6 +2,42 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v150 — 12/11/2026 (armada, sin publicar) · «Lo hecho, verificado»: la app sabe qué se hizo en cada columna y avisa antes de repetirlo
+
+**Pedido de Ángel** (12/11/2026): «yo hoy doy una OT, los chicos la hacen; por ahí son tres columnas y hacen dos. La IA lo ve, me dice "está bien, esta tarea está cumplida (2 de 3)". Y si mañana hago otra orden de la misma obra me tiene que decir "eso ya se hizo", que ya lo haya verificado. Y hoy puse una tarea en una plaza que ya la habían hecho ayer: si lo hubiera verificado, me lo hubiera dicho». Agregado: «si podés aportar y mejorar lo que busco, mejor».
+
+**Base:** ORIGINAL 149b (publicada, `91285a26…`); armada primero sobre la 149 y reaplicada sobre la 149b con el mismo parche. El parche son reemplazos chicos + un módulo nuevo antes de `revisarAppDiag`: se reaplica sobre otra base (por ejemplo la v149b) con `--otra-base`.
+
+**Por qué pasaba:** «Quedan N de T» descontaba lo **cerrado** por la oficina y lo asignado en órdenes abiertas, pero no lo que la cuadrilla **ya hizo y mandó** sin cerrar, ni sabía **qué columna** se hizo. El aviso de «tarea sin cerrar» (v128) no decía si en esa orden se hizo o no.
+
+**1. Lo hecho por obra, tarea y columna (de memoria, sin lecturas nuevas, no escribe nada)**
+- Por cada columna/caja: **hecho y verificado** (orden cerrada o «✅ Está bien»), **hecho sin verificar** (lo que mandó la cuadrilla: pasos de Modo obra con la hora, fotos con su columna, marcas y «se hizo»), **no se hizo** (con el porqué) y **asignado** (orden abierta), con fecha, OT y quién. Sin pasos ni fotos por columna dice «hecho según la cuadrilla, sin detalle por columna».
+
+**2. La verificación de la orden (sin IA)**
+- Por tarea: «pedidas 3 · hechas 2 (Col 4 y Col 5, con foto y hora) · no se hizo Col 6: «faltó material»» → ✅ cumplida / 🟡 parcial (2 de 3) / 🔴 sin hacer / ⚠ dudosa (dijo que sí sin foto, foto sacada a más de 150 m de la obra o con GPS impreciso, hora rara, menos fotos que columnas, sin detalle por columna).
+- En el tablero de Órdenes (Para revisar y cerrar, Hoy, Sin cerrar), en el «📸 Avance», en el cierre (**precarga las cantidades con lo verificado** y muestra la línea «🔎 Lo verificado») y como hallazgo del Supervisor.
+- Botones «✅ Está bien» (guarda `campo.verificado {ok, por, ts, resultado}`, sin reglas nuevas), «Cerrar con esto» y «✨ Que lo revise el asistente» (mira la verificación con la herramienta nueva `verificar_orden` y las miniaturas con `ver_fotos`; solo propone). El cierre por voz recibe la verificación y avisa si lo dicho supera lo que mandó la cuadrilla.
+
+**3. Avisar antes de repetir**
+- **Llenar orden:** al lado de «Quedan N de T», por tarea: «⏳ Mandado sin cerrar: Col 4 y Col 5 ayer (OT-2026-120, Juan, con foto y hora)», «⚠ Ya hecho: …», «✕ Col 6 no se hizo», «📅 Ya asignado hoy en OT-…» y «Falta de verdad: 1 (Col 6)».
+- **Al emitir**, si se pide más de lo que falta de verdad: «Esto ya está hecho en 2 de 3 (Col 4 y Col 5)» con **Cancelar / Dejar solo Col 6 / Emitir igual** (antes que el «¿por qué asignás de más?» de siempre; va en el botón «Emitir», así la sugerida y el asistente emiten como antes).
+- **Quedan / orden sugerida / pase a mañana:** lo mandado sin cerrar ya no cuenta como «asignado» sino como hecho, y lo que «no se hizo» vuelve a «queda»: la sugerida sugiere Col 6 y no Col 4–5; lo no terminado pasa a mañana solo por lo que falta de verdad.
+- **Asistente:** `proponer_orden` y `proponer_ordenes_sugeridas` lo dicen en la tarjeta.
+- **Repaso de lo ya emitido:** en el tablero (Hoy / Próximas) las órdenes emitidas que piden algo ya hecho dicen «⚠ Esto ya se hizo …» con «Dejar solo Col 6» o «Sacar esa tarea» (con «Sí», como Seguimiento › Editar).
+
+**Agregados**
+- **4. Planilla de columnas** en el legajo y en la ficha del Mapa de guerra: Col 1…N × pozo, hormigonado, izaje, vínculo, luminaria, tablerito, sellado, PAT, con color por estado; tocar una celda = quién, cuándo, hora, OT y la foto.
+- **5. Modo obra de la cuadrilla:** si la columna que le toca ya figura hecha (otra cuadrilla u otro día), «⚠ Col 4 y Col 5: Montaje de columna PRFV ya figura hecho el 11/11 (Juan). Te paso a la que falta: Col 6. ¿Es otra cosa?» y pasa a la que falta (sin inventar columnas que la obra no tiene); «Es otra cosa: hacerla igual» la vuelve a dar.
+- **6. Parte de verificación del día** a las 18:00 (la hora del pase a mañana, con el mismo turno en `configEquipo/salud`): «Hoy: 7 tareas cumplidas, 2 parciales, 1 dudosa · mañana hay 1 orden que repite trabajo hecho», aviso en la app (con «Ver») y al celu de Administración y Oficina.
+
+**Sin reglas nuevas. Sin APK nuevo.** **Ángel:** subir `index.html`.
+
+**Pruebas:** `t_v150` PC 60/60 · celu 60/60 (con `REGLAS=1` también: sin reglas nuevas): verificación 2 de 3 parcial y dudosas (sin detalle por columna, foto a 820 m), tablero, hoja, «Cerrar con esto» con el cierre precargado (2), «Está bien» guarda `campo.verificado`, Supervisor, línea de Llenar orden, cartel al emitir con las tres opciones, pase a mañana (1 en vez de 3), saldo, repaso del tablero con «Sacar esa tarea» y «Sí», sugerida solo Col 6, planilla en el legajo y en el Mapa de guerra, parte de las 18:00 (turno, aviso, «Ver»), asistente (`verificar_orden` + `ver_fotos` simulados, tarjeta de `proponer_orden`; el pañol no la recibe), cuadrilla en Modo obra (salta Col 4 y 5 y lo dice, «Es otra cosa», nada de la oficina). Sobre la base final (v149b): `t_v149b` 37/37 y 37/37, `t_circuito` 16/16 y 16/16, `t_v146` 64/64 y 64/64, `t_v142` 49/49 y 49/49, `t_v149` 34/34 y 35/35, `t_v106` y `t_v111` OK, `t_v143` PC 78/78; `t_v143` celu falla a veces una prueba (el asistente emite sin «en qué vehículo va cada uno»): **pasa igual con la v149b publicada** (3 de 4 corridas fallaron) — es una carrera vieja de tiempos, no de esta versión. Batería completa de a 3 (sobre la 149, `TZ` de Córdoba): todo OK salvo `t_v083` (reemplazada) y lo que se arregló o repitió solo: `t_v106`/`t_v111` (el cierre perdía lo cargado al «Agregar a alguien»/«No fue» por una marca `data-*` en el campo: arreglado), `t_v149` celu (1 muestra de 152, sola OK), `t_v142` y `t_v149b` (esperaban la v149b).
+
+**Pendientes / a confirmar:** el radio de 150 m para «foto de otra obra» y qué es «hora rara»; las fotos sueltas (sin orden) todavía no cuentan para la verificación (habría que leerlas); lo asignado en la planilla supone las siguientes columnas que faltan; el cierre rápido del asistente no muestra la verificación (el cierre por voz sí).
+
+**Huellas (SHA-256):** ORIGINAL `150_2026-11-12_app-EMA_ORIGINAL.html` `b9cadafdbd833dd569e60012bebf730dc000d068e2b47e5e5a65e7a4cfbdc291` · `index.html` `43af21f4f7c4e8cf7b73b2a9e1a1f15dc17d014e9ea0c5d9e357ff6d97a19ee4` · sello `2026-11-12 11:24 · 42ca6e` (meta `ema-version` y `#appVersion`). Detalle en `herramientas/v150/huellas.txt`.
+
 ## v149b — 12/11/2026 (urgente, publicada en GitHub) · Las fotos de la cuadrilla no se pierden nunca + copia en el celu + mandar lo hecho
 
 **Pedido de Ángel** (12/11/2026): «los chicos están teniendo problemas con las fotos: no pueden enviar y entonces se les pierden. Aparte de enviarse en la app, tendría que poder hacer que se les descarguen en el cel automáticamente al mismo tiempo». Capturas: Bruno (11/11 16:36, con 4G) con «Esperando señal · 11 fotos + 23 cambios» y «⏳ 11 fotos esperando señal»; Franco (OT-2026-218 LAS TABLITAS) con «1 de 10 hechas · Todavía nadie envió» que «no puede cerrar la orden».
