@@ -91,6 +91,7 @@ async function abrir(op = {}) {
   if (!op.v149) await page.addInitScript(() => { window.__v149No = true; });   // v149: las pruebas viejas tienen el micrófono de antes (termina con el motor), sin respuesta en vivo ni effort más liviano; v149:true los prueba
   if (!op.v150) await page.addInitScript(() => { window.__v150No = true; });   // v150: las pruebas viejas no ven la verificación de las órdenes, los avisos de trabajo repetido ni la planilla de columnas; v150:true los prueba
   if (!op.v151) await page.addInitScript(() => { window.__v151No = true; });   // v151: las pruebas viejas no ven «Falta documentación» / «Terminadas» (Avance y Obras) ni la ficha de documentación del legajo; v151:true las prueba
+  if (!op.v152) await page.addInitScript(() => { window.__v152No = true; });   // v152: las pruebas viejas no ven «↔ Mover» de las fotos ni las herramientas nuevas del asistente (buscar_fotos, proponer_mover_fotos con columna/orden); v152:true los prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];
