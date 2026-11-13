@@ -2,6 +2,28 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v154 — 13/11/2026 (armada, sin publicar) · Auditor de puntos: el asistente explica, revisa, anota el porqué y corrige TODOS los puntos
+
+**Pedido de Ángel** (13/11/2026), después de ver la v153: «cualquier pregunta de los puntos se la tengo que poder hacer a la IA… me tiene que decir exactamente por qué se le dio ese punto, si es válido ese punto, si yo esa vez le dije "démosle un poquito más"… detectar, mover, cambiar, todo con la autorización de nosotros (la oficina y yo)». Lo de PDF y videos (Worker `ema-fotos` `v2-fotos`) pasa a ser la **v155** (instructivo y comentario del Worker renombrados).
+
+**Base:** ORIGINAL 153 (`6402b904…`). Parche con reemplazos chicos + el módulo `auditorPuntos` antes de `revisarAppDiag` (`--otra-base` para reaplicar).
+
+**1. Explicar cada punto** (`__auditPuntos.explicarOrden` / `explicarPersona`, herramienta `explicar_puntos`): la misma cuenta de `puntosDeOrden`, paso a paso: cantidad × valor de la tarea, de dónde sale el valor (fábrica/diccionario, editado en Producción, puesto a mano en la orden, baremo cambiado después del cierre), la regla de reparto (asignada, repartida por lo hecho, «Elegir quiénes», equipos, a mano por tarea o de toda la orden, rol × horas con el peso y las horas), la parte de cada uno, el historial con quién, cuándo y el **motivo** (o «sin motivo anotado»), criterios anotados, piso/reinicios, quincena cerrada (foto fija) y ajustes. El total por persona es el mismo que muestra Producción (si no cuadra, lo dice). Ejemplo de la prueba: Juan Pérez, 1ª quincena de noviembre = OT-160 8 + OT-161 10,1 + OT-162 7 = **25,1** (Producción dice 25,1); «Pablo 9,25 en la OT-177» = «Colocación de apoyo PRFV: 1 apoyo × 18,5 = 18,5; repartida entre Pablo y Ariel con la cuenta de siempre (rol × horas): 9,25 de 18,5, en «✏ Corregir cierre» de Lucía, motivo «El apoyo lo colocaron Pablo y Ariel…»». La cuadrilla también puede preguntar, pero solo por lo suyo (sin nombres de los demás ni plata).
+
+**2. Revisar si están bien** (`revisar`, `revisar_puntos`, sin IA): reparto que no suma, puntos a quien no está o tiene 0 h, «no se hizo» con puntos, la cuadrilla contra el cierre (v150), la misma columna cobrada en dos órdenes, puntos a mano sin motivo, valor distinto del baremo sin explicación, diferencia con la foto fija de una quincena cerrada, cerrada sin puntos y puntos por hora fuera de lo común («para mirar»). Cada hallazgo con la orden, la explicación y una propuesta. Línea en el Supervisor y hoja «🔎 Puntos» (Revisión · Por persona · Criterios) desde Producción › Por quincena.
+
+**3. El porqué queda:** motivo obligatorio en «⭐ Puntos», en los puntos a mano del cierre (y el historial ya no se pierde al volver a cerrar), en «Cuánto vale cada tarea» (`configEquipo/baremo.hist[]`) y en «✏ Corregir cierre»; notas y criterios (`proponer_nota_puntos` → `cierre.puntosHist` tipo `nota` y/o `configEquipo/baremo.criterios[]`), que el asistente lee siempre.
+
+**4. Cambiar con «Sí»** (tarjeta antes → después, motivo, auditoría, aviso «⭐ Puntos corregidos»): `proponer_puntos_persona` (mover puntos dentro de una orden; la suma tiene que dar el total), `proponer_valor_tarea` (solo hacia adelante: las cerradas no cambian, y lo dice), `proponer_corregir_cierre` (v153) y `proponer_correcciones_puntos` (varias juntas en UNA tarjeta con casillas, incluido «mover» lo hecho de una orden cerrada a otra con el motor de la v153; las fotos van aparte con «↔ Mover»). Quincena cerrada: la foto fija no se toca y la diferencia va como ajuste.
+
+**Permisos:** solo Administración y Oficina (`TOOLS_ROL` y el motor); la cuadrilla solo `explicar_puntos` de lo suyo; pañol y «solo mirar» nada. **Sin reglas nuevas** (probado con `REGLAS=1`). **Sin APK nuevo.** **Ángel:** subir `index.html`.
+
+**Pruebas:** `t_v154` PC 81/81 · celu 84/84 · con las reglas reales (`REGLAS=1`) 81/81. Batería completa de a 3 (TZ de Córdoba, 314 corridas): todo OK salvo `t_v083` (reemplazada) y `t_v143` PC y celu 65/78 (igual que con la v153: mañana es sábado); `t_v137` PC 61/62 en la batería (la onda de rayitas, tiempos) y 62/62 sola. `t_v153`, `t_v127`, `t_v128*`, `t_v150`, `t_v141` y `t_circuito` OK en PC y celu. Capturas en el scratchpad (`v154/capturas/`).
+
+**A confirmar:** umbral de «puntos por hora» (2× o la mitad del promedio, con 3 órdenes o más); la misma columna en dos órdenes solo ve lo que tiene detalle por columna; los pesos de los roles y el valor del punto todavía no piden motivo; la cuadrilla no ve el motivo que escribió la oficina.
+
+**Huellas (SHA-256):** ORIGINAL `154_2026-11-13_app-EMA_ORIGINAL.html` `18620bf916b95cbb14d78b9dab4b8ed3911f042e37eaa24ce6d8b03721d814c2` · `index.html` `4c3ad0c38bf4f57239b1e0a8b8990da1bd00cbfc106344266ab1b45a10d46a40` · sello `2026-11-13 18:53 · c57e6a` (meta `ema-version` y `#appVersion`).
+
 ## v153 — 13/11/2026 (armada, sin publicar) · ✏ Corregir el cierre de una orden YA CERRADA (a mano y con el asistente)
 
 **Pedido de Ángel** (13/11/2026): el asistente le contestó «No te lo pude dejar armado: la OT-2026-177 ya está cerrada y desde acá no tengo cómo corregir el cierre de una orden cerrada…» (el apoyo PRFV del tablero de 0 a 1 hecho por Pablo Picone y Ariel Lastra, 9,25 c/u; Marcos y Bruno siguen con 4,8 por la acometida; el armado del tablero con fotos de Marcos pero «no se hizo» en el cierre). Ángel: **«NECESITO QUE LA IA PUEDA HACER ESAS MODIFICACIONES»**.
