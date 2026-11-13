@@ -1,0 +1,8 @@
+09315cf5fee71cc173f40020da8e9bc15b6c9454f8ce2d55bff5f190bf7bb0f0   152_2026-11-13_app-EMA_ORIGINAL.html
+5bb716643b81ca8fbc6e95a33132dd6af24ffd3fb9e7ec6339f848807ff2b6d8   fijo/index.html
+c03f08a0b46c7b8df945f061c56f4e4fb89d6e43f9a998b308a5ae5b83befa9f   patch_v152.py
+753eca1feafc196783686987045e3c2d928a559b7578ced3641becf00facd250   moverFoto.js
+40cd6e8888cfcff0fe2eba9ac8c02d028bd6257f82f7eebd1d4c2f4583f5ada0   moverFoto.css
+cfe5bdaf19a11ae73c577ffa6a23061b1e8686a9b42509c05a0d2236d3df76aa   ia152.js
+base: 151_2026-11-13_app-EMA_ORIGINAL.html 4d15141368029393109c0c96fda5369df3ae9d1525ce7cda9c5d46b124ac88c5
+sello: 2026-11-13 15:16 · 3bb581 (meta ema-version y #appVersion)

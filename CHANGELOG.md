@@ -2,6 +2,31 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v152 — 13/11/2026 (armada, sin publicar) · ↔ Mover fotos: a mano y con el asistente
+
+**Pedido de Ángel** (13/11/2026): «la IA de la app no puede mover imágenes de una carpeta a otra; tiene que poder, y también agregá para que en la app se pueda hacer manual y con la IA». Son las 4: de una obra a otra, de columna o tipo dentro de la misma obra (Col 4 → Col 5, Zanja → Tablero), desde «Fotos sin obra» a una obra y de una orden a otra.
+
+**Base:** ORIGINAL 151 (`4d151413…`). Parche con reemplazos chicos + el módulo `moverFoto` antes de `revisarAppDiag` (`--otra-base` para reaplicar).
+
+**Por qué el asistente «no podía»** (reproducido con el Worker simulado contra la v151, `t_v152` grupo 0 con `ANTES=1`):
+- `proponer_mover_fotos` solo aceptaba los id que devolvía `ubicar_fotos` (la búsqueda por GPS). `ver_fotos` no devolvía el id de cada foto → «Hay fotos que no conozco: usá primero ubicar_fotos». No había forma de buscar «la de las 10:30» o «las 3 últimas de Juan».
+- Solo cambiaba de obra: no había destino por columna/tipo ni por orden («esta foto es de la Col 6» → error).
+- Cuando movía, no tocaba la orden: la foto seguía en `campo.fotos` de la orden de origen (seguía contando ahí para la verificación v150 y aparecía en el legajo de la obra vieja). El «Mover a X» del Supervisor (v144) tenía el mismo problema.
+
+**1. Un solo motor (`__moverFoto.mover`)**: cambia todo lo que dice dónde está la foto, por los caminos de la app: la ficha `fotosObra` y el adjunto (obra, orden, tipo, columna, tarea + `movidaDe` y `movidaHist`, el historial no se pierde); la orden de origen (la foto sale de `campo.fotos`, queda `campo.fotosMovidas` con a dónde fue) y la de destino (entra con su tarea, columna y miniatura de 72 px); dentro de la misma orden cambia columna/tipo/tarea (y el «Terminé» de Modo obra que solo tenía esa foto pasa a la columna nueva). La imagen no se mueve ni se copia. Auditoría `foto_mover`. Después se refrescan el legajo, la galería, Mis tareas, la verificación v150 y la planilla de columnas. El Supervisor usa el mismo motor.
+
+**2. A mano:** «↔ Mover» en el visor de fotos y en la selección de varias (legajo —también «☑ Elegir fotos»—, Mis fotos, Mis tareas…) → hoja «¿A dónde la pasás?»: obra (buscador), orden de esa obra (propone la del día en la que estaba quien sacó la foto), de qué es, columna (de la lista de la obra u «Otro…»), tarea, motivo (obligatorio si cambia de obra), antes → después y «Sí, mover». «📷 Fotos sin obra»: «☑ Elegir para asignar a una obra». Modo obra: «↔ Era de otra columna» en la foto guardada.
+
+**3. Con el asistente:** `buscar_fotos` (por obra, orden, día, persona, columna, tipo, hora ± 20 min, «Fotos sin obra», las N últimas; con miniaturas si hace falta) y `proponer_mover_fotos` nueva con los 4 destinos → tarjeta con miniaturas y antes → después → «Sí» (`porAsistente`). `ver_fotos` devuelve el id. El system le dice que SÍ puede mover fotos. Solo Administración y Oficina.
+
+**Permisos (sin reglas nuevas):** quien edita Avance o Registrar obra mueve cualquier foto (si toca una orden, también tiene que editar Órdenes); la cuadrilla solo corrige la columna/tipo de SUS fotos en SU orden abierta (la base no la deja tocar la ficha: el legajo la muestra con lo que dice la orden); «solo mirar» y pañol, nada. **Sin APK nuevo.** **Ángel:** subir `index.html`.
+
+**Pruebas:** `t_v152` PC 73/73 · celu 73/73 · con las reglas reales (`REGLAS=1`) 73/73: el bug antes (v151: 4/4 reproducido) y después; una foto desde el visor del legajo (Col 5 → Col 6: orden, ficha, adjunto, verificación 2 → 3 columnas con detalle, planilla, legajo, auditoría); tipo Zanja → Tablero → Caja con historial; varias desde «☑ Elegir fotos» a otra obra y otra orden (sale de la OT-120, entra en la OT-121 con su tarea; motivo obligatorio); «Fotos sin obra» → BULEVARES; orden → orden (OT-122 → OT-130); cuadrilla (solo su foto de su orden abierta, solo columna, no otra obra, no orden cerrada; «Era de otra columna»); «solo mirar» nada; el asistente con las 4 frases (buscar → tarjeta → Sí → movida, auditoría con porAsistente) y el pañol sin las herramientas. Batería completa de a 3 (TZ de Córdoba): 305 de 310 OK; fallan `t_v083` (reemplazada), `t_v143` PC y celu 65/78 (igual que con la v151: mañana es sábado) y `t_v137` PC 61/62 (la onda del micrófono, por tiempos: falla igual con la v151 corrida ahora). `t_v133` 30/30 · 32/32, `t_v144` 43/43 · 43/43, `t_v150` 60/60 · 60/60, `t_v151` 47/47 · 47/47, `t_v149b` 37/37 · 37/37, `t_circuito` 16/16 · 16/16. Capturas PC y celu.
+
+**A confirmar:** que la cuadrilla no pueda pasar una foto a otra obra/orden (las reglas no la dejan tocar la ficha; habría que publicar reglas nuevas); la orden que se propone al cambiar de obra (la del día de la foto donde estaba quien la sacó); que al pasar una foto de columna también se pase el «Terminé» de Modo obra si era la única foto de esa columna; una foto que todavía se está subiendo desde el celu no se puede mover hasta que llega.
+
+**Huellas (SHA-256):** ORIGINAL `152_2026-11-13_app-EMA_ORIGINAL.html` `09315cf5fee71cc173f40020da8e9bc15b6c9454f8ce2d55bff5f190bf7bb0f0` · `index.html` `5bb716643b81ca8fbc6e95a33132dd6af24ffd3fb9e7ec6339f848807ff2b6d8` · sello `2026-11-13 15:16 · 3bb581` (meta `ema-version` y `#appVersion`). Detalle en `herramientas/v152/huellas.txt`.
+
 ## v151 — 13/11/2026 (publicada en GitHub) · «📄 Falta documentación» y «✅ Terminadas» en Avance de obra y en Obras + ficha «📄 Documentación» del legajo
 
 **Pedido de Ángel** (13/11/2026): «el tablero de avance de obras y el de obras y legajos: tendríamos que agregar dos subíndices, uno de "le falta documentación" y otro de las que ya están terminadas». Respuestas: documentación completa = las 4 (carpeta EPEC con fecha, conforme a obra cerrado, planilla de PAT y certificado de instalación apta); terminada = avance del itemizado al 100 %, sola.
