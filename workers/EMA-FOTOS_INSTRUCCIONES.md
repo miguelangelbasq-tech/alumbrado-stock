@@ -6,7 +6,7 @@ No tiene claves adentro: entra al bucket por un **enlace** (Cloudflare lo llama 
 
 ---
 
-## ⚡ Actualizar el Worker para la v154 (10 minutos)
+## ⚡ Actualizar el Worker para la v155 (10 minutos)
 
 La versión nueva (`v2-fotos`) sigue guardando las fotos **exactamente igual que hoy**, y además:
 

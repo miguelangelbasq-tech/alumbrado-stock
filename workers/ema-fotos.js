@@ -1,5 +1,5 @@
 // Worker «ema-fotos» (Cloudflare) · Fotos, documentos y videos de la app de Alumbrado Público en Cloudflare R2 — EMA Servicios.
-// v2-fotos (v154): además de las fotos, guarda PDF (docs/…) y videos (videos/…), sube por partes lo que es muy grande,
+// v2-fotos (v155): además de las fotos, guarda PDF (docs/…) y videos (videos/…), sube por partes lo que es muy grande,
 // deja adelantar el video (pedidos por rango, «Range») y contesta HEAD. Las fotos siguen exactamente como antes (v037):
 //   PUT /f/fotos/AAAA/MM/<obra>/<id>.jpg  (Authorization: Bearer <token de Firebase>)  → {ok:true}
 //   GET /f/fotos/…  (Authorization: Bearer … o ?t=<token>)                               → la imagen
