@@ -1,0 +1,7 @@
+4d15141368029393109c0c96fda5369df3ae9d1525ce7cda9c5d46b124ac88c5  151_2026-11-13_app-EMA_ORIGINAL.html
+b95f6dd30ed9dbadcd4a92466d7ddf5b36a16c18502dde0c20299bad972b61ac  fijo/index.html
+2fbb44147aae4adc305c9b67e02c5b6bb146d0982f7eac70a421c8bafa4c2d60  patch_v151.py
+6141873f2000a8445e3eaa58fc6b7fdf0490c514b533feda6902cd6b407b8de0  docObra.js
+99a43d25870f4ac8fc41bcc5e8915b0dfd6b790cba1cde169e90af8600675520  docObra.css
+base: 150_2026-11-12_app-EMA_ORIGINAL.html b9cadafdbd833dd569e60012bebf730dc000d068e2b47e5e5a65e7a4cfbdc291
+sello: 2026-11-13 13:36 · c4f931 (meta ema-version y #appVersion)

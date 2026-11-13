@@ -23,11 +23,11 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Sin reglas nuevas** (probado con la réplica de las reglas). **Sin APK nuevo.** Todo de memoria: sin lecturas nuevas. **Ángel:** subir `index.html`.
 
-**Pruebas:** `t_v151` PC 47/47 · celu 47/47 (y con `REGLAS=1`): cuentas (100 % completa, 100 % sin PAT ni certificado, en curso sin carpeta, sin empezar fuera), subíndices y contadores, chips, fecha del 100 %, filtro por tipo y buscador, «📄 Documentación» abre la ficha, PAT con foto a R2 (sin la imagen en la base), certificado en papel, reemplazar con historial, PDF chico sí / grande no, ver la foto, carpeta → Registrar obra, permisos (mirar y cuadrilla sin botones), apagado igual que antes. Batería: BATERIA151.
+**Pruebas:** `t_v151` PC 47/47 · celu 47/47 (y con `REGLAS=1`): cuentas (100 % completa, 100 % sin PAT ni certificado, en curso sin carpeta, sin empezar fuera), subíndices y contadores, chips, fecha del 100 %, filtro por tipo y buscador, «📄 Documentación» abre la ficha, PAT con foto a R2 (sin la imagen en la base), certificado en papel, reemplazar con historial, PDF chico sí / grande no, ver la foto, carpeta → Registrar obra, permisos (mirar y cuadrilla sin botones), apagado igual que antes. Batería completa de a 3 (`TZ` de Córdoba): 304 de 308 OK; fallan solo `t_v083` (reemplazada) y `t_v143` en PC y celu (65/78), que falla **igual con la v150 publicada**: mañana es sábado y la orden sugerida usa el horario del sábado (la prueba supone un día hábil). `t_v150` 60/60 y 60/60, `t_v149b` 37/37 y 37/37, `t_circuito` 16/16 y 16/16, `t_v100` 20/20 y 22/22.
 
 **A confirmar:** desde qué % se reclama la documentación (1 %); el nombre «🗄 Archivadas» para las ocultadas; la fecha del 100 % cuando el avance se cargó a mano; el legajo impreso todavía no muestra la documentación.
 
-**Huellas (SHA-256):** HUELLAS151
+**Huellas (SHA-256):** ORIGINAL `151_2026-11-13_app-EMA_ORIGINAL.html` `4d15141368029393109c0c96fda5369df3ae9d1525ce7cda9c5d46b124ac88c5` · `index.html` `b95f6dd30ed9dbadcd4a92466d7ddf5b36a16c18502dde0c20299bad972b61ac` · sello `2026-11-13 13:36 · c4f931` (meta `ema-version` y `#appVersion`). Detalle en `herramientas/v151/huellas.txt`.
 
 ## v150 — 12/11/2026 (publicada en GitHub) · «Lo hecho, verificado»: la app sabe qué se hizo en cada columna y avisa antes de repetirlo
 
