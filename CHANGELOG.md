@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v151 — 13/11/2026 (armada, sin publicar) · «📄 Falta documentación» y «✅ Terminadas» en Avance de obra y en Obras + ficha «📄 Documentación» del legajo
+## v151 — 13/11/2026 (publicada en GitHub) · «📄 Falta documentación» y «✅ Terminadas» en Avance de obra y en Obras + ficha «📄 Documentación» del legajo
 
 **Pedido de Ángel** (13/11/2026): «el tablero de avance de obras y el de obras y legajos: tendríamos que agregar dos subíndices, uno de "le falta documentación" y otro de las que ya están terminadas». Respuestas: documentación completa = las 4 (carpeta EPEC con fecha, conforme a obra cerrado, planilla de PAT y certificado de instalación apta); terminada = avance del itemizado al 100 %, sola.
 
