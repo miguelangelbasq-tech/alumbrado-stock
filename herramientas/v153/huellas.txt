@@ -1,0 +1,8 @@
+6402b904e8fa72f0081ac028421540126f37259d9be73673d6f2dc02ab31b7eb   153_2026-11-13_app-EMA_ORIGINAL.html
+531ca9042aee4dde5afb93dd1de8eafa4eb01b507bb83013db037214b5d7084e   fijo/index.html
+28c95bb93cb4bc8eb4e31c5fbaaa82d50b9f5ef2c9d475dd97a5b78af753fde1   patch_v153.py
+fb4de593c84976c965e71ba2ae3c6ac22a78ccf5d1546a1ce7b1f905a39ddcf1   corregirCierre.js
+80439fd1c6f1f5c69fb29a6a564233ad547f362acc209ba19bc11fe25ea49308   corregirCierre.css
+a77bbbdaa00ff4f40392dc6fe944ca8ec0ebebe77a5896a2fd1477f968d3f64e   ia153.js
+base: 152_2026-11-13_app-EMA_ORIGINAL.html 09315cf5fee71cc173f40020da8e9bc15b6c9454f8ce2d55bff5f190bf7bb0f0
+sello: 2026-11-13 16:45 · f828be (meta ema-version y #appVersion)

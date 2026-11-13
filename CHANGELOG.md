@@ -2,6 +2,30 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v153 — 13/11/2026 (armada, sin publicar) · ✏ Corregir el cierre de una orden YA CERRADA (a mano y con el asistente)
+
+**Pedido de Ángel** (13/11/2026): el asistente le contestó «No te lo pude dejar armado: la OT-2026-177 ya está cerrada y desde acá no tengo cómo corregir el cierre de una orden cerrada…» (el apoyo PRFV del tablero de 0 a 1 hecho por Pablo Picone y Ariel Lastra, 9,25 c/u; Marcos y Bruno siguen con 4,8 por la acometida; el armado del tablero con fotos de Marcos pero «no se hizo» en el cierre). Ángel: **«NECESITO QUE LA IA PUEDA HACER ESAS MODIFICACIONES»**.
+
+**Base:** ORIGINAL 152 (`09315cf5…`). Parche con reemplazos chicos + el módulo `corregirCierre` antes de `revisarAppDiag` (`--otra-base` para reaplicar).
+
+**Por qué el asistente «no podía»** (reproducido con el Worker simulado contra la v152, `t_v153` grupo 0 con `ANTES=1`): no había ninguna herramienta para tocar el cierre; `proponer_editar_orden` sobre una orden cerrada solo cambiaba la orden y avisaba «sus puntos quedaron fijados con los datos de antes». A mano, «⭐ Puntos» solo cambiaba el valor de las tareas que ya tenían cantidad y «Abrir el cierre» rehacía todo el cierre.
+
+**1. Un solo motor (`__corregirCierre`)**, para la pantalla y el asistente, sobre una orden cerrada y por tarea: la cantidad hecha (0 → 1, «no se hizo» → hecha o al revés), quiénes la hicieron (de la orden o de la nómina: se suman a la orden como «＋ Agregar a alguien que también fue») y los puntos de esa tarea por persona (de entrada la cuenta de siempre, rol × horas; o a mano). A cada uno se le saca lo que tenía por esa tarea y se le suma lo nuevo; **lo de las otras tareas no se toca** (aunque se hayan corregido a mano con «⭐ Puntos»). Guarda la foto fija de puntos, `puntosTarea`, cantidades, `hechoPersona` y el historial (`puntosHist`: antes → después, quién, motivo, por el asistente o no). **Avance de la obra:** lo que sube sale de la misma cuenta del cierre (por partes, v108) y lo que baja se descuenta de lo que había sumado esa tarea: nunca dos veces (0 → 1 → 0 deja el itemizado como estaba). **Quincena cerrada:** no se toca; la diferencia ya pasa sola como ajuste a la quincena abierta (Producción › Quincenas) y la app lo avisa. **Conforme a obra cerrado:** aviso. Aviso «⭐ Puntos corregidos» al celu de los que cambian. Auditoría `ot_cierre_corregido`.
+
+**2. A mano:** «✏ Corregir cierre» al lado de «⭐ Puntos» en las órdenes cerradas del tablero y del Historial, y en «⭐ Puntos» › «📋 La orden» → hoja con cada tarea (lo del cierre y lo que mandó la cuadrilla), cantidad, «¿Se hizo?», quiénes (chips + «＋ Otra persona de la nómina»), puntos por persona, motivo obligatorio, antes → después de los puntos de cada uno, el total y el avance, «Sí, corregir» y «↶ Deshacer».
+
+**3. Con el asistente:** `proponer_corregir_cierre(otId, cambios, motivo)` → tarjeta antes → después (puntos por persona, total, avance) → «Sí». Usa la verificación v150: si en otra tarea lo que mandó la cuadrilla no coincide con el cierre (el tablero de Marcos: fotos pero «no se hizo»), la tarjeta lo muestra y el asistente pregunta antes de incluirlo. `proponer_editar_orden` sobre una cerrada (cantidades o quién) deriva acá. El system le dice que SÍ puede corregir cierres. Solo Administración y Oficina.
+
+**El caso OT-2026-177:** apoyo 0 → 1 por Pablo y Ariel = 18,5 puntos (lo que vale «Colocación de apoyo PRFV para el tablero» en el baremo de Ángel) → **9,25 cada uno** (los dos Oficiales con sus horas); Marcos y Bruno siguen con 4,8; total 9,6 → 28,1. El ítem 13 sube **0,7** y no 1: el apoyo es el 70 % del ítem 13 (el otro 30 % es el pozo del apoyo, cierre por partes v108).
+
+**Permisos:** sin reglas nuevas (lo mismo que «⭐ Puntos» y el cierre; probado con las reglas reales). Cuadrilla, pañol y «solo mirar» no ven el botón, el motor no los deja y el asistente no les da la herramienta. **Sin APK nuevo.** **Ángel:** subir `index.html`.
+
+**Pruebas:** `t_v153` PC 53/53 · celu 55/55 · con las reglas reales (`REGLAS=1`) 53/53; el bug antes (v152: 2/2 reproducido). Batería completa de a 3 (TZ de Córdoba): 5917 de 5946 pruebas; fallan `t_v083` (reemplazada), `t_v143` PC y celu 65/78 (igual que con la v152: mañana es sábado), y por tiempos con la máquina cargada `t_v092u` PC 17/19 y `t_v146` PC 63/64 (solas: 19/19 y 64/64). `t_v127` 11/11 · 12/12, `t_v128` (a–d) OK, `t_v146` celu 64/64, `t_v150` 60/60 · 60/60, `t_v152` 73/73 · 73/73, `t_circuito` 16/16 · 16/16, `t_v137` 62/62 · 63/63. Capturas PC y celu.
+
+**A confirmar:** con 0 horas cargadas en el cierre, quien la hizo cuenta la jornada para repartir; los ajustes de quincenas cerradas los hace Quincenas solo desde el piso de puntos (01/11/2026); si al corregir una orden de antes de la v108 (sin la tarea anotada en el avance) baja la cantidad, solo se descuenta si ningún otro trabajo de la orden usa ese ítem; el cierre rápido del asistente (`proponer_cierre`) sigue siendo para órdenes abiertas.
+
+**Huellas (SHA-256):** ORIGINAL `153_2026-11-13_app-EMA_ORIGINAL.html` `6402b904e8fa72f0081ac028421540126f37259d9be73673d6f2dc02ab31b7eb` · `index.html` `531ca9042aee4dde5afb93dd1de8eafa4eb01b507bb83013db037214b5d7084e` · sello `2026-11-13 16:45 · f828be` (meta `ema-version` y `#appVersion`). Detalle en `herramientas/v153/huellas.txt`.
+
 ## v152 — 13/11/2026 (armada, sin publicar) · ↔ Mover fotos: a mano y con el asistente
 
 **Pedido de Ángel** (13/11/2026): «la IA de la app no puede mover imágenes de una carpeta a otra; tiene que poder, y también agregá para que en la app se pueda hacer manual y con la IA». Son las 4: de una obra a otra, de columna o tipo dentro de la misma obra (Col 4 → Col 5, Zanja → Tablero), desde «Fotos sin obra» a una obra y de una orden a otra.
