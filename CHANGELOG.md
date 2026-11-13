@@ -2,6 +2,33 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v151 — 13/11/2026 (armada, sin publicar) · «📄 Falta documentación» y «✅ Terminadas» en Avance de obra y en Obras + ficha «📄 Documentación» del legajo
+
+**Pedido de Ángel** (13/11/2026): «el tablero de avance de obras y el de obras y legajos: tendríamos que agregar dos subíndices, uno de "le falta documentación" y otro de las que ya están terminadas». Respuestas: documentación completa = las 4 (carpeta EPEC con fecha, conforme a obra cerrado, planilla de PAT y certificado de instalación apta); terminada = avance del itemizado al 100 %, sola.
+
+**Base:** ORIGINAL 150 (publicada, `b9cadafd…`). Parche con reemplazos chicos + un módulo nuevo antes de `revisarAppDiag` (`--otra-base` para reaplicar).
+
+**1. Subíndices nuevos**
+- **Avance de obra:** debajo de Todas/Plazas/Barrios/Otras, «📊 Avance · 📄 Falta documentación (N) · ✅ Terminadas (N)», con el mismo estilo; respetan el filtro de tipo. «📊 Avance» deja todo como antes.
+- **Obras (legajos):** «🚧 En curso · 📄 Falta documentación (N) · ✅ Terminadas (N) · 🗄 Archivadas». La pestaña que antes se llamaba «✅ Terminadas» eran las obras **ocultadas** en Registrar obra: ahora se llama «🗄 Archivadas» (es lo mismo, cambia solo el nombre) para no confundirla con las terminadas al 100 %. Respetan el filtro de tipo y el buscador.
+- **Falta documentación:** obras terminadas o con avance ≥ 1 % (a confirmar) a las que les falta algo; cada una con chips de lo que falta («📁 Carpeta EPEC · 📋 Conforme a obra · ⚡ PAT · 📜 Certificado») y botón «📄 Documentación».
+- **Terminadas:** avance al 100 % (la misma cuenta del círculo de cada obra), con la fecha en que llegó al 100 % (el último cierre de orden que movió el avance; si se cargó a mano, «sin dato») y «✅ Documentación completa» o «⚠ Falta: …».
+- Entran también las obras archivadas (ocultas), marcadas «🗄 archivada», así una plaza ocultada sin papeles no se escapa.
+
+**2. Ficha «📄 Documentación» en el legajo** (plegable, antes de las fotos): las 4 filas con ✅/❌.
+- Carpeta EPEC: la fecha; si falta, «📁 Cargar la fecha» lleva a Registrar obra con la obra para editar.
+- Conforme a obra: si está cerrado y cuándo; si no, «📊 Ir a Avance de obra».
+- Planilla de PAT y Certificado: «📎 Cargar» (foto → nube de fotos R2 como las de obra; PDF hasta 650 KB como los remitos) o «✔ Lo tengo en papel» con fecha y dónde está; después «👁 Ver» y «↺ Reemplazar» (el anterior queda en «Antes (N)», nada se borra), quién y cuándo. Se guarda en `avanceObras/{id}.documentos.{pat, cert}`; auditoría `obra_documento`.
+- Los botones de cargar solo los ve quien edita Avance de obra o Registrar obra (no la cuadrilla ni «solo mirar»).
+
+**Sin reglas nuevas** (probado con la réplica de las reglas). **Sin APK nuevo.** Todo de memoria: sin lecturas nuevas. **Ángel:** subir `index.html`.
+
+**Pruebas:** `t_v151` PC 47/47 · celu 47/47 (y con `REGLAS=1`): cuentas (100 % completa, 100 % sin PAT ni certificado, en curso sin carpeta, sin empezar fuera), subíndices y contadores, chips, fecha del 100 %, filtro por tipo y buscador, «📄 Documentación» abre la ficha, PAT con foto a R2 (sin la imagen en la base), certificado en papel, reemplazar con historial, PDF chico sí / grande no, ver la foto, carpeta → Registrar obra, permisos (mirar y cuadrilla sin botones), apagado igual que antes. Batería: BATERIA151.
+
+**A confirmar:** desde qué % se reclama la documentación (1 %); el nombre «🗄 Archivadas» para las ocultadas; la fecha del 100 % cuando el avance se cargó a mano; el legajo impreso todavía no muestra la documentación.
+
+**Huellas (SHA-256):** HUELLAS151
+
 ## v150 — 12/11/2026 (publicada en GitHub) · «Lo hecho, verificado»: la app sabe qué se hizo en cada columna y avisa antes de repetirlo
 
 **Pedido de Ángel** (12/11/2026): «yo hoy doy una OT, los chicos la hacen; por ahí son tres columnas y hacen dos. La IA lo ve, me dice "está bien, esta tarea está cumplida (2 de 3)". Y si mañana hago otra orden de la misma obra me tiene que decir "eso ya se hizo", que ya lo haya verificado. Y hoy puse una tarea en una plaza que ya la habían hecho ayer: si lo hubiera verificado, me lo hubiera dicho». Agregado: «si podés aportar y mejorar lo que busco, mejor».
