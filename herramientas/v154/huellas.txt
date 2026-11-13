@@ -1,0 +1,8 @@
+18620bf916b95cbb14d78b9dab4b8ed3911f042e37eaa24ce6d8b03721d814c2  154_2026-11-13_app-EMA_ORIGINAL.html
+4c3ad0c38bf4f57239b1e0a8b8990da1bd00cbfc106344266ab1b45a10d46a40  fijo/index.html
+030496c708a89b7d595a1e4db8ed0d3be1b4155e701fd9878f4fa926ab77bdfe  patch_v154.py
+a22b33c5dd77cfcc1983ad06f14c6ce8ad2f6028fd5d62ba5bc16bc99c6021a7  auditorPuntos.js
+10793b5c9b0ebf5c2b4f4ab5b4f886eb26ae30b8722b3967d8f17ab9bb70aa79  auditorPuntos.css
+23df36187d425f18ca320edbd721f230cc522ef0efc6dbae4c98b85893fcca88  ia154.js
+base: 153_2026-11-13_app-EMA_ORIGINAL.html 6402b904e8fa72f0081ac028421540126f37259d9be73673d6f2dc02ab31b7eb
+sello: 2026-11-13 18:53 · c57e6a (meta ema-version y #appVersion)

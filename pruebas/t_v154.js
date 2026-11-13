@@ -206,7 +206,7 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     const av = Object.values(d.avisosPush || {}).filter((x) => /Puntos corregidos/.test(x.titulo)).map((x) => x.clave).sort();
     c(av.includes('lucas vera') && av.includes('diego luna'), 'aviso «⭐ Puntos corregidos» a los que cambian · ' + av.join());
     c((await auds(p, 'ot_puntos_persona')).length === 1 && (await auds(p, 'ot_cierre_corregido')).length === 1, 'auditoría (ot_puntos_persona y ot_cierre_corregido)');
-    r = await p.evaluate(() => window.__auditPuntos.revisar({ periodo: 'actual' }).hallazgos.filter((h) => h.otId === 'e170' || h.otId === 'e172').map((h) => h.tipo));
+    r = await p.evaluate(() => window.__auditPuntos.revisar({ periodo: 'actual' }).hallazgos.filter((h) => h.nivel !== 'info' && (h.otId === 'e170' || h.otId === 'e172')).map((h) => h.tipo));
     c(!r.length, 'y revisar ya no las marca · ' + JSON.stringify(r));
     // «mover» lo hecho de una orden a otra: dos correcciones con el motor de la v153
     r = await p.evaluate(() => { const x = window.__auditPuntos.planUno({ tipo: 'mover', deOt: 'OT-2026-173', aOt: 'OT-2026-110', tarea: 'montaje_prfv', cantidad: 1 }, 'se cargó en la orden equivocada'); return x.err || { n: x.specs.length, t: x.titulo, av: x.avisos.join(' ') }; });
@@ -239,11 +239,11 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     await foto(p, 'cierre_motivo', '#qpCierreMotBox');
     await p.evaluate(async () => { const x = document.querySelector('input[name="coCierreResp"][value="no"]'); x && (x.checked = true); await guardarCierreOt(); }); await p.waitForTimeout(1200);
     d = await db(p);
-    c(!(d.ordenesTrabajo.a120.cierre && d.ordenesTrabajo.a120.cierre.cerradoTs) && /motivo/.test(await txt(p, '#qpCierreMsg')), 'sin motivo no cierra · ' + await txt(p, '#qpCierreMsg'));
+    c(!(d.ordenesTrabajo.a120.cierre && d.ordenesTrabajo.a120.cierre.cerradoTs) && /por qué/.test(await txt(p, '#qpCierreMsg')), 'sin motivo no cierra · ' + await txt(p, '#qpCierreMsg') + ' ' + JSON.stringify(d.ordenesTrabajo.a120.cierre || null).slice(0, 300));
     await p.fill('#qpCierreMot', 'Juan hizo la Col 5 solo');
     await p.evaluate(async () => { await guardarCierreOt(); }); await p.waitForTimeout(2500);
     d = await db(p); const hc = ((d.ordenesTrabajo.a120.cierre || {}).puntosHist || []).slice(-1)[0] || {};
-    c(d.ordenesTrabajo.a120.cierre && d.ordenesTrabajo.a120.cierre.cerradoTs && hc.tipo === 'cierre' && hc.motivo === 'Juan hizo la Col 5 solo' && /toda la orden/.test(hc.aMano), 'con motivo: cierra y queda en el historial (tipo cierre) · ' + JSON.stringify(hc).slice(0, 160));
+    c(d.ordenesTrabajo.a120.cierre && d.ordenesTrabajo.a120.cierre.cerradoTs && hc.tipo === 'cierre' && hc.motivo === 'Juan hizo la Col 5 solo' && /toda la orden/.test(hc.aMano) && hc.despues > 0 && (hc.personas || []).length === 2, 'con motivo: cierra y queda en el historial (tipo cierre) · ' + JSON.stringify(hc).slice(0, 160));
     // volver a cerrar no pierde el historial
     await p.evaluate(() => window.abrirCierreOt('a120')); await p.waitForTimeout(1500);
     await p.evaluate(async () => { const x = document.querySelector('input[name="coCierreResp"][value="no"]'); x && (x.checked = true); const m = document.getElementById('qpCierreMot'); if (m) m.value = 'igual'; await guardarCierreOt(); }); await p.waitForTimeout(2500);

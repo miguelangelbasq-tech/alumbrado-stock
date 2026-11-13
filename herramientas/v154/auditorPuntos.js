@@ -205,7 +205,7 @@
   }
   function criteriosDe(o, k, persona) {
     const f = o ? fechaOt(o) : "";
-    return criterios().filter((c) => (!c.tarea || !k || c.tarea === k) && (!c.persona || !persona || nk(c.persona) === nk(persona)) && (!c.otId || !o || c.otId === o.id) && (!c.desde || !f || c.desde <= f)).map((c) => ({ texto: c.texto, tarea: c.tarea ? labelDe(c.tarea) : "", persona: c.persona || "", desde: c.desde || "", por: c.porNombre || c.por || "", fecha: fTs(c.ts) }));
+    return criterios().filter((c) => (!c.tarea || !k || c.tarea === k) && (!c.persona || !persona || nk(c.persona) === nk(persona)) && (!c.otId || !o || c.otId === o.id)).map((c) => ({ texto: c.texto, ...(c.desde && f && c.desde > f ? { ojo: "es de después de esta orden (rige desde el " + fC(c.desde) + ")" } : {}), tarea: c.tarea ? labelDe(c.tarea) : "", persona: c.persona || "", desde: c.desde || "", por: c.porNombre || c.por || "", fecha: fTs(c.ts) }));
   }
 
   // ===================================================================== explicar una orden
@@ -555,7 +555,7 @@
       return { tipo: it.tipo, spec: { tipo: it.tipo, otId: R.otId, cambios: it.cambios, motivo }, titulo: `✏ ${R.numero}: ${R.tareas.map((t) => `${t.label} ${fN(t.antes)} → ${fN(t.despues)}`).join(" · ")}`, detalle: R.personas.filter((p) => p.cambia).map((p) => `${primer(p.nombre)} ${fN(p.antes)} → ${fN(p.despues)}`).join(", "), avisos: R.avisos || [] };
     }
     if (it.tipo === "puntos_persona") { const R = planPersona(it.otId, it.puntos || {}, motivo); if (R.err) return { err: R.err }; return { tipo: it.tipo, spec: { tipo: it.tipo, otId: R.otId, nuevo: R.nuevo, motivo }, titulo: `⭐ ${R.numero}: ${R.personas.map((p) => `${primer(p.nombre)} ${fN(p.antes)} → ${fN(p.despues)}`).join(", ")}`, detalle: "", avisos: R.avisos }; }
-    if (it.tipo === "valor_tarea") { const R = planValor(it.tarea, it.puntos, motivo); if (R.err) return { err: R.err }; return { tipo: it.tipo, spec: { tipo: it.tipo, k: R.k, despues: R.despues, motivo }, titulo: `🏷 «${R.label}»: ${fN(R.antes)} → ${fN(R.despues)} por ${R.un}`, detalle: "desde ahora (las cerradas no cambian)", avisos: [] }; }
+    if (it.tipo === "valor_tarea") { const R = planValor(it.tarea, it.puntos, motivo); if (R.err) return { err: R.err }; return { tipo: it.tipo, spec: { tipo: it.tipo, k: R.k, despues: R.despues, motivo }, titulo: `🏷 «${R.label}»: ${fN(R.antes)} → ${fN(R.despues)} por ${R.un}`, detalle: "desde ahora (las cerradas no cambian)", avisos: R.avisos || [] }; }
     if (it.tipo === "nota") { const R = planNota(Object.assign({}, it, { texto: it.texto || motivo })); if (R.err) return { err: R.err }; return { tipo: it.tipo, spec: R, titulo: `📒 ${R.numero ? R.numero + ": " : "Criterio: "}«${R.texto.slice(0, 120)}»`, detalle: "", avisos: [] }; }
     if (it.tipo === "mover") { if (!motivo) return { err: "Falta el motivo." }; const R = planMover(it, motivo); if (R.err) return { err: R.err }; const a1 = planUno(R.specs[0]), a2 = planUno(R.specs[1]); if (a1.err || a2.err) return { err: a1.err || a2.err }; return { tipo: "mover", specs: R.specs, titulo: `↔ «${labelDe(R.specs[0].cambios[0].tarea)}»: ${a1.titulo.replace(/^✏ /, "")} · ${a2.titulo.replace(/^✏ /, "")}`, detalle: [a1.detalle, a2.detalle].filter(Boolean).join(" · "), avisos: [R.aviso].concat(a1.avisos, a2.avisos) }; }
     return { err: `No sé hacer «${it.tipo}».` };
@@ -666,8 +666,8 @@
       const r = await gco.apply(this, arguments);
       const o2 = id ? otDe(id) : null;
       if (o2 && o2.cierre && o2.cierre.cerradoTs && (x || histAntes.length) && !Array.isArray(o2.cierre.puntosHist)) {
-        const f = fijaDe(o2), personas = f ? f.porPersona.map((p) => { const a = perAntes.find((y) => nk(y.nombre) === nk(canon(p.nombre))); return { nombre: canon(p.nombre), antes: a ? a.pts : 0, despues: r2(p.pts) }; }) : [];
-        const hist = histAntes.concat(x ? [{ ts: Date.now(), por: yoMail(), porNombre: yoNombre(), tipo: "cierre", antes: totAntes, despues: f ? r2(f.total) : 0, motivo: mot, porAsistente: false, aMano: x.man ? "reparto de toda la orden" : "", tareas: x.tareas.map((k) => ({ k, tarea: labelDe(k) })), personas }] : []).slice(-20);
+        const f = fijaDe(o2) || (() => { const V = cuenta(o2, null); return { total: V.total, porPersona: V.personas }; })(), personas = f.porPersona.map((p) => { const a = perAntes.find((y) => nk(y.nombre) === nk(canon(p.nombre))); return { nombre: canon(p.nombre), antes: a ? a.pts : 0, despues: r2(p.pts) }; });
+        const hist = histAntes.concat(x ? [{ ts: Date.now(), por: yoMail(), porNombre: yoNombre(), tipo: "cierre", antes: totAntes, despues: r2(f.total), motivo: mot, porAsistente: false, aMano: x.man ? "reparto de toda la orden" : "", tareas: x.tareas.map((k) => ({ k, tarea: labelDe(k) })), personas }] : []).slice(-20);
         try { await window.fbOtUpdate(o2.id, { "cierre.puntosHist": hist }); o2.cierre = Object.assign({}, o2.cierre, { puntosHist: hist }); } catch (e) { console.warn("[cierre hist]", e); }
       }
       return r;
