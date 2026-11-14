@@ -84,6 +84,18 @@
       case 'ubicacionVivo': if (localStorage.getItem('stub.sinReglas083')) return false; return leer ? leeTodo() : (crear || act) ? (noDir() && id === uid) : esAdmin;   // v155
       // v089: Proyectista — solo Administración y Oficina
       case 'proyectos': if (localStorage.getItem('stub.sinReglas089')) return false; return leer ? leeTodo() : adminUOficina();   // v155
+      // v155: avisos de la cuadrilla a la oficina («📨 Para resolver»): cada uno crea los suyos (estado «nuevo», solo sus campos);
+      // los leen Administración, Oficina y Dirección (y cada uno los suyos: get del suyo o consulta con uid == el suyo);
+      // los marcan (visto / resuelto / respuesta) Administración y Oficina. Nadie los borra.
+      case 'avisosCuadrilla': {
+        if (localStorage.getItem('stub.sinReglas155')) return false;
+        const CAMPOS = ['uid', 'email', 'nombre', 'persona', 'personaClave', 'rol', 'texto', 'tipo', 'otId', 'otNumero', 'obraId', 'obraNombre', 'fotoId', 'fotoMini', 'ts', 'fecha', 'hora', 'estado', 'para', 'porAsistente'];
+        if (op === 'get') return leeTodo() || (confirmado && !!viejo && viejo.uid === uid);
+        if (op === 'list') return leeTodo() || (confirmado && ((nuevo || {}).__filtros || []).some((f) => f[0] === 'uid' && f[1] === '==' && f[2] === uid));
+        if (crear) return noDir() && (nuevo || {}).uid === uid && (nuevo || {}).estado === 'nuevo' && Object.keys(nuevo || {}).every((k) => CAMPOS.includes(k));
+        if (act) return adminUOficina() && soloCampos(['estado', 'vistoTs', 'vistoPor', 'respuesta', 'respTs', 'respPor', 'respPorNombre', 'resueltoTs', 'resueltoPor']);
+        return false;
+      }
       default: return false;
     }
   };

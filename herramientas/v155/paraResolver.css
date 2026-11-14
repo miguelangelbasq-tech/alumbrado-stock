@@ -1,0 +1,39 @@
+/* v155 · «📨 Para resolver»: los avisos de la cuadrilla (y del pañol y «solo mirar») a la oficina */
+#prOv .pr-caja{background:var(--bg,#EAF2F7);width:100%;max-width:720px;max-height:92vh;overflow-y:auto;overflow-x:hidden;border-radius:26px 26px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px));color:var(--text,#0D1424);font-family:var(--fuente);text-align:left;box-shadow:0 -20px 60px -20px rgba(13,20,36,.45)}
+@media (min-width:641px){#prOv .pr-caja{border-radius:26px;max-height:88vh}}
+#prOv button{font:inherit;cursor:pointer;letter-spacing:normal;text-transform:none}
+#prOv .pr-top{display:flex;align-items:center;margin-bottom:10px}
+#prOv .pr-top>div{flex:1 1 auto;min-width:0;margin-left:10px}
+#prOv .pr-top b{display:block;font:800 18px var(--fuente)}
+#prOv .pr-top small{display:block;font-size:12.5px;color:var(--text-soft)}
+#prOv .pr-x{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line,rgba(40,40,94,.12));background:#fff;color:var(--navy);font-size:18px;margin:0;padding:0}
+#prOv .pr-tabs{display:flex;background:rgba(40,40,94,.07);border-radius:999px;padding:3px;margin-bottom:10px}
+#prOv .pr-tabs button{flex:1 1 0;min-height:40px;border-radius:999px;border:0;background:none;font-weight:600;font-size:13.5px;color:var(--text-soft);margin:0}
+#prOv .pr-tabs button.on{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(40,40,94,.15)}
+#prOv .pr-item{background:rgba(255,255,255,.86);border:1px solid var(--canto,rgba(255,255,255,.8));border-left:4px solid #89C2DB;border-radius:18px;padding:12px 14px;margin-top:10px;box-shadow:0 12px 30px -24px rgba(40,40,94,.5)}
+#prOv .pr-item.rojo{border-left-color:#FF3B30;background:linear-gradient(135deg,rgba(255,59,48,.07),rgba(255,255,255,.9))}
+#prOv .pr-cab{display:flex;align-items:center;flex-wrap:wrap}
+#prOv .pr-cab>*{margin-right:8px}
+#prOv .pr-cab small{margin-left:auto;margin-right:0;font:500 11px var(--mono);color:var(--text-3)}
+#prOv .pr-tipo{font:700 12px var(--fuente);padding:4px 9px;border-radius:999px;background:rgba(30,111,145,.12);color:#1E6F91}
+#prOv .pr-tipo.rojo{background:rgba(255,59,48,.14);color:#B42318}
+#prOv .pr-est{font:600 11.5px var(--fuente);color:var(--text-soft)}
+#prOv .pr-est.nu{color:#B25E00}#prOv .pr-est.ok{color:#1B7A35}
+#prOv .pr-cuerpo{display:flex;align-items:flex-start;margin-top:8px}
+#prOv .pr-cuerpo>div{flex:1 1 auto;min-width:0}
+#prOv .pr-cuerpo b{font-size:14px}
+#prOv .pr-cuerpo small{display:block;font-size:12px;color:var(--text-soft)}
+#prOv .pr-cuerpo p{margin:4px 0 0;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+#prOv .pr-foto{flex:none;width:56px;height:56px;border-radius:12px;overflow:hidden;border:0;padding:0;margin:0 10px 0 0;background:#e3eef5}
+#prOv .pr-foto img{width:100%;height:100%;object-fit:cover;display:block}
+#prOv .pr-r{margin-top:6px;font-size:12.5px;color:#1B7A35}
+#prOv .pr-acc{display:flex;flex-wrap:wrap;margin-top:8px}
+#prOv .pr-acc button{width:auto;margin:0 8px 6px 0;min-height:44px;padding:0 16px}
+#prOv .pr-resp{display:block;margin-top:8px;font-size:12.5px;color:var(--text-soft)}
+#prOv .pr-resp textarea{display:block;width:100%;box-sizing:border-box;margin-top:4px;font-size:16px;border-radius:12px;border:1px solid var(--line,rgba(40,40,94,.15));padding:8px 10px}
+#prOv .pr-msg{font-size:13px;padding:8px 12px;border-radius:12px;background:rgba(30,111,145,.1);margin-top:6px}
+#prOv .pr-msg.rj{background:rgba(255,59,48,.1);color:#7a1b14}
+#prOv .pr-nada{font-size:14px;color:var(--text-soft);padding:16px 4px}
+#prOv .pr-pie{font-size:11.5px;color:var(--text-3);margin-top:12px}
+#menuParaResolver .pr-bd{display:inline-block;min-width:18px;height:18px;border-radius:9px;background:var(--danger,#FF3B30);color:#fff;font:700 10.5px/18px var(--mono);text-align:center;padding:0 5px;margin-left:6px}
+#prAvisarA{width:100%;font-size:16px}
