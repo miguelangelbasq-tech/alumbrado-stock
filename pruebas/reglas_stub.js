@@ -8,6 +8,7 @@
     // v049: cuadrilla y operario = personal de obra (solo miran; marcan sus tareas por soyDeLaOrden)
     cuadrilla: { inicio:'ver',registro:'oculto',calc:'ver',parte:'oculto',plan:'ver',avance:'oculto',mapa:'ver',stock:'ver',informe:'oculto',gastos:'oculto',produccion:'oculto',normas:'ver' },
     operario:  { inicio:'ver',registro:'oculto',calc:'ver',parte:'oculto',plan:'ver',avance:'oculto',mapa:'ver',stock:'ver',informe:'oculto',gastos:'oculto',produccion:'oculto',normas:'ver' },
+    direccion: { inicio:'ver',registro:'ver',calc:'ver',parte:'ver',plan:'ver',avance:'ver',mapa:'ver',stock:'ver',informe:'ver',gastos:'ver',produccion:'ver',normas:'ver' },   // v155: Dirección mira todo, no escribe
     mirar:     { inicio:'ver',registro:'ver',calc:'ver',parte:'ver',plan:'ver',avance:'ver',mapa:'ver',stock:'ver',informe:'ver',gastos:'oculto',produccion:'oculto',normas:'ver' }
   };
   const has = (o, k) => o && Object.prototype.hasOwnProperty.call(o, k);
@@ -17,18 +18,20 @@
     const yo = (uid && DB.usuarios && DB.usuarios[uid]) || null;
     const activo = !!yo && yo.activo !== false;
     const confirmado = activo && yo.pendiente !== true;
-    const rol = (yo && yo.rol) || 'mirar';
+    const rol0 = (yo && yo.rol) || 'mirar', rol = rol0 === 'direccion' && typeof window != 'undefined' && window.__reglasSinV155 ? 'mirar' : rol0;   // v155: __reglasSinV155 = las reglas de antes (Dirección cae a «mirar»)
     const esAdmin = confirmado && rol === 'admin';
     const nivel = h => { const base = (ROLES[rol] || ROLES.mirar)[h] || 'ver'; const aj = (yo && yo.ajustes) || {}; return has(aj, h) ? aj[h] : base; };
     const edita = h => confirmado && nivel(h) === 'editar';
     const lee = h => confirmado && nivel(h) !== 'oculto';
     const equipo = () => ['inicio', 'avance', 'stock', 'parte', 'registro', 'calc'].some(lee);
     const adminUOficina = () => confirmado && ['admin', 'oficina'].includes(rol);
+    const leeTodo = () => confirmado && ['admin', 'oficina', 'direccion'].includes(rol);   // v155
+    const noDir = () => confirmado && rol !== 'direccion';   // v155
     const diff = () => { const k = new Set([...Object.keys(viejo || {}), ...Object.keys(nuevo || {})]); return [...k].filter(x => JSON.stringify((viejo || {})[x]) !== JSON.stringify((nuevo || {})[x])); };
     const soloCampos = l => diff().every(k => l.includes(k));
     const renombraObra = () => (edita('registro') || edita('avance')) && soloCampos(['plazaNombre', 'obraId', 'barrio', 'destino', 'nombre', 'id', 'form', 'obra']);
     const miClave = () => (yo && yo.personaClave) || '';
-    const soyDeLaOrden = d => confirmado && miClave() !== '' && Array.isArray(d && d.personalNombres) && d.personalNombres.includes(miClave());
+    const soyDeLaOrden = d => confirmado && rol !== 'direccion' && miClave() !== '' && Array.isArray(d && d.personalNombres) && d.personalNombres.includes(miClave());
     const marcaCampo = () => soyDeLaOrden(viejo) && soloCampos(['campo', 'estado']) && ['Emitida', 'En curso'].includes((nuevo || {}).estado || '') && ['Emitida', 'En curso'].includes((viejo || {}).estado || '');   // v128
     const otDe = d => { const o = d && d.otId; return o && DB.ordenesTrabajo && DB.ordenesTrabajo[o]; };
     // v125 (fotoLibre): la cuadrilla crea fotos de cualquier obra sin orden; window.__reglasSinV125 = true simula las reglas de antes
@@ -44,7 +47,8 @@
       case 'configEquipo':
         if (id === 'alias') return leer ? true : esAdmin;
         if (!id) return false;   // listar configEquipo: no hay regla de colección
-        if (id === 'presencia' || id === 'salud') return confirmado;
+        if (id === 'presencia') return confirmado;
+        if (id === 'salud') return leer ? confirmado : noDir();   // v155
         if (id === 'baremo') return leer ? confirmado : edita('produccion');
         if (id === 'personal') return leer ? confirmado : (edita('produccion') || edita('parte'));
         if (id === 'cuadrillas') return leer ? confirmado : edita('parte');
@@ -54,7 +58,7 @@
         if (id === 'ubicacion') return localStorage.getItem('stub.sinReglas083') ? false : (leer ? confirmado : adminUOficina());   // v083
         if (id === 'precios') return leer ? equipo() : (edita('informe') || edita('avance') || edita('gastos') || edita('produccion'));
         return false;
-      case 'tableros': return confirmado;
+      case 'tableros': return leer ? confirmado : noDir();   // v155
       case 'auditoria': return leer ? equipo() : crear ? (confirmado && (nuevo || {}).usuario === email) : false;
       case 'movimientos': return R(equipo(), edita('stock') || edita('avance'), edita('stock') || renombraObra(), edita('stock'));
       case 'catalogoProductos': return leer ? equipo() : (edita('stock') || edita('calc'));
@@ -77,9 +81,9 @@
       case 'pushSubs': return leer ? false : (crear || act) ? (logueado && (nuevo || {}).uid === uid) : (logueado && (viejo || {}).uid === uid);
       case 'avisosPush': return crear ? (confirmado && (nuevo || {}).enviado === false) : false;
       // v083: ubicación en vivo — cada uno escribe la suya; la ven Administración y Oficina
-      case 'ubicacionVivo': if (localStorage.getItem('stub.sinReglas083')) return false; return leer ? adminUOficina() : (crear || act) ? (confirmado && id === uid) : esAdmin;
+      case 'ubicacionVivo': if (localStorage.getItem('stub.sinReglas083')) return false; return leer ? leeTodo() : (crear || act) ? (noDir() && id === uid) : esAdmin;   // v155
       // v089: Proyectista — solo Administración y Oficina
-      case 'proyectos': if (localStorage.getItem('stub.sinReglas089')) return false; return adminUOficina();
+      case 'proyectos': if (localStorage.getItem('stub.sinReglas089')) return false; return leer ? leeTodo() : adminUOficina();   // v155
       default: return false;
     }
   };

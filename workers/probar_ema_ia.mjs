@@ -70,7 +70,7 @@ const base = (extra = {}) => ({ model: "claude-haiku-5-5", max_tokens: 1000, mes
 // ---------- /salud
 {
   const { r, j } = await pedir("/salud", { metodo: "GET" });
-  prueba("/salud responde 200 con versión v4-ia, stream:true, los modelos, gastoMes y tope", r.status === 200 && j.ok && j.version === "v4-ia" && j.stream === true && j.gastoMes === 0 && j.tope === 100 && j.modelos.includes("claude-fable-5-2") && j.modelos.includes("claude-opus-5-5"));
+  prueba("/salud responde 200 con versión v5-ia, stream:true, los modelos, gastoMes y tope", r.status === 200 && j.ok && j.version === "v5-ia" && j.stream === true && j.gastoMes === 0 && j.tope === 100 && j.modelos.includes("claude-fable-5-2") && j.modelos.includes("claude-opus-5-5"));
   prueba("/salud dice clave:true y kv:false (con aviso)", j.clave === true && j.kv === false && !!j.aviso);
   const s2 = await pedir("/salud", { metodo: "GET", e: {} });
   prueba("/salud sin secret dice clave:false", s2.j.clave === false);
@@ -256,7 +256,7 @@ const tk = (uid, extra) => firmar(cuerpoToken(uid, extra));
   const l0 = lecturasFs, t = await tk("c-1");
   let r = await pedir("/ia", { token: t, cuerpo: pregunta(), e: E });
   prueba("v3: el Worker lee usuarios/{uid} y configEquipo/personal por REST con el MISMO token de la persona", r.r.status === 200 && lecturasFs - l0 === 2 && tokensFs.slice(-2).every((x) => x === "Bearer " + t));
-  prueba("v3: la respuesta trae ema.version v4-ia y el uso del día (rol cuadrilla, 1 de 10)", r.j.ema.version === "v4-ia" && r.j.ema.uso.rol === "cuadrilla" && r.j.ema.uso.preguntasHoy === 1 && r.j.ema.uso.topePreguntas === 10 && r.j.ema.uso.quedanPreguntas === 9 && !("gastoMes" in r.j.ema.freno));
+  prueba("v3: la respuesta trae ema.version v5-ia y el uso del día (rol cuadrilla, 1 de 10)", r.j.ema.version === "v5-ia" && r.j.ema.uso.rol === "cuadrilla" && r.j.ema.uso.preguntasHoy === 1 && r.j.ema.uso.topePreguntas === 10 && r.j.ema.uso.quedanPreguntas === 9 && !("gastoMes" in r.j.ema.freno));
   await pedir("/ia", { token: t, cuerpo: pregunta(), e: E });
   prueba("v3: el rol y los límites quedan guardados (no vuelve a leer la base en el pedido siguiente)", lecturasFs - l0 === 2 && E.IA_KV.get && JSON.parse(E.kv.get("rol:c-1")).rol === "cuadrilla");
   // ---- topes por rol y día: cuadrilla 10 (con 2 hechas: 8 más pasan, la 11.ª no)
@@ -323,6 +323,37 @@ const tk = (uid, extra) => firmar(cuerpoToken(uid, extra));
   prueba("v3: rol apagado en ⚙ (solo admin y oficina) → la cuadrilla recibe rol_apagado y oficina pasa", r.r.status === 403 && r.j.error.tipo === "rol_apagado" && r3.r.status === 200);
   CONFIG = null;
 }
+// ---------- v5-ia (v155): el rol «Dirección»
+{
+  Object.assign(USUARIOS, { "d-1": { rol: "direccion", nombre: "Roberto Directo" } });
+  CONFIG = null;
+  const E = { ...env, IA_POR_MINUTO: "500", ...nuevoKv() }, t = await tk("d-1");
+  let r = await pedir("/ia", { token: t, cuerpo: pregunta(), e: E });
+  prueba("v5: Dirección se reconoce (no cae a «Solo mirar»): 30 preguntas por día y ve el gasto del mes", r.r.status === 200 && r.j.ema.uso.rol === "direccion" && r.j.ema.uso.topePreguntas === 30 && r.j.ema.version === "v5-ia" && typeof r.j.ema.freno.gastoMes === "number");
+  const u = await pedir("/uso", { metodo: "GET", token: t, e: E });
+  prueba("v5: Dirección ve /uso (gasto del mes por parte y persona)", u.r.status === 200 && u.j.ok === true);
+  const m = await pedir("/mio", { metodo: "GET", token: t, e: E });
+  prueba("v5: /mio de Dirección dice rol direccion, habilitado y 30 de tope", m.r.status === 200 && m.j.rol === "direccion" && m.j.habilitado === true && m.j.topePreguntas === 30);
+  // límites guardados por la app antes de la v155 (sin Dirección en la lista): Dirección queda prendida
+  CONFIG = { roles: ["admin", "oficina"], limites: { roles: { direccion: { preguntas: 5, remitos: 0 } }, mes: { tope: 100, pausaPct: 80, cortePct: 95 } } };
+  const E2 = { ...env, IA_POR_MINUTO: "500", ...nuevoKv() };
+  r = await pedir("/ia", { token: await tk("d-1"), cuerpo: pregunta(), e: E2 });
+  prueba("v5: lista de prendidos de antes de la v155 → Dirección sigue prendida, con su tope de ⚙ (5)", r.r.status === 200 && r.j.ema.uso.topePreguntas === 5);
+  CONFIG = { roles: ["admin", "oficina"], rolesConDir: true };
+  const E3 = { ...env, IA_POR_MINUTO: "500", ...nuevoKv() };
+  r = await pedir("/ia", { token: await tk("d-1"), cuerpo: pregunta(), e: E3 });
+  prueba("v5: apagada en ⚙ (lista nueva sin Dirección) → rol_apagado", r.r.status === 403 && r.j.error.tipo === "rol_apagado");
+  // freno del mes: en pausa (80 %) Dirección sigue, como Oficina
+  CONFIG = null;
+  const E4 = { ...env, IA_POR_MINUTO: "500", ...nuevoKv() };
+  const mes = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 7);
+  await conDatos(E4, "g:" + mes, { usd: 85, partes: { preguntas: 85, remitos: 0, supervisor: 0 }, personas: {}, aviso: true });
+  r = await pedir("/ia", { token: await tk("d-1"), cuerpo: pregunta(), e: E4 });
+  const rm = await pedir("/ia", { token: await tk("m-1"), cuerpo: pregunta(), e: E4 });
+  prueba("v5: en pausa (≥ 80) Dirección sigue y «Solo mirar» queda frenado", r.r.status === 200 && rm.r.status === 429);
+  CONFIG = null;
+}
+
 {
   // ---- freno del mes: pausa a 80, corte a 95, aviso una vez, reinicio el día 1
   const E = { ...env, IA_POR_MINUTO: "500", ...nuevoKv() }, mes = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 7);
@@ -342,7 +373,7 @@ const tk = (uid, extra) => firmar(cuerpoToken(uid, extra));
   const ra = await pedir("/ia", { token: await tk("a-1"), cuerpo: pregunta(), e: E });
   prueba("v3: a los 95 USD se corta para todos menos Administración («Se renueva el día 1»)", r.r.status === 429 && r.j.error.tipo === "tope_mes" && r.j.error.mensaje === "El asistente llegó al tope de gasto del mes. Se renueva el día 1." && ra.r.status === 200);
   const s = await pedir("/salud", { metodo: "GET", e: E });
-  prueba("/salud muestra gastoMes y tope", s.j.version === "v4-ia" && s.j.gastoMes >= 95 && s.j.tope === 100 && s.j.kv === true);
+  prueba("/salud muestra gastoMes y tope", s.j.version === "v5-ia" && s.j.gastoMes >= 95 && s.j.tope === 100 && s.j.kv === true);
   // reinicio de mes
   const real = Date.now, mas = 32 * 86400e3; Date.now = () => real() + mas;
   try {
@@ -420,7 +451,7 @@ const tk = (uid, extra) => firmar(cuerpoToken(uid, extra));
   prueba("v4: stream:true pasa a Claude", visto && visto.stream === true);
   prueba("v4: la respuesta es text/event-stream con los eventos de Claude tal cual (en orden)", r.status === 200 && /event-stream/.test(r.headers.get("Content-Type")) && tx.indexOf(ev(EVS("claude-haiku-5-5")[3])) > 0 && tx.indexOf("message_stop") < tx.indexOf("event: ema") && r.headers.get("Access-Control-Allow-Origin") === ORIGEN);
   const m = /event: ema\ndata: (.+)\n\n$/.exec(tx), ema = m ? JSON.parse(m[1]) : null;
-  prueba("v4: al final, «event: ema» con el costo calculado igual que sin stream (0,00037) y la versión", ema && Math.abs(ema.costoUsd - 0.00037) < 1e-9 && ema.version === "v4-ia" && ema.uso && ema.uso.preguntasHoy === 1 && ema.modelo === "claude-haiku-5-5");
+  prueba("v4: al final, «event: ema» con el costo calculado igual que sin stream (0,00037) y la versión", ema && Math.abs(ema.costoUsd - 0.00037) < 1e-9 && ema.version === "v5-ia" && ema.uso && ema.uso.preguntasHoy === 1 && ema.modelo === "claude-haiku-5-5");
   const r2 = await pedir("/ia", { token: t, cuerpo: base({ stream: true }), e: E });
   respuestaClaude = null;
   const m2 = /event: ema\ndata: (.+)\n\n$/.exec(r2.tx), e2 = m2 ? JSON.parse(m2[1]) : null;
@@ -433,7 +464,7 @@ const tk = (uid, extra) => firmar(cuerpoToken(uid, extra));
   prueba("v4: juntarUsage junta la entrada de message_start con la salida de message_delta", JSON.stringify(juntarUsage(juntarUsage({}, { input_tokens: 5, output_tokens: 1 }), { output_tokens: 9 })) === JSON.stringify({ input_tokens: 5, output_tokens: 9 }));
   // sin stream, igual que antes
   const r4 = await pedir("/ia", { token: t, cuerpo: base(), e: E });
-  prueba("v4: sin stream la respuesta sigue siendo JSON con ema", r4.r.status === 200 && r4.j.content[0].text === "Hola Ángel" && r4.j.ema.version === "v4-ia");
+  prueba("v4: sin stream la respuesta sigue siendo JSON con ema", r4.r.status === 200 && r4.j.content[0].text === "Hola Ángel" && r4.j.ema.version === "v5-ia");
 }
 
 // ---------- la clave nunca aparece

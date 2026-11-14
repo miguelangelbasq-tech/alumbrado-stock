@@ -1,4 +1,8 @@
 // Worker «ema-ia» (Cloudflare) · Pase seguro entre la app y Claude para el «Asistente EMA» — EMA Servicios.
+// v5-ia (v155): reconoce el rol «Dirección» (gerencia / presidencia / dueño): sus topes de entrada son los de Oficina
+// (30 preguntas y 40 remitos por día, se cambian en el asistente › ⚙ › Límites), no se pausa al 80 % del freno del mes (como
+// Oficina; al 95 % se corta para todos menos Administración) y ve /uso. Antes caía a «Solo mirar» (10 preguntas). Si los
+// límites guardados por la app son de antes de la v155 (sin Dirección en la lista de prendidos), Dirección queda prendida.
 // v4-ia (v149): respuesta que se va mostrando mientras llega («stream»). Si la app manda  stream: true, el pedido va a
 // Claude con stream y el Worker reenvía los eventos (SSE) tal cual, a medida que llegan. Al terminar suma el costo igual que
 // siempre (con el «usage» que viene en los eventos) y agrega un último evento  «event: ema»  con {costoUsd, modelo, version,
@@ -40,7 +44,7 @@
 //  · IA_LIMITES         (opcional, JSON)      = topes por rol si la app no guardó otros, ej. {"oficina":{"preguntas":30,"remitos":40}}.
 // Ligadura recomendada (Settings › Bindings › KV namespace):  IA_KV  → cuenta bien aunque Cloudflare use varias copias del
 //  Worker. Sin KV cuenta en memoria (aproximado: cada copia lleva su cuenta) y /salud lo avisa.
-// Rutas: POST /ia · GET /salud · GET /uso (Administración y Oficina) · GET /mio.
+// Rutas: POST /ia · GET /salud · GET /uso (Administración, Oficina y Dirección) · GET /mio.
 // Reglas de la API para Opus 5.5 / Fable 5.2 / Sonnet 5.5 (las cumple este Worker aunque la app mande otra cosa):
 //  · nunca temperature / top_p / top_k ni «thinking» (el pensamiento va siempre prendido: se controla con output_config.effort);
 //  · tool_choice solo «auto» o «none» (forzar una herramienta da 400);
@@ -48,7 +52,7 @@
 //    filtros, el servidor lo reintenta solo con el modelo que recomienda. (Haiku no tiene respaldo: ahí no se manda.)
 // Sin SDK: es un fetch directo, para poder pegarlo a mano en el panel de Cloudflare (desde la v4 con stream opcional).
 
-const VERSION = "v4-ia";
+const VERSION = "v5-ia";
 
 const PROYECTO = "alumbrado-stock";
 const API_URL = "https://api.anthropic.com/v1/messages";
@@ -181,7 +185,7 @@ async function leerDoc(ruta, token, campos) {
 }
 
 // ---------- Quién es (rol leído de la base, nunca de la app). 10 min guardado.
-const ROLES = ["admin", "oficina", "panol", "cuadrilla", "operario", "mirar"];
+const ROLES = ["admin", "oficina", "direccion", "panol", "cuadrilla", "operario", "mirar"];   // v5: + direccion
 async function quienEs(env, uid, token) {
   const k = "rol:" + uid, ya = await guardadoLeer(env, k);
   if (ya && ya.rol) return ya;
@@ -198,7 +202,7 @@ async function quienEs(env, uid, token) {
 // ---------- Límites: configEquipo/personal → asistente.limites / asistente.roles; si no hay, variables del Worker; si no, estos
 const LIM_DEF = {
   // null = sin tope · 0 = no puede
-  roles: { admin: { preguntas: null, remitos: null }, oficina: { preguntas: 30, remitos: 40 }, panol: { preguntas: 20, remitos: 40 }, cuadrilla: { preguntas: 10, remitos: 0 }, operario: { preguntas: 10, remitos: 0 }, mirar: { preguntas: 10, remitos: 0 } },
+  roles: { admin: { preguntas: null, remitos: null }, oficina: { preguntas: 30, remitos: 40 }, direccion: { preguntas: 30, remitos: 40 }, panol: { preguntas: 20, remitos: 40 }, cuadrilla: { preguntas: 10, remitos: 0 }, operario: { preguntas: 10, remitos: 0 }, mirar: { preguntas: 10, remitos: 0 } },
   mes: { tope: 100, pausaPct: 80, cortePct: 95 },
 };
 const PAUSADOS = ["panol", "cuadrilla", "operario", "mirar"];
@@ -219,7 +223,7 @@ function mezclar(L, a) {
     const t = numOk(lim.mes.tope), p = numOk(lim.mes.pausaPct), c = numOk(lim.mes.cortePct);
     if (t > 0) L.mes.tope = t; if (p > 0 && p <= 100) L.mes.pausaPct = p; if (c > 0 && c <= 100) L.mes.cortePct = c;
   }
-  if (Array.isArray(a.roles) && a.roles.length) L.habilitados = a.roles.filter((r) => ROLES.includes(r)).concat(["admin"]);
+  if (Array.isArray(a.roles) && a.roles.length) L.habilitados = a.roles.filter((r) => ROLES.includes(r)).concat(["admin"]).concat(a.rolesConDir ? [] : ["direccion"]);   // v5: listas guardadas antes de Dirección
   return L;
 }
 async function limites(env, token) {
@@ -259,7 +263,7 @@ function clasificar(cuerpo, p, rol) {
   if (t === "supervisor" && (rol === "admin" || rol === "oficina")) return "supervisor";
   return "pregunta";
 }
-const ROL_TXT = { admin: "Administración", oficina: "Oficina", panol: "Pañol", cuadrilla: "Cuadrilla", operario: "Operario", mirar: "Solo mirar" };
+const ROL_TXT = { admin: "Administración", oficina: "Oficina", direccion: "Dirección", panol: "Pañol", cuadrilla: "Cuadrilla", operario: "Operario", mirar: "Solo mirar" };
 
 // ---------- Armar el pedido para Claude: solo los campos permitidos
 function armarPedido(b) {
@@ -440,7 +444,7 @@ async function pedidoIa(request, env, origen) {
   if (nv2.nivel && !G2.aviso) { G2.aviso = true; avisar = true; } // una vez por mes: la app le avisa a Administración
   await guardadoPoner(env, "g:" + mes, G2, 40 * 86400);
   const qHoy = D.q + (nueva ? 1 : 0), rHoy = D.r + (tipo === "remito" ? 1 : 0);
-  const of = rol === "admin" || rol === "oficina";
+  const of = rol === "admin" || rol === "oficina" || rol === "direccion";
   return {
     costoUsd: costo, modelo: modeloResp || p.model, version: VERSION,
     uso: { rol, tipo, preguntasHoy: qHoy, topePreguntas: tq, remitosHoy: rHoy, topeRemitos: tr, quedanPreguntas: tq == null ? null : Math.max(0, tq - qHoy), quedanRemitos: tr == null ? null : Math.max(0, tr - rHoy) },
@@ -498,7 +502,7 @@ function reenviarStream(r, cuentas, origen) {
 async function uso(request, env, origen) {
   const id = await identificar(request, env);
   if (id.err) return error(id.err[0], id.err[1], id.err[2], origen);
-  if (id.yo.rol !== "admin" && id.yo.rol !== "oficina") return error("permiso", "Esto lo ven solo Administración y Oficina.", 403, origen);
+  if (id.yo.rol !== "admin" && id.yo.rol !== "oficina" && id.yo.rol !== "direccion") return error("permiso", "Esto lo ven solo Administración, Oficina y Dirección.", 403, origen);
   const L = await limites(env, id.token), ahora = Date.now(), dia = diaAr(ahora), mes = mesAr(ahora), G = await leerMes(env, mes), nv = nivelMes(L, G.usd);
   const personas = Object.keys(G.personas).map((u) => { const x = G.personas[u], h = x.hoy && x.hoy.dia === dia ? x.hoy : { q: 0, r: 0 };
     return { uid: u, nombre: x.nombre || "", rol: x.rol || "", rolTxt: ROL_TXT[x.rol] || x.rol || "", hoy: { preguntas: h.q, remitos: h.r }, mes: { preguntas: x.q || 0, remitos: x.r || 0, usd: r6(x.usd || 0) }, topes: { preguntas: topeDe(L, x.rol, "preguntas"), remitos: topeDe(L, x.rol, "remitos") } }; })
