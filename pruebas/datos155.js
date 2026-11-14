@@ -32,6 +32,8 @@ function datos155() {
   d.db.fotosObra = { fo1: { plazaId: 'p2', plazaNombre: 'PLAZA LAS ACACIAS', fecha: hoy, cat: 'columna', num: 'Col 1', adjId: 'adjFo1', mini: PNG, por: 'Marcos Ríos', ts: ahora - 6e5 } };
   d.db.gastosObra = { gs1: { plazaId: 'p1', plazaNombre: 'PLAZA LOS ÁLAMOS', fecha: dia(-3), concepto: 'Hormigón', monto: 150000, categoria: 'material' } };
   d.db.configEquipo.precios = {};
+  // un aviso de Pedro a la oficina (de ayer): la cuadrilla no puede leer los avisos de los demás
+  d.db.avisosCuadrilla = { ac0: { uid: 'uPedro', email: 'pedro@' + DOM, nombre: 'Pedro Gómez', persona: 'Pedro Gómez', personaClave: 'pedro gomez', rol: 'cuadrilla', texto: 'Se rompió la pala', tipo: 'problema', otId: '', otNumero: '', obraId: 'p1', obraNombre: 'PLAZA LOS ÁLAMOS', fotoId: '', fotoMini: '', ts: ahora - 864e5, fecha: d.ayer, hora: '10:00', estado: 'nuevo', para: ['admin@' + DOM], porAsistente: true } };
   return d;
 }
 module.exports = { datos155, PNG };

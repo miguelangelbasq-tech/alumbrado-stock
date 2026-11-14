@@ -10,7 +10,10 @@
 //  5) oficina y admin abren «📊 Dirección» (Inicio Ejecutivo, menú, Tablero del dueño); cuadrilla, pañol y mirar no la ven;
 //     Usuarios ofrece el rol; con __v155No nada de esto.
 //  6) los dos detalles de la v154.
-const { abrir, prueba } = require('./h');
+//  7) la cuadrilla le avisa a la oficina por el asistente: Juan (celu) «avisale a Ángel que falta un fusible…» → tarjeta →
+//     «Sí, mandalo» → aviso a Administración y al supervisor, «📨 Para resolver», Ángel responde → le llega a Juan; seguridad en
+//     rojo (Inicio y Supervisor); pañol y mirar también pueden; la cuadrilla no lee los avisos de los demás (reglas).
+const { abrir, otraPagina, prueba } = require('./h');
 const { datos155 } = require('./datos155');
 const cel = process.argv[2] === 'cel';
 const W = 'https://ema-ia.mdiaz-60f.workers.dev';
@@ -255,6 +258,71 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     await foto(p, 'v154_periodo');
     const html = await p.content();
     c(!/usá proponer_corregir_cierre/.test(html) && !/anotar el motivo \(proponer_nota_puntos\)/.test(html) && /Si lo que cambia es lo hecho, usá ✏ Corregir cierre/.test(html), 'los avisos de la tarjeta ya no nombran herramientas: «Si lo que cambia es lo hecho, usá ✏ Corregir cierre»');
+    await A.page.close();
+  }
+
+  // ================================================================= 7) la cuadrilla le avisa a la oficina
+  if (SOLO('7')) {
+    const A = await sesion('juan', { reglas: true, crew: true, mtNuevo: true, tarjetas: true }); const p = A.page;
+    await p.waitForTimeout(2000);
+    const sw = await worker(p); await p.evaluate(() => window.__asistenteAbrir()); await p.waitForTimeout(800);
+    let ped = await decir(p, sw, 'avisale a Ángel que falta un fusible en LOS ÁLAMOS', [usa('avisar_oficina', { texto: 'Falta un fusible de 2 A para la Col 3 de LOS ÁLAMOS', tipo: 'falta_material' }), fin('Confirmalo con «Sí, mandalo».')]);
+    const tools = herramientas(ped), sist = JSON.stringify((ped[0] || {}).system || '');
+    c(tools.includes('avisar_oficina') && tools.includes('mis_avisos') && !tools.some((x) => /^proponer_/.test(x)) && !tools.includes('avisos_cuadrilla'), 'cuadrilla: el asistente tiene avisar_oficina y mis_avisos (y ninguna proponer_*) · ' + tools.join(','));
+    c(/AVISOS A LA OFICINA/.test(sist), 'el asistente de la cuadrilla sabe que puede avisarle a la oficina');
+    let card = await p.evaluate(() => { const e = [...document.querySelectorAll('#iaChat .ia-conf')].pop(); return e ? { t: e.textContent.replace(/\s+/g, ' '), si: (e.querySelector('[data-iasi]') || {}).textContent } : null; });
+    c(card && /Le mando esto a Ángel/.test(card.t) && /Falta un fusible de 2 A/.test(card.t) && /LOS ÁLAMOS/.test(card.t) && /OT-2026-130/.test(card.t) && /última foto/.test(card.t) && card.si === 'Sí, mandalo', 'tarjeta «📨 Le mando esto a Ángel» con el texto, su obra y orden de hoy, la foto y «Sí, mandalo» · ' + JSON.stringify(card).slice(0, 220));
+    await foto(p, 'cuadrilla_aviso_tarjeta');
+    await p.click('#iaChat .ia-conf:last-of-type [data-iasi]'); await p.waitForTimeout(1800);
+    let d = await db(p), ac = Object.entries(d.avisosCuadrilla || {}).map(([id, x]) => Object.assign({ id }, x)).filter((x) => x.uid === 'uJuan');
+    const push = Object.values(d.avisosPush || {}).filter((x) => x.tipo === 'avisoCuadrilla').map((x) => x.email).sort();
+    c(ac.length === 1 && ac[0].estado === 'nuevo' && ac[0].otId === 'h130' && ac[0].fotoId === 'fh1' && ac[0].tipo === 'falta_material' && /fusible/.test(ac[0].texto), 'con «Sí, mandalo» queda en «Para resolver» (nuevo, con la orden y la foto) · ' + JSON.stringify(ac[0] || {}).slice(0, 200));
+    c(JSON.stringify(push) === JSON.stringify(['admin@ema-alumbrado.app', 'lucia@ema-alumbrado.app']), 'le llega el aviso a Administración y a la supervisora de su orden (Lucía) · ' + JSON.stringify(push));
+    c(/se lo mandé/.test(await p.textContent('#iaChat')), 'la tarjeta dice «✅ Listo, se lo mandé»');
+    // por voz: «sí, mandalo» confirma
+    ped = await decir(p, sw, 'avisale a Ángel que se cortó un cable y hay peligro en la vereda', [usa('avisar_oficina', { texto: 'Se cortó un cable en la vereda de LOS ÁLAMOS: hay peligro', tipo: 'seguridad' }), fin('¿Se lo mando?')]);
+    await p.fill('#iaTxt', 'sí, mandalo'); await p.click('#iaEnviar'); await p.waitForTimeout(2200); await esperarIa(p);
+    d = await db(p); ac = Object.values(d.avisosCuadrilla || {}).filter((x) => x.uid === 'uJuan');
+    c(ac.some((x) => x.tipo === 'seguridad'), '«sí, mandalo» (escrito o dicho) confirma la tarjeta: el de seguridad también salió');
+    // reglas: la cuadrilla no lee los avisos de los demás
+    let r = await p.evaluate(async () => { const fs = firebase.firestore(), o = {}; const pr = async (k, f) => { try { const s = await f(); o[k] = 'ok:' + (s && s.size != null ? s.size : s && s.exists); } catch (e) { o[k] = String(e.code || e.message).slice(0, 30); } }; await pr('todos', () => fs.collection('avisosCuadrilla').get()); await pr('mios', () => fs.collection('avisosCuadrilla').where('uid', '==', 'uJuan').get()); await pr('dePedro', () => fs.collection('avisosCuadrilla').doc('ac0').get()); await pr('marcar', () => fs.collection('avisosCuadrilla').doc('ac0').update({ estado: 'resuelto' })); await pr('ajeno', () => fs.collection('avisosCuadrilla').add({ uid: 'uPedro', estado: 'nuevo', texto: 'x' })); return o; });
+    c(r.todos === 'permission-denied' && /^ok:2/.test(r.mios) && r.dePedro === 'permission-denied' && r.marcar === 'permission-denied' && r.ajeno === 'permission-denied', 'reglas: la cuadrilla lee solo los suyos, no los de Pedro, no los marca ni manda a nombre de otro · ' + JSON.stringify(r));
+    // Ángel (admin) en la misma base
+    const B = await otraPagina(A, Object.assign({}, MOD, { sesion: 'admin', reglas: true })); const q = B.page; await q.waitForTimeout(3500);
+    await q.evaluate(() => window.__paraResolver.cargar(true)); await q.waitForTimeout(600); await q.evaluate(() => window.__inicioPro && window.__inicioPro.pintar()); await q.waitForTimeout(500);
+    r = await q.evaluate(() => { const f = [...document.querySelectorAll('#ieAtender [data-ie="pararesolver"]')][0]; return { f: f ? f.textContent.replace(/\s+/g, ' ') : '', rojo: !!(f && f.querySelector('.rj')), sup: window.__supervisor.hallazgos({ ahora: true }).filter((h) => h.cat === 'Avisos').map((h) => h.g + ':' + h.t), menu: (document.getElementById('menuParaResolver') || {}).textContent || '' }; });
+    c(/Para resolver/.test(r.f) && r.rojo && /3/.test(r.f), 'Inicio Ejecutivo › Para atender: «📨 Para resolver» con los 3 nuevos, en rojo por el de seguridad · ' + r.f);
+    c(r.sup.length === 1 && /^rojo:.*Seguridad sin resolver: Juan/.test(r.sup[0]) && /Para resolver/.test(r.menu), 'el Supervisor lo marca en rojo y el menú tiene «📨 Para resolver» · ' + JSON.stringify(r.sup));
+    await q.evaluate(() => window.__paraResolver.abrir()); await q.waitForTimeout(900);
+    r = await q.evaluate(() => [...document.querySelectorAll('#prOv .pr-item')].map((e) => (e.classList.contains('rojo') ? 'R ' : '') + e.querySelector('.pr-tipo').textContent + ' ' + e.querySelector('.pr-cuerpo b').textContent));
+    c(r.length === 3 && /^R ⛑ Seguridad Juan/.test(r[0]), '«📨 Para resolver»: los 3 pendientes, primero el de seguridad (en rojo) · ' + JSON.stringify(r));
+    await foto(q, 'para_resolver');
+    const idF = Object.entries((await db(q)).avisosCuadrilla).find(([, x]) => x.tipo === 'falta_material')[0];
+    await q.click(`#prOv [data-pr="resolver:${idF}"]`); await q.waitForTimeout(300);
+    await q.fill('#prResp', 'Mañana te lo lleva el pañol'); await q.click(`#prOv [data-pr="si:${idF}"]`); await q.waitForTimeout(1200);
+    d = await db(q);
+    const res = d.avisosCuadrilla[idF], vuelta = Object.values(d.avisosPush || {}).filter((x) => x.tipo === 'avisoRespuesta');
+    c(res.estado === 'resuelto' && res.respuesta === 'Mañana te lo lleva el pañol' && vuelta.some((x) => x.clave === 'juan perez' && /te respondió/.test(x.titulo) && /pañol/.test(x.cuerpo)), 'Ángel lo marca resuelto con una respuesta → a Juan le llega «✅ … te respondió: Mañana te lo lleva el pañol» · ' + JSON.stringify(vuelta.map((x) => x.titulo)));
+    await q.click('#prOv [data-pr="visto:ac0"]'); await q.waitForTimeout(800);
+    c((await db(q)).avisosCuadrilla.ac0.estado === 'visto', '«👁 Visto» lo marca');
+    c(await scrollX(q) <= 0, 'sin scroll de costado');
+    await B.page.close();
+    // Juan pregunta si le respondieron
+    ped = await decir(p, sw, '¿me respondieron?', [usa('mis_avisos', {}), fin('Sí.')]);
+    c(/Mañana te lo lleva el pañol/.test(resultado(ped, 1)) && /resuelto/.test(resultado(ped, 1)), 'Juan ve sus avisos y la respuesta en el asistente (mis_avisos) · ' + resultado(ped, 1).slice(0, 160));
+    // pañol y mirar también pueden; Dirección solo mira
+    for (const quien of ['pan', 'mir']) {
+      const C = await otraPagina(A, Object.assign({}, MOD, { sesion: quien, reglas: true })); const z = C.page; await z.waitForTimeout(2500);
+      r = await z.evaluate(async () => { await window.__iaCargar(); const al = window.__asistente.alcance(); const m = await window.__paraResolver.mandar({ texto: 'Prueba de aviso', tipo: 'pregunta' }); return { permite: al.permite('avisar_oficina'), ok: !!m.ok, err: m.err || '' }; });
+      c(r.permite && r.ok, quien + ': también le puede avisar a la oficina · ' + JSON.stringify(r));
+      await C.page.close();
+    }
+    const Dd = await otraPagina(A, Object.assign({}, MOD, { sesion: 'dir', reglas: true })); const w = Dd.page; await w.waitForTimeout(2500);
+    await w.evaluate(() => window.__paraResolver.abrir()); await w.waitForTimeout(900);
+    r = await w.evaluate(() => ({ n: document.querySelectorAll('#prOv .pr-item').length, botones: document.querySelectorAll('#prOv [data-pr^="resolver:"], #prOv [data-pr^="visto:"]').length, txt: document.querySelector('#prOv .pr-top').textContent }));
+    c(r.n >= 3 && r.botones === 0 && /solo para mirar/.test(r.txt), 'Dirección ve «Para resolver» sin botones (solo mirar) · ' + JSON.stringify(r));
+    await Dd.page.close();
+    c(!errsJs(A).length, 'sin errores · ' + JSON.stringify(errsJs(A).slice(0, 3)));
     await A.page.close();
   }
 
