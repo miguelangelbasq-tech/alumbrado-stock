@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v154 — 13/11/2026 (armada, sin publicar) · Auditor de puntos: el asistente explica, revisa, anota el porqué y corrige TODOS los puntos
+## v154 — 13/11/2026 (publicada en GitHub 14/11) · Auditor de puntos: el asistente explica, revisa, anota el porqué y corrige TODOS los puntos
 
 **Pedido de Ángel** (13/11/2026), después de ver la v153: «cualquier pregunta de los puntos se la tengo que poder hacer a la IA… me tiene que decir exactamente por qué se le dio ese punto, si es válido ese punto, si yo esa vez le dije "démosle un poquito más"… detectar, mover, cambiar, todo con la autorización de nosotros (la oficina y yo)». Lo de PDF y videos (Worker `ema-fotos` `v2-fotos`) pasa a ser la **v155** (instructivo y comentario del Worker renombrados).
 
@@ -24,7 +24,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Huellas (SHA-256):** ORIGINAL `154_2026-11-13_app-EMA_ORIGINAL.html` `18620bf916b95cbb14d78b9dab4b8ed3911f042e37eaa24ce6d8b03721d814c2` · `index.html` `4c3ad0c38bf4f57239b1e0a8b8990da1bd00cbfc106344266ab1b45a10d46a40` · sello `2026-11-13 18:53 · c57e6a` (meta `ema-version` y `#appVersion`).
 
-## v153 — 13/11/2026 (armada, sin publicar) · ✏ Corregir el cierre de una orden YA CERRADA (a mano y con el asistente)
+## v153 — 13/11/2026 (publicada en GitHub 14/11) · ✏ Corregir el cierre de una orden YA CERRADA (a mano y con el asistente)
 
 **Pedido de Ángel** (13/11/2026): el asistente le contestó «No te lo pude dejar armado: la OT-2026-177 ya está cerrada y desde acá no tengo cómo corregir el cierre de una orden cerrada…» (el apoyo PRFV del tablero de 0 a 1 hecho por Pablo Picone y Ariel Lastra, 9,25 c/u; Marcos y Bruno siguen con 4,8 por la acometida; el armado del tablero con fotos de Marcos pero «no se hizo» en el cierre). Ángel: **«NECESITO QUE LA IA PUEDA HACER ESAS MODIFICACIONES»**.
 
@@ -48,7 +48,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Huellas (SHA-256):** ORIGINAL `153_2026-11-13_app-EMA_ORIGINAL.html` `6402b904e8fa72f0081ac028421540126f37259d9be73673d6f2dc02ab31b7eb` · `index.html` `531ca9042aee4dde5afb93dd1de8eafa4eb01b507bb83013db037214b5d7084e` · sello `2026-11-13 16:45 · f828be` (meta `ema-version` y `#appVersion`). Detalle en `herramientas/v153/huellas.txt`.
 
-## v152 — 13/11/2026 (armada, sin publicar) · ↔ Mover fotos: a mano y con el asistente
+## v152 — 13/11/2026 (publicada en GitHub 14/11) · ↔ Mover fotos: a mano y con el asistente
 
 **Pedido de Ángel** (13/11/2026): «la IA de la app no puede mover imágenes de una carpeta a otra; tiene que poder, y también agregá para que en la app se pueda hacer manual y con la IA». Son las 4: de una obra a otra, de columna o tipo dentro de la misma obra (Col 4 → Col 5, Zanja → Tablero), desde «Fotos sin obra» a una obra y de una orden a otra.
 
