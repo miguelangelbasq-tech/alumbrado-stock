@@ -2,6 +2,24 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v155 — 14/11/2026 (armada, sin publicar) · Rol «Dirección» con su Inicio + «📨 Para resolver» (la cuadrilla le avisa a la oficina) + 2 detalles de la v154
+
+**Pedido de Ángel** (14/11/2026), después de ver las maquetas: «Hagamos A en el celu y C en la compu. Y sumar lo de la B, calendarios»; la foto del día de cada obra y el pronóstico del clima contra lo planeado (sin «riesgo de multas»). Rol «Dirección»: «pueden mirar todo, consultar todo, pero no pueden cambiar nada»; «esa pantalla también mostrarla en oficina». Y: «los de cuadrilla, si quieren avisar algo, pueden avisarle a la IA y que la IA me avise a mí. Que me llegue con un mensaje o algo. O cosas que resolver.»
+
+**Base:** ORIGINAL 154 (`18620bf9…`). Parche `herramientas/v155/patch_v155.py` (reemplazos chicos + los módulos `inicioDir` y `paraResolver`; `--otra-base` para reaplicar).
+
+**1. Rol `direccion`:** todas las hojas en «ver» (también gastos y producción), Mi tablero y Mis tareas ocultos, nada que escriba (las `fb*` cortan; las reglas v155 niegan; `fbSaludGuardar` no escribe). Carga completa de datos, barra de abajo Inicio · Obras · Mapa · Informes · Perfil, ve la certificación y el personal en vivo. Usuarios ofrece el rol.
+
+**2. Inicio de Dirección (`#iniDir`)**, A en el celu y C en la compu, todo de memoria: número del día (K de hoy contra el ritmo que hace falta) y ayer; necesita tu atención (máx. 3); barras de 14 días con lo mandado sin cerrar aparte; curva S (plan lineal a confirmar, proyección «a este ritmo terminamos el dd/mm»); qué se hizo hoy/ayer por obra con la **foto del día** (UNA consulta `fotosObra` de hoy cada 15 min); dónde se trabaja hoy (mapa chico); equipo; **clima contra lo planeado** (Open-Meteo, 3 h guardado, avisa lluvia/viento sobre hormigonado, zanja, cruce o izaje de las órdenes y la sugerida); **programación** con semáforo (compu), pistas y **calendario de terminaciones**; plata sin IVA (certificado, margen, material entregado contra usado); asistente con 4 chips. Administración y Oficina la abren como «📊 Dirección» (Inicio Ejecutivo, menú, Tablero del dueño). La **fecha del acta de inicio** y el plazo se cargan en «Nuestra zona» (Administración); sin eso, «estimada» con la primera orden de la zona.
+
+**3. «📨 Para resolver»:** la cuadrilla (y el pañol y «solo mirar») le dice al asistente «avisale a Ángel que…» → tarjeta «📨 Le mando esto a Ángel» → «Sí, mandalo» (también escrito o por voz) → colección `avisosCuadrilla` + push a Administración y al supervisor de su orden (⚙ del asistente: admin / admin+oficina / admin+supervisor). Bandeja con visto / resuelto y respuesta que le llega a la persona; en el Inicio Ejecutivo, el menú y el Supervisor (seguridad/urgente en rojo). Tope 10 por persona y día (a confirmar).
+
+**4. Asistente:** Dirección pregunta todo como la oficina (plata, puntos, certificación, `como_vamos`) sin ninguna `proponer_*`; para un cambio, `anotar_para_oficina`. Cuadrilla/pañol/mirar: `avisar_oficina` y `mis_avisos`; admin/oficina/dirección: `avisos_cuadrilla`. **Worker `ema-ia` v5-ia** con el rol (`workers/ema-ia.js`, `probar_ema_ia.mjs` 110/110).
+
+**5. Detalles de la v154:** el período elegido en «🔎 Puntos» se ve marcado; los avisos de la tarjeta dicen «Si lo que cambia es lo hecho, usá ✏ Corregir cierre» (sin nombres de herramientas).
+
+**Reglas nuevas:** `firebase/Reglas_Firestore_v155.txt` (Dirección lee todo y no escribe; `avisosCuadrilla`). **Ángel:** subir `index.html`, publicar las reglas v155, pegar el Worker `ema-ia` v5-ia. Sin APK nuevo. PDF y videos pasan a la v156.
+
 ## v154 — 13/11/2026 (publicada en GitHub 14/11) · Auditor de puntos: el asistente explica, revisa, anota el porqué y corrige TODOS los puntos
 
 **Pedido de Ángel** (13/11/2026), después de ver la v153: «cualquier pregunta de los puntos se la tengo que poder hacer a la IA… me tiene que decir exactamente por qué se le dio ese punto, si es válido ese punto, si yo esa vez le dije "démosle un poquito más"… detectar, mover, cambiar, todo con la autorización de nosotros (la oficina y yo)». Lo de PDF y videos (Worker `ema-fotos` `v2-fotos`) pasa a ser la **v155** (instructivo y comentario del Worker renombrados).

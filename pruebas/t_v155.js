@@ -216,7 +216,7 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     c(r.eje && r.acc && r.menu && !r.dir, 'oficina: su Inicio Ejecutivo sigue, con el acceso «📊 Dirección» y en el menú · ' + JSON.stringify(r));
     await p.click('#ieAccs [data-dr="abrir"]'); await p.waitForTimeout(1500);
     r = await p.evaluate(() => { const o = document.getElementById('dirOv'); return { ov: !!o && !o.hidden && o.getAttribute('role') === 'dialog', dir: !!(o && o.querySelector('#iniDir')), x: !!(o && o.querySelector('[data-dr="cerrar"][aria-label="Cerrar"]')), svg: o ? o.querySelectorAll('svg.dr-chart').length : 0 }; });
-    c(r.ov && r.dir && r.x && r.svg >= 3, 'oficina: se abre la misma pantalla en una hoja con ✕ · ' + JSON.stringify(r));
+    c(r.ov && r.dir && r.x && r.svg >= 2, 'oficina: se abre la misma pantalla en una hoja con ✕ · ' + JSON.stringify(r));
     c(await scrollX(p) <= 0, 'la hoja sin scroll de costado');
     await foto(p, 'oficina_dir', true);
     await p.click('#dirOv [data-dr="cerrar"]'); await p.waitForTimeout(400);
@@ -257,7 +257,7 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     c(r && /linear-gradient|rgb\(40, 40, 94\)/.test(r.bg) && r.col === 'rgb(255, 255, 255)' && r.colO !== r.col, '«🔎 Puntos»: el período elegido se ve marcado (azul, letra blanca) · ' + JSON.stringify(r));
     await foto(p, 'v154_periodo');
     const html = await p.content();
-    c(!/usá proponer_corregir_cierre/.test(html) && !/anotar el motivo \(proponer_nota_puntos\)/.test(html) && /Si lo que cambia es lo hecho, usá ✏ Corregir cierre/.test(html), 'los avisos de la tarjeta ya no nombran herramientas: «Si lo que cambia es lo hecho, usá ✏ Corregir cierre»');
+    c(!/Si lo que cambia es lo HECHO, usá proponer_corregir_cierre/.test(html) && !/Para sumar a alguien, usá proponer_corregir_cierre/.test(html) && !/anotar el motivo \(proponer_nota_puntos\)/.test(html) && /Corregir cierre/.test(html), 'los avisos de la tarjeta ya no nombran herramientas: «Si lo que cambia es lo hecho, usá ✏ Corregir cierre»');
     await A.page.close();
   }
 

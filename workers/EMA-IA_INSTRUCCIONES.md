@@ -6,6 +6,19 @@ Tardás unos 10 minutos.
 
 ---
 
+## ⚡ Actualizar el Worker para la v155 (5 minutos)
+
+La app v155 suma el rol **«Dirección»** (gerencia, presidencia, el dueño): ve todo, pregunta todo y no cambia nada. El Worker de antes no conoce ese rol y lo trata como «Solo mirar» (10 preguntas por día y se pausa al 80 % del freno del mes). Hasta que pegues el nuevo, a Dirección le aparece una vez «Para preguntar más, Ángel tiene que pegar el Worker nuevo».
+
+1. Entrá a **dash.cloudflare.com** › **Workers & Pages** › **`ema-ia`** › **Edit code**.
+2. Borrá todo y pegá el contenido completo del archivo nuevo **`workers/ema-ia.js`** (en tu carpeta está también como `ema-ia_v5.js`).
+3. Tocá **Deploy**. La clave y el KV quedan como estaban.
+4. Abrí **https://ema-ia.mdiaz-60f.workers.dev/salud**: tiene que decir `"version":"v5-ia"` (y `"stream":true`, como la v4).
+
+Qué cambia: Dirección tiene de entrada los mismos topes que Oficina (30 preguntas y 40 remitos por día; se cambian en el asistente › ⚙ › **Límites**, donde ahora aparece «Dirección»), sigue andando con la pausa del 80 % (como Oficina; al 95 % se corta para todos menos Administración) y puede ver el gasto del mes. Si guardaste los límites antes de la v155, Dirección queda prendida igual. Todo lo demás, igual que la v4.
+
+---
+
 ## ⚡ Actualizar el Worker para la v149 (5 minutos)
 
 La app v149 puede mostrar la respuesta del asistente **mientras se va escribiendo** (como en Claude) y empezar a leerla en voz alta desde la primera frase. Para eso el Worker tiene que pasar la respuesta de a pedazos. Hasta que pegues el nuevo, el asistente anda **igual que hoy** (la respuesta aparece entera al final); el resto de la v149 (el micrófono que no se apaga solo, «Pensando…» al instante, preguntas cortas más livianas) anda sin tocar nada.

@@ -583,7 +583,7 @@ ${bar("Certificado (obras con gastos)", P.certTot, Math.max(P.certTot, P.gastTot
     if (esDir()) { try { window.mostrarVista("inicio"); } catch (e) { } return true; }
     try { window.__tableroDueno && window.__tableroDueno.cerrar(); } catch (e) { }
     let ov = $("dirOv");
-    if (!ov) { ov = document.createElement("div"); ov.id = "dirOv"; ov.className = "no-print"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", "Dirección"); ov.innerHTML = '<button type="button" class="dr-x" data-dr="cerrar" aria-label="Cerrar">✕</button><div id="dirOvCuerpo"></div>'; document.body.appendChild(ov); }
+    if (!ov) { ov = document.createElement("div"); ov.id = "dirOv"; ov.className = "no-print"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", "Dirección"); ov.innerHTML = '<div id="dirOvCuerpo"></div>'; document.body.appendChild(ov); }
     ov.hidden = false; st.abierto = true; cache = null; st.h = {}; st.nuevo = true;
     document.body.classList.add("dir-abierto");
     pintar();

@@ -94,6 +94,7 @@ async function abrir(op = {}) {
   if (!op.v152) await page.addInitScript(() => { window.__v152No = true; });   // v152: las pruebas viejas no ven «↔ Mover» de las fotos ni las herramientas nuevas del asistente (buscar_fotos, proponer_mover_fotos con columna/orden); v152:true los prueba
   if (!op.v153) await page.addInitScript(() => { window.__v153No = true; });   // v153: las pruebas viejas no ven «✏ Corregir cierre» ni proponer_corregir_cierre del asistente; v153:true los prueba
   if (!op.v154) await page.addInitScript(() => { window.__v154No = true; });   // v154: las pruebas viejas no ven el auditor de puntos (motivo obligatorio en ⭐ Puntos, el cierre y el baremo; explicar_puntos y las herramientas nuevas del asistente); v154:true los prueba
+  if (!op.v155) await page.addInitScript(() => { window.__v155No = true; });   // v155: las pruebas viejas no ven el rol Dirección, su Inicio, «📊 Dirección» ni «📨 Para resolver» (ni las herramientas nuevas del asistente); v155:true los prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];

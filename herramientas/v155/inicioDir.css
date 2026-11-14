@@ -1,5 +1,6 @@
 /* v155 · Inicio de Dirección (#iniDir): A en el celu, C en la compu (maquetas aprobadas por Ángel, 14/11). Estilo V1. */
 #viewInicio.ie-on > #iniDir{display:block}
+#viewInicio > #iniDir,#dirOv #iniDir{max-width:none !important;width:auto !important;margin:0 !important}
 #iniDir{--dr-sombra:0 18px 44px -26px rgba(40,40,94,.45),inset 0 1px 0 rgba(255,255,255,.9);--dr-line:rgba(40,40,94,.09);--dr-hondo:#1E6F91;color:var(--text,#0D1424);font-family:var(--fuente);font-size:15px;line-height:1.4;text-align:left}
 #iniDir button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;border-radius:0;box-shadow:none;width:auto;min-height:0;text-align:left;cursor:pointer;letter-spacing:normal;text-transform:none;transform:none}
 #iniDir .v5-ic{width:20px;height:20px;flex:none;display:block}#iniDir .s18{width:18px;height:18px}#iniDir .s22{width:22px;height:22px}
@@ -196,6 +197,7 @@ body.dir-abierto{overflow:hidden}
  #iniDir .drProg{grid-column:span 2}
  #iniDir .drPlata{grid-column:span 2}
  #iniDir .drIa{grid-column:1/-1}
+ #iniDir .drAt{order:1}#iniDir .drBar{order:2}#iniDir .drCurva{order:3}#iniDir .drHoy{order:4}#iniDir .drMapaC{order:5}#iniDir .drProg{order:6}#iniDir .drEq{order:7}#iniDir .drPlata{order:8}#iniDir .drClima{order:9}#iniDir .drIa{order:10}
  #iniDir .dr-mapa{height:300px}
  #iniDir .dr-mlist{grid-template-columns:repeat(4,1fr)}
  #iniDir .dr-mlist .dr-nada{grid-column:1/-1}
