@@ -1,0 +1,8 @@
+68b19096d01668c5d5d1c1e11d913ebbd5dbe952d101311e47c7a44aff6af975  160_2026-11-15_app-EMA_ORIGINAL.html
+9e3b28a9fdbe000bb8bec663ff7f26aa2807d56bed6c306c202d111f15a63643  fijo/index.html
+be1b5468bdef8c3e9a8187b6ddb1c67c2bfc79f9c0015d061878596ea54f066c  patch_v160.py
+b4fbc7b949a951ef049349604c60f139411451e18c4715018616a08bbf6d2f87  archivosNube.js
+0c0096ca7a97dc80e711ef0795aaae75adbc8556519996520eb8cc0594dbaf3d  archivosNube.css
+base: base159.html = 159_2026-11-15_app-EMA_ORIGINAL.html 58b9e85dbe10173a954bec85f8709d6b4f4c80e39d825d8b54af2513db7a2d42
+sello: 2026-11-15 12:08 · aafc42 (meta ema-version y #appVersion)
+Worker ema-fotos v2-fotos: 1f5ae17f5bc09c2bd31108c1ed2a6e6853fcdc061083464f2e4d8dfd23c747e8

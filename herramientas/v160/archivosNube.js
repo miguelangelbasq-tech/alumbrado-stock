@@ -507,7 +507,7 @@
     } else {
       const pc = Math.round((H.pct || 0) * 100);
       cuerpo = `<div class="an-prog"><div class="an-barra${H.mal ? " mal" : ""}"><i style="width:${H.fase === "listo" ? 100 : pc}%"></i></div><div class="an-paso${H.mal ? " mal" : ""}" id="anPaso" role="status" aria-live="polite">${H.txt}</div>`
-        + (H.antes ? `<div class="an-pesos">Antes <b>${fMB(H.antes)}</b> → ahora <b>${fMB(H.despues || H.antes)}</b>${H.dur ? " · " + fDur(H.dur) : ""}</div>` : "")
+        + (H.antes ? `<div class="an-pesos">${H.despues ? `Antes <b>${fMB(H.antes)}</b> → ahora <b>${fMB(H.despues)}</b>` : `Pesa <b>${fMB(H.antes)}</b>`}${H.dur ? " · " + fDur(H.dur) : ""}</div>` : "")
         + (H.fase === "achicando" ? `<div class="an-ayuda">Dejá la app abierta y la pantalla prendida mientras se achica.</div><button type="button" class="btn-ghost" data-an="cancelar">Cancelar</button>` : "")
         + (H.fase === "listo" || H.fase === "error" || H.fase === "espera" ? `<div class="an-dos"><button type="button" class="btn-primary" data-an="x">Listo</button>${H.fase === "error" ? '<button type="button" class="btn-ghost" data-an="otro">Probar con otro</button>' : ""}</div>` : "")
         + `</div>`;

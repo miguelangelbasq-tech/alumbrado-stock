@@ -13,7 +13,7 @@ Autor: Miguel Ángel Díaz © 2026
 - **Videos de obra:** la cuadrilla con «🎥 Video» en Modo obra (con la tarea y la columna de ese momento), Mis tareas clásica y la cámara de la app; la oficina en el legajo › «🎥 Videos y PDF» › «🎥 Subir video». Antes de subir, el celu lo **achica** (lado mayor 854 px ≈ 480p, ~1 Mbps + audio mono ~48 kbps, WebM; en la prueba 30 s de 1280×720 pasaron de 25 MB a 3 MB) mostrando el avance; si el aparato no puede, sube el original y avisa. Tope 2 minutos. Más de 95 MB → por partes (10 MB, se retoma si se corta). Bandeja IndexedDB `ema-archivos` con reintentos (30 s → 10 min, al volver la señal, al abrir, al volver a la app) y aviso si no hay lugar en el celu. Miniatura del primer cuadro en `fotosObra` (`tipo:"video"`, duración, peso), ficha en `adjuntos` con `r2`, y en la orden `campo.videos` (no `campo.fotos`).
 - **Ver:** reproductor con la dirección del Worker (`?t=`), se puede adelantar (pedidos por rango), bajar, compartir y (la oficina) «↔ Mover» como una foto más. Legajo: sección «🎥 Videos y PDF» (la oficina sube; «solo mirar», Dirección y pañol miran). Avance nuevo (v158): la hoja de cada columna muestra sus videos y PDF como evidencia, **sin contar como foto de la columna** (la verificación v150 tampoco los cuenta).
 
-**Pruebas:** `t_v160` PC 54/54 · celu ?? · `REGLAS=1` ??. Worker: `probar_ema_fotos.mjs` 98/98. Batería: ver abajo.
+**Pruebas:** `t_v160` PC 54/54 · celu 54/54 · `REGLAS=1` 54/54. Worker: `probar_ema_fotos.mjs` 98/98. Batería: ver abajo.
 
 **A confirmar:** el tope de 2 min y la calidad; el tope de 25 MB por PDF; en celulares reales, la grabación desde la app de Android y el achicado en el Moto (tarda lo que dura el video, con la app abierta); el espacio gratis de R2 (10 GB) con videos.
 
