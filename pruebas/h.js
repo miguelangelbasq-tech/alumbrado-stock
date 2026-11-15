@@ -99,6 +99,7 @@ async function abrir(op = {}) {
   if (!op.v157) await page.addInitScript(() => { window.__v157No = true; });   // v157: las pruebas viejas siguen con la hora de toda la tarea (Modo obra con «Terminé» por columna, sin el cartelito «Col N lista · N min», sin los minutos por columna en la oficina, 🧠 ni la orden sugerida, sin tiempos_por_unidad); v157:true lo prueba
   if (!op.v158) await page.addInitScript(() => { window.__v158No = true; });   // v158: las pruebas viejas siguen con el % del itemizado en toda la app y la pantalla de Avance de obra de antes (sin el avance nuevo por rubro y columna, sin las herramientas avance_obra / proponer_marcar_avance); v158:true lo prueba
   if (!op.v159) await page.addInitScript(() => { window.__v159No = true; });   // v159: las pruebas viejas no ven la calculadora de tareas nuevas ni proponer_tarea_nueva / proponer_editar_tarea del asistente; v159:true lo prueba
+  if (!op.v160) await page.addInitScript(() => { window.__v160No = true; });   // v160: las pruebas viejas no ven los PDF y videos en la nube (sección «🎥 Videos y PDF», botones 🎥, PDF hasta 25 MB): el PDF sigue hasta 650 KB en la base; v160:true lo prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];
