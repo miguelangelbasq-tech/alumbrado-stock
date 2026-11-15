@@ -2,6 +2,26 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v158 — 15/11/2026 (armada, sin publicar) · Avance de obra nuevo: por rubro y por columna, se mueve solo con las órdenes
+
+**Pedido de Ángel** (15/11/2026), de las maquetas `maq_avance`: «la A con la grilla de la C adentro. Hacelo.» · «Las tareas que no existen hay que agregarlas todas.» · «El % de la obra es el avance de la obra. Lo principal es que nosotros podamos editarlo: desde el avance de obra marcamos se hizo / no se hizo. Pero cuando se tiene que mover el avance de obra es según las órdenes de trabajo… Si puse que hoy van a ser 5 columnas y hicieron 5 columnas, se mueve… Lo mismo con las fallas.»
+
+**Base:** ORIGINAL 157 (`49932e6a…`). Parche `herramientas/v158/patch_v158.py` (reemplazos chicos + el módulo `avanceObra2`; `--otra-base` para reaplicar). PDF y videos pasa a la **v159**. Sin reglas nuevas (`avanceObras.av2` lo escribe quien edita Avance).
+
+**Cómo se calcula el %:** lo hecho sobre todo lo que lleva la obra, y cada cosa pesa sus horas-hombre del diccionario v108 (una columna izada 3 HH, un sellado 0,5 HH; lo que no tiene HH por unidad, una tabla propia; todo **a confirmar**). Lo que la cuadrilla mandó cuenta enseguida como «en revisión» (color claro) y pasa a «hecho» cuando la oficina cierra la orden o toca «✅ Está bien»; falla, observado o pieza que falta restan hasta que se arreglan. Es el % que muestra toda la app (Avance, legajo, Inicio, mapa, Dirección, Supervisor, informe, asistente). El del itemizado sigue en la plata (certificación, módulos K, curva S de Dirección) y aparte en «🧾 Ver itemizado» («Itemizado (lo que se cobra): N %»). Obra sin columnas ni cálculo: el del itemizado.
+
+**Qué lleva y cómo se mueve:** las columnas (cálculo / legajo / itemizado) con sus pasos (pozo, hormigón, acabado, izaje, aplomado, vínculo, artefacto, cable de subida, tablerito, sellado, PAT al final de cada circuito) y piezas (BPN 6 gris/celeste/verde, portafusibles, fusibles, peine, Cu 4×4 + TIF, luminaria, prensacable) + civil, cableado, PAT, tablero, pruebas y cierre (los 4 papeles de la v151). Cada orden marca lo suyo por tarea (`TAREA_AV`): pasos de Modo obra y fotos con su columna; «5 columnas» sin decir cuáles → las 5 siguientes que faltan («sin columna exacta»); el cierre manda (✏ Corregir cierre baja), anular / mover foto revierten; «no se hizo» con motivo de falla («artefacto quemado») = falla; la misma columna en dos órdenes cuenta una vez. Ejemplo de la prueba: la cuadrilla manda el tablerito de la Col 3 → «en revisión» y la obra sube; la oficina cierra → «hecho»; «2 izajes» sin decir cuáles → Col 6 y 7.
+
+**A mano** (quien edita Avance; Dirección y «solo mirar» ven sin botones; la cuadrilla no ve): hoja de la columna con «✅ Columna completa», destildar, «Se arruinó», «Observado», «No lleva», «Le falta» por pieza y «Pedir»; la grilla con «Elegir varias» («Marcar izaje en las 4», avisa fraguando / sin hormigón: «¿Lo marcaron igual?»); cosas sin columna («Guardar» cantidad); «＋ Agregar algo que lleva». Motivo obligatorio, `av2.hist` y `avanceHist` (v156), auditoría `avance_obra_marcar`. Nada se escribe solo: «💾 Guardar el avance armado» con «Sí».
+
+**Pantalla:** «flash» (anillo, inicio / prevista / a este ritmo y cuántos días después, tira de columnas, Falta, alertas), Tiempo de la obra (línea, días trabajados, ritmo, curva real / planeada lineal / proyectada), Material para lo que falta (`__matAvance`, «Pedir»), rubros desplegables con la grilla adentro, «¿Está terminada?», «Lo último que pasó», «¿Cómo se calcula?» con la tabla de pesos. La pestaña «Por etapa» (B) quedó para después.
+
+**Tareas nuevas (11):** acabado de pozo, fusibles/portafusibles/borneras del tablerito (por caja), cable de subida, prensacables, morsetos y terminales, conexión EPEC / medidor, inspección interna, plano conforme a obra, certificado de instalación apta, carpeta EPEC, rehacer lo que se arruinó. HH, dificultad (puntos = HH × dificultad), pasos y fotos **a confirmar**; no mueven el itemizado; salen en Llenar orden, la orden sugerida (rendimiento del diccionario) y Modo obra.
+
+**Auditor y asistente:** el control (v156) marca si los dos % difieren 25 puntos o más, la misma columna en dos órdenes y las fallas; `avance_obra` («¿qué le falta a la Col 4?» → «1 BPN 6 verde (2010)»), `proponer_marcar_avance` (tarjeta y «Sí»; Dirección solo lee); `auditar_avance` con obra suma el avance nuevo.
+
+**Pruebas:** `t_v158` PC 72/72 · celu 72/72 · `REGLAS=1` 72/72 (`datos158.js`). BATERIA158
+
 ## v157 — 15/11/2026 (armada, sin publicar) · El tiempo de CADA columna (no de toda la tarea)
 
 **Pedido de Ángel** (15/11/2026): «si yo te digo "haceme los tableritos de 3 columnas", recién cuando terminan las 3 columnas le sale el horario, y eso está mal: tiene que ser en cada columna… Si te doy 3 columnas, tendría que tener 3 horarios. Eso es para después sacar un promedio… Buscá una forma fácil y sencilla para los chicos.»
