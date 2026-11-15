@@ -2,6 +2,26 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v161 — 15/11/2026 (armada, sin publicar) · El Inicio de Administración y Oficina pasa a ser la pantalla de Dirección (con permiso de editar)
+
+**Pedido de Ángel** (15/11/2026): «Que directamente sea la misma pantalla [la de Dirección]. Con el beneficio de que la oficina y yo podemos editar.»
+
+**Base:** ORIGINAL 160 (`68b19096…`). Parche `herramientas/v161/patch_v161.py` (reemplazos chicos en `inicioPro` e `inicioDir` + el módulo `inicioUnico`; `--otra-base` para reaplicar). Sin reglas nuevas, sin escuchas nuevas.
+
+**Qué cambia:**
+- **Admin y oficina abren la app en `#iniDir`** (la pantalla de Dirección: A en el celu, C en la compu) como su Inicio, no como hoja. Dirección sigue igual (solo mirar); pañol, cuadrilla y «solo mirar» no cambian.
+- **Lo del Inicio Ejecutivo entra adentro, con sus acciones de siempre:** buscador + «Asistente» (debajo de la portada), «Para atender» fundido con «Necesita tu atención» (lo de Dirección —ritmo, obras atrasadas, material— y lo del Ejecutivo —para cerrar, sin cerrar, fotos sin obra, «📨 Para resolver», control del avance, gente sin tarea, usuarios nuevos, sin stock, respaldo, stock negativo— en una sola tarjeta), la orden sugerida de mañana («Emitidas N de M», «Revisar y emitir»), «🩺 Supervisor», «En obra ahora», «Órdenes de hoy» (con «Cerrar»), Accesos (Mapa de guerra, Tablero del dueño, Informe semanal, 🧠…) y «Obras» (chips y buscador). Gráficos primero: en la compu la sugerida, el Supervisor y los accesos van en la columna de la derecha; en el celu, después de «Qué se hizo». Los gráficos llevan a sus pantallas como antes (legajo, Avance, certificación). Nada se escribe solo.
+- **El Inicio Ejecutivo queda escondido**; abajo de todo «Ver el Inicio de antes» lo muestra (en esa sesión) con «‹ Volver al Inicio nuevo». Conviene dejarlo un par de semanas y después sacarlo.
+- **«📊 Dirección»** (menú, accesos, Tablero del dueño) ya no aparece para admin/oficina: es su Inicio.
+- **Rendimiento:** el código de la pantalla de Dirección pasa a leerse justo después del Inicio (antes estaba al final de la página y el Inicio tenía que esperar ≈ 4 s más en un celu lento); la portada y las piezas se dibujan primero y los gráficos al toque. Celu con CPU ×4: del «Inicio listo» al Inicio dibujado 220–350 ms (el Ejecutivo de la v160: 100–330 ms); repintado cada 2,5 s ≈ 30 ms.
+- **Arreglo (venía de la v155):** la bandeja «📨 Para resolver», al cerrarla, seguía tapando la pantalla (`#prOv[hidden]`).
+
+**Pruebas:** PRUEBAS_V161
+
+**Huellas:** ORIGINAL `dcc2597f…`, index `077f73b3…`, sello `2026-11-15 14:21 · 762a5c` (ver `herramientas/v161/huellas.txt`).
+
+**A confirmar:** cuánto tiempo queda «Ver el Inicio de antes»; si Dirección también tiene que ver (sin botones) las piezas del Ejecutivo (hoy no: «Dirección sigue igual»).
+
 ## v160 — 15/11/2026 (armada, sin publicar) · PDF y videos (comprimidos) en Cloudflare R2, junto a las fotos
 
 **Pedido de Ángel** (13/11/2026): «en el lugar donde mandamos las fotos (Cloudflare), ¿podemos almacenar los PDF y videos?» … «sí, los videos tendría que comprimirlos» … «dale, hacelo». No eligió detalles: van los valores por defecto, marcados «a confirmar».
