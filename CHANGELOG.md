@@ -16,7 +16,7 @@ Autor: Miguel Ángel Díaz © 2026
 - **Rendimiento:** el código de la pantalla de Dirección pasa a leerse justo después del Inicio (antes estaba al final de la página y el Inicio tenía que esperar ≈ 4 s más en un celu lento); la portada y las piezas se dibujan primero y los gráficos al toque. Celu con CPU ×4: del «Inicio listo» al Inicio dibujado 220–350 ms (el Ejecutivo de la v160: 100–330 ms); repintado cada 2,5 s ≈ 30 ms.
 - **Arreglo (venía de la v155):** la bandeja «📨 Para resolver», al cerrarla, seguía tapando la pantalla (`#prOv[hidden]`).
 
-**Pruebas:** PRUEBAS_V161
+**Pruebas:** `t_v161` PC 38/38 · celu 39/39 · `REGLAS=1` 38/38 (admin y oficina con todas las piezas y sus acciones, emitir la sugerida desde el Inicio, Dirección igual y sin acciones, pañol/cuadrilla/mirar sin cambios, `__v161No`, sin escuchas nuevas, tiempo en el celu con CPU ×4). Batería de a 3 (TZ Córdoba): 322/328 OK; fallan solo las conocidas (`t_v083` PC/celu, `t_v147` 52/53 PC y 117/118 celu, `t_v150` PC/celu se corta por tiempo). `t_v135`, `t_v136`, `t_v143`, `t_v145`, `t_v155`, `t_v156`, `t_v158`, `t_circuito` OK en PC y celu (no hizo falta cambiarlas: siguen con el Ejecutivo por `__v161No`). Medición: `herramientas/v161/medir_inicio.js`. Capturas celu y PC en el scratchpad (`v161/capturas`).
 
 **Huellas:** ORIGINAL `dcc2597f…`, index `077f73b3…`, sello `2026-11-15 14:21 · 762a5c` (ver `herramientas/v161/huellas.txt`).
 
