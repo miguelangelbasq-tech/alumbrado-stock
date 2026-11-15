@@ -17,6 +17,14 @@ const cel = process.argv[2] === 'cel';
 const CAP = process.env.CAP || '';
 const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
 const MED = __dirname + '/v160med/';
+// los videos de prueba se hacen con ffmpeg la primera vez (no van al repo)
+(function hacerVideos() {
+  const { execSync } = require('child_process'); fs.mkdirSync(MED, { recursive: true });
+  const F = (n, c) => { if (!fs.existsSync(MED + n)) execSync('ffmpeg -y -loglevel error ' + c + ' ' + MED + n, { stdio: 'inherit' }); };
+  F('v30.webm', '-f lavfi -i "testsrc2=size=1280x720:rate=30,noise=alls=40:allf=t" -f lavfi -i "sine=frequency=440:sample_rate=48000" -t 30 -c:v libvpx -b:v 7M -minrate 7M -maxrate 7M -deadline realtime -cpu-used 8 -c:a libopus -b:a 128k -ac 2');
+  F('v8.webm', '-f lavfi -i "testsrc2=size=640x480:rate=25" -f lavfi -i "sine=frequency=660:sample_rate=48000" -t 8 -c:v libvpx -b:v 2M -deadline realtime -cpu-used 8 -c:a libopus -b:a 96k');
+  F('vgrande.webm', '-f lavfi -i "testsrc2=size=640x360:rate=30,noise=alls=80:allf=t" -t 30 -c:v libvpx -b:v 30M -minrate 30M -maxrate 30M -bufsize 30M -deadline realtime -cpu-used 8 -an');
+})();
 const JPG = Buffer.from('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=', 'base64');
 function pdf(mb, hojas) {   // un PDF «de mentira» del tamaño pedido, con sus hojas
   const cab = '%PDF-1.4\n' + Array.from({ length: hojas }, (_, i) => `${i + 3} 0 obj << /Type /Page /Parent 2 0 R >> endobj\n`).join('') + '2 0 obj << /Type /Pages /Count ' + hojas + ' >> endobj\n';

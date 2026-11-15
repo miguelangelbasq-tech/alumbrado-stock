@@ -2,6 +2,21 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v160 — 15/11/2026 (armada, sin publicar) · PDF y videos (comprimidos) en Cloudflare R2, junto a las fotos
+
+**Pedido de Ángel** (13/11/2026): «en el lugar donde mandamos las fotos (Cloudflare), ¿podemos almacenar los PDF y videos?» … «sí, los videos tendría que comprimirlos» … «dale, hacelo». No eligió detalles: van los valores por defecto, marcados «a confirmar».
+
+**Base:** ORIGINAL 159 (`58b9e85d…`). Parche `herramientas/v160/patch_v160.py` (reemplazos chicos + el módulo `archivosNube`; `--otra-base` para reaplicar). **Worker `ema-fotos` v2-fotos** (`workers/ema-fotos.js`, ya hecho; `node workers/probar_ema_fotos.mjs` 98/98; instructivo «Actualizar el Worker para la v160»; copia y pasos simples en `entregas/v160/`). Sin reglas nuevas.
+
+**Qué cambia (solo si `/salud` del servidor de fotos dice `v2-fotos`; si no, todo como hoy y los botones nuevos dicen «falta actualizar el servidor de fotos»):**
+- **PDF a la nube:** todo PDF que pasa por `fbAdjuntoGuardar` (planilla de PAT y certificado v151, remitos v137/138, PDF sueltos del legajo) y el PDF original de los planos de obra va a `docs/AAAA/MM/<obra>/<id>.pdf`; en la base solo la ficha (`adjuntos`: r2, nombre, tamaño, páginas). Tope 25 MB (antes 650 KB adentro de la base). Ver / bajar como antes (del Worker). Sin señal: queda en la bandeja del celu y se sube solo; **nunca entero a la base**.
+- **Videos de obra:** la cuadrilla con «🎥 Video» en Modo obra (con la tarea y la columna de ese momento), Mis tareas clásica y la cámara de la app; la oficina en el legajo › «🎥 Videos y PDF» › «🎥 Subir video». Antes de subir, el celu lo **achica** (lado mayor 854 px ≈ 480p, ~1 Mbps + audio mono ~48 kbps, WebM; en la prueba 30 s de 1280×720 pasaron de 25 MB a 3 MB) mostrando el avance; si el aparato no puede, sube el original y avisa. Tope 2 minutos. Más de 95 MB → por partes (10 MB, se retoma si se corta). Bandeja IndexedDB `ema-archivos` con reintentos (30 s → 10 min, al volver la señal, al abrir, al volver a la app) y aviso si no hay lugar en el celu. Miniatura del primer cuadro en `fotosObra` (`tipo:"video"`, duración, peso), ficha en `adjuntos` con `r2`, y en la orden `campo.videos` (no `campo.fotos`).
+- **Ver:** reproductor con la dirección del Worker (`?t=`), se puede adelantar (pedidos por rango), bajar, compartir y (la oficina) «↔ Mover» como una foto más. Legajo: sección «🎥 Videos y PDF» (la oficina sube; «solo mirar», Dirección y pañol miran). Avance nuevo (v158): la hoja de cada columna muestra sus videos y PDF como evidencia, **sin contar como foto de la columna** (la verificación v150 tampoco los cuenta).
+
+**Pruebas:** `t_v160` PC 54/54 · celu ?? · `REGLAS=1` ??. Worker: `probar_ema_fotos.mjs` 98/98. Batería: ver abajo.
+
+**A confirmar:** el tope de 2 min y la calidad; el tope de 25 MB por PDF; en celulares reales, la grabación desde la app de Android y el achicado en el Moto (tarda lo que dura el video, con la app abierta); el espacio gratis de R2 (10 GB) con videos.
+
 ## v159 — 15/11/2026 (publicada en GitHub 15/11) · Crear tareas nuevas con el asistente y a mano, con los puntos de la fórmula
 
 **Pedido de Ángel** (15/11/2026): «también para crear nuevas tareas: por ahí se me van ocurriendo, se lo digo a la IA y lo tiene que calcular, y el tema de los puntos también calcularlo con la fórmula que dijimos, y que sea algo justo.»
