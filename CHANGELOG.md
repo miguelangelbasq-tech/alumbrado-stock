@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v161 — 15/11/2026 (armada, sin publicar) · El Inicio de Administración y Oficina pasa a ser la pantalla de Dirección (con permiso de editar)
+## v161 — 15/11/2026 (publicada en GitHub 15/11) · El Inicio de Administración y Oficina pasa a ser la pantalla de Dirección (con permiso de editar)
 
 **Pedido de Ángel** (15/11/2026): «Que directamente sea la misma pantalla [la de Dirección]. Con el beneficio de que la oficina y yo podemos editar.»
 
@@ -22,7 +22,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **A confirmar:** cuánto tiempo queda «Ver el Inicio de antes»; si Dirección también tiene que ver (sin botones) las piezas del Ejecutivo (hoy no: «Dirección sigue igual»).
 
-## v160 — 15/11/2026 (armada, sin publicar) · PDF y videos (comprimidos) en Cloudflare R2, junto a las fotos
+## v160 — 15/11/2026 (publicada en GitHub 15/11) · PDF y videos (comprimidos) en Cloudflare R2, junto a las fotos
 
 **Pedido de Ángel** (13/11/2026): «en el lugar donde mandamos las fotos (Cloudflare), ¿podemos almacenar los PDF y videos?» … «sí, los videos tendría que comprimirlos» … «dale, hacelo». No eligió detalles: van los valores por defecto, marcados «a confirmar».
 
