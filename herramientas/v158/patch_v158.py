@@ -26,8 +26,8 @@ leer = lambda f: open(os.path.join(SRC, f), encoding='utf-8').read().rstrip('\n'
 assert t.count('id="avanceObra2"') == 0, 'ya tiene la v158'
 
 # 1) tareas nuevas en el diccionario (con sus pasos «a confirmar»)
-R('    t("reparacion_falla", "Búsqueda y reparación de falla", VA, "falla", 3, S, N, S, S, { noAvanza: true }),\n',
-  '    t("reparacion_falla", "Búsqueda y reparación de falla", VA, "falla", 3, S, N, S, S, { noAvanza: true }),\n' + leer('tareas158.js') + '\n')
+R('  var VIEJAS = ["fundaciones", "galpon_prep",',
+  '  if (!window.__v158No) L.push(\n' + leer('tareas158.js').rstrip().rstrip(',') + '\n  );   // v158 (con __v158No, las pruebas viejas siguen con las 51 de antes)\n  var VIEJAS = ["fundaciones", "galpon_prep",')
 R('if (!ya[x.id]) { cat.push({ id: x.id, label: x.label, pasos: "" });',
   'if (!ya[x.id]) { cat.push({ id: x.id, label: x.label, pasos: x.pasos || "" });')
 # fotos que pide cada tarea nueva

@@ -53,6 +53,12 @@ function datos158(op = {}) {
   ot('o307', 'OT-2026-307', hoy, ['conexionado_tablerito'], { conexionado_tablerito: 2 }, det([['conexionado_tablerito', ['Col 1', 'Col 2']]], hoy, { marcas: { conexionado_tablerito: { hecho: true, cant: 2, por: 'Juan Pérez' } } }), false, { estado: 'En curso' });
   ot('o308', 'OT-2026-308', dia(1), ['montaje_prfv'], { montaje_prfv: 2 }, {}, false);
   if (op.sinOrdenes) d.db.ordenesTrabajo = {};
+  if (op.juanNueva) {   // Juan, hoy, con una tarea nueva por columna (Modo obra arranca en «Foto · Col N»)
+    const seg = { 'juan perez': { items: { casco: true, arnes: true, guantes: true, botines: true, conos: true, equipo: true }, ts: ts(hoy, '08:00'), ok: true, por: 'Juan Pérez' }, epp: true, baliza: true, herram: true, corte: 'no' };
+    d.db.ordenesTrabajo.o309 = { numero: 'OT-2026-309', fecha: hoy, plazaId: 'b1', plazaNombre: 'PLAZA BULEVARES', obraId: '4019', horaInicio: '07:30', horaFin: '15:30', cuadrilla: 'Juan y Pedro', responsable: 'Juan Pérez', personal: per.map((p) => Object.assign({}, p)), personalNombres: pn.slice(), actividades: ['fusibles_borneras'], previsto: { fusibles_borneras: 3 }, estado: 'Emitida', creado: ts(hoy, '07:00'),
+      campo: { llegada: { 'juan perez': { ts: ts(hoy, '08:10'), por: 'Juan Pérez', lat: -31.4201, lng: -64.1888, acc: 8, dist: 10, enObra: true } }, seguridad: seg, salida: { 'juan perez': { ts: ts(hoy, '07:50'), ok: true, por: 'Juan Pérez' } } } };
+    delete d.db.ordenesTrabajo.o307;
+  }
   // material: todo entregado menos el fusible 3017
   const v = (cod, cant, i) => ({ tipo: 'salida', codigo: cod, desc: 'x', un: 'Un.', cantidad: cant, plazaId: 'b1', plazaNombre: 'PLAZA BULEVARES', fecha: dia(-8), ts: ahora - 864e5 * 8 + i, retiradoPor: 'Juan Pérez', valeGrupo: 'S-00' + (10 + i) });
   d.db.movimientos = {}; [v(6010, 12, 1), v(6021, 12, 2), v(2010, 26, 3)].forEach((m, i) => { d.db.movimientos['mv' + i] = m; });

@@ -41,7 +41,7 @@
   const off = () => !!window.__v158No;
   const ots = () => intentar(() => (Array.isArray(ordenesTrabajo) ? ordenesTrabajo : []), []);
   const obras = () => intentar(() => window.avanceObrasTodas || [].concat(Array.isArray(avanceObras) ? avanceObras : [], window.avanceObrasOcultas || []), []) || [];
-  const obraDe = (id) => (id && typeof id == "object" ? id : obras().find((o) => o && String(o.id) === String(id)) || null);
+  const obraDe = (id) => (id && typeof id == "object" ? (id.id != null && obras().find((o) => o && String(o.id) === String(id.id))) || id : obras().find((o) => o && String(o.id) === String(id)) || null);   // un objeto con id: la obra de verdad (el legajo arma copias)
   const permiso = (h) => intentar(() => (window.PERMISOS && PERMISOS.permiso ? PERMISOS.permiso(h) : typeof window.permiso == "function" ? window.permiso(h) : "oculto"), "oculto");
   const esCrew = () => intentar(() => !!(window.__cuadrilla && window.__cuadrilla.esCrew && window.__cuadrilla.esCrew()), false);
   const rolYo = () => intentar(() => String((PERMISOS.yo() || {}).rol || ""), "");
@@ -374,7 +374,7 @@
     let tw = 0, th = 0, thv = 0;
     const rubros = RUB.map(([id, t, ico]) => { const w = W[id]; tw += w.w; th += w.h; thv += w.hv; return { id, t, ico, w: w.w, h: w.h, pct: w.w > 0 ? red(w.h / w.w * 100) : null, listas: w.listas, total: w.total, tags: w.tags }; }).filter((r) => r.w > 0);
     const pct = tw > 0 ? red(th / tw * 100) : 0, pctVer = tw > 0 ? red(thv / tw * 100) : 0;
-    return { o, L, R, RC, PN, rubros, pct, pctVer, tw, th, dupsOt, piezaFalta, ts: Date.now(), guardado: !!(o.av2 && (o.av2.guardado || Object.keys(obj(o.av2.m)).length)) };
+    return { o, L, R, RC, PN, rubros, pct, pctVer, pctX: tw > 0 ? th / tw * 100 : 0, tw, th, dupsOt, piezaFalta, ts: Date.now(), guardado: !!(o.av2 && (o.av2.guardado || Object.keys(obj(o.av2.m)).length)) };
   }
   // el % de la obra (null = no hay lista: se usa el del itemizado)
   function pct(o) { const E = estado(o); return E ? E.pct : null; }
