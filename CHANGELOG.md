@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v159 — 15/11/2026 (armada, sin publicar) · Crear tareas nuevas con el asistente y a mano, con los puntos de la fórmula
+## v159 — 15/11/2026 (publicada en GitHub 15/11) · Crear tareas nuevas con el asistente y a mano, con los puntos de la fórmula
 
 **Pedido de Ángel** (15/11/2026): «también para crear nuevas tareas: por ahí se me van ocurriendo, se lo digo a la IA y lo tiene que calcular, y el tema de los puntos también calcularlo con la fórmula que dijimos, y que sea algo justo.»
 
