@@ -2,6 +2,20 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v157 — 15/11/2026 (armada, sin publicar) · El tiempo de CADA columna (no de toda la tarea)
+
+**Pedido de Ángel** (15/11/2026): «si yo te digo "haceme los tableritos de 3 columnas", recién cuando terminan las 3 columnas le sale el horario, y eso está mal: tiene que ser en cada columna… Si te doy 3 columnas, tendría que tener 3 horarios. Eso es para después sacar un promedio… Buscá una forma fácil y sencilla para los chicos.»
+
+**Base:** ORIGINAL 156 (`ede2b5ee…`). Parche `herramientas/v157/patch_v157.py` (reemplazos chicos + el módulo `tiempoCol`; `--otra-base` para reaplicar). PDF y videos pasa a la **v158**.
+
+**Qué pasaba** (reproducido con `ANTES=1` contra la v156): por **Mis tareas clásica** las fotos de cada columna no dejaban hora; la hora se pedía una sola vez, al tocar «📤 Listo, enviar esta tarea», para TODA la tarea (sin `campo.pasosObra`). Por **Modo obra** la foto tampoco dejaba hora: había que tocar «Terminé» en cada columna y el fin era la hora de ese toque, no la de la foto; con la cámara B o sacando las fotos seguidas, las columnas quedaban sin hora hasta el final.
+
+**Qué cambió:** el fin de cada columna es la hora de su foto (si sacan varias, la última) o de «✓ Col N lista sin foto»; el inicio es cuando terminó la anterior de esa tarea (o lo último que terminó esa persona en la orden, o «Llegué»); «▶ Empecé Col N» (opcional, en Modo obra) manda. Al guardar, «✓ Col 1 lista · 42 min» con «cambiar» (− / + de 5 min). Modo obra ya no pide «Terminé» por columna: después de la última, «Así quedó cada columna» con los minutos editables y «Listo, mandar». Mis tareas clásica: «📤 Listo, enviar esta tarea» muestra cada columna y no pide horas. Hora dudosa (fotos seguidas —y la anterior también—, sin «Llegué» ni anterior, más de 5 h) marcada con el porqué, fuera del promedio. Sin señal, la hora es la del celu en la foto. Se guarda en `campo.pasosObra.<tarea>.<unidad>` (+ `iniTs/finTs/min/fuente/iniFuente/dudosa/v:157`) y `campo.horasTarea` = el rango; «Empecé» en `campo.colInicio`. Zanja/tablero/acometida: un tramo como antes. Órdenes viejas con la hora de toda la tarea: un tramo.
+
+**La oficina:** «⏱ Tiempo de cada columna» en el «📸 Avance» y en el cierre («Col 1 · 08:10–08:52 · 42 min · Juan y Pedro», con la mediana); la verificación (v150) marca la hora dudosa. **Promedios:** 🧠 › ⏱ «Minutos por columna» (mediana, rango, mediciones, dudosas aparte, por cuadrilla y por persona); la orden sugerida usa lo medido por columna con 3 o más buenas (unidades por HH = 60 / mediana de minutos × personas). **Asistente:** `tiempos_por_unidad` («¿cuánto tardan en hacer un tablerito?», «¿quién es más rápido izando?»).
+
+**Pruebas:** `t_v157` PC 43/43 · celu 43/43 · `REGLAS=1` 43/43 · `ANTES=1` contra la v156 4/4 (el bug) (`datos157.js`). Batería completa (320 corridas, TZ Córdoba, domingo): 312 OK; fallan `t_v083` (obsoleta), `t_v147` y `t_v150` PC y celu (lo mismo con la v156 hoy: alertas y parte de las 18 h en fin de semana) y `t_v143` PC y celu (la carrera conocida de `vehiculoPersona`; sola 78/78). `t_v142`, `t_v144`, `t_v148`, `t_v149b`, `t_v121`, `t_v123`, `t_v130`, `t_v156`, `t_circuito` OK. Huellas en `herramientas/v157/huellas.txt` (ORIGINAL `49932e6a…`, sello `2026-11-15 00:02 · 751ef0`). Sin reglas nuevas (todo en `campo`), sin Worker nuevo, sin APK nuevo. **Ángel:** subir `index.html` (cuando se publique).
+
 ## v156 — 15/11/2026 (publicada en GitHub 15/11) · Auditor del avance de obra: el asistente y una hoja sin IA controlan el avance con exactitud + 2 arreglos de la v155
 
 **Pedido de Ángel** (14/11/2026): «Necesito que la IA analice el avance de obra muy bien, muy detalladamente: si pasó algo mal, algo bien, con todas las tareas que se hicieron, más allá de que ya es automático. Necesito que tenga un control muy exacto de eso.» Mismo espíritu que el auditor de puntos (v154). Lo de PDF y videos (Worker `ema-fotos` `v2-fotos`) pasa a ser la **v157** (instructivo y comentario del Worker renombrados).
