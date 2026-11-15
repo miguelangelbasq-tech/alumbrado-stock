@@ -17,11 +17,11 @@ Autor: Miguel Ángel Díaz © 2026
 - **Dónde aparece:** Llenar orden; la orden sugerida (rendimiento de la fórmula, «quedan N de T» por el avance de la obra, Ajustes › rendimientos); Modo obra (columna por columna si se mide en columnas); el avance de obra nuevo (una cosa por columna en el rubro elegido, o el paso de la grilla); el auditor de puntos v154 dice de dónde sale el valor («tarea creada el … por … con la fórmula de siempre: 1 HH × 1,00 = 1 pts por columna…»).
 - **Asistente** (dormido): `proponer_tarea_nueva` (tarjeta con la cuenta, las parecidas, pasos, fotos, ítem, avance y rendimiento; «Sí, crearla» / «Cambiar algo» / «No»; si no sabe las horas, pregunta) y `proponer_editar_tarea`; SISTEMA «TAREAS NUEVAS (v159)». Solo admin/oficina.
 
-**Pruebas:** `t_v159` PC 48/48 · celu 48/48 · `REGLAS=1` 48/48. Batería: ver `herramientas/v159/bateria159.txt`.
+**Pruebas:** `t_v159` PC 48/48 · celu 48/48 · `REGLAS=1` 48/48. Batería de a 3 (TZ Córdoba): 315/323 OK; fallan solo las conocidas de la v158 (`t_v083` PC/celu, `t_v143` PC 77/78, `t_v147` 52/53 PC y 117/118 celu, `t_v150` PC/celu se corta por tiempo) más dos que fallan a veces también con la v158 y pasan repetidas solas: `t_v092u` (19/19) y `t_v146` celu (64/64). `t_v158`, `t_v157`, `t_v154`, `t_v112`, `t_v108`, `t_v108b` y `t_circuito` OK en PC y celu (ver `herramientas/v159/bateria159.txt`).
 
 **A confirmar:** el umbral de «justa» (1,5×); cómo se eligen las parecidas; las palabras que estiman los factores y las horas estimadas; el ítem sin parte (100 %); las tareas en metros en el avance (los metros de la zanja).
 
-**Huellas:** ver `herramientas/v159/huellas.txt`.
+**Huellas:** ORIGINAL `58b9e85d…`, index `6f311881…`, sello `2026-11-15 09:51 · 3e8de8` (ver `herramientas/v159/huellas.txt`).
 
 ## v158 — 15/11/2026 (publicada en GitHub 15/11) · Avance de obra nuevo: por rubro y por columna, se mueve solo con las órdenes
 
