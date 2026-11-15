@@ -1,0 +1,60 @@
+/* v159 · crear tareas con la calculadora (Producción y la tarjeta del asistente) */
+#tnCard.tn2-on .tn2-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-gap:10px;margin:10px 0}
+#tnCard.tn2-on .tn2-grid label{display:block;margin:0;font-size:13px;font-weight:600;color:var(--text-soft,#475569)}
+#tnCard.tn2-on .tn2-grid input,#tnCard.tn2-on .tn2-grid select,#tnCard.tn2-on .tn2-grid textarea{width:100%;margin:4px 0 0;min-height:42px;box-sizing:border-box}
+#tnCard.tn2-on .tn2-w{grid-column:1 / -1}
+#tnCard.tn2-on .tn2-mp{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-gap:6px;align-items:end}
+#tnCard.tn2-on .tn2-mp>span{padding:0 0 12px;font-weight:700;color:var(--text-3,#6E7C93)}
+#tnCard.tn2-on .tn2-fs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-gap:8px;margin:6px 0 10px}
+#tnCard.tn2-on .tn2-fl{display:flex;align-items:flex-start;margin:0;padding:8px 10px;border-radius:14px;background:rgba(40,40,94,.05);border:1px solid transparent;min-height:44px;cursor:pointer}
+#tnCard.tn2-on .tn2-fl.on{background:rgba(30,111,145,.10);border-color:rgba(30,111,145,.35)}
+#tnCard.tn2-on .tn2-fl input{width:auto;margin:3px 8px 0 0;flex:none}
+#tnCard.tn2-on .tn2-fl b{display:block;font-size:13.5px}
+#tnCard.tn2-on .tn2-fl small{display:block;font-size:12px;color:var(--text-3,#6E7C93);font-weight:500}
+#tnCard.tn2-on .tn2-res{padding:10px 12px;border-radius:14px;background:rgba(40,40,94,.06);font-size:13.5px}
+#tnCard.tn2-on .tn2-modo:empty{display:none}
+#tnCard.tn2-on .tn2-modo{margin:6px 0;padding:8px 12px;border-radius:12px;background:rgba(255,159,10,.12);font-weight:600;font-size:13.5px}
+#tnCard.tn2-on .tn2-mal{color:var(--danger,#FF3B30);font-weight:600}
+.tn2-avisos{margin:8px 0;font-size:13px;color:#8a5300}
+.tn2-avisos:empty{display:none}
+.tn2-avisos>div{padding:6px 10px;border-radius:10px;background:rgba(255,159,10,.12);margin:0 0 4px}
+.tn2-card{margin:8px 0 0}
+.tn2-sec{padding:8px 0;border-top:1px solid rgba(40,40,94,.08)}
+.tn2-sec:first-child{border-top:0}
+.tn2-st{font-weight:800;font-size:13px;color:var(--navy,#28285E);margin:0 0 4px}
+.tn2-cuenta{font-family:var(--mono,monospace);font-weight:800;font-size:16px;color:var(--navy,#28285E);margin:2px 0 4px;font-variant-numeric:tabular-nums}
+.tn2-l{font-size:13px;line-height:1.4;color:var(--text,#0D1424);overflow-wrap:anywhere}
+.tn2-pre{white-space:pre-line}
+.tn2-meta{margin-top:6px;color:var(--text-3,#6E7C93)}
+.tn2-est{display:inline-block;margin-left:4px;padding:1px 7px;border-radius:999px;background:rgba(255,159,10,.16);color:#8a5300;font-size:11px;font-weight:700;white-space:nowrap}
+.tn2-facs{margin:4px 0 0}
+.tn2-fac{display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;border-radius:999px;font-size:12px;background:rgba(40,40,94,.06);color:var(--text-3,#6E7C93)}
+.tn2-fac.on{background:rgba(30,111,145,.14);color:#1E6F91;font-weight:700}
+.tn2-par{display:block}
+.tn2-pf{display:grid;grid-template-columns:minmax(0,1fr);padding:4px 0;border-bottom:1px dashed rgba(40,40,94,.10);font-size:13px}
+.tn2-pn{font-weight:600;overflow-wrap:anywhere}
+.tn2-pv{font-family:var(--mono,monospace);font-size:12px;color:var(--text-soft,#475569);font-variant-numeric:tabular-nums}
+.tn2-esta .tn2-pn{color:#1E6F91}
+.tn2-justo{margin:6px 0 0;padding:6px 10px;border-radius:10px;font-size:13px;background:rgba(52,199,89,.12)}
+.tn2-justo.mal{background:rgba(255,59,48,.10);color:#a1150d;font-weight:700}
+#tn2Lista .tn2-it{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid rgba(40,40,94,.08)}
+#tn2Lista .tn2-it>div:first-child{min-width:0;margin-right:8px}
+#tn2Lista .tn2-it small{display:block;color:var(--text-3,#6E7C93);font-size:12px}
+#tn2Lista .tn2-it.baja{opacity:.6}
+#tn2Lista .tn2-ib{display:flex;flex-wrap:wrap;justify-content:flex-end}
+#tn2Lista .tn2-ib button{margin:2px 0 2px 6px;min-height:40px}
+.ot-tarea.tn2-baja:not(.on){display:none}
+.tn2-ov{position:fixed;top:0;right:0;bottom:0;left:0;z-index:9800;background:rgba(13,20,36,.45);display:flex;align-items:flex-end;justify-content:center}
+.tn2-hoja{background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 -10px 40px rgba(13,20,36,.25);padding-bottom:env(safe-area-inset-bottom)}
+.tn2-hc{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 8px;font-size:15px}
+.tn2-hc .v7-x{min-width:44px;min-height:44px;border:0;background:rgba(40,40,94,.06);border-radius:999px;font-size:16px;cursor:pointer}
+.tn2-hb{padding:0 16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.tn2-hb label{display:block;font-weight:600;font-size:13px}
+.tn2-hb input{width:100%;min-height:44px;margin:4px 0 0;box-sizing:border-box}
+.tn2-cb{font-size:13px;padding:3px 0}
+.tn2-cb span{color:var(--text-3,#6E7C93);margin-right:6px}
+.tn2-hp{display:flex;flex-wrap:wrap;padding:10px 16px 6px}
+.tn2-hp button{margin:0 8px 6px 0}
+.tn2-hmsg{padding:0 16px 12px;font-size:13px}
+@media (min-width:901px){.tn2-ov{align-items:center}.tn2-hoja{border-radius:24px}}
+@media (max-width:640px){#tnCard.tn2-on .tn2-grid,#tnCard.tn2-on .tn2-fs{grid-template-columns:minmax(0,1fr)}#tnCard.tn2-on .tn2-grid input,#tnCard.tn2-on .tn2-grid select,#tnCard.tn2-on .tn2-grid textarea{font-size:16px}#tn2Lista .tn2-it{display:block}#tn2Lista .tn2-ib{justify-content:flex-start}#tn2Lista .tn2-ib button{margin:4px 6px 0 0}}
