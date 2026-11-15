@@ -95,6 +95,7 @@ async function abrir(op = {}) {
   if (!op.v153) await page.addInitScript(() => { window.__v153No = true; });   // v153: las pruebas viejas no ven «✏ Corregir cierre» ni proponer_corregir_cierre del asistente; v153:true los prueba
   if (!op.v154) await page.addInitScript(() => { window.__v154No = true; });   // v154: las pruebas viejas no ven el auditor de puntos (motivo obligatorio en ⭐ Puntos, el cierre y el baremo; explicar_puntos y las herramientas nuevas del asistente); v154:true los prueba
   if (!op.v155) await page.addInitScript(() => { window.__v155No = true; });   // v155: las pruebas viejas no ven el rol Dirección, su Inicio, «📊 Dirección» ni «📨 Para resolver» (ni las herramientas nuevas del asistente); v155:true los prueba
+  if (!op.v156) await page.addInitScript(() => { window.__v156No = true; });   // v156: las pruebas viejas no ven el auditor del avance (motivo obligatorio al cambiar lo hecho a mano, la hoja «🔎 Control del avance», la línea del Supervisor, el parte de las 18 h ni las herramientas nuevas del asistente; ni los arreglos del Inicio de Dirección y «Para resolver»); v156:true los prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];

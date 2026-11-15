@@ -331,7 +331,7 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
 
   // ================================================================= 8) reclamo de puntos
   if (SOLO('8')) {
-    const A = await sesion('juan', { reglas: true, crew: true, mtNuevo: true, tarjetas: true, v154: true, v153: true }); const p = A.page;
+    const A = await sesion('juan', { reglas: true, crew: true, mtNuevo: true, tarjetas: true, v154: true, v153: true, v156: true }); const p = A.page;   // v156: con el arreglo de la explicación por tarea
     await p.waitForTimeout(2000);
     const sw = await worker(p); await p.evaluate(() => window.__asistenteAbrir()); await p.waitForTimeout(800);
     let ped = await decir(p, sw, 'me faltaron puntos en la OT-2026-132, el sellado', [usa('explicar_puntos', { otId: 'OT-2026-132' }), usa('avisar_oficina', { texto: 'Me faltaron los puntos del sellado de la Col 1 en la OT-2026-132: lo hice yo y mandé la foto', tipo: 'puntos', otId: 'OT-2026-132', tarea: 'sellado', cuantos: 2 }), fin('¿Se lo mando?')]);
@@ -343,9 +343,9 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     await p.evaluate(() => window.__paraResolver.mandar({ texto: 'Me faltaron puntos del izaje de la OT-2026-110', tipo: 'puntos', otId: 'OT-2026-110', tarea: 'izaje' }));
     let d = await db(p), recl = Object.entries(d.avisosCuadrilla || {}).map(([id, x]) => Object.assign({ id }, x)).filter((x) => x.tipo === 'puntos');
     const r1 = recl.find((x) => x.otId === 'r132'), r2 = recl.find((x) => x.otId === 'c110');
-    c(r1 && r1.tareaK === 'sellado_base' && r1.cuantos === 2 && r1.explicacion && r1.explicacion.pts === 2.5 && r2, 'el reclamo queda con la orden, la tarea, cuántos y la foto fija de la explicación (2,5 pts) · ' + JSON.stringify(r1 && { k: r1.tareaK, c: r1.cuantos, e: r1.explicacion }).slice(0, 200));
+    c(r1 && r1.tareaK === 'sellado_base' && r1.cuantos === 2 && r1.explicacion && r1.explicacion.pts === 0 && /Sellado/.test(r1.explicacion.tarea) && /Sellado/.test(r1.explicacion.cuenta) && !/Montaje/.test(r1.explicacion.cuenta) && r2, 'el reclamo queda con la orden, la tarea, cuántos y la foto fija de la explicación DE ESA TAREA (v156: el sellado, 0 pts; antes mostraba el montaje) · ' + JSON.stringify(r1 && { k: r1.tareaK, c: r1.cuantos, e: r1.explicacion }).slice(0, 200));
     // Ángel
-    const B = await otraPagina(A, Object.assign({}, MOD, { sesion: 'admin', reglas: true, v154: true, v153: true })); const q = B.page; await q.waitForTimeout(3500);
+    const B = await otraPagina(A, Object.assign({}, MOD, { sesion: 'admin', reglas: true, v154: true, v153: true, v156: true })); const q = B.page; await q.waitForTimeout(3500);
     const swq = await worker(q);
     await q.evaluate(() => window.__paraResolver.abrir()); await q.waitForTimeout(900);
     await q.click(`#prOv [data-pr="ia:${r2.id}"]`); await q.waitForTimeout(600);
@@ -357,6 +357,8 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     let an = await q.evaluate((id) => { const e = document.querySelector(`#prOv [data-prid="${id}"] .pr-an`); return e ? { c: e.className, t: e.textContent.replace(/\s+/g, ' ') } : null; }, r1.id);
     c(an && /ok/.test(an.c) && /Parece que tiene razón/.test(an.t) && /mandó foto/.test(an.t) && /pasaría de 2,5 a/.test(an.t), '«🔎 Analizar»: «Parece que tiene razón» (mandó foto y «se hizo» del sellado, el cierre puso 0) y cuánto pasaría a tener · ' + (an && an.t).slice(0, 260));
     await foto(q, 'reclamo_analisis');
+    const rv = await q.evaluate((id) => { const ov = document.getElementById('prOv'), suelto = [...ov.querySelectorAll('.pr-caja > .pr-msg')].map((e) => e.textContent).join(' '), it = ov.querySelector(`[data-prid="${id}"]`); return { suelto, ex: it ? (it.querySelector('.pr-ex') || {}).textContent || '' : '', an: !!(it && it.querySelector('.pr-an')) }; }, r1.id);
+    c(!/Parece que tiene razón/.test(rv.suelto) && rv.an && /tarea «Sellado/.test(rv.ex) && !/Montaje/.test(rv.ex), 'v156: el cartel del análisis queda pegado a su reclamo (no suelto arriba) y «La app le explicaba» es la cuenta del sellado · ' + JSON.stringify(rv).slice(0, 220));
     await q.click(`#prOv [data-pr="aut:${r1.id}"]`); await q.waitForTimeout(700);
     let r = await q.evaluate(() => ({ plan: !!document.querySelector('#prOv .pr-plan .cc-res'), mot: (document.getElementById('prMot') || {}).value || '' }));
     c(r.plan && /^Reclamo de Juan Pérez del /.test(r.mot), '«✅ Autorizar»: antes → después con el motor de «Corregir cierre» y el motivo precargado · ' + r.mot.slice(0, 80));
