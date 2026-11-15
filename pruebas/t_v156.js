@@ -255,17 +255,20 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
   if (SOLO('7')) {
     const A = await sesion('dir', { leaflet: true }, datos155); const p = A.page;
     await p.waitForTimeout(4500);
-    const ver = () => p.evaluate(() => { window.__preciosNube = Object.assign({}, window.__preciosNube || {}, { contratoInicio: '2026-10-15', contratoPlazoMeses: 4 }); window.__inicioDir.pintar(); const D = window.__inicioDir.datos(); const t = (document.getElementById('iniDir') || {}).textContent || ''; return { est: D.estProy, dif: D.difDias, proy: D.proy, t: t.replace(/\s+/g, ' ') }; });
+    const ver = () => p.evaluate(() => { window.__preciosNube = Object.assign({}, window.__preciosNube || {}, { contratoInicio: '2026-10-15', contratoPlazoMeses: 4 }); window.__inicioDir.pintar(); const D = window.__inicioDir.datos(true); const t = (document.getElementById('iniDir') || {}).textContent || ''; return { est: D.estProy, dif: D.difDias, proy: D.proy, t: t.replace(/\s+/g, ' ') }; });
+    const o0 = await p.evaluate(() => { const o = ordenesTrabajo.find((x) => x.numero === 'OT-2026-125'); return JSON.parse(JSON.stringify(o)); });
+    // sin días con avance en la última semana (se sacan los cierres de días anteriores): no hay ritmo para estimar
+    await p.evaluate(() => { const h = new Date(); h.setHours(0, 0, 0, 0); for (let i = ordenesTrabajo.length - 1; i >= 0; i--) { const o = ordenesTrabajo[i]; if (o.cierre && o.cierre.cerradoTs && new Date(String(o.fecha) + 'T12:00:00') < h) ordenesTrabajo.splice(i, 1); } });
     let r = await ver();
-    c(r.est === 'lejos' && !r.proy && !/\+999|más de 999|\d{3,} días después|terminamos el/.test(r.t) && /Muy atrasado: al ritmo de los últimos 7 días no se llega/.test(r.t), 'como en la captura (poco ritmo contra 18.407 módulos): «Muy atrasado: al ritmo de los últimos 7 días no se llega» en vez de «+999 d» / «2890 días después» · ' + JSON.stringify({ est: r.est, proy: r.proy }));
+    c(r.est === 'sinRitmo' && !/\+999|más de 999|\d{3,} días después/.test(r.t) && /todavía no hay ritmo/i.test(r.t), 'sin días con avance en la semana: «todavía no hay ritmo suficiente para estimar» (sin «+999 d» ni «N días después») · ' + JSON.stringify({ est: r.est, dif: r.dif }));
+    await foto(p, 'dir_sinritmo');
+    // como en la captura: poquito avance en varios días contra los 18.407 módulos de la zona
+    await p.evaluate((o0) => { const hab = []; const f = new Date(); for (let i = 0; i < 20 && hab.length < 4; i++) { f.setDate(f.getDate() - 1); if (f.getDay() !== 0) hab.push(`${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}`); } hab.forEach((x, i) => { ordenesTrabajo.push(Object.assign({}, o0, { id: 'zz' + i, numero: 'OT-2026-9' + i, fecha: x, cierre: Object.assign({}, o0.cierre, { fecha: x, avanceItems: [{ id: 5, delta: 0.3, k: 'montaje_prfv' }] }) })); }); }, o0);
+    r = await ver();
+    c(r.est === 'lejos' && !r.proy && !/\+999|más de 999|\d{3,} días después|terminamos el/.test(r.t) && /Muy atrasado: al ritmo de los últimos 7 días no se llega/.test(r.t), 'con poquito ritmo (como en la captura): «Muy atrasado: al ritmo de los últimos 7 días no se llega» en vez de «+999 d» / «2890 días después» · ' + JSON.stringify({ est: r.est, proy: r.proy }));
     await foto(p, 'dir_lejos');
     const k = await p.evaluate(() => { const e = document.querySelector('#iniDir .dr-k6') || document.querySelector('#iniDir .dr-hkpi'); return e ? e.textContent.replace(/\s+/g, ' ') : ''; });
     c(/No llega/.test(k) && !/\+999/.test(k), 'el KPI dice «No llega» (no «+999 d») · ' + k.slice(0, 160));
-    // sin días con avance en la última semana: no hay ritmo para estimar
-    await p.evaluate(() => { const h = new Date().toISOString().slice(0, 10); for (let i = ordenesTrabajo.length - 1; i >= 0; i--) { const o = ordenesTrabajo[i]; if (o.cierre && o.cierre.cerradoTs && String(o.fecha) < h) ordenesTrabajo.splice(i, 1); } });
-    r = await ver();
-    c(r.est === 'sinRitmo' && !/\+999|más de 999|\d{3,} días después/.test(r.t) && /todavía no hay ritmo/i.test(r.t), 'sin días con avance en la semana: «todavía no hay ritmo suficiente para estimar» · ' + JSON.stringify({ est: r.est, dif: r.dif }));
-    await foto(p, 'dir_sinritmo');
     c(!errsJs(A).length, 'sin errores de JS ' + JSON.stringify(errsJs(A).slice(0, 3)));
     await A.page.context().close();
   }

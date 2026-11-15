@@ -2,6 +2,26 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v156 — 15/11/2026 (armada, sin publicar) · Auditor del avance de obra: el asistente y una hoja sin IA controlan el avance con exactitud + 2 arreglos de la v155
+
+**Pedido de Ángel** (14/11/2026): «Necesito que la IA analice el avance de obra muy bien, muy detalladamente: si pasó algo mal, algo bien, con todas las tareas que se hicieron, más allá de que ya es automático. Necesito que tenga un control muy exacto de eso.» Mismo espíritu que el auditor de puntos (v154). Lo de PDF y videos (Worker `ema-fotos` `v2-fotos`) pasa a ser la **v157** (instructivo y comentario del Worker renombrados).
+
+**Base:** ORIGINAL 155 (`73e57dac…`). Parche `herramientas/v156/patch_v156.py` (reemplazos chicos + el módulo `auditorAvance`; `--otra-base` para reaplicar).
+
+**1. Explicar cada número** (`__auditAvance`, todo de memoria): cada ítem del itemizado con contratado, hecho y de dónde sale cada unidad: cada cierre de orden (fecha, OT, tarea y su parte del ítem por partes: «cada unidad de la tarea suma el 25 % del ítem»), correcciones con «✏ Corregir cierre» (quién, cuándo, motivo), revertidos al anular (no cuentan), lo cargado a mano en Avance de obra (quién, cuándo, motivo; lo viejo: «a mano, sin fecha, sin motivo anotado»), ajustes del conforme a obra y lo certificado (foto fija). La suma cuadra con el ítem o dice «NO CUADRA, faltan N». Etapas (solas o a mano), % de siempre, módulos K, la planilla de columnas (v150) contra el itemizado. Ejemplo de la prueba: «Ítem 5 (Columna PRFV 7 m…): contratado 2, hecho 1 (50 %). De dónde sale: OT-2026-201 (Excavación; 12 % del ítem): +0,24; OT-2026-201 (Hormigonado; 13 %): +0,26; OT-2026-202 (Montaje PRFV; 25 %): +0,5. Suma: 0,24 + 0,26 + 0,5 = 1 ✓ cuadra».
+
+**2. Revisar (sin IA):** ítem que no cuadra con sus fuentes, hechas de más, orden cerrada que no movió el avance (y cuánto debía sumar) o que lo movió dos veces, lo mandado por la cuadrilla sin cerrar, a mano sin respaldo y sin fecha (no entra en la certificación), la misma columna en dos órdenes, orden de obra imposible (izaje sin hormigonado, vínculo sin izaje, luminaria sin vínculo, cable sin zanja) y poco fraguado («a revisar»), cálculo ≠ itemizado (también las columnas de 10 m contra el ítem 8/4) y cálculo viejo no pasado, material contra avance, mes certificado cerrado ≠ hoy, provisiones mezcladas, 100 % sin documentación o con columnas sin foto, ritmo raro / obra parada. Cada hallazgo con su propuesta.
+
+**3. El porqué y los cambios con «Sí»:** cambiar lo hecho a mano en Avance de obra pide motivo (`avanceObras.avanceHist[]`); notas del porqué (`avanceNotas[]`): el control las usa y deja de marcar ese número; corregir un ítem, corregir el cierre (v153), pasar el cálculo (v102), varias juntas en una tarjeta con casillas. Auditoría `avance_auditoria`. Sin reglas nuevas.
+
+**4. Pantallas:** hoja «🔎 Control del avance» (por obra o todas, ítem por ítem desplegable con sus órdenes, planilla, hallazgos con su botón, «✨ Que lo analice el asistente»); accesos en Avance de obra (arriba y en cada obra), el legajo, el Supervisor («Avance: N cosas para revisar»), el Inicio Ejecutivo (Para atender, lo rojo) y el Inicio de Dirección (solo mirar). Parte del avance al final del día (18 h, sin IA, solo si hay rojos nuevos) a Administración.
+
+**5. Asistente:** `auditar_avance` (obra, obra + ítem, período, todas; paginado), `proponer_nota_avance`, `proponer_correcciones_avance`; SISTEMA «SÍ PODÉS AUDITAR EL AVANCE… nunca inventes el porqué de un número cargado a mano»; «revisá el avance de todas las obras» con el modelo del supervisor y effort high; la revisión de las 12/18 h suma lo rojo del avance. Admin/oficina (con cambios), Dirección (solo lectura); cuadrilla, pañol y mirar no.
+
+**6. Arreglos de la v155 (por las capturas):** el Inicio de Dirección ya no muestra «+999 d» ni «terminamos el 01/02/2035, 2890 días después»: con pocos días de avance dice «todavía no hay ritmo suficiente para estimar» y si a ese ritmo no se llega ni en el doble del plazo, «Muy atrasado: al ritmo de los últimos 7 días no se llega» (KPI «No llega»). «📨 Para resolver»: «La app le explicaba» es la cuenta de la TAREA reclamada (si no se sabe, la orden completa, aclarado) y el cartel del análisis queda pegado al reclamo.
+
+**Pruebas:** PRUEBAS156. **Ángel:** subir `index.html`. Sin reglas nuevas, sin Worker nuevo, sin APK nuevo.
+
 ## v155 — 14/11/2026 (armada, sin publicar) · Rol «Dirección» con su Inicio + «📨 Para resolver» (la cuadrilla le avisa a la oficina) + 2 detalles de la v154
 
 **Pedido de Ángel** (14/11/2026), después de ver las maquetas: «Hagamos A en el celu y C en la compu. Y sumar lo de la B, calendarios»; la foto del día de cada obra y el pronóstico del clima contra lo planeado (sin «riesgo de multas»). Rol «Dirección»: «pueden mirar todo, consultar todo, pero no pueden cambiar nada»; «esa pantalla también mostrarla en oficina». Y: «los de cuadrilla, si quieren avisar algo, pueden avisarle a la IA y que la IA me avise a mí. Que me llegue con un mensaje o algo. O cosas que resolver.»
