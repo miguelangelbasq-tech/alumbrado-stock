@@ -20,7 +20,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Auditor y asistente:** el control (v156) marca si los dos % difieren 25 puntos o más, la misma columna en dos órdenes y las fallas; `avance_obra` («¿qué le falta a la Col 4?» → «1 BPN 6 verde (2010)»), `proponer_marcar_avance` (tarjeta y «Sí»; Dirección solo lee); `auditar_avance` con obra suma el avance nuevo.
 
-**Pruebas:** `t_v158` PC 72/72 · celu 72/72 · `REGLAS=1` 72/72 (`datos158.js`). BATERIA158
+**Pruebas:** `t_v158` PC 72/72 · celu 72/72 · `REGLAS=1` 72/72 (`datos158.js`). Batería completa (TZ Córdoba, domingo, de a 3): todo OK salvo las conocidas: `t_v083` (obsoleta), `t_v147` y `t_v150` PC y celu (alertas / parte de las 18 h en domingo, igual con la v156 y la v157), y `t_v143` PC y `t_v157` PC que fallaron con la máquina cargada y pasan solas (78/78 y 43/43). Capturas en `capturas/` (celu y PC). Huellas en `herramientas/v158/huellas.txt` (sello `2026-11-15 07:28 · 220edb`).
 
 ## v157 — 15/11/2026 (armada, sin publicar) · El tiempo de CADA columna (no de toda la tarea)
 
