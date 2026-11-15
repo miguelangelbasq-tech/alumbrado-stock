@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v158 — 15/11/2026 (armada, sin publicar) · Avance de obra nuevo: por rubro y por columna, se mueve solo con las órdenes
+## v158 — 15/11/2026 (publicada en GitHub 15/11) · Avance de obra nuevo: por rubro y por columna, se mueve solo con las órdenes
 
 **Pedido de Ángel** (15/11/2026), de las maquetas `maq_avance`: «la A con la grilla de la C adentro. Hacelo.» · «Las tareas que no existen hay que agregarlas todas.» · «El % de la obra es el avance de la obra. Lo principal es que nosotros podamos editarlo: desde el avance de obra marcamos se hizo / no se hizo. Pero cuando se tiene que mover el avance de obra es según las órdenes de trabajo… Si puse que hoy van a ser 5 columnas y hicieron 5 columnas, se mueve… Lo mismo con las fallas.»
 
@@ -22,7 +22,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas:** `t_v158` PC 72/72 · celu 72/72 · `REGLAS=1` 72/72 (`datos158.js`). Batería completa (TZ Córdoba, domingo, de a 3): todo OK salvo las conocidas: `t_v083` (obsoleta), `t_v147` y `t_v150` PC y celu (alertas / parte de las 18 h en domingo, igual con la v156 y la v157), y `t_v143` PC y `t_v157` PC que fallaron con la máquina cargada y pasan solas (78/78 y 43/43). Capturas en `capturas/` (celu y PC). Huellas en `herramientas/v158/huellas.txt` (sello `2026-11-15 07:28 · 220edb`).
 
-## v157 — 15/11/2026 (armada, sin publicar) · El tiempo de CADA columna (no de toda la tarea)
+## v157 — 15/11/2026 (publicada en GitHub 15/11) · El tiempo de CADA columna (no de toda la tarea)
 
 **Pedido de Ángel** (15/11/2026): «si yo te digo "haceme los tableritos de 3 columnas", recién cuando terminan las 3 columnas le sale el horario, y eso está mal: tiene que ser en cada columna… Si te doy 3 columnas, tendría que tener 3 horarios. Eso es para después sacar un promedio… Buscá una forma fácil y sencilla para los chicos.»
 
