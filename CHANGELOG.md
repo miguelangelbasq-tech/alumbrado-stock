@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v156 — 15/11/2026 (armada, sin publicar) · Auditor del avance de obra: el asistente y una hoja sin IA controlan el avance con exactitud + 2 arreglos de la v155
+## v156 — 15/11/2026 (publicada en GitHub 15/11) · Auditor del avance de obra: el asistente y una hoja sin IA controlan el avance con exactitud + 2 arreglos de la v155
 
 **Pedido de Ángel** (14/11/2026): «Necesito que la IA analice el avance de obra muy bien, muy detalladamente: si pasó algo mal, algo bien, con todas las tareas que se hicieron, más allá de que ya es automático. Necesito que tenga un control muy exacto de eso.» Mismo espíritu que el auditor de puntos (v154). Lo de PDF y videos (Worker `ema-fotos` `v2-fotos`) pasa a ser la **v157** (instructivo y comentario del Worker renombrados).
 
@@ -22,7 +22,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas:** `t_v156` PC 69/69 · celu 71/71 · `REGLAS=1` 69/69 (`datos156.js`); `t_v155` con el arreglo del reclamo 85/85 · 86/86; batería completa (TZ=UTC) 311 de 318 OK: fallan `t_v083` (obsoleta), `t_v147` y `t_v150` (igual que con la v155) y `t_v143` PC una vez (carrera conocida; sola 78/78). Huellas en `herramientas/v156/huellas.txt` (ORIGINAL `ede2b5ee…`, sello `2026-11-14 22:15 · 94054e`). **Ángel:** subir `index.html`. Sin reglas nuevas, sin Worker nuevo, sin APK nuevo.
 
-## v155 — 14/11/2026 (armada, sin publicar) · Rol «Dirección» con su Inicio + «📨 Para resolver» (la cuadrilla le avisa a la oficina) + 2 detalles de la v154
+## v155 — 14/11/2026 (publicada en GitHub 15/11) · Rol «Dirección» con su Inicio + «📨 Para resolver» (la cuadrilla le avisa a la oficina) + 2 detalles de la v154
 
 **Pedido de Ángel** (14/11/2026), después de ver las maquetas: «Hagamos A en el celu y C en la compu. Y sumar lo de la B, calendarios»; la foto del día de cada obra y el pronóstico del clima contra lo planeado (sin «riesgo de multas»). Rol «Dirección»: «pueden mirar todo, consultar todo, pero no pueden cambiar nada»; «esa pantalla también mostrarla en oficina». Y: «los de cuadrilla, si quieren avisar algo, pueden avisarle a la IA y que la IA me avise a mí. Que me llegue con un mensaje o algo. O cosas que resolver.»
 
