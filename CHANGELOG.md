@@ -20,7 +20,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **6. Arreglos de la v155 (por las capturas):** el Inicio de Dirección ya no muestra «+999 d» ni «terminamos el 01/02/2035, 2890 días después»: con pocos días de avance dice «todavía no hay ritmo suficiente para estimar» y si a ese ritmo no se llega ni en el doble del plazo, «Muy atrasado: al ritmo de los últimos 7 días no se llega» (KPI «No llega»). «📨 Para resolver»: «La app le explicaba» es la cuenta de la TAREA reclamada (si no se sabe, la orden completa, aclarado) y el cartel del análisis queda pegado al reclamo.
 
-**Pruebas:** PRUEBAS156. **Ángel:** subir `index.html`. Sin reglas nuevas, sin Worker nuevo, sin APK nuevo.
+**Pruebas:** `t_v156` PC 69/69 · celu 71/71 · `REGLAS=1` 69/69 (`datos156.js`); `t_v155` con el arreglo del reclamo 85/85 · 86/86; batería completa (TZ=UTC) 311 de 318 OK: fallan `t_v083` (obsoleta), `t_v147` y `t_v150` (igual que con la v155) y `t_v143` PC una vez (carrera conocida; sola 78/78). Huellas en `herramientas/v156/huellas.txt` (ORIGINAL `ede2b5ee…`, sello `2026-11-14 22:15 · 94054e`). **Ángel:** subir `index.html`. Sin reglas nuevas, sin Worker nuevo, sin APK nuevo.
 
 ## v155 — 14/11/2026 (armada, sin publicar) · Rol «Dirección» con su Inicio + «📨 Para resolver» (la cuadrilla le avisa a la oficina) + 2 detalles de la v154
 

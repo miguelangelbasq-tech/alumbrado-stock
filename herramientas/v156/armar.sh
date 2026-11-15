@@ -3,7 +3,7 @@
 set -e
 cd /tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-83acf3badc27/scratchpad/v156
 O=${1:-fijo}; mkdir -p $O
-F=156_2026-11-15_app-EMA_ORIGINAL.html
+F=156_2026-11-14_app-EMA_ORIGINAL.html
 python3 patch_v156.py ${BASE:-../v155/155_2026-11-14_app-EMA_ORIGINAL.html} $F ${BASE:+--otra-base}
 node ../tools/compactar80.js $F $O/index.html
 for d in app camara catastro guias materiales; do [ -e $O/$d ] || ln -s ../../v137/fijo/$d $O/$d; done
