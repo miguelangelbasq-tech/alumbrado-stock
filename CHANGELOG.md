@@ -2,6 +2,27 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v159 — 15/11/2026 (armada, sin publicar) · Crear tareas nuevas con el asistente y a mano, con los puntos de la fórmula
+
+**Pedido de Ángel** (15/11/2026): «también para crear nuevas tareas: por ahí se me van ocurriendo, se lo digo a la IA y lo tiene que calcular, y el tema de los puntos también calcularlo con la fórmula que dijimos, y que sea algo justo.»
+
+**Base:** ORIGINAL 158 (`a58321ea…`). Parche `herramientas/v159/patch_v159.py` (reemplazos chicos + el módulo `tareaNueva2`; `--otra-base` para reaplicar). PDF y videos pasa a la **v160** (instructivo del Worker `ema-fotos` y CLAUDE.md). Sin reglas nuevas (`configEquipo/baremo` lo escribe quien edita Producción).
+
+**La fórmula** (la del diccionario v108, la MISMA función `dif` de `diccionarioTareas`, ahora a la vista como `window.__diccDif`): D = 1 + 0,2 por cada factor (🪜 altura o barquilla · 🏋 pesado · ⚡ riesgo eléctrico · 🎯 oficio), tope 1,8, redondeado a 1 decimal; **puntos por unidad = HH × D** (redondeado a 2 decimales). Ejemplo de la prueba: «pintar las bases de las columnas, más o menos media hora por columna entre dos» → 0,5 h × 2 personas = 1 HH; sin altura, peso, riesgo ni oficio → D = 1; **1 HH × 1,00 = 1 pts por columna**; parecidas: Pintura de columna 1,2 pts/h, Sellado de base 2 pts/h, Acabado de pozo 1 pts/h → «está pareja».
+
+**Qué cambia:**
+- **Motor `__tareaNueva2`** (lo usan la pantalla y el asistente). `proponer` arma la tarea completa sin escribir nada: unidad, HH (dichas, de minutos × personas o estimadas con las parecidas y los minutos medidos v157), factores (dichos o estimados por las palabras), D, la cuenta escrita, las 3 parecidas con sus pts por hora y si es justa (más de 1,5 veces o menos de 0,67 veces → «revisá»), pasos y fotos borrador, ítem del itemizado (solo si se dice, con su parte) o `noAvanza`, qué marca en el avance nuevo (un paso de la grilla o una cosa nueva del rubro) y el rendimiento por día para la sugerida. Lo estimado va «estimado · a confirmar».
+- **Crear con «Sí»** (solo quien edita Producción; no cuadrilla, operario, pañol, mirar ni Dirección): `registrarTareasNuevas` con la ficha `t159`, historial del baremo (`hist`, tipo `nueva`, con motivo), `sugerida.rend` si dio rendimiento, auditoría `tarea_nueva`. **Editar** (motivo obligatorio, antes → después en el historial; las órdenes cerradas guardan sus puntos) y **dar de baja / reactivar** (no se borra: la de baja no aparece en Llenar orden ni en la sugerida; las órdenes viejas siguen andando).
+- **A mano:** Producción › «Cuánto vale cada tarea» › «＋ Crear tarea» es ahora la calculadora: HH o minutos × personas, los 4 factores con su explicación, D y los puntos que se recalculan solos, las parecidas al lado, unidad, fase, pasos, fotos, ítem y avance, puntos a mano (con el aviso de «no es justa»), motivo; «Sí, crearla» en una hoja con ✕; lista de las creadas con «✏ Editar» / «⏸ Dar de baja».
+- **Dónde aparece:** Llenar orden; la orden sugerida (rendimiento de la fórmula, «quedan N de T» por el avance de la obra, Ajustes › rendimientos); Modo obra (columna por columna si se mide en columnas); el avance de obra nuevo (una cosa por columna en el rubro elegido, o el paso de la grilla); el auditor de puntos v154 dice de dónde sale el valor («tarea creada el … por … con la fórmula de siempre: 1 HH × 1,00 = 1 pts por columna…»).
+- **Asistente** (dormido): `proponer_tarea_nueva` (tarjeta con la cuenta, las parecidas, pasos, fotos, ítem, avance y rendimiento; «Sí, crearla» / «Cambiar algo» / «No»; si no sabe las horas, pregunta) y `proponer_editar_tarea`; SISTEMA «TAREAS NUEVAS (v159)». Solo admin/oficina.
+
+**Pruebas:** `t_v159` PC 48/48 · celu 48/48 · `REGLAS=1` 48/48. Batería: ver `herramientas/v159/bateria159.txt`.
+
+**A confirmar:** el umbral de «justa» (1,5×); cómo se eligen las parecidas; las palabras que estiman los factores y las horas estimadas; el ítem sin parte (100 %); las tareas en metros en el avance (los metros de la zanja).
+
+**Huellas:** ver `herramientas/v159/huellas.txt`.
+
 ## v158 — 15/11/2026 (publicada en GitHub 15/11) · Avance de obra nuevo: por rubro y por columna, se mueve solo con las órdenes
 
 **Pedido de Ángel** (15/11/2026), de las maquetas `maq_avance`: «la A con la grilla de la C adentro. Hacelo.» · «Las tareas que no existen hay que agregarlas todas.» · «El % de la obra es el avance de la obra. Lo principal es que nosotros podamos editarlo: desde el avance de obra marcamos se hizo / no se hizo. Pero cuando se tiene que mover el avance de obra es según las órdenes de trabajo… Si puse que hoy van a ser 5 columnas y hicieron 5 columnas, se mueve… Lo mismo con las fallas.»
