@@ -58,7 +58,7 @@ R('function puedePlata() { return !window.__v145No && !!window.__fbUser && !esCr
 R('const veOficina = () => { const y = yo(); try { return !!y && (["admin", "oficina"].includes(y.rol)', 'const veOficina = () => { const y = yo(); try { return !!y && (["admin", "oficina"].includes(y.rol) || (y.rol === "direccion" && !window.__v155No)')
 
 # 3) asistente (lo liviano)
-R('const ROLES_TODOS = ["admin", "oficina", "panol", "cuadrilla", "operario", "mirar"];', 'const ROLES_TODOS = ["admin", "oficina", "direccion", "panol", "cuadrilla", "operario", "mirar"];   // v155: + Dirección')
+R('const ROLES_TODOS = ["admin", "oficina", "panol", "cuadrilla", "operario", "mirar"];', 'const ROLES_TODOS = window.__v155No ? ["admin", "oficina", "panol", "cuadrilla", "operario", "mirar"] : ["admin", "oficina", "direccion", "panol", "cuadrilla", "operario", "mirar"];   // v155: + Dirección')
 R('return rol === "admin" || window.__iaRoles().indexOf(rol) >= 0;', 'return rol === "admin" || window.__iaRoles().indexOf(rol) >= 0 || (rol === "direccion" && !window.__v155No && !(((window.__personalNube || {}).asistente || {}).rolesConDir));   // v155: listas guardadas antes de Dirección')
 R('operario: { preguntas: 10, remitos: 0 }, mirar: { preguntas: 10, remitos: 0 } }, mes:', 'operario: { preguntas: 10, remitos: 0 }, mirar: { preguntas: 10, remitos: 0 }, direccion: { preguntas: 30, remitos: 40 } }, mes:')
 # asistente (dormido)

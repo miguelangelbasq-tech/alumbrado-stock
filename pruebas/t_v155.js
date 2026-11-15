@@ -13,6 +13,9 @@
 //  7) la cuadrilla le avisa a la oficina por el asistente: Juan (celu) «avisale a Ángel que falta un fusible…» → tarjeta →
 //     «Sí, mandalo» → aviso a Administración y al supervisor, «📨 Para resolver», Ángel responde → le llega a Juan; seguridad en
 //     rojo (Inicio y Supervisor); pañol y mirar también pueden; la cuadrilla no lee los avisos de los demás (reglas).
+//  8) reclamo de puntos: Juan reclama el sellado de la OT-2026-132 (mandó foto y el cierre le dio 0) → «🔎 Analizar» = «parece que
+//     tiene razón» → «✅ Autorizar» → «Sí» → puntos corregidos + respuesta; otro sin razón → «✕ No corresponde» → respuesta; el
+//     asistente lo analiza (Worker simulado).
 const { abrir, otraPagina, prueba } = require('./h');
 const { datos155 } = require('./datos155');
 const cel = process.argv[2] === 'cel';
@@ -322,6 +325,62 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     r = await w.evaluate(() => ({ n: document.querySelectorAll('#prOv .pr-item').length, botones: document.querySelectorAll('#prOv [data-pr^="resolver:"], #prOv [data-pr^="visto:"]').length, txt: document.querySelector('#prOv .pr-top').textContent }));
     c(r.n >= 3 && r.botones === 0 && /solo para mirar/.test(r.txt), 'Dirección ve «Para resolver» sin botones (solo mirar) · ' + JSON.stringify(r));
     await Dd.page.close();
+    c(!errsJs(A).length, 'sin errores · ' + JSON.stringify(errsJs(A).slice(0, 3)));
+    await A.page.close();
+  }
+
+  // ================================================================= 8) reclamo de puntos
+  if (SOLO('8')) {
+    const A = await sesion('juan', { reglas: true, crew: true, mtNuevo: true, tarjetas: true, v154: true, v153: true }); const p = A.page;
+    await p.waitForTimeout(2000);
+    const sw = await worker(p); await p.evaluate(() => window.__asistenteAbrir()); await p.waitForTimeout(800);
+    let ped = await decir(p, sw, 'me faltaron puntos en la OT-2026-132, el sellado', [usa('explicar_puntos', { otId: 'OT-2026-132' }), usa('avisar_oficina', { texto: 'Me faltaron los puntos del sellado de la Col 1 en la OT-2026-132: lo hice yo y mandé la foto', tipo: 'puntos', otId: 'OT-2026-132', tarea: 'sellado', cuantos: 2 }), fin('¿Se lo mando?')]);
+    c(/2[,.]5/.test(resultado(ped, 1)) && /pendiente_de_confirmacion/.test(resultado(ped, 2)), 'Juan: primero la explicación de lo suyo (2,5 pts) y después la tarjeta del reclamo · ' + resultado(ped, 1).slice(0, 120));
+    const card = await p.evaluate(() => { const e = [...document.querySelectorAll('#iaChat .ia-conf')].pop(); return e ? e.textContent.replace(/\s+/g, ' ') : ''; });
+    c(/Reclamo de puntos/.test(card) && /Tarea: Sellado/i.test(card) && /faltan 2 pts/.test(card) && /OT-2026-132/.test(card), 'tarjeta del reclamo: tarea, cuántos, la orden y lo que la app le explica hoy · ' + card.slice(0, 220));
+    await foto(p, 'reclamo_tarjeta');
+    await p.click('#iaChat .ia-conf:last-of-type [data-iasi]'); await p.waitForTimeout(1600);
+    await p.evaluate(() => window.__paraResolver.mandar({ texto: 'Me faltaron puntos del izaje de la OT-2026-110', tipo: 'puntos', otId: 'OT-2026-110', tarea: 'izaje' }));
+    let d = await db(p), recl = Object.entries(d.avisosCuadrilla || {}).map(([id, x]) => Object.assign({ id }, x)).filter((x) => x.tipo === 'puntos');
+    const r1 = recl.find((x) => x.otId === 'r132'), r2 = recl.find((x) => x.otId === 'c110');
+    c(r1 && r1.tareaK === 'sellado_base' && r1.cuantos === 2 && r1.explicacion && r1.explicacion.pts === 2.5 && r2, 'el reclamo queda con la orden, la tarea, cuántos y la foto fija de la explicación (2,5 pts) · ' + JSON.stringify(r1 && { k: r1.tareaK, c: r1.cuantos, e: r1.explicacion }).slice(0, 200));
+    // Ángel
+    const B = await otraPagina(A, Object.assign({}, MOD, { sesion: 'admin', reglas: true, v154: true, v153: true })); const q = B.page; await q.waitForTimeout(3500);
+    const swq = await worker(q);
+    await q.evaluate(() => window.__paraResolver.abrir()); await q.waitForTimeout(900);
+    await q.click(`#prOv [data-pr="ia:${r2.id}"]`); await q.waitForTimeout(600);
+    await esperarIa(q); await q.waitForTimeout(500);
+    const pIa = swq.pedidos[0] || {}, ultimo = JSON.stringify((pIa.messages || []).slice(-1));
+    c(/Analizá si este reclamo de puntos es correcto/.test(ultimo) && /OT-2026-110/.test(ultimo) && (pIa.tools || []).some((x) => x.name === 'explicar_puntos'), '«✨ Que lo analice el asistente» abre el asistente con el reclamo y la explicación');
+    await q.evaluate(() => { window.__asistente && window.__asistente.cerrar && window.__asistente.cerrar(); window.__paraResolver.abrir(); }); await q.waitForTimeout(900);
+    await q.click(`#prOv [data-pr="anal:${r1.id}"]`); await q.waitForTimeout(900);
+    let an = await q.evaluate((id) => { const e = document.querySelector(`#prOv [data-prid="${id}"] .pr-an`); return e ? { c: e.className, t: e.textContent.replace(/\s+/g, ' ') } : null; }, r1.id);
+    c(an && /ok/.test(an.c) && /Parece que tiene razón/.test(an.t) && /mandó foto/.test(an.t) && /pasaría de 2,5 a/.test(an.t), '«🔎 Analizar»: «Parece que tiene razón» (mandó foto y «se hizo» del sellado, el cierre puso 0) y cuánto pasaría a tener · ' + (an && an.t).slice(0, 260));
+    await foto(q, 'reclamo_analisis');
+    await q.click(`#prOv [data-pr="aut:${r1.id}"]`); await q.waitForTimeout(700);
+    let r = await q.evaluate(() => ({ plan: !!document.querySelector('#prOv .pr-plan .cc-res'), mot: (document.getElementById('prMot') || {}).value || '' }));
+    c(r.plan && /^Reclamo de Juan Pérez del /.test(r.mot), '«✅ Autorizar»: antes → después con el motor de «Corregir cierre» y el motivo precargado · ' + r.mot.slice(0, 80));
+    await foto(q, 'reclamo_autorizar');
+    await q.fill('#prResp', 'Tenías razón, ya te los sumé'); await q.click(`#prOv [data-pr="autsi:${r1.id}"]`); await q.waitForTimeout(2200);
+    d = await db(q);
+    const ot = d.ordenesTrabajo.r132, pj = ((ot.cierre.puntos || {}).porPersona || []).find((x) => /Juan/.test(x.nombre)) || {}, hist = ot.cierre.puntosHist || [];
+    c(ot.cierre.cantidades.sellado_base === 1 && pj.pts > 2.5 && hist.some((h) => h.tipo === 'corregir') && hist.some((h) => h.tipo === 'nota' && /Reclamo de Juan/.test(h.texto) && /autorizado/.test(h.texto)), 'con «Sí»: el cierre se corrige (sellado 1), Juan sube de 2,5 a ' + pj.pts + ' y queda la nota del reclamo en el historial de la orden');
+    const ac1 = d.avisosCuadrilla[r1.id], vuelta = Object.values(d.avisosPush || {}).filter((x) => x.clave === 'juan perez');
+    c(ac1.estado === 'autorizado' && ac1.decPorNombre && vuelta.some((x) => /autorizó tu reclamo/.test(x.titulo) && /ya te los sumé/.test(x.cuerpo)) && vuelta.some((x) => /Puntos corregidos/.test(x.titulo)), 'el reclamo queda «autorizado» (quién, cuándo) y a Juan le llegan la respuesta y «⭐ Puntos corregidos»');
+    c(Object.values(d.auditoria || {}).some((x) => x.accion === 'puntos_reclamo' && /autorizado/.test(x.detalle || '')), 'auditoría «puntos_reclamo»');
+    // el que no tiene razón
+    await q.click(`#prOv [data-pr="anal:${r2.id}"]`); await q.waitForTimeout(900);
+    an = await q.evaluate((id) => { const e = document.querySelector(`#prOv [data-prid="${id}"] .pr-an`); return e ? e.textContent.replace(/\s+/g, ' ') : ''; }, r2.id);
+    c(/No parece/.test(an) && /coincide con el cierre/.test(an), 'el otro reclamo: «No parece» (lo que mandó la cuadrilla coincide con el cierre) · ' + an.slice(0, 160));
+    await q.click(`#prOv [data-pr="rech:${r2.id}"]`); await q.waitForTimeout(400);
+    await q.click(`#prOv [data-pr="rechsi:${r2.id}"]`); await q.waitForTimeout(600);
+    c((await db(q)).avisosCuadrilla[r2.id].estado !== 'rechazado' && /por qué no corresponde/i.test(await q.textContent('#prOv')), '«✕ No corresponde» sin motivo no se guarda (el motivo es obligatorio)');
+    await q.fill('#prResp', 'el izaje de esa orden lo cobraron completo los tres'); await q.click(`#prOv [data-pr="rechsi:${r2.id}"]`); await q.waitForTimeout(1500);
+    d = await db(q);
+    c(d.avisosCuadrilla[r2.id].estado === 'rechazado' && Object.values(d.avisosPush || {}).some((x) => x.clave === 'juan perez' && /no corresponde/.test(x.titulo) && /cobraron completo/.test(x.cuerpo)), '«No corresponde» con motivo → a Juan le llega «revisó tu reclamo: no corresponde porque…»');
+    await B.page.close();
+    ped = await decir(p, sw, '¿qué pasó con mis reclamos?', [usa('mis_avisos', {}), fin('Eso.')]);
+    c(/autorizado/.test(resultado(ped, 1)) && /no corresponde/.test(resultado(ped, 1)), 'Juan ve sus reclamos con el estado y la respuesta · ' + resultado(ped, 1).slice(0, 160));
     c(!errsJs(A).length, 'sin errores · ' + JSON.stringify(errsJs(A).slice(0, 3)));
     await A.page.close();
   }

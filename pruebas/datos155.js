@@ -32,6 +32,13 @@ function datos155() {
   d.db.fotosObra = { fo1: { plazaId: 'p2', plazaNombre: 'PLAZA LAS ACACIAS', fecha: hoy, cat: 'columna', num: 'Col 1', adjId: 'adjFo1', mini: PNG, por: 'Marcos Ríos', ts: ahora - 6e5 } };
   d.db.gastosObra = { gs1: { plazaId: 'p1', plazaNombre: 'PLAZA LOS ÁLAMOS', fecha: dia(-3), concepto: 'Hormigón', monto: 150000, categoria: 'material' } };
   d.db.configEquipo.precios = {};
+  // reclamo de puntos: OT-2026-132 (ayer, BULEVARES, CERRADA): montaje 1 (Juan y Pedro, 2,5 c/u) y el sellado quedó en 0, pero Juan
+  // mandó foto y «se hizo» del sellado de la Col 1 → Juan tiene razón
+  const perJP = [{ nombre: 'Juan Pérez', rol: 'Oficial' }, { nombre: 'Pedro Gómez', rol: 'Ayudante' }];
+  O.r132 = Object.assign(base('OT-2026-132', d.ayer, 'p3', { personal: perJP, personalNombres: ['juan perez', 'pedro gomez'], cuadrilla: 'Juan y Pedro', responsable: 'Juan Pérez', actividades: ['montaje_prfv', 'sellado_base'], previsto: { montaje_prfv: 1, sellado_base: 1 }, estado: 'Terminada',
+    campo: { fotos: { sj1: { k: 'sellado_base', cat: 'columna', num: 'Col 1', por: 'Juan Pérez', ts: ahora - 26 * 36e5, mini: PNG, distObra: 8 } }, marcas: { sellado_base: { k: 'sellado_base', hecho: true, cant: 1, por: 'Juan Pérez', ts: ahora - 26 * 36e5 }, montaje_prfv: { k: 'montaje_prfv', hecho: true, cant: 1, por: 'Juan Pérez', ts: ahora - 26 * 36e5 } }, tareaEnv: { sellado_base: { 'juan perez': { estado: 'si', ts: ahora - 26 * 36e5, por: 'Juan Pérez' } } }, enviados: { 'juan perez': { ts: ahora - 25 * 36e5, nombre: 'Juan Pérez' } } },
+    cierre: { cerradoTs: ahora - 22 * 36e5, fecha: d.ayer, cantidades: { montaje_prfv: 1, sellado_base: 0 }, horas: 8, horasPersona: { 'Juan Pérez': 8, 'Pedro Gómez': 8 }, horasPersonaV: 2, avanceItems: [],
+      puntos: { total: 5, ts: ahora - 22 * 36e5, renglones: [{ k: 'montaje_prfv', tarea: 'Izaje de columnas PRFV', cant: 1, un: 'columna', ptsUnit: 5, pts: 5 }], porPersona: [{ nombre: 'Juan Pérez', rol: 'Oficial', pts: 2.5 }, { nombre: 'Pedro Gómez', rol: 'Ayudante', pts: 2.5 }] } } }));
   // un aviso de Pedro a la oficina (de ayer): la cuadrilla no puede leer los avisos de los demás
   d.db.avisosCuadrilla = { ac0: { uid: 'uPedro', email: 'pedro@' + DOM, nombre: 'Pedro Gómez', persona: 'Pedro Gómez', personaClave: 'pedro gomez', rol: 'cuadrilla', texto: 'Se rompió la pala', tipo: 'problema', otId: '', otNumero: '', obraId: 'p1', obraNombre: 'PLAZA LOS ÁLAMOS', fotoId: '', fotoMini: '', ts: ahora - 864e5, fecha: d.ayer, hora: '10:00', estado: 'nuevo', para: ['admin@' + DOM], porAsistente: true } };
   return d;

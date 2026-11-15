@@ -194,12 +194,13 @@ service cloud.firestore {
     // v155: avisos de la cuadrilla (y del pañol y «solo mirar») a la oficina por el asistente («📨 Para resolver»).
     //  · cada uno CREA los suyos: con su uid, estado «nuevo» y solo estos campos (Dirección no: deja sus pedidos por avisos);
     //  · los LEEN Administración, Oficina y Dirección; cada uno lee los suyos (la consulta tiene que pedir uid == el suyo);
-    //  · los MARCAN (visto, resuelto y la respuesta) Administración y Oficina; nadie los borra.
+    //  · los MARCAN (visto, resuelto y la respuesta; en un reclamo de puntos: el análisis y si se autoriza o no) Administración
+    //    y Oficina; nadie los borra. El reclamo de puntos guarda además la tarea, cuántos y la explicación de la app en ese momento.
     match /avisosCuadrilla/{id} {
       allow read: if leeTodo() || (logueado() && resource.data.uid == request.auth.uid);
       allow create: if confirmadoNoDir() && request.resource.data.uid == request.auth.uid && request.resource.data.estado == 'nuevo'
-        && request.resource.data.keys().hasOnly(['uid','email','nombre','persona','personaClave','rol','texto','tipo','otId','otNumero','obraId','obraNombre','fotoId','fotoMini','ts','fecha','hora','estado','para','porAsistente']);
-      allow update: if adminUOficina() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','vistoTs','vistoPor','respuesta','respTs','respPor','respPorNombre','resueltoTs','resueltoPor']);
+        && request.resource.data.keys().hasOnly(['uid','email','nombre','persona','personaClave','rol','texto','tipo','otId','otNumero','obraId','obraNombre','fotoId','fotoMini','ts','fecha','hora','estado','para','porAsistente','tarea','tareaK','cuantos','explicacion']);
+      allow update: if adminUOficina() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','vistoTs','vistoPor','respuesta','respTs','respPor','respPorNombre','resueltoTs','resueltoPor','analisis','decision','decTs','decPor','decPorNombre','decMotivo']);
     }
     // v089: Proyectista (relevamiento en obra → plano). Solo Administración y Oficina leen y cargan; la cuadrilla no lo ve.
     match /proyectos/{id}          { allow read: if leeTodo(); allow write: if adminUOficina(); }

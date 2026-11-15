@@ -89,11 +89,11 @@
       // los marcan (visto / resuelto / respuesta) Administración y Oficina. Nadie los borra.
       case 'avisosCuadrilla': {
         if (localStorage.getItem('stub.sinReglas155')) return false;
-        const CAMPOS = ['uid', 'email', 'nombre', 'persona', 'personaClave', 'rol', 'texto', 'tipo', 'otId', 'otNumero', 'obraId', 'obraNombre', 'fotoId', 'fotoMini', 'ts', 'fecha', 'hora', 'estado', 'para', 'porAsistente'];
+        const CAMPOS = ['uid', 'email', 'nombre', 'persona', 'personaClave', 'rol', 'texto', 'tipo', 'otId', 'otNumero', 'obraId', 'obraNombre', 'fotoId', 'fotoMini', 'ts', 'fecha', 'hora', 'estado', 'para', 'porAsistente', 'tarea', 'tareaK', 'cuantos', 'explicacion'];
         if (op === 'get') return leeTodo() || (confirmado && !!viejo && viejo.uid === uid);
         if (op === 'list') return leeTodo() || (confirmado && ((nuevo || {}).__filtros || []).some((f) => f[0] === 'uid' && f[1] === '==' && f[2] === uid));
         if (crear) return noDir() && (nuevo || {}).uid === uid && (nuevo || {}).estado === 'nuevo' && Object.keys(nuevo || {}).every((k) => CAMPOS.includes(k));
-        if (act) return adminUOficina() && soloCampos(['estado', 'vistoTs', 'vistoPor', 'respuesta', 'respTs', 'respPor', 'respPorNombre', 'resueltoTs', 'resueltoPor']);
+        if (act) return adminUOficina() && soloCampos(['estado', 'vistoTs', 'vistoPor', 'respuesta', 'respTs', 'respPor', 'respPorNombre', 'resueltoTs', 'resueltoPor', 'analisis', 'decision', 'decTs', 'decPor', 'decPorNombre', 'decMotivo']);
         return false;
       }
       default: return false;
