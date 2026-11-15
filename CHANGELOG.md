@@ -2,6 +2,16 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v162 — 15/11/2026 (armada, sin publicar) · Videos cortos y livianos
+**Pedido (Ángel, 15/11):** «lo que pese lo menos posible para subirlo y que esté buena calidad… videos cortos, no tienen que ser videos largos».
+- Tope de **1 minuto** por video (antes 2).
+- Se sigue achicando a 480p (lado mayor 854 px), pero con video a 600 kbps (antes 1 Mbps) y audio mono a 32 kbps (antes 48 kbps): ≈ 4,7 MB por minuto (antes ≈ 8).
+- Un video que ya viene más liviano (≤ 0,8 Mbps y ≤ 960 px) no se vuelve a achicar.
+- Textos: «Videos cortos: hasta 1 minuto… (≈ 5 MB por minuto)».
+- Solo constantes y textos de `archivosNube` (v160). Sin reglas nuevas. Se arma con `herramientas/v162/patch_v162.py` sobre el ORIGINAL 161.
+- **Pruebas:** `t_v162` PC 5/5 · celu 5/5 (30 s de 1280×720: de 25 MB a 1,8 MB, 854×480; 1:15 rechazado); `t_v160` PC 54/54 · celu 54/54; `t_v161` 38/38; `t_humo` 3/3.
+- Sello `2026-11-15 20:35 · 5a0ea7`. Huellas en `herramientas/v162/huellas.txt`.
+
 ## v161 — 15/11/2026 (publicada en GitHub 15/11) · El Inicio de Administración y Oficina pasa a ser la pantalla de Dirección (con permiso de editar)
 
 **Pedido de Ángel** (15/11/2026): «Que directamente sea la misma pantalla [la de Dirección]. Con el beneficio de que la oficina y yo podemos editar.»
