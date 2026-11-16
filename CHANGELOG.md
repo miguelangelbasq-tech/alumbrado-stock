@@ -15,11 +15,11 @@ Autor: Miguel Ángel Díaz © 2026
 - Arreglos chicos: el historial de la hoja de la Col 1 mostraba también los cambios de las Col 10–12; el cartel de la hoja ya no se borra cuando se redibuja sola después de guardar.
 - Pruebas viejas con `__v163No` (todo como la v162). Sin reglas nuevas. Se arma con `herramientas/v163/patch_v163.py` (+ `puesta.js`) sobre el ORIGINAL 162.
 
-**Pruebas:** `t_v163` PC 42/42 · celu 42/42 · `REGLAS=1` 42/42. BATERIA163
+**Pruebas:** `t_v163` PC 42/42 · celu 42/42 · `REGLAS=1` 42/42. Batería completa (166 pruebas × PC y celu, sin `t_v083`, reemplazada): **326/330** — `t_v143` (PC y celu, la carrera vieja de `vehiculoPersona`) y `t_v149` celu (muestreo del 🎤 con la máquina cargada) pasan solas; `t_v142` y `t_v154` (PC y celu) fallan igual contra la v162: el 16/11 arranca la quincena y sus datos (de 2 a 4 días atrás) quedan en la anterior (fecha de la prueba, no de la v163).
 
 **A confirmar:** «Ayer» = 24 h antes (no pregunta la hora); si los papeles también se pueden marcar en la puesta al día (hoy van por «📄 Documentación»); que «Está toda terminada» pase también las fallas/observadas a hecho; la fecha del 100 % en «✅ Terminadas» dice «sin dato» para lo puesto al día.
 
-- Sello `SELLO163`. Huellas en `herramientas/v163/huellas.txt`.
+- Sello `2026-11-16 14:11 · bfa1a8`. Huellas en `herramientas/v163/huellas.txt`.
 
 ## v162 — 15/11/2026 (armada, sin publicar) · Videos cortos y livianos
 **Pedido (Ángel, 15/11):** «lo que pese lo menos posible para subirlo y que esté buena calidad… videos cortos, no tienen que ser videos largos».
