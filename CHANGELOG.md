@@ -2,6 +2,25 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v163 — 16/11/2026 (armada, sin publicar) · Avance de obra: marcar lo que ya está hecho, fácil y sin que lo frene el fraguado
+**Pedido (Ángel, 15/11):** «Cuando entrás al avance de obra y querés editar, diciendo esta tarea ya la hice… está como un poco complicado… Hay plazas que están retrasadas, que ya están completas y solo le falta la última cosa, y no puedo marcar que ya se hizo porque me tira que falta el hormigonado y tengo que esperar 3 días… La idea es marcar ahora y que luego avance solo.»
+
+**Qué lo frenaba (reproducido contra la v162, `t_v163` grupo 0 con `ANTES=1`, 5/5):** en una obra vieja sin órdenes, «✅ Columna completa» guardaba el hormigón con la hora del momento y el avance lo mostraba «⏳ fraguando» 72 h (alerta «1 base fraguando», la columna en «fraguando» en la tira, y al marcar el izaje el aviso «está fraguando hasta…»); además había que ir columna por columna (o un paso por vez con «Elegir varias») escribiendo el motivo cada vez.
+
+**Qué cambia:**
+- **Lo marcado a mano no fragua** salvo que se diga que se hormigonó hace poco: al marcar el hormigón (solo, «Columna completa» o «Todo» en «Elegir varias») pregunta «¿Cuándo se hormigonó?» con **«Ya hace días (está fraguado)»** elegido de entrada; «Hoy» / «Ayer» sí fragua 72 h desde ese momento. El aviso al marcar el izaje sobre un hormigón fraguando no frena (se marca y avisa «quedó marcado igual»; en «Elegir varias», «Marcar igual»). Lo que viene de las órdenes sigue igual.
+- **«⚡ Poner al día esta obra»** en el flash del avance (solo quien edita Avance; no cuadrilla, Dirección, «solo mirar» ni pañol): una hoja para marcar en UN paso las columnas (todas, o desde Col N hasta Col M) × los pasos (con «Todo» y atajos «Solo pozo y hormigón» / «Hasta el izaje»), lo que no va por columna (zanja, cable, tablero, acometida, inspecciones…; todo o uno por uno, con cantidad), el motivo precargado «Puesta al día del avance», el resumen antes → después con el % nuevo y «Sí, marcar». **«🏁 Está toda terminada»** = todo hecho de una (3 toques: ⚡ · Está toda terminada · Sí). Sin fraguado. Solo suma lo que falta: no pisa lo que viene de las órdenes; de ahí en adelante las órdenes siguen moviendo el avance solas encima y lo marcado no se cuenta dos veces. Los papeles siguen por «📄 Documentación».
+- Se guarda como siempre (`fbAvanceCampos`): `av2.m` (una entrada por columna, `a<ts>_<COL>` con los pasos), `av2.hist` y `avanceHist`, con auditoría. Lo puesto al día no tiene fecha real: no inventa un ritmo de «100 % en un día».
+- **Asistente:** `proponer_marcar_avance` acepta `puesta_al_dia` («de la 1 a la 6 ya están izadas») y `toda_terminada` («ya estaba hecha toda»), con `cosas` y `cuando_hormigon`; tarjeta con el antes → después y «Sí».
+- Arreglos chicos: el historial de la hoja de la Col 1 mostraba también los cambios de las Col 10–12; el cartel de la hoja ya no se borra cuando se redibuja sola después de guardar.
+- Pruebas viejas con `__v163No` (todo como la v162). Sin reglas nuevas. Se arma con `herramientas/v163/patch_v163.py` (+ `puesta.js`) sobre el ORIGINAL 162.
+
+**Pruebas:** `t_v163` PC 42/42 · celu 42/42 · `REGLAS=1` 42/42. BATERIA163
+
+**A confirmar:** «Ayer» = 24 h antes (no pregunta la hora); si los papeles también se pueden marcar en la puesta al día (hoy van por «📄 Documentación»); que «Está toda terminada» pase también las fallas/observadas a hecho; la fecha del 100 % en «✅ Terminadas» dice «sin dato» para lo puesto al día.
+
+- Sello `SELLO163`. Huellas en `herramientas/v163/huellas.txt`.
+
 ## v162 — 15/11/2026 (armada, sin publicar) · Videos cortos y livianos
 **Pedido (Ángel, 15/11):** «lo que pese lo menos posible para subirlo y que esté buena calidad… videos cortos, no tienen que ser videos largos».
 - Tope de **1 minuto** por video (antes 2).

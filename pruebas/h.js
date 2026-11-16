@@ -101,6 +101,7 @@ async function abrir(op = {}) {
   if (!op.v159) await page.addInitScript(() => { window.__v159No = true; });   // v159: las pruebas viejas no ven la calculadora de tareas nuevas ni proponer_tarea_nueva / proponer_editar_tarea del asistente; v159:true lo prueba
   if (!op.v160) await page.addInitScript(() => { window.__v160No = true; });   // v160: las pruebas viejas no ven los PDF y videos en la nube (sección «🎥 Videos y PDF», botones 🎥, PDF hasta 25 MB): el PDF sigue hasta 650 KB en la base; v160:true lo prueba
   if (!op.v161) await page.addInitScript(() => { window.__v161No = true; });   // v161: las pruebas viejas siguen con el Inicio Ejecutivo de admin/oficina (y «📊 Dirección» como hoja); v161:true prueba el Inicio de Dirección con las piezas del Ejecutivo adentro
+  if (!op.v163) await page.addInitScript(() => { window.__v163No = true; });   // v163: las pruebas viejas siguen con el hormigón a mano que fragua 72 h y sin «⚡ Poner al día esta obra»; v163:true lo prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];
