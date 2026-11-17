@@ -91,95 +91,94 @@ el dibujo; el sello no lee el EXIF de las fotos de la app; la miniatura sale del
 «Sacar otra» con la cámara tibia: no vuelve a pedir la cámara (t_v164 grupo 0); la 1.ª se pide al apoyar el dedo en «Foto».
 (abrir, arriba: del toque al video con imagen, incluye el «Foto guardada» que se cierra y la carga de la máquina.)
 
-=== (A2) «Como una cámara normal: apretás y saca AL INSTANTE» — toques REALES ===================================================
+=== (A2) «Como una cámara normal: apretás y saca AL INSTANTE» — toques REALES (versión final 2b2e8b) ======================
 Script: herramientas/v164/medir_toque.js. page.touchscreen.tap (CDP Input.dispatchTouchEvent), 5 toques seguidos a 1 por segundo en
 Modo obra y en la cámara de la barra. «toque → señal» = del pointerdown (su timeStamp: cuando entró el dedo) al cuadro con la señal
-(rAF después de empezar el destello; en la v163, sin destello: el cuadro en que se cierra la cámara de Modo obra; en la barra la
-v163 no da ninguna señal: «—»). «foto» = cuándo la foto llega a la app (el change del input). Tareas largas = las de la página del
-celu mientras la cámara está abierta. v164 con sello e7075c (la final a56faf solo cambia el lugar del cartel «N fotos esperando» en la cámara); cada par v163/v164 corrido uno detrás del otro (la primera línea
-de cada uno es la carga de la máquina).
-Meta: destello < 100 ms y poder sacar la siguiente < 300 ms en todos los toques; ninguna tarea larga > 100 ms con la cámara abierta.
+(rAF después de empezar el destello; en la v163, sin destello: el cuadro en que se cierra la cámara de Modo obra; en la barra la v163
+no da ninguna señal: «—»). «dedo→JS» = del dedo a que el código lo atiende. «foto» = la foto llega a la app (el change del input).
+Tareas largas = las de la página del celu con la cámara abierta. Cada corrida empieza con la carga de la máquina (otros agentes
+corriendo baterías al mismo tiempo: 5–15 en 4 núcleos). Meta: destello < 100 ms y la siguiente < 300 ms en todos los toques;
+ninguna tarea larga > 100 ms con la cámara abierta.
 
-02:13:07 up  3:12,  0 user,  load average: 6.41, 6.22, 5.89
-== v163 (antes) · CPU ×6
-  Modo obra: 5 toques · toque → señal en pantalla: 350 ms (cerrada) · foto 433 ms | 851 ms (cerrada) · foto 907 ms | — · foto 2338 ms | 903 ms (cerrada) · foto 5429 ms | 837 ms (cerrada) · SIN FOTO
-    tareas largas con la cámara abierta: 84 · > 100 ms 23 · > 200 ms 5 · la más larga 372 ms
-  Cámara de la barra: 5 toques · toque → señal en pantalla: — · foto 2056 ms | — · foto 3380 ms | — · foto 3123 ms | — · foto 3153 ms | — · foto 3437 ms
-    tareas largas con la cámara abierta: 90 · > 100 ms 27 · > 200 ms 2 · la más larga 416 ms
-  errores: Cannot read properties of null (reading 'pos')
-
-02:14:13 up  3:14,  0 user,  load average: 5.79, 6.13, 5.89
+09:12:45 up 9 min,  0 user,  load average: 11.28, 5.50, 2.47
 == v164 · CPU ×6
-  Modo obra: 5 toques · toque → señal en pantalla: 35 ms (destello) · foto 476 ms | 237 ms (destello) · foto 567 ms | 3 ms (destello) · foto 488 ms | 3 ms (destello) · foto 238 ms | 24 ms (destello) · foto 305 ms
-    tareas largas con la cámara abierta: 19 · > 100 ms 7 · > 200 ms 1 · la más larga 228 ms
-  Cámara de la barra: 5 toques · toque → señal en pantalla: 7 ms (destello) · foto 234 ms | 84 ms (destello) · foto 541 ms | 7 ms (destello) · foto 157 ms | 16 ms (destello) · foto 150 ms | 19 ms (destello) · foto 250 ms
-    tareas largas con la cámara abierta: 16 · > 100 ms 2 · > 200 ms 1 · la más larga 427 ms
+  Modo obra: 5 toques · toque → señal en pantalla: [dedo→JS 8] 20 ms (destello) · foto 422 ms | [dedo→JS 4] 15 ms (destello) · foto 342 ms | [dedo→JS 14] 22 ms (destello) · foto 286 ms | [dedo→JS 8] 8 ms (destello) · foto 193 ms | [dedo→JS 14] 7 ms (destello) · foto 244 ms
+    tareas largas con la cámara abierta: 16 · > 100 ms 2 · > 200 ms 0 · la más larga 118 ms
+  Cámara de la barra: 5 toques · toque → señal en pantalla: [dedo→JS 8] 7 ms (destello) · foto 281 ms | [dedo→JS 143] 135 ms (destello) · foto 453 ms | [dedo→JS 6] 2 ms (destello) · foto 589 ms | [dedo→JS 12] 26 ms (destello) · foto 213 ms | [dedo→JS 9] 18 ms (destello) · foto 570 ms
+    tareas largas con la cámara abierta: 26 · > 100 ms 3 · > 200 ms 0 · la más larga 172 ms
 
-02:19:04 up  3:18,  0 user,  load average: 7.01, 6.20, 5.97
+09:17:02 up 13 min,  0 user,  load average: 10.43, 9.02, 4.70
 == v163 (antes) · CPU ×4
-  Modo obra: 5 toques · toque → señal en pantalla: 422 ms (cerrada) · foto 509 ms | 361 ms (cerrada) · foto 441 ms | 542 ms (cerrada) · foto 651 ms | 510 ms (cerrada) · foto 602 ms | 375 ms (cerrada) · foto 468 ms
-    tareas largas con la cámara abierta: 43 · > 100 ms 11 · > 200 ms 3 · la más larga 326 ms
-  Cámara de la barra: 5 toques · toque → señal en pantalla: — · foto 259 ms | — · foto 2137 ms | — · foto 2565 ms | — · foto 2141 ms | — · foto 2135 ms
-    tareas largas con la cámara abierta: 66 · > 100 ms 11 · > 200 ms 1 · la más larga 251 ms
+  Modo obra: 5 toques · toque → señal en pantalla: [dedo→JS 3] 607 ms (cerrada) · foto 695 ms | [dedo→JS 257] 755 ms (cerrada) · foto 822 ms | [dedo→JS 14] 595 ms (cerrada) · foto 686 ms | [dedo→JS 16] 375 ms (cerrada) · foto 474 ms | [dedo→JS 40] 791 ms (cerrada) · foto 892 ms
+    tareas largas con la cámara abierta: 47 · > 100 ms 16 · > 200 ms 5 · la más larga 315 ms
+  Cámara de la barra: 5 toques · toque → señal en pantalla: [dedo→JS 4] — · foto 772 ms | [dedo→JS 208] — · foto 1695 ms | [dedo→JS 34] — · foto 3520 ms | [dedo→JS 94] — · foto 3723 ms | [dedo→JS 170] — · SIN FOTO
+    tareas largas con la cámara abierta: 46 · > 100 ms 3 · > 200 ms 1 · la más larga 246 ms
 
-02:19:58 up  3:19,  0 user,  load average: 4.48, 5.62, 5.78
+09:17:57 up 14 min,  0 user,  load average: 6.57, 8.22, 4.68
 == v164 · CPU ×4
-  Modo obra: 5 toques · toque → señal en pantalla: 7 ms (destello) · foto 224 ms | 16 ms (destello) · foto 132 ms | 12 ms (destello) · foto 141 ms | 7 ms (destello) · foto 93 ms | 3 ms (destello) · foto 89 ms
-    tareas largas con la cámara abierta: 7 · > 100 ms 1 · > 200 ms 0 · la más larga 139 ms
-  Cámara de la barra: 5 toques · toque → señal en pantalla: 14 ms (destello) · foto 157 ms | 7 ms (destello) · foto 178 ms | 8 ms (destello) · foto 157 ms | 7 ms (destello) · foto 184 ms | 122 ms (destello) · foto 269 ms
-    tareas largas con la cámara abierta: 9 · > 100 ms 0 · > 200 ms 0 · la más larga 83 ms
+  Modo obra: 5 toques · toque → señal en pantalla: [dedo→JS 7] 18 ms (destello) · foto 214 ms | [dedo→JS 3] 6 ms (destello) · foto 201 ms | [dedo→JS 9] 30 ms (destello) · foto 236 ms | [dedo→JS 5] 15 ms (destello) · foto 164 ms | [dedo→JS 4] 11 ms (destello) · foto 160 ms
+    tareas largas con la cámara abierta: 8 · > 100 ms 0 · > 200 ms 0 · la más larga 69 ms
+  Cámara de la barra: 5 toques · toque → señal en pantalla: [dedo→JS 8] 3 ms (destello) · foto 192 ms | [dedo→JS 38] 49 ms (destello) · foto 136 ms | [dedo→JS 8] 6 ms (destello) · foto 151 ms | [dedo→JS 5] 6 ms (destello) · foto 73 ms | [dedo→JS 9] 3 ms (destello) · foto 147 ms
+    tareas largas con la cámara abierta: 3 · > 100 ms 0 · > 200 ms 0 · la más larga 73 ms
+
+(La v163 con CPU ×6 no llegó a abrir la cámara en esta corrida, con la máquina cargada; la de antes, con el sello e7075c y carga 6:)
+ v163 CPU ×6: Modo obra 350 · 851 · — · 903 · 837 ms hasta que se cierra la cámara (un toque SIN FOTO y «Cannot read properties of null
+ (reading 'pos')»); barra: ninguna señal, foto a 2–3,4 s; 23 / 27 tareas > 100 ms (hasta 372 / 416 ms).
 
 Resumen (sin la oficina en otra página):
- · v163: Modo obra 350–903 ms hasta que se ve algo (la cámara que se cierra) y un toque sin foto + «Cannot read properties of null
-   (reading 'pos')»; cámara de la barra: NINGUNA señal y la foto llega 2–3,4 s después del toque; 23–27 tareas > 100 ms (hasta 416 ms).
- · v164: destello 3–35 ms con CPU ×6 (salvo uno de 237 ms y uno de 84) y 3–16 ms con CPU ×4 (salvo uno de 122 ms); la siguiente se
-   puede sacar enseguida (la cámara no se cierra ni se bloquea: los 10 toques sacaron foto, la foto está lista a los 90–570 ms);
-   tareas > 100 ms con la cámara abierta: 2–7 con CPU ×6 (la más larga 228/427 ms) y 0–1 con CPU ×4 (83–139 ms). Lo que queda es
-   el sello y la entrega cuando paran de sacar, y el lienzo de la cámara de mentira (se redibuja cada 200 ms en el hilo): con la
-   cámara de mentira quieta (MOCKQ=1, CPU ×6) quedan 1–2 tareas de 104–169 ms, ninguna > 200 ms, y por origen dentro de ellas:
-   nativo/dibujo/GC 176 ms · la app 39 ms (perfil, PERFILT=1).
- · t_v164 grupo 5 (celu, CPU ×6, cámara de mentira quieta): Modo obra 8 · 16 · 19 · 20 · 14 ms; barra 19 · 1 · 127 · 14 · 18 ms;
-   1 tarea > 100 ms en cada una (121 / 107 ms), ninguna > 200 ms.
+ · v164: destello 2–30 ms en 19 de 20 toques (uno de 135 ms con CPU ×6 en la barra, cuando el dedo tardó 143 ms en llegar a la página);
+   la siguiente se puede sacar enseguida (la cámara no se cierra ni se bloquea; la foto está lista a los 73–590 ms y los 20 toques sacaron
+   foto); tareas > 100 ms con la cámara abierta: CPU ×6 2–3 (la más larga 118–172 ms), CPU ×4 0 (la más larga 69–73 ms); ninguna > 200 ms.
+ · v163: CPU ×4 Modo obra 375–791 ms hasta ver algo, barra ninguna señal y la foto a 0,8–3,7 s (un toque SIN FOTO); 16 + 3 tareas > 100 ms.
+ · Lo que queda de > 100 ms con CPU ×6: el sello y la entrega cuando paran de sacar y lo nativo (dibujo/GC). Con la cámara de mentira
+   quieta (MOCKQ=1, CPU ×6, dos corridas): destello 1–58 ms, 0–3 tareas > 100 ms, la más larga 93–316 ms; por origen (PERFILT=1):
+   nativo/dibujo/GC 161 ms · la app 118 ms (la barra de abajo y «atrás» corrían su primera vuelta al abrir la cámara: ahora la primera
+   vuelta es a los 30 s).
+ · t_v164 grupo 5 (celu, CPU ×6, cámara de mentira quieta): Modo obra 16 · 16 · 23 · 17 · 14 ms; barra 4 · 36 · 48 · 12 · 14 ms.
 
-Con la oficina en otra página del MISMO navegador de pruebas (v164 a CPU ×6 no terminó: la máquina cargada; la de abajo, CPU ×4):
-02:15:06 up  3:14,  0 user,  load average: 5.70, 6.06, 5.88
+Con la oficina abierta en otra página del MISMO navegador de pruebas:
+09:13:41 up 10 min,  0 user,  load average: 9.24, 5.89, 2.78
 == v163 (antes) · CPU ×6 · con la oficina abierta
-  Modo obra: 3 toques · toque → señal en pantalla: 3732 ms (cerrada) · foto 3044 ms | 3203 ms (cerrada) · foto 2880 ms | 3981 ms (cerrada) · foto 3438 ms
-    tareas largas con la cámara abierta: 86 · > 100 ms 21 · > 200 ms 9 · la más larga 1010 ms
-  Cámara de la barra: 5 toques · toque → señal en pantalla: — · foto 3877 ms | — · foto 3492 ms | — · foto 4344 ms | — · foto 4173 ms | — · foto 3347 ms
-    tareas largas con la cámara abierta: 105 · > 100 ms 43 · > 200 ms 6 · la más larga 383 ms
+  Modo obra: 3 toques · toque → señal en pantalla: [dedo→JS 1217] 3194 ms (cerrada) · foto 3088 ms | [dedo→JS 2964] — · foto 9103 ms | [dedo→JS 670] 4930 ms (cerrada) · SIN FOTO
+    tareas largas con la cámara abierta: 61 · > 100 ms 35 · > 200 ms 15 · la más larga 2178 ms
+  Cámara de la barra: 5 toques · toque → señal en pantalla: [dedo→JS 1303] — · foto 5186 ms | [dedo→JS 1436] — · foto 5857 ms | [dedo→JS 1843] — · foto 5916 ms | [dedo→JS 572] — · foto 5851 ms | [dedo→JS 1006] — · foto 4453 ms
+    tareas largas con la cámara abierta: 93 · > 100 ms 58 · > 200 ms 28 · la más larga 729 ms
+  errores: Cannot read properties of null (reading 'pos')
 
-02:20:42 up  3:20,  0 user,  load average: 4.69, 5.49, 5.73
+09:15:36 up 12 min,  0 user,  load average: 14.90, 8.95, 4.26
+== v164 · CPU ×6 · con la oficina abierta
+  Modo obra: 5 toques · toque → señal en pantalla: [dedo→JS 531] 1413 ms (destello) · foto 1749 ms | [dedo→JS 1078] 976 ms (destello) · foto 1583 ms | [dedo→JS 86] 75 ms (destello) · foto 461 ms | [dedo→JS 1418] 2393 ms (destello) · foto 2833 ms | [dedo→JS 54] 65 ms (destello) · foto 536 ms
+    tareas largas con la cámara abierta: 31 · > 100 ms 13 · > 200 ms 1 · la más larga 354 ms
+  Cámara de la barra: 5 toques · toque → señal en pantalla: [dedo→JS 898] 907 ms (destello) · foto 1156 ms | [dedo→JS 1529] 1418 ms (destello) · foto 1804 ms | [dedo→JS 28] 34 ms (destello) · foto 224 ms | [dedo→JS 222] 217 ms (destello) · foto 824 ms | [dedo→JS 209] 197 ms (destello) · foto 536 ms
+    tareas largas con la cámara abierta: 40 · > 100 ms 8 · > 200 ms 0 · la más larga 179 ms
+
+09:18:40 up 15 min,  0 user,  load average: 6.25, 7.97, 4.75
 == v163 (antes) · CPU ×4 · con la oficina abierta
-  Modo obra: 3 toques · toque → señal en pantalla: 3800 ms (cerrada) · foto 2982 ms | 3828 ms (cerrada) · foto 3112 ms | 4042 ms (cerrada) · foto 3342 ms
-    tareas largas con la cámara abierta: 61 · > 100 ms 16 · > 200 ms 8 · la más larga 620 ms
-  Cámara de la barra: 5 toques · toque → señal en pantalla: — · foto 3178 ms | — · foto 3275 ms | — · foto 2657 ms | — · foto 2729 ms | — · SIN FOTO
-    tareas largas con la cámara abierta: 69 · > 100 ms 12 · > 200 ms 1 · la más larga 234 ms
+  Modo obra: 3 toques · toque → señal en pantalla: [dedo→JS 1931] 3834 ms (cerrada) · foto 3355 ms | [dedo→JS 1088] 3145 ms (cerrada) · foto 2557 ms | [dedo→JS 2012] 4124 ms (cerrada) · foto 3682 ms
+    tareas largas con la cámara abierta: 69 · > 100 ms 27 · > 200 ms 9 · la más larga 757 ms
+  Cámara de la barra: 5 toques · toque → señal en pantalla: [dedo→JS 1873] — · foto 3174 ms | [dedo→JS 1595] — · foto 2949 ms | [dedo→JS 1371] — · foto 3219 ms | [dedo→JS 1226] — · foto 3299 ms | [dedo→JS 1999] — · foto 3529 ms
+    tareas largas con la cámara abierta: 84 · > 100 ms 26 · > 200 ms 2 · la más larga 236 ms
 
-(v164) 02:22:02 up  3:21,  0 user,  load average: 6.06, 5.65, 5.76
+09:20:05 up 16 min,  0 user,  load average: 10.21, 8.65, 5.26
 == v164 · CPU ×4 · con la oficina abierta
-  Modo obra: 5 toques · toque → señal en pantalla: 1671 ms (destello) · foto 1968 ms | 27 ms (destello) · foto 174 ms | 1172 ms (destello) · foto 1719 ms | 1690 ms (destello) · foto 1878 ms | 1393 ms (destello) · foto 1892 ms
-    tareas largas con la cámara abierta: 24 · > 100 ms 7 · > 200 ms 2 · la más larga 375 ms
-  Cámara de la barra: 5 toques · toque → señal en pantalla: 2953 ms (destello) · foto 3393 ms | 925 ms (destello) · foto 1226 ms | 322 ms (destello) · foto 473 ms | 2528 ms (destello) · foto 2829 ms | 17 ms (destello) · foto 447 ms
-    tareas largas con la cámara abierta: 39 · > 100 ms 7 · > 200 ms 0 · la más larga 167 ms
- · Con la oficina abierta en otra página del mismo navegador (las dos con CPU ×4/×6, la base de mentira sincronizada por el
-   almacenamiento del navegador, la máquina con carga 5–8 en 4 núcleos), el dedo tarda 0,4–1,9 s en LLEGAR a la página del celu
-   («dedo→JS»: del timeStamp del toque al primer código que lo atiende), aunque esa página casi no tiene tareas largas: la demora es
-   del navegador de pruebas (un solo proceso del navegador para las dos «personas» y la CPU compartida), no de la app; en cuanto el
-   toque llega, el destello sale en 2–100 ms. En obra la oficina es otro aparato. La v163 en las mismas condiciones: 3,2–4,0 s hasta
-   ver algo en Modo obra y ninguna señal en la barra (y con 9 tareas > 200 ms, hasta 1 s).
+  Modo obra: 5 toques · toque → señal en pantalla: [dedo→JS 1815] 1759 ms (destello) · foto 2118 ms | [dedo→JS 12] 23 ms (destello) · foto 431 ms | [dedo→JS 1406] 1207 ms (destello) · foto 2226 ms | [dedo→JS 20] 21 ms (destello) · foto 263 ms | [dedo→JS 28] 36 ms (destello) · foto 178 ms
+    tareas largas con la cámara abierta: 30 · > 100 ms 10 · > 200 ms 3 · la más larga 396 ms
+  Cámara de la barra: 5 toques · toque → señal en pantalla: [dedo→JS 1865] 2846 ms (destello) · foto 3169 ms | [dedo→JS 904] 912 ms (destello) · foto 1049 ms | [dedo→JS 1480] 1473 ms (destello) · foto 2105 ms | [dedo→JS 2081] 2036 ms (destello) · foto 2193 ms | [dedo→JS 367] 363 ms (destello) · foto 943 ms
+    tareas largas con la cámara abierta: 39 · > 100 ms 10 · > 200 ms 0 · la más larga 191 ms
+ · Con la oficina en otra página del mismo navegador (las dos con CPU ×4/×6, la base de mentira sincronizada por el almacenamiento del
+   navegador, la máquina con carga 6–15), el dedo tarda hasta 0,5–2 s en LLEGAR a la página del celu («dedo→JS») aunque esa página casi
+   no tiene tareas largas: la demora es del navegador de pruebas (un solo proceso del navegador y la CPU compartida), no de la app; en
+   cuanto el toque llega, el destello sale en 2–100 ms. En obra la oficina es otro aparato. La v163 en las mismas condiciones: 3–5 s hasta
+   ver algo en Modo obra (y un toque sin foto), ninguna señal en la barra, 15–28 tareas > 200 ms (hasta 2,2 s).
 
 === Qué hace la v164 para el toque (A2) =====================================================================================
  1. El disparo sale en el pointerdown (no espera al clic); el clic que sigue no despierta a nadie (atrás, barra de abajo, etc.).
- 2. En el toque solo: el destello (Web Animations: opacidad, en el compositor) y el «quién soy»; el cuadro se toma en la tarea
-    siguiente con createImageBitmap(video) entero (≈ 20–35 ms con CPU ×6; con «resize» lo hacía en el hilo: 130–165 ms).
- 3. Un Worker con OffscreenCanvas achica el cuadro a 1024, arma el JPEG y la miniatura (respaldo para el Chrome que no tenga:
-    canvas + toBlob, que Chrome arma de a pedazos).
+ 2. En el toque solo el destello (Web Animations: opacidad, en el compositor); el cuadro se toma en la tarea siguiente con
+    createImageBitmap(video) entero (≈ 20–35 ms con CPU ×6; con «resize» lo hacía en el hilo: 130–165 ms).
+ 3. Un Worker con OffscreenCanvas achica el cuadro a 1024, arma el JPEG y la miniatura (respaldo: canvas + toBlob).
  4. Modo obra en ráfaga: la cámara queda abierta, la columna avanza sola, «Listo» sale.
- 5. Lo pesado de cada foto (sello, ficha, orden, bandeja, miniatura para la oficina) espera 1,5 s sin tocar el disparador.
+ 5. La foto queda en el celu (bandeja) apenas llega; lo pesado (sello, ficha, imagen, cola) espera 1,5 s sin tocar el disparador.
  6. Con la cámara abierta, las escuchas de la base guardan el último aviso y lo entregan al cerrarla; Mis tareas se redibuja al
-    cerrarla; los vigías de la página no se despiertan por la cámara, las pantallas tapadas, los carteles chicos ni la clase del body.
+    cerrarla; los vigías de la página no se despiertan por la cámara, las pantallas tapadas, los carteles chicos ni la clase del body;
+    los relojitos de atrás corren cada 30 s y la primera vez a los 30 s.
  7. Si en el celu real el WebView igual no da el destello al instante: la alternativa es la cámara nativa en el APK (no hecha).
-   Repetida con el momento en que el código recibe el toque («dedo→JS»): Modo obra [dedo→JS 1862] 2855 · [1042] 1045 · [1093] 1097 ·
-   [1332] 1312 · [406] 417 ms; barra [1841] 2811 · [1024] 917 · [25] 42 · [1440] 1395 · [22] 34 ms: casi toda la demora es ANTES
-   de que el toque llegue a la página.

@@ -63,7 +63,7 @@ R('''    var ultimo = 0, extra = Array.prototype.slice.call(arguments, 2);
   '''    var ultimo = 0, extra = Array.prototype.slice.call(arguments, 2), b0 = document.body, conCam = !!(b0 && b0.classList.contains("ec-abierta"));
     return orig.call(window, function () {
       if (document.hidden) { var a = Date.now(); if (a - ultimo < ESCONDIDA_MS) return; ultimo = a; }
-      else if (!conCam && !window.__v164No && document.body && document.body.classList.contains("ec-abierta")) { var c = Date.now(); if (c - ultimo < CAMARA_MS) return; ultimo = c; }   // v164
+      else if (!conCam && !window.__v164No && document.body && document.body.classList.contains("ec-abierta")) { var c = Date.now(); if (!ultimo) { ultimo = c; return; } if (c - ultimo < CAMARA_MS) return; ultimo = c; }   // v164 (la primera vuelta, recién a los 30 s de abrirla)
       else ultimo = 0;''')
 R('''  var orig = window.setInterval, ESCONDIDA_MS = 60000;''', '''  var orig = window.setInterval, ESCONDIDA_MS = 60000, CAMARA_MS = 30000;''')
 # y los «vigías» que miran TODA la página (appCelular, atrás, Llenar orden, barra…) se despertaban con cada cambio adentro de
@@ -244,6 +244,7 @@ R('''    avisar("Guardando la foto…");
       const s = await window.guardarFotoObra(file, meta);''',
   '''    const AT = ''' + ON + ''' && window.__fotoAlToque;
     if (AT) { try { AT.antes(file, meta, ot, campoFoto); } catch (x) { console.warn("[v164]", x); } }   // v164: la orden la ve al toque; la foto ya está en la bandeja
+    if (AT && window.__fotoQuieto) await window.__fotoQuieto();   // v164: lo pesado, cuando el dedo se queda quieto
     avisar(AT ? (num ? num + " · " : "") + "Guardada · subiendo…" : "Guardando la foto…");
     try {
       const s = await window.guardarFotoObra(file, meta);''')
@@ -269,7 +270,8 @@ R('''    let tc = null; if ((window.__tiempoCol && !window.__v157No)) { meta.__t
     let tc = null; if ((window.__tiempoCol && !window.__v157No) && !p.suelta) { meta.__tcYa = 1;''')
 R('''FC.poner({ id: pe.id, f, meta: Object.assign({}, meta, { __bandejaId: "" }), plaza: o.plazaNombre || "", origen: "obra", otId: o.id, k: p.k, tarea: p.label, cat, num, por, ts: t0 });''',
   '''FC.poner(Object.assign({ id: pe.id, f, meta: Object.assign({}, meta, { __bandejaId: "", __adjId: "" }), plaza: o.plazaNombre || "", origen: "obra", otId: o.id, k: p.k, tarea: p.label, cat, num, por, ts: t0 }, pe.adjId ? { adjId: pe.adjId } : {}));
-    if (AT) AT.anunciar(o, pe, f, (patch) => a.guardar(otDe(o.id) || o, patch));''')
+    if (AT) AT.anunciar(o, pe, f, (patch) => a.guardar(otDe(o.id) || o, patch));
+    if (AT && rafaga && window.__fotoQuieto) await window.__fotoQuieto();   // v164: lo pesado, cuando el dedo se queda quieto (la foto ya está en el celu)''')
 R('''    const u = unidades(o, p), ix = u.items.findIndex((x) => nk(x.num) === nk(num));
     const cuenta = u.tipo === "unidad" ?''',
   '''    const u = p.suelta ? { tipo: "suelta", items: [] } : unidades(o, p), ix = u.items.findIndex((x) => nk(x.num) === nk(num));
@@ -329,7 +331,6 @@ R('''inp.dataset.cat = pa.u.cat; inp.dataset.otra = otra ? "1" : "";''',
 R('''    const src = intentar(() => URL.createObjectURL(f), "");
     const meta = { plazaId:''',
   '''    const rafaga = ''' + ON + ''' && inp.dataset.ecRafaga === "1"; inp.value = "";
-    if (''' + ON + ''' && window.__fotoQuieto) await window.__fotoQuieto();   // v164: nada pesado al lado del toque
     const src = intentar(() => URL.createObjectURL(f), "");
     const meta = { plazaId:''')
 R('''const t0 = (window.__tiempoCol && !window.__v157No) ? window.__tiempoCol.ahora() : Date.now(), pe = {''',
@@ -349,10 +350,6 @@ R('''    pintar(true);
     pintar(true);
     hojaFoto(o, info);
   }''')
-# cámara de la barra: lo pesado también espera
-R('''  async function guardarLibre(file, el) {''',
-  '''  async function guardarLibre(file, el) {
-    if (''' + ON + ''' && window.__fotoQuieto) await window.__fotoQuieto();   // v164: nada pesado al lado del toque''')
 
 # el clic que sigue al toque del disparador (la foto ya salió en el pointerdown) no despierta a nadie: atrás, la barra de abajo
 # y otros revisaban toda la página con cada clic (100–300 ms con el celu lento, justo entre foto y foto). Va en el primer script.
