@@ -117,3 +117,4 @@
 .cc-at{display:flex;flex-wrap:wrap;margin:4px -3px 0}
 .cc-at button{flex:1 1 140px;margin:3px;min-height:44px;border-radius:999px;border:1.5px solid #cfd8e6;background:#fff;color:var(--navy,#28285E);font:800 14px var(--fuente,inherit);cursor:pointer}
 #emaCam.vi-on .ec-borrar-ult{bottom:calc(140px + env(safe-area-inset-bottom,0px)) !important}
+#emaCam.vi-on .cb-listo{visibility:hidden !important}

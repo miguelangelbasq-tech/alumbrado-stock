@@ -45,9 +45,9 @@ R('let li = 0; const nT = window.__hechoTope ?',
 R("Todavía no tenés órdenes en esta quincena.</div>'}</div></div>`;",
   "Todavía no tenés órdenes en esta quincena.</div>'}</div>${window.__inicioTarea && !window.__v165No ? window.__inicioTarea.misRecordsHtml() : \"\"}</div>`;")
 
-# Modo obra: con la cámara C abierta (opción C) la foto no abre la hoja «Foto guardada» (la cámara sigue para la columna siguiente)
-R('    hojaFoto(o, { src: s.mini || src, num, tarea: primero(p.label), gps, enEspera: enEspera, cuenta, pe: pe.id, tc });',
-  '    if (!(window.__inicioTarea && window.__inicioTarea.camC())) hojaFoto(o, { src: s.mini || src, num, tarea: primero(p.label), gps, enEspera: enEspera, cuenta, pe: pe.id, tc });')
+# Modo obra: la cámara C (opción C) va en ráfaga (v164); al salir de ella no se abre «Foto guardada» (la tarea sigue en marcha)
+R('const h = S.hojaPend; S.hojaPend = null;',
+  'const h = S.hojaPend; S.hojaPend = null; if (!window.__v165No && window.__inicioTarea && window.__inicioTarea.estado().cam) { pintar(true); return; }')
 # tiempoCol: el inicio de la primera columna sale de «Voy a iniciar»
 R('empece: "desde «Empecé»"', 'empece: window.__v165No ? "desde «Empecé»" : "desde «Voy a iniciar» / «Empecé»"')
 

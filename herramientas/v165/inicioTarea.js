@@ -224,7 +224,7 @@ ${ultimas().length ? `<div class="vi-lbl">Las últimas que usaron</div><div clas
       const u = intentar(() => CD().unidades(o.id, p.k), null);
       inp = entrada("cdFotoIn", o); inp.dataset.k = p.k; inp.dataset.ot = o.id; inp.dataset.cat = (u && u.cat) || "otra"; inp.dataset.otra = "";
       inp.dataset.fln = it ? it.num : u && u.tipo === "unidad" ? ((u.items.find((x) => !x.paso) || {}).num || "") : p.label;
-      inp.dataset.ecSeguir = "1";   // opción C: la cámara sigue abierta para la columna siguiente
+      if (window.__v164No) inp.dataset.ecSeguir = "1"; else { inp.dataset.ecRafaga = "1"; inp.dataset.ecSeguir = ""; }   // opción C: la cámara sigue abierta (la ráfaga de la v164)
     }
     const usarTel = intentar(() => localStorage.getItem("ema.camara.telefono") === "1", false);
     if (window.camaraApp && window.camaraApp.abrir && !usarTel && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) { window.camaraApp.abrir(inp); vestir(); }

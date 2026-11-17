@@ -1,0 +1,30 @@
+v165 · «Que no se tilde nada» · tareas largas (PerformanceObserver longtask) con la CPU ×6
+Celu 390×844, Chromium con CPU ×6 (CDP), base de mentira con «aviso por colección» (__stubPorColeccion, como Firestore),
+cámara de mentira (canvas), toques con el mouse en el lugar del botón (sin el buscador de Playwright dentro de la página).
+Misma entrega (ORIGINAL 165 sobre la v164 final 2b2e8b), corrida 3 veces con la v165 prendida y 3 apagada (__v165No = la v164).
+Script: herramientas/v165/medir_v165.js (APP=… node medir_v165.js 6 1|0, desde la carpeta de pruebas). Máquina con carga 2–3.
+Cada celda: la tarea más larga (ms) · cuántas pasaron de 200 ms en ese paso.
+
+paso                               v165 (1 · 2 · 3)                  v164 (sin la v165)               qué es
+abrir Modo obra                    80·0  127·0  122·0               162·0  195·0  149·0
+tocar «Foto» → cartel              199·0 240·1  146·0               520·1  374·1  300·1     (v164: abría la cámara)
+«Voy a iniciar» → cámara abierta   215·1 166·0  145·0               (= la fila de arriba)
+una foto con la cámara C           154·0 105·0  154·0               179·0  134·0  191·0     (ráfaga de la v164)
+«Col ▾» (lista de columnas)          0·0   0·0    0·0               —
+«Terminé la tarea» → hoja           72·0  66·0   61·0               —
+Llenar orden (abrir la pantalla)   568·1 474·1  392·1               357·1  397·1  411·1     (no es de la v165: ver abajo)
+tildar una tarea con columnas      146·0 141·0  176·0               160·0  166·0  143·0     (v164: sin los chips)
+«Las que siguen»                    63·0   0·0   62·0               —
+
+Lo que se hizo para que no se tilde:
+ · La tanda 2 de appCelular (tablas del pañol como tarjetas + acordeón de la Calculadora) recorría TODAS las filas del catálogo del
+   pañol con cada cambio de la página (abrir el cartel, la cámara, una hoja): ≈ 150 ms por vez con CPU ×6. Ahora solo corre si el
+   cambio toca #viewStock o #viewCalculadora.
+ · «Voy a iniciar» abre la cámara en el toque y anota la orden en otro turno (450 ms después; la hora es la del toque): la escritura
+   y lo que redibuja quedan fuera del toque.
+ · El cartel y la hoja «Terminé» no llaman a atrasApp a mano (ya mira la página y cada toque: 150 ms por llamada con CPU ×6).
+ · Las cuentas de la v165 son baratas (con CPU ×6): pasoActual + unidades < 3 ms, el cartel 14 ms, los chips de una obra 3 ms.
+
+Lo que queda > 200 ms y no es de la v165 (también con la v164 sola): abrir la pantalla de Llenar orden (350–570 ms: el formulario y
+el tablero de Órdenes), y algún toque (≈ 200–240 ms) por lo que atrasApp, el asistente (lengüeta) y la cuadrilla revisan en cada
+toque (≈ 170 ms con CPU ×6). Abrir la cámara (getUserMedia + armar la pantalla) queda en 145–215 ms.
