@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v165 — 16/11/2026 (armada, sin publicar) · La cuadrilla: «▶ Voy a iniciar esta tarea», cámara primero (opción C), otra tarea rápido y récords
+## v165 — 16/11/2026 (publicada en GitHub 17/11) · La cuadrilla: «▶ Voy a iniciar esta tarea», cámara primero (opción C), otra tarea rápido y récords
 **Pedido (Ángel, 16/11):** «Al iniciar la tarea le tiene que salir un cartel grande "voy a iniciar esta tarea", cosa que nosotros podamos medir más exacto» · «si nosotros no ponemos la tarea exacta, ellos en otra que pongan el nombre, que sea rápido» · «cada vez que rompan récord darles emojis diciendo genial rompiste tu récord o estuviste bien». Maquetas aprobadas (opción C · cámara primero) y los agregados del mismo día: columnas del cálculo en la orden y en la cámara, la PAT en dos instancias, «entrás a la tarea y ahí la cámara rápida», «que no se tilde nada».
 
 **Qué cambia (cuadrilla y operario, en Modo obra):**
@@ -22,7 +22,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 - Sello `2026-11-17 06:47 · b5dc7b`. Huellas en `herramientas/v165/huellas.txt`. Capturas del celu (las mismas pantallas que las maquetas) en la carpeta de entrega `v165/capturas/`.
 
-## v164 — 16/11/2026 (armada, sin publicar) · Fotos de la cuadrilla: el disparador que no sacaba, que lleguen al toque y nombrar en la cámara
+## v164 — 16/11/2026 (publicada en GitHub 17/11) · Fotos de la cuadrilla: el disparador que no sacaba, que lleguen al toque y nombrar en la cámara
 **Pedido (Ángel, 16/11, después de probar en obra):** «para sacar fotos es súper lento» · «a la hora de nombrar es súper lento… columna, tablero, PAT» · «una vez que sacan fotos no me llega, tengo que esperar» · **«estuve ahí esperando, apretando y no se sacaba la foto. Rarísimo»** · «que no se tilde nada» · «entrás a la tarea y ahí la cámara rápida».
 
 **Por qué el disparador no respondía (reproducido contra la v163, `herramientas/v164/sonda_disparador.js` y `medir164.js SECC=A`):** (1) el toque copiaba el video a 1920 × 1440 y lo pasaba a JPEG **antes** de dar ninguna señal: con el celu ocupado guardando la foto anterior (sello, miniaturas, subida) eso tardaba 1 a 5 s y no se veía nada; (2) si la cámara todavía no tenía imagen (recién abierta, celu lento) el toque **no hacía nada ni decía nada** (`if (!v.videoWidth) return`); (3) el segundo toque arrancaba otra foto que en Modo obra terminaba con la cámara ya cerrada: error «Cannot read properties of null (reading 'pos')» y esa foto se perdía. Además, «Sacar otra» después de una foto suelta no hacía nada.
@@ -47,7 +47,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 - Sello `2026-11-17 06:10 · 2b2e8b`. Huellas en `herramientas/v164/huellas.txt`.
 
-## v163 — 16/11/2026 (armada, sin publicar) · Avance de obra: marcar lo que ya está hecho, fácil y sin que lo frene el fraguado
+## v163 — 16/11/2026 (publicada en GitHub 17/11) · Avance de obra: marcar lo que ya está hecho, fácil y sin que lo frene el fraguado
 **Pedido (Ángel, 15/11):** «Cuando entrás al avance de obra y querés editar, diciendo esta tarea ya la hice… está como un poco complicado… Hay plazas que están retrasadas, que ya están completas y solo le falta la última cosa, y no puedo marcar que ya se hizo porque me tira que falta el hormigonado y tengo que esperar 3 días… La idea es marcar ahora y que luego avance solo.»
 
 **Qué lo frenaba (reproducido contra la v162, `t_v163` grupo 0 con `ANTES=1`, 5/5):** en una obra vieja sin órdenes, «✅ Columna completa» guardaba el hormigón con la hora del momento y el avance lo mostraba «⏳ fraguando» 72 h (alerta «1 base fraguando», la columna en «fraguando» en la tira, y al marcar el izaje el aviso «está fraguando hasta…»); además había que ir columna por columna (o un paso por vez con «Elegir varias») escribiendo el motivo cada vez.
@@ -66,7 +66,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 - Sello `2026-11-16 14:11 · bfa1a8`. Huellas en `herramientas/v163/huellas.txt`.
 
-## v162 — 15/11/2026 (armada, sin publicar) · Videos cortos y livianos
+## v162 — 15/11/2026 (publicada en GitHub 17/11) · Videos cortos y livianos
 **Pedido (Ángel, 15/11):** «lo que pese lo menos posible para subirlo y que esté buena calidad… videos cortos, no tienen que ser videos largos».
 - Tope de **1 minuto** por video (antes 2).
 - Se sigue achicando a 480p (lado mayor 854 px), pero con video a 600 kbps (antes 1 Mbps) y audio mono a 32 kbps (antes 48 kbps): ≈ 4,7 MB por minuto (antes ≈ 8).
