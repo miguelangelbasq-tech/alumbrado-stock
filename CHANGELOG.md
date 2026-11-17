@@ -2,6 +2,24 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v166 — 17/11/2026 (armada, sin publicar) · «▶ Voy a iniciar» y el tiempo de cada columna también en Mis tareas (la lista)
+**Pedido (Ángel, 17/11, con la v165 en los celus):** «a los chicos no les sale eso del tiempo ni nada». Los chicos sacan las fotos desde **Mis tareas** («Ver lista completa»), no desde Modo obra, y la v165 solo enganchaba el botón grande de Modo obra. Maqueta en `maq166/` (tarjeta con el botón verde, el cartel, «En marcha», cada columna con su tiempo).
+
+**Qué pasaba (reproducido contra la v165, `t_v166` grupo 0 con `ANTES=1`, 5/5):** el 📷 de Mis tareas abría la cámara directo, sin cartel y sin hora de inicio (`campo.tareaInicio` vacío); la v157 sí dejaba la hora de cada foto en `campo.pasosObra` (la primera columna contada desde «Llegué»: 34 min en vez de 24), pero en la fila no se veía nada: solo el cartelito `#tcAviso`, que se va a los 9 s; las fotos de Mis tareas no pasaban por el récord (`trasFoto` llamaba a la `marcar` interna, no a la que envuelve la v165); y las filas no seguían las columnas que eligió la oficina (`ot.columnas`): proponía la Col 5 y no había fila para la Col 8.
+
+**Qué cambia (cuadrilla y operario en Mis tareas; la oficina sin cambios):**
+- **El primer 📷 (o «Se hizo») de una tarea sin arrancar** abre el mismo cartel de la v165 («¿Arrancás con POZO?», «Col 6, 7 y 8 · PLAZA LOS ÁLAMOS · con Pedro», «Todavía no», «¿Es otra tarea?»). «▶ Voy a iniciar» anota lo mismo (`campo.tareaInicio`, `colInicio` de esa fila; en tareas sin columnas, la hora de inicio de la tarea) para todos los de la orden —el compañero ya no ve el cartel— y **sigue con lo que la persona quería**: la cámara de esa fila, la de la app o la del teléfono / APK (el mismo toque de siempre, así la foto llega a su fila por `fotoSegura` / `androidPro`). «Todavía no» deja sacar la foto sin anotar y no vuelve a preguntar en 15 min; ✕ no hace nada.
+- **Cabecera de cada tarea:** botón verde «▶ Voy a iniciar esta tarea» (anota y abre la cámara de la primera fila) o «▶ En marcha desde 08:20 · 24 min» con quiénes («inició Juan» para el compañero).
+- **Cada fila con foto:** «✓ Col 6 lista · 24 min · 08:20 → 08:44» con «cambiar» (− / +), queda ahí (en la plantilla, no un cartelito) y lo abierto sigue abierto aunque Mis tareas se redibuje; la fila que sigue, «⏱ Col 7 corriendo · N min». Las filas que faltan son las columnas que eligió la oficina.
+- **Récords y felicitaciones:** la foto de cada columna pasa por el récord de la v165 («🔥 ¡Récord tuyo! Col 6 en 24 min», «👍 Estuviste bien»); al mandar una tarea, `campo.tareaFin`, el récord de las tareas sin columnas (zanja, por metro) y las felicitaciones. El resumen por columna al mandar (v157) sigue igual.
+- Pruebas viejas con `__v166No` (todo como la v165). Sin reglas nuevas. Se arma con `herramientas/v166/patch_v166.py` (+ `inicioMt.js` / `.css`) sobre el ORIGINAL 165.
+
+**Pruebas:** `t_v166` (5 grupos, 38 pruebas) celu 38/38 · PC 38/38 · `REGLAS=1` 38/38 (Juan en el celu con CPU ×4, Pedro en otra página). Las pedidas: `t_v165`, `t_v157`, `t_v142`, `t_v149b`, `t_v123`, `t_v130`, `t_circuito` OK en PC y celu; `t_v164` celu 70/70, PC 68/70 en la tanda (los dos de tiempos: tarea larga y destello con la máquina cargada; 70/70 sola). BATERIA_PENDIENTE. «Que no se tilde» (CPU ×6, mediana de 3 contra `__v166No`): tocar el 📷 → cartel 65–93 ms (la cámara de la v165: 128–167 ms); abrir Mis tareas 280–420 ms contra 282–331 (lo > 200 ya estaba en la v165).
+
+**A confirmar:** «Todavía no» deja seguir con la foto (15 min sin volver a preguntar); «Se hizo» también pide el cartel si la tarea no arrancó; la cabecera muestra los minutos al momento de dibujarse (no corre cada minuto).
+
+- Sello `2026-11-17 14:19 · 241e77`. Huellas en `herramientas/v166/huellas.txt`. Capturas del celu en la carpeta de entrega `v166/capturas/`.
+
 ## v165 — 16/11/2026 (publicada en GitHub 17/11) · La cuadrilla: «▶ Voy a iniciar esta tarea», cámara primero (opción C), otra tarea rápido y récords
 **Pedido (Ángel, 16/11):** «Al iniciar la tarea le tiene que salir un cartel grande "voy a iniciar esta tarea", cosa que nosotros podamos medir más exacto» · «si nosotros no ponemos la tarea exacta, ellos en otra que pongan el nombre, que sea rápido» · «cada vez que rompan récord darles emojis diciendo genial rompiste tu récord o estuviste bien». Maquetas aprobadas (opción C · cámara primero) y los agregados del mismo día: columnas del cálculo en la orden y en la cámara, la PAT en dos instancias, «entrás a la tarea y ahí la cámara rápida», «que no se tilde nada».
 
