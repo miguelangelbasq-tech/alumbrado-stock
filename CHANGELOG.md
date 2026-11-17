@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v166 — 17/11/2026 (armada, sin publicar) · «▶ Voy a iniciar» y el tiempo de cada columna también en Mis tareas (la lista)
+## v166 — 17/11/2026 (publicada en GitHub) · «▶ Voy a iniciar» y el tiempo de cada columna también en Mis tareas (la lista)
 **Pedido (Ángel, 17/11, con la v165 en los celus):** «a los chicos no les sale eso del tiempo ni nada». Los chicos sacan las fotos desde **Mis tareas** («Ver lista completa»), no desde Modo obra, y la v165 solo enganchaba el botón grande de Modo obra. Maqueta en `maq166/` (tarjeta con el botón verde, el cartel, «En marcha», cada columna con su tiempo).
 
 **Qué pasaba (reproducido contra la v165, `t_v166` grupo 0 con `ANTES=1`, 5/5):** el 📷 de Mis tareas abría la cámara directo, sin cartel y sin hora de inicio (`campo.tareaInicio` vacío); la v157 sí dejaba la hora de cada foto en `campo.pasosObra` (la primera columna contada desde «Llegué»: 34 min en vez de 24), pero en la fila no se veía nada: solo el cartelito `#tcAviso`, que se va a los 9 s; las fotos de Mis tareas no pasaban por el récord (`trasFoto` llamaba a la `marcar` interna, no a la que envuelve la v165); y las filas no seguían las columnas que eligió la oficina (`ot.columnas`): proponía la Col 5 y no había fila para la Col 8.
