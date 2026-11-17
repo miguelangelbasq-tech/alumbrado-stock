@@ -103,6 +103,7 @@ async function abrir(op = {}) {
   if (!op.v161) await page.addInitScript(() => { window.__v161No = true; });   // v161: las pruebas viejas siguen con el Inicio Ejecutivo de admin/oficina (y «📊 Dirección» como hoja); v161:true prueba el Inicio de Dirección con las piezas del Ejecutivo adentro
   if (!op.v163) await page.addInitScript(() => { window.__v163No = true; });   // v163: las pruebas viejas siguen con el hormigón a mano que fragua 72 h y sin «⚡ Poner al día esta obra»; v163:true lo prueba
   if (!op.v164) await page.addInitScript(() => { window.__v164No = true; });   // v164: las pruebas viejas siguen con las fotos de antes (la cola sale con la cámara cerrada, sin la miniatura al toque ni la fila para nombrar en la cámara); v164:true lo prueba
+  if (!op.v165) await page.addInitScript(() => { window.__v165No = true; });   // v165: las pruebas viejas siguen sin «Voy a iniciar», sin la cámara C, sin otra tarea, récords ni columnas en la orden y con la medición de PAT de antes; v165:true lo prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];
