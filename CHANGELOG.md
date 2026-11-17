@@ -2,6 +2,28 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v164 — 16/11/2026 (armada, sin publicar) · Fotos de la cuadrilla: el disparador que no sacaba, que lleguen al toque y nombrar en la cámara
+**Pedido (Ángel, 16/11, después de probar en obra):** «para sacar fotos es súper lento» · «a la hora de nombrar es súper lento… columna, tablero, PAT» · «una vez que sacan fotos no me llega, tengo que esperar» · **«estuve ahí esperando, apretando y no se sacaba la foto. Rarísimo»** · «que no se tilde nada» · «entrás a la tarea y ahí la cámara rápida».
+
+**Por qué el disparador no respondía (reproducido contra la v163, `herramientas/v164/sonda_disparador.js` y `medir164.js SECC=A`):** (1) el toque copiaba el video a 1920 × 1440 y lo pasaba a JPEG **antes** de dar ninguna señal: con el celu ocupado guardando la foto anterior (sello, miniaturas, subida) eso tardaba 1 a 5 s y no se veía nada; (2) si la cámara todavía no tenía imagen (recién abierta, celu lento) el toque **no hacía nada ni decía nada** (`if (!v.videoWidth) return`); (3) el segundo toque arrancaba otra foto que en Modo obra terminaba con la cámara ya cerrada: error «Cannot read properties of null (reading 'pos')» y esa foto se perdía. Además, «Sacar otra» después de una foto suelta no hacía nada.
+
+**Qué cambia:**
+- **El toque saca la foto siempre y al instante:** destello y vibración en el mismo toque; el cuadro se copia ya a 1024 px (el tamaño de la foto final); en Modo obra la cámara se va en ese toque y la foto se arma por atrás; sin imagen todavía avisa «La cámara está arrancando… la saco apenas se vea» y la saca sola (si en 6 s no hay imagen: «Tocá ✕ y abrila de nuevo, o usá la del teléfono»); nunca dos a la vez; con la cámara ya cerrada la foto llega igual.
+- **La cámara abre al toque:** se empieza a prender al apoyar el dedo en «Foto», y queda «tibia» 25 s después de cada foto («Sacar otra» abre sin volver a pedirla); se apaga si la app se va al fondo.
+- **Llega al toque a la oficina, con la cámara abierta:** la cola de por atrás y la bandeja ya no esperan a que se cierre la cámara y pasen 1,5–1,8 s sin tocar nada (salen a los 0,6 s del disparo, de a una, en los huecos del hilo); apenas se saca, la orden recibe la miniatura (del mismo cuadro del disparo) con **«subiendo…»** en el «📸 Avance», la ficha del legajo se escribe antes que la imagen grande, y la imagen sube después. Nada se duplica (el número de la foto se fija de entrada) ni se pierde (la bandeja v149b la tiene desde el primer momento).
+- **Más liviana:** el sello decodifica una sola vez (`createImageBitmap`) y de ese lienzo salen las miniaturas y la imagen para subir (antes `comprimirImagen` dos veces + `__miniChica`); no lee el EXIF de las fotos de la cámara de la app.
+- **Que no se tilde con la cámara abierta:** los relojitos de las pantallas de atrás corren cada 10 s como mucho y los vigías de la página no se despiertan por lo que cambia adentro de la cámara o detrás de ella (al cerrarla, todos se enteran); la marca en vivo ya no obliga a recalcular la página cada segundo; la píldora de la cámara de la barra cada 2 s.
+- **Nombrar en la cámara misma** (Modo obra y cámara de la barra): «‹ Col N ›» + **Columna · Tablero · PAT · Zanja · Acometida · Otro…** arriba del disparador; «Otro…» abre un teclado chico con lo último escrito; lo elegido sigue en la foto siguiente (las columnas pasan solas a la que sigue); lo que no es tarea de su orden va igual a la orden como foto suelta y la oficina la mueve con «↔ Mover».
+- Pruebas viejas con `__v164No` (todo como la v163). Sin reglas nuevas. Se arma con `herramientas/v164/patch_v164.py` (+ `fotosAlToque.html`) sobre el ORIGINAL 163.
+
+**Números (celu, CPU ×6, máquina de pruebas cargada; detalle en `herramientas/v164/medidas.txt`):** tocar con la cámara arrancando: v163 0 fotos y ninguna señal → v164 destello en 42 ms y la foto sale sola; dos toques: v163 1 foto + error → v164 1 foto sin errores; disparo → la oficina la ve: Modo obra 7,4–11,1 s → 3,3–4,6 s, cámara de la barra 10,2–15,0 s → 3,8–7,5 s (las 5 con la cámara abierta); tareas largas de más de 200 ms al disparar 12 → 10 y mientras sube con la cámara abierta 1 (321 ms) → 0 (la más larga 196 ms).
+
+**Pruebas:** RESUMEN_PRUEBAS
+
+**A confirmar:** en celulares reales que el destello / la cámara que se va al toque se sientan al instante; la cámara tibia 25 s y la precalentada (la lucecita del celu prendida); los 6 s de espera si la cámara no muestra imagen; los botones para nombrar y que Tablero/PAT/Zanja/Acometida que no son tarea de la orden vayan como foto suelta; con la cámara abierta, lo de atrás se actualiza cada 10 s.
+
+- Sello `2026-11-16 21:48 · 5cecfe`. Huellas en `herramientas/v164/huellas.txt`.
+
 ## v163 — 16/11/2026 (armada, sin publicar) · Avance de obra: marcar lo que ya está hecho, fácil y sin que lo frene el fraguado
 **Pedido (Ángel, 15/11):** «Cuando entrás al avance de obra y querés editar, diciendo esta tarea ya la hice… está como un poco complicado… Hay plazas que están retrasadas, que ya están completas y solo le falta la última cosa, y no puedo marcar que ya se hizo porque me tira que falta el hormigonado y tengo que esperar 3 días… La idea es marcar ahora y que luego avance solo.»
 

@@ -1,0 +1,319 @@
+<style id="fotosAlToqueCss">
+/* v164 · nombrar la foto en la cámara (Modo obra y cámara de la barra) y «subiendo…» en la oficina */
+#fnFila{position:absolute;z-index:3;left:0;right:0;bottom:calc(108px + env(safe-area-inset-bottom,0px));background:#05060ad9;padding:8px 10px 6px}
+#emaCam.fn-on #ecMarca{top:calc(64px + env(safe-area-inset-top,0px)) !important;bottom:auto !important}
+#emaCam.fn-on .ec-borrar-ult{left:auto;right:12px;bottom:calc(292px + env(safe-area-inset-bottom,0px))}
+#emaCam.fn-on .ec-aviso{top:calc(118px + env(safe-area-inset-top,0px))}
+#emaCam.fn-on .cd-guia{top:calc(112px + env(safe-area-inset-top,0px));bottom:285px}
+.fn-num{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 0 6px}
+.fn-fl{flex:none;width:48px;height:48px;margin:0;padding:0;border:0;border-radius:50%;background:#1d2029;color:#fff;font:700 24px/1 var(--fuente,Inter,sans-serif);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.fn-fl[disabled]{visibility:hidden}
+.fn-nt{flex:0 1 230px;min-width:0;margin:0;padding:2px 6px;border:0;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;cursor:default}
+.fn-nt b{font:800 23px/1.15 var(--disp,Inter,sans-serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.fn-nt small{font:500 10.5px/1.5 var(--mono,monospace);letter-spacing:.12em;text-transform:uppercase;color:#84C3DA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.fn-chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:6px;padding:0 2px}
+#cbPanel .fn-chips{padding:6px 10px 6px}
+.fn-chip{margin:0;min-height:44px;padding:0 6px;border:1.5px solid #ffffff38;border-radius:14px;background:#14161d;color:#fff;font:700 14.5px/1.1 var(--fuente,Inter,sans-serif);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fn-chip.on{background:#ffd60a;border-color:#ffd60a;color:#14161d}
+.fn-otro{position:absolute;z-index:6;left:0;right:0;top:0;bottom:0;background:#000000a6;display:flex;align-items:flex-start;justify-content:center;padding:calc(56px + env(safe-area-inset-top,0px)) 12px 0}
+.fn-oc{width:min(100%,460px);background:#fff;color:#0D1424;border-radius:20px;padding:12px 14px 14px;box-shadow:0 12px 40px #0008}
+.fn-oh{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px}
+.fn-oh b{font:800 17px var(--fuente,Inter,sans-serif)}
+.fn-x{width:44px;height:44px;margin:0;padding:0;border:0;border-radius:50%;background:#eef1f6;color:#0D1424;font-size:16px;cursor:pointer}
+.fn-rec{display:flex;flex-wrap:wrap;margin:0 -3px 8px}
+.fn-rec button{margin:3px;min-height:44px;padding:0 14px;border-radius:999px;border:1.5px solid #cfd8e6;background:#f4f7fb;color:#0D1424;font:700 14.5px var(--fuente,Inter,sans-serif);cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fn-rec small{display:block;width:100%;margin:0 3px 2px;color:#6E7C93;font:600 11px var(--mono,monospace);letter-spacing:.1em;text-transform:uppercase}
+.fn-form{display:flex}
+.fn-form input{flex:1 1 auto;min-width:0;margin:0 8px 0 0;min-height:48px;font-size:16px}
+.fn-form button{flex:none;width:auto;margin:0;min-height:48px;padding:0 18px}
+#ecFlash{position:absolute;left:0;top:0;right:0;bottom:0;z-index:4;background:#fff;opacity:0;pointer-events:none}
+#ecFlash.on{animation:ecFlash .22s ease-out}
+@keyframes ecFlash{0%{opacity:.75}100%{opacity:0}}
+#emaCam .ec-disparo.ec-tic i{animation:ecTic .2s ease-out}
+@keyframes ecTic{0%{transform:scale(.8)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){#ecFlash.on{animation-duration:.01s}#emaCam .ec-disparo.ec-tic i{animation:none}}
+.ao-subiendo{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:#1E6F91}
+</style>
+<script id="fotosAlToque">
+(function () {
+  "use strict";
+  // v164 · Fotos de la cuadrilla (Ángel 16/11/2026, después de probar en obra):
+  //  1) «Una vez que envían o sacan fotos de la tarea no me llega, tengo que esperar»: la cola de por atrás (Modo obra) y la
+  //     bandeja (v149b) solo trabajaban con la cámara CERRADA y 1,5–1,8 s sin tocar la pantalla; si los chicos seguían usando
+  //     el celu, nada salía. Ahora sale apenas pasan 0,6 s del disparo (window.__fotoLibre), de a una por turno
+  //     (window.__fotoTurno: nunca en el mismo cuadro del disparo, en un hueco del hilo). Y, apenas se saca, la orden recibe la
+  //     miniatura con «subiendo…» (campo.fotos.<adjId>, el número de la foto fijado de entrada); la ficha del legajo va antes
+  //     que la imagen grande (guardarFotoObra). Si la app se cierra, la bandeja ya la tiene y le saca el «subiendo».
+  //  2) «Es súper lento»: el disparo arma la foto a 1024 px y el sello decodifica una sola vez (createImageBitmap); de ese
+  //     lienzo salen las miniaturas (140 y 72 px) y la imagen para subir (antes, comprimirImagen dos veces + __miniChica).
+  //  3) «A la hora de nombrar es súper lento»: fila de botones en la cámara (Modo obra y cámara de la barra):
+  //     «‹ Col 4 ›» · Columna · Tablero · PAT · Zanja · Acometida · Otro… (teclado chico con lo último escrito).
+  //     Lo elegido sigue para la foto siguiente (las columnas pasan solas a la siguiente sin foto). Si no es de una tarea de
+  //     su orden, la foto va igual a la orden («suelta», sin tarea) y la oficina la mueve con «↔ Mover» (v152).
+  if (window.__v164No) return;
+  window.__v164On = () => !window.__v164No;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (a) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[a]);
+  const Lk = (s) => String(s || "").replace(/[~*\/\[\].`]/g, "_").slice(0, 120) || "_";
+  const nk = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+  const intentar = (f, d) => { try { return f(); } catch (e) { return d; } };
+  const ots = () => intentar(() => (Array.isArray(ordenesTrabajo) ? ordenesTrabajo : []), []);
+  const otDe = (id) => ots().find((o) => o && o.id === id) || null;
+  const CA = () => window.camaraApp || {};
+  const catTxt = (c) => intentar(() => window.catFotoTxt(c), c);
+  const pideNum = (c) => intentar(() => !!window.catFotoPideNum(c), false);
+  const MED = [];   // tiempos de las últimas fotos (menú › Versión y pruebas)
+  const medir = (adj, k) => { if (!adj) return; let m = MED.find((x) => x.adj === adj); if (!m) { m = { adj, t0: Date.now() }; MED.push(m); if (MED.length > 30) MED.shift(); } if (m[k] == null) m[k] = Date.now() - m.t0; };
+
+  // ------------------------------------------------------------------ cuándo se puede trabajar (sin trabar el disparador)
+  let ultDisparo = 0, ultToque = 0;
+  document.addEventListener("pointerdown", (e) => { ultToque = Date.now(); if (e.target && e.target.closest && e.target.closest('#emaCam [data-ec="disparar"]')) ultDisparo = Date.now(); }, true);
+  document.addEventListener("click", (e) => { if (e.target && e.target.closest && e.target.closest('#emaCam [data-ec="disparar"]')) ultDisparo = Date.now(); }, true);
+  const libre = () => document.hidden || (Date.now() - ultDisparo > 600 && Date.now() - ultToque > 200);
+  window.__fotoLibre = libre;
+  // de a una: el sello pide el turno; la base lo suelta apenas la ficha está escrita (la imagen sube mientras sigue la otra)
+  const TU = { ocupado: false, esperan: [], n: 0 };
+  function mover() {
+    if (TU.ocupado || !TU.esperan.length) return;
+    if (!libre()) return void setTimeout(mover, 120);
+    TU.ocupado = true; const ok = TU.esperan.shift(); let suelto = false;
+    const soltar = () => { if (suelto) return; suelto = true; clearTimeout(tope); TU.ocupado = false; setTimeout(mover, 0); };
+    const tope = setTimeout(soltar, 20000);
+    const ir = () => { TU.n++; ok(soltar); };
+    if (typeof window.requestIdleCallback == "function") window.requestIdleCallback(ir, { timeout: 250 }); else setTimeout(ir, 16);
+  }
+  window.__fotoTurno = { pedir: () => new Promise((ok) => { TU.esperan.push(ok); mover(); }), estado: () => ({ ocupado: TU.ocupado, esperan: TU.esperan.length, n: TU.n }) };
+
+  // ------------------------------------------------------------------ miniaturas
+  function aDataUrl(b) { return new Promise((ok, mal) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = () => mal(r.error); r.readAsDataURL(b); }); }
+  function chica(src, w0, h0, lado, tope) {
+    const k = Math.min(1, lado / Math.max(w0, h0)), w = Math.max(1, Math.round(w0 * k)), h = Math.max(1, Math.round(h0 * k));
+    const cv = document.createElement("canvas"); cv.width = w; cv.height = h; cv.getContext("2d").drawImage(src, 0, 0, w, h);
+    let q = 0.7, u = cv.toDataURL("image/jpeg", q);
+    while (u.length > tope && q > 0.3) { q -= 0.1; u = cv.toDataURL("image/jpeg", q); }
+    return u;
+  }
+  // del lienzo del sello (ya dibujado): la del legajo (140 px, < 7 KB) y la de la orden (72 px, < 3 KB)
+  function minisDe(cv, meta) { meta.__mini140 = chica(cv, cv.width, cv.height, 140, 9300); meta.__mini72 = chica(cv, cv.width, cv.height, 72, 3000); }
+  // de la foto recién sacada (antes del sello): decodifica chica, fuera del hilo
+  const MINIS = {};   // la miniatura que ya se armó con el cuadro del disparo (nombre|tamaño → dataURL)
+  const claveMini = (f) => (f ? (f.name || "") + "|" + (f.size || 0) : "");
+  async function miniDe(f) {
+    const m0 = MINIS[claveMini(f)]; if (m0) return m0;
+    if (typeof createImageBitmap == "function") {
+      try { const b = await createImageBitmap(f, { resizeWidth: 96, resizeQuality: "low" }); const u = chica(b, b.width, b.height, 72, 3000); try { b.close(); } catch (e) { } return u; } catch (e) { }
+    }
+    const url = URL.createObjectURL(f);
+    try { const i = await new Promise((ok, mal) => { const x = new Image(); x.onload = () => ok(x); x.onerror = mal; x.src = url; }); return chica(i, i.naturalWidth, i.naturalHeight, 72, 3000); }
+    catch (e) { return ""; } finally { URL.revokeObjectURL(url); }
+  }
+  // la imagen para subir, del archivo sellado (si pesa más de 350 KB, la base la vuelve a achicar como antes)
+  async function pre(blob, wh) { if (!blob || blob.size > 350 * 1024) return null; try { return { dataUrl: await aDataUrl(blob), w: wh[0], h: wh[1], bytes: blob.size }; } catch (e) { return null; } }
+  const nuevoAdj = () => { try { return firebase.firestore().collection("adjuntos").doc().id; } catch (e) { return "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10); } };
+
+  // ------------------------------------------------------------------ la oficina la ve al toque
+  // Modo obra: pe = la foto pendiente (cuadrillaDia), guardar(patch) = __mtAPI.guardar de esa orden
+  function anunciar(o, pe, f, guardar) {
+    medir(pe.adjId, "disparo");
+    miniDe(f).then((m) => {
+      if (pe.fin) return;   // ya está la de verdad
+      pe.miniB = m || "";
+      guardar({ ["campo.fotos." + Lk(pe.adjId)]: Object.assign({ por: pe.por, ts: pe.ts, cat: pe.cat || "otra", num: pe.num || "", mini: m || "", subiendo: true }, pe.k ? { k: pe.k, tarea: pe.tarea } : {}) });
+      medir(pe.adjId, "anuncio");
+      const sb = document.querySelector('#cdHoja .cd-sube[data-pe="' + pe.id + '"]'); if (sb && !pe.fin) sb.textContent = "✓ La oficina ya la ve · subiendo la foto…";
+    }).catch((e) => console.warn("[v164] miniatura", e));
+  }
+  // cámara de la barra: la foto queda en la bandeja ya mismo y la orden (si hay) recibe la miniatura
+  function antes(file, meta, ot, campoFoto) {
+    const adj = nuevoAdj(); meta.__adjId = adj; medir(adj, "disparo");
+    const B = window.__fotoBandeja;
+    if (B && typeof B.ponerNueva == "function") {
+      const id = "cb_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), m = {};
+      Object.keys(meta).forEach((k) => { const v = meta[k]; if (v == null || typeof v == "function" || k === "__adjId" || k === "__bandejaId") return; m[k] = v; });
+      meta.__bandejaId = id;
+      try { B.ponerNueva({ id, f: file, meta: m, plaza: meta.plazaNombre || "", origen: "camara", otId: meta.otId || "", k: meta.k || "", tarea: meta.tarea || "", cat: meta.cat || "", num: meta.num || "", por: meta.por || "", ts: Date.now(), adjId: adj }); } catch (e) { }
+    }
+    if (ot && typeof campoFoto == "function") miniDe(file).then((mi) => {
+      if (HECHAS[adj]) return;   // la de verdad ya llegó a la orden: no la vuelve a poner «subiendo»
+      campoFoto(ot.id, { ["campo.fotos." + Lk(adj)]: Object.assign({ por: meta.por || "", ts: Date.now(), cat: meta.cat || "otra", num: meta.num || "", mini: mi || "", subiendo: true }, meta.k ? { k: meta.k, tarea: meta.tarea } : {}) });
+      medir(adj, "anuncio");
+    }).catch(() => { });
+  }
+  // la imagen de una foto que todavía está subiendo: se espera un poco antes de decir «no está»
+  function envolverLeer() {
+    const o = window.fbAdjuntoLeer; if (typeof o != "function" || o.__v164) return;
+    const n = async function (id) {
+      let r = await o.apply(this, arguments);
+      for (let i = 0; !r && i < 3; i++) { await new Promise((ok) => setTimeout(ok, 2500)); r = await o.apply(this, arguments); }
+      return r;
+    };
+    window.__heredar && window.__heredar(n, o); n.__v164 = 1; window.fbAdjuntoLeer = n;
+  }
+  setTimeout(envolverLeer, 4000); setInterval(envolverLeer, 5000);
+  // tiempos: cuándo llegó a la base cada foto (lo mira la prueba y menú › Versión)
+  const HECHAS = {};
+  const vigilar = () => { try { const g = window.guardarFotoObra; if (typeof g != "function" || g.__v164m) return; const n = function (f, meta) { const adj = meta && meta.__adjId; const p = g.apply(this, arguments); Promise.resolve(p).then(() => { if (adj) HECHAS[adj] = 1; medir(adj, "base"); }, () => medir(adj, "celu")); return p; }; window.__heredar && window.__heredar(n, g); n.__v164m = 1; window.guardarFotoObra = n; } catch (e) { } };
+  setTimeout(vigilar, 3000);
+
+  // ------------------------------------------------------------------ nombrar en la cámara
+  const CHIPS = [["columna", "Columna"], ["tablero", "Tablero"], ["pat", "PAT"], ["zanja", "Zanja"], ["conexion", "Acometida"], ["otra", "Otro…"]];
+  const KREC = "ema.foto.otros";
+  const recientes = () => intentar(() => JSON.parse(localStorage.getItem(KREC) || "[]") || [], []).filter((x) => typeof x == "string" && x.trim()).slice(0, 8);
+  const recordar = (t) => { t = String(t || "").trim().slice(0, 40); if (!t) return; const l = [t].concat(recientes().filter((x) => nk(x) !== nk(t))).slice(0, 8); try { localStorage.setItem(KREC, JSON.stringify(l)); } catch (e) { } };
+  const chipsHtml = (cat, attr) => `<div class="fn-chips">${CHIPS.map((c) => c[0] === "otra" ? `<button type="button" class="fn-chip${cat === "otra" ? " on" : ""}" data-fnotro="1">${esc(c[1])}</button>` : `<button type="button" class="fn-chip${cat === c[0] || (c[0] === "columna" && (cat === "caja" || cat === "luminaria") && false) ? " on" : ""}" ${attr}="${c[0]}">${esc(c[1])}</button>`).join("")}</div>`;
+  // cámara de la barra: los botones de siempre (data-cbm los maneja obraGps) + «Otro…»
+  function filaCb(CB) { return chipsHtml(CB.cat, "data-cbm"); }
+
+  // Modo obra: estado de lo que va a decir la foto
+  let NM = null;
+  const STK = {};   // por orden: lo que eligió a mano (sigue para la foto siguiente)
+  const tareasDe = (o) => intentar(() => window.__mtAPI.tareas(o) || [], []);
+  const uniDe = (o, k) => (k ? intentar(() => window.__cuadrillaDia.unidades(o.id, k), null) : null);
+  const catDeT = (o, t) => { const u = uniDe(o, t.k); return (u && u.cat) || intentar(() => window.catFotoDeTarea(t.label), "otra"); };
+  function sigNum(o, k) { const u = uniDe(o, k); if (!u || u.tipo !== "unidad" || !u.items.length) return ""; const it = u.items.find((x) => !x.foto && !x.paso) || u.items.find((x) => !x.foto) || u.items[0]; return it.num; }
+  function elegir(cat, op) {
+    op = op || {};
+    const o = otDe(NM.ot); if (!o) return;
+    NM.otro = cat === "otra" ? String(op.otro || "") : "";
+    const ts = tareasDe(o), t = cat === "otra" ? null : (ts.find((x) => x.k === NM.k0 && catDeT(o, x) === cat) || ts.find((x) => catDeT(o, x) === cat));
+    NM.cat = cat;
+    if (t) { NM.k = t.k; NM.lbl = t.label; NM.suelta = false; NM.num = op.num || (pideNum(cat) ? sigNum(o, t.k) : ""); }
+    else { NM.k = ""; NM.lbl = cat === "otra" ? NM.otro || "Otra" : catTxt(cat); NM.suelta = true; NM.num = ""; }
+    if (op.manual) { NM.manual = true; STK[o.id] = { cat, otro: NM.otro, ts: Date.now() }; }
+    aplicar();
+  }
+  const primera = (s) => String(s || "").split(/\s[·\-–(]/)[0].trim();
+  function aplicar() {
+    const inp = NM.inp; if (!inp) return;
+    const que = NM.cat === "otra" ? (NM.otro || "Otra") : NM.num || (NM.suelta ? catTxt(NM.cat) : NM.lbl || catTxt(NM.cat));
+    inp.dataset.k = NM.k; inp.dataset.cat = NM.cat; inp.dataset.fln = que; inp.dataset.fnSuelta = NM.suelta ? "1" : "";
+    const tit = NM.suelta ? que : primera(NM.lbl) + (NM.num ? " · " + NM.num : "");
+    intentar(() => CA().ponerQue(que, tit), null);
+    const g = document.querySelector("#emaCam .cd-guia span"); if (g) g.textContent = NM.cat === "columna" ? "Columna entera en el cuadro ✓" : NM.cat === "otra" ? "Que se vea lo que es ✓" : "Que se vea el trabajo ✓";
+    pintar();
+  }
+  function filaHtml() {
+    const o = otDe(NM.ot), u = o && NM.k && pideNum(NM.cat) ? uniDe(o, NM.k) : null, lista = u && u.tipo === "unidad" ? u.items : null;
+    const n = lista ? lista.filter((x) => x.foto).length : 0;
+    const que = NM.cat === "otra" ? NM.otro || "Otra" : NM.num || (NM.suelta ? catTxt(NM.cat) : primera(NM.lbl) || catTxt(NM.cat));
+    const sub = NM.suelta ? "va a la orden sin tarea" : lista ? n + " de " + lista.length + " con foto" : primera(NM.lbl) || "foto";
+    return `<div class="fn-num"><button type="button" class="fn-fl" data-fn="prev" aria-label="Anterior"${lista ? "" : " disabled"}>‹</button><div class="fn-nt" aria-live="polite"><b>${esc(que)}</b><small>${esc(sub)}</small></div><button type="button" class="fn-fl" data-fn="next" aria-label="Siguiente"${lista ? "" : " disabled"}>›</button></div>` + chipsHtml(NM.cat === "caja" || NM.cat === "luminaria" ? "columna" : NM.cat, "data-fncat");
+  }
+  function pintar() {
+    const cam = $("emaCam"); if (!cam || !NM) return;
+    let f = $("fnFila"); if (!f) { f = document.createElement("div"); f.id = "fnFila"; cam.appendChild(f); cam.classList.add("fn-on"); }
+    const h = filaHtml(); if (f.__h !== h) { f.innerHTML = h; f.__h = h; }
+  }
+  function mover1(paso) {
+    const o = otDe(NM.ot), u = o && uniDe(o, NM.k); if (!u || u.tipo !== "unidad" || !u.items.length) return;
+    const i = u.items.findIndex((x) => nk(x.num) === nk(NM.num)), j = Math.max(0, Math.min(u.items.length - 1, (i < 0 ? 0 : i) + paso));
+    NM.num = u.items[j].num; aplicar();
+  }
+  function alAbrir() {
+    const cam = $("emaCam"), inp = intentar(() => CA().inp(), null);
+    if (!cam || !inp || inp.id !== "cdFotoIn" || cam.__fn) return;
+    cam.__fn = 1;
+    const o = otDe(inp.dataset.ot); if (!o) return;
+    NM = { ot: o.id, inp, k0: inp.dataset.k || "", k: inp.dataset.k || "", cat: inp.dataset.cat || "otra", num: pideNum(inp.dataset.cat) ? inp.dataset.fln || "" : "", lbl: (tareasDe(o).find((x) => x.k === inp.dataset.k) || {}).label || "", suelta: false, otro: "", manual: false };
+    inp.dataset.fnSuelta = "";
+    const s = STK[o.id];
+    if (s && Date.now() - s.ts < 30 * 60000 && (s.cat !== NM.cat || s.cat === "otra")) { elegir(s.cat, { otro: s.otro }); setTimeout(() => NM && NM.inp === inp && aplicar(), 160); }
+    else pintar();
+  }
+  new MutationObserver(() => { const c = $("emaCam"); if (c && !c.__fn) alAbrir(); if (!c && NM) { NM = null; } }).observe(document.body, { childList: true });
+
+  // «Otro…»: teclado chico con lo último escrito (dentro de la cámara, sin ir a otra pantalla)
+  function abrirOtro() {
+    const cam = $("emaCam"); if (!cam) return;
+    let d = $("fnOtro"); if (d) d.remove();
+    const rec = recientes();
+    d = document.createElement("div"); d.id = "fnOtro"; d.className = "fn-otro"; d.setAttribute("role", "dialog"); d.setAttribute("aria-label", "Qué es la foto");
+    d.innerHTML = `<div class="fn-oc"><div class="fn-oh"><b>¿Qué es la foto?</b><button type="button" class="fn-x" data-fno="x" aria-label="Cerrar">✕</button></div>${rec.length ? `<div class="fn-rec"><small>Lo último que escribiste</small>${rec.map((r) => `<button type="button" data-fnorec="${esc(r)}">${esc(r)}</button>`).join("")}</div>` : ""}<form class="fn-form" data-fno="form"><input id="fnOtroIn" type="text" maxlength="40" autocomplete="off" enterkeyhint="done" placeholder="Ej.: medidor, caño roto, base…"><button type="submit" class="btn-primary">Listo</button></form></div>`;
+    cam.appendChild(d);
+    if (!rec.length) setTimeout(() => { const i = $("fnOtroIn"); i && i.focus(); }, 60);
+  }
+  function usarOtro(txt) {
+    txt = String(txt || "").trim(); const d = $("fnOtro"); d && d.remove();
+    if (!txt) return;
+    recordar(txt);
+    if (NM && NM.inp && intentar(() => CA().inp() === NM.inp, false)) return elegir("otra", { otro: txt, manual: true });
+    if (window.__camB && typeof window.__camB.otro == "function") window.__camB.otro(txt);
+  }
+  document.addEventListener("click", (e) => {
+    const t = e.target; if (!t || !t.closest || !t.closest("#emaCam")) return;
+    const ot = t.closest("[data-fnotro]"); if (ot) { e.preventDefault(); e.stopPropagation(); return abrirOtro(); }
+    const rc = t.closest("[data-fnorec]"); if (rc) { e.preventDefault(); e.stopPropagation(); return usarOtro(rc.dataset.fnorec); }
+    const x = t.closest('[data-fno="x"]'); if (x) { e.preventDefault(); e.stopPropagation(); const d = $("fnOtro"); d && d.remove(); return; }
+    if (t.id === "fnOtro") { e.preventDefault(); e.stopPropagation(); t.remove(); return; }
+    if (!NM) return;
+    const c = t.closest("[data-fncat]"); if (c) { e.preventDefault(); e.stopPropagation(); return elegir(c.dataset.fncat, { manual: true }); }
+    const f = t.closest("[data-fn]"); if (f) { e.preventDefault(); e.stopPropagation(); mover1(f.dataset.fn === "next" ? 1 : -1); if (NM) { NM.manual = true; } }
+  }, true);
+  document.addEventListener("submit", (e) => { const f = e.target; if (!f || !f.closest || !f.closest("#fnOtro")) return; e.preventDefault(); usarOtro(($("fnOtroIn") || {}).value); }, true);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("fnOtro")) { e.stopPropagation(); $("fnOtro").remove(); } }, true);
+
+  // ------------------------------------------------------------------ (A) el disparador responde SIEMPRE y al instante
+  // Antes: el toque armaba la foto a 1920 × 1440 y la pasaba a JPEG antes de ninguna señal (1 a 5 s con el celu ocupado o con la
+  // foto anterior guardándose); sin imagen todavía no hacía nada; un segundo toque arrancaba otra foto que se perdía.
+  const DISP = { n: 0, ignorados: 0, esperas: 0, ms: [] };
+  function destello() {
+    const e = $("emaCam"); if (!e) return;
+    let f = $("ecFlash"); if (!f) { f = document.createElement("div"); f.id = "ecFlash"; f.setAttribute("aria-hidden", "true"); e.appendChild(f); }
+    // con Web Animations (no obliga a recalcular la página); en un Chrome sin animate, con la clase en el cuadro siguiente
+    const b = e.querySelector('[data-ec="disparar"] i'), quieto = intentar(() => matchMedia("(prefers-reduced-motion: reduce)").matches, false);
+    if (typeof f.animate == "function") {
+      try { f.animate([{ opacity: 0.75 }, { opacity: 0 }], { duration: quieto ? 1 : 220, easing: "ease-out" }); if (b && !quieto) b.animate([{ transform: "scale(.8)" }, { transform: "scale(1)" }], { duration: 200, easing: "ease-out" }); } catch (x) { }
+    } else { f.classList.remove("on"); requestAnimationFrame(() => f.classList.add("on")); }
+    try { navigator.vibrate && navigator.vibrate(30); } catch (x) { }
+  }
+  function esperarVideo(cam, h, ms) {
+    return new Promise((ok) => {
+      const t0 = Date.now();
+      const mirar = () => { if (h.actual() !== cam) return ok(false); const v = h.$("ecVideo"); if (v && v.videoWidth && v.readyState >= 2) return ok(true); if (Date.now() - t0 > ms) return ok(false); setTimeout(mirar, 60); };
+      mirar();
+    });
+  }
+  function entregar(inp, f) { try { const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; inp.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) { console.warn("[v164] cámara", e); } }
+  async function camDisp(cam, h) {
+    if (!cam) return;
+    const t0 = Date.now(), seguir = cam.inp && cam.inp.dataset.ecSeguir === "1";
+    if (cam.tomada) { DISP.ignorados++; return; }   // Modo obra: ya la sacó, se está cerrando
+    destello();
+    let v = h.$("ecVideo");
+    if (!v || !v.videoWidth || v.readyState < 2) {
+      if (cam.esperando) { h.avisoCam("Ya la saco: la cámara está arrancando…"); return; }
+      cam.esperando = true; DISP.esperas++; h.avisoCam("La cámara está arrancando… la saco apenas se vea");
+      const ok = await esperarVideo(cam, h, window.__camEsperaMs || 6000); cam.esperando = false;
+      if (h.actual() !== cam) return;
+      if (!ok) return h.avisoCam("La cámara no muestra imagen. Tocá ✕ y abrila de nuevo, o usá la del teléfono (📱).", true);
+      h.avisoCam(""); v = h.$("ecVideo"); destello();
+    }
+    // el cuadro se copia YA (lo que se ve al tocar), a 1024 px como la foto final
+    const k = Math.min(1, 1024 / Math.max(v.videoWidth, v.videoHeight));
+    const cv = document.createElement("canvas"); cv.width = Math.round(v.videoWidth * k); cv.height = Math.round(v.videoHeight * k);
+    const c = cv.getContext("2d"); if (cam.facing === "user") { c.translate(cv.width, 0); c.scale(-1, 1); }
+    c.drawImage(v, 0, 0, cv.width, cv.height);
+    const ahora = Date.now(), pos = cam.pos, ctx = Object.assign({}, cam.ctx), inp = cam.inp;
+    DISP.n++;
+    if (!seguir) { cam.tomada = true; h.cerrar(true); }   // Modo obra: la cámara se va al toque (queda tibia para «Sacar otra»)
+    const blob = await new Promise((ok) => { try { cv.toBlob(ok, "image/jpeg", 0.92); } catch (e) { ok(null); } });
+    if (!blob) { if (h.actual() === cam) { cam.tomada = false; h.avisoCam("No se pudo sacar la foto: probá de nuevo.", true); } return; }
+    if (pos) try { window.selloPonerGPS && window.selloPonerGPS(pos); } catch (e) { }
+    const f = new File([blob], `EMA_${new Date(ahora).toISOString().replace(/[-:T]/g, "").slice(0, 14)}.jpg`, { type: "image/jpeg", lastModified: ahora });
+    try { const k2 = Object.keys(MINIS); if (k2.length > 30) delete MINIS[k2[0]]; MINIS[claveMini(f)] = chica(cv, cv.width, cv.height, 72, 3000); } catch (e) { }   // la miniatura para la oficina, del mismo cuadro (sin volver a abrir la foto)
+    try { window.__camDisparo && window.__camDisparo(f, { plaza: ctx.plaza, que: ctx.que, quien: ctx.quien, pos }); } catch (e) { }
+    DISP.ms.push(Date.now() - t0); if (DISP.ms.length > 20) DISP.ms.shift();
+    if (seguir && h.actual() === cam) { cam.foto = f; const bu = document.querySelector('#emaCam [data-ec="usar"]'); bu ? bu.click() : h.usar(); }
+    else entregar(inp, f);   // con la cámara ya cerrada, la foto llega igual (nunca se pierde)
+  }
+  window.__camDisp164 = camDisp;
+  // (C) la cámara abre al toque: se prende al apoyar el dedo en «Foto» (Modo obra) o en la cámara de la barra
+  document.addEventListener("pointerdown", (e) => {
+    const t = e.target; if (!t || !t.closest) return;
+    if (t.closest('#cdApp [data-cd="boton"][data-fase="foto"], #cdHoja [data-cdh="otra"], #navN1 [data-n1="camara"]')) intentar(() => CA().precalentar && CA().precalentar(), null);
+  }, true);
+
+  window.__fotoAlToque = { nuevoAdj, minisDe, miniDe, pre, anunciar, antes, medidas: () => MED.slice(), libre, disparos: () => JSON.parse(JSON.stringify(DISP)) };
+  window.__fotoNombre = { filaCb, elegir: (c, op) => NM && elegir(c, op), estado: () => (NM ? { cat: NM.cat, num: NM.num, k: NM.k, suelta: NM.suelta, otro: NM.otro } : null), recientes, abrirOtro, usarOtro };
+})();
+</script>

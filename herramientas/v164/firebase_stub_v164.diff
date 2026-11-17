@@ -1,0 +1,53 @@
+--- /tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-83acf3badc27/scratchpad/v164/firebase_stub.antes.js	2026-11-16 18:00:27.285195317 +0000
++++ /tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-83acf3badc27/scratchpad/t4/firebase_stub.js	2026-11-16 23:04:07.086151334 +0000
+@@ -35,12 +35,19 @@
+   }
+   // ---- oyentes
+   const oyentes = new Set();
+-  let pendiente = false;
+-  function avisar() {
++  let pendiente = false, cols = null;   // v164: con window.__stubPorColeccion, como Firestore: solo avisa a quien escucha la colección que cambió
++  function avisar(col) {
++    if (col && window.__stubPorColeccion) { if (cols !== 'todas') (cols = cols || new Set()).add(col); } else cols = 'todas';
+     if (pendiente) return; pendiente = true;
+-    setTimeout(() => { pendiente = false; oyentes.forEach(o => { try { o(); } catch (e) { console.error(e); } }); }, 0);
++    setTimeout(() => { pendiente = false; const cs = cols; cols = null; oyentes.forEach(o => { if (cs !== 'todas' && cs && o.__col && !cs.has(o.__col)) return; try { o(); } catch (e) { console.error(e); } }); }, 0);
+   }
+-  window.addEventListener('storage', e => { if (e.key === 'stub.db') { DB = leer('stub.db', {}); avisar(); } });
++  window.addEventListener('storage', e => {
++    if (e.key !== 'stub.db') return;
++    const viejo = DB; DB = leer('stub.db', {});
++    if (!window.__stubPorColeccion) return avisar();
++    const ks = new Set(Object.keys(viejo).concat(Object.keys(DB))); let n = 0;
++    ks.forEach(k => { if (JSON.stringify(viejo[k]) !== JSON.stringify(DB[k])) { n++; avisar(k); } });
++  });
+   // window.__stubRegla(op, col, id, viejo, nuevo) → false = permission-denied (reglas de Firestore simuladas, opcional)
+   const permite = (op, col, id, viejo, nuevo) => { try { return !window.__stubRegla || window.__stubRegla(op, col, id, viejo, nuevo, DB) !== false; } catch (e) { console.warn('regla', e); return false; } };
+   const escribir = (col, id, fn) => {
+@@ -56,7 +63,7 @@
+     // como Firestore: un documento no puede pasar de 1 MiB (1.048.576 bytes) → «invalid-argument»
+     if (nuevo !== undefined && new Blob([JSON.stringify(nuevo)]).size > 1048487) { const er = new Error('Document cannot be written because its size exceeds the maximum allowed size of 1,048,576 bytes.'); er.code = 'invalid-argument'; window.__stubGrandes = (window.__stubGrandes || 0) + 1; return Promise.reject(er); }
+     if (!permite(op, col, id, viejo, nuevo)) { window.__stubNegadas = (window.__stubNegadas || []).concat([op + ' ' + col + '/' + id]); return Promise.reject(errPerm()); }
+-    const aplicar = () => { if (nuevo === undefined) delete DB[col][id]; else DB[col][id] = nuevo; guardar(); avisar(); };
++    const aplicar = () => { if (nuevo === undefined) delete DB[col][id]; else DB[col][id] = nuevo; guardar(); avisar(col); };
+     aplicar(); return Promise.resolve();
+   };
+   // v155: la regla ve el documento (get) o los filtros de la consulta (list)
+@@ -86,7 +93,7 @@
+       delete: () => escribir(col, id, c => { delete c[id]; }),
+       onSnapshot: (cb, err) => {
+         if (!leerOk(col, id)) { setTimeout(() => err && err(errPerm()), 0); return () => {}; }
+-        const dem = ((window.__stubDemora || {})[col + '/' + id]) || 0; let listo = !dem; const f = () => listo && cb(docSnap(col, id)); oyentes.add(f); setTimeout(() => { listo = true; f(); }, dem); return () => oyentes.delete(f);   // v078: demora de la primera respuesta
++        const dem = ((window.__stubDemora || {})[col + '/' + id]) || 0; let listo = !dem; const f = () => listo && cb(docSnap(col, id)); f.__col = col; oyentes.add(f); setTimeout(() => { listo = true; f(); }, dem); return () => oyentes.delete(f);   // v078: demora de la primera respuesta
+       }
+     };
+     return ref;
+@@ -114,7 +121,7 @@
+       onSnapshot: (cb, err) => {
+         if (typeof cb === 'object' && cb && cb.next) { err = cb.error; cb = cb.next; }
+         if (!leerOk(col)) { setTimeout(() => err && err(errPerm()), 0); return () => {}; }
+-        const dem = ((window.__stubDemora || {})[col]) || demRed(ejecutar()) || 0; let listo = !dem; const f = () => listo && cb(ejecutar()); oyentes.add(f); setTimeout(() => { listo = true; f(); }, dem); return () => oyentes.delete(f);   // v078: demora de la primera respuesta
++        const dem = ((window.__stubDemora || {})[col]) || demRed(ejecutar()) || 0; let listo = !dem; const f = () => listo && cb(ejecutar()); f.__col = col; oyentes.add(f); setTimeout(() => { listo = true; f(); }, dem); return () => oyentes.delete(f);   // v078: demora de la primera respuesta
+       }
+     };
+   }

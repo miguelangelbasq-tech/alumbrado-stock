@@ -43,3 +43,9 @@ Estas pruebas se suman al arnés del kit (`h.js`, `firebase_stub.js`, `reglas_st
 - `t_v111.js`: cierre: 0 horas, puntos a mano con saldo, «✕ No fue».
 - `t_v112.js`: «Llenar orden» por pasos, cartel de pendientes, gente con un toque, puntos por persona, marcas combinadas, tareas de barrio, «＋ Crear tarea». **Arnés:** `window.__ofCompat = true` en las pruebas viejas, salvo `ofPasos:true`.
 - `t_v028.js` (v109): espera 1,5 s con la cámara abierta, como una persona. Antes contestaba al instante y no veía que la foto se perdía si la pantalla se redibujaba.
+
+# Pruebas de la v164
+
+- `t_v164.js` (celu con CPU ×6; `SOLO=0..4`; también `REGLAS=1`): fotos de la cuadrilla. 0 = el disparador responde siempre (precalentada, tocar con la cámara arrancando, cámara tibia, Modo obra se cierra en el toque, dos toques = una foto, «no muestra imagen»); 1 = 5 fotos seguidas con la cámara de la barra y la oficina las ve con la cámara abierta; 2 = nombrar en la cámara de la barra; 3 = Modo obra (fila para nombrar, foto suelta, «subiendo…» en el «📸 Avance»); 4 = sin señal, cerrar la app a mitad, `__v164No`.
+- Necesita en `firebase_stub.js` `window.__stubPorColeccion` (cada escritura avisa solo a quien escucha esa colección, también entre páginas): el cambio está en `herramientas/v164/firebase_stub_v164.diff`.
+- `h.js` pone `__v164No` en las pruebas viejas salvo `v164:true`.

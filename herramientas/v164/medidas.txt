@@ -1,0 +1,92 @@
+v164 · Fotos de la cuadrilla · medidas antes (v163, fijo/index.html) y después (v164)
+Celu 390×844 (dpr 2), Chromium con CPU ×6 y ×4 (CDP), base de mentira (firebase_stub) con «aviso por colección», nube de fotos (Worker) con 1,5 s por foto,
+cámara de mentira (canvas 1920×1440, getUserMedia 300 ms). La oficina = otra página con la sesión de Lucía mirando la orden en memoria.
+Script: herramientas/v164/medir164.js (APP=… [V164=1] [CPU=6|4] [SECC=A]). La máquina de pruebas estaba cargada (otras baterías corriendo:
+carga 3–8 en 4 núcleos): los números absolutos son peores que en un celu solo; sirven para comparar antes/después, corridos uno detrás del otro.
+Corrida con el armado de las 21:06 (antes de dos ajustes chicos de la final: los vigías tampoco se despiertan por las pantallas tapadas y la
+marca de «subiendo…» no se repone si la foto ya llegó); el disparador y la llegada a la oficina no cambian con eso.
+«toque → señal» medido desde la prueba incluye lo que tarda el navegador en entregar el toque con el hilo ocupado; tocado desde la página
+(la cámara arrancando), la v164 da el destello en 7–42 ms.
+
+=== (A) El disparador (Modo obra) ==========================================================================================
+                                                   v163 (antes)                                 v164
+tocar apenas abre la cámara (sin imagen todavía)   0 fotos, ninguna señal (no hace nada)         destello al toque, aviso «arrancando…», la foto
+                                                                                                 sale sola: entregada a los 2,5 s
+dos toques seguidos (120 ms)                       1 foto + error «Cannot read properties of     1 foto, sin errores
+                                                   null (reading 'pos')» (la 2.ª se pierde)
+señal del toque                                    ninguna hasta que la cámara se cierra         destello + vibración en el mismo toque
+                                                   (después de armar el JPEG de 1920×1440)       (Modo obra: la cámara se va en ese toque)
+causa: disparar() armaba el JPEG grande antes de cualquier señal (1–5 s con el celu guardando la foto anterior), salía sin
+decir nada si videoWidth == 0, y un 2.º toque arrancaba otra foto que terminaba con cam == null. Sonda: herramientas/v164/sonda_disparador.js.
+
+=== CPU ×6 ===========================================================================================================
+-- v163 (antes)
+  Modo obra foto 1: abrir 3.2 s · toque → señal 4.3 s · → foto entregada 4.1 s · → «Foto guardada» 5.2 s · → la oficina la ve 11.1 s
+  Modo obra foto 2: abrir 5.5 s · toque → señal 3.0 s · → foto entregada 3.0 s · → «Foto guardada» 3.8 s · → la oficina la ve 7.4 s
+  Modo obra foto 3: abrir 2.9 s · toque → señal 3.4 s · → foto entregada 3.2 s · → «Foto guardada» 4.0 s · → la oficina la ve 8.6 s
+  Cámara de la barra: abrir 2.1 s
+  Barra foto 1: toque → señal — · → foto entregada 3.8 s · → la oficina la ve 10.2 s
+  Barra foto 2: toque → señal — · → foto entregada — · → la oficina la ve 13.7 s
+  Barra foto 3: toque → señal — · → foto entregada 5.0 s · → la oficina la ve 13.9 s
+  Barra foto 4: toque → señal — · → foto entregada 5.2 s · → la oficina la ve 15.0 s
+  Barra foto 5: toque → señal — · → foto entregada 6.2 s · → la oficina la ve 11.9 s
+  la oficina vio las 5 con la cámara abierta: sí · fotos nuevas: Modo obra 3, barra 5
+  tocar con la cámara arrancando (1,5 s): 0 foto · señal — · entregada —
+  dos toques seguidos (120 ms): 1 foto(s) · ERRORES: Cannot read properties of null (reading 'pos')
+  tareas largas (cantidad · > 200 ms · la más larga): arranque 85 · 11 · 2437 ms | abrir 56 · 9 · 1086 ms | disparo 167 · 12 · 456 ms | despues 13 · 0 · 162 ms | subiendo 117 · 1 · 321 ms | fin 76 · 4 · 383 ms
+-- v164
+  Modo obra foto 1: abrir 1.6 s · toque → señal 2.0 s · → foto entregada 3.3 s · → «Foto guardada» 4.9 s · → la oficina la ve 4.6 s
+  Modo obra foto 2: abrir 5.5 s · toque → señal 1.8 s · → foto entregada 3.0 s · → «Foto guardada» 3.9 s · → la oficina la ve 3.3 s
+  Modo obra foto 3: abrir 900 ms · toque → señal 1.8 s · → foto entregada 3.3 s · → «Foto guardada» 4.7 s · → la oficina la ve 3.9 s
+  Cámara de la barra: abrir 1.3 s
+  Barra foto 1: toque → señal 2.3 s · → foto entregada 3.4 s · → la oficina la ve 3.8 s
+  Barra foto 2: toque → señal 2.0 s · → foto entregada 3.4 s · → la oficina la ve 3.8 s
+  Barra foto 3: toque → señal 2.5 s · → foto entregada 4.0 s · → la oficina la ve 4.4 s
+  Barra foto 4: toque → señal 1.9 s · → foto entregada — · → la oficina la ve 7.5 s
+  Barra foto 5: toque → señal 1.9 s · → foto entregada 3.1 s · → la oficina la ve 5.2 s
+  la oficina vio las 5 con la cámara abierta: sí · fotos nuevas: Modo obra 3, barra 5
+  tocar con la cámara arrancando (1,5 s): 1 foto · señal 42 ms · entregada 2.5 s
+  dos toques seguidos (120 ms): 1 foto(s) · sin errores
+  tareas largas (cantidad · > 200 ms · la más larga): arranque 53 · 9 · 1838 ms | abrir 45 · 4 · 1128 ms | disparo 83 · 10 · 1027 ms | despues 16 · 1 · 348 ms | subiendo 30 · 0 · 196 ms | nombrar 28 · 1 · 234 ms | fin 56 · 5 · 286 ms
+
+=== CPU ×4 ===========================================================================================================
+-- v163 (antes)
+  Modo obra foto 1: abrir 1.2 s · toque → señal 3.5 s · → foto entregada 3.5 s · → «Foto guardada» 4.1 s · → la oficina la ve 8.1 s
+  Modo obra foto 2: abrir 8.2 s · toque → señal 4.4 s · → foto entregada 4.3 s · → «Foto guardada» 4.8 s · → la oficina la ve 9.2 s
+  Modo obra foto 3: abrir 7.5 s · toque → señal 3.3 s · → foto entregada 3.2 s · → «Foto guardada» 3.7 s · → la oficina la ve 9.6 s
+  Cámara de la barra: abrir 905 ms
+  Barra foto 1: toque → señal — · → foto entregada 2.6 s · → la oficina la ve 7.0 s
+  Barra foto 2: toque → señal — · → foto entregada 3.2 s · → la oficina la ve 7.7 s
+  Barra foto 3: toque → señal — · → foto entregada 3.9 s · → la oficina la ve 8.6 s
+  Barra foto 4: toque → señal — · → foto entregada 4.2 s · → la oficina la ve 8.2 s
+  Barra foto 5: toque → señal — · → foto entregada 4.1 s · → la oficina la ve 8.5 s
+  la oficina vio las 5 con la cámara abierta: sí · fotos nuevas: Modo obra 3, barra 5
+  tocar con la cámara arrancando (1,5 s): 0 foto · señal — · entregada —
+  dos toques seguidos (120 ms): 1 foto(s) · ERRORES: Cannot read properties of null (reading 'pos')
+  tareas largas (cantidad · > 200 ms · la más larga): arranque 37 · 7 · 1323 ms | abrir 41 · 4 · 804 ms | disparo 74 · 5 · 573 ms | despues 5 · 0 · 77 ms | subiendo 75 · 1 · 245 ms | fin 53 · 1 · 270 ms
+-- v164
+  Modo obra foto 1: abrir 1.5 s · toque → señal 2.2 s · → foto entregada 3.4 s · → «Foto guardada» 4.1 s · → la oficina la ve 3.9 s
+  Modo obra foto 2: abrir 1.2 s · toque → señal 2.0 s · → foto entregada 3.1 s · → «Foto guardada» 3.8 s · → la oficina la ve 3.4 s
+  Modo obra foto 3: abrir 4.5 s · toque → señal 2.0 s · → foto entregada 3.1 s · → «Foto guardada» 3.5 s · → la oficina la ve 3.5 s
+  Cámara de la barra: abrir 1.7 s
+  Barra foto 1: toque → señal 1.7 s · → foto entregada 2.8 s · → la oficina la ve 3.0 s
+  Barra foto 2: toque → señal 1.4 s · → foto entregada — · → la oficina la ve 6.8 s
+  Barra foto 3: toque → señal 2.2 s · → foto entregada 3.3 s · → la oficina la ve 5.1 s
+  Barra foto 4: toque → señal 1.4 s · → foto entregada 1.1 s · → la oficina la ve 2.8 s
+  Barra foto 5: toque → señal 1.4 s · → foto entregada 2.8 s · → la oficina la ve 3.0 s
+  la oficina vio las 5 con la cámara abierta: sí · fotos nuevas: Modo obra 3, barra 5
+  tocar con la cámara arrancando (1,5 s): 1 foto · señal 7 ms · entregada 2.5 s
+  dos toques seguidos (120 ms): 1 foto(s) · sin errores
+  tareas largas (cantidad · > 200 ms · la más larga): arranque 51 · 5 · 1675 ms | abrir 38 · 6 · 1223 ms | disparo 45 · 1 · 421 ms | despues 9 · 0 · 132 ms | subiendo 24 · 0 · 133 ms | nombrar 11 · 0 · 142 ms | fin 35 · 1 · 274 ms
+
+=== (B) tareas largas ======================================================================================================
+Arriba, por fase (cantidad · más de 200 ms · la más larga). Lo que queda de más de 200 ms no es de la cámara: perfil de CPU
+(herramientas/v164/perfil_tareas_largas.js) → las pantallas de atrás que se redibujan con cada escritura (Mis tareas, el título
+de la hoja, appCelular), la base de mentira que guarda TODO en el navegador en cada escritura (en el celu real no pasa), y el
+arranque de la página. Con la cámara abierta la v164 calma los relojitos (cada 10 s) y los vigías de la página (no se despiertan
+por lo que cambia adentro de la cámara o detrás); la marca ya no obliga a recalcular la página cada segundo; destello sin forzar
+el dibujo; el sello no lee el EXIF de las fotos de la app; la miniatura sale del cuadro del disparo.
+
+=== (C) Abrir la cámara ====================================================================================================
+«Sacar otra» con la cámara tibia: no vuelve a pedir la cámara (t_v164 grupo 0); la 1.ª se pide al apoyar el dedo en «Foto».
+(abrir, arriba: del toque al video con imagen, incluye el «Foto guardada» que se cierra y la carga de la máquina.)
