@@ -1,5 +1,5 @@
 --- /tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-83acf3badc27/scratchpad/v164/firebase_stub.antes.js	2026-11-16 18:00:27.285195317 +0000
-+++ /tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-83acf3badc27/scratchpad/t4/firebase_stub.js	2026-11-16 23:04:07.086151334 +0000
++++ /tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-83acf3badc27/scratchpad/t4/firebase_stub.js	2026-11-17 01:42:28.311766917 +0000
 @@ -35,12 +35,19 @@
    }
    // ---- oyentes
@@ -38,7 +38,7 @@
        onSnapshot: (cb, err) => {
          if (!leerOk(col, id)) { setTimeout(() => err && err(errPerm()), 0); return () => {}; }
 -        const dem = ((window.__stubDemora || {})[col + '/' + id]) || 0; let listo = !dem; const f = () => listo && cb(docSnap(col, id)); oyentes.add(f); setTimeout(() => { listo = true; f(); }, dem); return () => oyentes.delete(f);   // v078: demora de la primera respuesta
-+        const dem = ((window.__stubDemora || {})[col + '/' + id]) || 0; let listo = !dem; const f = () => listo && cb(docSnap(col, id)); f.__col = col; oyentes.add(f); setTimeout(() => { listo = true; f(); }, dem); return () => oyentes.delete(f);   // v078: demora de la primera respuesta
++        const dem = ((window.__stubDemora || {})[col + '/' + id]) || 0; let listo = !dem; /* v164: __snapRetener (como el SDK envuelto por la app: con la cámara abierta la escucha guarda el último aviso) */ const f = () => { if (!listo) return; if (f.__ya && window.__snapRetener && window.__snapRetener(f, () => cb(docSnap(col, id)))) return; f.__ya = 1; cb(docSnap(col, id)); }; f.__col = col; oyentes.add(f); setTimeout(() => { listo = true; f(); }, dem); return () => oyentes.delete(f);   // v078: demora de la primera respuesta
        }
      };
      return ref;
@@ -47,7 +47,7 @@
          if (typeof cb === 'object' && cb && cb.next) { err = cb.error; cb = cb.next; }
          if (!leerOk(col)) { setTimeout(() => err && err(errPerm()), 0); return () => {}; }
 -        const dem = ((window.__stubDemora || {})[col]) || demRed(ejecutar()) || 0; let listo = !dem; const f = () => listo && cb(ejecutar()); oyentes.add(f); setTimeout(() => { listo = true; f(); }, dem); return () => oyentes.delete(f);   // v078: demora de la primera respuesta
-+        const dem = ((window.__stubDemora || {})[col]) || demRed(ejecutar()) || 0; let listo = !dem; const f = () => listo && cb(ejecutar()); f.__col = col; oyentes.add(f); setTimeout(() => { listo = true; f(); }, dem); return () => oyentes.delete(f);   // v078: demora de la primera respuesta
++        const dem = ((window.__stubDemora || {})[col]) || demRed(ejecutar()) || 0; let listo = !dem; /* v164: __snapRetener (como el SDK envuelto por la app: con la cámara abierta la escucha guarda el último aviso) */ const f = () => { if (!listo) return; if (f.__ya && window.__snapRetener && window.__snapRetener(f, () => cb(ejecutar()))) return; f.__ya = 1; cb(ejecutar()); }; f.__col = col; oyentes.add(f); setTimeout(() => { listo = true; f(); }, dem); return () => oyentes.delete(f);   // v078: demora de la primera respuesta
        }
      };
    }

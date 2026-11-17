@@ -1,6 +1,6 @@
 // v164 · Fotos de la cuadrilla: que lleguen al toque a la oficina, más rápidas y fáciles de nombrar en la cámara.
 // Celu 390×844 con CPU ×6 (CPU=4 para la otra medida). También con REGLAS=1 (Juan es cuadrilla: las reglas reales).
-// Grupos (SOLO=0..4): 0 (A) el disparador responde siempre: tocar con la cámara arrancando, dos toques seguidos, la cámara
+// Grupos (SOLO=0..5; 5 = toques reales, 5 seguidos, con el umbral en ms; CON_OFICINA=1 con la oficina en otra página): 0 (A) el disparador responde siempre: tocar con la cámara arrancando, dos toques seguidos, la cámara
 // que no muestra imagen, el destello en el mismo toque, la cámara «tibia» y precalentada · 1 cámara de la barra, 5 fotos seguidas con la cámara abierta → la oficina (otra página, otra sesión) las
 // ve antes de cerrarla, sin duplicar · 2 nombrar en la cámara de la barra (Tablero, PAT, Otro… con texto y lo último escrito,
 // Columna ‹ ›) sin salir de la cámara · 3 Modo obra: la fila (‹ Col › y los botones), la foto «suelta» que no es de la orden,
@@ -17,7 +17,11 @@ const prep = () => {
   window.__stubPorColeccion = true;   // como Firestore: cada escritura avisa solo a quien escucha esa colección
   const dib = (c) => { const x = c.getContext('2d'); x.fillStyle = '#9cc3e6'; x.fillRect(0, 0, c.width, c.height); x.fillStyle = '#6f6f5c'; x.fillRect(0, c.height * 0.62, c.width, c.height); };
   window.__gumN = 0; window.__gumMs = 300;
-  if (navigator.mediaDevices) navigator.mediaDevices.getUserMedia = async () => { window.__gumN++; if (window.__gumNunca) return new Promise(() => { }); await new Promise((r) => setTimeout(r, window.__gumMs)); const c = document.createElement('canvas'); c.width = 1920; c.height = 1440; dib(c); setInterval(() => dib(c), 250); return c.captureStream(8); };
+  window.__T5 = []; window.__LT5 = []; window.__camLT5 = false;
+  try { new PerformanceObserver((l) => l.getEntries().forEach((e) => { if (window.__camLT5) window.__LT5.push(Math.round(e.duration)); })).observe({ entryTypes: ['longtask'] }); } catch (e) { }
+  document.addEventListener('pointerdown', (e) => { const b = e.target && e.target.closest && e.target.closest('#emaCam [data-ec="disparar"]'); if (b) window.__T5.push({ pd: e.timeStamp }); }, true);
+  const an = Element.prototype.animate; Element.prototype.animate = function () { if (this.id === 'ecFlash') { const x = window.__T5[window.__T5.length - 1]; if (x && !x.f) requestAnimationFrame((ts) => { if (!x.f) x.f = ts; }); } return an.apply(this, arguments); };
+  if (navigator.mediaDevices) navigator.mediaDevices.getUserMedia = async () => { window.__gumN++; if (window.__gumNunca) return new Promise(() => { }); await new Promise((r) => setTimeout(r, window.__gumMs)); const c = document.createElement('canvas'); c.width = 1920; c.height = 1440; dib(c); setInterval(() => { if (!window.__gumQuieto) dib(c); }, 250); return c.captureStream(8); };
 };
 async function armar(op) {
   op = op || {};
@@ -63,19 +67,34 @@ async function armar(op) {
     c(r0.sinImg && r0.flash, 'tocar antes de que haya imagen: el destello sale en el mismo toque');
     c(/arrancando/.test(r0.aviso) && r0.rol === 'status', 'y avisa «La cámara está arrancando… la saco apenas se vea» (' + r0.aviso + ')');
     c(await A.esperar(() => window.__entregadas >= 1, null, 15000), 'la foto se saca sola apenas aparece la imagen (antes: no pasaba nada)');
+    c(await ev(() => !!document.getElementById('emaCam') && !!document.querySelector('#emaCam [data-fn="listo"]')), 'Modo obra: la cámara queda abierta para la siguiente (ráfaga, con «Listo»)');
+    // dos toques seguidos en ráfaga: dos fotos, cada una con su columna, sin errores
+    await p.waitForTimeout(400);
+    const n0 = await ev(() => window.__entregadas), q0 = await ev(() => (document.querySelector('#fnFila .fn-nt b') || {}).textContent || '');
+    await ev(() => { const b = document.querySelector('#emaCam [data-ec="disparar"]'); b.click(); setTimeout(() => b.click(), 150); });
+    await A.esperar((n) => window.__entregadas >= n + 2, n0, 10000);
+    c(await ev((n) => window.__entregadas - n, n0) === 2, 'ráfaga: dos toques seguidos = dos fotos');
+    await p.waitForTimeout(500);
+    const q1 = await ev(() => (document.querySelector('#fnFila .fn-nt b') || {}).textContent || '');
+    c(/^Col/.test(q0) && /^Col/.test(q1) && q0 !== q1, 'la fila pasa sola a la columna siguiente después de cada foto (' + q0 + ' → ' + q1 + ')');
+    // «Listo»: sale de la cámara, «Foto guardada» y la cámara queda tibia
+    await ev(() => document.querySelector('#emaCam [data-fn="listo"]').click());
     await A.esperar(() => !!document.querySelector('#cdHoja [data-cdh="otra"]'), null, 20000);
-    // la cámara quedó «tibia»: «Sacar otra» abre sin volver a pedir la cámara
+    c(await ev(() => !document.getElementById('emaCam') && /Foto guardada/.test(document.getElementById('cdHoja').textContent)), '«Listo»: sale de la cámara y muestra «Foto guardada»');
     c(await ev(() => window.camaraApp.tibia()), 'después de la foto la cámara queda tibia (lista para «Sacar otra»)');
     await ev(() => { window.__gumMs = 300; window.__g1 = window.__gumN; });
     await p.tap('#cdHoja [data-cdh="otra"]'); await A.camLista();
     c(await ev(() => window.__gumN === window.__g1), '«Sacar otra» abre con la cámara tibia (sin volver a pedirla)');
-    await ev(() => { window.__camTibiaMs = 2000; });
-    // dos toques seguidos: una foto, sin errores (antes la segunda tiraba «Cannot read properties of null» y se perdía)
-    await p.waitForTimeout(400);
+    await ev(() => { window.__camTibiaMs = 2000; window.camaraApp.cerrar(); }); await p.waitForTimeout(600);
+    await ev(() => { const h = document.querySelector('#cdHoja [data-cdh="x"]'); h && h.click(); }); await p.waitForTimeout(600);
+    // una sola foto por vez (como Mis tareas clásica): dos toques = una foto, sin errores (antes la segunda tiraba
+    // «Cannot read properties of null (reading 'pos')» y se perdía)
+    await ev(() => { const i = document.getElementById('cdFotoIn'); i.dataset.ecRafaga = ''; window.camaraApp.abrir(i); });
+    await A.camLista(); await p.waitForTimeout(400);
     const n1 = await ev(() => window.__entregadas);
-    const r1 = await ev(() => { const b = document.querySelector('#emaCam [data-ec="disparar"]'); b.click(); const ida = !document.getElementById('emaCam'); b.click(); return ida; });
-    c(r1, 'Modo obra: la cámara se va en el mismo toque (la foto se arma por atrás)');
+    await ev(() => { const b = document.querySelector('#emaCam [data-ec="disparar"]'); b.click(); b.click(); });
     await A.esperar((n) => window.__entregadas > n, n1, 10000); await p.waitForTimeout(2500);
+    c(await ev(() => !document.getElementById('emaCam')), 'una foto por vez: la cámara se va después del toque');
     c(await ev((n) => window.__entregadas - n, n1) === 1, 'dos toques seguidos: una sola foto');
     c(await ev(() => window.__errs.length === 0), 'sin errores (' + (await ev(() => window.__errs.slice(0, 2).join(' | '))) + ')');
     await A.esperar(() => !!document.querySelector('#cdHoja [data-cdh="x"]'), null, 20000);
@@ -175,18 +194,21 @@ async function armar(op) {
     const a1 = await nt(); await p.tap('#fnFila [data-fn="next"]'); await p.waitForTimeout(300); const a2 = await nt();
     c(/^Col/.test(a1) && /^Col/.test(a2) && a1 !== a2, '‹ › cambia la columna: ' + a1 + ' → ' + a2);
     c(await ev(() => /Col/.test((document.querySelector('#ecMarca .ec-l1') || {}).textContent || '')), 'la marca en vivo dice la columna');
+    await A.B.page.evaluate(() => { window.__vioSubiendo = 0; const mirar = () => { if (document.querySelector('.ao-subiendo')) window.__vioSubiendo = Date.now(); }; new MutationObserver(mirar).observe(document.body, { childList: true, subtree: true }); setInterval(mirar, 100); });
     const t0 = await ev(() => Date.now());
-    await p.tap('#emaCam [data-ec="disparar"]');
+    await p.tap('#emaCam [data-ec="disparar"]'); await p.waitForTimeout(1800);
+    await p.tap('#emaCam [data-fn="listo"]');   // v164: Modo obra en ráfaga: «Listo» sale de la cámara
     await A.esperar(() => { const h = document.getElementById('cdHoja'); return !!h && /Foto guardada/.test(h.textContent); }, null, 20000);
-    const okAo = await A.B.page.waitForFunction(() => !!document.querySelector('.ao-subiendo'), null, { timeout: 15000, polling: 100 }).then(() => true, () => false);
-    const t1 = Date.now();
+    const okAo = await A.B.page.waitForFunction(() => !!window.__vioSubiendo, null, { timeout: 15000, polling: 100 }).then(() => true, () => false);
+    const t1 = (await A.B.page.evaluate(() => window.__vioSubiendo)) || Date.now();
     c(okAo, 'la oficina ve la foto en el «📸 Avance» con «subiendo…» mientras la imagen sube (' + ((t1 - t0) / 1000).toFixed(1) + ' s del disparo)');
     let d = await A.db(), nv = d.campo.filter((x) => !k0.has(x.id));
     c(nv.length === 1 && nv[0].num === a2 && nv[0].k === 'montaje_prfv', 'la foto quedó en la orden con lo elegido (' + (nv[0] && nv[0].num) + ')');
     await p.tap('#cdHoja [data-cdh="otra"]'); await A.camLista(); await p.waitForTimeout(500);
     await p.tap('#fnFila .fn-chip[data-fncat="tablero"]'); await p.waitForTimeout(300);
     c(/Tablero/.test(await nt()) && await ev(() => /sin tarea/.test((document.querySelector('#fnFila .fn-nt small') || {}).textContent || '')), '«Tablero» (no hay tarea de tablero en la orden): va a la orden sin tarea');
-    await p.tap('#emaCam [data-ec="disparar"]');
+    await p.tap('#emaCam [data-ec="disparar"]'); await p.waitForTimeout(1800);
+    await p.tap('#emaCam [data-fn="listo"]');   // v164: Modo obra en ráfaga: «Listo» sale de la cámara
     await A.esperar(() => { const h = document.getElementById('cdHoja'); return !!h && /Foto guardada/.test(h.textContent); }, null, 20000);
     await p.waitForTimeout(2500);
     d = await A.db(); nv = d.campo.filter((x) => !k0.has(x.id));
@@ -197,7 +219,8 @@ async function armar(op) {
     await p.tap('#fnFila .fn-chip[data-fnotro]'); await p.waitForTimeout(300);
     await p.fill('#fnOtroIn', 'Caño roto'); await p.tap('#fnOtro button[type="submit"]'); await p.waitForTimeout(300);
     c(/Caño roto/.test(await nt()) && await ev(() => /Caño roto/.test((document.querySelector('#ecMarca .ec-l1') || {}).textContent || '')), '«Otro…»: «Caño roto» en el número y en la marca');
-    await p.tap('#emaCam [data-ec="disparar"]');
+    await p.tap('#emaCam [data-ec="disparar"]'); await p.waitForTimeout(1800);
+    await p.tap('#emaCam [data-fn="listo"]');   // v164: Modo obra en ráfaga: «Listo» sale de la cámara
     await A.esperar(() => { const h = document.getElementById('cdHoja'); return !!h && /Foto guardada/.test(h.textContent); }, null, 20000);
     await p.waitForTimeout(2500);
     d = await A.db(); nv = d.campo.filter((x) => !k0.has(x.id));
@@ -245,6 +268,38 @@ async function armar(op) {
     await V.camB();
     c(await V.ev(() => !document.querySelector('#cbPanel .fn-chips') && !!document.querySelector('#cbPanel .cbx-modos') && !window.__fotoAlToque && !window.__fotoLibre), 'con __v164No: la cámara de la barra como antes (sin la fila nueva ni la cola nueva)');
     await V.browser.close();
+  }
+  // ================================================================ 5) «apretás y saca AL INSTANTE»: toques reales, 5 seguidos
+  if (corre(5)) {
+    console.log('— 5 · toques reales (CDP), 5 seguidos a 1 por segundo, Modo obra y cámara de la barra (CPU ×' + process.env.CPU + ')');
+    const A = await armar({ oficina: !!process.env.CON_OFICINA }), { p, ev } = A;
+    const caja = async (sel) => { const b = await p.locator(sel).first().boundingBox(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; };
+    const rafaga = async (nombre) => {
+      await ev(() => { window.__T5 = []; window.__LT5 = []; window.__camLT5 = true; window.__gumQuieto = true; });
+      const d = await caja('#emaCam [data-ec="disparar"]');
+      for (let i = 0; i < 5; i++) { await p.touchscreen.tap(d.x, d.y); await p.waitForTimeout(1000); }
+      await p.waitForTimeout(2500);
+      const T = await ev(() => window.__T5), LT = await ev(() => window.__LT5);
+      await ev(() => { window.__camLT5 = false; });
+      const ms = T.map((x) => (x.f ? Math.round(x.f - x.pd) : 9999)), ord = ms.slice().sort((a, b) => a - b), med = ord[Math.floor(ord.length / 2)];
+      console.log('    ' + nombre + ': toque → destello en pantalla ' + ms.join(' · ') + ' ms (mediana ' + med + ') · tareas largas con la cámara abierta: ' + LT.length + ' (> 100 ms: ' + LT.filter((x) => x > 100).length + ', la más larga ' + Math.max(0, ...LT) + ' ms)');
+      c(T.length === 5 && ms.every((x) => x < 9999), nombre + ': los 5 toques dieron su destello');
+      c(med <= 100 && Math.max(...ms) <= 250, nombre + ': destello en ≤ 100 ms (mediana) y ninguno pasa de 250 ms');
+      c(LT.filter((x) => x > 200).length === 0, nombre + ': ninguna tarea larga de más de 200 ms con la cámara abierta');
+    };
+    await ev(() => window.__cuadrillaDia.ir('obra')); await p.waitForTimeout(3500);
+    const n0 = await ev(() => Object.keys((((window.__stubDB().ordenesTrabajo || {}).ot1 || {}).campo || {}).fotos || {}).length);
+    { const b = await caja('#cdApp [data-cd="boton"]'); await p.touchscreen.tap(b.x, b.y); await A.camLista(); await p.waitForTimeout(800); }
+    await rafaga('Modo obra');
+    await ev(() => document.querySelector('#emaCam [data-fn="listo"]').click()); await p.waitForTimeout(1500);
+    await ev(() => { const h = document.querySelector('#cdHoja [data-cdh="x"]'); h && h.click(); }); await p.waitForTimeout(1200);
+    await A.camB(); await p.waitForTimeout(500);
+    await rafaga('Cámara de la barra');
+    await ev(() => window.camaraApp.cerrar());
+    const ok = await A.esperar((n) => Object.keys((((window.__stubDB().ordenesTrabajo || {}).ot1 || {}).campo || {}).fotos || {}).length >= n + 10, n0, 60000);
+    c(ok, 'las 10 fotos quedaron en la orden');
+    c(A.errores.length === 0, 'sin errores (' + A.errores.slice(0, 2).join(' | ') + ')');
+    await A.browser.close();
   }
   process.exit(c.fin() ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(2); });

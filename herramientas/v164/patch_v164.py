@@ -28,6 +28,15 @@
    sello no lee el EXIF de las fotos de la cámara de la app; la miniatura para la oficina sale del cuadro del disparo.
  · (C) LA CÁMARA ABRE AL TOQUE: se prende al apoyar el dedo en «Foto» y queda tibia 25 s después de cada foto («Sacar otra»
    abre sin volver a pedirla); se apaga si la app se va al fondo.
+ · (A2) «COMO UNA CÁMARA NORMAL: APRETÁS Y SACA AL INSTANTE» (Ángel 17/11): el disparo sale en el pointerdown (no espera al
+   clic, y ese clic no despierta a nadie más); el destello se dibuja primero y el cuadro se toma en la tarea siguiente con
+   createImageBitmap(video) entero (con «resize» lo hacía en el hilo: 130–165 ms con CPU ×6); un Worker con OffscreenCanvas lo
+   achica a 1024, arma el JPEG y la miniatura (respaldo: el canvas de siempre). Modo obra queda en RÁFAGA: la cámara sigue
+   abierta, la fila pasa sola a la columna siguiente y «Listo» sale (ahí aparece «Foto guardada»). Lo pesado de cada foto
+   (guardarla, la miniatura, la orden, la bandeja, el sello) espera 1,5 s sin tocar el disparador (window.__fotoQuieto); con
+   la cámara abierta las escuchas de la base guardan el último aviso y lo entregan al cerrarla (window.__snapRetener, también
+   el arnés) y Mis tareas se redibuja al cerrarla (window.__trasCamara); los vigías no se despiertan por carteles chicos ni
+   por cambios de clase del body/html. Destello mediana 16–18 ms (CPU ×6, toques reales).
  · Compatibilidad: __v164No (lo pone el arnés salvo v164:true). Sin reglas nuevas.
 Uso: python3 patch_v164.py ORIGINAL_163.html SALIDA.html [--otra-base]"""
 import sys, os, re, hashlib, datetime
@@ -46,7 +55,7 @@ ON = '(window.__v164On && window.__v164On())'
 # ============================================================================== 0) (B) «que no se tilde nada»: con la cámara abierta
 # La cámara tapa toda la pantalla, pero los relojitos de las otras pantallas (atrás, barra de abajo, Llenar orden, Inicio…)
 # seguían revisando la página cada 1–3 s: tareas de 120–300 ms con el celu lento, justo mientras se saca y se guarda la foto.
-# Con la cámara abierta corren como mucho una vez cada 10 s; los que se crean con la cámara abierta (los de la cámara) siguen.
+# Con la cámara abierta corren como mucho una vez cada 30 s; los que se crean con la cámara abierta (los de la cámara) siguen.
 R('''    var ultimo = 0, extra = Array.prototype.slice.call(arguments, 2);
     return orig.call(window, function () {
       if (document.hidden) { var a = Date.now(); if (a - ultimo < ESCONDIDA_MS) return; ultimo = a; }
@@ -56,7 +65,7 @@ R('''    var ultimo = 0, extra = Array.prototype.slice.call(arguments, 2);
       if (document.hidden) { var a = Date.now(); if (a - ultimo < ESCONDIDA_MS) return; ultimo = a; }
       else if (!conCam && !window.__v164No && document.body && document.body.classList.contains("ec-abierta")) { var c = Date.now(); if (c - ultimo < CAMARA_MS) return; ultimo = c; }   // v164
       else ultimo = 0;''')
-R('''  var orig = window.setInterval, ESCONDIDA_MS = 60000;''', '''  var orig = window.setInterval, ESCONDIDA_MS = 60000, CAMARA_MS = 10000;''')
+R('''  var orig = window.setInterval, ESCONDIDA_MS = 60000;''', '''  var orig = window.setInterval, ESCONDIDA_MS = 60000, CAMARA_MS = 30000;''')
 # y los «vigías» que miran TODA la página (appCelular, atrás, Llenar orden, barra…) se despertaban con cada cambio adentro de
 # la cámara (la hora y el GPS de la marca, la píldora, los botones) y revisaban la página entera. Con la cámara abierta, lo que
 # cambia adentro de la cámara, o en las pantallas que quedan tapadas detrás (.wrap), no los despierta (lo demás, sí; y al
@@ -65,11 +74,13 @@ R('''  window.__relojitosAhorro = { original: orig, minimoEscondida: ESCONDIDA_M
   '''  window.__relojitosAhorro = { original: orig, minimoEscondida: ESCONDIDA_MS };
   var MO = window.MutationObserver;
   if (MO) {
+    var AVISOS = { fssAviso: 1, tcAviso: 1, avToast: 1, ecToast: 1 };   // carteles chicos que van y vienen detrás de la cámara
+    var soloAvisos = function (x) { var l = [].slice.call(x.addedNodes).concat([].slice.call(x.removedNodes)); return l.length > 0 && l.every(function (n) { return n.nodeType !== 1 ? true : !!AVISOS[n.id]; }); };
     var MO2 = function (cb) {
       var yo = new MO(function (recs, obs) {
         if (yo.__ancho && !window.__v164No) {
           var b = document.body, cam = b && b.classList.contains("ec-abierta") && document.getElementById("emaCam");
-          if (cam) { var r = []; for (var i = 0; i < recs.length; i++) { var tg = recs[i].target, el = tg && tg.nodeType === 1 ? tg : tg && tg.parentNode; if (!cam.contains(tg) && !(el && el.closest && el.closest(".wrap"))) r.push(recs[i]); } if (!r.length) return; recs = r; }   // lo de adentro de la cámara y de las pantallas de atrás (tapadas): al cerrarla, todos se enteran
+          if (cam) { var r = []; for (var i = 0; i < recs.length; i++) { var tg = recs[i].target, el = tg && tg.nodeType === 1 ? tg : tg && tg.parentNode; if (!cam.contains(tg) && !(el && el.closest && el.closest(".wrap, #fssAviso, #tcAviso, #avToast")) && !(tg === b && soloAvisos(recs[i])) && !(recs[i].type === "attributes" && (tg === b || tg === document.documentElement))) r.push(recs[i]); } if (!r.length) return; recs = r; }   // lo de adentro de la cámara y de las pantallas de atrás (tapadas): al cerrarla, todos se enteran
         }
         return cb.call(this, recs, obs);
       });
@@ -81,7 +92,7 @@ R('''  window.__relojitosAhorro = { original: orig, minimoEscondida: ESCONDIDA_M
   }''')
 # la marca en vivo se reubica solo si cambió la pantalla o el video (antes, cada segundo: obligaba a recalcular la página)
 R('''    cam.reloj = setInterval(() => { pintarMarca(); ubicarMarca(); }, 1000);''',
-  '''    cam.reloj = setInterval(() => { pintarMarca(); const v = $("ecVideo"), kk = v ? [cam.nRes || 0, v.videoWidth, v.videoHeight, document.body.className.length].join() : "";   /* sin leer innerWidth: obliga a recalcular la página */ if (!''' + ON + ''' || kk !== cam.kMarca) { cam.kMarca = kk; ubicarMarca(); } }, 1000);''')
+  '''    cam.reloj = setInterval(() => { pintarMarca(); const v = $("ecVideo"), kk = v ? [cam.nRes || 0, v.videoWidth, v.videoHeight, $("emaCam").classList.contains("fn-on")].join() : "";   /* sin leer innerWidth: obliga a recalcular la página */ if (!''' + ON + ''' || kk !== cam.kMarca) { cam.kMarca = kk; ubicarMarca(); } }, 1000);''')
 # la píldora de la cámara de la barra: cada 2 s (antes cada 1 s, y cada vuelta recalculaba la obra y la marca)
 R('''    clearInterval(CB.reloj); CB.reloj = setInterval(() => { if (!$("emaCam")) return clearInterval(CB.reloj); pintar(false); }, 1000);''',
   '''    clearInterval(CB.reloj); CB.reloj = setInterval(() => { if (!$("emaCam")) return clearInterval(CB.reloj); pintar(false); }, ''' + ON + ''' ? 2000 : 1000);
@@ -292,6 +303,71 @@ R('''  window.__camB = { activa: camB, abrir, resolver, pintar: () => pintar(tru
 # ============================================================================== 7) «📸 Avance» de la oficina: «subiendo…»
 R('''(f.mini ? '<img src="' + esc(f.mini) + '" alt="">' : '<span class="ao-sinfoto">📷</span>') + "<span>" + esc((f.num ? f.num + " · " : "") + (String(f.por || "").split(" ")[0]) + " " + hora(f.ts)) + "</span></button>";''',
   '''(f.mini ? '<img src="' + esc(f.mini) + '" alt="">' : '<span class="ao-sinfoto">📷</span>') + "<span>" + esc((f.num ? f.num + " · " : "") + (String(f.por || "").split(" ")[0]) + " " + hora(f.ts)) + "</span>" + (f.subiendo && !window.__v164No ? '<i class="ao-subiendo">subiendo…</i>' : "") + "</button>";''')
+
+# ============================================================================== 9) «como una cámara normal: apretás y saca AL INSTANTE»
+# (Ángel 17/11, después de ver las medidas). El disparo sale en el pointerdown (no espera al clic); la cámara de Modo obra queda
+# abierta para sacar varias seguidas («ráfaga», con «Listo»); lo que viene después de cada foto (guardarla, la miniatura, la
+# orden, la bandeja) espera a que pase ~1 s sin tocar el disparador; y, con la cámara abierta, las escuchas de la base no
+# redibujan las pantallas de atrás (se entregan al cerrarla o con 4 s sin tocar nada).
+R('''    if (a === "disparar") return disparar();''',
+  '''    if (a === "disparar") { if (''' + ON + ''' && Date.now() - ultPD < 1500) return; return disparar(); }   // v164: ya salió en el pointerdown''')
+R('''  document.addEventListener("keydown", (e) => { if (cam && e.key === "Escape") cerrar(); });''',
+  '''  document.addEventListener("keydown", (e) => { if (cam && e.key === "Escape") cerrar(); });
+  let ultPD = 0;   // v164: el disparo sale al apoyar el dedo (como una cámara de verdad)
+  document.addEventListener("pointerdown", (e) => {
+    if (!cam || !(''' + ON + ''') || (e.button && e.button > 0)) return;
+    const b = e.target && e.target.closest && e.target.closest('#emaCam [data-ec="disparar"]'); if (!b) return;
+    const ec = $("emaCam"); if (ec && ec.classList.contains("ec-cb") && window.__camB && window.__camB.sinObra && window.__camB.sinObra()) return;   // cámara de la barra sin obra: el clic abre «¿En qué obra estás?»
+    ultPD = Date.now(); window.__camUltDisparo = ultPD; disparar();
+  }, true);''')
+R('''  window.__camB = { activa: camB, abrir, resolver, pintar: () => pintar(true),''',
+  '''  window.__camB = { activa: camB, abrir, resolver, pintar: () => pintar(true), sinObra: () => !calc().obra,''')
+# Modo obra: la cámara queda abierta (ráfaga)
+R('''inp.dataset.cat = pa.u.cat; inp.dataset.otra = otra ? "1" : "";''',
+  '''inp.dataset.cat = pa.u.cat; inp.dataset.otra = otra ? "1" : ""; inp.dataset.ecRafaga = ''' + ON + ''' ? "1" : "";''')
+# lo pesado de la foto espera ~1 s sin tocar el disparador; la hora de la columna es la del disparo
+R('''    const src = intentar(() => URL.createObjectURL(f), "");
+    const meta = { plazaId:''',
+  '''    const rafaga = ''' + ON + ''' && inp.dataset.ecRafaga === "1"; inp.value = "";
+    if (''' + ON + ''' && window.__fotoQuieto) await window.__fotoQuieto();   // v164: nada pesado al lado del toque
+    const src = intentar(() => URL.createObjectURL(f), "");
+    const meta = { plazaId:''')
+R('''const t0 = (window.__tiempoCol && !window.__v157No) ? window.__tiempoCol.ahora() : Date.now(), pe = {''',
+  '''const t0 = ''' + ON + ''' && !window.__tcAhora && f.lastModified ? f.lastModified : (window.__tiempoCol && !window.__v157No) ? window.__tiempoCol.ahora() : Date.now(), pe = {''')
+R('''    pintar(true);
+    const gps = intentar(() => !!(window.__fotoGpsVivo && window.__fotoGpsVivo()), false) || !!S.pos;
+    hojaFoto(o, { src: s.mini || src, num, tarea: primero(p.label), gps, enEspera: enEspera, cuenta, pe: pe.id, tc });
+  }''',
+  '''    const gps = intentar(() => !!(window.__fotoGpsVivo && window.__fotoGpsVivo()), false) || !!S.pos;
+    const info = { src: s.mini || src, num, tarea: primero(p.label), gps, enEspera: enEspera, cuenta, pe: pe.id, tc };
+    if (rafaga && $("emaCam")) {   // v164: con la cámara abierta, «Foto guardada» sale al cerrarla (Listo / ✕)
+      S.hojaPend = { id: o.id, info };
+      if (!S.obsRafaga) { S.obsRafaga = 1; new MutationObserver(() => { if (!S.hojaPend || $("emaCam")) return; const h = S.hojaPend; S.hojaPend = null; const o2 = otDe(h.id); pintar(true); if (o2) hojaFoto(o2, h.info); }).observe(document.body, { childList: true }); }
+      try { window.__fotoAlToque && window.__fotoAlToque.enCamara(info); } catch (e) { }
+      return;
+    }
+    pintar(true);
+    hojaFoto(o, info);
+  }''')
+# cámara de la barra: lo pesado también espera
+R('''  async function guardarLibre(file, el) {''',
+  '''  async function guardarLibre(file, el) {
+    if (''' + ON + ''' && window.__fotoQuieto) await window.__fotoQuieto();   // v164: nada pesado al lado del toque''')
+
+# el clic que sigue al toque del disparador (la foto ya salió en el pointerdown) no despierta a nadie: atrás, la barra de abajo
+# y otros revisaban toda la página con cada clic (100–300 ms con el celu lento, justo entre foto y foto). Va en el primer script.
+R('''  window.__relojitosAhorro = { original: orig, minimoEscondida: ESCONDIDA_MS };''',
+  '''  window.__relojitosAhorro = { original: orig, minimoEscondida: ESCONDIDA_MS };
+  document.addEventListener("click", function (e) {
+    if (window.__v164No || !(Date.now() - (window.__camUltDisparo || 0) < 1500)) return;
+    var t = e.target; if (!t || !t.closest || !t.closest('#emaCam [data-ec="disparar"]')) return;
+    e.stopImmediatePropagation(); e.preventDefault();
+  }, true);''')
+# Mis tareas no se redibuja detrás de la cámara (al cerrarla, sí)
+R('''    M(ot, patch), A();
+    return true;''',
+  '''    M(ot, patch); if (!(''' + ON + ''' && window.__trasCamara && window.__trasCamara("mt", A))) A();   // v164: con la cámara abierta, al cerrarla
+    return true;''')
 
 # ============================================================================== 8) el módulo
 MOD = open(os.path.join(SRC, 'fotosAlToque.html'), encoding='utf-8').read()

@@ -3,6 +3,7 @@
 #fnFila{position:absolute;z-index:3;left:0;right:0;bottom:calc(108px + env(safe-area-inset-bottom,0px));background:#05060ad9;padding:8px 10px 6px}
 #emaCam.fn-on #ecMarca{top:calc(64px + env(safe-area-inset-top,0px)) !important;bottom:auto !important}
 #emaCam.fn-on .ec-borrar-ult{left:auto;right:12px;bottom:calc(292px + env(safe-area-inset-bottom,0px))}
+#emaCam.fn-on .fb-cam{top:auto;bottom:calc(298px + env(safe-area-inset-bottom,0px));left:12px;transform:none;max-width:52%}
 #emaCam.fn-on .ec-aviso{top:calc(118px + env(safe-area-inset-top,0px))}
 #emaCam.fn-on .cd-guia{top:calc(112px + env(safe-area-inset-top,0px));bottom:285px}
 .fn-num{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 0 6px}
@@ -26,6 +27,8 @@
 .fn-form{display:flex}
 .fn-form input{flex:1 1 auto;min-width:0;margin:0 8px 0 0;min-height:48px;font-size:16px}
 .fn-form button{flex:none;width:auto;margin:0;min-height:48px;padding:0 18px}
+#emaCam.fn-rafaga .ec-lado{display:none}
+#emaCam .cb-listo b{color:#34C759;font-size:22px;line-height:1}
 #ecFlash{position:absolute;left:0;top:0;right:0;bottom:0;z-index:4;background:#fff;opacity:0;pointer-events:none}
 #ecFlash.on{animation:ecFlash .22s ease-out}
 @keyframes ecFlash{0%{opacity:.75}100%{opacity:0}}
@@ -69,7 +72,14 @@
   let ultDisparo = 0, ultToque = 0;
   document.addEventListener("pointerdown", (e) => { ultToque = Date.now(); if (e.target && e.target.closest && e.target.closest('#emaCam [data-ec="disparar"]')) ultDisparo = Date.now(); }, true);
   document.addEventListener("click", (e) => { if (e.target && e.target.closest && e.target.closest('#emaCam [data-ec="disparar"]')) ultDisparo = Date.now(); }, true);
-  const libre = () => document.hidden || (Date.now() - ultDisparo > 600 && Date.now() - ultToque > 200);
+  const QUIETO_MS = 1500;   // después de cada disparo, nada pesado durante 1,5 s (a confirmar): con fotos seguidas, se guardan al parar
+  const ultD = () => Math.max(ultDisparo, window.__camUltDisparo || 0);
+  const libre = () => document.hidden || (Date.now() - ultD() > QUIETO_MS && Date.now() - ultToque > 200);
+  // lo pesado de cada foto espera a que pase ~1 s sin tocar el disparador (y a un hueco del hilo)
+  window.__fotoQuieto = () => new Promise((ok) => {
+    const mirar = () => { const f = QUIETO_MS - (Date.now() - ultD()); if (f > 0 && !document.hidden) return setTimeout(mirar, Math.min(f + 20, 400)); if (typeof window.requestIdleCallback == "function") window.requestIdleCallback(() => ok(), { timeout: 300 }); else setTimeout(ok, 16); };
+    mirar();
+  });
   window.__fotoLibre = libre;
   // de a una: el sello pide el turno; la base lo suelta apenas la ficha está escrita (la imagen sube mientras sigue la otra)
   const TU = { ocupado: false, esperan: [], n: 0 };
@@ -214,13 +224,19 @@
     if (!cam || !inp || inp.id !== "cdFotoIn" || cam.__fn) return;
     cam.__fn = 1;
     const o = otDe(inp.dataset.ot); if (!o) return;
+    if (inp.dataset.ecRafaga === "1") { cam.classList.add("fn-rafaga"); const ab = cam.querySelector(".ec-abajo"); if (ab && !ab.querySelector('[data-fn="listo"]')) ab.insertAdjacentHTML("beforeend", '<button type="button" class="cb-listo" data-fn="listo" aria-label="Listo, salir de la cámara"><b aria-hidden="true">✓</b><span>Listo</span></button>'); }
     NM = { ot: o.id, inp, k0: inp.dataset.k || "", k: inp.dataset.k || "", cat: inp.dataset.cat || "otra", num: pideNum(inp.dataset.cat) ? inp.dataset.fln || "" : "", lbl: (tareasDe(o).find((x) => x.k === inp.dataset.k) || {}).label || "", suelta: false, otro: "", manual: false };
     inp.dataset.fnSuelta = "";
     const s = STK[o.id];
     if (s && Date.now() - s.ts < 30 * 60000 && (s.cat !== NM.cat || s.cat === "otra")) { elegir(s.cat, { otro: s.otro }); setTimeout(() => NM && NM.inp === inp && aplicar(), 160); }
     else pintar();
   }
-  new MutationObserver(() => { const c = $("emaCam"); if (c && !c.__fn) alAbrir(); if (!c && NM) { NM = null; } }).observe(document.body, { childList: true });
+  new MutationObserver(() => {
+    const c = $("emaCam");
+    if (c && !$("ecFlash")) { const f = document.createElement("div"); f.id = "ecFlash"; f.setAttribute("aria-hidden", "true"); c.appendChild(f); }   // listo de antes (el toque no agrega nada a la página)
+    if (c && !c.__fn) alAbrir(); if (!c && NM) { NM = null; }
+    if (!c) soltarSnaps();
+  }).observe(document.body, { childList: true });
 
   // «Otro…»: teclado chico con lo último escrito (dentro de la cámara, sin ir a otra pantalla)
   function abrirOtro() {
@@ -245,9 +261,10 @@
     const rc = t.closest("[data-fnorec]"); if (rc) { e.preventDefault(); e.stopPropagation(); return usarOtro(rc.dataset.fnorec); }
     const x = t.closest('[data-fno="x"]'); if (x) { e.preventDefault(); e.stopPropagation(); const d = $("fnOtro"); d && d.remove(); return; }
     if (t.id === "fnOtro") { e.preventDefault(); e.stopPropagation(); t.remove(); return; }
+    if (t.closest('[data-fn="listo"]')) { e.preventDefault(); e.stopPropagation(); return void intentar(() => CA().cerrar(true), null); }
     if (!NM) return;
     const c = t.closest("[data-fncat]"); if (c) { e.preventDefault(); e.stopPropagation(); return elegir(c.dataset.fncat, { manual: true }); }
-    const f = t.closest("[data-fn]"); if (f) { e.preventDefault(); e.stopPropagation(); mover1(f.dataset.fn === "next" ? 1 : -1); if (NM) { NM.manual = true; } }
+    const f = t.closest("[data-fn]"); if (f) { e.preventDefault(); e.stopPropagation(); if (f.dataset.fn === "listo") return void intentar(() => CA().cerrar(true), null); mover1(f.dataset.fn === "next" ? 1 : -1); if (NM) { NM.manual = true; } }
   }, true);
   document.addEventListener("submit", (e) => { const f = e.target; if (!f || !f.closest || !f.closest("#fnOtro")) return; e.preventDefault(); usarOtro(($("fnOtroIn") || {}).value); }, true);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("fnOtro")) { e.stopPropagation(); $("fnOtro").remove(); } }, true);
@@ -276,7 +293,7 @@
   function entregar(inp, f) { try { const dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; inp.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) { console.warn("[v164] cámara", e); } }
   async function camDisp(cam, h) {
     if (!cam) return;
-    const t0 = Date.now(), seguir = cam.inp && cam.inp.dataset.ecSeguir === "1";
+    const t0 = Date.now(), rafaga = !!(cam.inp && cam.inp.dataset.ecRafaga === "1"), seguir = rafaga || (cam.inp && cam.inp.dataset.ecSeguir === "1");
     if (cam.tomada) { DISP.ignorados++; return; }   // Modo obra: ya la sacó, se está cerrando
     destello();
     let v = h.$("ecVideo");
@@ -288,32 +305,130 @@
       if (!ok) return h.avisoCam("La cámara no muestra imagen. Tocá ✕ y abrila de nuevo, o usá la del teléfono (📱).", true);
       h.avisoCam(""); v = h.$("ecVideo"); destello();
     }
-    // el cuadro se copia YA (lo que se ve al tocar), a 1024 px como la foto final
-    const k = Math.min(1, 1024 / Math.max(v.videoWidth, v.videoHeight));
-    const cv = document.createElement("canvas"); cv.width = Math.round(v.videoWidth * k); cv.height = Math.round(v.videoHeight * k);
-    const c = cv.getContext("2d"); if (cam.facing === "user") { c.translate(cv.width, 0); c.scale(-1, 1); }
-    c.drawImage(v, 0, 0, cv.width, cv.height);
+    // el cuadro se toma YA (lo que se ve al tocar), a 1024 px como la foto final. Con Worker + OffscreenCanvas (Chrome 69+) el
+    // dibujo y el JPEG se hacen fuera del hilo de la pantalla; si no, como antes (canvas + toBlob, que Chrome arma de a pedazos)
+    const k = Math.min(1, 1024 / Math.max(v.videoWidth, v.videoHeight)), W2 = Math.round(v.videoWidth * k), H2 = Math.round(v.videoHeight * k), espejo = cam.facing === "user";
+    // el destello se dibuja primero; el cuadro se toma en la tarea siguiente (16–33 ms después: la cámara da 15–30 cuadros por segundo)
+    let cv = null;
+    const despuesDelDestello = (fn) => new Promise((ok) => requestAnimationFrame(() => setTimeout(() => ok(fn()), 0)));
+    // createImageBitmap(video) entero (≈ 25 ms con CPU ×6; con «resize» lo hace en el hilo: 130–165 ms) y lo achica el Worker
+    let bmP = OFF.ok() ? despuesDelDestello(() => createImageBitmap(v).catch(() => null)) : null;
+    if (!bmP) await despuesDelDestello(() => { cv = document.createElement("canvas"); cv.width = W2; cv.height = H2; const c = cv.getContext("2d"); if (espejo) { c.translate(W2, 0); c.scale(-1, 1); } c.drawImage(v, 0, 0, W2, H2); });
     const ahora = Date.now(), pos = cam.pos, ctx = Object.assign({}, cam.ctx), inp = cam.inp;
+    const ds = rafaga ? { fln: inp.dataset.fln || "", k: inp.dataset.k || "", cat: inp.dataset.cat || "", fnSuelta: inp.dataset.fnSuelta || "" } : null;   // lo que dice ESTA foto
     DISP.n++;
-    if (!seguir) { cam.tomada = true; h.cerrar(true); }   // Modo obra: la cámara se va al toque (queda tibia para «Sacar otra»)
-    const blob = await new Promise((ok) => { try { cv.toBlob(ok, "image/jpeg", 0.92); } catch (e) { ok(null); } });
+    if (rafaga && NM && NM.inp === inp) requestAnimationFrame(() => setTimeout(() => avanzar(ds), 0));   // la fila pasa a la columna siguiente (después del destello)
+    let blob = null, mini = "";
+    if (bmP) {
+      if (!seguir) cam.tomada = true;
+      const bm = await bmP;
+      const r = bm ? await OFF.armar(bm, W2, H2, espejo) : null;   // el cuadro pasa al Worker (sin copiarlo)
+      if (r && r.blob) { blob = r.blob; mini = r.mini ? await aDataUrl(r.mini).catch(() => "") : ""; }
+      else {   // el Worker no pudo: con el canvas de siempre (del cuadro, si quedó, o del video)
+        const src = bm && bm.width ? bm : h.$("ecVideo");
+        if (src && (src.width || src.videoWidth)) { cv = document.createElement("canvas"); cv.width = W2; cv.height = H2; const c = cv.getContext("2d"); if (espejo) { c.translate(W2, 0); c.scale(-1, 1); } c.drawImage(src, 0, 0, W2, H2); }
+      }
+      try { bm && bm.close(); } catch (e) { }
+      if (!seguir) h.cerrar(true);   // Mis tareas / foto suelta: la cámara se va (queda tibia)
+    } else if (!seguir) { cam.tomada = true; h.cerrar(true); }
+    if (!blob && cv) { blob = await new Promise((ok) => { try { cv.toBlob(ok, "image/jpeg", 0.92); } catch (e) { ok(null); } }); try { mini = chica(cv, W2, H2, 72, 3000); } catch (e) { } }
     if (!blob) { if (h.actual() === cam) { cam.tomada = false; h.avisoCam("No se pudo sacar la foto: probá de nuevo.", true); } return; }
     if (pos) try { window.selloPonerGPS && window.selloPonerGPS(pos); } catch (e) { }
     const f = new File([blob], `EMA_${new Date(ahora).toISOString().replace(/[-:T]/g, "").slice(0, 14)}.jpg`, { type: "image/jpeg", lastModified: ahora });
-    try { const k2 = Object.keys(MINIS); if (k2.length > 30) delete MINIS[k2[0]]; MINIS[claveMini(f)] = chica(cv, cv.width, cv.height, 72, 3000); } catch (e) { }   // la miniatura para la oficina, del mismo cuadro (sin volver a abrir la foto)
-    try { window.__camDisparo && window.__camDisparo(f, { plaza: ctx.plaza, que: ctx.que, quien: ctx.quien, pos }); } catch (e) { }
+    try { const k2 = Object.keys(MINIS); if (k2.length > 30) delete MINIS[k2[0]]; if (mini) MINIS[claveMini(f)] = mini; } catch (e) { }   // la miniatura para la oficina, del mismo cuadro (sin volver a abrir la foto)
+    // la miniatura de «la última» (misFotos) y lo demás, cuando el dedo se queda quieto
+    const avisarCam = () => { try { window.__camDisparo && window.__camDisparo(f, { plaza: ctx.plaza, que: ctx.que, quien: ctx.quien, pos }); } catch (e) { } };
+    if (seguir) window.__fotoQuieto().then(avisarCam); else avisarCam();
     DISP.ms.push(Date.now() - t0); if (DISP.ms.length > 20) DISP.ms.shift();
-    if (seguir && h.actual() === cam) { cam.foto = f; const bu = document.querySelector('#emaCam [data-ec="usar"]'); bu ? bu.click() : h.usar(); }
+    if (rafaga) entregarCon(inp, f, ds);   // Modo obra con la cámara abierta: con lo que decía al disparar
+    else if (seguir && h.actual() === cam) { cam.foto = f; const bu = document.querySelector('#emaCam [data-ec="usar"]'); bu ? bu.click() : h.usar(); }
     else entregar(inp, f);   // con la cámara ya cerrada, la foto llega igual (nunca se pierde)
   }
+  function entregarCon(inp, f, ds) {
+    const ahora = { fln: inp.dataset.fln || "", k: inp.dataset.k || "", cat: inp.dataset.cat || "", fnSuelta: inp.dataset.fnSuelta || "" };
+    Object.assign(inp.dataset, ds); entregar(inp, f); Object.assign(inp.dataset, ahora);
+  }
+  // dibujar y armar el JPEG fuera del hilo de la pantalla (si el celu puede); si algo falla, se apaga y sigue con el canvas
+  const OFF = (() => {
+    let w = null, roto = !!window.__anSinWorker, n = 0; const esperan = {};
+    const COD = "onmessage=async function(e){var d=e.data;try{var oc=new OffscreenCanvas(d.w,d.h),c=oc.getContext('2d');if(d.espejo){c.translate(d.w,0);c.scale(-1,1);}c.drawImage(d.bm,0,0,d.w,d.h);var b=await oc.convertToBlob({type:'image/jpeg',quality:0.92});var k=Math.min(1,72/Math.max(d.w,d.h)),mw=Math.max(1,Math.round(d.w*k)),mh=Math.max(1,Math.round(d.h*k));var o2=new OffscreenCanvas(mw,mh),c2=o2.getContext('2d');c2.drawImage(oc,0,0,mw,mh);var m=await o2.convertToBlob({type:'image/jpeg',quality:0.7});try{d.bm.close();}catch(x){}postMessage({id:d.id,blob:b,mini:m});}catch(er){postMessage({id:d.id,err:String(er&&er.message||er)});}};";
+    const ok = () => !roto && typeof createImageBitmap == "function" && typeof OffscreenCanvas == "function" && typeof Worker == "function" && typeof Blob == "function";
+    function trabajador() {
+      if (w) return w;
+      try { w = new Worker(URL.createObjectURL(new Blob([COD], { type: "text/javascript" }))); w.onmessage = (e) => { const d = e.data || {}, r = esperan[d.id]; if (!r) return; delete esperan[d.id]; r(d.err ? null : d); }; w.onerror = () => { roto = true; Object.keys(esperan).forEach((k) => { esperan[k](null); delete esperan[k]; }); }; }
+      catch (e) { roto = true; w = null; }
+      return w;
+    }
+    function armar(bm, W2, H2, espejo) {
+      return new Promise((res) => {
+        const t = trabajador(); if (!t) return res(null);
+        const id = ++n; let listo = false; const fin = (x) => { if (listo) return; listo = true; res(x); };
+        esperan[id] = fin; setTimeout(() => { if (!listo) { roto = true; delete esperan[id]; fin(null); } }, 8000);
+        try { t.postMessage({ id, bm, w: W2, h: H2, espejo }, [bm]); } catch (e) { roto = true; delete esperan[id]; fin(null); }
+      });
+    }
+    return { ok, armar, estado: () => ({ roto, worker: !!w }) };
+  })();
   window.__camDisp164 = camDisp;
+  // Modo obra en ráfaga: después de cada foto, la columna que sigue (sin foto y sin sacar en esta ráfaga)
+  function avanzar(ds) {
+    if (!NM || !NM.inp) return;
+    (NM.hechas = NM.hechas || {})[nk(ds.k) + "|" + nk(ds.fln)] = 1;
+    if (NM.suelta || NM.cat === "otra" || !pideNum(NM.cat) || nk(NM.num) !== nk(ds.fln)) return;
+    const o = otDe(NM.ot), u = o && uniDe(o, NM.k); if (!u || u.tipo !== "unidad") return;
+    const ya = (x) => NM.hechas[nk(NM.k) + "|" + nk(x.num)];
+    const i = u.items.findIndex((x) => nk(x.num) === nk(NM.num));
+    const sig = u.items.slice(i + 1).find((x) => !x.foto && !x.paso && !ya(x)) || u.items.find((x) => !x.foto && !x.paso && !ya(x));
+    if (sig) { NM.num = sig.num; aplicar(); }
+  }
+  // el cartelito adentro de la cámara («✓ Col 1 · subiendo…»), sin tapar ni frenar
+  function enCamara(info) {
+    const e = document.querySelector("#emaCam #ecAviso"); if (!e) return;
+    e.textContent = "✓ " + [info.num, info.tarea].filter(Boolean).join(" · ") + " guardada · subiendo…"; e.hidden = false; e.classList.remove("mal");
+    clearTimeout(enCamara.t); enCamara.t = setTimeout(() => { e.hidden = true; }, 1600);
+  }
   // (C) la cámara abre al toque: se prende al apoyar el dedo en «Foto» (Modo obra) o en la cámara de la barra
   document.addEventListener("pointerdown", (e) => {
     const t = e.target; if (!t || !t.closest) return;
     if (t.closest('#cdApp [data-cd="boton"][data-fase="foto"], #cdHoja [data-cdh="otra"], #navN1 [data-n1="camara"]')) intentar(() => CA().precalentar && CA().precalentar(), null);
   }, true);
 
-  window.__fotoAlToque = { nuevoAdj, minisDe, miniDe, pre, anunciar, antes, medidas: () => MED.slice(), libre, disparos: () => JSON.parse(JSON.stringify(DISP)) };
+  // ------------------------------------------------------------------ con la cámara abierta, la base no redibuja lo de atrás
+  // Cada escritura (la foto en la orden, la ficha…) hace que la base avise a todas las escuchas de este celu, y la app redibuja
+  // Mis tareas, el Inicio, el título, los avisos… detrás de la cámara (tareas de 100–600 ms con el celu lento, justo entre
+  // foto y foto). Con la cámara abierta, cada escucha guarda solo el ÚLTIMO aviso y lo entrega al cerrarla (o con 4 s sin tocar
+  // nada). El primer aviso de cada escucha pasa siempre.
+  const SNAP = new Map(); let snapT = null;
+  const camAbierta = () => !!(document.body && document.body.classList.contains("ec-abierta") && $("emaCam"));
+  const TRAS = new Map();
+  function trasCamara(clave, fn) { if (!camAbierta()) { fn(); return false; } TRAS.set(clave, fn); return true; }
+  window.__trasCamara = trasCamara;
+  function soltarSnaps() {
+    if (!camAbierta() && TRAS.size) { const l = Array.from(TRAS.values()); TRAS.clear(); l.forEach((fn) => { try { fn(); } catch (e) { console.warn("[v164] al cerrar", e); } }); } clearTimeout(snapT); snapT = null; if (!SNAP.size) return; const l = Array.from(SNAP.values()); SNAP.clear(); l.forEach((run) => { try { run(); } catch (e) { console.warn("[v164] escucha", e); } }); }
+  function vigiaSnaps() { clearTimeout(snapT); snapT = setTimeout(() => { if (!SNAP.size) return; if (camAbierta() && (Date.now() - ultToque < 4000 || Date.now() - ultD() < 4000)) return vigiaSnaps(); soltarSnaps(); }, 1000); }
+  window.__snapRetener = (clave, run) => { if (!camAbierta() || document.hidden) return false; SNAP.set(clave, run); vigiaSnaps(); return true; };
+  (function envolverSdk() {
+    try {
+      const F = window.firebase && firebase.firestore; if (!F || !F.Query || !F.DocumentReference) return;
+      const env = (proto) => {
+        const o = proto && proto.onSnapshot; if (typeof o != "function" || o.__v164) return;
+        const n = function () {
+          const args = Array.prototype.slice.call(arguments), clave = {}; let primera = true;
+          const pasar = (f, ctx, ar) => { if (primera) { primera = false; return f.apply(ctx, ar); } if (window.__snapRetener(clave, () => f.apply(ctx, ar))) return; return f.apply(ctx, ar); };
+          for (let i = 0; i < args.length; i++) {
+            const a = args[i];
+            if (typeof a == "function") { args[i] = function () { return pasar(a, this, arguments); }; break; }
+            if (a && typeof a.next == "function") { const nx = a.next; args[i] = Object.assign({}, a, { next: function () { return pasar(nx, a, arguments); }, error: a.error && a.error.bind(a), complete: a.complete && a.complete.bind(a) }); break; }
+          }
+          return o.apply(this, args);
+        };
+        Object.keys(o).forEach((k) => { n[k] = o[k]; }); n.__v164 = 1; proto.onSnapshot = n;
+      };
+      env(F.Query.prototype); env(F.DocumentReference.prototype); if (F.CollectionReference) env(F.CollectionReference.prototype);
+    } catch (e) { console.warn("[v164] escuchas", e); }
+  })();
+
+  window.__fotoAlToque = { nuevoAdj, minisDe, miniDe, pre, anunciar, antes, medidas: () => MED.slice(), libre, disparos: () => JSON.parse(JSON.stringify(DISP)), enCamara, snapsRetenidos: () => SNAP.size, soltarSnaps, worker: () => OFF.estado(), trasCamara };
   window.__fotoNombre = { filaCb, elegir: (c, op) => NM && elegir(c, op), estado: () => (NM ? { cat: NM.cat, num: NM.num, k: NM.k, suelta: NM.suelta, otro: NM.otro } : null), recientes, abrirOtro, usarOtro };
 })();
 </script>
