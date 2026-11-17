@@ -1,0 +1,15 @@
+/* v166 · Mis tareas (la lista): «▶ Voy a iniciar esta tarea» / «En marcha» en la cabecera y el tiempo de cada columna en su fila */
+.vim-cab{margin:0 0 8px}
+.vim-cab .vim-go{display:block;width:100%;min-height:56px;margin:0;padding:8px 16px;border:0;border-radius:18px;background:linear-gradient(135deg,#1f9d4c,#34c759);color:#fff;font:800 18px/1.15 var(--fuente,inherit);cursor:pointer;box-shadow:0 6px 16px rgba(31,157,76,.26);text-transform:uppercase;letter-spacing:.2px}
+.vim-cab.on{display:flex;align-items:center;padding:10px 12px;border-radius:16px;background:#e9f7ee;border:1px solid rgba(52,199,89,.40);color:#14532d;font:700 15px var(--fuente,inherit)}
+.vim-cab.on span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.fl-fila.hecha{flex-wrap:wrap}
+.vim-t{flex:1 1 100%;min-width:0;width:100%}
+.vim-t .tc-linea{margin:4px 0 2px;padding:6px 10px;font-size:14px}
+.vim-t .tc-linea .tc-cb{min-height:44px}
+.vim-cab .vim-go{text-transform:none;font-size:19px}
+.vim-cab.on b{display:block;font-weight:800}
+.vim-cab.on small{display:block;font-weight:600;font-size:13px;color:#166534;margin-top:2px}
+.vim-t .tc-linea .vim-h{display:block;font:600 13px var(--mono,monospace);color:var(--text-soft,#475569);margin-top:1px}
+.fl-fila.sig{flex-wrap:wrap}
+.vim-corre{flex:1 1 100%;margin:2px 0 0;color:var(--text-soft,#475569);font:600 13px var(--fuente,inherit)}
