@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v169 — 18/11/2026 (armada, sin publicar) · «🔧 Armadas» con su propio subíndice en el Pañol
+## v169 — 18/11/2026 (publicada en GitHub 18/11) · «🔧 Armadas» con su propio subíndice en el Pañol
 **Pedido (Ángel, 18/11):** «eso tiene que tener su propio subíndice, no dentro de pañol (el catálogo)» (la tarjeta «🔧 Luminarias armadas» de la v168 estaba dentro de Pañol › Catálogo pañol).
 
 **Qué cambia:**
