@@ -142,7 +142,7 @@
     intentar(() => A.redibujar());
   }
   window.addEventListener("change", (e) => {
-    const t = e.target; if (off() || !t || !t.dataset || t.dataset.mto171 !== "1" || !t.files || !t.files[0]) return;
+    const t = e.target; if (off() || !t || !t.dataset || t.dataset.mto171 !== "1" || !t.files || !t.files[0]) return;   // solo su input (con la cámara abierta no llega nada más)
     const P = pendiente() || (() => { const tr = t.closest(".mt-tarea[data-k]"), cd = t.closest(".mt-ot[data-ot]"); return tr && cd ? { ot: cd.dataset.ot, k: tr.dataset.k, label: "", cat: "otra", num: t.dataset.fln || "Otra", real: false, ts: Date.now() } : null; })();
     S.pend = null; try { localStorage.removeItem(KPEND); } catch (x) { }
     if (!P) return;
@@ -153,8 +153,9 @@
   }, true);
 
   // ------------------------------------------------------------------ toques
+  const camAbierta = () => !!(document.body && document.body.classList.contains("ec-abierta"));   // con la cámara abierta no hace nada (como la v164)
   document.addEventListener("click", (e) => {
-    const t = e.target; if (off() || !t || !t.closest) return;
+    const t = e.target; if (off() || camAbierta() || !t || !t.closest) return;
     const b = t.closest('#mtApp [data-mto="abrir"]');
     if (b) {
       const tr = b.closest(".mt-tarea[data-k]"), cd = b.closest(".mt-ot[data-ot]"); if (!tr || !cd) return;
