@@ -5,7 +5,7 @@ set -e
 cd "$(dirname "$0")"; SAL=${SAL:-..}; mkdir -p "$SAL/_tmp"
 P=/usr/bin/python3
 $P armar.py "$SAL/_tmp/manual.docx" todo
-$P actualizar.py "$SAL/_tmp/manual.docx" "$SAL/Manual_de_uso_App_Alumbrado_EMA_v147" odt,docx,pdf
+$P actualizar.py "$SAL/_tmp/manual.docx" "$SAL/Manual_de_uso_App_Alumbrado_EMA_v168" odt,docx,pdf
 for r in cuadrilla:Manual_Cuadrilla panol:Manual_Panol oficina:Manual_Oficina admin:Manual_Administracion; do
   $P armar.py "$SAL/_tmp/${r%%:*}.docx" "${r%%:*}"
   $P actualizar.py "$SAL/_tmp/${r%%:*}.docx" "$SAL/${r##*:}" pdf

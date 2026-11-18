@@ -34,7 +34,7 @@ def main():
             filtro = {'odt': 'writer8', 'docx': 'MS Word 2007 XML', 'pdf': 'writer_pdf_Export'}[f]
             props = [pv('FilterName', filtro), pv('Overwrite', True)]
             if f == 'pdf':
-                props.append(pv('FilterData', uno.Any('[]com.sun.star.beans.PropertyValue', tuple([pv('ExportBookmarks', True), pv('Quality', 88), pv('ReduceImageResolution', True), pv('MaxImageResolution', 200), pv('UseTaggedPDF', True)]))))
+                props.append(pv('FilterData', uno.Any('[]com.sun.star.beans.PropertyValue', tuple([pv('ExportBookmarks', True), pv('Quality', 82), pv('ReduceImageResolution', True), pv('MaxImageResolution', 150), pv('UseTaggedPDF', True)]))))
             doc.storeToURL(uno.systemPathToFileUrl(sal + '.' + f), tuple(props)); print('ok', sal + '.' + f)
         doc.close(True)
     finally:

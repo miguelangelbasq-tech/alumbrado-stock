@@ -93,7 +93,7 @@ def primeros(A, modo):
     A.p('El número rojo sobre un botón avisa que hay algo pendiente (por ejemplo, órdenes para cerrar o reservas por preparar). En la oficina y el pañol la barra se puede guardar con la flechita **‹** de la derecha: queda una lengüeta en el borde izquierdo para volver a sacarla. A la cuadrilla la barra le queda siempre fija.')
     A.img('pp_barra', 'La barra de abajo de la oficina, con el número de órdenes para cerrar', ancho=11)
     A.p('Todo lo demás está en el **menú**: las tres rayitas arriba a la izquierda. Ahí aparecen solo las pantallas que tu usuario puede usar. Arriba dice con qué usuario entraste y su rol, y está **Cerrar sesión**. Al pie del menú está **Versión …**.')
-    A.cel(('pp_menu', 'El menú (oficina)'), ('pp_menu_version', 'Al pie: «Versión …»'), ('pp_inicio_ofi_cel', 'Inicio de la oficina en el celu'))
+    A.cel(('pp_menu', 'El menú (oficina)'), ('pp_menu_version', 'Al pie: «Versión …»'), ('p10_inicio_cel', 'Inicio de la oficina en el celu'))
 
     A.h(2, 'Qué ve cada uno')
     A.p('Lo decide Administración en **Usuarios y permisos**. Los roles son:')
@@ -210,7 +210,7 @@ def parte1(A, modo):
         '**Programación** de cada obra: a tiempo, en riesgo, atrasada o terminada, con la fecha prevista (la del Gantt o la estimada) y la fecha a este ritmo. Pestañas **Semáforo** (en la compu además material, fotos y papeles), **Pistas** y **Calendario**.',
         '**Plata**: el último mes certificado, el borrador del mes, lo acumulado y el margen; el material entregado contra el usado.',
     ])
-    A.cel(('p10_inicio_cel', 'El Inicio en el celu'), ('n155_dir_calendario_cel', 'Programación › Calendario'), ('n155_dir_clima_cel', 'Clima contra lo planeado'))
+    A.cel(('p10_inicio_cel_2', 'Más abajo en el celu'), ('n155_dir_calendario_cel', 'Programación › Calendario'), ('n155_dir_clima_cel', 'Clima contra lo planeado'))
     A.h(3, 'Ver el Inicio de antes')
     A.p('Al pie está **Ver el Inicio de antes**: muestra el Inicio «Ejecutivo» anterior, con **‹ Volver al Inicio nuevo** arriba. La próxima vez que abrís la app vuelve a salir el nuevo.')
 
@@ -276,7 +276,7 @@ def parte1(A, modo):
         'Los PDF pueden ser de hasta 25 MB.',
         'Como las fotos, quedan en el celu hasta que suben y se reintentan solos.',
     ])
-    A.img('n160_legajo_pc', 'Videos y PDF en el legajo')
+    A.img('n160_legajo_videos_pc', 'Videos y PDF en el legajo')
     A.atencion('Los videos y los PDF grandes necesitan el servidor de fotos actualizado. Si no, la app avisa «falta actualizar el servidor de fotos» y el PDF sigue con el tope de antes (650 KB). El espacio gratis de la nube se llena rápido con videos: usalos para lo que hace falta.')
 
     A.h(3, 'Mayúsculas prolijas')
@@ -470,7 +470,7 @@ def parte1(A, modo):
         'Si no: elegí las columnas (todas, o **desde** / **hasta**) y los pasos hechos (**Todo** o los atajos civil / izaje), y lo que no va por columna (zanja, cable, tablero…) con su cantidad.',
         'El motivo viene escrito («Puesta al día del avance»); cambialo si querés. Mirá el resumen antes → después y tocá **Sí, marcar**.',
     ])
-    A.img('n163_puesta_pc', 'Poner al día una obra')
+    A.img('p10_puesta', 'Poner al día una obra')
     A.vinetas([
         'Solo suma lo que falta: lo que ya vino de las órdenes no se toca. Después, las órdenes nuevas siguen moviendo el avance encima, sin contar dos veces.',
         'Los papeles (plano conforme, planilla de PAT, certificado, carpeta) no se marcan acá: van por **📄 Documentación**.',
@@ -757,10 +757,10 @@ def parte3(A):
     ])
     A.cel(('cu_08_E_llegue', '«Llegué»'), ('n165_0_modo_obra', 'Modo obra con la tarea que sigue'), ('n165_1_iniciar', '▶ Voy a iniciar esta tarea'))
     A.h(3, '▶ Voy a iniciar esta tarea')
-    A.p('El cartel anota **la hora exacta en que arrancó la tarea** (y su primera columna), para todos los de la orden: a tu compañero ya no le sale. Opciones:')
+    A.p('El cartel pregunta «¿Arrancás con Pozo?» (la tarea que sigue, sus columnas y con quién) y anota **la hora exacta en que arrancó la tarea** (y su primera columna), para todos los de la orden: a tu compañero ya no le sale. Opciones:')
     A.vinetas([
-        '**▶ Voy a iniciar**: anota la hora y abre la cámara de esa tarea.',
-        '**¿Es otra tarea?**: si vas a hacer otra cosa. Las de tu orden están a un toque; si es una que **no estaba en la orden**, elegila con los botones grandes (Pozo, Hormigón, Izaje, Vínculo, Artefacto, Tablerito, Tablero, PAT, Zanja) o **✏ Otra: escribila o decila 🎤**. Le llega a la oficina como «hecho de más», con sus fotos y su hora.',
+        '**▶ Voy a iniciar esta tarea**: anota la hora y abre la cámara de esa tarea. Si te olvidaste de tocarlo al empezar, después corregís la hora con − / +.',
+        '**¿Es otra tarea? Elegila acá**: si vas a hacer otra cosa. Las de tu orden están a un toque; si es una que **no estaba en la orden**, elegila con los botones grandes (Pozo, Hormigón, Izaje, Vínculo, Artefacto, Tablerito, Tablero, PAT, Zanja) o **✏ Otra: escribila o decila 🎤**. Le llega a la oficina como «hecho de más», con sus fotos y su hora.',
         '**Todavía no**: cierra el cartel sin anotar nada.',
     ])
     A.cel(('n165_3_otra_tarea', '¿Es otra tarea?'), ('n165_4_escribir', 'Otra: escribila o decila'))
@@ -772,7 +772,7 @@ def parte3(A):
         'Sacás una foto por columna, sin salir de la cámara. Si te equivocaste de columna, la oficina la corrige (o vos, con **↔ Era de otra columna**).',
         '**✓ Terminé la tarea** cuando terminaste.',
     ])
-    A.cel(('n165_C_camara', 'La cámara de la tarea'), ('n165_8_camara_columnas', 'Elegir la columna'), ('n165_C_camara_fotos', 'Con las fotos sacadas'))
+    A.cel(('n165_C_camara', 'La cámara de la tarea'), ('n165_8_camara_columnas', 'Una felicitación y la lista de columnas'), ('n165_C_camara_fotos', 'Con las fotos sacadas'))
     A.h(3, 'Terminé: el tiempo de cada columna')
     A.p('Al tocar **✓ Terminé la tarea** sale **Así quedó cada columna**: cuánto tardó cada una (el fin es la hora de su foto, el inicio es la columna anterior o el «Voy a iniciar»). Si alguna está mal, corregila con − / +. En las tareas que no van por columna (zanja, tablero…) pregunta **¿Cuánto hicieron?**. Tocá **✓ Listo, mandar**. Abajo aparece la tarea que sigue, con su **▶ Voy a iniciar esta tarea**.')
     A.cel(('n165_2_terminar', 'Así quedó cada columna'), ('n165_6_record', 'Un récord'))
@@ -802,6 +802,7 @@ def parte3(A):
     A.consejo('Usá siempre la cámara de la app, no la del teléfono: Android puede cerrar la app mientras sacás la foto. Igual, si usás la del teléfono desde Mis tareas, la app la recupera.')
     A.h(3, '🎥 Video')
     A.p('**🎥 Video** (en Modo obra, en Mis tareas y en la cámara): elegís la tarea y la columna, tocás **🎥 Grabar** (o **📁 Elegir** uno que ya tenés) y queda en la orden. **Hasta 1 minuto**: el celu lo achica antes de subirlo y tarda lo que dura el video, con la app abierta. Los videos no cuentan como foto de la columna.')
+    A.cel(('n160_cuadrilla_video_cel', '🎥 Video: tarea y columna'), ('n160_video_achicando_cel', 'El celu lo achica'), ('n160_reproductor_cel', 'El reproductor'))
 
     A.h(2, 'Falta material')
     A.p('**Falta material** en Modo obra: tildá lo que falta de la reserva de la orden (con la cantidad) o escribí otra cosa, y tocá **Avisar al pañol y a la oficina**. Les llega el aviso y te avisan cuando esté.')
@@ -829,13 +830,13 @@ def parte3(A):
     A.p('Desde **Ver lista completa de Mis tareas**: tus órdenes en pestañas **Hoy**, **Pendientes** y **Terminadas**, con **Cómo llegar**, **Ver la orden completa**, la seguridad, cada tarea en una tarjeta (‹ ›) con sus fotos fila por fila, «Se hizo» / «No se hizo», y **Tus puntos** arriba.')
     A.p('Acá también se anota el inicio y el tiempo de cada columna:')
     A.vinetas([
-        'Al tocar el primer 📷 (o «Se hizo») de una tarea que no arrancó, sale el mismo cartel **▶ Voy a iniciar esta tarea**. Con **▶ Voy a iniciar** sigue con la cámara de esa fila (la de la app o la del teléfono). Con **Todavía no** sacás la foto sin anotar (y no vuelve a preguntar por 15 minutos).',
+        'Al tocar el primer 📷 (o «Se hizo») de una tarea que no arrancó, sale el mismo cartel **▶ Voy a iniciar esta tarea**. Con **▶ Voy a iniciar esta tarea** sigue con la cámara de esa fila (la de la app o la del teléfono). Con **Todavía no** sacás la foto sin anotar (y no vuelve a preguntar por 15 minutos).',
         'La cabecera de la tarea dice **▶ En marcha desde 08:20 · 24 min** y quiénes la iniciaron.',
         'Cada fila con foto dice «✓ Col 6 lista · 24 min · 08:20 → 08:44», con **cambiar** (− / +). La que sigue dice «⏱ Col 7 corriendo».',
         'Las filas son las columnas que eligió la oficina en la orden.',
         'Al mandar la tarea (**📤 Listo, enviar esta tarea**) sale el resumen por columna. **📤 Mandar lo que hice** manda lo hecho aunque la orden no esté terminada.',
     ])
-    A.cel(('n166_cartel', '«Voy a iniciar» desde Mis tareas'), ('n166_filas', 'El tiempo de cada columna'), ('ps_avisos', 'Aviso que abre la orden'))
+    A.cel(('n166_1_cartel_mis_tareas', '«Voy a iniciar» desde Mis tareas'), ('n166_4_filas_tiempo', 'El tiempo de cada columna'), ('ps_avisos', 'Aviso que abre la orden'))
 
     A.h(2, 'Pañol, mapa y cálculos rápidos')
     A.vinetas(['**Pañol**: el catálogo para ver qué hay (sin cambiar nada).', '**Mapa**: las obras; tocá una para ver dónde está.', '**Cálculos rápidos** (al pie de Hoy): hormigón, zanja, cables, consumo, abrazaderas y caída de tensión.'])
