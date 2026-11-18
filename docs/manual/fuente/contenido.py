@@ -856,6 +856,7 @@ def parte3(A):
         'Las filas son las columnas que eligió la oficina en la orden.',
         'Al mandar la tarea (**📤 Listo, enviar esta tarea**) sale el resumen por columna. **📤 Mandar lo que hice** manda lo hecho aunque la orden no esté terminada.',
     ])
+    A.p('**＋ Otra foto** (abajo de las fotos que te piden, en cada tarea): para sacar una foto de más. Primero te pregunta **¿Qué es la foto?** con los mismos botones de la cámara: **Columna** (con ‹ Col N ›), **Tablero**, **PAT**, **Zanja**, **Acometida** u **Otro…** (lo escribís; lo último que escribiste aparece para tocarlo). Después se abre la cámara. La foto queda en la orden con ese nombre, en **📎 Otras fotos** de la tarea, en Mis fotos y en el legajo; **no cuenta** para las que te piden (si es una columna que la tarea pide, va a su fila). La oficina la ve en el «📸 Avance» debajo de esa tarea y la puede mover.')
     A.cel(('n166_1_cartel_mis_tareas', '«Voy a iniciar» desde Mis tareas'), ('n166_4_filas_tiempo', 'El tiempo de cada columna'), ('ps_avisos', 'Aviso que abre la orden'))
 
     A.h(2, 'Pañol, mapa y cálculos rápidos')
