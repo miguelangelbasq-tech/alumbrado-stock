@@ -2,6 +2,55 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v168 — 18/11/2026 (armada, sin publicar) · Luminarias armadas (pañol)
+**Pedido (Ángel, 18/11):** «tenemos una obra que usamos como depósito que se llama deposito luminarias… del depósito sacamos artefacto, prensacable y cable, armamos el artefacto armado con el prensacable adentro y el cable… la idea es tener stock de ya armadas para no perder tiempo… necesitamos que luego salga a una obra… es como un movimiento interno pero no podemos perder el registro porque sale del pañol pero no sale de la empresa y aparte necesitamos que sea algo rápido para mover las armadas a la plaza que lo necesite». Eligió la «Idea 1 + 2» y aprobó las maquetas (Receta · Pañol › Armadas · Armar · Comprobante · Llevar a obra).
+
+**Qué cambia (Pañol › Catálogo pañol, tarjeta «🔧 Luminarias armadas»; quien edita el pañol: admin, oficina, pañol):**
+- **Receta** («＋ Nueva armada» / «Ver o cambiar la receta»): nombre, **código del pañol que elige la persona** (la app propone el siguiente libre de la familia 6 en x001–x499 con un botón «Usar 60NN», no lo pone sola, y rechaza un código usado en el catálogo, en movimientos, en cálculos, en reservas, los códigos de barrio movidos y los x500–x999), unidad Un., y las piezas (buscador del catálogo; la cantidad por armada **vacía, «a confirmar»**, hasta que la carga la persona; si el producto tiene «m por Un.» lo muestra). Va a `catalogoProductos/<código>` por `fbGuardarProductoCatalogo` con `armada {v:1, piezas[{codigo, desc, un, cant}], ts, por, porNombre, hist[]}`; cambiar la receta deja la anterior en `armada.hist` (lo ya armado guarda la suya). Varias recetas.
+- **Armar** (tarjeta y ficha del producto): tipo, ¿cuántas? − / +, «Sale del pañol» (cada pieza × cantidad con lo que hay; si no alcanza, lo marca, dice «hasta N» y no deja armar), «Entra» (+N), «¿Quién armó?» (nómina, opcional), «Sí, armar N». Guarda por `fbAddMovimiento` las salidas de cada pieza y la entrada de la armada con `armado:true`, `armadoGrupo`, `numero:"AR-0001"` (correlativo propio; las letras **a confirmar**), sin obra, `quienes`, `armadoDe`; la entrada con `precioUnit` = suma de las piezas al último costo, `precioFuente` (de dónde sale cada costo) y `receta` (copia). El costo del catálogo de la armada se actualiza con ese valor. Auditoría `armado`.
+- **Comprobante**: en pantalla (AR-0001, QR, salió / entró, «No es un gasto de ninguna obra…») y la hoja A4 «Comprobante de armado — N° AR-0001» con QR (`?doc=AR-0001` y el lector QR lo abren; el comprobante de cualquier pata del listado abre este); «Imprimir etiqueta QR» (dos etiquetas grandes para la caja); «Llevar a obra»; «Anular este armado» (con motivo; solo si las armadas siguen en el pañol: si ya salieron, lo dice; se anulan las patas, no se borra nada, vuelven las piezas; auditoría `armado_anulado`). Anular una pata desde el listado ofrece anular el resto del armado.
+- **Llevar a obra**: primero las obras con orden hoy y los próximos 7 días, con «el cálculo pide 8, recibió 2» (de la primera pieza de la receta, con lo entregado desglosado), «Buscar otra obra…», cantidad − / + (tope = libres, sin lo apartado), «La plaza recibe» desglosado, «Hacer vale · S-NNNN». Es un **vale de salida común** (S-, `valeGrupo`, el comprobante de siempre). Devolución sin usar = la devolución de siempre (vuelven como armadas).
+- **DEPÓSITO LUMINARIAS** (la obra cuyo nombre tiene «depósito» y «luminaria»): si tiene material entregado, la tarjeta lo muestra y ofrece «Pasarlo a armadas»: elegís la receta, **escribís cuántas hay de verdad** (tope: lo que alcanza con lo que figura ahí), antes → después, lo que sobra con casilla «Devolver al pañol», motivo, «Sí» → devolución desde esa obra (D-) + armado (AR-). Auditoría `armadas_deposito`. Después, la nota de no seguir usándola de depósito (la obra no se oculta sola).
+- **Cuadrilla, solo mirar y Dirección:** ven la tarjeta (las armadas listas, libres, la receta) sin botones; la cuadrilla ve la armada como un producto más (catálogo, material para retirar, Antes de salir).
+- **Asistente:** `stock` devuelve la receta de cada armada (`armada {lleva[], nota}`); `consultar` movimientos explica `armado:true`; el resumen del día no cuenta las patas del armado.
+
+**El armado no es consumo de ninguna obra — cada lugar que lee movimientos (`window.__armVista` = saca las patas del armado y abre cada armada que fue —o volvió— de una obra en sus piezas, con la receta guardada en el armado más cercano anterior o, si no, la vigente):**
+
+| Lugar | Qué hace | v168 |
+|---|---|---|
+| `stockActual` (stock del pañol) | base + movimientos | **sin cambio**: cuenta las dos patas (bajan las piezas, sube la armada) |
+| `colasYNumeros` (números S-/E-/D-) | número por grupo | el armado lleva `numero` AR- y el grupo reconoce `armadoGrupo` (si no, cada pata salía «AR-0001-B»); los S-/E-/D- no se corren |
+| `calcularBalancePlaza` (calculado vs. entregado del legajo) | entregado por obra | desglose |
+| `entregadoPorCodigoPlaza` (materiales por tarea de la orden) | entregado por obra | desglose |
+| `comprasParaPlaza` (Lista de compras › por plaza) | lo que salió a la obra | desglose |
+| `comprasPorMinimo` (Lista de compras, «⛔ se acabó» / bajo mínimo) | stock contra mínimo | las armadas afuera (se arman, no se compran); las piezas bajan solas por `stockActual` |
+| `stockUltimaEntradaDe` / `stockUltimoPrecio` | última entrada / precio | sin cambio (la entrada del armado le da su costo a la armada; las armadas no están en compras) |
+| Ficha del material («salió este mes», proveedor sugerido) y «📊 Por sector» | salidas del mes | desglose |
+| Centro de informes › movimientos de pañol | movimientos por destino | desglose |
+| `GASTOS.costeoDe` (Gastos › Por obra, Ganancia, tablero del dueño, Dirección) | material de la obra × costo del catálogo | desglose: la obra paga las piezas |
+| `gastosPro` › Generales y por mes (materiales por mes) | salidas a obras × costo | desglose |
+| `__reservas.entregadoAObra` (faltante del cómputo, material contra avance, Llevar a obra, depósito) | entregado neto por obra | desglose |
+| Legajo › «📦 Material entregado» | entregado neto por obra | desglose |
+| `__matAvance` (material contra avance, «Ver vales») | vales de la obra por material | desglose (el vale de la armada aparece en cada pieza con su número) |
+| `pedidoCompras` (consumo de las obras programadas, lo recibido) | salidas y entradas | desglose |
+| `informeSemanal` (lo que salió en la semana) | vales netos | desglose |
+| Asistente `resumen_dia` | salidas / entradas del día | sin las patas del armado |
+| Asistente `consultar` movimientos / `stock` | listado crudo / stock | crudo con `armado:true` explicado / la receta |
+| `cargoDePersona` («👷 Por persona») | material en cargo | sin cambio (el armado no es `enCargo`) |
+| Devoluciones (lo entregado para devolver) | por código | sin cambio: la armada vuelve como armada |
+| `stockNegativo`, respaldo, listado y filtros de Movimientos | historia del stock | sin cambio; la pata se ve como «🔧 Armado (sale / entra)» |
+| `registrarObra` (renombrar en cascada, contar movimientos) · historial del legajo · `remitoFoto` · proveedores · cotización · `fechaVivaImpresionCel` · `cuadrillaDia` (Antes de salir) | — | sin cambio (el armado no tiene obra, remito ni proveedor; la armada sale como producto) |
+| QR / `?doc=` (`codigosQr`) | S-/E-/D- | también AR- |
+| `certMensual`, `auditorAvance`, `tableroDueno`, `inicioDir` | no leen movimientos directo | por `__matAvance` / `GASTOS` (desglosados) |
+
+Pruebas viejas con `__v168No` (todo como la v167). **Sin reglas nuevas** (`movimientos` y `catalogoProductos`, que el pañol ya edita). Se arma con `herramientas/v168/patch_v168.py` (+ `armadas.js` / `.css`) sobre el ORIGINAL 167.
+
+**A confirmar con Ángel:** el prefijo «AR-»; los metros de cable por armada (los carga él en la receta; en la maqueta 5,5 m era ejemplo); los códigos de las armadas (los elige él; la app propone el siguiente libre de la familia 6); qué hacer con la obra «DEPOSITO LUMINARIAS» después de pasar a armadas (la app no la oculta ni la archiva). **Para después:** armar desde el asistente (`proponer_movimiento_panol` tipo armado: no se hizo, el asistente solo explica) y el aviso en la reserva de una obra que pide 6010 «Hay N armadas · Llevarlas en su lugar» (no se hizo).
+
+**Pruebas:** PRUEBAS_168
+
+**Huellas (sello `2026-11-18 11:24 · c2f1f8`):** ORIGINAL `168_2026-11-18_app-EMA_ORIGINAL.html` dc9dd7332b0e3fc8d5b3e8977931c15ef81ac87a0cdfb14ebc1de0a4d7dbed49 · `index.html` a99204ef6673c319ae13b2744989d0a8794498ac536b76f61075d6f12a88b4fa.
+
 ## v167 — 18/11/2026 (publicada en GitHub 18/11) · Zoom en la cámara + galería: elegir varias, enviar varias, borrar
 **Pedido (Ángel, 18/11):** «La cámara no podés hacer zoom… como que muy alejada, tenés que acercarte mucho para la foto.» · «Cuando sacás varias fotos, podés entrar a la galería y apretar enviar varias, seleccionar varias o eliminar alguna, tanto la cuadrilla como la oficina. Y automáticamente se ponen en obras y legajos, pero que también se puedan enviar de ahí varias.» · «Cuando hagas el zoom verificá que todo esté bien, que siga con el tiempo rápido de sacar fotos.»
 
