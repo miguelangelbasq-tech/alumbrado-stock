@@ -21,13 +21,15 @@
   window.__armTabVe = ve;
   function sub() { return ((document.querySelector("#subtabsStock .subtab.activo") || {}).dataset || {}).sub || ""; }
   function enStock() { const v = $("viewStock"); return !!v && v.style.display !== "none" && getComputedStyle(v).display !== "none"; }
+  // en el celu la fila de subpestañas se corre de costado: que se vea la que quedó elegida
+  function verTab() { const b = document.querySelector("#subtabsStock .subtab.activo"), st = $("subtabsStock"); if (!b || !st) return; intentar(() => { const br = b.getBoundingClientRect(), sr = st.getBoundingClientRect(); st.scrollLeft = Math.max(0, st.scrollLeft + (br.left - sr.left) - (sr.width - br.width) / 2); }); }
   function ir(op) {
     if (no()) return false;
     S.desdeCat = !!(op && op.desdeCat);
     try { if (!enStock()) window.mostrarVista("stock"); } catch (e) { }
     S.ve = ve();
     if (typeof window.__stockSubIr == "function") window.__stockSubIr("armadas");
-    pintar();
+    pintar(); verTab();
     try { window.scrollTo({ top: 0 }); } catch (e) { }
     try { window.__atras && window.__atras.sync && window.__atras.sync(); } catch (e) { }
     return true;
@@ -35,7 +37,7 @@
   function volver() {
     S.desdeCat = false;
     if (typeof window.__stockSubIr == "function") window.__stockSubIr("inventario");
-    pintar();
+    pintar(); verTab();
     try { window.__atras && window.__atras.sync && window.__atras.sync(); } catch (e) { }
   }
   function lineaHtml() {

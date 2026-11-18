@@ -47,6 +47,7 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
       c(/Luminaria armada 7 m/.test(await tx(p, '#arCard')) && !!(await p.$('#arCard [data-ar="armar"]')), 'la tarjeta de siempre: la armada con «Armar» y «Llevar a obra»');
       c(/Luminarias armadas/.test(e.hdr), 'el título de arriba dice «Luminarias armadas» (' + e.hdr + ')');
       c(e.volver, 'arriba, «‹ Volver al catálogo»');
+      c(await p.evaluate(() => { const b = document.querySelector('#subtabsStock .subtab.activo'), s = document.getElementById('subtabsStock').getBoundingClientRect(), r = b.getBoundingClientRect(); return r.left >= s.left - 1 && r.right <= s.right + 1; }), 'la subpestaña «🔧 Armadas» queda a la vista en la fila');
       c((await scrollX(p)) <= 0, 'sin scroll de costado');
       await foto(p, '02_armadas_desde_catalogo');
       c(await esperar(p, () => window.__atras && window.__atras.estado().prof > 0), 'el «atrás» lo tiene anotado');

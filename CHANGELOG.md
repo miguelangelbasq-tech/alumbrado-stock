@@ -15,9 +15,9 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Cómo se arma:** `herramientas/v169/patch_v169.py` sobre el ORIGINAL 168 (reemplazos chicos en el script de las subpestañas del Pañol, el HTML del catálogo, la ficha de la armada, `abrirRef` del QR y la capa `armadasCat` de `atrasApp`) + el módulo `armadasTab` (`armadasTab.js/.css`).
 
-**Pruebas:** `t_v169` 41/41 en PC, celu y `REGLAS=1`; `t_v168`, `t_circuito`, `t_v102`, `t_v137`, `t_v138`, `t_v140`, `t_v146` en PC y celu (ver resultados abajo).
+**Pruebas:** `t_v169` PC 42/42 · celu 46/46 (igual con `REGLAS=1`; en el celu la subpestaña elegida queda a la vista en la fila); `t_v168` 83/83 PC y celu; `t_circuito` 16/16; `t_v102a–e`, `t_v137` (62 · 63), `t_v138` (68 · 69), `t_v140` (39 · 41), `t_v146` (64 · 64) en PC y celu, todo OK. Capturas en el celu y la compu.
 
-**Huellas:** sello `2026-11-18 14:34 · 91b928` · ORIGINAL `169_2026-11-18_app-EMA_ORIGINAL.html` `1b341d9e254594d914a651cd43cb92e513d2e07cca32c207573ab2fef49abefe` · `index.html` `b8ef5e820eb2697bd14fc6373fe4142d666f4ce60ac6076d2aebc1d94a526714`.
+**Huellas:** sello `2026-11-18 14:47 · 19d27b` · ORIGINAL `169_2026-11-18_app-EMA_ORIGINAL.html` `c1ef41e5deee3d5acd9361a5f59856cce4b2394a96b3d1e420bad0c0168ed004` · `index.html` `b81b52468b9ed3bb0bebc4b09a2d872d79495d0ea7454c99583a57a89544b784`.
 
 ## v168 — 18/11/2026 (publicada en GitHub 18/11) · Luminarias armadas (pañol)
 **Pedido (Ángel, 18/11):** «tenemos una obra que usamos como depósito que se llama deposito luminarias… del depósito sacamos artefacto, prensacable y cable, armamos el artefacto armado con el prensacable adentro y el cable… la idea es tener stock de ya armadas para no perder tiempo… necesitamos que luego salga a una obra… es como un movimiento interno pero no podemos perder el registro porque sale del pañol pero no sale de la empresa y aparte necesitamos que sea algo rápido para mover las armadas a la plaza que lo necesite». Eligió la «Idea 1 + 2» y aprobó las maquetas (Receta · Pañol › Armadas · Armar · Comprobante · Llevar a obra).

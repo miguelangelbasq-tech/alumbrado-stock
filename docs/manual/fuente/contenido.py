@@ -10,10 +10,14 @@ PORTADAS = {
     'oficina': ('Oficina', 'Primeros pasos y Parte 1 — órdenes, obras, avance, informes y producción'),
     'panol': ('Pañol', 'Primeros pasos y Parte 2 — catálogo, reservas, entradas, remitos, compras, luminarias armadas y herramientas'),
     'cuadrilla': ('Cuadrilla / Operario', 'Primeros pasos y Parte 3 — tu día en la obra desde el celular'),
+    'direccion': ('Dirección', 'Ver todo: obras, avance, tiempos, plata y el Asistente'),
 }
 
 
 def escribir(A, modo):
+    if modo == 'direccion':
+        import contenido_direccion as D
+        D.escribir(A); return
     if modo == 'todo':
         si_sos(A); nuevo(A)
     primeros(A, modo)
