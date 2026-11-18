@@ -1,0 +1,6 @@
+capturas/img/
+capturas/cap9/
+capturas/log/
+capturas/log_*.txt
+_tmp/
+__pycache__/

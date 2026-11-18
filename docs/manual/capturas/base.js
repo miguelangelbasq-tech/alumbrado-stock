@@ -1,13 +1,13 @@
-// Utilidades para sacar las capturas del manual con la app real (v147) y los datos de ejemplo.
+// Utilidades para sacar las capturas del manual con la app real (v168) y los datos de ejemplo.
 // Uso: TZ=America/Argentina/Cordoba APP=.../index.html APPDIR=... node sacar.js [filtro]
 const T = process.env.T || '/tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-83acf3badc27/scratchpad/t';
 const { abrir } = require('./h_es');
 const SAL = process.env.SAL || __dirname + '/img';
 const fs = require('fs'); fs.mkdirSync(SAL, { recursive: true });
-const TODO = { inicio: true, nav: true, porPartes: true, ofPasos: true, tarjetas: true, mtNuevo: true, rsObra: true, lgPleg: true, iaPro: true, guias: true, crew: true, sugerida: true, obraGps: true, camaraB: true, v145: true, v146: true, v147: true, pisoReal: true, https: true, mov: true };
+const TODO = { inicio: true, nav: true, porPartes: true, ofPasos: true, tarjetas: true, mtNuevo: true, rsObra: true, lgPleg: true, iaPro: true, guias: true, crew: true, sugerida: true, obraGps: true, camaraB: true, v145: true, v146: true, v147: true, v149: true, v150: true, v151: true, v152: true, v153: true, v154: true, v155: true, v156: true, v157: true, v158: true, v159: true, v160: true, v161: true, v163: true, v164: true, v165: true, v166: true, v167: true, v168: true, supervisor: false, pisoReal: true, https: true, mov: true };
 const limpiar = () => {
   try { localStorage.setItem('ema.nav.guardada', '0'); } catch (e) { }
-  window.__pmPausa = true; window.__isNoAuto = true; window.__supNoIA = true;
+  window.__pmPausa = true; window.__hvPausa = true; window.__aaPausa = true; window.__isNoAuto = true; window.__supNoIA = true;
   const dib = (c) => { const x = c.getContext('2d'); const g = x.createLinearGradient(0, 0, 0, c.height); g.addColorStop(0, '#9cc3e6'); g.addColorStop(.6, '#cfe0ee'); x.fillStyle = g; x.fillRect(0, 0, c.width, c.height); x.fillStyle = '#7c7a68'; x.fillRect(0, c.height * 0.66, c.width, c.height); x.fillStyle = '#3d4a55'; x.fillRect(c.width * .47, c.height * .12, c.width * .06, c.height * .56); x.fillRect(c.width * .47, c.height * .12, c.width * .22, c.height * .025); };
   if (navigator.mediaDevices) navigator.mediaDevices.getUserMedia = async () => { const c = document.createElement('canvas'); c.width = 720; c.height = 1280; dib(c); setInterval(() => dib(c), 300); return c.captureStream(10); };
   document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'); s.textContent = '#avToast{display:none!important}'; document.head.appendChild(s); });

@@ -1,14 +1,14 @@
-# Contenido del manual de uso (al día con la v147). Lo usa armar.py.
+# Contenido del manual de uso (al día con la v168). Lo usa armar.py.
 # Bloques: A.h(nivel, txt, salto) · A.p(txt) · A.pasos([...]) · A.vinetas([...]) · A.consejo(txt) · A.atencion(txt)
 #          A.tabla(cab, filas) · A.img(captura, pie) (compu) · A.cel((captura, pie), …) (celu, hasta 3 juntas)
 # **negrita** = nombre de botón o de pantalla tal como está en la app.
 
-FECHA_PORTADA = 'Versión de la app del 11/11/2026'
+FECHA_PORTADA = 'Versión de la app del 18/11/2026'
 PORTADAS = {
     'todo': ('Administración · Oficina · Pañol · Cuadrilla', ''),
-    'admin': ('Administración', 'Primeros pasos y Parte 1 — todo lo de la oficina, con lo que es solo de Administración'),
+    'admin': ('Administración', 'Primeros pasos y Parte 1 — todo lo de la oficina, con lo que es solo de Administración y lo que ve Dirección'),
     'oficina': ('Oficina', 'Primeros pasos y Parte 1 — órdenes, obras, avance, informes y producción'),
-    'panol': ('Pañol', 'Primeros pasos y Parte 2 — catálogo, reservas, entradas, remitos, compras y herramientas'),
+    'panol': ('Pañol', 'Primeros pasos y Parte 2 — catálogo, reservas, entradas, remitos, compras, luminarias armadas y herramientas'),
     'cuadrilla': ('Cuadrilla / Operario', 'Primeros pasos y Parte 3 — tu día en la obra desde el celular'),
 }
 
@@ -27,12 +27,13 @@ def escribir(A, modo):
 # ------------------------------------------------------------------ portada y novedades
 def si_sos(A):
     A.h(1, 'Cómo leer este manual', salto=True)
-    A.p('El manual está ordenado por lo que hace cada uno. No hace falta leerlo entero: buscá tu rol en la tabla y leé esas partes. Cada pantalla tiene una captura de la app tal como se ve hoy (la versión del 11/11/2026), con datos de ejemplo.')
+    A.p('El manual está ordenado por lo que hace cada uno. No hace falta leerlo entero: buscá tu rol en la tabla y leé esas partes. Cada pantalla tiene una captura de la app tal como se ve hoy (la versión del 18/11/2026), con datos de ejemplo.')
     A.tabla(['Si sos…', 'Leé'], [
         ['Administración', 'Primeros pasos y la Parte 1 completa. Lo que solo puede hacer Administración (Tablero del dueño, Usuarios y permisos, límites del asistente, cerrar la certificación del mes) está marcado.'],
         ['Oficina', 'Primeros pasos y la Parte 1 (órdenes, obras, avance, informes, producción). Te sirve leer la Parte 2 para entender lo que hace el pañol y la Parte 3 para saber qué ve la cuadrilla.'],
-        ['Pañol', 'Primeros pasos y la Parte 2 (catálogo, reservas, entradas, remito con foto, pedido de compras, herramientas).'],
-        ['Cuadrilla / Operario', 'Primeros pasos y la Parte 3 (tu día en la obra desde el celular: Hoy, Modo obra, la cámara, los pasos de cada tarea).'],
+        ['Pañol', 'Primeros pasos y la Parte 2 (catálogo, reservas, entradas, remito con foto, pedido de compras, luminarias armadas, herramientas).'],
+        ['Cuadrilla / Operario', 'Primeros pasos y la Parte 3 (tu día en la obra desde el celular: Hoy, Modo obra, «Voy a iniciar», la cámara, el tiempo de cada columna, los pasos de cada tarea).'],
+        ['Dirección', 'Primeros pasos y, en la Parte 1, «El Inicio» y «Dirección». Ves todo (también la plata y los puntos) pero no cambiás nada.'],
         ['Solo mirar', 'Primeros pasos. Ves casi todo, pero no podés cambiar nada.'],
         ['Todos', 'Parte 4 — Guías: cómo se hace cada trabajo y la ficha técnica de cada material.'],
     ], anchos=[4, 13])

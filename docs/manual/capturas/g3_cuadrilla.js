@@ -6,7 +6,7 @@
 // La oficina ve seguridad / salida / falta material en el «📸 Avance» y en el cierre, y cierra como siempre (puntos y avance).
 // Con «cel» saca las 22 capturas del recorrido (capturas/NN_*.png).
 const { abrir, otraPagina, prueba } = require('./h_es');
-const { datos142 } = require('/tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-83acf3badc27/scratchpad/t/datos142');
+const { datos142 } = require((process.env.T || '/tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-83acf3badc27/scratchpad/t') + '/datos142');
 const fs = require('fs');
 const cel = process.argv[2] === 'cel';
 const CAP = process.env.CAP || '/tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-83acf3badc27/scratchpad/v142/capturas/';
@@ -22,7 +22,7 @@ const FOTO = '/tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-8
   const c = prueba('v142' + (cel ? ' cel' : ''));
   const d = datos142();
   d.db.configEquipo.personal.asistente = { roles: ['admin', 'oficina', 'panol', 'cuadrilla', 'operario', 'mirar'] };
-  const MOD = { v147: true, mov: true, inicio: true, crew: true, nav: true, mtNuevo: true, tarjetas: true, ofPasos: true, porPartes: true, rsObra: true, lgPleg: true, reglas: true, https: true, leaflet: true, cel };
+  const MOD = { v147: true, v149: true, v150: true, v151: true, v152: true, v153: true, v154: true, v155: true, v156: true, v157: true, v158: true, v159: true, v160: true, v161: true, v163: true, v164: true, v165: true, v166: true, v167: true, v168: true, mov: true, inicio: true, crew: true, nav: true, mtNuevo: true, tarjetas: true, ofPasos: true, porPartes: true, rsObra: true, lgPleg: true, reglas: true, https: true, leaflet: true, cel };
   // la entrada (sin sesión todavía)
   const P = await abrir(Object.assign({ datos: d, espera: 2500 }, MOD, { cel: true })), q0 = P.page;
   await q0.evaluate(() => { const u = document.querySelector('#portada input[type="text"], #portada input[type="email"], #loginUsuario'); u && (u.value = 'juan'); });
