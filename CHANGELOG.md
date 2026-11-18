@@ -2,6 +2,25 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v170 — 18/11/2026 (armada, sin publicar) · Avance de obra: carga rápida a mano
+**Pedido (Ángel, 18/11):** «en avance de obra no se puede editar, tendríamos que mejorar eso para que sea más fácil editar y poner a mano lo que se va a cambiar y poner al día. Igual se tiene que mover automático (con las órdenes)… está difícil entrar a columna. Y poder poner: ya pusieron diez columnas — y un cartel: eso significa que las bases y el hormigón están hechas… Sacar el cartel que te pide explicaciones por ahora, hasta que lo pongamos al día. Y también poner, por ejemplo, columnas todas puestas o solo 8 de 10, pero editado rápido.»
+
+**Qué cambia (Avance de obra › una obra; quien edita el avance: Administración y Oficina):**
+- **«✏ Carga rápida»** arriba del avance: por cada paso de la columna (pozo, hormigón, izaje, vínculo, artefacto, tablerito, sellado, PAT; acabado, aplomado y subida en «Otros pasos») dice «N de 12 · K de órdenes» y tiene − / + (o escribir el número), **Todas**, **Ninguna** y **Listo**. Sube marcando las **primeras que faltan**, en orden; baja sacando las últimas marcadas a mano. Lo que viene de las órdenes (hecho, en revisión, fraguando), las fallas y las observadas no se tocan (no deja bajar de lo de las órdenes). «elegir» lleva a «Elegir varias» con ese paso (para elegir cuáles).
+- **Lo que no va por columna** (zanja, cable, tablero, acometida, inspecciones…) en la misma tarjeta: metros o cantidades con − N + y «Listo»; las de una vez con «Marcar hecho». Los papeles siguen por «📄 Documentación».
+- **Cascada con cartel** (abajo, role=status): «Marcar 10 izadas también marca pozo y hormigón de esas 10 (ya fraguado)» → **Sí** / **Solo el izaje** / Cancelar. Solo pasos de antes en la misma columna y solo donde faltan; el hormigón a mano no fragua (regla de la v163). Si el izaje cae sobre un hormigón de una orden que todavía fragua, se marca igual y avisa. Al sacar un paso: «¿También sacás los pasos que siguen (vínculo…)?» → **Sí, también** / **Solo el izaje**.
+- **La grilla, «✏ Tocar marca: Sí»** (de entrada): tocar una celda que falta la marca (con la misma cascada); una marcada a mano la saca; una de una orden, con falla, observada o «no lleva» abre la hoja de siempre. **Mantener apretado** abre la hoja de la celda. «Tocar marca: No» = como antes.
+- **«↶ Deshacer»** en el cartel durante 10 s después de cada cambio (vuelve todo como estaba; queda en el historial).
+- **Motivo:** por ahora **no se pide** (ni en la tarjeta, ni en la hoja de la columna, ni en «Elegir varias», «＋ Agregar», «⚡ Poner al día» —ahí queda «opcional», precargado— ni en el ítem por ítem del itemizado de la v156); queda «Carga rápida del avance» con quién y cuándo, en `av2.hist`, `avanceHist` y la auditoría. **Administración** lo vuelve a pedir en la misma tarjeta: «Pedir motivo al cambiar el avance a mano: No (por ahora) / Sí» (`configEquipo/baremo.avanceMotivo`). El asistente sigue pidiendo su motivo.
+- Las órdenes siguen moviendo el avance encima (v158 / v163 sin cambios); «⚡ Poner al día esta obra» y «🏁 Está toda terminada» siguen.
+- Dirección, «solo mirar», pañol y cuadrilla no ven la tarjeta ni «Tocar marca». Sin reglas nuevas. Pruebas viejas con `__v170No` (todo como la v169).
+
+**Cómo se arma:** `herramientas/v170/patch_v170.py` sobre el ORIGINAL 169 (reemplazos chicos en `avanceObra2` —motivo según el ajuste, la tarjeta en la pantalla, el toque en la grilla, `hojaCelda`/`hojaCosa` en `__av2`— y en `auditorAvance.pedirMotivo`) + el módulo `avanceRapido` (`rapido.js/.css`).
+
+**Pruebas:** `t_v170` 60/60 en PC, celu y `REGLAS=1` (PC y celu); `t_v158` 72/72 · 72/72, `t_v163` 42/42 · 42/42, `t_v156` 69/69 · 71/71, `t_v168` 83/83 · 83/83, `t_v169` 42/42 · 46/46, `t_circuito` 16/16 · 16/16 (PC · celu), todo OK. Las pruebas viejas corren con `__v170No` (motivo obligatorio como antes): no hubo que cambiar ninguna
+
+**Huellas:** sello `2026-11-18 15:00 · 46bb08` · ORIGINAL `170_2026-11-18_app-EMA_ORIGINAL.html` `ee91ded376e0148443a6c99d7b734b818ca4b971550406a10fcb5b294da93f7b` · `index.html` `735cf2ece87c20f2ecf6362b6e6d7038793fe2358848d8c7eae51317436497ff`.
+
 ## v169 — 18/11/2026 (publicada en GitHub 18/11) · «🔧 Armadas» con su propio subíndice en el Pañol
 **Pedido (Ángel, 18/11):** «eso tiene que tener su propio subíndice, no dentro de pañol (el catálogo)» (la tarjeta «🔧 Luminarias armadas» de la v168 estaba dentro de Pañol › Catálogo pañol).
 
