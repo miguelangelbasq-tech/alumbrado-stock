@@ -2,6 +2,22 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v171 — 18/11/2026 (armada, sin publicar) · «＋ Otra foto» con nombre en Mis tareas
+**Pedido (Ángel, 18/11):** «en Mis tareas de la cuadrilla ellos ponen las fotos que les piden, y de paso deberían poder poner otra, y ahí que les pida poner un nombre como en la cámara: ponés "otra" y te pide un nombre, ¿entendés?»
+
+**Qué cambia (Mis tareas, la lista):**
+- En cada tarea, debajo de las fotos que se piden: **«📎 Otras fotos»** (las que ya se sacaron, con su nombre) y el botón **«＋ Otra foto»** (en las tareas por tomas reemplaza al «📷 Otra foto» de antes, que no pedía nombre).
+- «＋ Otra foto» abre **«¿Qué es la foto?»** con los mismos botones de la cámara (v164): **Columna** (con «‹ Col N ›»; de entrada la que sigue a las de la tarea), **Tablero**, **PAT**, **Zanja**, **Acometida** y **Otro…** (se escribe; aparece «Lo último que escribiste», la misma lista de la cámara). Elegido el nombre se abre la cámara de siempre: la de la app, la del teléfono o la del APK.
+- La foto queda en la orden con ese nombre, **suelta** (sin tarea, como la v164): no cuenta para las fotos que se piden ni para la verificación (v150). Se ve en «Otras fotos» de la tarea, en «📷 Mis fotos», en el legajo, y la oficina la ve en el «📸 Avance» debajo de esa tarea («📎 Otras fotos (de más, no cuentan)»); se mueve con «↔ Mover» (v152). Si es una columna que la tarea pide (ej. Col 6 de un pozo Col 6–8), va a su fila como siempre.
+- Si la tarea no arrancó, el botón también pide el cartel **«▶ Voy a iniciar»** (v166), como los otros 📷.
+- Sin señal: queda en el celu y en la orden, y sube sola. Sin reglas nuevas. Pruebas viejas con `__v171No` (todo como la v170).
+
+**Cómo se arma:** `herramientas/v171/patch_v171.py` sobre el ORIGINAL 170 (reemplazos chicos en `mtFotosLista` / `mtTomasHtml`, la orden de Mis tareas, `avanceOrden` e `inicioMt`) + el módulo `otraFoto` (`otraFoto.js/.css`).
+
+**Pruebas:** RESULTADOS171
+
+**Huellas:** sello `2026-11-18 15:33 · dfeb49` · ORIGINAL `171_2026-11-18_app-EMA_ORIGINAL.html` `ba7a0e52a40ccf02c01ade3123c17a3ace68697af96ddfc434765722ceaed14a` · `index.html` `98006943a9f8bf96c583b46f57d9a95413fe419e758b5508b9d0aed5c3e06c14`.
+
 ## v170 — 18/11/2026 (publicada en GitHub 18/11) · Avance de obra: carga rápida a mano
 **Pedido (Ángel, 18/11):** «en avance de obra no se puede editar, tendríamos que mejorar eso para que sea más fácil editar y poner a mano lo que se va a cambiar y poner al día. Igual se tiene que mover automático (con las órdenes)… está difícil entrar a columna. Y poder poner: ya pusieron diez columnas — y un cartel: eso significa que las bases y el hormigón están hechas… Sacar el cartel que te pide explicaciones por ahora, hasta que lo pongamos al día. Y también poner, por ejemplo, columnas todas puestas o solo 8 de 10, pero editado rápido.»
 
