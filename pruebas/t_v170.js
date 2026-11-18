@@ -56,6 +56,9 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     d = await db(p);
     const m = ((d.avanceObras.b4.av2 || {}).m) || {}, ks = Object.keys(m);
     c(ks.length === 30 && ks.every((k) => m[k].e === 'si' && m[k].motivo === 'Carga rápida del avance' && m[k].por === 'lucia@ema-alumbrado.app') && m.c_horm_COL1.fragOk === true && !m.c_horm_COL1.hormTs, 'en la base: 30 claves (10 × 3) con el motivo «Carga rápida del avance», quién, y el hormigón sin fraguado');
+    c(ks.every((k) => m[k].pd === 1 && m[k].rapido === 1 && m[k].ts > 0), 'sin fecha real (pd, como «⚡ Poner al día»), con quién y cuándo para la auditoría');
+    const ti = await p.evaluate(() => { const T = window.__av2.tiempo(window.__av2.estado('b4')); window.__av2.abrirColumna('b4', 0); const h = document.getElementById('a2Ov').textContent; window.__av2.cerrarHoja(); return { ritmo: T.ritmo, conF: T.ev.filter((x) => x.f !== '0000-00-00').length, sinF: T.ev.filter((x) => x.f === '0000-00-00').length, ult: !!document.querySelector('#a2App .a2-u'), origen: /Carga rápida \(ya estaba hecho\)/.test(h) }; });
+    c(ti.ritmo == null && ti.conF === 0 && ti.sinF === 30 && !ti.ult && ti.origen, 'no infla el ritmo ni «Lo último que pasó» (cuenta desde el principio) y la hoja dice «Carga rápida (ya estaba hecho)» · ' + JSON.stringify(ti));
     c(((d.avanceObras.b4.av2 || {}).hist || []).length === 1 && (d.avanceObras.b4.avanceHist || []).some((x) => x.av2 && /Carga rápida/.test(x.motivo) && x.despues === r0.pct), 'queda en av2.hist y en avanceHist (antes → después)');
     // deshacer
     await p.click('#a2Rc [data-a2r="deshacer"]'); await p.waitForTimeout(1300);
@@ -200,6 +203,7 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     await listo(p, 'k:zanja', 100); await p.waitForTimeout(900);
     const z1 = await p.evaluate(() => window.__av2.estado('b4').RC.zanja.h);
     let d = await db(p);
+    c(d.avanceObras.b4.av2.m.k_zanja.pd === 1 && !(await p.evaluate(() => window.__av2.tiempo(window.__av2.estado('b4')).ev.some((x) => x.f !== '0000-00-00'))), 'la zanja tampoco tiene fecha real (sin «Lo último que pasó»)');
     c(z0.h === 0 && z1 === 100 && d.avanceObras.b4.av2.m.k_zanja.e === 'cant' && d.avanceObras.b4.av2.m.k_zanja.cant === 100, 'zanja: «100 de ' + z0.tot + ' m» con «Listo» (k_zanja cant 100)');
     c(await p.evaluate(() => document.querySelector('#a2Rap details.a2r-dd:not(.a2r-ddp)').open), 'la lista sigue abierta después del cambio');
     await p.click('#a2Rap [data-a2r="bin"][data-id="replanteo"]'); await p.waitForTimeout(1200);

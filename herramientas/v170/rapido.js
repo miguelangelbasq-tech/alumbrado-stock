@@ -67,8 +67,11 @@
   const paso = (E, p) => E.L.pasos.find((q) => q.id === p);
 
   // ============================================================== planes (sin escribir)
-  const valSi = (p) => Object.assign({ e: "si", ts: Date.now(), por: yoMail(), porNombre: yoNombre(), motivo: "", rapido: 1 }, p === "horm" ? { fragOk: true } : {});
-  const valNo = () => ({ e: "no", ts: Date.now(), por: yoMail(), porNombre: yoNombre(), motivo: "", rapido: 1 });
+  // sin fecha real (como «⚡ Poner al día», v163: pd): pone al día lo hecho antes de hoy; no entra en el ritmo, ni en «Lo último que
+  //  pasó», ni en el número del día; cuenta desde el principio en la curva. Quién y cuándo quedan en ts / por / av2.hist (auditoría).
+  const valSi = (p) => Object.assign({ e: "si", ts: Date.now(), por: yoMail(), porNombre: yoNombre(), motivo: "", rapido: 1, pd: 1 }, p === "horm" ? { fragOk: true } : {});
+  const valNo = () => ({ e: "no", ts: Date.now(), por: yoMail(), porNombre: yoNombre(), motivo: "", rapido: 1, pd: 1 });
+  const sinFecha = (P) => { if (P && P.cambios) P.cambios.forEach((c) => { c.val.pd = 1; c.val.rapido = 1; }); return P; };
   function planSubir(E, p, idx, cascada) {
     const cambios = [], filas = [], pre = cascada ? arr(PRE[p]).filter((q) => paso(E, q)) : [];
     idx.forEach((i) => {
@@ -181,7 +184,7 @@
     const k = cuentaCosa(E, x), q = "k:" + id, d = Math.max(k.min, Math.min(k.max, num(S.dr[q] != null ? S.dr[q] : k.n)));
     delete S.dr[q];
     if (Math.abs(d - k.n) < 1e-9) return A.pintar();
-    const P = A.planMarcar({ obra: E.o.id, cosa: x.id, accion: "marcar", cant: d });
+    const P = sinFecha(A.planMarcar({ obra: E.o.id, cosa: x.id, accion: "marcar", cant: d }));
     if (P.err) return cartel({ t: P.err, mal: true, ms: 5000 });
     hacer(P, `${x.label}: ${fN(k.n)} → ${fN(d)}${x.un ? " " + x.un : ""}`);
   }
@@ -190,7 +193,7 @@
     const x = E.L.cosas.find((c) => c.id === id); if (!x) return;
     const k = cuentaCosa(E, x);
     if (k.roto || (k.n >= 1 && k.ord > 0)) return A.hojaCosa(E.o.id, x.id);   // viene de una orden (o está rota): la hoja de siempre
-    const P = A.planMarcar({ obra: E.o.id, cosa: x.id, accion: k.n >= 1 ? "desmarcar" : "marcar" });
+    const P = sinFecha(A.planMarcar({ obra: E.o.id, cosa: x.id, accion: k.n >= 1 ? "desmarcar" : "marcar" }));
     if (P.err) return cartel({ t: P.err, mal: true, ms: 5000 });
     hacer(P, `${x.label}: ${k.n >= 1 ? "sacado" : "hecho"}`);
   }

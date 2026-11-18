@@ -52,6 +52,9 @@ R('return `<div class="a2-grilla"><div class="a2-gtit"><span>Columna por columna
 
 # ============================================================== la tarjeta «✏ Carga rápida» arriba del avance
 R('return `${flashHtml(E, T)}<div class="a2-cuerpo"><div class="a2-izq">${tiempoHtml(E, T)}', 'return `${flashHtml(E, T)}<div class="a2-cuerpo"><div class="a2-izq">${window.__avRapHtml ? window.__avRapHtml(E) : ""}${tiempoHtml(E, T)}')
+# lo cargado rápido no tiene fecha real (como la puesta al día): sin «Lo último que pasó» para las cosas y con su nombre
+R('if (r.man && r.man.e === "cant") l.push({', 'if (r.man && r.man.e === "cant" && !(r.man.pd && r.man.rapido && !window.__v170No)) l.push({')
+R('if (r.pd && r.e === "mano" && !off3()) return `Puesta al día (ya estaba hecho) · ', 'if (r.pd && r.e === "mano" && !off3()) return `${r.rapido && !window.__v170No ? "Carga rápida (ya estaba hecho)" : "Puesta al día (ya estaba hecho)"} · ')
 R('abrirColumna: hojaColumna, cerrarHoja,', 'abrirColumna: hojaColumna, hojaCelda, hojaCosa, cerrarHoja,')
 
 # ============================================================== v156: el motivo del ítem por ítem sigue el mismo ajuste
