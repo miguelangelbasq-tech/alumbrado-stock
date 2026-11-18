@@ -211,6 +211,7 @@ def parte1(A, modo):
         '**Plata**: el último mes certificado, el borrador del mes, lo acumulado y el margen; el material entregado contra el usado.',
     ])
     A.cel(('p10_inicio_cel_2', 'Más abajo en el celu'), ('n155_dir_calendario_cel', 'Programación › Calendario'), ('n155_dir_clima_cel', 'Clima contra lo planeado'))
+    A.img('real_23', '«Dónde se trabaja hoy»: cada obra con su número, cuántas personas y si están en vivo (captura de la app real)', ancho=13)
     A.h(3, 'Ver el Inicio de antes')
     A.p('Al pie está **Ver el Inicio de antes**: muestra el Inicio «Ejecutivo» anterior, con **‹ Volver al Inicio nuevo** arriba. La próxima vez que abrís la app vuelve a salir el nuevo.')
 
@@ -430,7 +431,15 @@ def parte1(A, modo):
 
     A.h(2, 'Mapa y Mapa de guerra')
     A.p('Menú › **Mapa de plazas** o **Mapa** en la barra. Los pines tienen el color del avance: gris sin empezar, rojo menos del 30 %, amarillo 30–59 %, azul 60–99 %, verde terminada. Tocá un pin para ver la ficha de la obra. **📍 Dónde estoy** centra el mapa en donde estás, **＋ Punto** agrega tableros, problemas o acopios, y abajo a la izquierda está **Satélite**.')
-    A.img('of_mapa', 'El mapa de obras')
+    A.vinetas([
+        'A la izquierda: el buscador (plaza, barrio, ID o persona), **Ver todas**, **Dónde estoy**, **Pantalla completa**, **Nueva plaza acá** y **Ver nombres en el mapa**. Arriba dice cuántas obras están ubicadas y cuántas no tienen ubicación (punto gris en la lista).',
+        '**Ver**: **Todas**, **Plazas**, **Barrios** u **Otras**.',
+        '**Plazas del pliego**: **Ninguna** (de entrada), **Las 244**, o por zona **Este**, **Centro**, **Oeste**. Muestra las plazas del pliego con su ubicación, sin cargar nada a mano; las que ya están en el tablero aparecen con su pin de obra. Acercate para ver el nombre o tocá un punto para saber cuál es y registrarla.',
+        '**Ocultar plazas finalizadas** y, abajo, la lista de obras con su avance y su etapa.',
+        'Abajo a la izquierda, el botón para pasar de **Satélite** a **Calles**; abajo a la derecha, **＋ Punto** y **Referencia** (qué es cada color y cada dibujo).',
+    ])
+    A.img('real_21', 'El mapa en satélite, con las obras y la lista (captura de la app real)')
+    A.img('real_22', '«Plazas del pliego: Este»: aparecen las plazas de nuestra zona (captura de la app real)')
     A.h(3, '🎯 Control («Mapa de guerra»)')
     A.p('Arriba del mapa, el botón **Control** lo pasa a modo control (solo quien edita Órdenes). Se ve todo lo de hoy de un vistazo:')
     A.vinetas([
