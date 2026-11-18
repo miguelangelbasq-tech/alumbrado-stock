@@ -2,6 +2,23 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v169 — 18/11/2026 (armada, sin publicar) · «🔧 Armadas» con su propio subíndice en el Pañol
+**Pedido (Ángel, 18/11):** «eso tiene que tener su propio subíndice, no dentro de pañol (el catálogo)» (la tarjeta «🔧 Luminarias armadas» de la v168 estaba dentro de Pañol › Catálogo pañol).
+
+**Qué cambia:**
+- **Pañol › «🔧 Armadas»**: subpestaña nueva, después de Herramientas, con la tarjeta de la v168 tal cual (recetas, Armar, Llevar a obra, DEPÓSITO LUMINARIAS → «Pasarlo a armadas», comprobantes AR-). Arriba dice «Luminarias armadas».
+- **Catálogo pañol**: ya no tiene la tarjeta; queda una línea «🔧 Luminarias armadas: N listas · **Ver**» (sin receta: «todavía no hay recetas») que lleva a la subpestaña. Entrando por ahí aparece «‹ Volver al catálogo» y el «atrás» del celu vuelve al catálogo (no sale del pañol).
+- **Ficha de la armada**: además de «Armar», «Llevar a obra» y la receta, «Ver en Pañol › Armadas» (cierra la ficha y abre la subpestaña).
+- **QR / `?doc=AR-0001`**: el comprobante del armado se abre con Pañol › Armadas detrás.
+- **Quién la ve**: lo mismo que la tarjeta de la v168: quien edita el pañol (admin, oficina, pañol) siempre; cuadrilla, «solo mirar» y Dirección si hay alguna receta, sin botones. La cuadrilla (que en el pañol solo tiene Catálogo pañol) ve «Catálogo pañol» + «🔧 Armadas» si hay receta; si no, como antes. La barra de abajo del pañolero no cambia.
+- Sin reglas nuevas. Pruebas viejas con `__v169No` (todo como la v168).
+
+**Cómo se arma:** `herramientas/v169/patch_v169.py` sobre el ORIGINAL 168 (reemplazos chicos en el script de las subpestañas del Pañol, el HTML del catálogo, la ficha de la armada, `abrirRef` del QR y la capa `armadasCat` de `atrasApp`) + el módulo `armadasTab` (`armadasTab.js/.css`).
+
+**Pruebas:** `t_v169` 41/41 en PC, celu y `REGLAS=1`; `t_v168`, `t_circuito`, `t_v102`, `t_v137`, `t_v138`, `t_v140`, `t_v146` en PC y celu (ver resultados abajo).
+
+**Huellas:** sello `2026-11-18 14:34 · 91b928` · ORIGINAL `169_2026-11-18_app-EMA_ORIGINAL.html` `1b341d9e254594d914a651cd43cb92e513d2e07cca32c207573ab2fef49abefe` · `index.html` `b8ef5e820eb2697bd14fc6373fe4142d666f4ce60ac6076d2aebc1d94a526714`.
+
 ## v168 — 18/11/2026 (publicada en GitHub 18/11) · Luminarias armadas (pañol)
 **Pedido (Ángel, 18/11):** «tenemos una obra que usamos como depósito que se llama deposito luminarias… del depósito sacamos artefacto, prensacable y cable, armamos el artefacto armado con el prensacable adentro y el cable… la idea es tener stock de ya armadas para no perder tiempo… necesitamos que luego salga a una obra… es como un movimiento interno pero no podemos perder el registro porque sale del pañol pero no sale de la empresa y aparte necesitamos que sea algo rápido para mover las armadas a la plaza que lo necesite». Eligió la «Idea 1 + 2» y aprobó las maquetas (Receta · Pañol › Armadas · Armar · Comprobante · Llevar a obra).
 

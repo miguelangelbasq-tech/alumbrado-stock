@@ -684,10 +684,10 @@ def parte2(A):
     A.p('Debajo: todo lo que está bajo el mínimo y lo que alguna vez se cargó y hoy está en 0 («⛔ se acabó», con la cantidad sugerida = la última entrada).')
 
     A.h(2, '🔧 Luminarias armadas')
-    A.p('Para las luminarias que se arman en el pañol (la luminaria con su prensacable y su cable de subida) y quedan listas para llevar. **Armar no es consumo de ninguna obra**: las piezas salen del pañol y entra la armada; recién cuando una armada va a una obra, esa obra recibe las piezas. La tarjeta **🔧 Luminarias armadas** está en **Catálogo pañol**, y cada armada tiene sus botones en su ficha.')
+    A.p('Para las luminarias que se arman en el pañol (la luminaria con su prensacable y su cable de subida) y quedan listas para llevar. **Armar no es consumo de ninguna obra**: las piezas salen del pañol y entra la armada; recién cuando una armada va a una obra, esa obra recibe las piezas. Todo está en **Pañol › 🔧 Armadas** (su propia pestaña, al lado de Herramientas); en **Catálogo pañol** queda una línea «🔧 Luminarias armadas: N listas · **Ver**» que lleva ahí, y cada armada tiene sus botones en su ficha (también «Ver en Pañol › Armadas»).')
     A.h(3, 'La receta')
     A.pasos([
-        'Tocá **＋ Nueva armada**. Escribí el nombre (por ejemplo «Luminaria armada 7 m»).',
+        'En **Pañol › 🔧 Armadas** tocá **＋ Nueva armada**. Escribí el nombre (por ejemplo «Luminaria armada 7 m»).',
         'El **código del pañol** lo elegís vos: la app propone el siguiente libre de la familia 6 (**Usar 6026**). No acepta un código que ya existe ni los reservados.',
         'Agregá las piezas (por código o palabras: la luminaria, el prensacable, el cable…) con la **cantidad por armada**. Las cantidades no vienen cargadas: los metros de cable los ponés vos.',
         'Tocá **Guardar receta**. Podés tener varias recetas: 7 m, 10 m, con capuchón doble…',
@@ -702,14 +702,14 @@ def parte2(A):
     A.cel(('n168_cel_03_receta', 'La receta'), ('n168_cel_04_armar', 'Armar luminarias'), ('n168_cel_05_comprobante', 'Armado guardado'))
     A.h(3, 'Llevar a obra')
     A.pasos([
-        'En la tarjeta o en la ficha de la armada tocá **Llevar a obra**.',
+        'En **Pañol › 🔧 Armadas** o en la ficha de la armada tocá **Llevar a obra**.',
         'Elegí la obra (arriba salen las que tienen orden hoy o en los próximos días, con cuánto pide el cálculo y cuánto recibió) o buscá otra.',
         'Elegí cuántas y, si querés, quién las retira. Tocá **Hacer vale**: sale el vale S- de siempre.',
     ])
     A.p('La obra recibe **las piezas** (la luminaria, el prensacable, los metros de cable): así el legajo, «calculado vs. entregado», el costo de la obra, el material contra avance y los informes cuentan igual que si hubieran salido sueltas. Si vuelven sin usar, se hace la devolución de siempre.')
     A.cel(('n168_cel_06_llevar', 'Llevar armadas a una obra'), ('n168_cel_08_legajo', 'La obra recibe las piezas'))
     A.h(3, 'El depósito de luminarias')
-    A.p('Si en una obra «DEPOSITO LUMINARIAS» figura material entregado para armar, la tarjeta lo avisa con **Pasarlo a armadas**: ponés **¿Cuántas armadas hay de verdad?** (contalas), mirás el antes → después y lo que sobra (piezas sueltas que vuelven al pañol) y tocás **Sí, pasar N a armadas**. Se hace la devolución de esas piezas desde el depósito y enseguida el armado. La obra del depósito no se oculta sola: se puede archivar desde Obras.')
+    A.p('Si en una obra «DEPOSITO LUMINARIAS» figura material entregado para armar, **Pañol › 🔧 Armadas** lo avisa con **Pasarlo a armadas**: ponés **¿Cuántas armadas hay de verdad?** (contalas), mirás el antes → después y lo que sobra (piezas sueltas que vuelven al pañol) y tocás **Sí, pasar N a armadas**. Se hace la devolución de esas piezas desde el depósito y enseguida el armado. La obra del depósito no se oculta sola: se puede archivar desde Obras.')
     A.cel(('n168_cel_09_deposito', 'Pasar el depósito a armadas'), ('n168_cel_11_panol_armadas', 'La tarjeta con las armadas'), ('n168_cel_12_ficha', 'La ficha de la armada'))
     A.consejo('Las letras **AR-** del comprobante, los metros de cable por armada y los códigos de cada armada los confirma Ángel. Armar desde el Asistente todavía no está.')
 
