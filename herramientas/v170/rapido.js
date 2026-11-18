@@ -200,8 +200,8 @@
     const A = AV(); if (!A || A.st.sel) return false;
     const p = t.dataset.p, i = +t.dataset.i, E = A.estado(A.st.id); if (!E) return false;
     const r = E.R[p + "|" + i];
-    const largo = S.down && S.down.el === t && Date.now() - S.down.ts > 480; S.down = null;
-    if (largo || !r) return false;   // mantener apretado: la hoja de la celda
+    if (S.trago && Date.now() - S.trago < 1500) { S.trago = 0; return true; }   // ya se abrió la hoja al mantener apretado
+    if (!r) return false;
     if (libre(r)) { pedirSubir(E, p, [i]); return true; }
     if (aMano(r) && r.e !== "pieza") { pedirBajar(E, p, [i]); return true; }
     return false;   // de una orden, falla, observada, no lleva, pieza: la hoja de siempre
@@ -284,7 +284,15 @@
   document.addEventListener("keydown", (e) => { const x = e.target; if (e.key !== "Enter" || !x || !x.dataset || !x.dataset.a2rn || off()) return; e.preventDefault(); const b = document.querySelector('.a2r-listo[data-q="' + x.dataset.a2rn + '"]'); b && !b.hidden && b.click(); });
   document.addEventListener("toggle", (e) => { if (e.target && e.target.classList && e.target.classList.contains("a2r-dd")) { if (e.target.classList.contains("a2r-ddp")) S.pAb = e.target.open; else S.kAb = e.target.open; } }, true);
   // mantener apretado una celda (modo «Tocar marca»): abre la hoja; sin el menú del celu
-  document.addEventListener("pointerdown", (e) => { const c = e.target && e.target.closest && e.target.closest('#a2App [data-a2="cel"]'); S.down = c && modoToque() ? { el: c, ts: Date.now() } : null; }, true);
+  const soltar = () => { if (S.down) { clearTimeout(S.down.tm); S.down = null; } };
+  document.addEventListener("pointerdown", (e) => {
+    soltar(); const c = e.target && e.target.closest && e.target.closest('#a2App [data-a2="cel"]'); if (!c || !modoToque() || (AV() && AV().st.sel)) return;
+    const p = c.dataset.p, i = +c.dataset.i, x = e.clientX, yy = e.clientY;
+    S.down = { x, y: yy, tm: setTimeout(() => { S.down = null; S.trago = Date.now(); intentar(() => AV().hojaCelda(AV().st.id, p, i), null); }, 520) };
+  }, true);
+  document.addEventListener("pointermove", (e) => { if (S.down && Math.abs(e.clientX - S.down.x) + Math.abs(e.clientY - S.down.y) > 12) soltar(); }, true);
+  document.addEventListener("pointerup", soltar, true); document.addEventListener("pointercancel", soltar, true);
+  document.addEventListener("scroll", soltar, true);
   document.addEventListener("contextmenu", (e) => { if (modoToque() && e.target && e.target.closest && e.target.closest('#a2App [data-a2="cel"]')) e.preventDefault(); }, true);
 
   window.__avRapHtml = html;
