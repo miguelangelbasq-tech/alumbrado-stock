@@ -1,0 +1,57 @@
+  ✓ el servidor de fotos dice v2-fotos → la app usa lo nuevo
+  ✓ la hoja de la documentación dice «El PDF, hasta 25 MB (va a la nube…)»
+  ✓ PDF de 3 MB → al Worker en docs/AAAA/MM/q2/… (3,0 MB, application/pdf)
+  ✓ en la base solo la ficha: r2, tamaño, 3 páginas, sin el archivo (309 bytes)
+  ✓ ver el PDF lo baja del Worker (PAT_las_rosas.pdf)
+  ✓ sin señal: «quedó en el celu» · 1 PDF en la bandeja (2,0 MB) · el documento anotado · nada entero en la base
+  ✓ ningún PDF entero en la base
+  ✓ vuelve la señal → sube solo a docs/ y sale de la bandeja
+  ✓ el legajo tiene la sección «🎥 Videos y PDF»
+  ✓ la oficina ve «🎥 Subir video» y «📎 Subir PDF»
+  ✓ PDF suelto del legajo: subido y en la lista con sus 5 hojas
+  ✓ hoja «🎥 Video de obra» con «Grabar» / «Elegir» y la columna para elegir
+    video de 30 s: antes 25,0 MB → después 1,3 MB en 36 s · ✓ Video guardado (de 25 MB a 1,3 MB).
+  ✓ video de 30 s achicado en el celu: 25,0 MB → 1,3 MB (5 %)
+  ✓ subido al Worker en videos/…/q2/….webm (1,3 MB)
+  ✓ ficha en adjuntos: tipo video, r2, achicado, peso original, Col 2
+  ✓ miniatura (primer cuadro) en fotosObra con tipo video, duración 30 s y peso
+  ✓ el legajo muestra el video con ▶ (🎥 Videos y PDF🎥 Subir video📎 Subir PDFVideos (1)▶0:30Col 218/11 · Lucía Fernández · 1,3)
+  ✓ el video no aparece entre las fotos del legajo
+  ✓ reproductor con la dirección del Worker (?t=)
+  ✓ adelantar a 0:20 anda (duración 30 s, 2 pedidos por rango con 206)
+  ✓ reproductor con «⬇ Bajar», «📤 Compartir» y «↔ Mover» (oficina)
+  ✓ bajar el video (video_PLAZA_LAS_ROSAS_2026-11-18.webm)
+  ✓ sin scroll de costado
+  ✓ sin errores ()
+  ✓ el aparato no puede achicar: avisa y sube el original (✓ Video guardado. Este celu no puede achicar videos: se sube como está (107 MB).)
+  ✓ video grande (107,1 MB) por partes: 11 partes de 10 MB, juntado entero en el Worker
+  ✓ adelantar el grande pide solo pedazos (22 rangos, ninguno entero)
+  ✓ tope del PDF (remitos, documentación) = 25 MB con el servidor nuevo
+  ✓ un PDF de remito por fbAdjuntoGuardar va a docs/ (ficha sin el archivo)
+  ✓ sin errores ()
+  ✓ Modo obra tiene «🎥 Video»
+  ✓ la hoja viene con la tarea y la columna de Modo obra (Col 1)
+    video de 8 s (cuadrilla): 2,1 MB → 0,4 MB
+  ✓ la cuadrilla graba, se achica (2,1 MB → 0,4 MB) y sube
+  ✓ en la orden: campo.videos (Col 1, mini) y NO campo.fotos
+  ✓ fotosObra con la orden y la columna (como una foto más, sin contar)
+  ✓ la verificación (v150) no cuenta el video como foto de la columna ({"fotos":0,"est":"pend"})
+  ✓ la cámara de la app tiene el botón «🎥 Video»
+  ✓ sin errores ()
+  ✓ avance nuevo: la hoja de Col 1 muestra el video como evidencia (🎥 Videos y PDF de Col 1 (evidencia: no cuentan como foto)▶0:08Col 118)
+  ✓ Mis tareas clásica: «🎥 Video» en la orden
+  ✓ solo mirar: ve «🎥 Videos y PDF» sin los botones de subir
+  ✓ solo mirar: mira el video (sin «↔ Mover»)
+  ✓ solo mirar: no puede subir videos
+  ✓ Dirección: ve «🎥 Videos y PDF» sin los botones de subir
+  ✓ Dirección: mira el video (sin «↔ Mover»)
+  ✓ Dirección: no puede subir videos
+  ✓ pañol: ve «🎥 Videos y PDF» sin los botones de subir
+  ✓ pañol: mira el video (sin «↔ Mover»)
+  ✓ pañol: no puede subir videos
+  ✓ servidor viejo (v1): sin lo nuevo, PDF hasta 650 KB
+  ✓ el legajo dice «Falta actualizar el servidor de fotos» (sin botones de subir)
+  ✓ PDF de 3 MB rechazado como antes («la app guarda hasta 650 KB»), nada al Worker
+  ✓ apagado (__v160No): sin la sección ni lo nuevo
+  ✓ apagado: la documentación sigue con el PDF hasta 650 KB
+RESULTADO v160: 54/54 OK

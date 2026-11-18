@@ -1,0 +1,41 @@
+  ✓ Mis tareas: las filas que faltan son las columnas que eligió la oficina (Col 6, 7 y 8, salteando la 5) · ["Col 6","Col 7","Col 8"]
+  ✓ el 📷 de la Col 6 en Mis tareas abre el MISMO cartel de la v165 («¿Arrancás con POZO?», «Col 6, 7 y 8 · … · con Pedro», «Todavía no»), sin abrir la cámara todavía · ✕Tarea 1 de 3 · OT-2026-165¿Arrancás con Pozo?Col 6, 7 y 8 · PLAZA LOS ÁLAMOS · con Pedro ▶ Voy a iniciaresta tarea Todavía no ¿Es otra tarea? Elegila acá La ho
+  ✓ el toque del 📷 → cartel tarda menos de 200 ms (CPU ×4) · 1 ms
+  ✓ «▶ Voy a iniciar»: campo.tareaInicio.excavacion.juan perez 08:20 (con la gente) y colInicio de la Col 6 · {"ti":"08:20","ci":"08:20"}
+  ✓ … y sigue con lo que quería: la cámara de esa fila (Col 6) se abre en el mismo toque · {"cam":true,"fln":"Col 6"}
+  ✓ la foto de Mis tareas pasa por el récord: «🔥 ¡Récord tuyo! Col 6 en 24 min · Tu mejor era 30 min» · 🔥 ¡Récord tuyo! · Col 6 en 24 min · Tu mejor era 30 min · Pozo
+  ✓ la fila de la Col 6 dice «✓ Col 6 lista · 24 min» (desde «Voy a iniciar») · 1✅ Col 61 de 4📷 +✓ Col 6 lista · 24 mindesde «Voy a iniciar»08:20 → 08:44cambiar−5+5
+  ✓ la cabecera de la tarea: «▶ En marcha desde 08:20 · 24 min» · ▶ En marcha desde 08:20 · 24 minJuan y Pedro
+  ✓ la tarea ya arrancó: el 📷 de la Col 7 abre la cámara directo (sin cartel)
+  ✓ en la orden: campo.pasosObra con el tiempo de cada columna (24, 26, 31) · Col 6 08:20-08:44 24 | Col 7 08:44-09:10 26 | Col 8 09:10-09:41 31
+  ✓ cada fila con su «✓ Col N lista · N min» (y siguen ahí, no es un cartelito que se va) · 1✅ Col 61 de 4📷 +✓ Col 6 lista · 24 mindesde «Voy | 2✅ Col 71 de 4📷 +✓ Col 7 lista · 26 min08:44 → 09 | 3✅ Col 81 de 4📷 +✓ Col 8 lista · 31 min09:10 → 09
+  ✓ «👍 Estuviste bien» en la Col 7 y nada en la Col 8 (31 min) · 🔥 ¡Récord tuyo! · Col 6 en 24 min · Tu mejor era 30 min · Pozo | 👍 Estuviste bien · Col 7 en 26 min · Cerca de tu mejor tiempo (24 min) | ⭐ Todas las fotos bien hoy · Con su columna, su hora y en la obra ·  · 💪 12 días seguidos sin fallas
+  ✓ «cambiar» → −5 en la fila: la Col 8 queda 26 min (empezó 09:15) y los botones siguen abiertos después de redibujar · 3✅ Col 81 de 4📷 +✓ Col 8 lista · 26 min09:15 → 09:41−5+5
+  ✓ Pedro: la tarea ya está iniciada por Juan: «▶ En marcha desde 08:20 · inició Juan», su 📷 no muestra el cartel y no hay una segunda entrada · ▶ En marcha desde 08:20 · 1 h 25 minJuan y Pedro · inició Juan · {"cartel":false}
+  ✓ sin errores (Pedro)
+  ✓ «✓ Se hizo · mandar»: el resumen con el tiempo de cada columna (sin pedir horas) · ✅ Excavación de pozos de fundaciónPlaza Los Álamos · OT-2026-165La hora de cada columna⏱ El tiempo de cada una salió solo de la foto. Si algo no está bien, tocá − / +.Col 6 · 08:20–08:44 · 24 min−5+5C
+  ✓ mandada: tareaEnv, campo.tareaFin 09:50 y la tarea con el rango de sus columnas (08:20 a 09:41) · {"te":"si","tf":"09:50","ht":{"ini":"08:20","fin":"09:41","por":"Juan Pérez","ts":1795013177348}}
+  ✓ ya mandada: la cabecera no ofrece «Voy a iniciar»
+  ✓ en la base: los minutos de cada columna (Col 8 corregida a 26) y un solo inicio
+  ✓ sin errores (Juan)
+  ✓ sin scroll de costado
+  ✓ en la app de Android: el 📷 abre el cartel (la cámara del teléfono todavía no) · cámara 0
+  ✓ «Voy a iniciar» → la cámara del teléfono (plugin Camera) una vez → la foto llega a la fila de la Col 6 (campo.fotos con su columna) · cámara 1
+  ✓ la foto del teléfono marca el fin de la Col 6: 08:30–08:58 · 28 min, en la fila · Col 6 08:30-08:58 28
+  ✓ sin errores (APK)
+  ✓ «Todavía no»: sigue con la foto (la cámara se abre) sin anotar el inicio
+  ✓ y no vuelve a preguntar enseguida por esa tarea
+  ✓ la cabecera de una tarea sin arrancar: «▶ Voy a iniciar esta tarea» · ▶ Voy a iniciar esta tarea
+  ✓ el botón abre el cartel del izaje («Col 2 y 3») · ✕Tarea 2 de 3 · OT-2026-165¿Arrancás con Izaje?Col 2 y 3 · PLAZA LOS ÁLAMOS · con Pedro ▶ Voy a inic
+  ✓ ✕ cierra el cartel sin anotar ni abrir la cámara
+  ✓ «Voy a iniciar» de la cabecera: anota el izaje (09:00) y abre la cámara de su primera columna
+  ✓ y la cabecera pasa a «▶ En marcha desde 09:00»
+  ✓ la zanja (sin columnas): «Voy a iniciar» (pasando por «¿Es otra tarea?» → Zanja) deja tareaInicio y la hora de inicio de la tarea (10:00) · {"ini":"10:00"}
+   tomas de la zanja: Profundidad con la cinta, Ancho con la cinta, Cama de arena y cable apoyado, Protección colocada, Zanja tapada · cant 10
+  ✓ «Se hizo · mandar» de la zanja: la hora de inicio ya viene de «Voy a iniciar» (10:00) · "10:00"
+  ✓ al mandar la zanja (10 m en 30 min; antes 38–45): «🔥 ¡Récord tuyo!» · 🔥 ¡Récord tuyo! · 10 metro de zanjeo troncal en 30 min · Tu mejor era 38 min | ⭐ Todas las fotos bien hoy · Con su columna, su hora y en la obra ·  · 💪 12 días seguidos sin fallas
+  ✓ sin errores
+  ✓ __v166No: Mis tareas como la v165 (el 📷 abre la cámara, sin cabecera ni tiempo en la fila ni récord) · {"cartel":false,"cam":true} · 1✅ Col 61 de 4📷 +
+MEDIDAS {"v165":{"abrir":323,"toque":141,"cartel":false,"todas":[{"abrir":323,"toque":141,"cartel":false},{"abrir":208,"toque":147,"cartel":false},{"abrir":361,"toque":107,"cartel":false}]},"v166":{"abrir":288,"toque":92,"cartel":true,"todas":[{"abrir":288,"toque":71,"cartel":true},{"abrir":360,"toque":117,"cartel":true},{"abrir":242,"toque":92,"cartel":true}]}}
+  ✓ CPU ×6 (mediana de 3): tocar el 📷 → el cartel sin tareas largas nuevas (v166 92 ms contra la cámara de la v165 141 ms) y abrir Mis tareas igual (v166 288 ms · v165 323 ms; tarea más larga)
+RESULTADO v166 cel: 38/38 OK

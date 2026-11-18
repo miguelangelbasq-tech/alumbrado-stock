@@ -1,0 +1,37 @@
+  ✓ al abrir el panel pregunta /salud: el Worker dice v4-ia → respuesta en vivo prendida · {"ls":"1","ok":true}
+  ✓ 30 s dictando: el motor cortó solo 5 veces y el 🎤 y la onda siguieron prendidos todo el tiempo (151 de 151 muestras)
+  ✓ el texto en la caja es todo lo dicho, en orden y sin repetir lo que el motor repite al volver (99 palabras) · 
+  ✓ nunca dos sesiones a la vez y el motor vuelve enseguida (hueco máx. 65 ms)
+  ✓ navegador: interimResults y continuous prendido (fuera de Android) · {"continuous":true,"interim":true,"t":8237.599999999627}
+  ✓ tocar 🎤 otra vez lo apaga: botón y onda apagados, motor parado y el texto queda completo
+  ✓ app 1.4: el plugin arranca con continuousPTT (se vuelve a prender adentro), sin el pitido de Android, con parciales y sin ventana · {"language":"es-AR","maxResults":1,"partialResults":true,"popup":false,"continuousPTT":true,"muteRecognizerBeep":true}
+  ✓ app 1.4: 30 s con 5 cortes del motor (1 del todo, que la app volvió a prender) y el 🎤 nunca se apagó
+  ✓ app 1.4: al tocar 🎤 se apaga y queda todo lo dicho sin repetir (100 palabras) · 
+  ✓ sin ninguna palabra, sigue prendido aunque el motor corte y recién al tope se apaga con aviso · 🎤 Apagué el micrófono porque no escuché nada.
+  ✓ con algo dicho y después silencio largo: se apaga y deja lo dicho · {"on":false,"ay":"🎤 Apagué el micrófono porque no escuché nada más. Tocalo para seguir.","tx":"columna1 columna2 columna3"}
+  ✓ al enviar se apaga el 🎤 y lo que llega tarde NO vuelve a la caja · {"v":"","on":false,"tarde":1,"activa":false,"largo":null}
+  ✓ el mensaje salió con lo dictado hasta el momento · columna1 columna2 columna3 columna4 columna5 columna6 columna7 columna8
+  ✓ charla: el motor cortó a mitad de frase («decime cuántas…») y se mandó la frase entera · decime cuántas columnas le faltan a san martín
+  ✓ charla: el turno termina ~1,5 s después de lo último que se escuchó (1681 ms)
+  ✓ charla: pregunta por voz → effort «low» y respuesta en vivo · [{"effort":"low"},4000,true]
+  ✓ charla: lee la respuesta frase por frase y vuelve a escuchar sin escucharse a sí misma · ["Le faltan ocho columnas de diez metros.","¿Algo más?"]
+  ✓ «💭 Pensando…» aparece al instante, antes de que conteste nada · 💭 Pensando…
+  ✓ con el Worker v4-ia los pedidos van con stream:true
+  ✓ lo que llegó de a pedazos se arma igual que la respuesta entera: pensamiento con su firma, texto y herramienta con su input · [{"type":"thinking","thinking":"busco la obra","signature":"firmaB"},{"type":"text","text":"Me fijo."},{"type":"tool_use","id":"tu_1","name":"buscar_obra","input":{"texto":"san martin"}}]
+  ✓ la herramienta corrió en la app y su resultado volvió en el pedido siguiente
+  ✓ el texto se va escribiendo en la burbuja mientras llega (55 muestras antes del final) · ✨EMA · 12:12Hoy hay dos órdenes. 
+  ✓ al terminar queda la burbuja de siempre con el texto completo (y sin la de «en vivo») · ✨EMA · 12:12ObraHoy hay dos órdenes. La primera es en Plaza San Martín con Juan. La segunda todavía no tiene gente.Escuc
+  ✓ «leer siempre»: empieza a leer con la primera frase, antes de que termine de llegar (2203 ms antes) · ["Hoy hay dos órdenes.","La primera es en Plaza San Martín con Juan.","La segunda todavía no tiene gente."]
+  ✓ lee todo una sola vez (nada repetido) · Hoy hay dos órdenes. La primera es en Plaza San Martín con Juan. La segunda todavía no tiene gente.
+  ✓ tiempos de la pregunta guardados (window.__iaMedidas): primer texto 716 ms de 5622 ms · {"cuando":"12:12:31","texto":"qué órdenes hay hoy en san martín y quién va","modelo":"claude-opus-5-5","effort":"low","stream":true,"primero":716,"total":5622,"armar":1,"red":5615,"herr":1,"nHerr":1,"pintar":1,"kb":81}
+  ✓ effort: pregunta corta → low; revisar/comparar, armar una orden o una pregunta larga → como antes · ["low/4000","medium/16000","medium/16000","medium/16000"]
+  ✓ con el Worker v3-ia, /salud apaga la respuesta en vivo
+  ✓ sin v4: el pedido va sin stream y la respuesta llega entera como siempre
+  ✓ si pidió en vivo y llega JSON entero, igual muestra la respuesta
+  TIEMPOS celu CPU×4 · Claude simulado 1800 ms en dos vueltas · antes (v148): primer texto 1840 ms, fin 1840 ms · ahora (v149): primer texto 343 ms, fin 2091 ms · lo de la app (armar 10 ms, herramientas 2 ms, dibujar 6 ms, pedido 92 KB)
+  ✓ con respuesta en vivo, el primer texto aparece mucho antes: 343 ms contra 1840 ms
+  ✓ el total no empeora: 2091 ms contra 1840 ms
+  ✓ lo que pone la app es poco: armar el pedido 10 ms, dibujar 6 ms
+  ✓ sin scroll de costado · 0
+  ✓ sin errores de JS []
+RESULTADO v149 cel: 35/35 OK

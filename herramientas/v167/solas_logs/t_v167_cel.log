@@ -1,0 +1,95 @@
+— 0 · qué cámara trasera usa (2 traseras: la gran angular primero)
+    cámaras pedidas: ultra → main · enumerateDevices: 1 · último pedido: {"audio":false,"video":{"facingMode":{"ideal":"environment"},"width":{"ideal":1920},"height":{"ideal":1440},"deviceId":{"exact":"main"}}}
+  ✓ la cámara de la app se queda con la principal de atrás («camera2 0»), no la gran angular: ultra → main
+  ✓ queda anotada en el celu (ema.cam.principal) · {"id":"main","label":"camera2 0, facing back","ts":1795014780129}
+  ✓ botones de zoom 1× 2× 3× en la cámara
+  ✓ la vez siguiente pide directo la principal (un solo pedido): main
+  ✓ si la anotada no abre, vuelve a «la de atrás» y la cámara anda igual: ultra → main
+  ✓ sin errores ()
+— 1 · zoom del aparato (getCapabilities().zoom 1–8)
+  ✓ lee el zoom del aparato (1× a 8×)
+  ✓ «2×»: applyConstraints({advanced:[{zoom:2}]}), sin agrandar la imagen en la pantalla · {"advanced":[{"zoom":2}]}
+  ✓ con el zoom del aparato la foto sale entera (1024×768, el aparato ya acercó)
+  ✓ «3×» → zoom 3
+  ✓ pellizco con dos dedos (de 80 a 220 px) → zoom 2.75 del aparato
+  ✓ muestra el valor («2,8×») cuando no es 1× / 2× / 3×
+  ✓ sin errores ()
+— 2 · zoom digital (el aparato no tiene zoom)
+    Modo obra: FotoTOCÁ ACÁ
+  ✓ Modo obra: los botones no tapan el disparador, la fila para nombrar ni «Listo»
+  ✓ Modo obra (ráfaga) con 2×: la foto = lo que se ve y la cámara sigue abierta (683×1024)
+  ✓ el aparato no ofrece zoom → digital
+  ✓ 1×: la foto entera (1024×768, del rojo al amarillo) · {"w":1024,"h":768,"L":"R","R":"Y","C":""}
+  ✓ «2×»: la imagen se agranda en la pantalla (scale(2))
+  ✓ 2×: la foto = lo que se ve (683×1024, bordes G…B; se ve 960×1440 del video, G…B)
+  ✓ la marca en vivo queda sobre lo que se ve (= la foto)
+  ✓ 3×: también (640×1004, G…B)
+  ✓ cámara de la barra: los botones de zoom (44 px) no tapan el disparador, la fila para nombrar ni la píldora
+  ✓ pellizco: zoom 2.75 (scale(2.75))
+  ✓ con el pellizco la foto también = lo que se ve (652×1024)
+  ✓ con la cámara tibia el zoom sigue (2.75)
+  ✓ cerrada del todo, vuelve a 1×
+  ✓ sin errores ()
+— 3 · cámara C (v165)
+  ✓ cámara C: los botones de zoom no tapan la píldora, el reloj, «Col ▾», «Terminé», las miniaturas ni el disparador
+  ✓ cámara C con 2×: la foto = lo que se ve (683×1024)
+  ✓ sin errores ()
+— 4 · destello con y sin zoom (toques reales, CPU ×6)
+    Modo obra 1× (zoom 1, digital 1): toque → destello 23 · 270 · 26 · 79 · 18 ms (mediana 26) · tareas largas: 29 (la más larga 292 ms) · fotos 5
+  ✗ Modo obra 1×: destello ≤ 100 ms (mediana 26) y ninguno > 250 (270)
+  ✓ Modo obra 1×: ninguna tarea larga > 300 ms con la cámara abierta (la más larga 292; en esta máquina la v166 da 140–420 en t_v164 grupo 5)
+  ✓ Modo obra 1×: las 5 fotos salieron (5)
+    Modo obra 2× digital (zoom 2, digital 2): toque → destello 42 · 91 · 22 · 92 · 22 ms (mediana 42) · tareas largas: 32 (la más larga 233 ms) · fotos 5
+  ✓ Modo obra 2× digital: destello ≤ 100 ms (mediana 42) y ninguno > 250 (92)
+  ✓ Modo obra 2× digital: ninguna tarea larga > 300 ms con la cámara abierta (la más larga 233; en esta máquina la v166 da 140–420 en t_v164 grupo 5)
+  ✓ Modo obra 2× digital: las 5 fotos salieron (5)
+    Modo obra 2× del aparato (zoom 2, digital 1): toque → destello 49 · 9 · 59 · 12 · 17 ms (mediana 17) · tareas largas: 23 (la más larga 372 ms) · fotos 5
+  ✓ Modo obra 2× del aparato: destello ≤ 100 ms (mediana 17) y ninguno > 250 (59)
+  ✗ Modo obra 2× del aparato: ninguna tarea larga > 300 ms con la cámara abierta (la más larga 372; en esta máquina la v166 da 140–420 en t_v164 grupo 5)
+  ✓ Modo obra 2× del aparato: las 5 fotos salieron (5)
+    Cámara de la barra 1× (zoom 1, digital 1): toque → destello 440 · 10 · 35 · 39 · 39 ms (mediana 39) · tareas largas: 22 (la más larga 434 ms) · fotos 5
+  ✗ Cámara de la barra 1×: destello ≤ 100 ms (mediana 39) y ninguno > 250 (440)
+  ✗ Cámara de la barra 1×: ninguna tarea larga > 300 ms con la cámara abierta (la más larga 434; en esta máquina la v166 da 140–420 en t_v164 grupo 5)
+  ✓ Cámara de la barra 1×: las 5 fotos salieron (5)
+    Cámara de la barra 2× digital (zoom 2, digital 2): toque → destello 9 · 109 · 710 · 441 · 46 ms (mediana 109) · tareas largas: 23 (la más larga 520 ms) · fotos 5
+  ✗ Cámara de la barra 2× digital: destello ≤ 100 ms (mediana 109) y ninguno > 250 (710)
+  ✗ Cámara de la barra 2× digital: ninguna tarea larga > 300 ms con la cámara abierta (la más larga 520; en esta máquina la v166 da 140–420 en t_v164 grupo 5)
+  ✓ Cámara de la barra 2× digital: las 5 fotos salieron (5)
+    medianas: Modo obra 1× 26 ms · 2× digital 42 ms · 2× aparato 17 ms · cámara de la barra 1× 39 ms · 2× digital 109 ms
+— 5 · galería de la cuadrilla (Juan)
+  ✓ «📷 Mis fotos» abre la galería con «☑ Elegir»
+  ✓ hoja «☑ Elegir fotos» (.v7-ov, role=dialog, ✕) con sus 3 fotos y la que estaba mirando ya elegida · {"dlg":true,"n":3,"on":1,"st":true}
+  ✓ «Elegir todas»: «3 elegidas de 3», «📤 Enviar (3)», «🗑 Borrar (3)»
+  ✓ «↔ Mover» con las reglas de la v152 (la cuadrilla, solo sus fotos de su orden)
+  ✓ «Ninguna» saca todas
+  ✓ «📤 Enviar (3)»: el menú del celu con las 3 fotos de una (navigator.share) · {"n":3,"tipos":["image/png","image/png","image/png"],"kb":[74,74,74],"text":"📷 3 fotos de PLAZA LOS ÁLAMOS · EMA Servicios · Alumbrado Público"}
+  ✓ pide «¿Borrar 2 fotos?» (ventana propia con ✕, no confirm) · ¿Borrar 2 fotos?No van a contar ni las va a ver la oficina. Si hacía falta, sacá otra.✕Can
+  ✓ se borraron las 2 (quedan «borrada» en la orden, como «🗑 La última»); las otras quedan · {"hf1":false,"hf2":true,"hf3":true,"hp1":false}
+  ✓ la hoja queda con la que sigue
+  ✓ con una de Pedro: «🗑 Borrar (1)» y «1 no es tuya» · 🗑 Borrar (1) · 1 no es tuya (o ya se mandó la orden)
+  ✓ solo la de Pedro elegida: «Borrar» apagado
+  ✓ la barra de elegir (mantener apretada) también dice «Enviar (1)» y «Borrar (1)» para la cuadrilla · ✕1 elegida Todas📤Enviar (1)⬇Bajar↔Mover🗑Borrar (1)
+  ✓ sin errores ()
+— 6 · «cuando sacás varias fotos» (cámara de la barra)
+  ✓ las 3 fotos caen solas en la orden y en el legajo de la obra (fotosObra con su obra)
+  ✓ la última foto (abajo a la izquierda) abre la galería con «☑ Elegir»
+  ✓ «📤 Enviar (3)» desde la cámara: 3 JPEG · {"n":3,"tipos":["image/jpeg","image/jpeg","image/jpeg"],"kb":[506,506,506],"text":"📷 3 fotos de PLAZA BULEVARES · EMA Servicios · Alumbrado Público"}
+  ✓ la cámara sigue abierta debajo (al cerrar la hoja se sigue sacando)
+  ✓ sin errores ()
+— 7 · app de Android
+  ✓ en la app: «Enviar (3)» → Share con los 3 archivos en la caché · ["file:///cache/comp_1795015248306_0_EMA_PLAZA_LOS_ALAMOS_Montaje_de_columna_PRFV_Col_1_20261118_1205_1.png","file:///cache/comp_1795015248360_1_EMA_PLAZA_LOS_ALAMOS_Montaje_de_columna_PRFV_Col_2_20261118_1207_2.png","file:///cache/comp_1795015248793_2_EMA_PLAZA_LOS_ALAMOS_Montaje_de_columna_PRFV_Col_3_20261118_1208_3.png"]
+  ✓ sin errores ()
+— 8 · oficina en el legajo y solo mirar
+  ✓ legajo «☑ Elegir fotos»: «2 elegidas», «Enviar (2)», «Borrar (2)» (la oficina borra las de cualquiera) · ✕2 elegidas Todas📤Enviar (2)⬇Bajar↔Mover🗑Borrar (2)
+  ✓ la barra entra en la pantalla
+  ✓ celu: «Enviar (2)» → el menú del celu con 2 fotos
+  ✓ pide «¿Borrar 2 fotos?»
+  ✓ la oficina borró las 2 (fotosBorradas de la obra, como el legajo de siempre)
+  ✓ el legajo ya no las muestra
+  ✓ sin errores ()
+  ✓ solo mirar: solo «Enviar» (sin Borrar ni Mover)
+  ✓ sin errores ()
+— 9 · __v167No
+  ✓ con __v167No: la cámara como antes (sin zoom ni elegir la principal) · ultra
+  ✓ con __v167No: la galería sin lista de fondo sigue sin «☑ Elegir»
+RESULTADO v167 cel: 70/76 FALLAS

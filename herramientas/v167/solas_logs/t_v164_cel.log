@@ -1,0 +1,80 @@
+— 0 · el disparador responde siempre (Modo obra, CPU ×6)
+  ✓ al apoyar el dedo en «Foto» la cámara ya se empieza a prender (precalentada)
+  ✓ tocar antes de que haya imagen: el destello sale en el mismo toque
+  ✓ y avisa «La cámara está arrancando… la saco apenas se vea» (La cámara está arrancando… la saco apenas se vea)
+  ✓ la foto se saca sola apenas aparece la imagen (antes: no pasaba nada)
+  ✓ Modo obra: la cámara queda abierta para la siguiente (ráfaga, con «Listo»)
+  ✓ ráfaga: dos toques seguidos = dos fotos
+  ✓ la fila pasa sola a la columna siguiente después de cada foto (Col 2 → Col 4)
+  ✓ «Listo»: sale de la cámara y muestra «Foto guardada»
+  ✓ después de la foto la cámara queda tibia (lista para «Sacar otra»)
+  ✓ «Sacar otra» abre con la cámara tibia (sin volver a pedirla)
+  ✓ una foto por vez: la cámara se va después del toque
+  ✓ dos toques seguidos: una sola foto
+  ✓ sin errores ()
+  ✓ si la cámara no muestra imagen: «Tocá ✕ y abrila de nuevo, o usá la del teléfono»
+  ✓ las fotos quedaron en la orden (4)
+— 1 · cámara de la barra: 5 fotos seguidas con la cámara abierta
+  ✓ la cámara de la barra tiene la fila para nombrar (Columna · Tablero · PAT · Zanja · Acometida · Otro…)
+  ✓ la oficina ve las 5 fotos (con su miniatura) antes de cerrar la cámara
+    disparo → la oficina la ve: 4.6 s · 14.4 s · 8.5 s · 5.6 s · 5.0 s · disparo → disparador listo: 4.3 s · 4.7 s · 5.6 s · 5.2 s · 4.8 s
+  ✓ cada foto llega a la oficina en menos de 15 s con la cámara abierta (CPU ×6)
+  ✓ las fichas del legajo (fotosObra) llegan a la base con la cámara abierta
+  ✓ en la orden quedaron exactamente 5 fotos nuevas (sin duplicar): 5
+  ✓ las 5 imágenes están subidas (adjuntos con el mismo número que la orden)
+  ✓ una sola ficha del legajo por foto (fotosObra con el mismo número)
+  ✓ ya no dicen «subiendo…» y tienen su miniatura
+  ✓ la bandeja del celu quedó vacía
+  ✓ sin errores ()
+— 2 · nombrar en la cámara de la barra, sin salir de la cámara
+  ✓ un toque en «Tablero»: el número grande y la marca en vivo dicen Tablero
+  ✓ la foto quedó como Tablero en el legajo (cat tablero)
+  ✓ PAT: la foto dice PAT 1
+  ✓ «Otro…» abre el teclado chico adentro de la cámara
+  ✓ el texto escrito queda en el número grande y en la marca
+  ✓ la foto dice «Medidor» (cat otra)
+  ✓ la foto siguiente mantiene «Medidor»
+  ✓ la próxima vez, «Medidor» está para elegir de un toque
+  ✓ Columna con ‹ ›: Col 1 → Col 2
+  ✓ la foto dice Col 2
+  ✓ después de la foto pasa sola a la columna siguiente (Col 1)
+  ✓ todo sin salir de la cámara (no se abrió ninguna otra pantalla)
+  ✓ en la orden: las fotos de «Medidor» con lo elegido (campo.fotos)
+  ✓ sin errores ()
+— 3 · Modo obra: nombrar en la cámara y la oficina en el «📸 Avance»
+  ✓ en Modo obra la cámara trae la fila: ‹ Col › y Columna · Tablero · PAT · Zanja · Acometida · Otro…
+  ✓ ‹ › cambia la columna: Col 1 → Col 2
+  ✓ la marca en vivo dice la columna
+  ✓ la oficina ve la foto en el «📸 Avance» con «subiendo…» mientras la imagen sube (10.9 s del disparo)
+  ✓ la foto quedó en la orden con lo elegido (Col 2)
+  ✓ «Tablero» (no hay tarea de tablero en la orden): va a la orden sin tarea
+  ✓ la foto del tablero quedó en la orden como foto suelta (sin tarea, la oficina la mueve con ↔ Mover)
+  ✓ la foto siguiente mantiene «Tablero»
+  ✓ «Otro…»: «Caño roto» en el número y en la marca
+  ✓ la foto de «Caño roto» está en la orden
+  ✓ volver a «Columna» propone la siguiente sin foto (Col 1)
+  ✓ las 3 fotos subidas, sin duplicar y sin «subiendo…» (3)
+  ✓ una ficha del legajo por foto
+  ✓ la ficha del legajo dice Col 2
+  ✓ sin errores ()
+— 4 · sin señal y vuelve; cerrar la app a mitad; con __v164No como antes
+  ✓ sin señal: no llega nada a la base (todavía)
+  ✓ las 2 fotos están guardadas en el celu (bandeja)
+  ✓ vuelve la señal: las 2 llegan solas a la orden
+  ✓ cerrar la app a mitad: la foto se recupera y sube sola (3 en la orden, 3)
+  ✓ nada se duplica: una ficha del legajo y una imagen por foto
+  ✓ ninguna queda con «subiendo…»
+  ✓ sin errores ()
+  ✓ con __v164No: la cámara de la barra como antes (sin la fila nueva ni la cola nueva)
+— 5 · toques reales (CDP), 5 seguidos a 1 por segundo, Modo obra y cámara de la barra (CPU ×6)
+    Modo obra: toque → destello en pantalla 11 · 41 · 9 · 16 · 4 ms (mediana 11) · tareas largas con la cámara abierta: 21 (> 100 ms: 7, la más larga 165 ms)
+  ✓ Modo obra: los 5 toques dieron su destello
+  ✓ Modo obra: destello en ≤ 100 ms (mediana) y ninguno pasa de 250 ms
+  ✓ Modo obra: ninguna tarea larga de más de 200 ms con la cámara abierta
+    Cámara de la barra: toque → destello en pantalla 5 · 133 · 140 · 16 · 3 ms (mediana 16) · tareas largas con la cámara abierta: 34 (> 100 ms: 9, la más larga 149 ms)
+  ✓ Cámara de la barra: los 5 toques dieron su destello
+  ✓ Cámara de la barra: destello en ≤ 100 ms (mediana) y ninguno pasa de 250 ms
+  ✓ Cámara de la barra: ninguna tarea larga de más de 200 ms con la cámara abierta
+  ✓ las 10 fotos quedaron en la orden
+  ✓ sin errores ()
+RESULTADO v164: 70/70 OK

@@ -1,0 +1,79 @@
+  ✓ tarjeta del Inicio Ejecutivo: «Mañana: N órdenes sugeridas» con las obras y el botón · 📋Mañana: 3 órdenes sugeridasJueves 19/11 · las armó la app con lo que queda de cada obra y la gente libre. Nada sale si
+  ✓ obra sin cálculo (BARRIO SAN VICENTE): no se sugiere y va a «Sin cálculo: no puedo sugerir»
+  ✓ misma cuadrilla hasta terminar: Los Álamos con Juan y Pedro (la de la última orden) · Juan Pérez,Pedro Gómez
+  ✓ izaje: las 4 que quedan, Col 9 a Col 12 (las siguientes a las de foto), con el porqué y el fraguado cumplido · {"k":"montaje_prfv","cant":4,"cols":"Col 9 a Col 12","porque":"Quedan 4 de 12 | Bases hormigonadas el 12/11: ya pasaron las 72 h de fraguado | Según Ángel: todo la cuadrilla, 4–5 por día con 2 y grúa | Cuadrilla de montaje","fuente":"angel"}
+  ✓ izaje con 2 personas: «Según Ángel: todo la cuadrilla, 4–5 por día»
+  ✓ lo que quedó de ayer: el vínculo «se hicieron 6 de 8» en la OT-2026-134, columnas siguientes · {"k":"montaje_vinculo","cant":4,"cols":"Col 7 a Col 10","porque":"Quedó de la orden del 17/11 en la OT-2026-134 (se hicieron 6 de 8) | Quedan 6 de 12 | 4 van con el izaje (según Ángel: «poner vínculo, subir») | Diccionario: 1 HH por vínculo (a confirmar) | Cuadrilla de montaje","fuente":"dicc"}
+  ✓ sugerencia «Lo ideal: el equipo civil antes → 13 por día» (no obligatoria)
+  ✓ falta material: la reserva contra el stock del pañol (solo aviso)
+  ✓ vehículos: la grúa para el izaje y la hidro de Juan para el vínculo en altura · vG,vH1
+  ✓ puntos estimados y jornada usada/disponible · 21.6 · 16,16
+  ✓ fraguado con fecha: Las Acacias se hormigonó ayer → no se iza mañana (izaje desde …) · montaje_prfv: se hormigonaron el martes 17/11 → fraguan hasta el viernes 20 → izaje desde el sábado 21/11 (72 h)
+  ✓ persona ocupada: Diego ya tiene la OT-2026-139 ese día (no se repite)
+  ✓ equipo civil: va a Las Acacias (izaje pendiente sin el cable a la vista) · Raúl Sosa,Javier Olariaga,Ronaldo Paz,Axel Díaz
+  ✓ zanja: 100 m por día según Ángel, con tope en lo que falta (96) · {"k":"zanjeo","cant":96,"cols":"","porque":"Quedan 96 de 180 | Según Ángel: 100 m por día, a mano (varía según terreno y profundidad) | Equipo civil","fuente":"angel"}
+  ✓ tendido: lo que hay de zanja abierta (320 × 84/180 = 149 m) · 149
+  ✓ el equipo civil con transporte (Hilux)
+  ✓ pozos y hormigonado de toda la obra el mismo día (6 y 6)
+  ✓ más de 5 bases → «Pedir camión de hormigón»
+  ✓ fraguado sin fecha (cargadas a mano): no bloquea, avisa «No sé cuándo se hormigonaron»
+  ✓ ausencias: Lucas de vacaciones no se propone y se avisa «Cambia la cuadrilla»
+  ✓ sin vehículo: aviso rojo
+  ✓ gente libre: Ana Torres en «Sin orden»
+  ✓ rendimiento medido (3 cierres: 8 por día con 2) contra el del diccionario (16) · {"m":"medido 8","d":"dicc 16","txt":"Medido: 8 por día con 2 (3 cierres)"}
+  ✓ modos de izaje: todo 4 (tope 5) · civil 13 con 3 · caño 6 con 2 · caño 12 con 3 y civil · guía 3 · {"todo":["todo",4,5],"civil":["civil",13,13],"cano2":["cano2",6,6],"cano3":["cano3",12,12],"guia":["guia",3,3]}
+  ✓ sábado de 7:30 a 13:00 = 5,5 h (hasta las 14 = 6,5 h); domingo no · {"a":5.5,"b":6.5,"dom":0}
+  ✓ jabalina con su conexión el mismo día que los tableritos (4 con 4) · {"k":"pat","cant":4,"cols":"","porque":"Quedan 12 de 12 | Con los tableritos de esas columnas | Según Ángel: la jabalina con su conexión va el mismo día que los tableritos | Cuadrilla de montaje","fuente":"angel"}
+  ✓ sellado y aplomado del civil: solo las columnas izadas (8 de 12) · {"k":"sellado_base","cant":8,"cols":"Col 1 a Col 8","porque":"Quedan 12 de 12 | Solo las columnas ya izadas (con el cable subido) | Según Ángel: el equipo civil sella, pone la arena y aploma todas las que estén listas | Equipo civil","fuente":"angel"}
+  ✓ lugares: no más gente que lugares (grúa de 2 con 3 personas)
+  ✓ semana encadenada: lo que se iza el primer día ya no queda para el segundo (4 en total) · [["montaje_prfv:4","montaje_vinculo:4"],["montaje_vinculo:2","montaje_luminaria:12","conexionado_tablerito:2","pat:2"],["conexionado_tablerito:5","pat:5"],["conexionado_tablerito:5","pat:5"],[]]
+  ✓ fraguado igual en metálica: Plaza del Sol se hormigona el primer día y al otro no se iza · montaje_metalica: Col 5 a Col 10: se hormigonaron el jueves 19/11 (en la sugerida) → fraguan hasta el domingo 22 → izaje desde el lunes 23/11 (72 h)
+  ✓ hoja de sugeridas: una tarjeta por obra con el porqué y «Sin cálculo»
+  ✓ KPIs arriba: órdenes, personas, puntos, avisos · 3órdenes7personas113,2puntos7avisos
+  ✓ pestaña «Por persona»: quién va a dónde, libres y ausentes
+  ✓ pestaña «Semana» con «Emitir el día»
+  ✓ cambiar gente: tocar a Pedro lo saca y se recalculan jornada (8 HH) y puntos · 8,8 · 10.8
+  ✓ sumar a un libre (＋ Ana) y − en la cantidad (izaje 4 → 3)
+  ✓ «Volver a la sugerida» deja todo como estaba
+  ✓ nada se escribe en la base al abrir, mirar y cambiar la sugerida (solo con «Emitir» / «Guardar»)
+  ✓ tocar un ajuste no guarda nada todavía
+  ✓ ajustes que se guardan en configEquipo/baremo.sugerida (con «Guardar») · {"sabFin":"14:00","jornada":8}
+  ✓ 🧠 Lo que aprende la app › ⏱ Tiempos: lo medido por tarea (con datos, diferencia, personas y cuadrilla)
+  ✓ 📦 Material: lo que ya existe y «Próximamente…»
+  ✓ 📤 Plan para la inspección: hoja A4 con obra, ID, tareas, cuadrilla (cuántos y responsable), vehículo y horario, sin puntos ni plata
+  ✓ emitir las 3: tres órdenes con su número OT · OT-2026-140,OT-2026-141,OT-2026-142
+  ✓ la orden de Los Álamos: personalNombres, tareas, fecha y la grúa · {"pn":["juan perez","pedro gomez"],"prev":{"montaje_prfv":4,"montaje_vinculo":4},"veh":["vG","vH1"]}
+  ✓ aviso al celu al emitir a cada uno (7 personas) · 7
+  ✓ recordatorio a las 7:00 del día (enviarDesde = 7:00 de Argentina, «Hoy: obra · tareas») · 7 · Hoy: PLAZA LOS ÁLAMOS · 07:00 · Montaje de columna PRFV ×4, Montaje del vínculo en la columna ×4
+  ✓ la hoja dice qué órdenes salieron
+  ✓ después de emitir, la sugerida muestra las emitidas (no las vuelve a proponer)
+  ✓ la tarjeta del Inicio queda «Emitidas 3 de 3» · 📋Mañana: emitidas 3 de 3Jueves 19/11 · las armó la app con lo que queda de cada
+  ✓ Producción › Personal del equipo: 🗓 Ausencias, 🦺 Equipo civil y 🚚 tipo y lugares de cada vehículo
+  ✓ ausencia agregada en configEquipo/personal.ausencias
+  ✓ Llenar orden avisa si eligen a alguien ausente (solo aviso)
+  ✓ sin errores de la página · 
+  ✓ grúa ocupada: no se propone izaje y se avisa · montaje_prfv: Bases hormigonadas el 12/11: ya pasaron las 72 h de fraguado · La grúa ya va a OT-2026-150 ese día: no hay izaje
+  ✓ emitir solo la incluida (casilla de cada obra)
+  ✓ «Avisar a cada uno al celu» apagado: no sale el aviso de siempre
+  ✓ igualdad con Llenar orden: el documento guardado es el mismo (sin id, número ni fechas de creación) · diferencias: 
+  ✓ los puntos al cerrar dan igual por los dos caminos (sin la hora del cierre) · [{"nombre":"Juan Pérez","rol":"Oficial","pts":13.5,"aMano":false,"asignado":0},{"nombre":"Pedro Gómez","rol":"Ayudante","pts":8.1,"aMano":false,"asignado":0}]
+  ✓ el avance / «Quedan» de la obra queda igual por los dos caminos
+  ✓ la sugerida avisa que ya hay una orden de esa obra ese día
+  ✓ al emitir aparece «Ya hay una orden para … ese día» (unaObra), arriba de la hoja
+  ✓ «Sumar a la OT-2026-160»: la gente y las tareas van a esa orden · ["ana torres","juan perez","pedro gomez"]
+  ✓ chip «📋 Órdenes de mañana» en el asistente
+  ✓ oficina recibe ordenes_sugeridas, proponer_ordenes_sugeridas y proponer_rendimiento
+  ✓ ordenes_sugeridas le pasa al modelo lo que calcula el mismo motor de la hoja (obras, tareas, porqué)
+  ✓ tarjeta antes → después con «Sí, emitir las 2» / «Abrir la hoja» / «No» · Para confirmar · no se hace solo📋 Órdenes sugeridas · jueves 19/11/2026📍 2 órdenes · 5 personasPLAZA LOS ÁLAMOS · Montaje de columna PRFV4 columna → 3 columna
+  ✓ con el «Sí» se emiten por «Llenar orden» (2 órdenes)
+  ✓ a mano en la hoja: los mismos tres cambios quedaron aplicados
+  ✓ lo que propone el asistente sale igual que haciendo los mismos cambios a mano en la hoja · 2  | 
+  ✓ «✨ Revisar con el asistente»: un solo pedido (pregunta) con la sugerida armada → «Está bien así»
+  ✓ revisión con una propuesta (sacar Plaza del Sol) que se acepta: salen las otras 2
+  ✓ «✨ Informe del asistente» le manda los tiempos ya agregados, sin plata
+  ✓ con el «Sí» el rendimiento propuesto se guarda en Ajustes de la sugerida
+  ✓ cuadrilla: no recibe ordenes_sugeridas ni las propuestas
+  ✓ cuadrilla: no ve la orden sugerida
+  ✓ solo mirar: no recibe ordenes_sugeridas ni las propuestas
+  ✓ solo mirar: no ve la orden sugerida
+RESULTADO v143 cel: 78/78 OK
