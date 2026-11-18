@@ -53,7 +53,7 @@ def nuevo(A):
         ['Rol «Dirección»', 'Un rol nuevo para gerencia y el dueño: ve todo, consulta todo con el Asistente y no cambia nada.'],
         ['📨 Para resolver', 'La cuadrilla, el pañol y «solo mirar» le avisan a la oficina por el Asistente («che, falta material», «me faltaron puntos»). La oficina lo ve, responde, y un reclamo de puntos se analiza y se autoriza o no.'],
         ['Órdenes', '**Lo hecho, verificado**: cada orden dice si se cumplió (✅ 2 de 3, 🟡, ⚠ dudosa) con las fotos y la hora de cada columna; la app avisa antes de mandar a hacer algo que ya está hecho. **Columnas en Llenar orden**. **✏ Corregir cierre** de una orden ya cerrada. Motivo obligatorio al tocar puntos a mano.'],
-        ['Avance de obra', 'Pantalla nueva por rubro y por columna, que se mueve sola con las órdenes. El % de la obra sale de ahí. Se marca a mano con motivo: **Columna completa**, **Elegir varias**, **⚡ Poner al día esta obra**, **🏁 Está toda terminada**. El itemizado queda para la plata. **🔎 Control del avance** explica cada número.'],
+        ['Avance de obra', 'Pantalla nueva por rubro y por columna, que se mueve sola con las órdenes. El % de la obra sale de ahí. Se marca a mano rápido con **✏ Carga rápida** («10 de 12», **Todas**, tocando la grilla, con **↶ Deshacer**), **Columna completa**, **Elegir varias**, **⚡ Poner al día esta obra**, **🏁 Está toda terminada**. El itemizado queda para la plata. **🔎 Control del avance** explica cada número.'],
         ['Obras', 'Pestañas **Falta documentación** y **Terminadas**, ficha **📄 Documentación** (carpeta, conforme a obra, PAT, certificado). **↔ Mover** fotos de obra, de columna o de orden. **🎥 Videos y PDF** en el legajo.'],
         ['Producción y puntos', '**🔎 Revisar y explicar los puntos**: cada punto explicado con la cuenta, revisión de errores y correcciones con **Sí**. **Crear tareas nuevas** con la calculadora (puntos = horas-hombre × dificultad).'],
         ['Cuadrilla', '**▶ Voy a iniciar esta tarea** y la **cámara de la tarea**: cada foto marca una columna y queda el **tiempo de cada columna**. «Otra tarea» con botones o dictada. **Récords** personales. Lo mismo en **Mis tareas**. Las fotos **no se pierden** (quedan en el celu hasta que suben).'],
@@ -472,7 +472,14 @@ def parte1(A, modo):
     ])
     A.img('n158_avance_flash_pc', 'El avance de una obra: resumen arriba, rubros abajo')
     A.h(3, 'Marcar a mano')
-    A.p('Tocá una columna (o una celda) y se abre su hoja: lo que tiene cada paso y de dónde salió, sus fotos y videos, y los botones **✅ Columna completa**, destildar un paso o **Se arruinó**. Para muchas a la vez, **Elegir varias**: tocás las celdas y marcás todas juntas. Siempre pide el **motivo** y queda en el historial.')
+    A.p('Lo más rápido es la tarjeta **✏ Carga rápida**, arriba del avance: por cada paso (pozo, hormigón, izaje, vínculo, artefacto, tablerito, sellado, PAT) ponés cuántas columnas lo tienen hecho (**−** / **+**, escribiendo el número, **Todas** o **Ninguna**) y tocás **Listo**. Se marcan las primeras que faltan, en orden. Lo que no va por columna (zanja, cable, tablero…) va igual, abajo.')
+    A.vinetas([
+        'Marcar un paso marca también los de antes en esas columnas, y te pregunta: «Marcar 10 izadas también marca pozo y hormigón de esas 10 (ya fraguado)» → **Sí** o **Solo el izaje**. Al sacar uno pregunta si sacás también los pasos que siguen.',
+        'En la grilla, con **✏ Tocar marca: Sí**, tocar una celda la marca o la saca al toque; mantenela apretada para ver su hoja. Lo que vino de una orden no se saca tocando: se abre su hoja.',
+        'Después de cada cambio aparece **↶ Deshacer** unos segundos.',
+        'Por ahora **no pide el motivo** (queda «Carga rápida del avance» en el historial).' + (' Administración lo vuelve a pedir en la misma tarjeta: **Pedir motivo al cambiar el avance a mano: Sí**.' if adm else ''),
+    ])
+    A.p('Tocá una columna (o una celda, con «Tocar marca: No») y se abre su hoja: lo que tiene cada paso y de dónde salió, sus fotos y videos, y los botones **✅ Columna completa**, destildar un paso o **Se arruinó**. Para muchas a la vez, **Elegir varias**: tocás las celdas y marcás todas juntas. Todo queda en el historial.')
     A.img('n158_columna_pc', 'La hoja de una columna')
     A.img('n158_elegir_varias_pc', '«Elegir varias»: varias celdas juntas')
     A.p('Al marcar el hormigón a mano pregunta **¿Cuándo se hormigonó?**: **Ya hace días (está fraguado)** (viene marcado), **Hoy** o **Ayer**. Solo con «Hoy» o «Ayer» la base queda «fraguando» las 72 horas. Si marcás el izaje sobre una base que todavía fragua, lo marca igual y avisa.')
@@ -481,7 +488,7 @@ def parte1(A, modo):
     A.pasos([
         'Si está toda hecha, **🏁 Está toda terminada** y listo (3 toques).',
         'Si no: elegí las columnas (todas, o **desde** / **hasta**) y los pasos hechos (**Todo** o los atajos civil / izaje), y lo que no va por columna (zanja, cable, tablero…) con su cantidad.',
-        'El motivo viene escrito («Puesta al día del avance»); cambialo si querés. Mirá el resumen antes → después y tocá **Sí, marcar**.',
+        'El motivo viene escrito («Puesta al día del avance»), cambialo si querés. Mirá el resumen antes → después y tocá **Sí, marcar**.',
     ])
     A.img('p10_puesta', 'Poner al día una obra')
     A.vinetas([

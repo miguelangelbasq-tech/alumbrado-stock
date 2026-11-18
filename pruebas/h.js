@@ -108,6 +108,7 @@ async function abrir(op = {}) {
   if (!op.v167) await page.addInitScript(() => { window.__v167No = true; });   // v167: las pruebas viejas siguen sin zoom en la cámara ni la hoja «Elegir fotos» (Enviar / Borrar varias); v167:true lo prueba
   if (!op.v168) await page.addInitScript(() => { window.__v168No = true; });   // v168: las pruebas viejas no ven las luminarias armadas (receta, armar, llevar a obra, depósito) ni el desglose de las armadas en piezas; v168:true lo prueba
   if (!op.v169) await page.addInitScript(() => { window.__v169No = true; });   // v169: las pruebas viejas siguen con la tarjeta de las armadas dentro de Catálogo pañol (sin la subpestaña «🔧 Armadas»); v169:true lo prueba
+  if (!op.v170) await page.addInitScript(() => { window.__v170No = true; });   // v170: las pruebas viejas siguen con el motivo obligatorio al cambiar el avance a mano y sin la «✏ Carga rápida» ni «Tocar marca» en la grilla; v170:true lo prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];
