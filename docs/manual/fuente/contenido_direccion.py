@@ -285,13 +285,10 @@ def asistente(A):
         'Podés seguir la charla: «¿y la de Las Acacias?», «mostrame las fotos», «armámelo en PDF».',
     ])
     A.h(2, 'Lo que puede y lo que no')
-    A.tabla(['Sí', 'No'], [
-        ['Contestar todo lo que hay en la app, con números: avance, plata, gastos, puntos, tiempos, stock, personal.', 'Cambiar datos (órdenes, avance, puntos, obras, pañol). Eso lo hace la oficina.'],
-        ['Explicar de dónde sale un número (el avance de un ítem, los puntos de alguien) y revisar si está bien.', 'Inventar: si un dato no está, lo dice. Lo que está «a confirmar» lo dice así.'],
-        ['Mirar fotos y planos, y decirte si una foto parece de otra obra.', 'Emitir o cerrar órdenes, mover fotos, crear tareas.'],
-        ['Armar un PDF (una orden, el avance de una obra, el informe mensual, los puntos…).', ''],
-        ['**Dejarle anotado un pedido a la oficina** (con tu **Sí**).', ''],
-    ], anchos=[8.5, 8.5])
+    A.p('**Sí puede:**')
+    A.vinetas(['Contestar todo lo que hay en la app, con números: avance, plata, gastos, puntos, tiempos, stock, personal.', 'Explicar de dónde sale un número (el avance de un ítem, los puntos de alguien) y revisar si está bien.', 'Mirar fotos y planos, y decirte si una foto parece de otra obra.', 'Armar un PDF (una orden, el avance de una obra, el informe mensual, los puntos…).', '**Dejarle anotado un pedido a la oficina** (con tu **Sí**).'])
+    A.p('**No puede** (con tu usuario):')
+    A.vinetas(['Cambiar datos: órdenes, avance, puntos, obras, pañol, fotos. Eso lo hace la oficina.', 'Inventar: si un dato no está, lo dice. Lo que está «a confirmar» lo dice así.'])
     A.h(2, 'Cuántas preguntas por día')
     A.p('Dirección tiene **30 preguntas por día** (se reinicia al día siguiente). Abajo del chat dice **Te quedan N preguntas hoy**. Cuenta cada pregunta tuya; las vueltas que da para buscar datos no cuentan. Hay además un freno de gasto del mes que maneja Administración.')
     A.consejo('Si dice que te quedan 10 (el tope de «solo mirar») o aparece un cartel verde de que hay que actualizar el asistente, avisale a Administración: falta pegar la versión nueva del asistente (v5) en el servidor.')
