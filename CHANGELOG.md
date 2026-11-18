@@ -18,9 +18,9 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Cómo se arma:** `herramientas/v170/patch_v170.py` sobre el ORIGINAL 169 (reemplazos chicos en `avanceObra2` —motivo según el ajuste, sin fecha real para lo cargado rápido (`eventos`, `origenTxt`), la tarjeta en la pantalla, el toque en la grilla, `hojaCelda`/`hojaCosa` en `__av2`— y en `auditorAvance.pedirMotivo`) + el módulo `avanceRapido` (`rapido.js/.css`).
 
-**Pruebas:** `t_v170` 60/60 en PC, celu y `REGLAS=1` (PC y celu); `t_v158` 72/72 · 72/72, `t_v163` 42/42 · 42/42, `t_v156` 69/69 · 71/71, `t_v168` 83/83 · 83/83, `t_v169` 42/42 · 46/46, `t_circuito` 16/16 · 16/16 (PC · celu), todo OK. Las pruebas viejas corren con `__v170No` (motivo obligatorio como antes): no hubo que cambiar ninguna
+**Pruebas:** `t_v170` 63/63 en PC, celu y `REGLAS=1` (PC y celu); `t_v158` 72/72 · 72/72, `t_v163` 42/42 · 42/42 (vueltos a correr con lo de «sin fecha real»), `t_v156` 69/69 · 71/71, `t_v168` 83/83 · 83/83, `t_v169` 42/42 · 46/46, `t_circuito` 16/16 · 16/16 (PC · celu), todo OK. Las pruebas viejas corren con `__v170No` (motivo obligatorio como antes): no hubo que cambiar ninguna
 
-**Huellas:** sello `SELLO170` · ORIGINAL `170_2026-11-18_app-EMA_ORIGINAL.html` `ee91ded376e0148443a6c99d7b734b818ca4b971550406a10fcb5b294da93f7b` · `index.html` `735cf2ece87c20f2ecf6362b6e6d7038793fe2358848d8c7eae51317436497ff`.
+**Huellas:** sello `2026-11-18 15:17 · c082a1` · ORIGINAL `170_2026-11-18_app-EMA_ORIGINAL.html` `f11ab788f7ddbf160d6598c00df2d12567addf5b46c6fb923bf581e5efb9f487` · `index.html` `80052a39a334f09f4fa79af50b5e9f6b701cd5cbff9fa701a96381d8210b236d`.
 
 ## v169 — 18/11/2026 (publicada en GitHub 18/11) · «🔧 Armadas» con su propio subíndice en el Pañol
 **Pedido (Ángel, 18/11):** «eso tiene que tener su propio subíndice, no dentro de pañol (el catálogo)» (la tarjeta «🔧 Luminarias armadas» de la v168 estaba dentro de Pañol › Catálogo pañol).
