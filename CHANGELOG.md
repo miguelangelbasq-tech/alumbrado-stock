@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v172 — 18/11/2026 (armada, sin publicar) · Cámara: el video sin burbuja y «Tablero 1»
+## v172 — 18/11/2026 (publicada en GitHub 18/11) · Cámara: el video sin burbuja y «Tablero 1»
 **Pedido (Ángel, 18/11):** (1) «En la cámara tener la burbuja de video, que molesta: no deja apretar el botón de siguiente. La burbuja no me gusta, elegí otro lugar.» (2) «Selecciono Tablero y al apretar arriba de Tablero (otra vez) debería dejarte poner tablero y algo que yo quiero poner, como 1 o E o roto, lo que sea.»
 
 **Qué cambia:**
