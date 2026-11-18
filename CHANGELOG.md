@@ -47,7 +47,7 @@ Pruebas viejas con `__v168No` (todo como la v167). **Sin reglas nuevas** (`movim
 
 **A confirmar con Ángel:** el prefijo «AR-»; los metros de cable por armada (los carga él en la receta; en la maqueta 5,5 m era ejemplo); los códigos de las armadas (los elige él; la app propone el siguiente libre de la familia 6); qué hacer con la obra «DEPOSITO LUMINARIAS» después de pasar a armadas (la app no la oculta ni la archiva). **Para después:** armar desde el asistente (`proponer_movimiento_panol` tipo armado: no se hizo, el asistente solo explica) y el aviso en la reserva de una obra que pide 6010 «Hay N armadas · Llevarlas en su lugar» (no se hizo).
 
-**Pruebas:** PRUEBAS_168
+**Pruebas:** `t_v168` (7 grupos, 83 pruebas) PC 83/83 · celu 83/83 · `REGLAS=1` 83/83 sobre la entrega. Batería completa de a 3 (PC y celu, en una máquina cargada): **en pausa** (pedido del coordinador) con 329 de 344 corridas: PC todas salvo las conocidas por tiempos (`t_v031` 14/15, `t_v143` 77/78, `t_v154` se corta por tiempo, `t_v164` 66/70 y `t_v164f` 69/70: tiempos del destello con la máquina cargada; las viejas corren con `__v168No`, donde el código nuevo no hace nada); celu hasta `t_v155` igual (`t_v143`, `t_v146` 63/64, `t_v149` 34/35, `t_v154`, `t_v149b`, `t_v155` a repetir solas); faltan las celu de `t_v156` en adelante. A repetir solas antes de publicar.
 
 **Huellas (sello `2026-11-18 11:24 · c2f1f8`):** ORIGINAL `168_2026-11-18_app-EMA_ORIGINAL.html` dc9dd7332b0e3fc8d5b3e8977931c15ef81ac87a0cdfb14ebc1de0a4d7dbed49 · `index.html` a99204ef6673c319ae13b2744989d0a8794498ac536b76f61075d6f12a88b4fa.
 
