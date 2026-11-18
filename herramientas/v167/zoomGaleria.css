@@ -1,0 +1,38 @@
+/* v167 · zoom de la cámara (botones 1× 2× 3× a la derecha, a media altura) y la hoja «Elegir fotos» de la galería */
+#emaCam{overflow:hidden}
+#emaCam video{touch-action:none;transform-origin:50% 50%}
+.zm-bar{position:absolute;z-index:4;right:10px;top:40%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;padding:4px;border-radius:999px;background:#0000006b}
+.zm-bar button{width:44px;height:44px;margin:3px 0;padding:0;border:0;border-radius:50%;background:#ffffff26;color:#fff;font:800 14px/1 var(--mono,monospace);cursor:pointer}
+.zm-bar button.on{background:#ffd60a;color:#14161d}
+.zm-bar button[hidden]{display:none}
+.zm-val{position:absolute;right:54px;top:50%;transform:translateY(-50%);padding:4px 10px;border-radius:999px;background:#000000b3;color:#fff;font:800 14px var(--mono,monospace);white-space:nowrap;pointer-events:none}
+.zm-val[hidden]{display:none}
+@media print{.zm-bar{display:none !important}}
+/* hoja «Elegir fotos» (arriba del visor y de la cámara) */
+#zgOv{z-index:10085}
+#zgConf{z-index:10090}
+#zgOv .zg-caja{display:flex;flex-direction:column;max-height:92vh;max-height:92dvh;padding-bottom:0}
+.zg-todas{display:flex;flex-wrap:wrap;margin:0 -3px 8px}
+.zg-todas .chip{margin:3px;min-height:44px;cursor:pointer}
+.zg-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-gap:6px;overflow-y:auto;flex:1 1 auto;min-height:0;padding:2px 2px 8px}
+@media (min-width:641px){.zg-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.zg-f{position:relative;display:block;width:100%;margin:0;padding:0;border:3px solid transparent;border-radius:14px;background:#dfe3ee;overflow:hidden;cursor:pointer;height:0;padding-top:100%}
+.zg-f img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block}
+.zg-f .zg-sin{position:absolute;left:0;right:0;top:40%;text-align:center;font-size:22px}
+.zg-f i{position:absolute;left:6px;top:6px;width:24px;height:24px;border-radius:50%;border:2px solid #fff;background:#0005;box-shadow:0 1px 3px #0008}
+.zg-f small{position:absolute;left:0;right:0;bottom:0;padding:3px 6px;background:linear-gradient(#0000,#000000b0);color:#fff;font:600 11px/1.2 var(--fuente,inherit);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zg-f.on{border-color:#1E6F91}
+.zg-f.on img{transform:scale(.92);border-radius:10px}
+.zg-f.on i{background:#1E6F91 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/14px no-repeat}
+.zg-pie{position:sticky;bottom:0;margin:0 -16px;padding:8px 16px calc(14px + env(safe-area-inset-bottom,0px));background:var(--bg,#ECEFF7);border-top:1px solid var(--border,rgba(40,40,94,.1))}
+.zg-acc{display:flex;flex-wrap:wrap;margin:0 -4px}
+.zg-acc button{flex:1 1 110px;width:auto;margin:4px;min-height:48px}
+.zg-borrar{color:#b3261e !important}
+.zg-rojo{background:#b3261e !important}
+.zg-nota{margin:0 0 6px;font-size:12.5px;font-weight:600;color:var(--text-soft,#4B5670)}
+.zg-msg{min-height:0;font-size:13.5px;font-weight:600;color:#11683f;margin:0 0 4px}
+.zg-msg:empty{display:none}
+.zg-msg.mal{color:#b3261e}
+#gpBarra .zg-bn{display:block;font-style:normal;font-size:10px;font-weight:500;opacity:.85;white-space:nowrap}
+@media (max-width:420px){#gpBarra .zg-bn{display:none}}
+@media print{#zgOv,#zgConf{display:none !important}}
