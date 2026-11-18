@@ -2,6 +2,22 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v172 — 18/11/2026 (armada, sin publicar) · Cámara: el video sin burbuja y «Tablero 1»
+**Pedido (Ángel, 18/11):** (1) «En la cámara tener la burbuja de video, que molesta: no deja apretar el botón de siguiente. La burbuja no me gusta, elegí otro lugar.» (2) «Selecciono Tablero y al apretar arriba de Tablero (otra vez) debería dejarte poner tablero y algo que yo quiero poner, como 1 o E o roto, lo que sea.»
+
+**Qué cambia:**
+- **El «🎥 Video» ya no flota.** Antes era una burbuja redonda encima de la fila para nombrar y tapaba **«›»** (columna siguiente) y **«PAT»** en las tres cámaras (la de la barra, Modo obra y la cámara de la tarea de la v165), en 390×844 y en 360×740. Ahora: en la **cámara de la barra** y en **Modo obra** va **en la fila de abajo, entre la última foto y el disparador** (el disparador sigue al centro y «Listo» a la derecha); en la **cámara de la tarea** (abajo van sus miniaturas y «Terminé») va **arriba, entre el nombre de la obra y el reloj**. Hace lo mismo: cierra la cámara y abre la hoja del video con la obra, la orden y la columna.
+- **Agregarle algo al nombre de la foto.** En los botones para nombrar (**Columna · Tablero · PAT · Zanja · Acometida**), el elegido muestra **✎**; tocándolo otra vez sale **«Tablero ___»** (con ✕) con lo último que usaste en ese botón y **1 · 2 · 3 · E · roto** (en Columna y PAT: E · roto, que ya llevan número), o se escribe con el teclado. Queda **«Tablero 1»**, **«Tablero E»**, **«Tablero roto»**; en Columna se suma al número (**«Col 4 base»**) y ‹ Col N › sigue andando. Lo agregado **sigue para las fotos siguientes** hasta que se cambia o se saca («Sacar «1»»); se olvida a los 30 min sin sacar fotos. Lo último de cada botón queda en el celu.
+- La foto se guarda con **cat** como siempre y **num = el nombre entero** (orden, legajo, «📸 Avance» de la oficina). Si el nombre no es una columna/unidad de la tarea («Col 4 base», «Tablero 1»), va **suelta** (a la orden sin tarea, como la v164 / v171): no cuenta para la tarea, no marca el tiempo de una columna ni pasa sola a la siguiente; la oficina la mueve con «↔ Mover».
+- **En «＋ Otra foto»** (v171) lo mismo: el primer toque elige el botón y muestra «📷 Sacar la foto · Tablero», otra vez → «Tablero ___»; la próxima vez sigue elegido lo último («Tablero 1»), así que son los mismos dos toques de antes.
+- Nada nuevo corre con la cámara abierta (un solo escucha de toques). Sin reglas nuevas. Pruebas viejas con `__v172No` (todo como la v171).
+
+**Cómo se arma:** `herramientas/v172/patch_v172.py` sobre el ORIGINAL 171 (reemplazos chicos en `archivosNube.botonCamara`, la cámara C de `inicioTarea`, `fotosAlToque`, `obraGps` y `otraFoto`) + el módulo `sufijoFoto` (`sufijoFoto.js/.css`). Capturas de las 3 cámaras en los 2 tamaños: `herramientas/v172/cap172.js`.
+
+**Pruebas:** PRUEBAS172
+
+**Huellas:** HUELLAS172
+
 ## v171 — 18/11/2026 (publicada en GitHub 18/11) · «＋ Otra foto» con nombre en Mis tareas
 **Pedido (Ángel, 18/11):** «en Mis tareas de la cuadrilla ellos ponen las fotos que les piden, y de paso deberían poder poner otra, y ahí que les pida poner un nombre como en la cámara: ponés "otra" y te pide un nombre, ¿entendés?»
 

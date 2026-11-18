@@ -812,6 +812,7 @@ def parte3(A):
     A.vinetas([
         '**La obra la elige el GPS**: arriba dice la obra más cercana (a menos de 150 m del pin), aunque tu orden de hoy sea de otra. Si no es tu orden, lo dice.',
         '**Nombrar la foto**: abajo, **‹ Col N ›** para pasar de columna, y los botones **Columna**, **Tablero**, **PAT**, **Zanja**, **Acometida** y **Otro…** (escribís el nombre; recuerda lo último). Lo elegido sigue en la foto siguiente.',
+        '**Agregarle algo al nombre**: el botón elegido muestra **✎**; tocalo otra vez y elegí **1**, **2**, **3**, **E**, **roto** (o lo último que usaste) o escribilo: queda **Tablero 1**, **Tablero E**, **Tablero roto**, **Col 4 base**. Sigue para las fotos siguientes hasta que lo cambies (**Sacar…** lo quita). Si no es una columna de tu tarea, la foto va a la orden sin tarea y la oficina la ubica.',
         '**Zoom**: a la derecha, **1× 2× 3×**; también con dos dedos (pellizco). La app usa la cámara principal de atrás (no la gran angular). La foto sale tal cual se ve.',
         'Para cambiar la obra tocá el nombre de arriba: **¿En qué obra estás?** con las cercanas y tus órdenes. Si es otra, **Es otra obra**: buscala y decí por qué (es obligatorio).',
         'Si el GPS anda mal, la app te pide que elijas la obra y marca la foto para que la oficina la revise.',
@@ -821,7 +822,7 @@ def parte3(A):
     A.p('La foto le llega a la oficina al toque, aunque sigas con la cámara abierta (la ve con «subiendo…» hasta que sube la grande). La cámara queda «tibia» unos segundos después de cerrarla, así la próxima abre más rápido.')
     A.consejo('Usá siempre la cámara de la app, no la del teléfono: Android puede cerrar la app mientras sacás la foto. Igual, si usás la del teléfono desde Mis tareas, la app la recupera.')
     A.h(3, '🎥 Video')
-    A.p('**🎥 Video** (en Modo obra, en Mis tareas y en la cámara): elegís la tarea y la columna, tocás **🎥 Grabar** (o **📁 Elegir** uno que ya tenés) y queda en la orden. **Hasta 1 minuto**: el celu lo achica antes de subirlo y tarda lo que dura el video, con la app abierta. Los videos no cuentan como foto de la columna.')
+    A.p('**🎥 Video** (en Modo obra, en Mis tareas y en la cámara: abajo, al lado de la última foto; en la cámara de la tarea, arriba al lado del reloj): elegís la tarea y la columna, tocás **🎥 Grabar** (o **📁 Elegir** uno que ya tenés) y queda en la orden. **Hasta 1 minuto**: el celu lo achica antes de subirlo y tarda lo que dura el video, con la app abierta. Los videos no cuentan como foto de la columna.')
     A.cel(('n160_cuadrilla_video_cel', '🎥 Video: tarea y columna'), ('n160_video_achicando_cel', 'El celu lo achica'), ('n160_reproductor_cel', 'El reproductor'))
 
     A.h(2, 'Falta material')
@@ -856,7 +857,7 @@ def parte3(A):
         'Las filas son las columnas que eligió la oficina en la orden.',
         'Al mandar la tarea (**📤 Listo, enviar esta tarea**) sale el resumen por columna. **📤 Mandar lo que hice** manda lo hecho aunque la orden no esté terminada.',
     ])
-    A.p('**＋ Otra foto** (abajo de las fotos que te piden, en cada tarea): para sacar una foto de más. Primero te pregunta **¿Qué es la foto?** con los mismos botones de la cámara: **Columna** (con ‹ Col N ›), **Tablero**, **PAT**, **Zanja**, **Acometida** u **Otro…** (lo escribís; lo último que escribiste aparece para tocarlo). Después se abre la cámara. La foto queda en la orden con ese nombre, en **📎 Otras fotos** de la tarea, en Mis fotos y en el legajo; **no cuenta** para las que te piden (si es una columna que la tarea pide, va a su fila). La oficina la ve en el «📸 Avance» debajo de esa tarea y la puede mover.')
+    A.p('**＋ Otra foto** (abajo de las fotos que te piden, en cada tarea): para sacar una foto de más. Primero te pregunta **¿Qué es la foto?** con los mismos botones de la cámara: **Columna** (con ‹ Col N ›), **Tablero**, **PAT**, **Zanja**, **Acometida** u **Otro…** (lo escribís; lo último que escribiste aparece para tocarlo). Tocás uno y **📷 Sacar la foto** (tocándolo otra vez le agregás algo: **Tablero 1**, **Tablero roto**). Después se abre la cámara. La foto queda en la orden con ese nombre, en **📎 Otras fotos** de la tarea, en Mis fotos y en el legajo; **no cuenta** para las que te piden (si es una columna que la tarea pide, va a su fila). La oficina la ve en el «📸 Avance» debajo de esa tarea y la puede mover.')
     A.cel(('n166_1_cartel_mis_tareas', '«Voy a iniciar» desde Mis tareas'), ('n166_4_filas_tiempo', 'El tiempo de cada columna'), ('ps_avisos', 'Aviso que abre la orden'))
 
     A.h(2, 'Pañol, mapa y cálculos rápidos')
