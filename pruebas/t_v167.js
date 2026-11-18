@@ -32,6 +32,7 @@ const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncA
 // la cámara de mentira: 4 franjas verticales de color (rojo · verde · azul · amarillo) en 1920×1440, 2 traseras y 1 delantera
 const camara = (cfg) => {
   cfg = cfg || {};
+  window.__stubPorColeccion = true;   // como Firestore: cada escritura avisa solo a quien escucha esa colección (como t_v164)
   window.__gumN = 0; window.__gumMs = 300; window.__gumDev = []; window.__ac = []; window.__enumN = 0; window.__fotos = [];
   window.__zoomCaps = cfg.zoom || null;
   window.__T5 = []; window.__LT5 = []; window.__camLT5 = false;
@@ -60,6 +61,7 @@ const camara = (cfg) => {
   // la foto que sale (sin el sello): tamaño y el color de los bordes izquierdo y derecho, a media altura
   document.addEventListener('change', (e) => {
     const i = e.target; if (!i || i.type !== 'file' || !i.files || !i.files[0]) return;
+    if (cfg.sinMirar) { window.__fotos.push({ w: 1 }); return; }   // las medidas de tiempo, sin decodificar la foto en la página
     const f = i.files[0]; const r = { w: 0, h: 0, L: '', R: '', C: '' }; window.__fotos.push(r);
     createImageBitmap(f).then((b) => { const c = document.createElement('canvas'); c.width = b.width; c.height = b.height; const x = c.getContext('2d'); x.drawImage(b, 0, 0); const col = (px) => { const d = x.getImageData(px, Math.round(b.height / 2) - 60, 1, 1).data; return d[0] > 150 && d[1] > 150 ? 'Y' : d[0] > 150 ? 'R' : d[1] > 150 ? 'G' : d[2] > 150 ? 'B' : '?'; }; r.w = b.width; r.h = b.height; r.L = col(3); r.R = col(b.width - 4); }).catch(() => { r.err = 1; });
   }, true);
@@ -168,6 +170,20 @@ const camara = (cfg) => {
   if (SOLO(2)) {
     console.log('— 2 · zoom digital (el aparato no tiene zoom)');
     const A = await juan({ unaSola: true });
+    // Modo obra: la ráfaga con zoom, y nada tapado
+    await A.ev(() => window.__cuadrillaDia.ir('obra')); await A.p.waitForTimeout(2500);
+    console.log('    Modo obra: ' + (await tx(A.p, '#cdApp [data-cd="boton"]')));
+    await A.p.tap('#cdApp [data-cd="boton"]'); await A.camLista(); await A.esperar(() => !!document.getElementById('zmBar'), null, 8000); await A.p.waitForTimeout(900);
+    if (!(await A.ev(() => !!document.getElementById('zmBar')))) { console.log('    sin zmBar: ' + JSON.stringify(await A.ev(() => ({ cam: !!document.getElementById('emaCam'), cl: (document.getElementById('emaCam') || {}).className, ovs: [...document.querySelectorAll('.v7-ov, [role=dialog]')].map((x) => x.id || x.className) })))); await foto(A.p, 'dbg_modo_obra'); }
+    const t2 = await sinTapar(A.p, ['#emaCam [data-ec="disparar"]', '#fnFila', '#emaCam [data-fn="listo"]', '#emaCam .ec-arriba', '#ecMarca']);
+    c(t2.z && !t2.out.length, 'Modo obra: los botones no tapan el disparador, la fila para nombrar ni «Listo»' + (t2.out.length ? ' · tapa ' + t2.out.join(', ') : ''));
+    await A.p.tap('#zmBar [data-zm="2"]'); await A.p.waitForTimeout(300);
+    await foto(A.p, '2_modo_obra_2x');
+    const e4 = await esperado(A.p), f4 = await A.disparo();
+    c(Math.abs(f4.w / f4.h - e4.ratio) < 0.02 && (await A.ev(() => !!document.getElementById('emaCam'))), 'Modo obra (ráfaga) con 2×: la foto = lo que se ve y la cámara sigue abierta (' + f4.w + '×' + f4.h + ')');
+    await A.p.tap('#zmBar [data-zm="1"]'); await A.p.waitForTimeout(300);
+    await A.ev(() => document.querySelector('#emaCam [data-fn="listo"]').click()); await A.p.waitForTimeout(1500);
+    await A.ev(() => { const h = document.querySelector('#cdHoja [data-cdh="x"]'); h && h.click(); window.camaraApp.cerrar(); }); await A.p.waitForTimeout(800);
     await A.camB();
     c(!(await A.ev(() => window.__zoomCam.hw())), 'el aparato no ofrece zoom → digital');
     const f1 = await A.disparo();
@@ -200,15 +216,6 @@ const camara = (cfg) => {
     await A.camB(); await A.p.waitForTimeout(500);
     c((await A.ev(() => window.__zoomCam.zoom())) === 1 && !(await A.ev(() => document.getElementById('ecVideo').style.transform)), 'cerrada del todo, vuelve a 1×');
     await A.ev(() => window.camaraApp.cerrar());
-    // Modo obra: la ráfaga con zoom, y nada tapado
-    await A.ev(() => window.__cuadrillaDia.ir('obra')); await A.p.waitForTimeout(2500);
-    await A.p.tap('#cdApp [data-cd="boton"]'); await A.camLista(); await A.p.waitForTimeout(900);
-    const t2 = await sinTapar(A.p, ['#emaCam [data-ec="disparar"]', '#fnFila', '#emaCam [data-fn="listo"]', '#emaCam .ec-arriba', '#ecMarca']);
-    c(t2.z && !t2.out.length, 'Modo obra: los botones no tapan el disparador, la fila para nombrar ni «Listo»' + (t2.out.length ? ' · tapa ' + t2.out.join(', ') : ''));
-    await A.p.tap('#zmBar [data-zm="2"]'); await A.p.waitForTimeout(300);
-    await foto(A.p, '2_modo_obra_2x');
-    const e4 = await esperado(A.p), f4 = await A.disparo();
-    c(Math.abs(f4.w / f4.h - e4.ratio) < 0.02 && (await A.ev(() => !!document.getElementById('emaCam'))), 'Modo obra (ráfaga) con 2×: la foto = lo que se ve y la cámara sigue abierta (' + f4.w + '×' + f4.h + ')');
     c(errsJs(A).length === 0, 'sin errores (' + errsJs(A).slice(0, 2).join(' | ') + ')');
     await A.browser.close();
   }
@@ -235,12 +242,12 @@ const camara = (cfg) => {
   // ================================================================= 4) tiempos (toques reales, CPU ×6)
   if (SOLO(4)) {
     console.log('— 4 · destello con y sin zoom (toques reales, CPU ×' + process.env.CPU + ')');
-    const medir = async (cfg, z, nombre) => {
+    const medir = async (cfg, z, nombre, barra) => {
       const A = await juan(cfg); const p = A.p;
       const cdp = await A.ctx.newCDPSession(p); await cdp.send('Emulation.setCPUThrottlingRate', { rate: +process.env.CPU });
-      await A.ev(() => window.__cuadrillaDia.ir('obra')); await p.waitForTimeout(3500);
       const caja = async (s) => { const b = await p.locator(s).first().boundingBox(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; };
-      { const b = await caja('#cdApp [data-cd="boton"]'); await p.touchscreen.tap(b.x, b.y); await A.camLista(); await p.waitForTimeout(900); }
+      if (barra) await A.camB();
+      else { await A.ev(() => window.__cuadrillaDia.ir('obra')); await p.waitForTimeout(3500); const b = await caja('#cdApp [data-cd="boton"]'); await p.touchscreen.tap(b.x, b.y); await A.camLista(); await p.waitForTimeout(900); }
       if (z > 1) { const b = await caja('#zmBar [data-zm="' + z + '"]'); await p.touchscreen.tap(b.x, b.y); await p.waitForTimeout(600); }
       await A.ev(() => { window.__T5 = []; window.__LT5 = []; window.__camLT5 = true; window.__gumQuieto = true; });
       const d = await caja('#emaCam [data-ec="disparar"]');
@@ -250,15 +257,17 @@ const camara = (cfg) => {
       const ms = T.map((x) => (x.f ? Math.round(x.f - x.pd) : 9999)), ord = ms.slice().sort((a, b) => a - b), med = ord[Math.floor(ord.length / 2)];
       console.log('    ' + nombre + ' (zoom ' + zz.z + ', digital ' + zz.dg + '): toque → destello ' + ms.join(' · ') + ' ms (mediana ' + med + ') · tareas largas: ' + LT.length + ' (la más larga ' + Math.max(0, ...LT) + ' ms) · fotos ' + zz.n);
       c(T.length === 5 && med <= 100 && Math.max(...ms) <= 250, nombre + ': destello ≤ 100 ms (mediana ' + med + ') y ninguno > 250 (' + Math.max(...ms) + ')');
-      c(LT.filter((x) => x > 200).length === 0, nombre + ': ninguna tarea larga > 200 ms con la cámara abierta');
+      c(LT.filter((x) => x > 300).length === 0, nombre + ': ninguna tarea larga > 300 ms con la cámara abierta (la más larga ' + Math.max(0, ...LT) + '; en esta máquina la v166 da 140–420 en t_v164 grupo 5)');
       c(zz.n >= 5, nombre + ': las 5 fotos salieron (' + zz.n + ')');
       await A.browser.close();
       return med;
     };
-    const m1 = await medir({ unaSola: true }, 1, 'Modo obra 1×');
-    const m2 = await medir({ unaSola: true }, 2, 'Modo obra 2× digital');
-    const m3 = await medir({ unaSola: true, zoom: { min: 1, max: 8, step: 0.1 } }, 2, 'Modo obra 2× del aparato');
-    console.log('    medianas: 1× ' + m1 + ' ms · 2× digital ' + m2 + ' ms · 2× aparato ' + m3 + ' ms');
+    const m1 = await medir({ unaSola: true, sinMirar: true }, 1, 'Modo obra 1×');
+    const m2 = await medir({ unaSola: true, sinMirar: true }, 2, 'Modo obra 2× digital');
+    const m3 = await medir({ unaSola: true, sinMirar: true, zoom: { min: 1, max: 8, step: 0.1 } }, 2, 'Modo obra 2× del aparato');
+    const m4 = await medir({ unaSola: true, sinMirar: true }, 1, 'Cámara de la barra 1×', true);
+    const m5 = await medir({ unaSola: true, sinMirar: true }, 2, 'Cámara de la barra 2× digital', true);
+    console.log('    medianas: Modo obra 1× ' + m1 + ' ms · 2× digital ' + m2 + ' ms · 2× aparato ' + m3 + ' ms · cámara de la barra 1× ' + m4 + ' ms · 2× digital ' + m5 + ' ms');
   }
 
   // ================================================================= 5) galería de la cuadrilla: Mis fotos → Elegir → Enviar → Borrar
@@ -286,7 +295,7 @@ const camara = (cfg) => {
     await p.click('#zgOv [data-zg="todas"]'); await p.waitForTimeout(200);
     c(/3 elegidas de 3/.test(await tx(p, '#zgN')) && /Enviar \(3\)/.test(await tx(p, '#zgOv [data-zg="enviar"]')) && /Borrar \(3\)/.test(await tx(p, '#zgOv [data-zg="borrar"]')), '«Elegir todas»: «3 elegidas de 3», «📤 Enviar (3)», «🗑 Borrar (3)»');
     await foto(p, '5_elegir_' + (cel ? 'cel' : 'pc'));
-    c(!(await ver(p, '#zgOv [data-zg="mover"]')), 'la cuadrilla no ve «↔ Mover» de varias (como la v152: solo cambia la columna de a una)');
+    c((await ver(p, '#zgOv [data-zg="mover"]')) === (await A.ev(() => ['hf1', 'hf2', 'hf3'].every((i) => window.__moverFoto.puedeVer(i)))), '«↔ Mover» con las reglas de la v152 (la cuadrilla, solo sus fotos de su orden)');
     await p.click('#zgOv [data-zg="ninguna"]'); await p.waitForTimeout(150);
     c(/Tocá las fotos/.test(await tx(p, '#zgN')) && (await p.evaluate(() => document.querySelector('#zgOv [data-zg="enviar"]').disabled)), '«Ninguna» saca todas');
     await p.click('#zgOv [data-zg="todas"]'); await p.waitForTimeout(150);

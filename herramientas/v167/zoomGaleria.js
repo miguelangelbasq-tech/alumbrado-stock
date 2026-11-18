@@ -62,7 +62,7 @@
   }
   async function reintento(pedir, facing, e) {   // la principal anotada no abrió: se olvida y se vuelve a «la de atrás»
     const p = leerP();
-    if (p && p.id && !no()) { ponerP(null); try { return await pedir({ facingMode: { ideal: facing }, width: { ideal: 1920 }, height: { ideal: 1440 } }); } catch (e2) { if (e2 && /NotAllowed|Security/i.test(e2.name)) throw e2; } }
+    if (p && p.id && !no()) { ponerP(null); Z.revisado = false; Z.cambiado = false; try { return await pedir({ facingMode: { ideal: facing }, width: { ideal: 1920 }, height: { ideal: 1440 } }); } catch (e2) { if (e2 && /NotAllowed|Security/i.test(e2.name)) throw e2; } }
     return pedir(true);
   }
   function digital() { return Z.hw ? Math.max(1, Z.z / Math.min(Z.z, Z.hw.max)) : Z.z; }
@@ -77,12 +77,13 @@
     };
     correr();
   }
-  function medirCaja() { const v = $("ecVideo"); if (!v) return null; Z.caja = { W: v.clientWidth, H: v.clientHeight }; return Z.caja; }
+  function medirCaja() { const v = $("ecVideo"); if (!v) return null; Z.caja = { L: v.offsetLeft || 0, T: v.offsetTop || 0, W: v.clientWidth, H: v.clientHeight }; return Z.caja; }
   function aplicarDigital() {
     const v = $("ecVideo"); if (!v) return;
     const d = digital(), esp = v.classList.contains("espejo");
-    if (d > 1.001) { medirCaja(); v.style.transform = (esp ? "scaleX(-1) " : "") + "scale(" + d.toFixed(3) + ")"; }
-    else v.style.transform = "";
+    // agrandada desde el centro y recortada a su propio cuadro (clip-path en el lugar de antes de agrandar): lo que se ve = el recorte
+    if (d > 1.001) { medirCaja(); const q = ((1 - 1 / d) * 50).toFixed(3) + "%"; v.style.transform = (esp ? "scaleX(-1) " : "") + "scale(" + d.toFixed(3) + ")"; v.style.clipPath = "inset(" + q + ")"; v.style.webkitClipPath = "inset(" + q + ")"; }
+    else { v.style.transform = ""; v.style.clipPath = ""; v.style.webkitClipPath = ""; }
   }
   function pintarBar() {
     const b = $("zmBar"); if (!b) return;
@@ -109,7 +110,7 @@
     const s = kc * d;
     let sx = Math.round((x0 - cx) / s), sy = Math.round((y0 - cy) / s), sw = Math.round((x1 - x0) / s), sh = Math.round((y1 - y0) / s);
     sw = Math.max(2, Math.min(vw - sx, sw)); sh = Math.max(2, Math.min(vh - sy, sh));
-    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0, cx: sx, cy: sy, cw: sw, ch: sh };
+    return { x: x0 + c.L, y: y0 + c.T, w: x1 - x0, h: y1 - y0, cx: sx, cy: sy, cw: sw, ch: sh };
   }
   function recorte(v) { const r = vis(v); return r ? { x: r.cx, y: r.cy, w: r.cw, h: r.ch } : null; }
   function html() {
@@ -264,7 +265,7 @@
   function pintarHoja() {
     const v = $("zgOv"); if (!v) return;
     const n = G.sel.size, tot = G.items.length, el = elegidos(), r = resumenBorrar(el);
-    const grid = G.items.map((it) => '<button type="button" class="zg-f' + (G.sel.has(it.k) ? " on" : "") + '" data-zgf="' + esc(it.k) + '" aria-pressed="' + (G.sel.has(it.k) ? "true" : "false") + '" aria-label="' + esc(it.titulo || "Foto") + '">' + (it.mini || it.src ? '<img alt="" src="' + esc(it.mini || it.src) + '">' : '<span class="zg-sin">📷</span>') + '<i aria-hidden="true"></i>' + (it.titulo ? "<small>" + esc(it.titulo) + "</small>" : "") + "</button>").join("");
+    const grid = G.items.map((it) => '<button type="button" class="zg-f' + (G.sel.has(it.k) ? " on" : "") + '" data-zgf="' + esc(it.k) + '" aria-pressed="' + (G.sel.has(it.k) ? "true" : "false") + '" aria-label="' + esc(it.titulo || "Foto") + '">' + (it.mini || it.src ? '<img alt="" src="' + esc(it.mini || it.src) + '">' : '<span class="zg-sin">📷</span>') + '<i aria-hidden="true"></i>' + (it.titulo ? "<small>" + esc(String(it.titulo).split(" · ").pop()) + "</small>" : "") + "</button>").join("");
     const borra = algunoBorra();
     const h = '<div class="v7-caja zg-caja"><div class="v7-cab"><div><h3>☑ Elegir fotos</h3><small id="zgN">' + (n ? "<b>" + n + "</b> elegida" + (n === 1 ? "" : "s") + " de " + tot : "Tocá las fotos para elegirlas") + "</small></div>" +
       '<button type="button" class="v7-x" data-zg="x" aria-label="Cerrar">✕</button></div>' +

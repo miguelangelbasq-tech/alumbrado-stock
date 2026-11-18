@@ -26,7 +26,7 @@
 .zg-f.on i{background:#1E6F91 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/14px no-repeat}
 .zg-pie{position:sticky;bottom:0;margin:0 -16px;padding:8px 16px calc(14px + env(safe-area-inset-bottom,0px));background:var(--bg,#ECEFF7);border-top:1px solid var(--border,rgba(40,40,94,.1))}
 .zg-acc{display:flex;flex-wrap:wrap;margin:0 -4px}
-.zg-acc button{flex:1 1 110px;width:auto;margin:4px;min-height:48px}
+.zg-acc button{flex:1 1 100px;width:auto;margin:4px;min-height:48px;padding-left:10px;padding-right:10px;white-space:nowrap}
 .zg-borrar{color:#b3261e !important}
 .zg-rojo{background:#b3261e !important}
 .zg-nota{margin:0 0 6px;font-size:12.5px;font-weight:600;color:var(--text-soft,#4B5670)}
@@ -34,5 +34,5 @@
 .zg-msg:empty{display:none}
 .zg-msg.mal{color:#b3261e}
 #gpBarra .zg-bn{display:block;font-style:normal;font-size:10px;font-weight:500;opacity:.85;white-space:nowrap}
-@media (max-width:420px){#gpBarra .zg-bn{display:none}}
+@media (max-width:420px){#gpBarra .zg-bn{display:none}#gpBarra [data-gpb="compartir"] span,#gpBarra [data-gpb="borrar"] span{display:block;font-size:10px;white-space:nowrap}#gpBarra [data-gpb="compartir"],#gpBarra [data-gpb="borrar"]{font-size:16px;padding:2px 5px}}
 @media print{#zgOv,#zgConf{display:none !important}}
