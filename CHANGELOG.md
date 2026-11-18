@@ -14,7 +14,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Cómo se arma:** `herramientas/v171/patch_v171.py` sobre el ORIGINAL 170 (reemplazos chicos en `mtFotosLista` / `mtTomasHtml`, la orden de Mis tareas, `avanceOrden` e `inicioMt`) + el módulo `otraFoto` (`otraFoto.js/.css`).
 
-**Pruebas:** RESULTADOS171
+**Pruebas:** `t_v171` PC 36/36 · celu 36/36 (igual con `REGLAS=1`); `t_v165` 59/59, `t_v166` 38/38, `t_v167` 76/76, `t_v149b` 37/37, `t_v107` 6/6, `t_circuito` 16/16 en PC y celu. `t_v164` 68/70 en la tanda (grupo 5, tiempos del destello con CPU ×6): solo, entre 6/8 y 8/8 según la corrida, igual que la v170 (7/8 y 8/8 en la misma máquina): un toque suelto de 200–440 ms de vez en cuando, sin relación con Mis tareas. Capturas del celu.
 
 **Huellas:** sello `2026-11-18 15:33 · dfeb49` · ORIGINAL `171_2026-11-18_app-EMA_ORIGINAL.html` `ba7a0e52a40ccf02c01ade3123c17a3ace68697af96ddfc434765722ceaed14a` · `index.html` `98006943a9f8bf96c583b46f57d9a95413fe419e758b5508b9d0aed5c3e06c14`.
 
