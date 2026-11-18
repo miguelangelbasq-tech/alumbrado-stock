@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v171 — 18/11/2026 (armada, sin publicar) · «＋ Otra foto» con nombre en Mis tareas
+## v171 — 18/11/2026 (publicada en GitHub 18/11) · «＋ Otra foto» con nombre en Mis tareas
 **Pedido (Ángel, 18/11):** «en Mis tareas de la cuadrilla ellos ponen las fotos que les piden, y de paso deberían poder poner otra, y ahí que les pida poner un nombre como en la cámara: ponés "otra" y te pide un nombre, ¿entendés?»
 
 **Qué cambia (Mis tareas, la lista):**
