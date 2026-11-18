@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v168 — 18/11/2026 (armada, sin publicar) · Luminarias armadas (pañol)
+## v168 — 18/11/2026 (publicada en GitHub 18/11) · Luminarias armadas (pañol)
 **Pedido (Ángel, 18/11):** «tenemos una obra que usamos como depósito que se llama deposito luminarias… del depósito sacamos artefacto, prensacable y cable, armamos el artefacto armado con el prensacable adentro y el cable… la idea es tener stock de ya armadas para no perder tiempo… necesitamos que luego salga a una obra… es como un movimiento interno pero no podemos perder el registro porque sale del pañol pero no sale de la empresa y aparte necesitamos que sea algo rápido para mover las armadas a la plaza que lo necesite». Eligió la «Idea 1 + 2» y aprobó las maquetas (Receta · Pañol › Armadas · Armar · Comprobante · Llevar a obra).
 
 **Qué cambia (Pañol › Catálogo pañol, tarjeta «🔧 Luminarias armadas»; quien edita el pañol: admin, oficina, pañol):**
