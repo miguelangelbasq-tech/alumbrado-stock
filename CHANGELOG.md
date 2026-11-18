@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v170 — 18/11/2026 (armada, sin publicar) · Avance de obra: carga rápida a mano
+## v170 — 18/11/2026 (publicada en GitHub 18/11) · Avance de obra: carga rápida a mano
 **Pedido (Ángel, 18/11):** «en avance de obra no se puede editar, tendríamos que mejorar eso para que sea más fácil editar y poner a mano lo que se va a cambiar y poner al día. Igual se tiene que mover automático (con las órdenes)… está difícil entrar a columna. Y poder poner: ya pusieron diez columnas — y un cartel: eso significa que las bases y el hormigón están hechas… Sacar el cartel que te pide explicaciones por ahora, hasta que lo pongamos al día. Y también poner, por ejemplo, columnas todas puestas o solo 8 de 10, pero editado rápido.»
 
 **Qué cambia (Avance de obra › una obra; quien edita el avance: Administración y Oficina):**
