@@ -14,9 +14,9 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Cómo se arma:** `herramientas/v172/patch_v172.py` sobre el ORIGINAL 171 (reemplazos chicos en `archivosNube.botonCamara`, la cámara C de `inicioTarea`, `fotosAlToque`, `obraGps` y `otraFoto`) + el módulo `sufijoFoto` (`sufijoFoto.js/.css`). Capturas de las 3 cámaras en los 2 tamaños: `herramientas/v172/cap172.js`.
 
-**Pruebas:** PRUEBAS172
+**Pruebas:** `t_v172` 74/74 en PC, celu y `REGLAS=1` (PC y celu); con `ANTES=1` contra la v171 reproduce lo de Ángel en las 6 (3 cámaras × 390×844 / 360×740: el video tapa «›» y «PAT»). `t_v171` 36/36 · 36/36, `t_v167` 76/76 · 76/76, `t_v166` 38/38 · 38/38, `t_v165` 59/59 · 59/59, `t_v164` 70/70 · 70/70, `t_v160` 54/54 · 54/54, `t_circuito` 16/16 · 16/16 (PC · celu; en la tanda de a 3, `t_v160`, `t_v164` y `t_circuito` en PC fallaron 1–2 por tiempos y pasaron enteras solas). **`t_v164` grupo 5** (destello y tareas largas con la cámara abierta, CPU ×6, toques reales) con todo prendido, de a una, alternando con la v171 en 4 rondas: v171 5, 7, 7, 8 de 8 (27/32) · v172 7, 7, 7, 7 de 8 (28/32): igual (lo que falla en las dos es el tope de 100 ms de mediana en la cámara de la barra con la máquina cargada). Medidas en `herramientas/v172/medidas_t_v164_g5.txt`.
 
-**Huellas:** HUELLAS172
+**Huellas:** sello `2026-11-18 17:06 · 235cd2` · ORIGINAL `172_2026-11-18_app-EMA_ORIGINAL.html` `3aaf46e5d5a59e5cff39aa77a6a108e040239b633ed9e666dc372a16be9fe21d` · `index.html` `4d96009b3cce3a5e9f649d61a5af74030cc526a8104a771fc9e069722417eca7`.
 
 ## v171 — 18/11/2026 (publicada en GitHub 18/11) · «＋ Otra foto» con nombre en Mis tareas
 **Pedido (Ángel, 18/11):** «en Mis tareas de la cuadrilla ellos ponen las fotos que les piden, y de paso deberían poder poner otra, y ahí que les pida poner un nombre como en la cámara: ponés "otra" y te pide un nombre, ¿entendés?»

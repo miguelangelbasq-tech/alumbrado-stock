@@ -1,0 +1,12 @@
+t_v160.js pc: RESULTADO v160: 54/54 OK 
+t_v164.js pc: RESULTADO v164: 70/70 OK 
+t_circuito.js pc:   ✓ cuadrilla: le explica que mande cada tarea apenas la termina · 📤 Mandá cada tarea apenas la terminás: «✓ Se hizo» (con sus fotos) o «✗ No se h RESULTADO circuito: 16/16 OK 
+1 v171  32 · 41 · 15 · 12 · 20 ms (mediana 20) · tareas largas con la cámara abierta: 27 (> 100 ms: 7, la más larga 204 ms)  6 · 286 · 6 · 15 · 10 ms (mediana 10) · tareas largas con la cámara abierta: 28 (> 100 ms: 8, la más larga 206 ms) RESULTADO v164: 5/8 FALLAS 
+1 v172  11 · 109 · 16 · 6 · 9 ms (mediana 11) · tareas largas con la cámara abierta: 25 (> 100 ms: 6, la más larga 129 ms)  9 · 327 · 20 · 75 · 9 ms (mediana 20) · tareas largas con la cámara abierta: 33 (> 100 ms: 4, la más larga 153 ms) RESULTADO v164: 7/8 FALLAS 
+2 v171  31 · 20 · 3 · 11 · 13 ms (mediana 13) · tareas largas con la cámara abierta: 25 (> 100 ms: 5, la más larga 145 ms)  203 · 280 · 14 · 105 · 7 ms (mediana 105) · tareas largas con la cámara abierta: 38 (> 100 ms: 4, la más larga 195 ms) RESULTADO v164: 7/8 FALLAS 
+2 v172  34 · 30 · 9 · 16 · 20 ms (mediana 20) · tareas largas con la cámara abierta: 27 (> 100 ms: 8, la más larga 167 ms)  151 · 271 · 13 · 56 · 162 ms (mediana 151) · tareas largas con la cámara abierta: 32 (> 100 ms: 10, la más larga 195 ms) RESULTADO v164: 7/8 FALLAS 
+3 v171  11 · 19 · 18 · 9 · 14 ms (mediana 14) · tareas largas con la cámara abierta: 21 (> 100 ms: 8, la más larga 224 ms)  19 · 204 · 16 · 10 · 15 ms (mediana 16) · tareas largas con la cámara abierta: 33 (> 100 ms: 5, la más larga 146 ms) RESULTADO v164: 7/8 FALLAS 
+3 v172  27 · 20 · 5 · 11 · 16 ms (mediana 16) · tareas largas con la cámara abierta: 20 (> 100 ms: 7, la más larga 236 ms)  29 · 219 · 56 · 16 · 12 ms (mediana 29) · tareas largas con la cámara abierta: 37 (> 100 ms: 6, la más larga 141 ms) RESULTADO v164: 7/8 FALLAS 
+4 v171  11 · 35 · 3 · 43 · 16 ms (mediana 16) · tareas largas con la cámara abierta: 21 (> 100 ms: 4, la más larga 114 ms)  21 · 19 · 4 · 16 · 14 ms (mediana 16) · tareas largas con la cámara abierta: 31 (> 100 ms: 3, la más larga 130 ms) RESULTADO v164: 8/8 OK 
+4 v172  9 · 39 · 7 · 15 · 7 ms (mediana 9) · tareas largas con la cámara abierta: 20 (> 100 ms: 5, la más larga 189 ms)  169 · 249 · 10 · 120 · 16 ms (mediana 120) · tareas largas con la cámara abierta: 28 (> 100 ms: 6, la más larga 178 ms) RESULTADO v164: 7/8 FALLAS 
+FIN
