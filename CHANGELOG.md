@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v167 — 18/11/2026 (armada, sin publicar) · Zoom en la cámara + galería: elegir varias, enviar varias, borrar
+## v167 — 18/11/2026 (publicada en GitHub 18/11) · Zoom en la cámara + galería: elegir varias, enviar varias, borrar
 **Pedido (Ángel, 18/11):** «La cámara no podés hacer zoom… como que muy alejada, tenés que acercarte mucho para la foto.» · «Cuando sacás varias fotos, podés entrar a la galería y apretar enviar varias, seleccionar varias o eliminar alguna, tanto la cuadrilla como la oficina. Y automáticamente se ponen en obras y legajos, pero que también se puedan enviar de ahí varias.» · «Cuando hagas el zoom verificá que todo esté bien, que siga con el tiempo rápido de sacar fotos.»
 
 **Qué pasaba (reproducido contra la v166, `t_v167` grupo 0 con `ANTES=1`, 2/2):** la cámara de la app pedía solo «la de atrás» (`facingMode: environment`) y nunca miraba cuál de las traseras le daba el celu: con un celu de dos traseras (la gran angular primero en la lista, como la ofrece el navegador) se quedaba con la gran angular, nunca llamaba a `enumerateDevices`, y no tenía zoom de ninguna clase (ni pellizco, ni botones, ni el zoom del aparato). En los celus con gran angular / macro / profundidad, Chrome puede dar una que no es la principal (**a confirmar en el Moto g24**: tiene principal + macro). La imagen en pantalla ya era igual a la foto (las dos el cuadro entero), así que lo «alejado» no venía del encuadre.
