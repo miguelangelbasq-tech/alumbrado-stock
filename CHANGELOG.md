@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v180 — 19/11/2026 (armada, sin publicar) · 🗂 Unir, mover y eliminar carpetas de obra
+## v180 — 19/11/2026 (publicada en GitHub 19/11) · 🗂 Unir, mover y eliminar carpetas de obra
 **Pedido (Ángel, 19/11):** «en carpetas a veces se crean por error o son duplicados; hay que poner la posibilidad de mover o eliminar carpeta, mover órdenes, fotos, todo». «Carpeta» = una obra (su legajo en Obras / su registro en `avanceObras`).
 
 **Qué cambia (módulo `carpetasObra` + `carpetasObraCss`, bandera `__v180No`; solo Administración y Oficina con «editar» en Registrar obra o Avance):**
