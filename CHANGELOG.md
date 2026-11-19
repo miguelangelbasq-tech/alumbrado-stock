@@ -25,6 +25,10 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Cómo se arma:** `herramientas/v178/patch_v178.py` sobre el ORIGINAL 177 (`d7367b93…`): `ia178.js` antes de `window.__asistente`, la línea del SISTEMA y `cerrarQ, reabrirQ` en `window.__quincenas`. Sin reglas nuevas.
 
+**Pruebas:** `t_v178` PC 86/86 · celu 86/86 · `REGLAS=1` 86/86 · 86/86; `t_v141` 44/44 · 44/44, `t_v133` 30/30 · 32/32, `t_v134` 33/33 · 35/35, `t_v152` 73/73 · 73/73, `t_v153` 53/53 · 55/55, `t_v156` 69/69 · 71/71, `t_v175` 47/47 · 47/47, `t_v176` 42/42 · 42/42, `t_circuito` 16/16 · 16/16 (celu repetida sola: la primera dio 15/16 por tiempos con la máquina cargada); `t_v154` se corta igual con la v177 (la quincena de Juan cae en la quincena anterior por la fecha de hoy: es de la prueba, no de la v178). Las pruebas viejas corren con `__v178No` (nueva línea en `pruebas/h.js`).
+
+**Sello:** `2026-11-19 10:28 · 4ad344` · ORIGINAL `13d0ec8ef22b49e6f5309589e7564e63b8d6120a8a6cbe682243376aec0383e4` · index `a80683f4ed0bbb4254584bcd35b68595b215ca4b874b04819abd701675f07417`.
+
 ## v177 — 19/11/2026 (publicada en GitHub 19/11) · El Inicio prolijo (el logo de EMA en su lugar)
 **Pedido (Ángel, 19/11, mirando el Inicio de admin en la compu):** «la ubicación del cartel de EMA… no se está respetando la prolijidad y la belleza de la interfaz que veníamos manejando, ¿qué pasó?».
 
