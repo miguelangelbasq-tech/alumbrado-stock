@@ -6,7 +6,7 @@ Autor: Miguel Ángel Díaz © 2026
 **Pedido (Ángel, 19/11, después de que el 18/11 a las 12:36 se pisó la nómina —10 de 15 personas, legajos, valor hora—, se vaciaron los vehículos y faltan datos de precios):** «hay que tener algo controlador, o que la IA tenga eso, porque no pueden pasar cosas así; es muy grave». Después: «el Guardián es solo para Administración».
 
 **Qué cambia (módulo `guardianDatos`, bandera `__v176No`):**
-- **Copia de todos los días:** el primer aparato de Administración u Oficina (Oficina en silencio, para que salga aunque ese día no entre ningún admin) toma el turno con una transacción en `configEquipo/salud.guardian.<día>` y guarda `adjuntos/cfg-<día>` con personal, precios, baremo, cuadrillas, ubicación, usuarios cortos, guías y reinicios (sin sus `respaldos[]`, con tamaños y cuentas; lo que pasa de 300 KB va aparte). Nunca vapid ni secretosServidor. No se borran solas (con más de 60, Administración puede borrar las viejas con «Sí»).
+- **Copia de todos los días:** el primer aparato de Administración u Oficina (Oficina en silencio, para que salga aunque ese día no entre ningún admin) toma el turno con una transacción en `configEquipo/salud.guardian.<día>` y guarda `adjuntos/cfg-<día>` con personal, baremo, cuadrillas, ubicación, usuarios cortos, guías y reinicios (sin sus `respaldos[]`, con tamaños y cuentas; lo que pasa de 300 KB va aparte). Nunca vapid ni secretosServidor. No se borran solas (con más de 60, Administración puede borrar las viejas con «Sí»).
 - **Control:** cada minuto, de memoria, cuenta cada lista (nómina, vehículos, precios de Gastos, valores del baremo, tareas creadas, cuadrillas, pañol, obras, órdenes, reservas, movimientos, gastos, cómputos, usuarios) y la compara con la copia del día anterior. Si se borran 2 o más, una lista queda en 0 o un campo que tenía datos queda vacío → **alerta roja**: Inicio › Para atender, Supervisor «Datos» y aviso al celu de los admin una vez por incidente («Se borraron 5 personas de la nómina entre ayer y hoy (quedan 10 de 15; la última vez guardó … el 18/11 a las 12:36)»). Lo sacado con el «Sí» de la guardia de la v174 queda en ámbar, sin aviso.
 - **«Ver qué cambió» y «Volver a como estaba»:** persona por persona, vehículo por vehículo, precio por precio; lo borrado viene tildado, lo cambiado no; nunca saca lo agregado después; copia de cómo está antes de guardar (`respaldos[]`), se lee de vuelta de la base, auditoría `guardian_restaurar`; la alerta se cierra. «Está bien así» con «Sí» si fue a propósito.
 - **Hoja «🛡 Guardián de datos»** (menú): alertas, cómo está cada lista (hoy / copia anterior / hace 7 días), últimos guardados (quién y cuándo), copias del día, «Guardar una copia ahora», «⬇ Descargar respaldo completo ahora» con la fecha del último.
@@ -14,13 +14,15 @@ Autor: Miguel Ángel Díaz © 2026
 - **Auditoría `config_guardar`** con las cuentas antes → después de cada guardado de configEquipo (precios, baremo, cuadrillas, ubicación, alias, guías, reinicios y lo de personal que no es nómina/vehículos, que ya anota la v174).
 - Oficina, Dirección, pañol, cuadrilla y solo mirar no ven nada del Guardián.
 
-**A confirmar:** la copia va en `adjuntos`, que cualquier usuario confirmado puede leer por las reglas (trae precios); si no se quiere, hace falta una regla nueva. Los umbrales. «Volver» trabaja sobre personal, precios, baremo, cuadrillas y ubicación. Visto de paso (no tocado): borrar un precio de la lista de Gastos guarda con `set merge`, que en Firestore no borra la clave del mapa.
+**Precios:** `configEquipo/precios` lo lee solo el equipo y `adjuntos` cualquier confirmado: la copia del día de precios va adentro del mismo documento (`precios.guardianCopias[]`, últimos 7 días); en adjuntos solo sus cuentas, tamaño y huella. La vuelta atrás de precios usa esa copia.
+
+**A confirmar:** Los umbrales. «Volver» trabaja sobre personal, precios, baremo, cuadrillas y ubicación. Visto de paso (no tocado): borrar un precio de la lista de Gastos guarda con `set merge`, que en Firestore no borra la clave del mapa.
 
 **Cómo se arma:** `herramientas/v176/patch_v176.py` sobre el ORIGINAL 175 (`f26cb3e6…`): el módulo antes de `revisarAppDiag`, `ia176.js` antes de `window.__asistente`, la línea del SISTEMA, el Supervisor, Para atender y la revisión con IA. Sin reglas nuevas.
 
-**Pruebas:** `t_v176` (nueva) PC 40/40 · celu 40/40 · `REGLAS=1` 40/40 · 40/40; `t_v174` 57/57 · 57/57, `t_v175` 47/47 · 47/47, `t_v136` (supervisor) 45/45 · 55/55, `t_v141` 44/44 · 44/44, `t_circuito` 16/16 · 16/16 (PC · celu), todo OK. Las pruebas viejas corren con `__v176No` (nueva línea en `pruebas/h.js`).
+**Pruebas:** `t_v176` (nueva) PC 42/42 · celu 42/42 · `REGLAS=1` 42/42 · 42/42; `t_v174` 57/57 · 57/57, `t_v175` 47/47 · 47/47, `t_v136` (supervisor) 45/45 · 55/55, `t_v141` 44/44 · 44/44, `t_circuito` 16/16 · 16/16 (PC · celu), todo OK. Las pruebas viejas corren con `__v176No` (nueva línea en `pruebas/h.js`).
 
-**Sello:** `2026-11-19 09:36 · dd8072` · ORIGINAL `ff77bb0286deb33cb35d2dbe8326f3f3fa6efc3ad0d19b259b33035f97a401ae` · index `5b15ac0d59fd3ddd3954bfe5e8a0f69880824642dac0c0f760d04b4c489eb0e4`.
+**Sello:** `2026-11-19 09:46 · 31a050` · ORIGINAL `f3dc5b3ec14e1f21b622fb25fad4cc19a57ec6d096e7265593983099ecf5ee34` · index `c5a8daacd8810c50f37a952dc3f711f11d8fd96b050a68e3e73105b87823ad68`.
 
 ## v175 — 19/11/2026 (publicada en GitHub 19/11) · El asistente carga el personal
 **Pedido (Ángel, 19/11, después de que se pisó la nómina):** «la IA de la app tiene que poder cargar por su cuenta el personal».
