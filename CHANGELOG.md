@@ -2,6 +2,29 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v178 — 19/11/2026 (armada, sin publicar) · El asistente ve TODO y hace TODO
+**Pedido (Ángel, 19/11):** «la IA de la app tiene que saber y ver todo lo de la app, absolutamente todo; no puede decirme que no ve; tiene que poder ver todo, saber todo y poder hacer todo. Revisá eso.»
+
+**Por qué decía «no lo veo» (revisión completa: `herramientas/v178/COBERTURA.md`):** (1) mucho se carga recién al abrir su pantalla (herramientas y sus movimientos, puntos del mapa, quincenas cerradas, presencia, ubicación en vivo, gastos, planos): con la pantalla cerrada `consultar` decía «Está vacía en memoria»; (2) colecciones que el asistente no conocía: adjuntos, fichas de fotos, auditoría, avisos de la cuadrilla, Proyectista, notas de planos, tableros, cuadrillas, guías, salud, alias; (3) no podía leer un documento entero por su número, buscar un nombre en todo ni ver la pantalla; (4) muchas acciones de la pantalla no tenían herramienta (reservas, herramientas, gastos, obra nueva, usuarios, mapa, documentación, avisos, ausencias, contactos, quincena, borrar fotos, alta de producto); (5) los `enum` de `consultar` / `proponer_editar` se armaban antes de sumar colecciones.
+
+**Qué cambia (bloque `ia178` del asistente dormido, bandera `__v178No`; solo Administración y Oficina, cada uno con sus permisos):**
+- **Leer:** `consultar` y `describir_datos` con TODAS las colecciones; lo que no está en memoria se lee de la base a pedido (una consulta con tope —25 a 800 según la colección— y paginado; con filtro simple va directo con `where`; caché 3 min). Oficina también ve la ubicación en vivo (como en el Mapa); auditoría, usuarios, presencia, alias y tableros siguen siendo de Administración.
+- **`leer_doc(coleccion, id)`**: un documento entero por id, número (OT-, R-, S-/E-), código del producto, código H- o nombre de la obra; configEquipo por documento. pushSubs, avisosPush y secretosServidor no se leen (y dice por qué).
+- **`buscar_en_todo(texto, profundo)`**: dónde aparece un nombre o número en todas las colecciones (las grandes —adjuntos, fotos, auditoría— con `profundo`).
+- **`ver_pantalla`**: la pantalla, la pestaña elegida, la ventana de encima, el texto visible, los campos con su valor y los botones (sin el panel del asistente).
+- **`dato_app`**: pedido de compras, lista de compras, tablero del dueño, alertas del Mapa de guerra, informe semanal, documentación, material contra avance, gente sin tarea, armadas, fotos en el celu, lecturas, gasto del asistente, versión.
+- **`proponer_accion`** (tarjeta y «Sí», por el mismo camino que la pantalla, auditoría `asistente_editar`): reserva (aprobar, alistar, lista, rechazar, anular, cerrar), herramienta (asignar, pasar, devolver, reparación, reparada, baja, reactivar; sale el «📄 Remito para firmar» de siempre), gasto, obra nueva, archivar obra, borrar obra (solo Administración y solo sin nada cargado), usuario (solo Administración: rol, activo, confirmar, nombre, vínculo con la nómina; no a sí mismo), punto del mapa, documentación «en papel», aviso de la cuadrilla (visto / resuelto con respuesta al celu), ausencia, contacto, quincena (cerrar / reabrir con `__quincenas.cerrarQ/reabrirQ`), borrar fotos (`fotosBorrar`), alta de producto (el código lo elige la app con `proximoCodigoCatalogo`, como «Guardar producto»).
+- **`proponer_editar`** suma cuadrillas, guías, proyectos y notas de planos, y lee de la base lo que no está en memoria.
+- **Lo delicado pide el «Sí» dos veces** («Sí, estoy seguro»): borrar obra, borrar fotos, anular/cerrar reserva, baja de herramienta, usuarios (rol / desactivar), quincena, reiniciar puntos (`reinicios`), anular un movimiento, baja de un producto.
+- **SISTEMA:** «VER Y HACER TODO (v178)… NUNCA digas "no lo puedo ver" sin antes buscarlo… si de verdad no está, decí dónde buscaste».
+- Cuadrilla, pañol, «solo mirar» y Dirección: exactamente como antes (sin las herramientas nuevas; los `enum` viejos; NO_VE).
+
+**Lo que sigue sin poder (a propósito o porque necesita la mano):** pushSubs / avisosPush / secretosServidor (las reglas no dejan leerlos); las imágenes y videos como datos (se miran con ver_fotos / ver_plano); sacar fotos, subir archivos y relevar en Proyectista (cámara, GPS, archivo); lo de cada aparato (contraseña, huella, cerrar sesión).
+
+**A confirmar:** los topes de lectura (adjuntos 25 por página, auditoría 200, fotos 150, gastos 800…); que Oficina vea la ubicación en vivo por el asistente (como la ve en el Mapa).
+
+**Cómo se arma:** `herramientas/v178/patch_v178.py` sobre el ORIGINAL 177 (`d7367b93…`): `ia178.js` antes de `window.__asistente`, la línea del SISTEMA y `cerrarQ, reabrirQ` en `window.__quincenas`. Sin reglas nuevas.
+
 ## v177 — 19/11/2026 (publicada en GitHub 19/11) · El Inicio prolijo (el logo de EMA en su lugar)
 **Pedido (Ángel, 19/11, mirando el Inicio de admin en la compu):** «la ubicación del cartel de EMA… no se está respetando la prolijidad y la belleza de la interfaz que veníamos manejando, ¿qué pasó?».
 
