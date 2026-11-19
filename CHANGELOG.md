@@ -28,6 +28,10 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Cómo se arma:** `herramientas/v174b/patch_v174b.py` sobre el ORIGINAL 174 (cambia el bloque `personalSeguro` por `herramientas/v174/personalSeguro.js/.css`, la copia en el aparato de precios y baremo en sus escuchas y la carrera de `aplicarBaremoDeLaNube` / `aplicarPreciosDeLaNube`).
 
+**Pruebas:** `t_v174` PC 57/57 · celu 57/57 · `REGLAS=1` 57/57 · 57/57 (grupo 7 = forma real de las órdenes: contra la v174 solo encontraba a Juan y Pedro; grupo 8 = precios); `t_v173` 51/51 · 51/51, `t_circuito` 16/16 · 16/16.
+
+**Huellas:** sello `2026-11-19 09:07 · 88531a` · ORIGINAL `174b_2026-11-19_app-EMA_ORIGINAL.html` `dda6c2dcdb80a0b67794c3556618acbd6d29d9772c8da75978b7762ee1226522` · `index.html` `4f810616bd58ced4c0e1295b07f65aa20ee927285fd7c08f7c166eb5da5f782c`.
+
 ## v174 — 19/11/2026 (publicada en GitHub 19/11) · La nómina y los vehículos no se pierden + «🩹 Recuperar»
 **Pedido (Ángel, 19/11):** Producción › Personal del equipo quedó con 10 personas (justo la lista de ejemplo que trae la app) y sin vehículos; faltan JAVIER OLARIAGA, Ivan Exequiel Pereyra, PETITTI ISMAEL, Bruno Federico Cherino y Vizgarra Alfredo, que siguen en las órdenes de esta semana. «Quiero recuperar TODO lo que se borró, y verificá qué se borró y qué pasó.»
 
