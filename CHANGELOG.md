@@ -2,6 +2,23 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v183 — 19/11/2026 (armada, sin publicar) · Calculadora: cable 3×1,5, ganancia de 6 m y luminarias de distinta potencia
+**Pedido (Ángel, 19/11):** «la calculadora modifiquemos 4 metros para cables 3x1,5 brazo de 0.4 m columnas de 7 metros ese cable es para el artefacto y la ganancia de abajo hacia arriba es de 6 metro para columna de 10 metros también 6 metros de abajo hacia arriba y de arriba hacia abajo o sea el 3x1.5 son 7,5 metros con brazo de un metro y lo que nos faltó agregar es que a veces usamos en la misma obra luminarias de distinta potencia agrega eso».
+
+**Qué cambia (módulo `calc183` + `calc183Css` + reemplazos chicos, bandera `__v183No`):**
+- **Cable 3×1,5 a la luminaria, uno por artefacto:** **4 m** en columna de 7 m con brazo de 0,4 m y **7,5 m** en la de 10 m con brazo de 1 m (antes (altura − caja) + brazo + 0,60 = 4,5 / 8,1 m). El capuchón de 0,425 y el cuádruple de 1,025 cuentan como 0,4 y 1 m. Otra combinación (7 m con brazo de 1 m, 10 m con 0,4, brazo de 1,5 m…) = la más parecida + la diferencia de altura y de brazo, **«a confirmar»** en el cómputo. Con columnas de 7 y de 10 m en la misma plaza, los brazos de 1 m o más van en la de 10 m y los cortos en la de 7 (a confirmar). Lo usan el cómputo (6001), el ítem 30 de la vista previa del itemizado y la cuenta del ítem 30 de las plazas certificadas; la guía «Preparación en galpón» y Proyectista (4 m de entrada) dicen lo nuevo.
+- **Ganancia del troncal: 6 m por subida** («de abajo hacia arriba»), en columnas de 7 y de 10 m (antes PRFV 3,5 + 0,5 = 4 m y metálica 5 m). Las subidas siguen siendo 2 × columnas − circuitos y el 5 % de reserva / `itemCant` igual. Campo, ayuda, resumen y guía de tendido («6 m, o 12 m si sigue a la próxima»).
+- **Luminarias de distinta potencia en la misma obra:** en «Vínculos y luminarias», «＋ Otra potencia en la misma obra» → «💡 Luminarias por potencia»: la primera es la potencia de siempre y lleva el resto; cada otra con potencia, cantidad y **producto del pañol** (lista de luminarias de la familia 6; sin elegir queda «elegí el producto del pañol (a confirmar)» sin código: nunca se inventa). El cómputo trae un renglón por potencia («Luminaria vial LED 180 W — producto 6011…»), la potencia instalada (kW) y las corrientes en 220 V / 380 V (cos φ 0,95, como «💡 Consumo»), aviso si una luminaria pasa lo que aguanta el fusible de 2 A, y las provisiones salen solas: **85.1** (75 W) y **85.2** (180 W). Se guarda en el formulario (campo `lumTipos183`): editar el cómputo trae las potencias; un cómputo viejo sale con una sola, como antes. «Ver en 💡 Consumo» lleva las potencias a Cálculos rápidos, que suma «Otra potencia» (la caída de tensión ya tenía la potencia de cada columna).
+- **Asistente:** `proponer_calculo` acepta `cambiosForm.luminarias [{potencia, cantidad, codigo}]` (la tarjeta muestra «todas de 75 W» → «75 W (el resto) + 8 × 180 W (6011)»; un código que no es una luminaria del pañol se rechaza).
+
+**A confirmar:** el cable en metálica (la fórmula de antes daba 5,50 m en 7 m con brazo de 400 mm, verificada contra el ítem 7.7 de cuatro cómputos oficiales; ahora 4 m); los 6 m de ganancia también en metálica (antes 5 m: caja a 2,50 m); las combinaciones que Ángel no dijo; en qué columna va cada brazo cuando hay 7 y 10 m; la calculadora de barrio sigue con una sola luminaria por cómputo (no se tocó).
+
+**Cómo se arma:** `herramientas/v183/patch_v183.py` sobre el ORIGINAL 180 (`327b9bdd…`; la v179/v180 no tocan nada de lo que usa: se aplicó igual sobre la 179) (`calc183.js`, `calc183.css` antes de `revisarAppDiag`).
+
+**Pruebas:** PRUEBAS183
+
+**Sello:** SELLO183
+
 ## v180 — 19/11/2026 (publicada en GitHub 19/11) · 🗂 Unir, mover y eliminar carpetas de obra
 **Pedido (Ángel, 19/11):** «en carpetas a veces se crean por error o son duplicados; hay que poner la posibilidad de mover o eliminar carpeta, mover órdenes, fotos, todo». «Carpeta» = una obra (su legajo en Obras / su registro en `avanceObras`).
 

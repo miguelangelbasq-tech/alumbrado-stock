@@ -1,0 +1,79 @@
+/* v184 · «💬 Chat interno»: conversaciones con la cuadrilla y pedidos que arma el asistente para aprobar */
+#chOv{position:fixed;left:0;top:0;right:0;bottom:0;z-index:9650;background:rgba(13,20,36,.42);display:flex;align-items:flex-end;justify-content:center}
+#chOv[hidden]{display:none}
+#chOv .ch-caja{background:var(--bg,#EAF2F7);width:100%;max-width:760px;height:100%;display:flex;flex-direction:column;overflow:hidden;color:var(--text,#0D1424);font-family:var(--fuente);text-align:left;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (min-width:641px){#chOv{align-items:center}#chOv .ch-caja{height:92vh;border-radius:26px;box-shadow:0 30px 80px -30px rgba(13,20,36,.55)}}
+#chOv button{font:inherit;cursor:pointer;letter-spacing:normal;text-transform:none}
+#chOv .ch-top{display:flex;align-items:center;padding:10px 12px 8px;background:rgba(255,255,255,.78);border-bottom:1px solid rgba(40,40,94,.08)}
+#chOv .ch-tt{flex:1 1 auto;min-width:0;margin:0 8px}
+#chOv .ch-tt b{display:block;font:800 17px var(--fuente);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#chOv .ch-tt small{display:block;font-size:12px;color:var(--text-soft)}
+#chOv .ch-x{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line,rgba(40,40,94,.12));background:#fff;color:var(--navy);font-size:18px;margin:0 0 0 6px;padding:0;line-height:1}
+#chOv .ch-x:first-child{margin-left:0}
+#chOv .ch-tabs{margin:8px 12px 0;display:flex}
+#chOv .ch-tabs .subtab{flex:1 1 0;min-height:40px}
+#chOv .ch-cuerpo{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;padding:10px 12px 14px;-webkit-overflow-scrolling:touch}
+#chOv .ch-fila{display:flex;align-items:center;width:100%;min-height:60px;margin:0 0 8px;padding:10px 12px;border-radius:18px;border:1px solid var(--canto,rgba(255,255,255,.8));background:rgba(255,255,255,.86);color:var(--text);text-align:left;box-shadow:0 10px 26px -22px rgba(40,40,94,.5)}
+#chOv .ch-fila.nuevo{border-left:4px solid #1E6F91}
+#chOv .ch-av{flex:none;width:40px;height:40px;border-radius:50%;background:var(--grad-accion,linear-gradient(135deg,#28285E,#1F5F86));color:#fff;font:700 14px/40px var(--fuente);text-align:center;margin-right:10px}
+#chOv .ch-fx{flex:1 1 auto;min-width:0}
+#chOv .ch-fx b{display:block;font-weight:700;font-size:15px}
+#chOv .ch-fx small{display:block;font-size:13px;color:var(--text-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#chOv .ch-pp{font-style:normal;font-size:11.5px;font-weight:700;color:#8A5300;background:rgba(255,159,10,.16);border-radius:999px;padding:2px 8px;margin-left:4px;white-space:nowrap}
+#chOv .ch-fh{flex:none;margin-left:8px;font:500 11px var(--mono);color:var(--text-3);text-align:right}
+#chOv .ch-dot{display:block;width:10px;height:10px;border-radius:50%;background:#1E6F91;margin:6px 0 0 auto}
+#chOv .ch-nuevo{display:block;font-size:13px;color:var(--text-soft);margin:6px 2px}
+#chOv .ch-nuevo select{display:block;width:100%;min-height:44px;font-size:16px;margin-top:4px;border-radius:14px}
+#chOv .ch-vacio{color:var(--text-soft);font-size:14px;text-align:center;padding:24px 10px}
+#chOv .ch-hint{font-size:13px;color:var(--text-soft);margin:0 2px 8px}
+#chOv #chBusca{width:100%;min-height:44px;font-size:16px;box-sizing:border-box;margin-bottom:8px;border-radius:14px}
+#chOv .ch-hab{display:flex;align-items:center;background:rgba(255,255,255,.86);border-radius:16px;padding:8px 10px;margin-bottom:6px}
+#chOv .ch-hab>span{flex:1 1 auto;min-width:0}
+#chOv .ch-hab b{display:block;font-size:14.5px}
+#chOv .ch-hab small{color:var(--text-3);font-size:12px}
+#chOv .ch-hab button{flex:none;min-height:44px;margin:0 0 0 8px;padding:0 14px;font-size:13.5px}
+#chOv .ch-mas{display:block;margin:0 auto 10px;min-height:36px;border:0;background:none;color:#1E6F91;font-size:13px;font-weight:600}
+#chOv .ch-b{max-width:84%;margin:0 0 8px;padding:8px 12px 6px;border-radius:18px 18px 18px 6px;background:#fff;box-shadow:0 8px 20px -18px rgba(40,40,94,.6);word-wrap:break-word;overflow-wrap:anywhere}
+#chOv .ch-b.mio{margin-left:auto;border-radius:18px 18px 6px 18px;background:#DCEBF4}
+#chOv .ch-b.ia{background:linear-gradient(135deg,rgba(137,194,219,.22),#fff);border:1px solid rgba(30,111,145,.18)}
+#chOv .ch-b p{margin:0;font-size:15px;line-height:1.4;white-space:pre-wrap}
+#chOv .ch-b small{display:block;text-align:right;font:500 10.5px var(--mono);color:var(--text-3);margin-top:3px}
+#chOv .ch-q{display:block;font-size:12px;font-weight:700;color:#1E6F91;margin-bottom:2px}
+#chOv .ch-foto{display:block;border:0;padding:0;margin:2px 0 4px;background:none;border-radius:12px;overflow:hidden;max-width:100%}
+#chOv .ch-foto img{display:block;max-width:100%;max-height:240px;border-radius:12px}
+#chOv .ch-sis,#chOv .ch-nota{margin:6px auto 10px;max-width:90%;text-align:center;font-size:12.5px;color:var(--text-soft);background:rgba(40,40,94,.06);border-radius:12px;padding:6px 10px}
+#chOv .ch-sis small{display:block;font:500 10.5px var(--mono);color:var(--text-3)}
+#chOv .ch-card{margin-top:8px;padding:10px;border-radius:14px;background:rgba(255,255,255,.95);border:1px solid rgba(40,40,94,.1);border-left:4px solid #FF9F0A}
+#chOv .ch-ct{font-weight:800;font-size:13.5px}
+#chOv .ch-cr{font-size:14px;margin:4px 0 2px}
+#chOv .ch-cs{font:500 11.5px var(--mono);color:var(--text-3);margin-bottom:6px}
+#chOv .ch-cam{display:flex;flex-wrap:wrap;align-items:baseline;font-size:13.5px;padding:4px 0;border-top:1px dashed rgba(40,40,94,.12)}
+#chOv .ch-cam span{flex:1 1 100%;color:var(--text-soft);font-size:12.5px}
+#chOv .ch-cam s{color:var(--text-3);margin-right:8px}
+#chOv .ch-cam b{color:#1C7A3A}
+#chOv .ch-cam s::after{content:" →";text-decoration:none;display:inline-block;margin-left:4px;color:var(--text-3)}
+#chOv .ch-est{font-size:13px;font-weight:600;margin-top:8px;border-radius:10px;padding:6px 8px}
+#chOv .ch-est.ok{background:rgba(52,199,89,.13);color:#1C7A3A}
+#chOv .ch-est.no{background:rgba(255,59,48,.1);color:#B3261E}
+#chOv .ch-est.am{background:rgba(255,159,10,.14);color:#8A5300}
+#chOv .ch-acc{display:flex;flex-wrap:wrap;margin-top:8px}
+#chOv .ch-acc button{min-height:44px;margin:0 8px 6px 0;padding:0 14px;font-size:14px}
+#chOv .ch-rj{color:#B3261E}
+#chOv .ch-mot{display:block;font-size:12.5px;color:var(--text-soft);margin-top:8px}
+#chOv .ch-mot input,#chOv .ch-mot textarea{display:block;width:100%;box-sizing:border-box;font-size:16px;margin-top:4px;min-height:44px;border-radius:12px}
+#chOv .ch-plan{margin-top:8px;font-size:13px;overflow-x:auto}
+#chOv .ch-msg{font-size:13px;border-radius:12px;padding:8px 10px;margin:8px 0 0;background:rgba(52,199,89,.12);color:#1C7A3A}
+#chOv .ch-top+.ch-msg,#chOv .ch-tabs+.ch-msg{margin:8px 12px 0}
+#chOv .ch-msg.rj{background:rgba(255,59,48,.1);color:#B3261E}
+#chOv .ch-an{display:block;margin-top:8px;font-size:12.5px;background:rgba(40,40,94,.05);border-radius:10px;padding:6px 8px}
+#chOv .ch-an span{display:block}
+#chOv .ch-pie{display:flex;align-items:flex-end;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.9);border-top:1px solid rgba(40,40,94,.08)}
+#chOv .ch-pie.solo{justify-content:center;font-size:13px;color:var(--text-soft);min-height:44px;align-items:center}
+#chOv .ch-ib{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line,rgba(40,40,94,.12));background:#fff;font-size:19px;line-height:42px;text-align:center;margin:0 6px 0 0;padding:0;cursor:pointer;box-sizing:border-box}
+#chOv .ch-ib.on{background:rgba(255,59,48,.12);border-color:#FF3B30}
+#chOv #chTxt{flex:1 1 auto;min-width:0;min-height:44px;max-height:140px;font-size:16px;line-height:1.35;padding:10px 12px;border-radius:22px;resize:none;box-sizing:border-box;margin:0}
+#chOv .ch-env{flex:none;min-height:44px;margin:0 0 0 6px;padding:0 16px}
+#menuChat .ch-bd,#chPerfil .ch-bd{display:inline-block;min-width:18px;height:18px;border-radius:9px;background:var(--danger,#FF3B30);color:#fff;font:700 10.5px/18px var(--mono);text-align:center;padding:0 5px;margin-left:6px;font-style:normal}
+#menuChat .ch-bd.am{background:var(--amber,#FF9F0A)}
+#viewPerfil #chPerfil .ch-bd{flex:none;align-self:center}
+body.ch-abierto #navN1{display:none}
