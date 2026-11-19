@@ -123,6 +123,14 @@ const ANTES = () => { window.__rcEspera = 400; window.__rcTope = 3000; window.__
       await ev(p, () => { window.__rcTopeDia = 0; }); await gesto(p); await ev(p, () => window.fbAvanceCampos('p2', { barrio: 'Alberdi' })); await p.waitForTimeout(2600); await flush(p);
       const rs = (await audDocs(p)).filter((d) => d.resumido);
       c(rs.length === 1 && rs[0].cambios[0].f[0].k === 'barrio' && !rs[0].cambios[0].f[0].dj && /barrio/.test(rs[0].detalle), 'cerca del cupo: solo resúmenes (sin valores) y más tiempo juntando');
+      // sin señal: se anota igual, no se traba y sale cuando vuelve
+      await ev(p, () => { window.__rcTopeDia = 400; window.__stubSinRed = true; }); const a0 = (await ev(p, () => window.__regCambios.cuenta())).aud;
+      await gesto(p); await ev(p, () => { window.fbAvanceCampos('p2', { barrio: 'Sin señal' }); }); await p.waitForTimeout(700); await flush(p);
+      await gesto(p); await ev(p, () => { window.fbAvanceCampos('p1', { direccion: 'Calle sin señal 1' }); }); await p.waitForTimeout(700); await flush(p);
+      const a1 = (await ev(p, () => window.__regCambios.cuenta())).aud;
+      await ev(p, () => { window.__stubSinRed = false; }); await p.waitForTimeout(1500);
+      const L3 = await cambios(p);
+      c(a1 - a0 === 2 && L3.some((x) => x.f && x.f.some((f) => f.dj === '"Sin señal"')) && L3.some((x) => x.f && x.f.some((f) => f.dj === '"Calle sin señal 1"')), 'sin señal: se anota igual (no se traba) y sale cuando vuelve');
       await A.browser.close();
     }
     // ================================================================= 2) la hoja «📜 Historial de cambios»

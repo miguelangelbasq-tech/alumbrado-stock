@@ -1,0 +1,16 @@
+/* v182 · datos seguros: respaldo con todo, restaurar sin duplicar, zona peligrosa */
+#dsHoja .ds-txt p{margin:6px 0;font-size:14.5px;line-height:1.45}
+#dsHoja .ds-txt .hint{font-size:13.5px}
+.ds-tabla{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}
+.ds-tabla th,.ds-tabla td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--border,rgba(40,40,94,.1));vertical-align:top}
+.ds-tabla td.n,.ds-tabla th.n{text-align:right;font-family:var(--mono,inherit);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ds-tabla tr.ds-cero td{color:var(--text-3,#6E7C93)}
+#dsEscribir{display:block;width:100%;max-width:260px;margin:8px 0;font-size:18px;letter-spacing:2px;text-transform:uppercase;min-height:44px}
+.ds-peligro{background:#b3261e!important;background-image:none!important}
+.ds-peligro[disabled]{opacity:.45}
+details.ds-zona{margin-top:12px;border:1px dashed #e3a39d;border-radius:14px;padding:6px 12px;background:#fff7f6}
+details.ds-zona[hidden]{display:none}
+details.ds-zona>summary{cursor:pointer;min-height:40px;line-height:40px;font-weight:700;font-size:14px;color:#b3261e}
+details.ds-zona .ds-zbot{display:flex;flex-wrap:wrap;margin:4px 0 6px}
+details.ds-zona .ds-zbot>button{margin:4px 8px 4px 0;color:#b3261e;min-height:44px}
+details.ds-zona .hint{font-size:13px;margin:4px 0 8px}

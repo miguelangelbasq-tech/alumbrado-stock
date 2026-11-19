@@ -72,16 +72,16 @@
   window.addEventListener("online", () => { ultOnline = Date.now(); });
   const VISTA = { viewInicio: "Inicio", viewTablero: "Mi tablero", viewMisTareas: "Mis tareas", viewCalculadora: "Calculadora", viewRegistro: "Registrar obra", viewObras: "Obras", viewParteDiario: "Órdenes", viewPlanificacion: "Planificación", viewAvance: "Avance de obra", viewMapa: "Mapa", viewStock: "Pañol", viewInforme: "Informes", viewGastos: "Gastos", viewProduccion: "Producción", viewNormas: "Normas", viewGuias: "Guías", viewUsuarios: "Usuarios", viewPerfil: "Perfil" };
   let pantCache = null, pantTs = 0;
-  function pantalla() {
+  function pantalla() {   // sin leer tamaños (nada de forzar el dibujo: la cámara escribe en el disparo)
     if (pantCache && Date.now() - pantTs < 500) return pantCache;
     let p = "", h = "";
     try {
+      if (document.body && document.body.classList.contains("ec-abierta")) { pantCache = { p: (pantCache && pantCache.p) || "", h: "Cámara" }; pantTs = Date.now(); return pantCache; }
       const vs = document.querySelectorAll('.wrap[id^="view"]');
-      for (let i = 0; i < vs.length; i++) { const v = vs[i]; if (v.style.display !== "none" && v.offsetWidth) { p = VISTA[v.id] || v.id.replace(/^view/, ""); break; } }
-      const ia = $("iaPanel");
+      for (let i = 0; i < vs.length; i++) { const v = vs[i]; if (v.style.display !== "none" && !v.hidden) { p = VISTA[v.id] || v.id.replace(/^view/, ""); break; } }
       const ds = document.querySelectorAll("body > .v7-ov, body > [role=dialog], body > .pf-modal");
-      for (let i = ds.length - 1; i >= 0; i--) { const d = ds[i]; if (d.offsetWidth && !d.hidden && d.id !== "rcOv") { h = d.getAttribute("aria-label") || (d.querySelector("h3") || {}).textContent || d.id || ""; break; } }
-      if (!h && ia && ia.offsetWidth && /abiert|on|visible/.test(ia.className + " " + document.body.className)) h = "Asistente";
+      for (let i = ds.length - 1; i >= 0; i--) { const d = ds[i]; if (!d.hidden && d.style.display !== "none" && d.id !== "rcOv") { h = d.getAttribute("aria-label") || (d.querySelector("h3") || {}).textContent || d.id || ""; break; } }
+      if (!h && document.body && document.body.classList.contains("ia-abierto")) h = "Asistente";
     } catch (e) { }
     pantCache = { p, h: String(h).trim().slice(0, 60) }; pantTs = Date.now();
     return pantCache;
@@ -419,7 +419,7 @@
   const json = (v, st, k) => { const l = limpio(v, k || "", 0, st); const s = JSON.stringify(l === undefined ? null : l); if (s.length > MAX_VAL) { st.x = st.x || "cortado"; return { s: JSON.stringify(Array.isArray(l) ? "[lista de " + l.length + "]" : typeof l == "object" ? "[" + Object.keys(l || {}).length + " datos]" : String(l).slice(0, 300)), corto: true }; } return { s }; };
   async function armarGrupo(g, resumir) {
     const op0 = g.ops[0];
-    if (op0.cache && !op0.cacheSnap) { try { op0.cacheSnap = await op0.cache; } catch (e) { } }
+    if (op0.cache && !op0.cacheSnap) { try { op0.cacheSnap = await Promise.race([op0.cache, new Promise((ok) => setTimeout(() => ok(null), 3000))]); } catch (e) { } }
     op0.idBuscado = g.id;
     const E = { c: g.col, id: g.id, n: g.ops.length, t0: g.t0, t1: g.t1, o: g.origen, pa: g.pant || "", h: g.hoja || "" };
     if (g.rev) E.rev = g.rev;
@@ -537,7 +537,9 @@
     };
     if (resumir) d.resumido = true;
     try {
-      await firebase.firestore().collection("auditoria").add(d);
+      // sin esperar al servidor: sin señal la base lo guarda en el celu y lo manda sola cuando vuelve (esperar trabaría el registro)
+      const pr = firebase.firestore().collection("auditoria").add(d);
+      if (pr && pr.then) pr.then(null, (e) => console.warn("[v181] auditoría", e && e.message));
       cuenta("aud", 1); cuenta("cambios", l.length); cuenta("kb", Math.round(JSON.stringify(d).length / 1024));
       ULT.unshift(d); if (ULT.length > 30) ULT.pop();
     } catch (e) { console.warn("[v181] auditoría", e && e.message); }
