@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v176 — 19/11/2026 (armada, sin publicar) · 🛡 Guardián de datos (solo Administración)
+## v176 — 19/11/2026 (publicada en GitHub 19/11) · 🛡 Guardián de datos (solo Administración)
 **Pedido (Ángel, 19/11, después de que el 18/11 a las 12:36 se pisó la nómina —10 de 15 personas, legajos, valor hora—, se vaciaron los vehículos y faltan datos de precios):** «hay que tener algo controlador, o que la IA tenga eso, porque no pueden pasar cosas así; es muy grave». Después: «el Guardián es solo para Administración».
 
 **Qué cambia (módulo `guardianDatos`, bandera `__v176No`):**
