@@ -18,7 +18,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Cómo se arma:** `herramientas/v176/patch_v176.py` sobre el ORIGINAL 175 (`f26cb3e6…`): el módulo antes de `revisarAppDiag`, `ia176.js` antes de `window.__asistente`, la línea del SISTEMA, el Supervisor, Para atender y la revisión con IA. Sin reglas nuevas.
 
-**Pruebas:** PRUEBAS176
+**Pruebas:** `t_v176` (nueva) PC 40/40 · celu 40/40 · `REGLAS=1` 40/40 · 40/40; `t_v174` 57/57 · 57/57, `t_v175` 47/47 · 47/47, `t_v136` (supervisor) 45/45 · 55/55, `t_v141` 44/44 · 44/44, `t_circuito` 16/16 · 16/16 (PC · celu), todo OK. Las pruebas viejas corren con `__v176No` (nueva línea en `pruebas/h.js`).
 
 **Sello:** `2026-11-19 09:36 · dd8072` · ORIGINAL `ff77bb0286deb33cb35d2dbe8326f3f3fa6efc3ad0d19b259b33035f97a401ae` · index `5b15ac0d59fd3ddd3954bfe5e8a0f69880824642dac0c0f760d04b4c489eb0e4`.
 
