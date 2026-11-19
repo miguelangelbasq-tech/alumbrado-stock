@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v174 — 19/11/2026 (armada, sin publicar) · La nómina y los vehículos no se pierden + «🩹 Recuperar»
+## v174 — 19/11/2026 (publicada en GitHub 19/11) · La nómina y los vehículos no se pierden + «🩹 Recuperar»
 **Pedido (Ángel, 19/11):** Producción › Personal del equipo quedó con 10 personas (justo la lista de ejemplo que trae la app) y sin vehículos; faltan JAVIER OLARIAGA, Ivan Exequiel Pereyra, PETITTI ISMAEL, Bruno Federico Cherino y Vizgarra Alfredo, que siguen en las órdenes de esta semana. «Quiero recuperar TODO lo que se borró, y verificá qué se borró y qué pasó.»
 
 **Qué pasó (causa):** la pantalla «Personal del equipo» arranca con una **lista de ejemplo de 10 personas escrita en el código** y la cambia por la de la base recién cuando la base contesta (y solo si la base tiene el campo `nomina`). Si la pantalla se abre y se toca **«Guardar»** antes de que llegue la base (señal lenta, cupo, un error de la escucha, o la base contestó antes de que la app terminara de leerse —esa carrera también existía: `aplicarPersonalDeLaNube` todavía no estaba definida y nadie la volvía a llamar), se graba esa lista de ejemplo como nómina: es lo que pasó el 18/11 a las 12:36 (Ángel cambió a una persona a «Medio oficial» y tocó «Guardar»). Además «Guardar» desde la tabla perdía campos que la tabla no muestra (`equipoCivil` de la v143). Los vehículos son un campo aparte (`vehiculos`) que ese «Guardar» no toca: los escriben la tarjeta «🚗 Vehículos» (agregar / ×), «Guardar los vehículos» de la v143 y el asistente (`proponer_editar` de `personal`); ninguno pedía confirmación para dejar la lista vacía, y no hay registro de quién la vació (no se anotaba en la auditoría).
