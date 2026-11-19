@@ -57,6 +57,7 @@
         if (id === 'reinicios') return localStorage.getItem('stub.sinReglas072') ? false : (leer ? confirmado : esAdmin);   // v072
         if (id === 'ubicacion') return localStorage.getItem('stub.sinReglas083') ? false : (leer ? confirmado : adminUOficina());   // v083
         if (id === 'precios') return leer ? equipo() : (edita('informe') || edita('avance') || edita('gastos') || edita('produccion'));
+        if (id === 'chat') return localStorage.getItem('stub.sinReglas184') ? false : (leer ? confirmado : adminUOficina());   // v184
         return false;
       case 'tableros': return leer ? confirmado : noDir();   // v155
       case 'auditoria': return leer ? equipo() : crear ? (confirmado && (nuevo || {}).usuario === email) : false;
@@ -94,6 +95,26 @@
         if (op === 'list') return leeTodo() || (confirmado && ((nuevo || {}).__filtros || []).some((f) => f[0] === 'uid' && f[1] === '==' && f[2] === uid));
         if (crear) return noDir() && (nuevo || {}).uid === uid && (nuevo || {}).estado === 'nuevo' && Object.keys(nuevo || {}).every((k) => CAMPOS.includes(k));
         if (act) return adminUOficina() && soloCampos(['estado', 'vistoTs', 'vistoPor', 'respuesta', 'respTs', 'respPor', 'respPorNombre', 'resueltoTs', 'resueltoPor', 'analisis', 'decision', 'decTs', 'decPor', 'decPorNombre', 'decMotivo']);
+        return false;
+      }
+      // v184: chat interno. Administración y Oficina todo; Dirección lee; el resto solo si está habilitado (configEquipo/chat)
+      // y solo «General» y su conversación («p_» + uid). Nadie borra; aprobar / no corresponde, solo Administración y Oficina.
+      case 'chatHilos': case 'chatInterno': {
+        if (localStorage.getItem('stub.sinReglas184')) return false;
+        const hab = () => ['admin', 'oficina'].includes(rol) || !!(((DB.configEquipo || {}).chat || {}).habilitados || {})[uid];
+        const mio = (h) => h === 'general' || h === 'p_' + uid;
+        const leeH = (h) => confirmado && (['admin', 'oficina', 'direccion'].includes(rol) || (mio(h) && hab()));
+        const escH = (h) => confirmado && (['admin', 'oficina'].includes(rol) || (rol !== 'direccion' && mio(h) && hab()));
+        if (col === 'chatHilos') {
+          if (leer) return leeH(id);
+          if (crear || act) return escH(id) && Object.keys(nuevo || {}).every((k) => ['id', 'tipo', 'uid', 'email', 'nombre', 'personaClave', 'ultTs', 'ultTexto', 'ultUid', 'ultNombre', 'pend', 'mes'].includes(k));
+          return false;
+        }
+        if (op === 'get') return !!viejo && leeH(viejo.hilo);
+        if (op === 'list') { if (['admin', 'oficina', 'direccion'].includes(rol) && confirmado) return true; const f = ((nuevo || {}).__filtros || []).find((x) => x[0] === 'hilo' && x[1] === '=='); return !!f && leeH(f[2]); }
+        if (crear) { const m = nuevo || {}; const CAMPOS = ['id', 'hilo', 'mes', 'uid', 'email', 'nombre', 'persona', 'personaClave', 'rol', 'texto', 'tipo', 'ts', 'fecha', 'hora', 'fotoMini', 'fotoId', 'porAsistente', 'refId', 'estado', 'pedido'];
+          return confirmado && m.uid === uid && Object.keys(m).every((k) => CAMPOS.includes(k)) && (['admin', 'oficina'].includes(rol) || (rol !== 'direccion' && mio(m.hilo) && hab() && ['msg', 'pedido', 'ia'].includes(m.tipo || 'msg') && ['', 'pendiente'].includes(m.estado || ''))); }
+        if (act) return adminUOficina() && soloCampos(['estado', 'decTs', 'decPor', 'decPorNombre', 'decMotivo', 'resultado', 'analisis']);
         return false;
       }
       default: return false;

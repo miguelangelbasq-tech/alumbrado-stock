@@ -121,6 +121,7 @@ async function abrir(op = {}) {
   if (!op.v185) await page.addInitScript(() => { window.__v185No = true; });   // v185: las pruebas viejas siguen con la Calculadora de antes (todas las tarjetas una debajo de la otra, el acordeón del celu, la barra flotante); v185:true lo prueba
   if (!op.v178) await page.addInitScript(() => { window.__v178No = true; });   // v178: las pruebas viejas siguen con el asistente de antes (sin leer de la base lo que no está en memoria, sin leer_doc, buscar_en_todo, ver_pantalla, dato_app ni proponer_accion); v178:true lo prueba
   if (!op.v181 && !process.env.V181) await page.addInitScript(() => { window.__v181No = true; });   // v181: las pruebas viejas siguen sin el registro de cambios (sin anotar cada escritura en auditoria, sin «📜 Historial de cambios» ni historial_cambios / proponer_revertir_cambio); v181:true (o V181=1) lo prueba
+  if (!op.v184) await page.addInitScript(() => { window.__v184No = true; });   // v184: las pruebas viejas no tienen el chat interno (ni su menú, ni el globito en «Perfil»); v184:true lo prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];

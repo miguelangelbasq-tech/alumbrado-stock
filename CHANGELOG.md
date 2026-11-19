@@ -41,6 +41,27 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Sello:** `2026-11-19 13:20 · bedb22` · ORIGINAL `b7e43ad66324dd30ce6455d8cc74a75ba833574bef07e0d304a37a5673f82a20` · index `da6ffe26ebbfbf50a0a23e7bf292e319851957879778d7100311d6276861c290`.
 
+## v184 — 19/11/2026 (armada, sin publicar) · 💬 Chat interno con pedidos que arma el asistente
+**Pedido (Ángel, 19/11):** «otra cosa para agregar un chat interno — oficina y administrador registran los que pueden entrar — sería algo como para que los de cuadrilla pidan cosas como "faltó hacerme esta tarea, agregarme esto" me entendés — y la IA me cree la tarea y me diga que la apruebe a mí y a la oficina».
+
+**Qué cambia (módulo `chat184` + `chat184Css`, bandera `__v184No`):**
+- **Quién entra:** Administración y Oficina siempre; **Dirección** mira todo (sin escribir ni aprobar); el resto (cuadrilla, operario, pañol, solo mirar) **solo si Administración u Oficina lo habilitó** en ⚙ del chat (`configEquipo/chat.habilitados`, auditoría `chat_habilitar`).
+- **Conversaciones:** «General» (todos los que entran) y **una por persona con la oficina**. Texto, **foto** (miniatura en el mensaje y la foto a la nube) y **dictado** 🎤. Globito de lo no leído en el menú («💬 Chat interno»), en **Perfil** y en la pestaña «Perfil» de la barra de abajo; **aviso al celu** del otro lado (al tocarlo abre esa conversación). Sin señal: «⏳ Sin enviar» y sale solo cuando vuelve.
+- **Pedidos con el asistente:** la cuadrilla escribe en su conversación «faltó cargarme la zanja de 10 m de hoy» → el asistente (Worker `ema-ia`, una pregunta con los topes de su rol, **solo con SUS órdenes**) arma la tarjeta: **sumar una tarea a su orden abierta**, **corregir el cierre** de una cerrada o **reclamo de puntos**; le contesta «Le mandé a Ángel y a la oficina para que lo aprueben» y avisa al celu de Administración y Oficina. Si falta un dato, pregunta en el chat. Sin asistente (sin señal, tope, caído), el mensaje llega igual como texto.
+- **Aprobar:** Administración u Oficina ven la tarjeta con **antes → después**; «✅ Aprobar» (motivo precargado) lo hace por los caminos de siempre (la orden por `fbOtUpdate`; el cierre por «✏ Corregir cierre» de la v153; el reclamo de puntos con el análisis de la v155) o «✕ No corresponde» con motivo obligatorio. A la persona le llega el aviso; auditoría `chat_pedido`. **Nada cambia sin aprobar.** Nadie borra mensajes.
+
+**Reglas nuevas (`firebase/Reglas_Firestore_v184.txt` = v155 + chat):** `configEquipo/chat`, `chatHilos`, `chatInterno`. Mientras no se publiquen, el chat no guarda nada: Administración y Oficina ven «Falta publicar las reglas de Firebase de la v184» (en el chat, en el menú y un aviso por día) y la cuadrilla no lo ve.
+
+**Qué tiene que hacer Ángel:** 1) publicar las reglas `Reglas_Firestore_v184.txt` (Firebase › Firestore › Reglas › pegar todo › Publicar); 2) subir el `index.html`; 3) en la app, Chat interno › ⚙ habilitar a los que van a entrar. No hace falta APK nuevo ni cambiar Workers.
+
+**A confirmar:** solo «General» + una por persona (sin chats entre dos de la cuadrilla); el asistente se usa solo si el mensaje suena a pedido; «sumar a la orden» suma a lo previsto (no marca hecho); lo leído queda en cada aparato; la conversación muestra el mes en curso («Ver el mes anterior»).
+
+**Cómo se arma:** `herramientas/v184/patch_v184.py` sobre el ORIGINAL 185 (`a118faaa…`, con la v180, v182, v183 y v185) (`chat184.js`, `chat184.css` antes de `revisarAppDiag`; el globito en «Perfil» de `navBarra`). Estudiado sobre la 179; las v180–v185 no tocan nada de lo que usa.
+
+**Pruebas:** `t_v184` PC 68/68 · celu 68/68 · `REGLAS=1` 70/70 · 70/70; `t_v141` 44/44 · 44/44, `t_v153` 53/53 · 55/55, `t_v178` 86/86 · 86/86, `t_circuito` 16/16 · 16/16 (la PC repetida sola: la primera dio 15/16 por tiempos con la máquina cargada), `t_v155` 84/85 · 85/86: falla solo «lluvia el jueves…» porque hoy es jueves (la prueba espera «Jueves» y la app dice «hoy»; pasa igual con la v183, no es de la v184). El `firebase_stub.js` de pruebas ahora le pasa a la regla los filtros de la consulta también al escuchar (`onSnapshot`), como Firestore (`herramientas/v184/firebase_stub_v184.diff`).
+
+**Sello:** `2026-11-19 14:10 · 4c16ee` · ORIGINAL `301d62f1e86d6c2bf3afd29de7df1c94bc16df6158a1588a7ac2359aa1d7623c` · index `6be8372ddf95903ad5ef13e699d3ceffc9a14ee0683332ec6ef9c8511dddef77` · reglas `7d240b1bf1f8e6679304254f0d4fc03d81cf695400354684783364dbcc48ad6c`.
+
 ## v183 — 19/11/2026 (publicada en GitHub 19/11) · Calculadora: cable 3×1,5, ganancia de 6 m y luminarias de distinta potencia
 **Pedido (Ángel, 19/11):** «la calculadora modifiquemos 4 metros para cables 3x1,5 brazo de 0.4 m columnas de 7 metros ese cable es para el artefacto y la ganancia de abajo hacia arriba es de 6 metro para columna de 10 metros también 6 metros de abajo hacia arriba y de arriba hacia abajo o sea el 3x1.5 son 7,5 metros con brazo de un metro y lo que nos faltó agregar es que a veces usamos en la misma obra luminarias de distinta potencia agrega eso».
 

@@ -1,0 +1,11 @@
+--- /tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-83acf3badc27/scratchpad/t179/firebase_stub.js	2026-11-19 13:29:13.574120534 +0000
++++ /tmp/claude-0/-home-user-alumbrado-stock/fe896edf-889c-50c7-8615-83acf3badc27/scratchpad/t184/firebase_stub.js	2026-11-19 16:43:39.991485586 +0000
+@@ -120,7 +120,7 @@
+       get: () => !leerOk(col, undefined, filtros) ? Promise.reject(errPerm()) : Promise.resolve(ejecutar()),
+       onSnapshot: (cb, err) => {
+         if (typeof cb === 'object' && cb && cb.next) { err = cb.error; cb = cb.next; }
+-        if (!leerOk(col)) { setTimeout(() => err && err(errPerm()), 0); return () => {}; }
++        if (!leerOk(col, undefined, filtros)) { setTimeout(() => err && err(errPerm()), 0); return () => {}; }   // v184: la regla ve los filtros de la consulta también al escuchar
+         const dem = ((window.__stubDemora || {})[col]) || demRed(ejecutar()) || 0; let listo = !dem; const f = () => listo && cb(ejecutar()); f.__col = col; oyentes.add(f); setTimeout(() => { listo = true; f(); }, dem); return () => oyentes.delete(f);   // v078: demora de la primera respuesta
+       }
+     };
