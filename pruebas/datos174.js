@@ -1,0 +1,21 @@
+// v174 · datos: la nómina real de 15 personas + 3 vehículos (bien) o como quedó el 18/11 a las 12:36 (mal: las 10 de la lista de
+// ejemplo con Lastra «Medio oficial» y sin vehículos). Las órdenes de esta semana tienen a los 5 que faltan con su rol y vehículo;
+// la quincena cerrada tiene el legajo de 2 de ellos.
+const { baseDatos } = require('./h');
+const FAB = [['51251', 'Mauricio Mainini', 'Oficial'], ['51115', 'Pablo Maximiliano Picone', 'Oficial'], ['51302', 'Lastra Sergi Ariel', 'Oficial'], ['51316', 'Víctor Exequiel Franco', 'Ayudante'], ['', 'Franco Nahuel Esequiel González', 'Ayudante'], ['51146', 'Marcos Marcelo González', 'Ayudante'], ['51222', 'Leandro Luis Damián Toledo Ontivero', 'Ayudante'], ['51320', 'Marcos Mancloba', 'Ayudante'], ['51299', 'Ulises Toledo', 'Ayudante'], ['51151', 'Herrera Juan Carlos', 'Oficial']];
+const CINCO = [['51400', 'JAVIER OLARIAGA', 'Oficial', 'v1'], ['51401', 'Ivan Exequiel Pereyra', 'Ayudante', ''], ['51402', 'PETITTI ISMAEL', 'Medio oficial', 'v2'], ['51403', 'Bruno Federico Cherino', 'Ayudante', ''], ['51404', 'Vizgarra Alfredo', 'Chofer', 'v3']];
+const VEH = [{ id: 'v1', nombre: 'Hilux blanca', patente: 'AB123CD', tipo: 'transporte', lugares: 5, activo: true }, { id: 'v2', nombre: 'Hidro 1', patente: 'AC456EF', tipo: 'hidro', lugares: 2, activo: true }, { id: 'v3', nombre: 'Grúa', patente: 'AD789GH', tipo: 'grua', lugares: 2, activo: true }];
+const nominaReal = () => FAB.map(([l, n, r], i) => ({ legajo: l, nombre: n, sector: 'alumbrado', rol: r, valorHora: 4000 + i * 10, vehiculoId: i === 0 ? 'v1' : '', activo: true, equipoCivil: i === 3 ? true : undefined })).concat(CINCO.map(([l, n, r, v]) => ({ legajo: l, nombre: n, sector: n === 'Vizgarra Alfredo' ? 'ilicitos' : 'alumbrado', rol: r, valorHora: 5000, vehiculoId: v, activo: true }))).map((p) => JSON.parse(JSON.stringify(p)));
+const nominaMala = () => FAB.map(([l, n, r]) => ({ legajo: l, nombre: n, sector: 'alumbrado', rol: n === 'Lastra Sergi Ariel' ? 'Medio oficial' : r, valorHora: 0, vehiculoId: '', activo: true }));
+function datos174(op = {}) {
+  const d = baseDatos(), hoy = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  const menos = (n) => new Date(Date.now() - n * 864e5 - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  d.db.configEquipo.personal = op.mal ? { nomina: nominaMala(), vehiculos: [], ts: Date.parse('2026-11-18T15:36:00Z'), usuario: 'admin@ema-alumbrado.app' } : { nomina: nominaReal(), vehiculos: VEH, ts: Date.parse('2026-11-17T12:00:00Z'), usuario: 'admin@ema-alumbrado.app', vehiculosTs: Date.parse('2026-11-10T12:00:00Z') };
+  const per = (l) => l.map(([, n, r]) => ({ nombre: n, rol: r }));
+  const clave = (n) => n.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  d.db.ordenesTrabajo.o1 = { numero: 'OT-2026-201', fecha: menos(1), plazaId: 'p1', plazaNombre: 'Plaza San Martín', horaInicio: '07:30', cuadrilla: 'Javier', personal: per([CINCO[0], CINCO[1], FAB[0]]), personalNombres: [CINCO[0][1], CINCO[1][1], FAB[0][1]].map(clave), actividades: [], estado: 'Terminada', vehiculos: [{ id: 'v1', nombre: 'Hilux blanca', patente: 'AB123CD' }], vehiculoPersona: { 'JAVIER OLARIAGA': { id: 'v1', nombre: 'Hilux blanca', patente: 'AB123CD' } } };
+  d.db.ordenesTrabajo.o2 = { numero: 'OT-2026-202', fecha: hoy, plazaId: 'p1', plazaNombre: 'Plaza San Martín', horaInicio: '07:30', cuadrilla: 'Petitti', personal: per([CINCO[2], CINCO[3], CINCO[4]]), personalNombres: [CINCO[2][1], CINCO[3][1], CINCO[4][1]].map(clave), actividades: [], estado: 'Emitida', vehiculos: [{ id: 'v2', nombre: 'Hidro 1', patente: 'AC456EF' }, { id: 'v3', nombre: 'Grúa', patente: 'AD789GH' }], vehiculoPersona: { 'PETITTI ISMAEL': { id: 'v2', nombre: 'Hidro 1', patente: 'AC456EF' }, 'Vizgarra Alfredo': { id: 'v3', nombre: 'Grúa', patente: 'AD789GH' } } };
+  d.db.cierresQuincena = { '2026-11-1': { key: '2026-11-1', desde: '2026-11-01', hasta: '2026-11-15', personas: [{ nombre: 'JAVIER OLARIAGA', legajo: '51400', rol: 'Oficial', pts: 10 }, { nombre: 'PETITTI ISMAEL', legajo: '51402', rol: 'Medio oficial', pts: 8 }] } };
+  return d;
+}
+module.exports = { datos174, nominaReal, nominaMala, VEH, FAB, CINCO };
