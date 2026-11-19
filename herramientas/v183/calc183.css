@@ -1,0 +1,19 @@
+/* v183 · luminarias de distinta potencia (Calculadora › Vínculos y luminarias) */
+#lum183 { margin: 8px 0 4px; }
+#lum183 .lum183-box { border: 1px solid var(--border, rgba(13,20,36,.12)); border-radius: 14px; padding: 10px 12px; background: rgba(255,255,255,.55); }
+#lum183 .lum183-tit { font-weight: 800; color: var(--navy, #28285E); margin-bottom: 6px; }
+#lum183 .lum183-fila { display: grid; grid-template-columns: 26px 1fr 1fr 2fr 34px; align-items: end; margin-bottom: 8px; }
+#lum183 .lum183-fila > * { margin-right: 8px; min-width: 0; }
+#lum183 .lum183-fila > *:last-child { margin-right: 0; }
+#lum183 .lum183-fila label { margin: 0 0 3px; font-size: 12px; }
+#lum183 .lum183-fila input, #lum183 .lum183-fila select { margin: 0; width: 100%; min-height: 44px; box-sizing: border-box; }
+#lum183 .lum183-lbl { font-family: "JetBrains Mono", monospace; font-weight: 800; color: var(--text-3, #6E7C93); padding-bottom: 12px; }
+#lum183 .lum183-w { min-height: 44px; display: flex; align-items: center; flex-wrap: wrap; }
+#lum183 .lum183-w .hint { margin: 0 0 0 6px; }
+#lum183 .lum183-x { width: 34px; min-height: 44px; }
+#lum183 .lum183-mas { min-height: 44px; }
+#lum183 .lum183-link { background: none; border: 0; padding: 0 2px; min-height: 44px; color: #1E6F91; font-weight: 700; text-decoration: underline; cursor: pointer; font: inherit; }
+@media (max-width: 640px) {
+  #lum183 .lum183-fila { grid-template-columns: 22px 1fr 1fr 34px; }
+  #lum183 .lum183-fila .lum183-prod { grid-column: 2 / 4; grid-row: 2; margin-top: 6px; }
+}

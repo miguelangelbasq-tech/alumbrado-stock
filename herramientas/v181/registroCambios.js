@@ -35,8 +35,8 @@
   const NO_COL = /^(auditoria|presencia|ubicacionVivo|pushSubs|avisosPush|secretosServidor)$/;
   const NO_DOC = { configEquipo: /^(presencia|salud|vapid)$/, adjuntos: /^cfg-/ };
   const FOTO_COL = /^(fotosObra|adjuntos|planosImg)$/;
-  const SECRETO = /token|clave|contrase|password|^pass$|secret|privad|fcm|endpoint|p256dh|^auth$|apikey|api_key/i;
-  const PRIVADO = /valorhora|valor_hora|sueldo|salario|jornal|valorpunto|valor_punto|valorhh|cbu|cuil|dni/i;
+  const SECRETO = /(^|_)(token|password|pass|contrasena|contraseña|secret|secreto|privatekey|privada|p256dh|auth|endpoint|apikey|api_key|fcm)$|Token$|^clave$/i;
+  const PRIVADO = /^(valorhora|valor_hora|sueldo|salario|jornal|valorpunto|valor_punto|valorhh|cbu|cuil|cuit|dni)$/i;
   const VOL = /^(ts|usuario|por|porNombre|actualizado|actualizadoPor|editadoTs|editadoPor|creado|version|respaldos|guardianCopias)$|Ts$/;
   const ESPERA = () => (window.__rcEspera != null ? +window.__rcEspera : 6000);        // silencio para cerrar un grupo
   const TOPE = () => (window.__rcTope != null ? +window.__rcTope : 30000);             // un grupo no espera más que esto
@@ -586,7 +586,7 @@
   }
 
   // ---------------------------------------------------------------- «Volver este cambio»
-  function reversibles(E) { return arr(E.f).filter((c) => !c.vol && !c.x && !c.ad); }
+  function reversibles(E) { return arr(E.f).filter((c) => !c.vol && !c.x && !c.ad && (c.an || c.aj !== undefined)); }
   const puedeVolver = (E) => E && ((E.t === "cambio" && reversibles(E).length > 0) || (E.t === "borrado" && E.prev && !E.prevX));
   function conPrivados(a, cur) {   // lo «[privado]» del registro se completa con lo que hay hoy
     if (a === MARCA_PRIV) return cur;
