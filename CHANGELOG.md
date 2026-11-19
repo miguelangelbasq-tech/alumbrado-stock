@@ -15,9 +15,9 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Cómo se arma:** `herramientas/v183/patch_v183.py` sobre el ORIGINAL 180 (`327b9bdd…`; la v179/v180 no tocan nada de lo que usa: se aplicó igual sobre la 179) (`calc183.js`, `calc183.css` antes de `revisarAppDiag`).
 
-**Pruebas:** PRUEBAS183
+**Pruebas:** `t_v183` PC 35/35 · celu 35/35 · `REGLAS=1` 35/35 · 35/35; `t_v066` 13/13 · 13/13, `t_v067` 21/21 · 21/21, `t_v101` 10/10 · 11/11, `t_v102a`–`e` OK (10/10 · 11/11, 8/8, 11/11 · 12/12, 8/8, 6/6), `t_v103` 7/7 · 7/7, `t_v108b` 11/11 · 11/11, `t_circuito` 16/16 · 16/16 (PC · celu), todo OK (las viejas corren con `__v183No`: no hubo que cambiar ninguna). `t_v134` 32/33 · 34/35: el mismo renglón falla igual con la v180 publicada («proponer_editar respeta los permisos…», viene de antes; no es de la v183).
 
-**Sello:** SELLO183
+**Sello:** `2026-11-19 13:09 · d49ee4` · ORIGINAL `0650f1a44425c1f54398ecad46047ec3c4fc007e316506486cf63bb8aef9c5d5` · index `206f545de7012a126a4f81c41c3e65739b1d3a1cba622ea21bee289b3f709f49`.
 
 ## v180 — 19/11/2026 (publicada en GitHub 19/11) · 🗂 Unir, mover y eliminar carpetas de obra
 **Pedido (Ángel, 19/11):** «en carpetas a veces se crean por error o son duplicados; hay que poner la posibilidad de mover o eliminar carpeta, mover órdenes, fotos, todo». «Carpeta» = una obra (su legajo en Obras / su registro en `avanceObras`).
