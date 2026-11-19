@@ -52,11 +52,11 @@
     const R = 6371000, r = Math.PI / 180, x = Math.sin((la2 - la1) * r / 2), y = Math.sin((lo2 - lo1) * r / 2);
     return 2 * R * Math.asin(Math.sqrt(x * x + Math.cos(la1 * r) * Math.cos(la2 * r) * y * y));
   }
-  function buscar(q) {
+  function buscar(q, excluir) {
     const s = String(q == null ? "" : q).trim(); if (!s) return [];
     const ex = obraDe(s); if (ex) return [ex];
     const z = nNom(s), idq = nId(s.replace(/^\s*id\s*/i, ""));
-    const l = obras().map((o) => {
+    const l = obras().filter((o) => !excluir || String(o.id) !== String(excluir)).map((o) => {
       const n = nNom(nombre(o)); let p = 0;
       if (o.obraId && nId(o.obraId) === idq) p = 95; else if (n === z) p = 90; else if (n.indexOf(z) >= 0 && z.length >= 3) p = 75; else if (z.length >= 5 && lev(n, z) <= 2) p = 70;
       else { const ws = z.split(" ").filter((w) => w.length > 2); if (ws.length && ws.every((w) => n.indexOf(w) >= 0)) p = 60; }
@@ -65,8 +65,8 @@
     if (!l.length) return [];
     return l.filter((x) => l[0].p - x.p < 10).map((x) => x.o);
   }
-  function resolver(q) {
-    const l = buscar(q);
+  function resolver(q, excluir) {
+    const l = buscar(q, excluir);
     if (!l.length) return { err: "No encontré ninguna obra que se parezca a «" + q + "»." };
     if (l.length > 1) { const v = l.filter((o) => !o.oculta && !o.unidaEn); if (v.length === 1) return { obra: v[0] }; return { err: "Hay varias obras que se parecen a «" + q + "»: " + l.slice(0, 6).map((o) => nombre(o) + (o.obraId ? " (ID " + o.obraId + ")" : "") + (o.oculta ? " — archivada" : "")).join(", ") + ". ¿Cuál?" }; }
     return { obra: l[0] };

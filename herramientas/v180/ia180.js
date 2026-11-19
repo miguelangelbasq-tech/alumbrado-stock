@@ -7,7 +7,7 @@
     var arr = function (x) { return Array.isArray(x) ? x : []; };
     function okRol() { var n = nivelRol(); return (n === "admin" || n === "oficina") && !!C() && C().puede(); }
     var NO_ROL = { err: "Unir, mover o eliminar carpetas de obra lo hacen Administración y Oficina (con «editar» en Registrar obra o Avance)." };
-    function obraR(q) { if (!C()) return { err: "Falta el módulo de carpetas." }; return C().resolver(q); }
+    function obraR(q, ex) { if (!C()) return { err: "Falta el módulo de carpetas." }; return C().resolver(q, ex); }
     function fila(ic, t, s) { return '<div class="ia-conf-f">' + ic + " " + t + (s ? "<br><small>" + s + "</small>" : "") + "</div>"; }
     H.revisar_carpetas = async function (a) {
       a = a || {};
@@ -25,7 +25,7 @@
       if (!puedeAcciones()) return SIN_ACC;
       if (!okRol()) return NO_ROL;
       var s = obraR(a.origen); if (s.err) return { err: "Origen: " + s.err };
-      var d = obraR(a.destino); if (d.err) return { err: "Destino: " + d.err };
+      var d = obraR(a.destino, s.obra.id); if (d.err) return { err: "Destino: " + d.err };
       var el = {}; arr(a.elegir).forEach(function (x) { if (x && x.conflicto) el[String(x.conflicto)] = /orig|une/i.test(x.quedarse || "") ? "origen" : /sum/i.test(x.quedarse || "") ? "sumar" : "destino"; });
       var R = await C().planUnir(s.obra.id, d.obra.id, { elegir: el, motivo: a.motivo || "" });
       if (R.err) return { err: R.err };
@@ -42,7 +42,7 @@
       if (!puedeAcciones()) return SIN_ACC;
       if (!okRol()) return NO_ROL;
       var s = obraR(a.origen); if (s.err) return { err: "Origen: " + s.err };
-      var d = obraR(a.destino); if (d.err) return { err: "Destino: " + d.err };
+      var d = obraR(a.destino, s.obra.id); if (d.err) return { err: "Destino: " + d.err };
       var inv = await C().inventario(s.obra.id); if (inv.err) return { err: inv.err };
       var g = inv.g, sel = { conAvance: a.con_avance !== false }, noEnc = [];
       var fDe = function (x) { return String(x.fecha || "").slice(0, 10); };
