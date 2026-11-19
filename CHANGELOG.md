@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v173 — 19/11/2026 (armada, sin publicar) · La orden por persona y por tiempo
+## v173 — 18/11/2026 (publicada en GitHub 18/11) · La orden por persona y por tiempo
 **Pedido (Ángel, 18/11):** «Hay que hacer dos cosas, para la IA y para la orden de trabajo, que sea por tiempo también. Ahora está por cuadrilla; tiene que ser por personas que van a hacer cada tarea. La IA también lo tiene que detectar… por ahí yo le pido a la IA que cierta persona va a hacer cierta cosa y te pone todo junto, eso está mal. Y luego por tiempo: si digo Pablo y Pedro van a estar hasta las 2 en esa plaza y los otros van a seguir trabajando hasta las 16, tiene que ser así… Que ellos cobren hasta ahí y lo que hicieron, y luego los otros siguen y van a cobrar más por todas las horas.» Y: «si le doy la misma tarea "armar luminaria" a dos personas: hay que armar 10, 5 cada uno — que a cada uno le aparezcan 5 nomás… para medir su tiempo y que hagan esas 5.»
 
 **Qué estaba mal (comprobado con la v172):**
@@ -20,7 +20,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas:** `t_v173` (nueva) PC 51/51 · celu 51/51 · `REGLAS=1` 53/53 · 53/53; con `ANTES=1` contra la v172 reproduce lo de Ángel (grupo 0 repartida: 2/2: los dos ven las mismas unidades y la foto del otro cuenta; grupo 4 asistente: 3/3: sin `quienes` ni `horario`, el izaje para los 4 y sin horario). `t_v094` 22/22 · 23/23, `t_v097` 23/23 · 24/24, `t_v111` 7/7 · 8/8, `t_v112` 14/14 · 15/15, `t_v128` 10/10 · 11/11, `t_v146` 64/64 · 64/64, `t_v153` 53/53 · 55/55, `t_v165` 59/59 · 59/59, `t_v166` 38/38 · 38/38, `t_circuito` 16/16 · 16/16 (PC · celu). `t_v143` 78/78 · 78/78 con `TZ=UTC` (con la hora de Córdoba después de las 21 da 77/78, igual que la v172: la regla de fechas UTC de §12). `t_v154` no termina con esta fecha ni con la v172 (la quincena de los datos de prueba: 1 orden de 3 cae en otra quincena hoy, 18/19-11); no es de la v173.
 
-**Huellas:** sello `2026-11-19 00:50 · 1225a7` · ORIGINAL `173_2026-11-19_app-EMA_ORIGINAL.html` `1e14c82d6227b6169c8b3ff96cc9b2e94158482f02ef93e0863fabfcf2bace76` · `index.html` `63a3593ddf5e4eb5d8b59addff1814a22398fda4843b8329a1175c6a87b7570f`.
+**Huellas:** sello `2026-11-18 21:50 · 1225a7` · ORIGINAL `173_2026-11-18_app-EMA_ORIGINAL.html` `766718bdf32473bcd6bca5112dbd173c8a9fcc811371c36151845d8151c701b7` · `index.html` `0621408094ce39603eeb59ba0a2abe2a2d1704c9a8feb4472c9299a4ab1fb21f`.
 
 ## v172 — 18/11/2026 (publicada en GitHub 18/11) · Cámara: el video sin burbuja y «Tablero 1»
 **Pedido (Ángel, 18/11):** (1) «En la cámara tener la burbuja de video, que molesta: no deja apretar el botón de siguiente. La burbuja no me gusta, elegí otro lugar.» (2) «Selecciono Tablero y al apretar arriba de Tablero (otra vez) debería dejarte poner tablero y algo que yo quiero poner, como 1 o E o roto, lo que sea.»
