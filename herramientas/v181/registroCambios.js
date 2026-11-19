@@ -107,6 +107,10 @@
     return "";
   }
   function anotar(col, id, kind, data, opt, extra) {
+    const t0 = window.__rcDebug ? performance.now() : 0;
+    try { return anotar0(col, id, kind, data, opt, extra); } finally { if (t0) (window.__rcDbg = window.__rcDbg || []).push(["anotar", col, Math.round(performance.now() - t0), camAbierta()]); }
+  }
+  function anotar0(col, id, kind, data, opt, extra) {
     try {
       if (window.__v181No || noVa(col, id)) return null;
       if (data && typeof data == "object") { const ya = YA.get(data) || new Set(), pk = col + "/" + id; if (ya.has(pk)) return null; ya.add(pk); YA.set(data, ya); }
@@ -563,7 +567,9 @@
       const g = gs[i];
       if (camAbierta()) { const now = Date.now(); gs.slice(i).forEach((x) => { const y = BUF.get(x.key); if (y) { y.ops = x.ops.concat(y.ops); y.t0 = x.t0; } else { x.t1 = now; BUF.set(x.key, x); } }); programar(); break; }   // se abrió la cámara: lo que falta, después
       if (i) await esperarQuieto();
+      const t1 = window.__rcDebug ? performance.now() : 0;
       let E = null; try { E = await armarGrupo(g, resumir); } catch (e) { E = null; }
+      if (t1) (window.__rcDbg = window.__rcDbg || []).push(["armar", g.col, Math.round(performance.now() - t1), camAbierta()]);
       if (!E) continue;
       const k = g.email + "|" + g.origen; if (!porQuien.has(k)) porQuien.set(k, { email: g.email, uid: g.uid, origen: g.origen, l: [] }); porQuien.get(k).l.push(E);
     }
@@ -585,7 +591,9 @@
     if (resumir) d.resumido = true;
     try {
       // sin esperar al servidor: sin señal la base lo guarda en el celu y lo manda sola cuando vuelve (esperar trabaría el registro)
+      const t2 = window.__rcDebug ? performance.now() : 0;
       const pr = firebase.firestore().collection("auditoria").add(d);
+      if (t2) (window.__rcDbg = window.__rcDbg || []).push(["add", l.length, Math.round(performance.now() - t2), camAbierta()]);
       if (pr && pr.then) pr.then(null, (e) => console.warn("[v181] auditoría", e && e.message));
       cuenta("aud", 1); cuenta("cambios", l.length); cuenta("kb", Math.round(JSON.stringify(d).length / 1024));
       ULT.unshift(d); if (ULT.length > 30) ULT.pop();
