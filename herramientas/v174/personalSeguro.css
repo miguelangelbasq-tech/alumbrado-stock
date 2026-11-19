@@ -13,3 +13,5 @@
 .ps-arch input{display:block;margin-top:8px;max-width:100%}
 .ps-peligro{background:#b3261e!important}
 #psAviso:empty{display:none}
+.ps-diag{margin:4px 0 8px;padding:10px 12px;border-radius:14px;background:#eef6fa;font-size:14px;line-height:1.45}
+.ps-ya summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--navy,#28285E);min-height:32px}

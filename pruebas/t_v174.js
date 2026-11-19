@@ -155,6 +155,22 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.split(',').indexOf(Str
       c(Array.isArray(b.respaldos) && b.respaldos[0].campos.tareasPropias[0].label === 'Pintar bases', 'baremo.respaldos[] con lo que había antes');
       await A.browser.close(); browser = null;
     }
+    if (SOLO(7) && !ANTES) {   // v174b: datos con la forma real + órdenes que cargan tarde
+      const A = await sesion('admin', datos174({ mal: true, real: true }), { demora: { ordenesTrabajo: 7000 }, espera: 1500 }), p = A.page;
+      await irPersonal(p); await p.waitForTimeout(400);
+      await p.click('#psRec [data-ps="abrir"]'); await p.waitForTimeout(1500);
+      await p.waitForTimeout(8000);
+      const A7 = await p.evaluate(() => window.__psRec.estado().A), f7 = A7.faltan.map((x) => x.nombre);
+      const cinco = [/olariaga/i, /pereyra/i, /petitti/i, /cherino/i, /vizgarra/i];
+      c(cinco.every((r) => f7.some((n) => r.test(n))), 'forma real: encuentra a los 5 (texto en mayúsculas, «persona», solo personalNombres, una orden de hace 60 días, reparto): ' + f7.join(', '));
+      c(!f7.some((n) => /mainini/i.test(n)) && A7.yaEn.some((y) => /MAININI/i.test(y.nombre)), 'MAURICIO MAININI (mayúsculas) cuenta como ya en la nómina');
+      const pet = A7.faltan.find((x) => /petitti/i.test(x.nombre));
+      c(pet && pet.datos.rol && pet.datos.rol.v === 'Medio oficial', 'el rol de «funcion»: Medio oficial');
+      c(A7.vFaltan.length === 3, 'los 3 vehículos (vehiculos[], vehiculoId, vehiculoPersona): ' + A7.vFaltan.map((x) => x.v.nombre || x.id).join(', '));
+      const dg = await tx(p, '#psOv .ps-diag');
+      c(/Revisé \d+ órdenes/.test(dg) && /ya están en la nómina/.test(dg) && /faltan/.test(dg) && A7.diag.ordenes >= 3, 'dice qué revisó: ' + dg.slice(0, 140));
+      await A.browser.close(); browser = null;
+    }
     if (SOLO(5) && !ANTES) {
       const A = await sesion('pedro', datos174()), p = A.page;
       await p.waitForTimeout(800);

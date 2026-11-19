@@ -153,7 +153,26 @@
   document.addEventListener("click", (e) => { if (e.target.closest && e.target.closest('#subtabsProd [data-sub="personal"]')) setTimeout(() => { try { pintarEstado(); } catch (er) { } }, 60); });
 
   // ---------- las fuentes
-  const ordenes = () => intentar(() => (typeof ordenesTrabajo !== "undefined" ? ordenesTrabajo : window.ordenesTrabajo) || [], []).filter((o) => o && o.estado !== "Anulada").slice().sort((a, b) => String(b.fecha || "").localeCompare(String(a.fecha || "")) || (+b.creado || 0) - (+a.creado || 0));
+  // v174b: todas las órdenes (las de memoria + las leídas de la base al abrir la hoja), también las anuladas (la gente fue igual a otra)
+  let otLeidas = [], qLeidas = null, uLeidos = null, leidoErr = [];
+  const ordenes = () => { const m = new Map(); intentar(() => (typeof ordenesTrabajo !== "undefined" ? ordenesTrabajo : window.ordenesTrabajo) || [], []).concat(otLeidas).forEach((o) => { if (o && (o.id || o.numero)) m.set(o.id || o.numero, Object.assign({}, m.get(o.id || o.numero) || {}, o)); }); return [...m.values()].sort((a, b) => String(b.fecha || "").localeCompare(String(a.fecha || "")) || (+b.creado || 0) - (+a.creado || 0)); };
+  const nomDe = (p) => typeof p == "string" ? p : p && typeof p == "object" ? String(p.nombre || p.persona || p.name || p.n || p.nombreCompleto || "") : "";
+  const rolDe = (p) => p && typeof p == "object" ? String(p.rol || p.funcion || p.rolNombre || "") : "";
+  const titulo = (s) => String(s || "").split(" ").map((w) => w ? w[0].toUpperCase() + w.slice(1) : w).join(" ");
+  function genteDeOrden(o) {   // [{n, rol, de}] de todos los lugares donde una orden nombra gente
+    const l = [], add = (n, rol, de) => { n = String(n || "").trim(); if (n && n.length > 2) l.push({ n, rol: rol || "", de }); };
+    arr(o.personal).forEach((p) => add(nomDe(p), rolDe(p), "personal"));
+    add(o.responsable, "", "responsable");
+    Object.keys(obj(o.asignada)).forEach((k) => { const v = o.asignada[k]; (Array.isArray(v) ? v : [v]).forEach((n) => add(nomDe(n), "", "asignada")); });
+    Object.keys(obj(o.reparto)).forEach((k) => arr(o.reparto[k]).forEach((r) => add(nomDe(r), "", "reparto")));
+    Object.keys(obj(o.equipoTarea)).forEach((k) => arr(o.equipoTarea[k]).forEach((n) => add(nomDe(n), "", "equipoTarea")));
+    Object.keys(obj(o.equipos)).forEach((k) => arr(o.equipos[k]).forEach((e) => arr(e && e.nombres).forEach((n) => add(nomDe(n), "", "equipos"))));
+    Object.keys(obj(o.vehiculoPersona)).forEach((n) => add(n, "", "vehiculoPersona"));
+    Object.keys(obj(o.horario)).forEach((n) => add(n, "", "horario"));
+    const ci = obj(o.cierre); ["hechoPersona", "horasPersona", "puntos"].forEach((c) => Object.keys(obj(ci[c])).forEach((n) => add(n, "", "cierre")));
+    arr(o.personalNombres).forEach((k) => add(titulo(k), "", "personalNombres"));   // solo la clave normalizada: va última (si hay otra forma de escribirlo, gana esa)
+    return l;
+  }
   const copiasLocales = () => intentar(() => JSON.parse(localStorage.getItem("ema.personal.respaldoLocal") || "[]"), []).filter((x) => x && (arr(x.nomina).length || arr(x.vehiculos).length));
   let archivo = null, auditCopias = [], auditLeida = false, salud = null;
   function copias() {
@@ -184,26 +203,32 @@
     const vehOt = new Map();
     O.forEach((o) => {
       const vp = obj(o.vehiculoPersona), f = o.fecha || "";
-      arr(o.personal).forEach((p) => { if (!p || !p.nombre) return; const x = persona(p.nombre); x.refs.push("orden " + (o.numero || o.id)); if (!x.ultima || f > x.ultima) x.ultima = f; dato(x, "rol", p.rol, `la orden ${o.numero || o.id} del ${f}`); if (p.legajo) dato(x, "legajo", p.legajo, `la orden ${o.numero || o.id}`); });
+      genteDeOrden(o).forEach((g) => { const x = persona(g.n); if (!x) return; if (x.refs.length < 40) x.refs.push("orden " + (o.numero || o.id)); x.nOt = (x.nOt || 0) + 1; if (!x.ultima || f > x.ultima) x.ultima = f; if (g.rol) dato(x, "rol", g.rol, `la orden ${o.numero || o.id} del ${f}`); });
+      arr(o.personal).forEach((p) => { if (p && typeof p == "object" && p.legajo) { const x = persona(nomDe(p)); x && dato(x, "legajo", p.legajo, `la orden ${o.numero || o.id}`); } });
+      if (o.vehiculoId && !arr(o.vehiculos).some((v) => v && v.id === o.vehiculoId)) { const y = vehOt.get(o.vehiculoId) || { id: o.vehiculoId, nombre: "", patente: "", refs: [], ultima: "", aCargo: "" }; y.refs.push(o.numero || o.id); vehOt.set(o.vehiculoId, y); }
       Object.keys(vp).forEach((n) => { const v = vp[n]; if (!v || !v.id) return; const x = persona(n); dato(x, "vehiculoId", v.id, `la orden ${o.numero || o.id} del ${f} (iba en ${v.nombre || v.id})`); });
       arr(o.vehiculos).forEach((v) => { if (!v || !v.id) return; const y = vehOt.get(v.id) || { id: v.id, nombre: v.nombre || "", patente: v.patente || "", refs: [], ultima: "", aCargo: "" }; y.refs.push(o.numero || o.id); if (!y.ultima || f > y.ultima) y.ultima = f; if (!y.nombre && v.nombre) y.nombre = v.nombre; if (!y.patente && v.patente) y.patente = v.patente; vehOt.set(v.id, y); });
       Object.keys(vp).forEach((n) => { const v = vp[n]; if (v && v.id) { const y = vehOt.get(v.id) || { id: v.id, nombre: v.nombre || "", patente: v.patente || "", refs: [o.numero || o.id], ultima: f, aCargo: "" }; if (!y.aCargo) y.aCargo = n; vehOt.set(v.id, y); } });
     });
     // 3) quincenas cerradas (legajo y rol)
-    Object.keys(obj(window.__cierresQuincena)).sort().reverse().forEach((q) => arr(window.__cierresQuincena[q].personas).forEach((p) => { if (!p || !p.nombre) return; const x = persona(p.nombre); x.refs.push("quincena " + q); dato(x, "legajo", p.legajo, `la quincena cerrada ${q}`); dato(x, "rol", String(p.rol || "").split(" / ")[0], `la quincena cerrada ${q}`); }));
+    const QQ = Object.assign({}, obj(qLeidas), obj(window.__cierresQuincena));
+    Object.keys(QQ).sort().reverse().forEach((q) => arr(QQ[q].personas).forEach((p) => { if (!p || !p.nombre) return; const x = persona(p.nombre); x.refs.push("quincena " + q); dato(x, "legajo", p.legajo, `la quincena cerrada ${q}`); dato(x, "rol", String(p.rol || "").split(" / ")[0], `la quincena cerrada ${q}`); }));
     // 4) usuarios con persona vinculada (cuadrilla / operario)
-    intentar(() => window.PERMISOS.lista(), []).forEach((u) => { if (u && u.persona && /cuadrilla|operario/.test(u.rol || "") && u.activo !== false) { const x = persona(u.persona); x.refs.push("usuario " + (u.usuario || u.email || "")); } });
+    const UU = (uLeidos && uLeidos.length ? uLeidos : intentar(() => window.PERMISOS.lista(), [])) || [];
+    UU.forEach((u) => { if (u && u.persona && u.activo !== false && !/^(admin|oficina|direccion)$/.test(u.rol || "")) { const x = persona(u.persona); x.refs.push("usuario " + (u.usuario || u.email || "")); } });
     // 5) movimientos del pañol: el sector
     intentar(() => window.stockMovimientos || [], []).slice().sort((a, b) => (+b.ts || 0) - (+a.ts || 0)).forEach((m) => { const s = m && m.sector; if (!s) return; [m.personaNombre, m.retira, m.retiradoPor, m.quien, m.devueltoPor].forEach((n) => { if (n && P.size) { for (const [q, x] of P) if (mismo(q, n)) dato(x, "sector", s, "los vales del pañol"); } }); });
     // vehículos: copias + órdenes + combustible
     const V = new Map();
     C.forEach((c) => c.vehiculos.forEach((v) => { if (!v || !v.nombre) return; const id = v.id || "n:" + nk(v.nombre); if (!V.has(id)) V.set(id, { v: clon(v), fuente: c.fuente }); }));
-    vehOt.forEach((y, id) => { if (!V.has(id)) V.set(id, { v: { id, nombre: y.nombre || "(sin nombre)", patente: y.patente || "", activo: true }, fuente: `las órdenes (${y.refs.slice(0, 3).join(", ")}${y.refs.length > 3 ? "…" : ""})`, ot: y }); else V.get(id).ot = y; });
+    vehOt.forEach((y, id) => { if (!V.has(id)) V.set(id, { v: { id, nombre: y.nombre || "(sin nombre)", patente: y.patente || "", activo: true }, fuente: `las órdenes (${y.refs.slice(0, 3).join(", ")}${y.refs.length > 3 ? "…" : ""})`, ot: y, soloId: !y.nombre }); else V.get(id).ot = y; });
     intentar(() => window.gastosObra || [], []).forEach((g) => { if (g && g.vehiculoId && !V.has(g.vehiculoId) && !vAct.some((x) => x.id === g.vehiculoId)) V.set(g.vehiculoId, { v: { id: g.vehiculoId, nombre: "", patente: "", activo: true }, fuente: "una carga de combustible de Gastos (" + (g.desc || g.fecha || "") + ")", soloId: true }); });
     // armar las filas
     const faltan = [], completar = [], vFaltan = [], vCompletar = [], perdido = [];
+    const noObra = UU.filter((u) => u && /^(admin|oficina|direccion|panol|mirar)$/.test(u.rol || "")).map((u) => u.persona || u.nombre).filter(Boolean);
     P.forEach((x) => {
       const ya = buscar(actual, x.nombre);
+      if (!ya && noObra.some((n) => mismo(n, x.nombre))) { x.noObra = true; return; }
       if (!ya) {
         const f = { nombre: x.nombre, datos: x.datos, refs: x.refs, ultima: x.ultima };
         if (desde && x.ultima && x.ultima < desde && !x.refs.some((r) => /copia|archivo|auditor|lista vieja/.test(r))) return;
@@ -226,11 +251,20 @@
     arr(b.respaldos).forEach((r) => linea.push(`Copia del ${fH(r.ts)} (${arr(r.nomina).length} personas, ${arr(r.vehiculos).length} vehículos) antes de un guardado de ${esc(r.por || "?")}.`));
     if (salud && salud.ultimoRespaldo) linea.push(`Último respaldo completo bajado: <b>${fH(salud.ultimoRespaldo.ts)}</b> por ${esc(salud.ultimoRespaldo.usuario || "?")} → si tenés ese archivo («respaldo_completo_…json»), cargalo abajo: trae la nómina y los vehículos completos.`);
     if (auditLeida && !auditCopias.length) linea.push("En la auditoría no hay ninguna copia de la nómina: hasta la v174 los guardados de la nómina no se anotaban.");
-    return { actual: actual.length, vehiculos: vAct.length, faltan, completar, vFaltan, vCompletar, perdido, linea, copias: C.map((c) => ({ id: c.id, fuente: c.fuente, personas: c.nomina.length, vehiculos: c.vehiculos.length })) };
+    const yaEn = []; P.forEach((x) => { const ya = buscar(actual, x.nombre); if (ya) yaEn.push({ nombre: x.nombre, en: ya.nombre, nOt: x.nOt || 0 }); });
+    const diag = { ordenes: O.length, ordenesConGente: O.filter((o) => genteDeOrden(o).length).length, leidasBase: otLeidas.length, quincenas: Object.keys(QQ).length, usuarios: UU.length, vales: intentar(() => (window.stockMovimientos || []).length, 0), copias: C.length, personas: P.size, noObra: [...P.values()].filter((x) => x.noObra).length, errores: leidoErr.slice(), syncOt: intentar(() => window.__sync.ordenesTrabajo.ts, 0) };
+    return { diag, yaEn, actual: actual.length, vehiculos: vAct.length, faltan, completar, vFaltan, vCompletar, perdido, linea, copias: C.map((c) => ({ id: c.id, fuente: c.fuente, personas: c.nomina.length, vehiculos: c.vehiculos.length })) };
   }
 
   // ---------- leer la auditoría (asistente que editó configEquipo/personal) y salud (último respaldo bajado)
   async function leerMas() {
+    leidoErr = [];
+    const db = intentar(() => firebase.firestore(), null);
+    if (db) {
+      try { const s = await db.collection("ordenesTrabajo").get(); otLeidas = s.docs.map((d) => Object.assign({ id: d.id }, d.data())); } catch (e) { leidoErr.push("órdenes (" + ((e && e.code) || "sin conexión") + ")"); }
+      try { const s = await db.collection("cierresQuincena").get(); qLeidas = {}; s.forEach((d) => { qLeidas[d.id] = Object.assign({ id: d.id }, d.data()); }); } catch (e) { leidoErr.push("quincenas"); }
+      try { const s = await db.collection("usuarios").get(); uLeidos = s.docs.map((d) => Object.assign({ id: d.id }, d.data())); } catch (e) { leidoErr.push("usuarios"); }
+    }
     try { salud = window.fbSaludLeer ? await window.fbSaludLeer() : null; } catch (e) { salud = null; }
     try {
       const s = await firebase.firestore().collection("auditoria").where("accion", "==", "asistente_editar").limit(300).get();
@@ -267,6 +301,8 @@
     if (!A) return `<p>Buscando…</p>`;
     const nSel = (p) => Object.keys(st.sel).filter((k) => k[0] === p && st.sel[k] !== false).length;
     return `<div class="v7-asa"></div><div class="v7-cab"><div><h3>🔎 Qué se borró</h3><small>Hoy la nómina tiene ${A.actual} persona${A.actual === 1 ? "" : "s"} y ${A.vehiculos} vehículo${A.vehiculos === 1 ? "" : "s"}.</small></div><button type="button" class="v7-x" data-ps="x" aria-label="Cerrar">✕</button></div>
+<div class="ps-diag" role="status">🔎 Revisé <b>${A.diag.ordenes}</b> órdenes (${A.diag.ordenesConGente} con gente${A.diag.leidasBase ? `, ${A.diag.leidasBase} leídas recién de la base` : ""}), <b>${A.diag.quincenas}</b> quincenas cerradas, <b>${A.diag.usuarios}</b> usuarios, ${A.diag.vales} vales del pañol y ${A.diag.copias} copias. Encontré <b>${A.diag.personas}</b> personas: <b>${A.yaEn.length}</b> ya están en la nómina y <b>${A.faltan.length}</b> faltan${A.diag.noObra ? ` (${A.diag.noObra} son de la oficina, no van)` : ""}.${A.diag.errores.length ? ` <span class="ps-falta">No pude leer: ${esc(A.diag.errores.join(", "))}.</span>` : ""}${!A.diag.ordenes ? ' <span class="ps-falta">Todavía no hay órdenes cargadas: esperá unos segundos y se vuelve a revisar solo.</span>' : ""}</div>
+<details class="ps-ya"><summary>Ya en la nómina (${A.yaEn.length})</summary><ul class="ps-ul">${A.yaEn.map((y) => `<li>${esc(y.nombre)}${nk(y.nombre) !== nk(y.en) ? ` → <b>${esc(y.en)}</b>` : ""}${y.nOt ? ` <small>(${y.nOt} órdenes)</small>` : ""}</li>`).join("")}</ul></details>
 <h4 class="ps-h">Qué pasó</h4><ul class="ps-ul">${A.linea.map((l) => `<li>${l}</li>`).join("")}</ul>
 <h4 class="ps-h">Personas que no están en la nómina (${A.faltan.length})</h4>${A.faltan.length ? A.faltan.map(filaPer).join("") : '<div class="hint">No falta nadie de los que aparecen en las órdenes, quincenas, usuarios ni copias.</div>'}
 <h4 class="ps-h">Datos que faltan de los que están (${A.completar.length})</h4>${A.completar.length ? A.completar.map((x, i) => `<label class="ps-fila"><input type="checkbox" data-pssel="c${i}" ${st.sel["c" + i] !== false ? "checked" : ""}><span><b>${esc(x.nombre)}</b>: ${esc(x.txt)} <b>${esc(fmtV(x.campo, x.v))}</b> <small>de ${esc(x.fuente)}</small></span></label>`).join("") : '<div class="hint">Nada para completar con las copias que hay.</div>'}
@@ -288,10 +324,12 @@ ${A.vCompletar.length ? `<h4 class="ps-h">Datos que faltan de los vehículos (${
     let v = $("psOv"); v && v.remove();
     v = document.createElement("div"); v.id = "psOv"; v.className = "v7-ov v7-arriba"; v.setAttribute("role", "dialog"); v.setAttribute("aria-modal", "true"); v.setAttribute("aria-label", "Qué se borró");
     v.innerHTML = `<div class="v7-caja ps-caja"></div>`; document.body.appendChild(v);
-    st.abierta = true; st.msg = ""; st.A = null; pintarHoja();
+    st.abierta = true; st.msg = ""; st.A = null; firmaRe = ""; pintarHoja();
     await leerMas(); st.A = analizar(); selDefault(); pintarHoja();
   }
   function cerrar() { const v = $("psOv"); v && v.remove(); st.abierta = false; }
+  let firmaRe = "";
+  setInterval(() => { try { if (!st.abierta || !st.A || !$("psOv")) return; const f = JSON.stringify([intentar(() => window.__sync.ordenesTrabajo.ts, 0), Object.keys(obj(window.__cierresQuincena)).length, intentar(() => window.PERMISOS.lista().length, 0), intentar(() => window.__personalNube.ts, 0)]); if (!firmaRe) { firmaRe = f; return; } if (f !== firmaRe) { firmaRe = f; const a = st.A; st.A = analizar(); if (st.A.faltan.length !== a.faltan.length || st.A.vFaltan.length !== a.vFaltan.length) selDefault(); pintarHoja(); } } catch (e) { } }, 2000);
   async function aplicar() {
     const A = st.A; if (!A) return;
     if (!cargado()) { st.msg = "⚠ Todavía no llegó la nómina de la base."; return pintarHoja(); }

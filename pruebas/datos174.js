@@ -16,6 +16,13 @@ function datos174(op = {}) {
   d.db.ordenesTrabajo.o1 = { numero: 'OT-2026-201', fecha: menos(1), plazaId: 'p1', plazaNombre: 'Plaza San Martín', horaInicio: '07:30', cuadrilla: 'Javier', personal: per([CINCO[0], CINCO[1], FAB[0]]), personalNombres: [CINCO[0][1], CINCO[1][1], FAB[0][1]].map(clave), actividades: [], estado: 'Terminada', vehiculos: [{ id: 'v1', nombre: 'Hilux blanca', patente: 'AB123CD' }], vehiculoPersona: { 'JAVIER OLARIAGA': { id: 'v1', nombre: 'Hilux blanca', patente: 'AB123CD' } } };
   d.db.ordenesTrabajo.o2 = { numero: 'OT-2026-202', fecha: hoy, plazaId: 'p1', plazaNombre: 'Plaza San Martín', horaInicio: '07:30', cuadrilla: 'Petitti', personal: per([CINCO[2], CINCO[3], CINCO[4]]), personalNombres: [CINCO[2][1], CINCO[3][1], CINCO[4][1]].map(clave), actividades: [], estado: 'Emitida', vehiculos: [{ id: 'v2', nombre: 'Hidro 1', patente: 'AC456EF' }, { id: 'v3', nombre: 'Grúa', patente: 'AD789GH' }], vehiculoPersona: { 'PETITTI ISMAEL': { id: 'v2', nombre: 'Hidro 1', patente: 'AC456EF' }, 'Vizgarra Alfredo': { id: 'v3', nombre: 'Grúa', patente: 'AD789GH' } } };
   d.db.cierresQuincena = { '2026-11-1': { key: '2026-11-1', desde: '2026-11-01', hasta: '2026-11-15', personas: [{ nombre: 'JAVIER OLARIAGA', legajo: '51400', rol: 'Oficial', pts: 10 }, { nombre: 'PETITTI ISMAEL', legajo: '51402', rol: 'Medio oficial', pts: 8 }] } };
+  if (op.real) {   // v174b: como guardan la gente las órdenes reales (texto en mayúsculas, otras claves, solo la clave normalizada, viejas)
+    const o1 = d.db.ordenesTrabajo.o1, o2 = d.db.ordenesTrabajo.o2;
+    o1.personal = ['JAVIER OLARIAGA', 'IVAN EXEQUIEL PEREYRA', 'MAURICIO MAININI']; o1.estado = 'Anulada'; o1.unidaEn = 'o2';
+    o2.personal = [{ persona: 'PETITTI ISMAEL', funcion: 'Medio oficial' }, { nombre: 'VIZGARRA ALFREDO' }]; delete o2.vehiculoPersona; o2.vehiculos = []; o2.vehiculoId = 'v2';
+    o2.reparto = { izaje: [{ nombre: 'Vizgarra Alfredo', cant: 2 }] };
+    d.db.ordenesTrabajo.o3 = { numero: 'OT-2026-090', fecha: menos(60), plazaId: 'p1', plazaNombre: 'Plaza San Martín', personal: [], personalNombres: ['bruno federico cherino'], actividades: [], estado: 'Terminada', vehiculos: [{ id: 'v3', nombre: 'Grúa', patente: 'AD789GH' }], vehiculoPersona: { 'IVAN EXEQUIEL PEREYRA': { id: 'v1', nombre: 'Hilux blanca', patente: 'AB123CD' } } };
+  }
   return d;
 }
 module.exports = { datos174, nominaReal, nominaMala, VEH, FAB, CINCO };

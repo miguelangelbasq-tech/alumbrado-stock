@@ -2,6 +2,15 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v174b — 19/11/2026 (armada, sin publicar) · «🩹 Recuperar» encuentra a la gente con los datos reales
+**Pedido (Ángel, 19/11):** con la v174 publicada, «🩹 Recuperar personal y vehículos» decía que no había nada para recuperar, pero faltan JAVIER OLARIAGA, Ivan Exequiel Pereyra, PETITTI ISMAEL, Bruno Federico Cherino y Vizgarra Alfredo (están en las órdenes de esta semana) y no hay vehículos.
+
+**Qué estaba mal (comprobado con la v174, `t_v174` grupo 7: solo encontraba a Juan y Pedro):** la búsqueda usaba solo lo que estaba en memoria y solo `personal[]` como objetos con `nombre`. Se perdía: `personal[]` como texto (órdenes viejas, «JAVIER OLARIAGA»), con otras claves (`persona`, `funcion`), la gente que solo está en `personalNombres` (claves normalizadas), en `reparto` / `asignada` / `equipoTarea` / `equipos` / `horario` / el cierre, las órdenes anuladas (unidas en otra), el vehículo que solo está en `vehiculoId`, y lo que todavía no había cargado (las quincenas cerradas se escuchan recién al abrir Por quincena; las órdenes pueden tardar). Si la hoja se abría antes de que cargaran las órdenes, daba 0 y no se volvía a revisar.
+
+**Qué cambia (solo el módulo `personalSeguro`):** al abrir la hoja lee de la base **todas** las órdenes, las quincenas cerradas y los usuarios (una vez, admin); saca la gente de todos esos lugares; se vuelve a revisar sola cuando terminan de cargar las órdenes; la gente de la oficina (admin/oficina/dirección/pañol/mirar) no se propone; un vehículo sin nombre (solo el número) no se tilda. La hoja dice qué revisó: «🔎 Revisé N órdenes (M con gente, K leídas recién de la base), Q quincenas, U usuarios, V vales y C copias. Encontré P personas: X ya están en la nómina y Y faltan», más «Ya en la nómina (X)» con cómo se emparejó cada uno («MAURICIO MAININI → Mauricio Mainini»).
+
+**Cómo se arma:** `herramientas/v174b/patch_v174b.py` sobre el ORIGINAL 174 (cambia el bloque `personalSeguro` por `herramientas/v174/personalSeguro.js/.css`).
+
 ## v174 — 19/11/2026 (publicada en GitHub 19/11) · La nómina y los vehículos no se pierden + «🩹 Recuperar»
 **Pedido (Ángel, 19/11):** Producción › Personal del equipo quedó con 10 personas (justo la lista de ejemplo que trae la app) y sin vehículos; faltan JAVIER OLARIAGA, Ivan Exequiel Pereyra, PETITTI ISMAEL, Bruno Federico Cherino y Vizgarra Alfredo, que siguen en las órdenes de esta semana. «Quiero recuperar TODO lo que se borró, y verificá qué se borró y qué pasó.»
 
