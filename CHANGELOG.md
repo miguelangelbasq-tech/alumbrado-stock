@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v175 — 19/11/2026 (armada, sin publicar) · El asistente carga el personal
+## v175 — 19/11/2026 (publicada en GitHub 19/11) · El asistente carga el personal
 **Pedido (Ángel, 19/11, después de que se pisó la nómina):** «la IA de la app tiene que poder cargar por su cuenta el personal».
 
 **Qué cambia (en el asistente, bandera `__v175No`):**
