@@ -2,6 +2,27 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v182 — 19/11/2026 (armada, sin publicar) · Datos seguros: los agujeros de la auditoría del 19/11
+**Pedido:** arreglar lo que encontró la auditoría del 19/11 sobre la v176 («¿pasó algo más?», `INFORME.md`): lugares donde se podían pisar o borrar datos de verdad.
+
+**Qué cambia (sin bandera: son arreglos; módulo `datosSeguros` + `datosSegurosCss` + reemplazos chicos):**
+1. **Caché vacía ≠ «llegó la base»:** las escuchas de `configEquipo/baremo`, `personal`, `precios`, `cuadrillas`, `ubicacion` (y `reinicios`) ya no marcan `__cfgCargado` / `__personalCargado` cuando el documento llega `!exists` desde la caché (`metadata.fromCache`: aparato nuevo, caché borrada, sin señal). La guardia de la v174 frena «Guardar» con lo de fábrica hasta que conteste el servidor (también sin señal, que antes quedaba en cola y salía al volver). La lectura de la ubicación al guardar, igual.
+2. **Respaldo completo:** cada lista se lee **de la base** (también las **obras archivadas**; antes iba solo lo visible de la memoria); si no se puede leer, va lo del aparato y el cartel lo dice en ámbar; si tampoco hay, en rojo. Suma `configEquipo/ubicacion` y `reinicios`. Formato `respaldo-completo-v3`.
+3. **«⬆ Restaurar desde un respaldo» sin duplicar:** compara contra la **base** (la lee), saltea lo que ya está por su número de registro **o** por sus datos (obra renombrada o archivada, orden, movimiento), escribe lo que falta **con su mismo número de registro** (restaurar dos veces no duplica), en el catálogo **solo completa datos vacíos** (nunca el costo ni la descripción de hoy); hoja con «se agregan N, se saltean M (ya están)» por lista, «Sí» y una segunda confirmación; auditoría `respaldo_restaurar` con lo agregado. Solo Administración y Oficina. Las fotos (`respaldo-fotos-v1`) siguen como antes (ya solo agregaban).
+4. **Borrar de verdad:** «🗑 Reiniciar movimientos», «⬆ Importar y REEMPLAZAR todos los movimientos» y «🗑 Limpiar historial» (cómputos) van en **«⚠ Zona peligrosa»** (solo Administración), con dos confirmaciones (la segunda escribiendo **BORRAR**), un archivo con lo que se borra que se baja solo **antes** y la auditoría `zona_peligrosa`. `fbClearMovimientos` / `fbReplaceAllMovimientos` / `fbHistCalcVaciar` no borran por ningún otro camino («se anulan, no se borran»). «⬆ Importar movimientos (JSON)» común **solo agrega** lo que falta (hoja «se agregan N, se saltean M»; auditoría `movimientos_importar`).
+5. **Equipos habituales:** el borrador armado antes de que llegue `personal` se vuelve a armar con lo guardado cuando llega (no se queda con la propuesta de ejemplo).
+6. **⚙ del asistente** (roles, modelo, límites, a quién le llegan los avisos) y **quién ve el tablero del dueño:** escriben por la guardia (`window.__dsPersonalSet` → `__psGuardia`: base llegada + `respaldos[]`); lo abierto antes de que llegue la base se vuelve a cargar y pide guardar de nuevo.
+7. **Teléfonos de «La cuadrilla en obra»:** sacar uno ya no toca la copia de la base antes de guardar, así la guardia pregunta «¿Sacar 1…?»; lo que se saca de `seguridadCuadrilla` / `herrPorTarea` también pregunta; lo abierto antes de la base se vuelve a cargar.
+8. **Chicos:** reinicios de puntos armados con lo de fábrica no se guardan (lee la base y pide tocar de nuevo); los Ajustes de la orden sugerida empezados antes de que llegue el baremo se vuelven a cargar antes de guardar; Gastos › Precios usa lo de la base si es más nuevo que lo guardado en el aparato; `avanceHist` / `avanceNotas` se agregan con `arrayUnion` (dos aparatos casi a la vez no se pisan).
+
+**Queda documentado (no cambiado):** `valorItems`, `etapas`, `puntos`, `planGantt` y `documentos` siguen reemplazando el campo entero desde la memoria (comparar con `__orig` ya evita pisar los campos que no cambiaron; si dos aparatos cambian el mismo campo casi a la vez, gana el último); los `items` de una reserva igual. Pasarlos a transacción es un cambio grande: sin pedido.
+
+**Cómo se arma:** `herramientas/v182/patch_v182.py` sobre el ORIGINAL 183 (`0650f1a4…`; los mismos reemplazos andan sobre la 178, 179 y 180) (`datosSeguros.js` / `.css` antes de `revisarAppDiag`). Sin reglas nuevas.
+
+**Pruebas:** PRUEBAS182
+
+**Sello:** SELLO182
+
 ## v183 — 19/11/2026 (publicada en GitHub 19/11) · Calculadora: cable 3×1,5, ganancia de 6 m y luminarias de distinta potencia
 **Pedido (Ángel, 19/11):** «la calculadora modifiquemos 4 metros para cables 3x1,5 brazo de 0.4 m columnas de 7 metros ese cable es para el artefacto y la ganancia de abajo hacia arriba es de 6 metro para columna de 10 metros también 6 metros de abajo hacia arriba y de arriba hacia abajo o sea el 3x1.5 son 7,5 metros con brazo de un metro y lo que nos faltó agregar es que a veces usamos en la misma obra luminarias de distinta potencia agrega eso».
 
