@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v183 — 19/11/2026 (armada, sin publicar) · Calculadora: cable 3×1,5, ganancia de 6 m y luminarias de distinta potencia
+## v183 — 19/11/2026 (publicada en GitHub 19/11) · Calculadora: cable 3×1,5, ganancia de 6 m y luminarias de distinta potencia
 **Pedido (Ángel, 19/11):** «la calculadora modifiquemos 4 metros para cables 3x1,5 brazo de 0.4 m columnas de 7 metros ese cable es para el artefacto y la ganancia de abajo hacia arriba es de 6 metro para columna de 10 metros también 6 metros de abajo hacia arriba y de arriba hacia abajo o sea el 3x1.5 son 7,5 metros con brazo de un metro y lo que nos faltó agregar es que a veces usamos en la misma obra luminarias de distinta potencia agrega eso».
 
 **Qué cambia (módulo `calc183` + `calc183Css` + reemplazos chicos, bandera `__v183No`):**
