@@ -1,7 +1,7 @@
 """v175 · El asistente carga el personal (Ángel 19/11: «la IA de la app tiene que poder cargar por su cuenta el personal»).
 Herramientas nomina (leer, con lo que falta según la v174), proponer_personal (altas / cambios / bajas / recuperar con el motor
 de la v174) y proponer_vehiculo; todo por la guardia __psGuardia, leído de vuelta. Chip «👷 Cargar personal». Bandera __v175No.
-Uso: python3 patch_v175.py ORIGINAL_174.html SALIDA.html [--otra-base]"""
+Uso: python3 patch_v175.py ORIGINAL_174b.html SALIDA.html [--otra-base]"""
 import sys, os, re, hashlib, datetime
 SRC = os.path.dirname(os.path.abspath(__file__))
 BASE_SHA = open(os.path.join(SRC, 'BASE_SHA')).read().strip()
@@ -9,7 +9,7 @@ args = [a for a in sys.argv[1:] if not a.startswith('--')]
 ent, sal = args[0], args[1]
 t = open(ent, encoding='utf-8').read()
 if '--otra-base' not in sys.argv:
-    assert hashlib.sha256(t.encode()).hexdigest() == BASE_SHA, 'no es el ORIGINAL de la 174 (usá --otra-base si sabés lo que hacés)'
+    assert hashlib.sha256(t.encode()).hexdigest() == BASE_SHA, 'no es el ORIGINAL de la 174b (usá --otra-base si sabés lo que hacés)'
 def R(a, b, n=1):
     global t
     c = t.count(a); assert c == n, (a[:90], c); t = t.replace(a, b)

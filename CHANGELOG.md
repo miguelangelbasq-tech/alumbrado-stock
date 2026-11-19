@@ -2,6 +2,20 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v175 — 19/11/2026 (armada, sin publicar) · El asistente carga el personal
+**Pedido (Ángel, 19/11, después de que se pisó la nómina):** «la IA de la app tiene que poder cargar por su cuenta el personal».
+
+**Qué cambia (en el asistente, bandera `__v175No`):**
+- `nomina` (leer): la nómina real de la base (legajo, nombre, rol, sector, valor hora —solo Administración y Oficina—, vehículo a cargo, equipo civil, activo) y los vehículos con quién los tiene; además lo que falta según «🔎 Qué se borró» (v174b), con de dónde sale cada dato. Si la nómina todavía no llegó de la base, lo dice y no muestra nada.
+- `proponer_personal`: altas de una persona o una lista dictada/pegada, cambios (legajo, rol, sector, valor hora, vehículo a cargo, equipo civil, nombre, reactivar), bajas (quedan «de baja», nunca se borran) y «recuperá lo que se borró» (el mismo motor de «🩹 Recuperar», v174b). Nombres prolijos; si alguien ya está (mismo nombre, nombre parecido o mismo legajo) pregunta en vez de duplicar; legajo y valor hora nunca se inventan («a completar»).
+- `proponer_vehiculo`: altas y cambios de vehículos (patente, tipo, lugares, a cargo de quién).
+- Tarjeta antes → después por persona con «Sí, cargarlos» / «No»; se guarda solo por la guardia de la v174 (base cargada, copia en `respaldos[]`, «Sí» si se saca algo) y se lee de vuelta: «✓ Guardado: N personas, M vehículos». Auditoría `personal_asistente` con `porAsistente:true`.
+- Chip «👷 Cargar personal» (Administración y Oficina). Dirección lee la nómina sin valor hora y no cambia nada; cuadrilla, pañol y mirar no reciben nada de esto.
+
+**Cómo se arma:** `herramientas/v175/patch_v175.py` sobre el ORIGINAL 174b (+ `ia175.js` antes de `window.__asistente`, el botón «Sí, cargarlos», la línea del SISTEMA y `__psRec.leerMas`). Sin reglas nuevas.
+
+**Pruebas:** ver abajo (se completa al terminar la batería).
+
 ## v174b — 19/11/2026 (armada, sin publicar) · «🩹 Recuperar» encuentra a la gente con los datos reales
 **Pedido (Ángel, 19/11):** con la v174 publicada, «🩹 Recuperar personal y vehículos» decía que no había nada para recuperar, pero faltan JAVIER OLARIAGA, Ivan Exequiel Pereyra, PETITTI ISMAEL, Bruno Federico Cherino y Vizgarra Alfredo (están en las órdenes de esta semana) y no hay vehículos.
 
@@ -9,7 +23,10 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Qué cambia (solo el módulo `personalSeguro`):** al abrir la hoja lee de la base **todas** las órdenes, las quincenas cerradas y los usuarios (una vez, admin); saca la gente de todos esos lugares; se vuelve a revisar sola cuando terminan de cargar las órdenes; la gente de la oficina (admin/oficina/dirección/pañol/mirar) no se propone; un vehículo sin nombre (solo el número) no se tilda. La hoja dice qué revisó: «🔎 Revisé N órdenes (M con gente, K leídas recién de la base), Q quincenas, U usuarios, V vales y C copias. Encontré P personas: X ya están en la nómina y Y faltan», más «Ya en la nómina (X)» con cómo se emparejó cada uno («MAURICIO MAININI → Mauricio Mainini»).
 
-**Cómo se arma:** `herramientas/v174b/patch_v174b.py` sobre el ORIGINAL 174 (cambia el bloque `personalSeguro` por `herramientas/v174/personalSeguro.js/.css`).
+**Precios (Ángel: «las cosas de precios y personal no están, es grave»):** el Itemizado guarda todo su estado de una vez (`overrides`, `itemsPropios`, `mapeoCol`, `baseEpec`, `contratistaPct`, `contratistaPrecios`, `contratistaListas`…) desde variables que arrancan con los valores de fábrica y se llenan con `aplicarPreciosDeLaNube`; el baremo igual (`aplicarBaremoDeLaNube`). Tenían **la misma carrera que la nómina**: si la base contestaba antes de que se leyera ese script, la función todavía no existía, nadie la volvía a llamar, la pantalla quedaba con lo de fábrica y el siguiente «Guardar» lo grababa encima (y la guardia de la v174 lo dejaba pasar porque el documento «ya había llegado»). Es la explicación más probable de que personal y precios se perdieran juntos. Arreglo: las dos se aplican también si la base ya contestó. La lista de precios de Gastos (`gastosRef`) ya estaba detrás de la guardia de la v174.
+- «🩹 Recuperar» suma **💲 Precios, baremo y el resto de la configuración**: por cada documento (precios, baremo, cuadrillas, ubicación, personal) el último guardado, las copias y, por campo, lo que una copia tiene de más que hoy (copias en la base `respaldos[].campos`, copia en el aparato `ema.cfg.respaldoLocal` —nueva: la primera versión de precios y baremo que llega a cada aparato—, archivo de respaldo); la lista de precios de Gastos rearmada con los gastos cargados (último precio de cada cosa); el módulo y la zona del último certificado cerrado. Mapas y listas se suman (nunca se saca nada); un valor suelto distinto al de hoy (p. ej. el % del contratista) aparece sin tildar. Después del «Sí» lee cada documento de vuelta.
+
+**Cómo se arma:** `herramientas/v174b/patch_v174b.py` sobre el ORIGINAL 174 (cambia el bloque `personalSeguro` por `herramientas/v174/personalSeguro.js/.css`, la copia en el aparato de precios y baremo en sus escuchas y la carrera de `aplicarBaremoDeLaNube` / `aplicarPreciosDeLaNube`).
 
 ## v174 — 19/11/2026 (publicada en GitHub 19/11) · La nómina y los vehículos no se pierden + «🩹 Recuperar»
 **Pedido (Ángel, 19/11):** Producción › Personal del equipo quedó con 10 personas (justo la lista de ejemplo que trae la app) y sin vehículos; faltan JAVIER OLARIAGA, Ivan Exequiel Pereyra, PETITTI ISMAEL, Bruno Federico Cherino y Vizgarra Alfredo, que siguen en las órdenes de esta semana. «Quiero recuperar TODO lo que se borró, y verificá qué se borró y qué pasó.»

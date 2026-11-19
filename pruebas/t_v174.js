@@ -102,7 +102,7 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.split(',').indexOf(Str
       await p.evaluate(() => { const i = window.__psRec.estado().A.faltan.findIndex((x) => /Cherino/.test(x.nombre)); const e = document.querySelector(`#psOv input[data-pssel="p${i}"]`); e.click(); });
       await p.waitForTimeout(300);
       await p.click('#psOv [data-ps="si"]'); await p.waitForTimeout(600);
-      c(/Agregar a la nómina/.test(await tx(p, '#psConf')), 'pide «Sí» antes de guardar');
+      c(/Recuperar esto/.test(await tx(p, '#psConf')), 'pide «Sí» antes de guardar');
       await p.click('#psConf [data-psc="si"]'); await p.waitForTimeout(1200);
       const b = await base(p);
       c(b.nomina.length >= 14 && !b.nomina.some((x) => /Cherino/.test(x.nombre)) && b.nomina.some((x) => x.nombre === 'Vizgarra Alfredo' && x.vehiculoId === 'v3'), `agregó los tildados (${b.nomina.length} personas; Bruno no, estaba destildado)`);
@@ -169,6 +169,33 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.split(',').indexOf(Str
       c(A7.vFaltan.length === 3, 'los 3 vehículos (vehiculos[], vehiculoId, vehiculoPersona): ' + A7.vFaltan.map((x) => x.v.nombre || x.id).join(', '));
       const dg = await tx(p, '#psOv .ps-diag');
       c(/Revisé \d+ órdenes/.test(dg) && /ya están en la nómina/.test(dg) && /faltan/.test(dg) && A7.diag.ordenes >= 3, 'dice qué revisó: ' + dg.slice(0, 140));
+      await A.browser.close(); browser = null;
+    }
+    if (SOLO(8) && !ANTES) {   // v174b: precios borrados (la misma carrera): copia del aparato, gastos cargados y certificado cerrado
+      const d = datos174();
+      const bueno = { overrides: { 1: 5000, 2: 6000, 3: 7000 }, itemsPropios: [{ id: 1001, desc: 'Pintura de base', un: 'Un.', precio: 900 }], contratistaPct: 65, baseEpec: 296126.45, zonaContrato: 'A', gastosRef: { lista: [{ id: 'g1', nombre: 'Gasoil', cat: 'combustible', un: 'l', precio: 1500, fecha: '2026-11-10' }], vehiculos: [] }, certCerrados: { '2026-10': { modulo: 296126.45, zona: 'A', ts: 1 } }, ts: Date.parse('2026-11-17T12:00:00Z'), usuario: 'admin@ema-alumbrado.app' };
+      d.db.configEquipo.precios = bueno;
+      d.db.gastosObra = { g1: { plazaId: 'p1', fecha: '2026-11-12', cat: 'alquiler', desc: 'Día de hidroelevador', cant: 1, un: 'día', pu: 80000, importe: 80000 }, g2: { plazaId: 'p1', fecha: '2026-11-15', cat: 'alquiler', desc: 'Día de hidroelevador', cant: 1, un: 'día', pu: 85000, importe: 85000 } };
+      const A = await sesion('admin', d), p = A.page;
+      await p.waitForTimeout(800);
+      const loc = await p.evaluate(() => JSON.parse(localStorage.getItem('ema.cfg.respaldoLocal') || '[]').filter((x) => x.doc === 'precios'));
+      c(loc.length >= 1 && loc[0].d.contratistaPct === 65, 'el aparato guardó la copia de precios que llegó');
+      // como quedó: los precios de fábrica (sin overrides, sin lista de Gastos, sin módulo)
+      await p.evaluate(() => { const x = JSON.parse(localStorage.getItem('stub.db')); x.configEquipo.precios = { overrides: {}, itemsPropios: [], contratistaPct: 70, gastosRef: { lista: [] }, certCerrados: { '2026-10': { modulo: 296126.45, zona: 'A', ts: 1 } }, ts: Date.parse('2026-11-18T15:36:00Z'), usuario: 'admin@ema-alumbrado.app' }; localStorage.setItem('stub.db', JSON.stringify(x)); });
+      await p.reload(); await p.waitForTimeout(4500);
+      await irPersonal(p); await p.waitForTimeout(400);
+      await p.click('#psRec [data-ps="abrir"]'); await p.waitForTimeout(2500);
+      const A8 = await p.evaluate(() => window.__psRec.estado().A), filas = A8.cfg.filter((x) => x.doc === 'precios');
+      const campo = (k) => filas.find((x) => x.campo === k);
+      c(campo('overrides') && campo('itemsPropios') && campo('gastosRef') && campo('baseEpec'), 'precios: propone overrides, ítems propios, la lista de Gastos y el módulo: ' + filas.map((x) => x.campo + ' ' + x.antes + '→' + x.despues).join(' | '));
+      c(campo('contratistaPct') && campo('contratistaPct').opcional && !A8.cfg.length === false, 'el % del contratista distinto (65 vs 70) aparece sin tildar');
+      c(/Precios e itemizado/.test(await tx(p, '#psOv')), 'la hoja muestra «Precios e itemizado» con su último guardado');
+      await p.click('#psOv [data-ps="si"]'); await p.waitForTimeout(500); await p.click('#psConf [data-psc="si"]'); await p.waitForTimeout(1500);
+      const pr = await p.evaluate(() => JSON.parse(localStorage.getItem('stub.db')).configEquipo.precios);
+      c(pr.overrides['1'] === 5000 && pr.itemsPropios.length === 1 && pr.baseEpec === 296126.45 && pr.contratistaPct === 70, 'vuelven overrides, ítems propios y módulo; el % sin tildar no se tocó');
+      c(pr.gastosRef.lista.some((x) => x.nombre === 'Gasoil') && pr.gastosRef.lista.some((x) => /hidroelevador/i.test(x.nombre)), 'la lista de Gastos: Gasoil (copia) e hidroelevador (de los gastos)');
+      c(Array.isArray(pr.respaldos) && pr.respaldos.length >= 1, 'respaldo de cómo estaba');
+      c(/✓ Precios e itemizado/.test(await tx(p, '#psMsg')), 'lo lee de vuelta: ' + (await tx(p, '#psMsg')).slice(0, 100));
       await A.browser.close(); browser = null;
     }
     if (SOLO(5) && !ANTES) {

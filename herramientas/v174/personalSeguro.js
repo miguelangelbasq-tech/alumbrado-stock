@@ -253,7 +253,54 @@
     if (auditLeida && !auditCopias.length) linea.push("En la auditoría no hay ninguna copia de la nómina: hasta la v174 los guardados de la nómina no se anotaban.");
     const yaEn = []; P.forEach((x) => { const ya = buscar(actual, x.nombre); if (ya) yaEn.push({ nombre: x.nombre, en: ya.nombre, nOt: x.nOt || 0 }); });
     const diag = { ordenes: O.length, ordenesConGente: O.filter((o) => genteDeOrden(o).length).length, leidasBase: otLeidas.length, quincenas: Object.keys(QQ).length, usuarios: UU.length, vales: intentar(() => (window.stockMovimientos || []).length, 0), copias: C.length, personas: P.size, noObra: [...P.values()].filter((x) => x.noObra).length, errores: leidoErr.slice(), syncOt: intentar(() => window.__sync.ordenesTrabajo.ts, 0) };
-    return { diag, yaEn, actual: actual.length, vehiculos: vAct.length, faltan, completar, vFaltan, vCompletar, perdido, linea, copias: C.map((c) => ({ id: c.id, fuente: c.fuente, personas: c.nomina.length, vehiculos: c.vehiculos.length })) };
+    const CF = analizarCfg();
+    return { cfg: CF.filas, cfgRes: CF.resumen, diag, yaEn, actual: actual.length, vehiculos: vAct.length, faltan, completar, vFaltan, vCompletar, perdido, linea, copias: C.map((c) => ({ id: c.id, fuente: c.fuente, personas: c.nomina.length, vehiculos: c.vehiculos.length })) };
+  }
+
+  // ---------- v174b: los otros documentos de configuración (precios, baremo, cuadrillas, ubicación) y lo que no es la nómina
+  const DOCS_CFG = ["precios", "baremo", "cuadrillas", "ubicacion", "personal"];
+  const tam = (v) => Array.isArray(v) ? v.length : v && typeof v == "object" ? Object.keys(v).length : vacio(v) ? 0 : 1;
+  const tamTxt = (v) => Array.isArray(v) ? v.length + " elementos" : v && typeof v == "object" ? Object.keys(v).length + " datos" : vacio(v) ? "vacío" : String(v).slice(0, 40);
+  const CFG_NO = /^(ts|usuario|por|porNombre|respaldos|nomina|lista|vehiculos|actualizado|actualizadoPor|editadoTs|editadoPor|ultimoRespaldo)$|Ts$|Por$/;
+  const copiasCfgLocales = () => intentar(() => JSON.parse(localStorage.getItem("ema.cfg.respaldoLocal") || "[]"), []).filter((x) => x && x.doc && x.d);
+  function copiasCfg(doc) {
+    const l = [], cur = curDe(doc);
+    arr(cur.respaldos).forEach((r) => { if (r && r.campos) l.push({ fuente: `copia guardada en la base el ${fH(r.ts)}${r.por ? " por " + r.por : ""}`, ts: r.ts, d: r.campos }); });
+    copiasCfgLocales().filter((x) => x.doc === doc).forEach((x) => l.push({ fuente: `copia en este aparato (de la base del ${fH(x.ts || x.visto)}${x.usuario ? ", guardada por " + x.usuario : ""})`, ts: x.ts || x.visto, d: x.d }));
+    if (archivo && archivo.cfg && archivo.cfg[doc]) l.push({ fuente: `archivo de respaldo «${archivo.nombre}»`, ts: archivo.ts || 0, d: archivo.cfg[doc] });
+    return l;
+  }
+  function gastosRefDeGastos() {   // la lista de precios de Gastos rearmada con los gastos cargados (el último precio de cada cosa)
+    const m = new Map();
+    intentar(() => window.gastosObra || [], []).forEach((g) => { if (!g || !g.desc || !(+g.pu > 0)) return; const k = nk(g.desc); const x = m.get(k) || { nombre: String(g.desc).trim(), cat: g.cat || "varios", un: g.un || "", precio: 0, fecha: "", hist: [] }; x.hist.push({ precio: +g.pu, fecha: g.fecha || "", por: g.usuario || "" }); if (!x.fecha || String(g.fecha || "") >= x.fecha) { x.precio = +g.pu; x.fecha = g.fecha || ""; x.un = g.un || x.un; } m.set(k, x); });
+    return [...m.values()].map((x) => Object.assign(x, { hist: x.hist.sort((a, b) => String(a.fecha).localeCompare(String(b.fecha))).slice(-12) }));
+  }
+  function analizarCfg() {
+    const filas = [], resumen = [];
+    DOCS_CFG.forEach((doc) => {
+      const cur = curDe(doc), C = copiasCfg(doc), best = {};
+      resumen.push({ doc, nombre: NOMBRE[doc] || doc, ts: cur.ts || 0, por: cur.usuario || cur.por || "", campos: Object.keys(cur).filter((k) => !CFG_NO.test(k)).length, copias: C.length, cargado: cargadoDe(doc) });
+      const peso = (v) => Array.isArray(v) ? v.length : v && typeof v == "object" ? JSON.stringify(v).length : 0;
+      C.forEach((c) => Object.keys(obj(c.d)).forEach((k) => { if (CFG_NO.test(k) || k.indexOf(".") >= 0) return; const v = c.d[k]; if (!tam(v)) return; const b = best[k], sc = !(v && typeof v == "object");
+        if (sc) { if (JSON.stringify(v) === JSON.stringify(cur[k])) return; if (!b || (c.ts || 0) > (b.ts || 0)) best[k] = { v, fuente: c.fuente, ts: c.ts }; return; }   // valor suelto: el más nuevo que sea distinto al de hoy
+        if (!b || peso(v) > peso(b.v) || (peso(v) === peso(b.v) && (c.ts || 0) > (b.ts || 0))) best[k] = { v, fuente: c.fuente, ts: c.ts }; }));
+      Object.keys(best).forEach((k) => { const b = best[k], a = cur[k]; if (JSON.stringify(a) === JSON.stringify(b.v)) return; const scal = !(b.v && typeof b.v == "object"); if (!scal && peso(a) >= peso(b.v)) return; filas.push({ doc, campo: k, antes: tamTxt(a), despues: tamTxt(b.v), v: b.v, fuente: b.fuente, opcional: scal && !vacio(a) }); });   // un valor suelto distinto al de hoy va sin tildar
+      if (doc === "precios") {
+        const gr = obj(cur.gastosRef), lista = arr(gr.lista), deG = gastosRefDeGastos().filter((x) => !lista.some((y) => nk(y.nombre) === nk(x.nombre)));
+        const fg = filas.find((f) => f.doc === "precios" && f.campo === "gastosRef");
+        if (fg) { const lc = arr(obj(fg.v).lista), mas = gastosRefDeGastos().filter((x) => !lc.some((y) => nk(y.nombre) === nk(x.nombre)) && !lista.some((y) => nk(y.nombre) === nk(x.nombre))); if (mas.length) { fg.v = Object.assign({}, fg.v, { lista: lc.concat(mas.map((x, i) => Object.assign({ id: "r" + Date.now().toString(36) + i }, x))) }); fg.fuente += " + los gastos cargados"; } fg.despues = arr(fg.v.lista).length + " precios"; fg.antes = lista.length + " precios"; }
+        else if (deG.length) filas.push({ doc, campo: "gastosRef", sub: "lista", antes: lista.length + " precios", despues: (lista.length + deG.length) + " precios (" + deG.length + " de los gastos cargados: " + deG.slice(0, 4).map((x) => x.nombre).join(", ") + (deG.length > 4 ? "…" : "") + ")", v: Object.assign({}, gr, { lista: lista.concat(deG.map((x, i) => Object.assign({ id: "r" + Date.now().toString(36) + i }, x))) }), fuente: "los gastos cargados (último precio de cada cosa)" });
+        const cc = obj(cur.certCerrados), mes = Object.keys(cc).sort().pop(), m = mes ? cc[mes] : null;
+        if (m && !(+cur.baseEpec > 0) && +m.modulo > 0 && !filas.some((f) => f.doc === "precios" && f.campo === "baseEpec")) filas.push({ doc, campo: "baseEpec", antes: "vacío", despues: String(m.modulo), v: +m.modulo, fuente: `el certificado cerrado de ${mes}` });
+        if (m && !cur.zonaContrato && m.zona && !filas.some((f) => f.doc === "precios" && f.campo === "zonaContrato")) filas.push({ doc, campo: "zonaContrato", antes: "vacío (se usa A)", despues: String(m.zona), v: m.zona, fuente: `el certificado cerrado de ${mes}` });
+      }
+    });
+    return { filas, resumen };
+  }
+  function mezclar(a, b) {   // nunca saca: mapas = lo de la copia + lo que hay hoy que la copia no tiene; listas = la copia + lo de hoy que no está
+    if (Array.isArray(b)) { const key = (x) => x && typeof x == "object" ? String(x.id || nk(x.nombre || x.label || "") || JSON.stringify(x)) : String(x); const ks = new Set(b.map(key)); return clon(b).concat(arr(a).filter((x) => !ks.has(key(x)))); }
+    if (b && typeof b == "object") { const r = clon(b); Object.keys(obj(a)).forEach((k) => { if (!(k in r)) r[k] = a[k]; else if (Array.isArray(r[k]) && Array.isArray(a[k])) r[k] = mezclar(a[k], r[k]); }); return r; }
+    return b;
   }
 
   // ---------- leer la auditoría (asistente que editó configEquipo/personal) y salud (último respaldo bajado)
@@ -276,7 +323,7 @@
   function leerArchivo(f) {
     return new Promise((ok) => {
       const r = new FileReader();
-      r.onload = () => { try { const j = JSON.parse(r.result), p = obj(obj(j.configEquipo).personal); if (!arr(p.nomina).length && !arr(p.lista).length && !arr(p.vehiculos).length) return ok("Ese archivo no trae la nómina ni los vehículos (tiene que ser un «respaldo_completo_…json»)."); archivo = { nombre: f.name, fecha: j.exportado ? fH(Date.parse(j.exportado)) : "", ts: Date.parse(j.exportado || "") || 0, nomina: arr(p.nomina).length ? p.nomina : arr(p.lista), vehiculos: arr(p.vehiculos) }; ok(""); } catch (e) { ok("No pude leer ese archivo."); } };
+      r.onload = () => { try { const j = JSON.parse(r.result), p = obj(obj(j.configEquipo).personal); if (!arr(p.nomina).length && !arr(p.lista).length && !arr(p.vehiculos).length && !Object.keys(obj(j.configEquipo)).length) return ok("Ese archivo no trae la nómina ni los vehículos (tiene que ser un «respaldo_completo_…json»)."); archivo = { nombre: f.name, fecha: j.exportado ? fH(Date.parse(j.exportado)) : "", ts: Date.parse(j.exportado || "") || 0, nomina: arr(p.nomina).length ? p.nomina : arr(p.lista), vehiculos: arr(p.vehiculos), cfg: obj(j.configEquipo) }; ok(""); } catch (e) { ok("No pude leer ese archivo."); } };
       r.onerror = () => ok("No pude leer ese archivo."); r.readAsText(f);
     });
   }
@@ -309,15 +356,16 @@
 <h4 class="ps-h">Vehículos que no están (${A.vFaltan.length})</h4>${A.vFaltan.length ? A.vFaltan.map((x, i) => `<label class="ps-fila"><input type="checkbox" data-pssel="v${i}" ${x.soloId ? "" : st.sel["v" + i] !== false ? "checked" : ""} ${x.soloId ? "disabled" : ""}><span><b>${esc(x.v.nombre || "(sin nombre)")}</b>${x.v.patente ? " · " + esc(x.v.patente) : ""}${x.v.tipo ? " · " + esc(x.v.tipo) : ""}${x.v.lugares ? " · " + esc(x.v.lugares) + " lugares" : ""} <small>de ${esc(x.fuente)}${x.ot && x.ot.aCargo ? " · lo llevó " + esc(x.ot.aCargo) + (x.ot.ultima ? " (" + esc(x.ot.ultima) + ")" : "") : ""}</small></span></label>`).join("") : '<div class="hint">No falta ningún vehículo de los que aparecen.</div>'}
 ${A.vCompletar.length ? `<h4 class="ps-h">Datos que faltan de los vehículos (${A.vCompletar.length})</h4>` + A.vCompletar.map((x, i) => `<label class="ps-fila"><input type="checkbox" data-pssel="w${i}" ${st.sel["w" + i] !== false ? "checked" : ""}><span><b>${esc(x.nombre)}</b>: ${esc(x.campo)} <b>${esc(String(x.v))}</b> <small>de ${esc(x.fuente)}</small></span></label>`).join("") : ""}
 <h4 class="ps-h">Lo que no está en ningún lado (${A.perdido.length})</h4>${A.perdido.length ? `<div class="hint">Esto hay que cargarlo a mano (o traer un archivo de respaldo):</div><ul class="ps-ul ps-perd">${A.perdido.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : '<div class="hint">Nada.</div>'}
+<h4 class="ps-h">💲 Precios, baremo y el resto de la configuración (${A.cfg.length})</h4><ul class="ps-ul">${A.cfgRes.map((r) => `<li><b>${esc(r.nombre)}</b>: ${r.cargado ? `${r.campos} datos guardados${r.ts ? `, último guardado el ${fH(r.ts)}${r.por ? " por " + esc(r.por) : ""}` : ""}` : "todavía no llegó de la base"} · ${r.copias} copia${r.copias === 1 ? "" : "s"}</li>`).join("")}</ul>${A.cfg.length ? A.cfg.map((x, i) => `<label class="ps-fila"><input type="checkbox" data-pssel="k${i}" ${st.sel["k" + i] ? "checked" : ""}><span><b>${esc(NOMBRE[x.doc] || x.doc)} › ${esc(x.campo)}</b>: ${esc(x.antes)} → <b>${esc(x.despues)}</b> <small>de ${esc(x.fuente)}</small></span></label>`).join("") : '<div class="hint">No hay ninguna copia ni dato con más información que lo que hay hoy. Si tenés un «respaldo_completo_…json», cargalo abajo.</div>'}
 <h4 class="ps-h">Copias encontradas (${A.copias.length})</h4>${A.copias.length ? `<ul class="ps-ul">${A.copias.map((c) => `<li>${esc(c.fuente)}: ${c.personas} personas, ${c.vehiculos} vehículos</li>`).join("")}</ul>` : '<div class="hint">Ninguna copia completa (ni en la base, ni en este aparato, ni en la auditoría).</div>'}
 <label class="ps-arch">📂 Buscar en un archivo de respaldo («respaldo_completo_…json»)<input type="file" accept=".json,application/json" id="psArch"></label>
 <div class="v7-msg" id="psMsg" role="status">${esc(st.msg)}</div>
-<div class="v7-acc"><button type="button" class="btn-ghost" data-ps="x">Cancelar</button><button type="button" class="btn-primary" data-ps="si" ${nSel("p") + nSel("c") + nSel("v") + nSel("w") ? "" : "disabled"}>Sí, agregarlos (${nSel("p")} personas · ${nSel("v")} vehículos${nSel("c") + nSel("w") ? " · " + (nSel("c") + nSel("w")) + " datos" : ""})</button></div>`;
+<div class="v7-acc"><button type="button" class="btn-ghost" data-ps="x">Cancelar</button><button type="button" class="btn-primary" data-ps="si" ${nSel("p") + nSel("c") + nSel("v") + nSel("w") + nSel("k") ? "" : "disabled"}>Sí, agregarlos (${nSel("p")} personas · ${nSel("v")} vehículos${nSel("c") + nSel("w") + nSel("k") ? " · " + (nSel("c") + nSel("w") + nSel("k")) + " datos" : ""})</button></div>`;
   }
   function selDefault() {
     const A = st.A; st.sel = {};
     A.faltan.forEach((_, i) => { st.sel["p" + i] = true; }); A.completar.forEach((_, i) => { st.sel["c" + i] = true; });
-    A.vFaltan.forEach((x, i) => { st.sel["v" + i] = !x.soloId; }); A.vCompletar.forEach((_, i) => { st.sel["w" + i] = true; });
+    A.vFaltan.forEach((x, i) => { st.sel["v" + i] = !x.soloId; }); A.vCompletar.forEach((_, i) => { st.sel["w" + i] = true; }); arr(A.cfg).forEach((x, i) => { st.sel["k" + i] = !x.opcional; });
   }
   function pintarHoja() { const v = $("psOv"); if (!v) return; const c = v.querySelector(".v7-caja"); const top = c.scrollTop; c.innerHTML = hojaHtml(); c.scrollTop = top; }
   async function abrir() {
@@ -338,9 +386,24 @@ ${A.vCompletar.length ? `<h4 class="ps-h">Datos que faltan de los vehículos (${
     A.completar.forEach((x, i) => { if (st.sel["c" + i] === false) return; const p = buscar(nom, x.nombre); if (p && vacio(p[x.campo])) { p[x.campo] = x.v; hecho.push(x.nombre + " (" + x.txt + ")"); } });
     A.vFaltan.forEach((x, i) => { if (st.sel["v" + i] === false || x.soloId) return; if (veh.some((v) => v.id === x.id)) return; const v = Object.assign({ activo: true }, clon(x.v)); if (!v.id || /^n:/.test(v.id)) v.id = "v" + Date.now().toString(36) + i; veh.push(v); hecho.push("vehículo " + v.nombre); });
     A.vCompletar.forEach((x, i) => { if (st.sel["w" + i] === false) return; const v = veh.find((y) => y.id === x.id); if (v && vacio(v[x.campo])) v[x.campo] = x.v; });
-    if (!hecho.length) { st.msg = "No hay nada tildado."; return pintarHoja(); }
-    const ok = await preguntar("¿Agregar a la nómina?", `<p>Se agrega${hecho.length === 1 ? "" : "n"} <b>${hecho.length}</b> cosa${hecho.length === 1 ? "" : "s"}: ${esc(hecho.slice(0, 30).join(", "))}${hecho.length > 30 ? "…" : ""}.</p><p>Queda: <b>${nom.length} personas</b> y <b>${veh.length} vehículos</b>. No se saca a nadie. Antes se guarda una copia de cómo está ahora.</p>`, "Sí, agregarlos", "No");
+    const pc = {}, hechoC = [];
+    arr(A.cfg).forEach((x, i) => { if (st.sel["k" + i] === false) return; const cur = curDe(x.doc); (pc[x.doc] = pc[x.doc] || {})[x.campo] = x.sub ? x.v : mezclar(cur[x.campo], x.v); hechoC.push((NOMBRE[x.doc] || x.doc) + " › " + x.campo); });
+    if (!hecho.length && !hechoC.length) { st.msg = "No hay nada tildado."; return pintarHoja(); }
+    const ok = await preguntar("¿Recuperar esto?", `${hecho.length ? `<p>Nómina: se agrega${hecho.length === 1 ? "" : "n"} <b>${hecho.length}</b>: ${esc(hecho.slice(0, 30).join(", "))}${hecho.length > 30 ? "…" : ""}. Queda: <b>${nom.length} personas</b> y <b>${veh.length} vehículos</b>.</p>` : ""}${hechoC.length ? `<p>Configuración: <b>${esc(hechoC.join(", "))}</b> (se suma lo de la copia a lo que hay hoy).</p>` : ""}<p>No se saca nada. Antes se guarda una copia de cómo está ahora.</p>`, "Sí, recuperar", "No");
     if (!ok) return;
+    const verC = [];
+    for (const doc of Object.keys(pc)) {
+      try {
+        if (doc === "personal") { const p2 = await guardia(Object.assign({}, pc[doc]), { sinPreguntar: true }); await firebase.firestore().collection("configEquipo").doc("personal").set(p2, { merge: true }); window.__personalNube = Object.assign({}, base(), p2); }
+        else { const p2 = await guardiaCfg(doc, Object.assign({}, pc[doc], { ts: Date.now(), usuario: yoEmail() }), { sinPreguntar: true }); await firebase.firestore().collection("configEquipo").doc(doc).set(p2, { merge: true });
+          if (doc === "baremo") { window.__baremoNube = Object.assign({}, obj(window.__baremoNube), p2); try { window.aplicarBaremoDeLaNube && window.aplicarBaremoDeLaNube(); } catch (e) { } }
+          else if (doc === "precios") { window.__preciosNube = Object.assign({}, obj(window.__preciosNube), p2); try { window.aplicarPreciosDeLaNube && window.aplicarPreciosDeLaNube(); } catch (e) { } }
+          else DAT[doc] = Object.assign({}, obj(DAT[doc]), p2); }
+        try { const s = await firebase.firestore().collection("configEquipo").doc(doc).get(); const d = s.exists ? s.data() || {} : {}; verC.push(`✓ ${NOMBRE[doc] || doc}: ${Object.keys(pc[doc]).map((k) => k + " " + tamTxt(d[k])).join(", ")}`); } catch (e) { verC.push(`⚠ ${NOMBRE[doc] || doc}: mandado, no lo pude leer de vuelta`); }
+        try { window.fbAuditar && window.fbAuditar("config_recuperar", `${doc}: ${Object.keys(pc[doc]).join(", ")}`, { doc, campos: Object.keys(pc[doc]) }); } catch (e) { }
+      } catch (er) { verC.push("⚠ " + (NOMBRE[doc] || doc) + ": " + window.__psErr(er)); }
+    }
+    if (!hecho.length) { st.msg = verC.join(" · "); st.A = analizar(); selDefault(); return pintarHoja(); }
     try {
       const patch = await guardia({ nomina: nom, vehiculos: veh, ts: Date.now(), usuario: yoEmail(), vehiculosTs: Date.now(), vehiculosPor: yoEmail() }, { accion: "personal_recuperar", sinPreguntar: true });
       await firebase.firestore().collection("configEquipo").doc("personal").set(patch, { merge: true });
@@ -348,7 +411,7 @@ ${A.vCompletar.length ? `<h4 class="ps-h">Datos que faltan de los vehículos (${
       try { window.aplicarPersonalDeLaNube && window.aplicarPersonalDeLaNube(); } catch (e) { }
       let ver = "";
       try { const s = await firebase.firestore().collection("configEquipo").doc("personal").get(); const d = s.exists ? s.data() || {} : {}; ver = `✓ Guardado: ${arr(d.nomina).length} personas, ${arr(d.vehiculos).length} vehículos (leído de vuelta de la base).`; } catch (e) { ver = "⚠ Se mandó a la base pero no pude leerlo de vuelta: fijate en un rato."; }
-      st.msg = `${ver} ${hecho.length} agregado${hecho.length === 1 ? "" : "s"}. Revisá los roles «a confirmar» y los legajos vacíos en la nómina.`;
+      st.msg = `${ver} ${hecho.length} agregado${hecho.length === 1 ? "" : "s"}. Revisá los roles «a confirmar» y los legajos vacíos en la nómina.${verC.length ? " " + verC.join(" · ") : ""}`;
       st.A = analizar(); selDefault();
     } catch (er) { st.msg = window.__psErr(er); }
     pintarHoja();
@@ -363,5 +426,5 @@ ${A.vCompletar.length ? `<h4 class="ps-h">Datos que faltan de los vehículos (${
     if (t.dataset && t.dataset.pssel) { st.sel[t.dataset.pssel] = t.checked; pintarHoja(); return; }
     if (t.id === "psArch" && t.files && t.files[0]) { const m = await leerArchivo(t.files[0]); st.msg = m || "✓ Archivo leído: se suma como copia."; st.A = analizar(); selDefault(); pintarHoja(); }
   });
-  window.__psRec = { analizar, abrir, cerrar, aplicar, copias, guardia, esFabrica, leerArchivo: (txt, nombre) => { const j = JSON.parse(txt), p = obj(obj(j.configEquipo).personal); archivo = { nombre: nombre || "respaldo.json", fecha: "", ts: 0, nomina: arr(p.nomina).length ? p.nomina : arr(p.lista), vehiculos: arr(p.vehiculos) }; }, estado: () => ({ cargado: cargado(), deBase: !!window.__nominaDeBase, sel: Object.assign({}, st.sel), A: st.A }) };
+  window.__psRec = { analizar, abrir, cerrar, aplicar, copias, guardia, esFabrica, leerArchivo: (txt, nombre) => { const j = JSON.parse(txt), p = obj(obj(j.configEquipo).personal); archivo = { nombre: nombre || "respaldo.json", fecha: "", ts: 0, nomina: arr(p.nomina).length ? p.nomina : arr(p.lista), vehiculos: arr(p.vehiculos), cfg: obj(j.configEquipo) }; }, estado: () => ({ cargado: cargado(), deBase: !!window.__nominaDeBase, sel: Object.assign({}, st.sel), A: st.A }) };
 })();
