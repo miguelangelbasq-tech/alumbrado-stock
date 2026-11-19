@@ -14,7 +14,9 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Cómo se arma:** `herramientas/v175/patch_v175.py` sobre el ORIGINAL 174b (+ `ia175.js` antes de `window.__asistente`, el botón «Sí, cargarlos», la línea del SISTEMA y `__psRec.leerMas`). Sin reglas nuevas.
 
-**Pruebas:** ver abajo (se completa al terminar la batería).
+**Pruebas:** `t_v175` (nueva) PC 47/47 · celu 47/47 · `REGLAS=1` 47/47 · 47/47; `t_v174` 57/57 · 57/57, `t_v173` 51/51 · 51/51, `t_v159` 48/48 · 48/48, `t_v141` 44/44 · 44/44, `t_circuito` 16/16 · 16/16 (PC · celu; `t_v174` PC y `t_circuito` celu dieron una falla de tiempos con la máquina cargada y pasan solas).
+
+**Sello:** `2026-11-19 09:16 · 4ccba4` · ORIGINAL `f26cb3e6bc794bbde8eae2384972f0d3a8d4e899137fb5fe0bd1981d819bc17f` · index `a82c1306de249b1eab85f536ac7fccd5da84c72b176114c8a172b8c269cc30ed`.
 
 ## v174b — 19/11/2026 (publicada en GitHub 19/11) · «🩹 Recuperar» encuentra a la gente con los datos reales
 **Pedido (Ángel, 19/11):** con la v174 publicada, «🩹 Recuperar personal y vehículos» decía que no había nada para recuperar, pero faltan JAVIER OLARIAGA, Ivan Exequiel Pereyra, PETITTI ISMAEL, Bruno Federico Cherino y Vizgarra Alfredo (están en las órdenes de esta semana) y no hay vehículos.
