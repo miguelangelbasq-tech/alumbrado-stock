@@ -1,0 +1,27 @@
+#hpBox{margin:12px 0 0;padding:10px 12px;border-radius:16px;background:rgba(40,40,94,.04);border:1px solid rgba(40,40,94,.10)}
+#hpBox .hp-t{font-weight:700;font-size:14px;color:var(--navy,#28285E);margin:0 0 6px}
+#hpBox .hp-t small{display:block;font-weight:500;font-size:12px;color:var(--text-soft,#475569);margin-top:2px}
+#hpBox .hp-fila{display:grid;grid-template-columns:minmax(90px,1fr) auto;align-items:center;column-gap:10px;row-gap:4px;padding:6px 0;border-top:1px solid rgba(40,40,94,.07)}
+#hpBox .hp-fila:first-of-type{border-top:0}
+#hpBox .hp-fila.prop .hp-n{color:var(--navy,#28285E);font-weight:700}
+#hpBox .hp-n{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hpBox .hp-hs{display:flex;align-items:center}
+#hpBox .hp-hs span{margin:0 6px;color:var(--text-3,#6E7C93);font-size:13px}
+#hpBox .hp-hs input{width:auto;min-width:96px;min-height:40px;margin:0;font-size:16px;padding:4px 6px}
+#hpBox .hp-acc{grid-column:1/-1;display:flex;flex-wrap:wrap}
+#hpBox .hp-acc .chip{margin:0 6px 0 0;min-height:36px}
+#hpBox .hp-pie{margin-top:8px;font-size:12.5px;font-weight:600;color:#1E6F91}
+.hp-mio{margin:8px 0;padding:8px 12px;border-radius:14px;background:#eef6fb;border:1px solid #cfe3ef;font-size:14px;color:#0D1424}
+.hp-mio small{display:block;font-size:12px;color:var(--text-soft,#475569);margin-top:2px}
+.hp-ci{display:block;font-size:12px;color:#1E6F91;font-weight:600;margin-top:2px}
+.hp-of{margin:6px 0;font-size:13px;color:#0D1424}
+.rp173-of{margin:6px 0;padding:8px 10px;border-radius:12px;background:rgba(40,40,94,.04)}
+.rp173-t{font-size:13px;margin-bottom:4px}
+.rp173-f{display:flex;flex-wrap:wrap;align-items:center;font-size:13px;padding:3px 0}
+.rp173-f span{flex:1 1 140px;min-width:0}.rp173-f span small{color:var(--text-3,#6E7C93);margin-left:4px}
+.rp173-f b{font-family:var(--mono,monospace);margin-right:8px}
+.rp173-f em{font-style:normal;font-size:12px;color:var(--text-soft,#475569);margin-right:8px}
+.rp173-f.ok b{color:#1d7a3a}
+.rp-caja .rp-iguales{display:inline-flex;align-items:center;min-height:36px;margin:4px 0 6px;padding:0 12px;border-radius:999px;border:1.5px solid var(--navy,#28285E);background:#fff;color:var(--navy,#28285E);font-weight:700;font-size:13px;cursor:pointer}
+.rp-caja .rp173-cols{margin-top:6px;font-size:12.5px;color:#1E6F91}
+@media (max-width:640px){#hpBox .hp-fila{grid-template-columns:1fr}#hpBox .hp-hs input{min-width:0;flex:1}}
