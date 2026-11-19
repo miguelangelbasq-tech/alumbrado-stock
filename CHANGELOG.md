@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v179 — 19/11/2026 (armada, sin publicar) · Personal del equipo por sector
+## v179 — 19/11/2026 (publicada en GitHub 19/11) · Personal del equipo por sector
 **Pedido (Ángel, 19/11):** «dentro de Personal del equipo tiene que tener subíndices que separen a Ilícitos, Alumbrado, Civil, Contratista, Oficina, Dirección y Pañol».
 
 **Qué cambia (módulo `sectores179` + reemplazos chicos, bandera `__v179No`):**
