@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v181 — 19/11/2026 (armada, sin publicar) · Registro de cambios en el Guardián
+## v181 — 19/11/2026 (publicada en GitHub 19/11) · Registro de cambios en el Guardián
 **Pedido (Ángel, 19/11):** «cada modificación, cada cambio —letra, color, nombre—, si se borra algo de la app, tiene que quedar registrado en la app qué es lo que se hizo y quién lo hizo, en el Guardián».
 
 **Qué cambia (módulo `registroCambios`, temprano, + bloque `ia181` del asistente, bandera `__v181No`; sin reglas nuevas):**
