@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v178 — 19/11/2026 (armada, sin publicar) · El asistente ve TODO y hace TODO
+## v178 — 19/11/2026 (publicada en GitHub 19/11) · El asistente ve TODO y hace TODO
 **Pedido (Ángel, 19/11):** «la IA de la app tiene que saber y ver todo lo de la app, absolutamente todo; no puede decirme que no ve; tiene que poder ver todo, saber todo y poder hacer todo. Revisá eso.»
 
 **Por qué decía «no lo veo» (revisión completa: `herramientas/v178/COBERTURA.md`):** (1) mucho se carga recién al abrir su pantalla (herramientas y sus movimientos, puntos del mapa, quincenas cerradas, presencia, ubicación en vivo, gastos, planos): con la pantalla cerrada `consultar` decía «Está vacía en memoria»; (2) colecciones que el asistente no conocía: adjuntos, fichas de fotos, auditoría, avisos de la cuadrilla, Proyectista, notas de planos, tableros, cuadrillas, guías, salud, alias; (3) no podía leer un documento entero por su número, buscar un nombre en todo ni ver la pantalla; (4) muchas acciones de la pantalla no tenían herramienta (reservas, herramientas, gastos, obra nueva, usuarios, mapa, documentación, avisos, ausencias, contactos, quincena, borrar fotos, alta de producto); (5) los `enum` de `consultar` / `proponer_editar` se armaban antes de sumar colecciones.
