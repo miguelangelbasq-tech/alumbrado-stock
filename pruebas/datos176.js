@@ -17,10 +17,12 @@ function datos176(op = {}) {
   if (op.ayer) {
     const f = dia(1), ts = Date.parse(f + 'T11:00:00Z');
     const per = { nomina: nominaReal(), vehiculos: VEH, ts: Date.parse('2026-11-17T12:00:00Z'), usuario: 'admin@' + DOM };
-    const docs = { personal: per, precios: { gastosRef: GREF(), zonaContrato: 'A' }, cuadrillas: { lista: [{ nombre: 'Cuadrilla 1' }, { nombre: 'Cuadrilla 2' }] } };
+    const docs = { personal: per, cuadrillas: { lista: [{ nombre: 'Cuadrilla 1' }, { nombre: 'Cuadrilla 2' }] } };
+    // precios: su copia del día va adentro de configEquipo/precios (lo lee solo el equipo), no en adjuntos
+    d.db.configEquipo.precios.guardianCopias = [{ fecha: f, ts, por: 'admin@' + DOM, hash: 'x', datos: { gastosRef: GREF(), zonaContrato: 'A' } }];
     const cuentas = { nomina: 15, vehiculos: 3, gastosRef: 12, cuadrillas: 2 };
     const campos = { personal: { nomina: 15, vehiculos: 3 }, precios: { gastosRef: 12, zonaContrato: 1 }, cuadrillas: { lista: 2 } };
-    d.db.adjuntos['cfg-' + f] = { tipo: 'respaldoCfg', fecha: f, ts, por: 'admin@' + DOM, docs, tam: { personal: 3000, precios: 600 }, cuentas, partes: [] };
+    d.db.adjuntos['cfg-' + f] = { tipo: 'respaldoCfg', fecha: f, ts, por: 'admin@' + DOM, docs, tam: { personal: 3000, precios: 600 }, cuentas, partes: [], huellas: { precios: 'x' }, enSuDoc: ['precios'] };
     d.db.configEquipo.salud = { guardian: { [f]: { estado: 'hecho', ts, por: 'admin@' + DOM, ids: ['cfg-' + f], cuentas, campos, tam: { personal: 3000, precios: 600 } } } };
   }
   return d;

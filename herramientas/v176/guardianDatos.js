@@ -37,12 +37,16 @@
   const fH = (t) => { if (!t) return "?"; const d = new Date(t); return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + " a las " + pad(d.getHours()) + ":" + pad(d.getMinutes()); };
   const fN = (n) => intentar(() => Number(n).toLocaleString("es-AR"), String(n));
   const tamJ = (x) => { try { return JSON.stringify(x).length; } catch (e) { return 0; } };
+  const hashDe = (x) => { let s = ""; try { s = JSON.stringify(x); } catch (e) { } let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(16) + "-" + s.length; };
+  // configEquipo/precios lo lee solo el equipo (reglas: equipo()), y adjuntos lo lee cualquier confirmado (también la cuadrilla):
+  // su copia del día NO va en adjuntos (ahí solo cuentas, tamaño y huella) sino adentro del mismo precios (guardianCopias[], 7 días).
+  const EN_SU_DOC = { precios: 1 };
 
   // ---------------------------------------------------------------- qué se copia y qué se cuenta
   const DOCS = ["personal", "precios", "baremo", "cuadrillas", "ubicacion", "alias", "guias", "reinicios"];   // nunca vapid (la privada ni existe acá) ni secretosServidor
   const RESTAURABLES = ["personal", "precios", "baremo", "cuadrillas", "ubicacion"];
   const NOMBRE = { personal: "Personal del equipo", precios: "Precios e itemizado", baremo: "Cuánto vale cada tarea", cuadrillas: "Cuadrillas", ubicacion: "Ubicación en vivo", alias: "Usuarios cortos", guias: "Guías", reinicios: "Reinicios de puntos" };
-  const VOL = /^(respaldos|ts|usuario|por|porNombre|actualizado|actualizadoPor|editadoTs|editadoPor|ultimoRespaldo)$|Ts$|Por$/;
+  const VOL = /^(respaldos|guardianCopias|ts|usuario|por|porNombre|actualizado|actualizadoPor|editadoTs|editadoPor|ultimoRespaldo)$|Ts$|Por$/;
   const memDoc = (d) => obj(d === "personal" ? window.__personalNube : d === "baremo" ? window.__baremoNube : d === "precios" ? window.__preciosNube : obj(window.__cfgDatos)[d]);
   const cargadoDoc = (d) => (d === "personal" ? !!window.__personalCargado : !!obj(window.__cfgCargado)[d]);
   const tam = (v) => (Array.isArray(v) ? v.length : v && typeof v == "object" ? Object.keys(v).length : v == null || v === "" ? 0 : 1);
@@ -195,20 +199,29 @@
     st.copiando = true;
     try {
       if (!(await tomarTurno(f, forzar))) { try { localStorage.setItem(KL, f); } catch (e) { } return { turno: false }; }
-      const docs = {}, tamD = {}, falto = [];
+      const docs = {}, tamD = {}, falto = [], propias = {}, huellas = {};
       for (const d of DOCS) {
-        try { const s = await db().collection("configEquipo").doc(d).get(); if (!s.exists) continue; const x = Object.assign({}, s.data() || {}); delete x.respaldos; docs[d] = x; tamD[d] = tamJ(x); }
+        try { const s = await db().collection("configEquipo").doc(d).get(); if (!s.exists) continue; const x = Object.assign({}, s.data() || {}); delete x.respaldos; delete x.guardianCopias; docs[d] = x; tamD[d] = tamJ(x); if (EN_SU_DOC[d]) propias[d] = arr((s.data() || {}).guardianCopias); }
         catch (e) { falto.push(d); }
       }
       const C = cuentas(), campos = {}; Object.keys(docs).forEach((d) => { campos[d] = camposDe(docs[d]); });
       const id = "cfg-" + f, main = { tipo: "respaldoCfg", fecha: f, ts: Date.now(), por: yoEmail(), docs: {}, tam: tamD, cuentas: C, partes: [], falto, version: intentar(() => document.querySelector('meta[name="ema-version"]').content, "") };
+      // precios (y lo que lea solo el equipo): la copia completa en su propio documento, en adjuntos solo la huella
+      for (const d of Object.keys(EN_SU_DOC)) {
+        if (!docs[d]) continue; huellas[d] = hashDe(docs[d]);
+        let l = arr(propias[d]).filter((x) => x && x.fecha !== f).concat([{ fecha: f, ts: main.ts, por: main.por, hash: huellas[d], datos: docs[d] }]).slice(-7);
+        while (l.length > 1 && tamJ(l) > 450000) l = l.slice(1);   // la base corta en 1 MB por documento
+        await db().collection("configEquipo").doc(d).set({ guardianCopias: l }, { merge: true });
+        delete docs[d];
+      }
+      main.huellas = huellas; main.enSuDoc = Object.keys(huellas);
       const aparte = {}; let total = 0;
       Object.keys(docs).sort((a, b) => tamD[a] - tamD[b]).forEach((d) => { if (tamD[d] > 300000 || total + tamD[d] > 700000) aparte[d] = docs[d]; else { main.docs[d] = docs[d]; total += tamD[d]; } });
       main.partes = Object.keys(aparte);
       const ids = [id];
       for (const d of main.partes) { const pid = id + "-" + d; await db().collection("adjuntos").doc(pid).set({ tipo: "respaldoCfgParte", fecha: f, ts: main.ts, por: main.por, doc: d, datos: aparte[d], tam: tamD[d] }); ids.push(pid); }
       await db().collection("adjuntos").doc(id).set(main);
-      const quien = {}; DOCS.forEach((d) => { if (docs[d]) { const u = ultimoGuardado(d); quien[d] = { ts: u.ts, por: u.por }; } });
+      const quien = {}; DOCS.forEach((d) => { if (docs[d] || huellas[d]) { const u = ultimoGuardado(d); quien[d] = { ts: u.ts, por: u.por }; } });
       const ent = { estado: "hecho", ts: main.ts, por: main.por, ids, tam: tamD, cuentas: C, campos, quien };
       await db().collection("configEquipo").doc("salud").set({ guardian: { [f]: ent } }, { merge: true });
       (st.salud = st.salud || {}).guardian = Object.assign({}, obj(st.salud.guardian), { [f]: ent });
@@ -222,6 +235,7 @@
     const s = await db().collection("adjuntos").doc("cfg-" + f).get(); if (!s.exists) return null;
     const m = s.data() || {}, docs = Object.assign({}, obj(m.docs));
     for (const d of arr(m.partes)) { try { const p = await db().collection("adjuntos").doc("cfg-" + f + "-" + d).get(); if (p.exists) docs[d] = obj(p.data().datos); } catch (e) { } }
+    Object.keys(EN_SU_DOC).forEach((d) => { const c = arr(memDoc(d).guardianCopias).filter((x) => x && x.fecha === f)[0]; if (c && c.datos) docs[d] = c.datos; });   // precios: su copia está en su propio documento
     return { fecha: f, ts: m.ts, por: m.por, docs, cuentas: obj(m.cuentas) };
   }
 
