@@ -35,7 +35,7 @@ const W = 'https://ema-ia.mdiaz-60f.workers.dev';
     await A.page.waitForTimeout(900); return A;
   };
   const otra = async (A, quien) => { const B = await abrir(Object.assign({ sesion: quien, browser: A.browser, ctx: A.ctx, espera: 4500 }, MOD, { cel: true })); B.page.on('dialog', (x) => x.accept()); await B.page.waitForTimeout(900); return B; };
-  const foto = async (p, n) => { if (!CAP) return; fs.mkdirSync(CAP, { recursive: true }); await p.waitForTimeout(300); await p.screenshot({ path: CAP + '/' + n + '_' + (cel ? 'cel' : 'pc') + '.png' }); };
+  const foto = async (p, n, sel) => { if (!CAP) return; fs.mkdirSync(CAP, { recursive: true }); if (sel) await p.evaluate((s) => { const e = document.querySelector(s); e && e.scrollIntoView({ block: 'center' }); }, sel); await p.waitForTimeout(300); await p.screenshot({ path: CAP + '/' + n + '_' + (cel ? 'cel' : 'pc') + '.png' }); };
   const errsJs = (A) => (A.errores || []).filter((e) => !/Missing or insufficient permissions|permission-denied|ERR_|Failed to fetch|aborted|fetching the script|prueba|sin permiso|Sin permiso|unsupported MIME/i.test(e));
   const tx = (p, sel) => p.evaluate((s) => { const e = document.querySelector(s); return e ? e.textContent.replace(/\s+/g, ' ').trim() : ''; }, sel);
   const db = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('stub.db') || '{}'));
@@ -44,7 +44,7 @@ const W = 'https://ema-ia.mdiaz-60f.workers.dev';
   const mtFilas = async (p) => {
     await p.evaluate(() => mostrarVista('mistareas')); await p.waitForTimeout(1300);
     if (!(await p.$('#mtApp .mt-ot[data-ot="ot173"] .mt-tarea'))) { await p.click('.mt-item[data-mtabrir="ot173"]').catch(() => { }); await p.waitForTimeout(1200); }
-    return p.evaluate(() => { const o = {}; document.querySelectorAll('#mtApp .mt-ot[data-ot="ot173"] .mt-tarea[data-k]').forEach((t) => { o[t.dataset.k] = { cuenta: ((t.querySelector('.fl-cuenta') || {}).textContent || '').trim(), filas: [...t.querySelectorAll('.fl-fila')].map((f) => ((f.querySelector('.fl-nom-btn b') || f.querySelector('.fl-nom') || {}).textContent || '').replace(/[✅\s]+/g, ' ').trim().replace(/\d+ de \d+$/, '').trim()) }; }); return o; });
+    return p.evaluate(() => { const o = {}; document.querySelectorAll('#mtApp .mt-ot[data-ot="ot173"] .mt-tarea[data-k]').forEach((t) => { o[t.dataset.k] = { cuenta: ((t.querySelector('.fl-cuenta') || {}).textContent || '').trim(), filas: [...t.querySelectorAll('.fl-fila')].map((f) => { const b = f.querySelector('.fl-nom-btn b'); if (b) return b.textContent.trim(); const n = f.querySelector('.fl-nom'); if (!n) return ''; const x = n.cloneNode(true); x.querySelectorAll('small').forEach((s) => s.remove()); return x.textContent.replace(/[✅\s]+/g, ' ').trim(); }) }; }); return o; });
   };
   // una foto de una columna, como la deja la app (orden + hora de la columna v157)
   const fotoCol = (p, k, num, hm) => p.evaluate(([k, num, hm]) => {
@@ -87,28 +87,28 @@ const W = 'https://ema-ia.mdiaz-60f.workers.dev';
     // «Voy a iniciar» y envío: lo de Pedro no es de Pablo
     const ini = await q.evaluate(() => { const o = ordenesTrabajo.find((x) => x.id === 'ot173'); window.__mtAPI.guardar(o, { 'campo.tareaInicio.armado_luminaria.pedro gomez': { ts: Date.now(), por: 'Pedro Gómez', v: 165 }, 'campo.tareaEnv.excavacion.Pedro Gómez': { estado: 'si', ts: Date.now(), por: 'Pedro Gómez' } }); return true; });
     await p.waitForTimeout(1600);
-    const r = await p.evaluate(() => { const o = ordenesTrabajo.find((x) => x.id === 'ot173'); return { ini: !!window.__inicioTarea.inicioDe(o, 'armado_luminaria'), iniQ: null, paso: (window.__cuadrillaDia.pasoActual(o) || {}).p ? window.__cuadrillaDia.pasoActual(o).p.k : '' }; });
+    const r = await p.evaluate(() => { const o = ordenesTrabajo.find((x) => x.id === 'ot173'); const ps = window.__cuadrillaDia.pasoActual('ot173') || {}; return { ini: !!window.__inicioTarea.inicioDe(o, 'armado_luminaria'), paso: ps.p ? ps.p.k : '' }; });
     const rq = await q.evaluate(() => { const o = ordenesTrabajo.find((x) => x.id === 'ot173'); return { ini: !!window.__inicioTarea.inicioDe(o, 'armado_luminaria') }; });
     c(ini && !r.ini && rq.ini, '«Voy a iniciar» de Pedro en el armado no le marca el inicio a Pablo (cada uno el suyo) · Pablo ' + r.ini + ' / Pedro ' + rq.ini);
     c(r.paso === 'armado_luminaria' || r.paso === 'excavacion', 'Modo obra de Pablo sigue con sus tareas aunque Pedro mandó la suya · paso ' + r.paso);
-    const pa = await p.evaluate(() => { const o = ordenesTrabajo.find((x) => x.id === 'ot173'); const ps = window.__cuadrillaDia.pasoActual(o); return ps && ps.p ? ps.p.k + ' ' + (ps.it ? ps.it.num : '') : ''; });
+    const pa = await p.evaluate(() => { const ps = window.__cuadrillaDia.pasoActual('ot173'); return ps && ps.p ? ps.p.k + ' ' + (ps.it ? ps.it.num : '') : ''; });
     c(/excavacion Col 4|armado_luminaria/.test(pa), 'el paso de Pablo es lo suyo (no lo de Pedro) · ' + pa);
     // la oficina
-    const L = await sesion('lucia'); const o = L.page;
-    await o.waitForTimeout(1200);
-    const of = await o.evaluate(() => { const ot = ordenesTrabajo.find((x) => x.id === 'ot173'); const d = document.createElement('div'); d.innerHTML = window.__cdOficinaHtml(ot); return d.textContent.replace(/\s+/g, ' '); });
-    c(/Excavaci[oó]n[^·]*· cada uno lo suyo/.test(of) && /Pablo Col 1 a Col 5 3 de 5\s*\d+ min/.test(of) && /Pedro Col 6 a Col 10 5 de 5/.test(of), '📸 Avance de la oficina: «Pablo Col 1 a Col 5 · 3 de 5 · N min» y «Pedro … 5 de 5» · ' + of.slice(0, 260));
+    const L = await abrir(Object.assign({ sesion: 'lucia', browser: A.browser, ctx: A.ctx, espera: 4500 }, MOD, { cel: true })); const o = L.page; o.on('dialog', (x) => x.accept());
+    await o.waitForTimeout(2000);
+    const of = await o.evaluate(() => { const ot = ordenesTrabajo.find((x) => x.id === 'ot173'); const d = document.createElement('div'); d.innerHTML = window.__cdOficinaHtml(ot); const r = d.querySelector('.rp173-of:last-of-type') || d; return [...d.querySelectorAll('.rp173-of')].map((x) => x.textContent).join(' | ').replace(/\s+/g, ' '); });
+    c(/Excavaci[oó]n[^·]*· cada uno lo suyo/.test(of) && /Pablo\s*Col 1 a Col 5\s*3 de 5\s*105 min/.test(of) && /Pedro\s*Col 6 a Col 10\s*5 de 5\s*145 min/.test(of), '📸 Avance de la oficina: «Pablo Col 1 a Col 5 · 3 de 5 · N min» y «Pedro … 5 de 5» · ' + of.slice(0, 260));
     const mins = await o.evaluate(() => window.__rp173.progreso('ot173', 'excavacion').map((x) => x.nombre.split(' ')[0] + ' ' + x.hechas + ' ' + x.min));
-    c(mins.join() === 'Pablo 3 100,Pedro 5 140', 'minutos de cada uno: Pablo 30 + 32 + 38 = 100 (desde las 08:10), Pedro 25 + 30 + 28 + 29 + 28 = 140 · ' + mins.join());
+    c(mins.join() === 'Pablo 3 105,Pedro 5 145', 'minutos de cada uno, cada uno desde lo suyo: Pablo 35 + 32 + 38 = 105 (llegó 08:05), Pedro 30 + 30 + 28 + 29 + 28 = 145 (antes la «columna anterior» de Pedro era la de Pablo) · ' + mins.join());
     const ver = await o.evaluate(() => window.__verifOt.verifOt('ot173').tareas.find((t) => t.k === 'excavacion').texto);
-    c(/por persona: Pablo 3 de 5 · 100 min · Pedro 5 de 5 · 140 min/.test(ver), 'verificación (v150): por persona · ' + ver);
+    c(/por persona: Pablo 3 de 5 · 105 min · Pedro 5 de 5 · 145 min/.test(ver), 'verificación (v150): por persona · ' + ver);
     await o.evaluate(() => { window.mostrarVista('parte'); window.abrirCierreOt('ot173'); }); await o.waitForTimeout(1500);
     const ci = await o.evaluate(() => [...document.querySelectorAll('#cierreCuerpo .cierre-qp[data-k="excavacion"]')].map((i) => i.dataset.n.split(' ')[0] + ' ' + i.value));
     c(ci.join() === 'Pablo 3,Pedro 5', 'cierre: «✂ Cuánto hizo cada uno» precargado con lo de sus columnas (Pablo 3, Pedro 5) · ' + ci.join());
-    await foto(o, '0_cierre_repartida');
+    await foto(o, '0_cierre_repartida', '#cierreCuerpo .rp-cierre');
     await o.evaluate(() => window.cerrarCuadroCierre());
     c(errsJs(A).length === 0 && errsJs(B).length === 0 && errsJs(L).length === 0, 'sin errores' + (errsJs(A).concat(errsJs(B), errsJs(L)).slice(0, 2).join(' | ')));
-    await L.ctx.close(); await A.ctx.close();
+    await A.ctx.close();
   }
 
   // ================================================================= 1) Llenar orden: el horario de cada uno y «Dividir en partes iguales»
@@ -125,7 +125,7 @@ const W = 'https://ema-ia.mdiaz-60f.workers.dev';
     for (const n of ['Pablo Picone', 'Pedro Gómez']) { await o.evaluate((n) => { [...document.querySelectorAll('#hpBox [data-hpq="14"]')].find((b) => b.dataset.hpn === n).click(); }, n); await o.waitForTimeout(300); }
     const pie = await tx(o, '#hpBox .hp-pie');
     c(/Pablo y Pedro: 08:00 a 14:00/.test(pie) && /Juan y Mario: 08:00 a 16:00 \(toda la jornada\)/.test(pie), '«hasta 14:00» para Pablo y Pedro: «Pablo y Pedro: 08:00 a 14:00 · Juan y Mario: 08:00 a 16:00 (toda la jornada)» · ' + pie);
-    await foto(o, '1_horario');
+    await foto(o, '1_horario', '#hpBox');
     // tareas: excavación 4 repartida en partes iguales entre los 4 con «➗»; zanjeo para todos
     await o.evaluate(() => { try { window.__ordenNueva.ir(3); } catch (e) { } ['excavacion', 'zanjeo'].forEach((k) => { const cb = document.querySelector('#otActividades .ot-act-check[value="' + k + '"]'); if (cb && !cb.checked) cb.click(); }); }); await o.waitForTimeout(1200);
     await o.evaluate(() => { const i = document.querySelector('.ot-act-prev[data-id="excavacion"]'); i.value = '4'; i.dispatchEvent(new Event('input', { bubbles: true })); const z = document.querySelector('.ot-act-prev[data-id="zanjeo"]'); z.value = '20'; z.dispatchEvent(new Event('input', { bubbles: true })); const s = document.querySelector('.ot-act-quien[data-id="excavacion"]'); s.value = '__reparto__'; s.dispatchEvent(new Event('change', { bubbles: true })); }); await o.waitForTimeout(900);
@@ -155,7 +155,7 @@ const W = 'https://ema-ia.mdiaz-60f.workers.dev';
 
   // ================================================================= 2) la cuadrilla ve su horario
   if ((SOLO(2) || SOLO(3)) && emitida) {
-    const d = datos173(); d.db.ordenesTrabajo[emitida.id] = emitida; delete d.db.ordenesTrabajo[emitida.id].id;
+    const d = datos173(); const em0 = JSON.parse(JSON.stringify(emitida)); delete em0.id; delete d.db.ordenesTrabajo.ot173; d.db.ordenesTrabajo[emitida.id] = em0;
     const A = await sesion('pablo', {}, d); const p = A.page;
     await p.evaluate((id) => { window.__cuadrillaDia.elegirOt && window.__cuadrillaDia.elegirOt(id); window.__cuadrillaDia.ir('orden'); }, emitida.id); await p.waitForTimeout(900);
     const t = await tx(p, '#cdApp');
@@ -180,7 +180,7 @@ const W = 'https://ema-ia.mdiaz-60f.workers.dev';
 
   // ================================================================= 3) cierre: horas por persona y puntos por rol × horas
   if (SOLO(3) && emitida) {
-    const d = datos173(); d.db.ordenesTrabajo[emitida.id] = emitida; delete d.db.ordenesTrabajo[emitida.id].id;
+    const d = datos173(); const em0 = JSON.parse(JSON.stringify(emitida)); delete em0.id; delete d.db.ordenesTrabajo.ot173; d.db.ordenesTrabajo[emitida.id] = em0;
     const L = await sesion('lucia', {}, d); const o = L.page;
     await o.evaluate((id) => { window.mostrarVista('parte'); window.abrirCierreOt(id); }, emitida.id); await o.waitForTimeout(1200);
     await o.evaluate(() => { document.querySelectorAll('#cierreCuerpo .cierre-qty').forEach((i) => { i.value = i.dataset.k === 'zanjeo' ? '20' : '4'; i.dispatchEvent(new Event('input', { bubbles: true })); }); }); await o.waitForTimeout(500);
@@ -189,16 +189,16 @@ const W = 'https://ema-ia.mdiaz-60f.workers.dev';
     const lab = await tx(o, '#cierreCuerpo .hp-ci');
     c(/08:00 a 14:00 \(horario de la orden\)/.test(lab), 'al lado de Pablo: «🕐 08:00 a 14:00 (horario de la orden)» · ' + lab);
     const pv = await o.evaluate(() => Object.fromEntries([...document.querySelectorAll('#cierreCuerpo .cierre-pers')].map((i) => [i.dataset.n.split(' ')[0], +String(i.value).replace(',', '.')])));
-    const esp = await o.evaluate((id) => { const ot = ordenesTrabajo.find((x) => x.id === id); const cant = {}; document.querySelectorAll('#cierreCuerpo .cierre-qty').forEach((i) => { cant[i.dataset.k] = +i.value; }); const z = window.puntosDeOrden(Object.assign({}, ot, { cierre: { cantidades: cant, horasPersona: { 'Pablo Picone': 6, 'Pedro Gómez': 6, 'Juan Pérez': 8, 'Mario Díaz': 8 }, horasPersonaV: 2, hechoPersona: { excavacion: { 'Pablo Picone': 1, 'Pedro Gómez': 1, 'Juan Pérez': 1, 'Mario Díaz': 1 } } } }), true); const j = window.puntosDeOrden(Object.assign({}, ot, { horario: {}, cierre: { cantidades: cant, horasPersona: {}, horasPersonaV: 2, hechoPersona: { excavacion: { 'Pablo Picone': 1, 'Pedro Gómez': 1, 'Juan Pérez': 1, 'Mario Díaz': 1 } } } }), true); const m = (x) => Object.fromEntries(x.porPersona.map((p) => [p.nombre.split(' ')[0], Math.round(p.pts * 10) / 10])); return { con: m(z), sin: m(j) }; }, emitida.id);
+    const esp = await o.evaluate((id) => { const ot = ordenesTrabajo.find((x) => x.id === id); const cant = {}; document.querySelectorAll('#cierreCuerpo .cierre-qty').forEach((i) => { cant[i.dataset.k] = +i.value; }); const hpe = window.__reparto.leerCierre(); const z = window.puntosDeOrden(Object.assign({}, ot, { cierre: { cantidades: cant, horasPersona: { 'Pablo Picone': 6, 'Pedro Gómez': 6, 'Juan Pérez': 8, 'Mario Díaz': 8 }, horasPersonaV: 2, hechoPersona: hpe } }), true); const j = window.puntosDeOrden(Object.assign({}, ot, { horario: {}, cierre: { cantidades: cant, horasPersona: {}, horasPersonaV: 2, hechoPersona: hpe } }), true); const m = (x) => Object.fromEntries(x.porPersona.map((p) => [p.nombre.split(' ')[0], Math.round(p.pts * 10) / 10])); return { con: m(z), sin: m(j) }; }, emitida.id);
     c(Math.abs(pv.Pablo - esp.con.Pablo) < 0.11 && Math.abs(pv.Juan - esp.con.Juan) < 0.11 && Math.abs(pv.Mario - esp.con.Mario) < 0.11 && pv.Juan > pv.Pablo && esp.sin.Pablo === esp.sin.Juan, 'puntos por rol × horas (puntosDeOrden, la cuenta de siempre): Pablo ' + pv.Pablo + ' (6 h) < Juan ' + pv.Juan + ' (8 h), Mario ' + pv.Mario + ', Pedro ' + pv.Pedro + ' (Ayudante, 6 h); con toda la jornada hubieran sido Pablo = Juan = ' + esp.sin.Pablo + ' · esperado ' + JSON.stringify(esp.con));
-    await foto(o, '3_cierre_horas');
+    await foto(o, '3_cierre_horas', '#cierreCuerpo .hp-ci');
     // guardar
     await o.evaluate(() => { const r = document.querySelector('#cierreCuerpo input[name="coCierreResp"][value="no"]'); if (r) { r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); } }); await o.waitForTimeout(200);
     await o.evaluate(() => window.guardarCierreOt()); await o.waitForTimeout(2200);
     const ot = await otDb(o, emitida.id);
     const hp = (ot.cierre || {}).horasPersona || {}, pp = Object.fromEntries((((ot.cierre || {}).puntos || {}).porPersona || []).map((x) => [x.nombre.split(' ')[0], Math.round(x.pts * 10) / 10]));
     c(hp['Pablo Picone'] === 6 && hp['Juan Pérez'] === 8 && Math.abs(pp.Pablo - esp.con.Pablo) < 0.11 && Math.abs(pp.Juan - esp.con.Juan) < 0.11, 'cierre guardado: horasPersona Pablo 6 / Juan 8 y los puntos fijados iguales a puntosDeOrden · ' + JSON.stringify(hp) + ' · ' + JSON.stringify(pp));
-    const au = await o.evaluate((id) => { const e = window.__auditPuntos.explicarOrden(id, { persona: 'Pablo Picone' }); return JSON.stringify(e).slice(0, 4000); }, emitida.id);
+    const au = await o.evaluate((id) => { const e = window.__auditPuntos.explicarOrden(id, { persona: 'Pablo Picone' }); return JSON.stringify(e); }, emitida.id);
     c(/trabajó de 08:00 a 14:00 \(6 h, horario de la orden\)/.test(au), 'el auditor de puntos (v154) explica «trabajó de 08:00 a 14:00 (6 h, horario de la orden)» · ' + (au.match(/[^"]{0,80}trabajó de[^"]{0,60}/) || [au.slice(0, 120)])[0]);
     c(errsJs(L).length === 0, 'sin errores (cierre)' + errsJs(L).slice(0, 2).join(' | '));
     await L.ctx.close();
@@ -248,11 +248,11 @@ const W = 'https://ema-ia.mdiaz-60f.workers.dev';
     c(em && em.asignada.excavacion === 'Pablo Picone' && JSON.stringify(em.equipoTarea.montaje_prfv) === '["Pedro Gómez","Juan Pérez"]' && JSON.stringify(em.columnas.excavacion) === '["Col 3","Col 4"]', 'orden emitida: excavación de Pablo en Col 3 y 4, izaje de Pedro y Juan juntos (Mario no) · ' + (em ? JSON.stringify({ a: em.asignada, e: em.equipoTarea, c: em.columnas }) : 'no salió'));
     c(em && em.horaFin === '16:00' && JSON.stringify(em.horario) === JSON.stringify({ 'Pablo Picone': { desde: '08:00', hasta: '14:00' }, 'Pedro Gómez': { desde: '08:00', hasta: '14:00' } }), '… y el horario: Pablo y Pedro hasta 14:00, la orden hasta 16:00 · ' + (em ? em.horaFin + ' ' + JSON.stringify(em.horario) : ''));
     // reparto: «armar 10 luminarias, 5 Pablo y 5 Pedro»
-    const ped2 = await decir(o, sw, 'mañana armar 10 luminarias en Las Acacias, 5 Pablo y 5 Pedro', [usa('proponer_orden', { obra: 'Las Acacias', fecha: 'mañana', personas: ['Pablo Picone', 'Pedro Gómez'], tareas: [{ tarea: 'Armado de luminaria', cantidad: 10, reparto: [{ persona: 'Pablo Picone', cantidad: 5 }, { persona: 'Pedro Gómez', cantidad: 5 }] }] }), fin('Listo.')]);
+    const ped2 = await decir(o, sw, 'mañana armar 10 luminarias en Plaza del Sol, 5 Pablo y 5 Pedro', [usa('proponer_orden', { obra: 'Plaza del Sol', fecha: 'mañana', personas: ['Pablo Picone', 'Pedro Gómez'], tareas: [{ tarea: 'Armado de luminaria', cantidad: 10, reparto: [{ persona: 'Pablo Picone', cantidad: 5 }, { persona: 'Pedro Gómez', cantidad: 5 }] }] }), fin('Listo.')]);
     const t2 = await tarjeta(o);
     c(/✂ Pablo 5 · Pedro 5/.test(t2), 'tarjeta del reparto: «✂ Pablo 5 · Pedro 5» · ' + t2.slice(0, 200));
     await si(o);
-    const em2 = await o.evaluate(() => { const x = ordenesTrabajo.filter((y) => y.plazaId === 'p2' && (y.actividades || []).indexOf('armado_luminaria') >= 0).sort((a, b) => (b.creado || 0) - (a.creado || 0))[0]; return x ? JSON.parse(JSON.stringify(x)) : null; });
+    const em2 = await o.evaluate(() => { const x = ordenesTrabajo.filter((y) => y.plazaId === 'p3' && (y.actividades || []).indexOf('armado_luminaria') >= 0).sort((a, b) => (b.creado || 0) - (a.creado || 0))[0]; return x ? JSON.parse(JSON.stringify(x)) : null; });
     c(em2 && (em2.reparto.armado_luminaria || []).map((x) => x.nombre.split(' ')[0] + ' ' + x.cant).join() === 'Pablo 5,Pedro 5' && !(em2.asignada || {}).armado_luminaria, 'orden emitida con reparto {Pablo 5, Pedro 5} · ' + JSON.stringify(em2 && em2.reparto));
     // editar: Mario se va a las 12 y el izaje lo hacen Pedro y Mario
     const ped3 = await decir(o, sw, 'en esa orden Mario se va a las 12 y el izaje lo hacen Pedro y Mario', [usa('proponer_editar_orden', { otId: em.numero, cambios: { horario: { 'Mario Díaz': { hasta: '12' } }, tareas: [{ tarea: 'Montaje de columna PRFV', quienes: ['Pedro Gómez', 'Mario Díaz'] }] } }), fin('Listo.')]);

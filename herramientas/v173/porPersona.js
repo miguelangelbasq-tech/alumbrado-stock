@@ -251,7 +251,7 @@
     const g = gruposTxt(ot); if (g) h += `<div class="hp-of">🕐 <b>Horario:</b> ${esc(g)}</div>`;
     arr(ot.actividades).forEach((k) => {
       const P = intentar(() => progreso(ot, k), null); if (!P) return;
-      h += `<div class="rp173-of"><div class="rp173-t">✂ <b>${esc(labelDe(k))}</b> · cada uno lo suyo</div>${P.map((x) => `<div class="rp173-f${x.hechas >= x.cant && x.cant > 0 ? " ok" : ""}"><span>👤 ${esc(primer(x.nombre))}${x.nombres.length ? " <small>" + esc(rangoCols(x.nombres)) + "</small>" : ""}</span><b>${esc(fN(x.hechas))} de ${esc(fN(x.cant))}</b>${x.min > 0 ? `<em>${x.min} min</em>` : ""}${x.envio ? `<em>${x.envio === "no" ? "📤 «no se hizo»" : "📤 mandó"}</em>` : ""}</div>`).join("")}</div>`;
+      h += `<div class="rp173-of"><div class="rp173-t">✂ <b>${esc(labelDe(k))}</b> · cada uno lo suyo</div>${P.map((x) => `<div class="rp173-f${x.hechas >= x.cant && x.cant > 0 ? " ok" : ""}"><span>👤 ${esc(primer(x.nombre))}${x.nombres.length ? " <small>" + esc(rangoCols(x.nombres)) + "</small>" : ""}</span> <b>${esc(fN(x.hechas))} de ${esc(fN(x.cant))}</b> ${x.min > 0 ? `<em>${x.min} min</em> ` : ""}${x.envio ? `<em>${x.envio === "no" ? "📤 «no se hizo»" : "📤 mandó"}</em>` : ""}</div>`).join("")}</div>`;
     });
     return h;
   }

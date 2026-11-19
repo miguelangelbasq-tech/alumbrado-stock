@@ -316,6 +316,10 @@ def parte1(A, modo):
     A.p('En cada tarea por columna aparece una cajita con las columnas del cálculo agrupadas por tablero y circuito (también **PAT T1**, **Tablero N**, **Acometida**). Cada chip dice cómo está: hecha, en otra orden, fraguando o sin el paso anterior. Botones **Las que siguen** (las que faltan, en orden), **Todo el circuito** y **Ninguna**. La cantidad de la tarea pasa a ser las columnas elegidas, y la cuadrilla ve en el celu exactamente esas.')
     A.img('n165_7_orden_columnas', 'Llenar orden con las columnas del cálculo')
     A.p('Si no elegís (o la orden sale de la sugerida o del Asistente), lleva **las que siguen**.')
+    A.h(3, 'Quién hace cada tarea y hasta qué hora')
+    A.p('En el paso 2, debajo de la gente, **🕐 ¿Hasta qué hora está cada uno?**: si alguien se va antes (o entra más tarde), ponele **desde – hasta** o tocá **hasta 14:00**; **toda la jornada** lo deja con el horario de la orden. Se ve en el resumen, en «Quién hace qué», en la hoja impresa (Entrada / Salida), en el celu de cada uno («Tu horario hoy») y en el «📸 Avance». Al cerrar, las horas de cada uno ya vienen con su horario y los puntos se cuentan por rol × horas como siempre: el que se fue a las 14 cobra sus horas y lo que hizo, y los que siguieron cobran todas las suyas.')
+    A.p('En el paso 3, **¿Quién?** de cada tarea: una persona, **👥 Elegir quiénes** (la hacen juntos) o **✂ Repartir** (cada uno su parte, con **➗ Dividir en partes iguales**). Con **✂ Repartir** cada uno tiene su propia tarea: si son 10 luminarias, 5 y 5, a cada uno le aparecen 5 en el celu (y, si elegiste columnas, las suyas: Pablo Col 1 a 5, Pedro Col 6 a 10), sus fotos, su «N de 5», su «Voy a iniciar» y su tiempo; la oficina ve «Pablo 5 de 5 · 42 min · Pedro 3 de 5» y el cierre trae cuánto hizo cada uno.')
+    A.p('Lo mismo con el **Asistente**: «Pablo hace el pozo de Col 3 y 4, Pedro y Juan el izaje; Pablo y Pedro hasta las 2, los demás hasta las 16» arma la orden con cada tarea para quien la hace (no todos en todo), las columnas y el horario de cada uno; «armar 10 luminarias, 5 Pablo y 5 Pedro» la reparte. La tarjeta muestra quién hace cada tarea y las horas de cada uno antes del «Sí».')
     A.h(3, '«Esto ya está hecho»')
     A.p('La app sabe qué se hizo en cada columna (por las fotos con su columna, la hora de Modo obra, las marcas y los cierres). Si la orden pide algo que ya está hecho, lo dice debajo de la tarea y, al tocar **Emitir**, pregunta: «Esto ya está hecho en 2 de 3 (Col 4 y Col 5)» con **Cancelar**, **Dejar solo** lo que falta o **Emitir igual**.')
     A.img('n150_aviso_cartel_pc', 'El aviso antes de emitir algo ya hecho')
@@ -386,6 +390,7 @@ def parte1(A, modo):
     A.h(2, 'Cierre del día por voz')
     A.p('Para cerrar varias órdenes de una, dictando. En **Órdenes › Para revisar y cerrar** (o **Hoy**) tocá **✨ Cerrar el día por voz**. Se abre el Asistente con la franja «Cierre del día · N órdenes abiertas»: ya sabe lo que mandó cada cuadrilla, así que decís solo lo que cambia.')
     A.pasos(['Tocá el micrófono y decí, por ejemplo: «Los Álamos se hicieron 4 izajes, Juan 8 horas, Pedro 6, faltó un vínculo, lo pasamos al jueves. Las Acacias 35 metros de zanja».', 'El Asistente arma la tarjeta **¿Cierro así?** con cada orden: antes → después (cantidades, horas, lo que pasa a otro día).', 'Revisala y tocá **Sí, cerrar**. Cada orden se cierra igual que a mano.'])
+    A.p('Si alguien se fue antes, decilo así: «Pablo y Pedro hasta las 2»: el Asistente pone las horas de cada uno (desde el inicio de la orden o su horario) y los puntos salen por esas horas.')
     A.img('or_voz', 'El Asistente en «modo cierre», al lado del tablero')
     A.img('or_voz_tarjeta', 'La tarjeta del cierre por voz, para confirmar')
 

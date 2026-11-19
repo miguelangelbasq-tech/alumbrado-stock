@@ -111,6 +111,7 @@ async function abrir(op = {}) {
   if (!op.v170) await page.addInitScript(() => { window.__v170No = true; });   // v170: las pruebas viejas siguen con el motivo obligatorio al cambiar el avance a mano y sin la «✏ Carga rápida» ni «Tocar marca» en la grilla; v170:true lo prueba
   if (!op.v171) await page.addInitScript(() => { window.__v171No = true; });   // v171: las pruebas viejas siguen sin «＋ Otra foto» con nombre en Mis tareas (el «📷 Otra foto» de antes en las tomas); v171:true lo prueba
   if (!op.v172) await page.addInitScript(() => { window.__v172No = true; });   // v172: las pruebas viejas siguen con el «🎥 Video» flotante de la cámara y sin «Tablero …» (tocar otra vez el botón elegido para agregarle algo al nombre); v172:true lo prueba
+  if (!op.v173) await page.addInitScript(() => { window.__v173No = true; });   // v173: las pruebas viejas siguen sin el horario de cada uno en la orden ni «cada uno lo suyo» en las tareas repartidas; v173:true lo prueba
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];

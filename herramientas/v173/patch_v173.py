@@ -66,6 +66,10 @@ R('''    const m = sinMem ? null : S.mem[o.id + "|" + Lk(k)]; if (m && diaDe(m.t
     if (!l.length) return null;''')
 R('''  window.__colsElegidas = (obra, k) =>''', '''  window.__colsPoner = (k, l) => { if (off()) return; ST.obra = obraForm(); ST.cargado = true; ST.sel[k] = arr(l).slice(); pintarForm(); };   // v173: el asistente elige las columnas
   window.__colsElegidas = (obra, k) =>''')
+# ============================================================== tiempo de cada columna (v157): en una tarea repartida, «la anterior» es la de la misma persona
+R('''    Object.keys(P).forEach((q) => { const x = P[q]; if (!x || x.estado !== "si" || q === key) return; const f = tsFin(x, dia);''',
+  '''    const rp173 = !window.__v173No && yoN && window.__rp173 && window.__rp173.mias(o, k, yoN);   // v173
+    Object.keys(P).forEach((q) => { const x = P[q]; if (!x || x.estado !== "si" || q === key || (rp173 && x.por && nk(x.por) !== nk(yoN))) return; const f = tsFin(x, dia);''')
 # ============================================================== verificación (v150): por persona
 R('''return { k, label: labelDe(k), un: unDe(k), pedidas: ped, hechas, sinDet, si, no, noN, motivo: motivoT, dudas, est, mandada: env, conDetalle: us.length > 0, texto: partes.join(" · ") };''',
   '''return { k, label: labelDe(k), un: unDe(k), pedidas: ped, hechas, sinDet, si, no, noN, motivo: motivoT, dudas, est, mandada: env, conDetalle: us.length > 0, texto: partes.join(" · ") + (window.__rp173 ? window.__rp173.verTxt(o, k) : "") };''')
@@ -81,8 +85,9 @@ R('''    s += `<tr><td>${escHtml(h.nombre)}</td><td>${escHtml(h.rol)}</td><td>&n
 R('''<b>Salen ${esc(o.horaInicio)}${o.horaFin ? " · hasta " + esc(o.horaFin) : ""}</b>''',
   '''<b>Salen ${esc(o.horaInicio)}${o.horaFin ? " · hasta " + esc(o.horaFin) : ""}${window.__hor173 ? esc(window.__hor173.miTxt(o, per())) : ""}</b>''')
 # ============================================================== auditor de puntos (v154): «trabajó de 08:00 a 14:00 (horario de la orden)»
-R('''      const add = (j, p, regla, como, yo) => { pp[j].pts += p; pp[j].partes.push({ k: r.k, label: r.label, pts: p, regla, como, yo: yo || como }); };''',
-  '''      const add = (j, p, regla, como, yo) => { const hT = window.__hor173 && !window.__v173No ? window.__hor173.auditTxt(o, pp[j].nombre) : ""; pp[j].pts += p; pp[j].partes.push({ k: r.k, label: r.label, pts: p, regla, como: como + hT, yo: (yo || como) + hT }); };''')
+R('''    out.resto = restos.map((x) => ({ k: x.r.k, pts: x.p, por: x.por })); out.personas = pp;''',
+  '''    out.resto = restos.map((x) => ({ k: x.r.k, pts: x.p, por: x.por })); out.personas = pp;
+    if (window.__hor173 && !window.__v173No) pp.forEach((x) => { const hT = window.__hor173.auditTxt(o, x.nombre); if (hT) { x.horario = hT.replace(/^ · /, ""); x.partes.forEach((y) => { y.como = (y.como || "") + hT; y.yo = (y.yo || "") + hT; }); } });   // v173''')
 # ============================================================== asistente (código dormido)
 R('''    const quien = {}; d.tareas.forEach((t) => { if (t.quien) quien[t.k] = t.quien; });
     try { window.__restaurarQuien && window.__restaurarQuien(quien); } catch (e) { }''', '''    const quien = {}; d.tareas.forEach((t) => { if (t.quien) quien[t.k] = t.quien; });
@@ -102,6 +107,7 @@ R('<script id="revisarAppDiag">', MOD + '<script id="revisarAppDiag">')
 
 # sello de versión (las dos marcas)
 ahora = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=-3))).strftime('%Y-%m-%d %H:%M')
+if os.environ.get('SELLO'): ahora = os.environ['SELLO']   # la fecha/hora del sello a mano (la v173 se selló con la fecha del 19/11 que pidió el coordinador)
 m = re.search(r'· v (\d{4}-\d\d-\d\d \d\d:\d\d · [0-9a-f]{6})<', t); assert m
 mm = re.search(r'<meta name="ema-version" content="([^"]+)">', t); assert mm and mm.group(1) == m.group(1)
 h6 = hashlib.sha256(t.encode()).hexdigest()[:6]

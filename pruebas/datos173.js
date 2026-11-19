@@ -20,6 +20,7 @@ function datos173(op = {}) {
   const cols = (n) => Array.from({ length: n }, (_, i) => 'Col ' + (i + 1));
   d.db.avanceObras = {
     p1: { nombre: 'Plaza Los Álamos', plazaNombre: 'Plaza Los Álamos', obraId: '4031', direccion: 'Los Álamos y Pje. 12', barrio: 'B° Villa Rivera', tipo: 'plaza', lat: -31.4271, lng: -64.1889, creado: ahora, valorItems: [{ id: 1, itemPliego: '5', cantidad: 10, cantidadAvanzada: 0 }], puntos: cols(10) },
+    p3: { nombre: 'Plaza del Sol', plazaNombre: 'Plaza del Sol', obraId: '4050', tipo: 'plaza', lat: -31.41, lng: -64.21, creado: ahora, valorItems: [{ id: 1, itemPliego: '5', cantidad: 12, cantidadAvanzada: 0 }], puntos: cols(12) },
     p2: { nombre: 'Plaza Las Acacias', plazaNombre: 'Plaza Las Acacias', obraId: '4040', tipo: 'plaza', lat: -31.40, lng: -64.20, creado: ahora, valorItems: [{ id: 1, itemPliego: '5', cantidad: 8, cantidadAvanzada: 0 }], puntos: cols(8) }
   };
   const per = [{ nombre: 'Pablo Picone', rol: 'Oficial' }, { nombre: 'Pedro Gómez', rol: 'Ayudante' }], pn = ['pablo picone', 'pedro gomez'];
