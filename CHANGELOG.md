@@ -41,7 +41,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Sello:** `2026-11-19 13:20 · bedb22` · ORIGINAL `b7e43ad66324dd30ce6455d8cc74a75ba833574bef07e0d304a37a5673f82a20` · index `da6ffe26ebbfbf50a0a23e7bf292e319851957879778d7100311d6276861c290`.
 
-## v184 — 19/11/2026 (armada, sin publicar) · 💬 Chat interno con pedidos que arma el asistente
+## v184 — 19/11/2026 (publicada en GitHub 19/11; reglas v184 por publicar) · 💬 Chat interno con pedidos que arma el asistente
 **Pedido (Ángel, 19/11):** «otra cosa para agregar un chat interno — oficina y administrador registran los que pueden entrar — sería algo como para que los de cuadrilla pidan cosas como "faltó hacerme esta tarea, agregarme esto" me entendés — y la IA me cree la tarea y me diga que la apruebe a mí y a la oficina».
 
 **Qué cambia (módulo `chat184` + `chat184Css`, bandera `__v184No`):**
