@@ -16,7 +16,7 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Pruebas:** ver abajo (se completa al terminar la batería).
 
-## v174b — 19/11/2026 (armada, sin publicar) · «🩹 Recuperar» encuentra a la gente con los datos reales
+## v174b — 19/11/2026 (publicada en GitHub 19/11) · «🩹 Recuperar» encuentra a la gente con los datos reales
 **Pedido (Ángel, 19/11):** con la v174 publicada, «🩹 Recuperar personal y vehículos» decía que no había nada para recuperar, pero faltan JAVIER OLARIAGA, Ivan Exequiel Pereyra, PETITTI ISMAEL, Bruno Federico Cherino y Vizgarra Alfredo (están en las órdenes de esta semana) y no hay vehículos.
 
 **Qué estaba mal (comprobado con la v174, `t_v174` grupo 7: solo encontraba a Juan y Pedro):** la búsqueda usaba solo lo que estaba en memoria y solo `personal[]` como objetos con `nombre`. Se perdía: `personal[]` como texto (órdenes viejas, «JAVIER OLARIAGA»), con otras claves (`persona`, `funcion`), la gente que solo está en `personalNombres` (claves normalizadas), en `reparto` / `asignada` / `equipoTarea` / `equipos` / `horario` / el cierre, las órdenes anuladas (unidas en otra), el vehículo que solo está en `vehiculoId`, y lo que todavía no había cargado (las quincenas cerradas se escuchan recién al abrir Por quincena; las órdenes pueden tardar). Si la hoja se abría antes de que cargaran las órdenes, daba 0 y no se volvía a revisar.
