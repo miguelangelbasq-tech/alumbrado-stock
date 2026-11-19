@@ -19,9 +19,9 @@ Autor: Miguel Ángel Díaz © 2026
 
 **Cómo se arma:** `herramientas/v182/patch_v182.py` sobre el ORIGINAL 183 (`0650f1a4…`; los mismos reemplazos andan sobre la 178, 179 y 180) (`datosSeguros.js` / `.css` antes de `revisarAppDiag`). Sin reglas nuevas.
 
-**Pruebas:** PRUEBAS182
+**Pruebas:** `t_v182` PC 45/45 · celu 45/45 · `REGLAS=1` 45/45 · 45/45 (el grupo 2 se corrigió en la prueba —la cabecera de la tabla sale en mayúsculas por CSS— y se repitió: 9/9 · 9/9); con `ANTES=1` contra la v178 publicada falla en cada grupo (la caché vacía guarda, el respaldo sin archivadas ni movimientos, la restauración duplica obras y pisa el catálogo, `fbClearMovimientos` borra, importar reemplaza, la tarjeta se queda con la propuesta, ⚙ Límites pisa con lo de fábrica, los teléfonos sin pregunta, `avanceHist` pisado, reinicios pisados). `t_v174` 57/57 · 57/57, `t_v176` 42/42 · 42/42, `t_v178` 86/86 · 86/86, `t_v145` 82/82 · 82/82, `t_v142` 49/49 · 49/49, `t_v141` 44/44 · 44/44, `t_circuito` 16/16 · 16/16 (PC · celu), todo OK sin cambiar las pruebas viejas.
 
-**Sello:** SELLO182
+**Sello:** `2026-11-19 13:20 · bedb22` · ORIGINAL `b7e43ad66324dd30ce6455d8cc74a75ba833574bef07e0d304a37a5673f82a20` · index `da6ffe26ebbfbf50a0a23e7bf292e319851957879778d7100311d6276861c290`.
 
 ## v183 — 19/11/2026 (publicada en GitHub 19/11) · Calculadora: cable 3×1,5, ganancia de 6 m y luminarias de distinta potencia
 **Pedido (Ángel, 19/11):** «la calculadora modifiquemos 4 metros para cables 3x1,5 brazo de 0.4 m columnas de 7 metros ese cable es para el artefacto y la ganancia de abajo hacia arriba es de 6 metro para columna de 10 metros también 6 metros de abajo hacia arriba y de arriba hacia abajo o sea el 3x1.5 son 7,5 metros con brazo de un metro y lo que nos faltó agregar es que a veces usamos en la misma obra luminarias de distinta potencia agrega eso».
