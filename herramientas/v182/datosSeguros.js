@@ -272,7 +272,7 @@
     op = op || {};
     if (!window.__personalCargado) throw err("todavía no llegaron los datos de la base; esperá unos segundos y probá de nuevo", "Todavía no llegaron los datos de la base: esperá unos segundos y probá de nuevo. No se guardó nada.");
     if (+op.desde > 0 && window.__dsPersonalLlego && +op.desde < window.__dsPersonalLlego) {
-      try { op.repintar && op.repintar(); } catch (e) { }
+      setTimeout(() => { try { op.repintar && op.repintar(); } catch (e) { } const m = op.msgId && document.getElementById(op.msgId); if (m) m.textContent = "⚠ Llegaron los datos de la base después de abrir esto: se volvieron a cargar. Revisá y guardá de nuevo. No se guardó nada."; }, 0);
       throw err("llegaron los datos de la base después de abrir esto: se volvieron a cargar, revisá y guardá de nuevo", "Llegaron los datos de la base después de abrir esto: se volvieron a cargar. Revisá y guardá de nuevo. No se guardó nada.");
     }
     let p = patch;

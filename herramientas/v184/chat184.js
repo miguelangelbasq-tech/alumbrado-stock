@@ -189,7 +189,7 @@
   const URL_IA = () => window.__iaUrl || "https://ema-ia.mdiaz-60f.workers.dev/ia";
   function misOts() {
     const c = nk(yo().personaClave || yo().persona || "");
-    const l = intentar(() => (window.__cuadrilla && window.__cuadrilla.esCrew() ? window.__cuadrilla.misOts() : null), null) || V.ots();
+    const l = V.ots().concat(arr(intentar(() => (window.__cuadrilla && window.__cuadrilla.esCrew() ? window.__cuadrilla.misOts() : null), null))).filter((o, i, L) => o && L.findIndex((x) => x && String(x.id) === String(o.id)) === i);   // las cerradas también (en el modo liviano, V.ots() ya son solo las suyas)
     const desde = iso(new Date(Date.now() - 21 * 864e5));
     return arr(l).filter((o) => o && o.estado !== "Anulada" && c && arr(o.personalNombres).map(nk).indexOf(c) >= 0 && String(o.fecha || "") >= desde)
       .sort((a, b) => String(b.fecha || "").localeCompare(String(a.fecha || ""))).slice(0, 12);

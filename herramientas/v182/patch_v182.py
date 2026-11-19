@@ -71,7 +71,7 @@ R('''aVeces: arr(e.aVeces).map((n) => ({ pedido: n, nombre: n, estado: "ok" })),
 DSP = '(window.__dsPersonalSet || ((x) => firebase.firestore().collection("configEquipo").doc("personal").set(x, { merge: true })))'
 R('''    if (verMes) refrescarGasto();   // v141''', '''    if (verMes) refrescarGasto();   // v141
     c.dataset.dsTs = String(Date.now());   // v182: cuándo se armó (si la base llega después, se vuelve a cargar antes de guardar)''')
-DS_OP = '{ desde: +(((document.getElementById("iaCfg") || {}).dataset || {}).dsTs || 0), repintar: pintarCfg, accion: "%s" }'
+DS_OP = '{ desde: +(((document.getElementById("iaCfg") || {}).dataset || {}).dsTs || 0), repintar: pintarCfg, msgId: "iaCfgMsg", accion: "%s" }'
 R('''      await firebase.firestore().collection("configEquipo").doc("personal").set({ asistente: { roles, ts: Date.now(), por: String((window.__fbUser || {}).email || "") } }, { merge: true });''',
   '''      await %s({ asistente: { roles, ts: Date.now(), por: String((window.__fbUser || {}).email || "") } }, %s);   // v182''' % (DSP, DS_OP % 'asistente_roles'))
 R('''      await firebase.firestore().collection("configEquipo").doc("personal").set({ asistente: Object.assign(cur, { modelo: a, modeloSupervisor: s, tsModelo: Date.now(), porModelo: String((window.__fbUser || {}).email || "") }) }, { merge: true });''',
