@@ -2,6 +2,25 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v179 — 19/11/2026 (armada, sin publicar) · Personal del equipo por sector
+**Pedido (Ángel, 19/11):** «dentro de Personal del equipo tiene que tener subíndices que separen a Ilícitos, Alumbrado, Civil, Contratista, Oficina, Dirección y Pañol».
+
+**Qué cambia (módulo `sectores179` + reemplazos chicos, bandera `__v179No`):**
+- **Producción › Personal del equipo:** pestañas Todos · Alumbrado · Civil · Ilícitos · Contratista · Oficina · Dirección · Pañol con la cantidad de cada una; filtran la tabla (se esconden filas: «Guardar» lee a todos, nadie se pierde por estar en otra pestaña); «＋ Agregar persona» trae el sector de la pestaña; la última pestaña queda en el aparato (`ema.per.sector`). En el celu la fila de pestañas se corre adentro, sin scroll de costado.
+- **El «Sector» de cada persona** suma Civil, Contratista, Oficina, Dirección y Pañol (claves `civil`, `contratista`, `oficina`, `direccion`, `panol` en el campo de siempre `nomina[].sector`; `alumbrado` e `ilicitos` igual; sin sector = Alumbrado). Se guarda por la guardia de la v174 (copia en `respaldos[]`).
+- **Civil** = sector Civil + los de Alumbrado marcados «equipo civil» (v143), con la marca «equipo civil». Administración tiene «Pasar los de equipo civil al sector Civil (N)» con «Sí» (guardia v174, auditoría `personal_sector`). La app no cambia nada sola.
+- **Gente sin tarea (v145) y orden sugerida (v143):** solo los sectores de obra (Alumbrado, Civil, Ilícitos); Contratista, Oficina, Dirección y Pañol no se reclaman ni entran como libres. Civil cuenta como equipo civil.
+- **Pañol:** el vale sigue con dos sectores; Ilícitos va como Ilícitos y todos los demás (también Civil y Contratista) como Alumbrado (`sectorDePersona` sin cambios). «Por sector» lo dice.
+- **Llenar orden:** el sector al lado del nombre en «Tocá para sumar o sacar a alguien» (menos Alumbrado). La lista para elegir el nombre también lo dice.
+- **Asistente (v175):** `nomina` con `sector` para filtrar (Civil con los de equipo civil) y la cuenta `porSector`; `proponer_personal` entiende «obra civil», «pañol», «contratado», «oficina», «dirección»…; un sector que no existe lo dice.
+- **Sin cambios:** puntos y producción, Gastos / mano de obra (usa el valor hora, no el sector).
+
+**Cómo se arma:** `herramientas/v179/patch_v179.py` sobre el ORIGINAL 178 (`13d0ec8e…`): el módulo `sectores179` antes de `revisarAppDiag` + reemplazos chicos. Sin reglas nuevas.
+
+**Pruebas:** `t_v179` (nueva, `datos179.js`) PC 45/45 · celu 45/45 · `REGLAS=1` 45/45 · 45/45. `t_v143` 78/78 · celu 77/78 (la carrera conocida de `vehiculoPersona` del asistente, §12; falla igual en la v177/v178), `t_v145` 82/82 · 82/82, `t_v174` 57/57 (al repetirla sola; la primera vez 56/57 por tiempos) · 57/57, `t_v175` 47/47 · 47/47, `t_v176` 42/42 · 42/42, `t_circuito` 16/16 · 16/16.
+
+**Sello:** `2026-11-19 11:20 · d490de` · ORIGINAL `05dccc61b06310f2a95773b996e148e6dc24afebfb81d9d9d47f40f3e78e3fe9` · index `c28c9fb27567d858d3e742e1606894c7e148932668906d699c25e3bde07b5923`.
+
 ## v178 — 19/11/2026 (publicada en GitHub 19/11) · El asistente ve TODO y hace TODO
 **Pedido (Ángel, 19/11):** «la IA de la app tiene que saber y ver todo lo de la app, absolutamente todo; no puede decirme que no ve; tiene que poder ver todo, saber todo y poder hacer todo. Revisá eso.»
 

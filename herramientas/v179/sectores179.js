@@ -84,7 +84,7 @@
     const h = `<div class="subtabs ps179-tabs" role="tablist" aria-label="Sector">${TABS.map((t) => `<button type="button" class="subtab${t[0] === tab ? " activo" : ""}" role="tab" aria-selected="${t[0] === tab}" data-ps179="${t[0]}">${esc(t[1])} <span class="ps179-n">${c[t[0]]}</span></button>`).join("")}</div>`
       + (tab === "civil" ? `<div class="hint ps179-nota">Civil: los del sector Civil y los de Alumbrado marcados «equipo civil».${pas.length ? ` <button type="button" class="btn-ghost ps179-pasar" data-ps179p="1">Pasar los de equipo civil al sector Civil (${pas.length})</button>` : ""}</div>` : "")
       + `<div class="ps179-msg" id="ps179Msg" role="status">${esc(msg)}</div>`;
-    if (bar.__h !== h) { bar.__h = h; bar.innerHTML = h; const a = bar.querySelector(".subtab.activo"); if (a && a.scrollIntoView && !soloCuentas) intentar(() => { const t = a.parentElement; t.scrollLeft = Math.max(0, a.offsetLeft - 20); }); }
+    if (bar.__h !== h) { bar.__h = h; bar.innerHTML = h; const a = bar.querySelector(".subtab.activo"); if (a && a.scrollIntoView && !soloCuentas) intentar(() => { const t = a.parentElement, ra = a.getBoundingClientRect(), rt = t.getBoundingClientRect(); if (ra.left < rt.left + 8 || ra.right > rt.right - 8) t.scrollLeft = Math.max(0, t.scrollLeft + ra.left - rt.left - 24); }); }
     if (soloCuentas) return;
     l.forEach((f) => { const ver = !f.nom || enTab(tab, f.sec, f.civ); f.tr.classList.toggle("ps179-off", !ver); });
   }
