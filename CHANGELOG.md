@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v185 — 19/11/2026 (armada, sin publicar) · La Calculadora por rubros (opción A)
+## v185 — 19/11/2026 (publicada en GitHub 19/11) · La Calculadora por rubros (opción A)
 **Pedido (Ángel, 19/11):** «VAMOS CON LA A» — la Calculadora (plaza y barrio) con subíndices por rubro, como la maqueta A.
 
 **Qué cambia (módulo `calc185` + `calc185Css`, bandera `__v185No`; no se toca nada del cálculo):**
