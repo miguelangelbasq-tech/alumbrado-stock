@@ -2,8 +2,8 @@
 Eléctrico · Civil · PAT · Resultado (barrio: Obra · Luminarias y postes · Red aérea · Alimentación y tablero · PAT de red ·
 Resultado) con su puntito, las tarjetas de siempre marcadas por rubro (no se rearman; el esquema de tierra se mueve a PAT),
 la barra de abajo (materiales, módulos K, avisos, «Calcular», ⚡ Cálculos rápidos), «Lo que sale de este rubro» y el
-Resultado por rubro con «✎ Cambiar». Bandera __v185No. Solo el módulo `calc185` antes de revisarAppDiag (+ sello): anda sobre
-la 183 y sobre las que se arman encima (181, 182, 184) sin tocar nada de ellas.
+Resultado por rubro con «✎ Cambiar». Bandera __v185No. Solo el módulo `calc185` antes de revisarAppDiag (+ sello): BASE_SHA = el ORIGINAL 182
+(publicado, con la 180 y la 183); anda igual sobre la 183 y las que se arman encima (181, 184) con --otra-base.
 Uso: python3 patch_v185.py ORIGINAL_ENTRADA.html SALIDA.html [--otra-base]"""
 import sys, os, re, hashlib, datetime
 SRC = os.path.dirname(os.path.abspath(__file__))

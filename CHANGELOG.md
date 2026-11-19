@@ -2,6 +2,24 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v185 — 19/11/2026 (armada, sin publicar) · La Calculadora por rubros (opción A)
+**Pedido (Ángel, 19/11):** «VAMOS CON LA A» — la Calculadora (plaza y barrio) con subíndices por rubro, como la maqueta A.
+
+**Qué cambia (módulo `calc185` + `calc185Css`, bandera `__v185No`; no se toca nada del cálculo):**
+- **Pestañas por rubro** arriba de la Calculadora: plaza **Obra · Columnas · Luminarias · Eléctrico · Civil · PAT · Resultado**; barrio **Obra · Luminarias y postes · Red aérea · Alimentación y tablero · PAT de red · Resultado**. Cada una con su **puntito**: verde = completo, naranja = falta algo (obra sin nombre, columnas en 0, vínculos en 0, cableado sin circuitos, civil sin bases ni zanja, barrio sin luminarias) o el último cálculo dejó un aviso de ese rubro; sin puntito = todas sus «Incluir esta tarea» apagadas. En el celu la fila de pestañas se desliza adentro suyo (sin scroll de costado), 64 px de alto; en la compu, las 7 en una fila.
+- **Los campos de siempre**: las tarjetas no se rearman, se marcan con su rubro y se muestran las de la pestaña (mismos id, mismo `calcular()`, `restaurarFormulario`, `__calcEditar`, «Editar» del historial, el asistente `proponer_calculo`, las potencias de la v183, las validaciones y el acordeón del celu: al entrar a una pestaña sus tarjetas se abren). Obra = Datos de la obra + «¿Quién pone el material?»; Columnas = nuevas + existentes + retiros; Luminarias = vínculos y luminarias (con las potencias); Eléctrico = cableado + tablero y acometida + elementos del tablero + empalmes; Civil = obra civil + cruce; **PAT = tarjeta nueva con el esquema de conexión a tierra movido ahí** (el mismo campo) y qué sale solo. Plaza / Barrio (el mismo selector de siempre) va arriba de las pestañas; Historial y Material por obra siguen como subíndices arriba. «‹ Columnas · Eléctrico ›» al pie de cada pestaña.
+- **Barra de abajo** (la `#calcFlotante` de siempre, ahora también en la compu): materiales · ≈ módulos K (el itemizado que da el cómputo, como «📥 Del cálculo de la obra»; barrio: «sin itemizado de barrio todavía») · avisos · «Cambió algo desde el último cálculo» · **⚡ Cálculos rápidos** · **Calcular** (el mismo; después va al Resultado).
+- **Compu: «Lo que sale de este rubro»** al lado de cada pestaña (del último cálculo; en el celu, abajo en corto «y N más ›»), con sus avisos y las notas del cómputo plegadas.
+- **Resultado:** materiales, módulos K y avisos; «Por rubro» (una tarjeta por rubro con su tabla y «✎ Cambiar» que lleva a la pestaña) · «Hoja completa · itemizado · pañol» (el resultado de siempre, con imprimir, registrar y el pañol) · «Avisos (N)». «Ver» del historial y todo lo que lleva al resultado abren la hoja completa; lo que lleva a un campo (foco, «ir a la sección», «Editar») abre su pestaña.
+
+**A confirmar:** qué cuenta como «falta algo» en cada puntito; que los avisos del número sean solo los avisos del cálculo (las notas ⚠ que vienen siempre —normas, criterios— van plegadas en cada rubro); en qué pestaña va cada tarjeta (retiros en Columnas, empalmes en Eléctrico, «¿Quién pone el material?» en Obra; barrio: retiros en Obra, PAT de las unidades en PAT de red); el módulo K de la barra cuenta todo el itemizado previsto (también provisiones).
+
+**Cómo se arma:** `herramientas/v185/patch_v185.py` sobre el ORIGINAL 182 publicado (`b7e43ad6…`, con la 180 y la 183) (solo el módulo antes de `revisarAppDiag` y el sello: anda igual sobre la 181, 182 y 184). Sin reglas nuevas.
+
+**Pruebas:** `t_v185` PC 57/57 · celu 56/56 · `REGLAS=1` 57/57 · 56/56; `t_v183` 35/35 · 35/35, `t_v066` 13/13 · 13/13, `t_v067` 21/21 · 21/21, `t_v101` 10/10 · 11/11, `t_v102a`–`e` OK (10/10 · 11/11, 8/8, 11/11 · 12/12, 8/8, 6/6), `t_v103` 7/7 · 7/7, `t_v108b` 11/11 · 11/11, `t_circuito` 16/16 · 16/16 (PC · celu), todo OK (las viejas corren con `__v185No`: no hubo que cambiar ninguna).
+
+**Sello:** `2026-11-19 13:59 · 82476b` · ORIGINAL `a118faaa05490bcf3836e886ca98b5aad426ca89cbda154e1f3c40b56184a41b` · index `171dcc043301bc50edb8c0add7b6b9e24053f83cf13b4d93b06d69bb26079b10`.
+
 ## v182 — 19/11/2026 (publicada en GitHub 19/11) · Datos seguros: los agujeros de la auditoría del 19/11
 **Pedido:** arreglar lo que encontró la auditoría del 19/11 sobre la v176 («¿pasó algo más?», `INFORME.md`): lugares donde se podían pisar o borrar datos de verdad.
 
