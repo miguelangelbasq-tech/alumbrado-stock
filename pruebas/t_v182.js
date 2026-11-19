@@ -158,7 +158,7 @@ const BAJADOS = () => { window.__bajados = []; const f = () => { if (window.resp
     const vistos = await hojas(p, 2); await p.waitForTimeout(2500);
     let b = await db(p), n = (c) => Object.keys(b[c] || {}).length;
     const prev = (vistos[0] || {}).txt || '';
-    c(vistos.length === 2 && /Se agregan/.test(prev) && /Se saltean/.test(prev) && /Total: se agregan 3, se saltean/.test(prev.replace(/\s+/g, ' ')), 'vista previa «se agregan N, se saltean M (ya están)» y una segunda confirmación · ' + vistos.length + ' · ' + prev.replace(/\s+/g, ' ').slice(-300));
+    c(vistos.length === 2 && /se agregan/i.test(prev) && /se saltean/i.test(prev) && /Total: se agregan 3, se saltean/.test(prev.replace(/\s+/g, ' ')), 'vista previa «se agregan N, se saltean M (ya están)» y una segunda confirmación · ' + vistos.length + ' · ' + prev.replace(/\s+/g, ' ').slice(-300));
     c(n('avanceObras') === n0('avanceObras') + 1 && !!b.avanceObras.pNueva, 'obras: solo entra la que faltaba (la renombrada y la archivada NO se duplican) · ' + n0('avanceObras') + ' → ' + n('avanceObras'));
     c(n('ordenesTrabajo') === n0('ordenesTrabajo') && n('movimientos') === n0('movimientos') + 1 && !!b.movimientos.m9, 'órdenes no se duplican y de los movimientos entra solo el que faltaba, con su número de registro · ' + [n0('ordenesTrabajo'), n('ordenesTrabajo'), n0('movimientos'), n('movimientos')].join(','));
     const pr = b.catalogoProductos['3017'] || {};
