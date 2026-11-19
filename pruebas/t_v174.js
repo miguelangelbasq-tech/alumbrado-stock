@@ -110,6 +110,7 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.split(',').indexOf(Str
       c(b.vehiculos.length === 3 && b.respaldos && b.respaldos.length === 1 && b.respaldos[0].nomina.length === 10, '3 vehículos y respaldo de cómo estaba (10)');
       const au = await p.evaluate(() => Object.values(JSON.parse(localStorage.getItem('stub.db')).auditoria || {}).filter((x) => x.accion === 'personal_recuperar'));
       c(au.length === 1, 'auditoría personal_recuperar');
+      c(/✓ Guardado: \d+ personas, 3 vehículos/.test(await tx(p, '#psMsg')), 'lo lee de vuelta de la base: ' + (await tx(p, '#psMsg')).slice(0, 60));
       c(await sinScroll(p), 'sin scroll de costado');
       await A.browser.close(); browser = null;
     }
@@ -137,6 +138,21 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.split(',').indexOf(Str
       await p.evaluate(() => { window.__psRec.leerArchivo(JSON.stringify({ formato: 'respaldo-completo-v2', configEquipo: { personal: { nomina: [{ nombre: 'Persona Del Archivo', rol: 'Oficial', legajo: '1' }], vehiculos: [] } } }), 'respaldo_completo_2026-11-10.json'); });
       const A5 = await p.evaluate(() => window.__psRec.analizar());
       c(A5.faltan.some((x) => x.nombre === 'Persona Del Archivo' && /archivo de respaldo/.test(x.datos.rol.fuente)), 'un archivo de respaldo suma lo que trae');
+      await A.browser.close(); browser = null;
+    }
+    if (SOLO(6) && !ANTES) {
+      const d = datos174(); d.db.configEquipo.baremo = Object.assign({}, d.db.configEquipo.baremo || {}, { tareasPropias: [{ id: 'propia_x1', label: 'Pintar bases', un: 'columna', pts: 1 }] });
+      const A = await sesion('admin', d, { demora: { 'configEquipo/baremo': 9000 }, espera: 1500 }), p = A.page;
+      const e1 = await p.evaluate(async () => { try { await window.fbBaremoGuardar({ tareasPropias: [] }); return 'guardó'; } catch (e) { return e.code; } });
+      c(e1 === 'ps-cargando', 'baremo: no se guarda antes de que llegue de la base (' + e1 + ')');
+      await p.waitForTimeout(9500);
+      const pr = p.evaluate(async () => { try { await window.fbBaremoGuardar({ tareasPropias: [] }); return 'guardó'; } catch (e) { return e.code; } });
+      await p.waitForTimeout(700);
+      c(/Pintar bases/.test(await tx(p, '#psConf')), 'baremo: sacar una tarea propia pide «Sí»');
+      await p.click('#psConf [data-psc="si"]'); c((await pr) === 'guardó', 'Sí: se guarda');
+      await p.waitForTimeout(500);
+      const b = await p.evaluate(() => JSON.parse(localStorage.getItem('stub.db')).configEquipo.baremo);
+      c(Array.isArray(b.respaldos) && b.respaldos[0].campos.tareasPropias[0].label === 'Pintar bases', 'baremo.respaldos[] con lo que había antes');
       await A.browser.close(); browser = null;
     }
     if (SOLO(5) && !ANTES) {

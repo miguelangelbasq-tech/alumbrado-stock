@@ -44,6 +44,28 @@ R('''    await firebase.firestore().collection("configEquipo").doc("personal").s
 R('''    else if (d.coleccion === "configEquipo") await db.collection("configEquipo").doc(d.doc).update(p);''',
   '''    else if (d.coleccion === "configEquipo") await db.collection("configEquipo").doc(d.doc).update(d.doc === "personal" && window.__psGuardia ? await window.__psGuardia(p) : p);   // v174''')
 
+# 6) los otros documentos de configuración: «ya llegó» + datos, y sus guardados por la guardia
+R('''a.collection("configEquipo").doc("baremo").onSnapshot((o) => {
+      window.__baremoNube''', '''a.collection("configEquipo").doc("baremo").onSnapshot((o) => {
+      (window.__cfgCargado = window.__cfgCargado || {}).baremo = true;   // v174
+      window.__baremoNube''')
+R('''a.collection("configEquipo").doc("precios").onSnapshot((o) => {
+      window.__preciosNube''', '''a.collection("configEquipo").doc("precios").onSnapshot((o) => {
+      (window.__cfgCargado = window.__cfgCargado || {}).precios = true;   // v174
+      window.__preciosNube''')
+R('''      firebase.firestore().collection("configEquipo").doc("cuadrillas").onSnapshot((e) => {
+        W = e.exists''', '''      firebase.firestore().collection("configEquipo").doc("cuadrillas").onSnapshot((e) => {
+        (window.__cfgCargado = window.__cfgCargado || {}).cuadrillas = true, (window.__cfgDatos = window.__cfgDatos || {}).cuadrillas = e.exists ? e.data() : {};   // v174
+        W = e.exists''')
+R('''        const d = s.exists ? s.data() : {}, firma = JSON.stringify(d || {});''', '''        const d = s.exists ? s.data() : {}, firma = JSON.stringify(d || {});
+        (window.__cfgCargado = window.__cfgCargado || {}).ubicacion = true, (window.__cfgDatos = window.__cfgDatos || {}).ubicacion = d;   // v174''')
+R('''        try { await db().collection("configEquipo").doc("ubicacion").set(nuevo); msg.textContent''', '''        try { await db().collection("configEquipo").doc("ubicacion").set(window.__cfgGuardia ? await window.__cfgGuardia("ubicacion", nuevo) : nuevo); msg.textContent''')
+R('''    await firebase.firestore().collection("configEquipo").doc("precios").set({ gastosRef: nuevo }, { merge: true });''', '''    const pgr = { gastosRef: nuevo };
+    await firebase.firestore().collection("configEquipo").doc("precios").set(window.__cfgGuardia ? await window.__cfgGuardia("precios", pgr) : pgr, { merge: true });   // v174''')
+R('''        await firebase.firestore().collection("configEquipo").doc("personal").set({ contactos: cts, seguridadCuadrilla: f.seg, herrPorTarea: f.ht, cuadrillaDiaTs: Date.now(), cuadrillaDiaPor: miEmail() }, { merge: true });''', '''        const pcd = { contactos: cts, seguridadCuadrilla: f.seg, herrPorTarea: f.ht, cuadrillaDiaTs: Date.now(), cuadrillaDiaPor: miEmail() };
+        await firebase.firestore().collection("configEquipo").doc("personal").set(window.__cfgGuardia ? await window.__cfgGuardia("personal", pcd) : pcd, { merge: true });   // v174''')
+R('''.doc(d.doc).update(d.doc === "personal" && window.__psGuardia ? await window.__psGuardia(p) : p);   // v174''', '''.doc(d.doc).update(d.doc === "personal" && window.__psGuardia ? await window.__psGuardia(p) : window.__cfgGuardia && /^(baremo|precios|cuadrillas|ubicacion)$/.test(d.doc) ? await window.__cfgGuardia(d.doc, p) : p);   // v174''')
+
 MOD = '<style id="personalSeguroCss">\n' + CSS + '</style>\n<script id="personalSeguro">\n' + JS + '</script>\n'
 R('<script id="revisarAppDiag">', MOD + '<script id="revisarAppDiag">')
 

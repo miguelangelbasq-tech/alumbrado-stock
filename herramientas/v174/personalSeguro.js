@@ -43,13 +43,59 @@
     });
   }
 
+  // ---------- la guardia de todos los documentos de configuración (baremo, precios, cuadrillas, personal, ubicacion)
+  const CFG = window.__cfgCargado = window.__cfgCargado || {};
+  const DAT = window.__cfgDatos = window.__cfgDatos || {};
+  const NOMBRE = { personal: "Personal del equipo", baremo: "Cuánto vale cada tarea", precios: "Precios e itemizado", cuadrillas: "Cuadrillas", ubicacion: "Ubicación en vivo" };
+  const curDe = (doc) => obj(doc === "personal" ? window.__personalNube : doc === "baremo" ? window.__baremoNube : doc === "precios" ? window.__preciosNube : DAT[doc]);
+  const cargadoDe = (doc) => doc === "personal" ? cargado() : !!CFG[doc];
+  const NO_RESP = /^(ts|usuario|por|porNombre|respaldos|actualizado|actualizadoPor|editadoTs|editadoPor)$|Ts$|Por$/;
+  const etq = (x) => x && typeof x == "object" ? String(x.nombre || x.label || x.persona || x.tarea || x.texto || x.id || JSON.stringify(x).slice(0, 40)) : String(x);
+  const getPath = (o, k) => k.split(".").reduce((a, q) => (a == null ? a : a[q]), o);
+  function quitados(antes, despues, ruta, out) {   // arrays que pierden elementos (un nivel de mapas adentro)
+    if (Array.isArray(antes) && Array.isArray(despues)) {
+      const key = (x) => (x && typeof x == "object" ? String(x.id || nk(x.nombre || x.label || x.persona || "") || JSON.stringify(x)) : String(x));
+      const nd = new Set(despues.map(key)); antes.forEach((x) => { if (!nd.has(key(x))) out.push(ruta + ": " + etq(x)); });
+    } else if (antes && despues && typeof antes == "object" && typeof despues == "object" && !Array.isArray(antes) && ruta.split(".").length < 2) {
+      Object.keys(despues).forEach((k) => quitados(antes[k], despues[k], ruta + "." + k, out));
+    }
+  }
+  async function guardiaCfg(doc, patch, op) {
+    op = op || {};
+    const p = Object.assign({}, patch || {});
+    if (!cargadoDe(doc)) {
+      if (doc === "ubicacion") { try { const s = await firebase.firestore().collection("configEquipo").doc(doc).get(); DAT[doc] = s.exists ? s.data() : {}; CFG[doc] = true; } catch (e) { } }
+      if (!cargadoDe(doc)) throw err("ps-cargando", `Todavía no llegaron los datos de «${NOMBRE[doc] || doc}» de la base: esperá unos segundos y probá de nuevo. No se guardó nada.`);
+    }
+    const cur = curDe(doc), salt = op.saltear || [];
+    const ks = Object.keys(p).filter((k) => !NO_RESP.test(k.split(".")[0]) && salt.indexOf(k) < 0);
+    const qt = []; ks.forEach((k) => { if (k.indexOf(".") < 0 && k !== "ausencias") quitados(cur[k], p[k], k, qt); });   // las ausencias se quitan de a una con su propia pregunta
+    if (qt.length && !op.sinPreguntar) {
+      const ok = await preguntar(`¿Sacar ${qt.length} de «${NOMBRE[doc] || doc}»?`, `<p>Al guardar se sacan:</p><ul class="ps-ul">${qt.slice(0, 30).map((x) => `<li>${esc(x)}</li>`).join("")}${qt.length > 30 ? "<li>…</li>" : ""}</ul><p class="hint">Queda una copia de cómo estaba.</p>`, "Sí, sacarlos", "No, cancelar");
+      if (!ok) throw err("ps-cancelado", "No se guardó nada (cancelado).");
+    }
+    const ent = Object.assign({ ts: Date.now(), por: yoEmail() }, op.entrada || {}), campos = {};
+    ks.forEach((k) => { const v = getPath(cur, k); if (v === undefined) return; const j = JSON.stringify(v); if (j && j.length < 150000 && j !== JSON.stringify(p[k])) campos[k] = clon(v); });
+    if (Object.keys(campos).length) ent.campos = campos;
+    if (Object.keys(ent).some((k) => ["nomina", "vehiculos", "campos"].indexOf(k) >= 0)) {
+      let l = arr(cur.respaldos).concat([ent]).slice(-10);
+      while (l.length > 1 && JSON.stringify(l).length > 400000) l = l.slice(1);   // la base corta en 1 MB por documento
+      p.respaldos = l;
+      if (doc !== "personal" && qt.length) try { window.fbAuditar && window.fbAuditar("config_guardar", `${doc}: sacó ${qt.slice(0, 10).join(", ")}`, { doc, sacados: qt.slice(0, 50) }); } catch (e) { }
+    }
+    return p;
+  }
+  window.__cfgGuardia = guardiaCfg;
+  [["fbBaremoGuardar", "baremo"], ["fbPreciosGuardar", "precios"]].forEach(([f, doc]) => { const o = window[f]; if (typeof o == "function" && !o.__ps) { const n = async function (e) { return o.call(this, await guardiaCfg(doc, e)); }; n.__ps = 1; window.__heredar && window.__heredar(n, o); window[f] = n; } });
+  (function () { const o = window.fbCuadrillasGuardar; if (typeof o == "function" && !o.__ps) { const n = async function (l) { const p = await guardiaCfg("cuadrillas", { lista: l }); if (p.respaldos) { await o.call(this, l); try { await firebase.firestore().collection("configEquipo").doc("cuadrillas").set({ respaldos: p.respaldos }, { merge: true }); } catch (e) { } return; } return o.call(this, l); }; n.__ps = 1; window.__heredar && window.__heredar(n, o); window.fbCuadrillasGuardar = n; } })();
+
   // ---------- la guardia: todo lo que escribe configEquipo/personal pasa por acá
   async function guardia(patch, op) {
     op = op || {};
     const p = Object.assign({}, patch || {}), ks = Object.keys(p);
     if (ks.some((k) => /^(nomina|vehiculos|lista|respaldos)\./.test(k))) throw err("ps-campo", "La nómina y los vehículos se cambian desde Producción › Personal del equipo (no por partes). No se guardó nada.");
     const tN = "nomina" in p || "lista" in p, tV = "vehiculos" in p;
-    if (!tN && !tV) return p;
+    if (!tN && !tV) return guardiaCfg("personal", p, op);
     if (!cargado()) throw err("ps-cargando", "Todavía no llegó la nómina de la base: esperá unos segundos y probá de nuevo. No se guardó nada.");
     const bN = nominaBase(), bV = vehBase();
     // lo que la pantalla no conoce (equipoCivil, rolAConfirmar…) no se pierde al guardar desde la tabla
@@ -66,14 +112,12 @@
       const ok = await preguntar(sacados.length ? `¿Sacar ${sacados.length} de la nómina?` : "¿Sacar vehículos?", h, "Sí, sacarlos", "No, cancelar");
       if (!ok) throw err("ps-cancelado", "No se guardó nada (cancelado).");
     }
-    if (bN.length || bV.length) {
-      const r = { ts: Date.now(), por: yoEmail(), nomina: clon(bN), vehiculos: clon(bV), deTs: base().ts || null, deUsuario: base().usuario || "" };
-      p.respaldos = arr(base().respaldos).concat([r]).slice(-10);
-    }
+    const entrada = { ts: Date.now(), por: yoEmail(), deTs: base().ts || null, deUsuario: base().usuario || "" };
+    if (tN) entrada.nomina = clon(bN); if (tV) entrada.vehiculos = clon(bV);
     try {
       window.fbAuditar && window.fbAuditar(op.accion || "personal_guardar", `Nómina ${bN.length} → ${nN.length} personas · vehículos ${bV.length} → ${nV.length}` + (sacados.length ? ` · sacó: ${sacados.join(", ")}` : "") + (vSac.length ? ` · sacó vehículos: ${vSac.join(", ")}` : ""), { antes: { personas: bN.length, vehiculos: bV.length }, despues: { personas: nN.length, vehiculos: nV.length }, sacados, vehiculosSacados: vSac, agregados: tN ? nN.filter((y) => y && y.nombre && !bN.some((x) => x && nk(x.nombre) === nk(y.nombre))).map((y) => y.nombre) : [] });
     } catch (e) { }
-    return p;
+    return guardiaCfg("personal", p, Object.assign({}, op, { entrada, saltear: ["nomina", "lista", "vehiculos"], sinPreguntar: true }));
   }
   window.__psGuardia = guardia;
   window.__psErr = (er) => {
@@ -264,7 +308,9 @@ ${A.vCompletar.length ? `<h4 class="ps-h">Datos que faltan de los vehículos (${
       await firebase.firestore().collection("configEquipo").doc("personal").set(patch, { merge: true });
       window.__personalNube = Object.assign({}, base(), patch);
       try { window.aplicarPersonalDeLaNube && window.aplicarPersonalDeLaNube(); } catch (e) { }
-      st.msg = `✓ Listo: ${hecho.length} agregado${hecho.length === 1 ? "" : "s"}. Revisá los roles «a confirmar» y los legajos vacíos en la nómina.`;
+      let ver = "";
+      try { const s = await firebase.firestore().collection("configEquipo").doc("personal").get(); const d = s.exists ? s.data() || {} : {}; ver = `✓ Guardado: ${arr(d.nomina).length} personas, ${arr(d.vehiculos).length} vehículos (leído de vuelta de la base).`; } catch (e) { ver = "⚠ Se mandó a la base pero no pude leerlo de vuelta: fijate en un rato."; }
+      st.msg = `${ver} ${hecho.length} agregado${hecho.length === 1 ? "" : "s"}. Revisá los roles «a confirmar» y los legajos vacíos en la nómina.`;
       st.A = analizar(); selDefault();
     } catch (er) { st.msg = window.__psErr(er); }
     pintarHoja();
