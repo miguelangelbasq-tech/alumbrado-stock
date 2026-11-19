@@ -319,14 +319,15 @@
     plano(data, "", 0);
     return out;
   }
-  function viejoDe(op) {
+  function viejoDe(op, lazy) {
     try {
       if (op.nueva) return { d: undefined, sabe: true };
       let s = null, ts = -1;   // la foto más nueva que tenga el documento
       if (op.dsnap) { s = op.dsnap.s; ts = op.dsnap.t; }
       (op.cands || []).forEach((q) => { if (q.t > ts) { const x = buscarEn(q.s, op.idBuscado); if (x) { s = x; ts = q.t; } } });
+      if (!s && op.cacheSnap) s = op.cacheSnap;
+      if (s && lazy) return { s, sabe: true };   // sin copiar el documento entero (solo lo que se cambió)
       if (s) return { d: s.exists === false ? undefined : (typeof s.data == "function" ? s.data() : undefined), sabe: true };
-      if (op.cacheSnap) return { d: op.cacheSnap.exists ? op.cacheSnap.data() : undefined, sabe: true };
       if ((op.cands || []).length) return { d: undefined, sabe: true };   // la app tiene la colección en memoria y ese documento no está: es nuevo
       return { d: undefined, sabe: false };
     } catch (e) { return { d: undefined, sabe: false }; }
@@ -427,7 +428,9 @@
       E.t = "fotos"; E.id = ""; const d0 = obj(op0.data); const ob = obraDe(g.col, "", d0); if (ob) { E.ob = ob.id; E.obn = ob.n; }
       E.ids = g.ops.map((o) => String(o.idDoc || "")).filter((x) => x).slice(0, 40); E.nom = "fotos"; E.r = resumenDe(g, E); return E;
     }
-    const V = viejoDe(op0); if (!V.sabe) { E.sinAntes = 1; CNT.sinAntes++; }
+    const soloUpd = g.ops.every((op) => op.kind === "update");
+    const V = viejoDe(op0, soloUpd); if (!V.sabe) { E.sinAntes = 1; CNT.sinAntes++; }
+    if (soloUpd) return armarUpd(g, E, V, resumir);
     let cur = V.d === undefined ? undefined : clonar(V.d); const antes = cur === undefined ? undefined : clonar(cur);
     const F = new Map();   // ruta → {a, d, an, dn}
     const nace = cur === undefined && V.sabe && g.ops.some((op) => op.kind !== "delete" && op.kind !== "update");
@@ -474,6 +477,47 @@
     return E;
   }
 
+  // update (lo más común: órdenes de la cuadrilla, obras): solo las rutas tocadas, sin copiar el documento entero
+  const ETQ = ["nombre", "plazaNombre", "plazaId", "numero", "desc", "importe", "codigo", "usuario", "email", "num", "cat", "categoria", "tipo", "general", "obra", "obraNombre", "titulo", "mime"];
+  function armarUpd(g, E, V, resumir) {
+    const s = V.s, hay = !!(V.sabe && s && s.exists !== false); let D0 = null;
+    const get = (p) => {
+      if (!hay) return undefined;
+      if (REAL && typeof s.get == "function") { try { const v = s.get(p); return v && typeof v == "object" ? clonar(v) : v; } catch (e) { return undefined; } }
+      if (D0 === null) { try { D0 = s.data() || {}; } catch (e) { D0 = {}; } }
+      const v = getPath(D0, p); return v && typeof v == "object" ? clonar(v) : v;
+    };
+    const F = new Map();
+    g.ops.forEach((op) => {
+      Object.keys(obj(op.data)).forEach((p) => {
+        const prev = F.has(p) ? F.get(p).d : get(p), r = aplicarCent(prev, op.data[p]);
+        if (!F.has(p)) F.set(p, { a: prev, an: prev === undefined });
+        const x = F.get(p); if (r.borra) { x.d = undefined; x.dn = true; } else { x.d = r.v; x.dn = false; x.vol = !!r.vol; }
+      });
+    });
+    const L = {}; ETQ.forEach((k) => { const v = get(k); if (v !== undefined) L[k] = v; });
+    F.forEach((x, p) => { if (p.indexOf(".") < 0 && ETQ.indexOf(p) >= 0 && !x.dn) L[p] = x.d; });
+    E.nom = etiquetaDoc(g.col, g.id, L);
+    const ob = obraDe(g.col, g.id, L); if (ob) { E.ob = ob.id; E.obn = ob.n; }
+    E.t = "cambio";
+    const campos = [];
+    F.forEach((x, p) => {
+      if (igualJ(x.a, x.d) && x.an === x.dn) return;
+      if (VOL.test(p.split(".").pop()) || VOL.test(p.split(".")[0])) return;
+      const c = { k: p }; if (x.vol) c.vol = 1;
+      if (resumir) { campos.push(c); return; }
+      const st = { x: "" }, kk = p.split(".").pop();
+      if (!V.sabe) c.ad = 1; else if (x.an) c.an = 1; else c.aj = json(x.a, st, kk).s;
+      if (x.dn) c.dn = 1; else c.dj = json(x.d, st, kk).s;
+      if (st.x) c.x = st.x; if (st.p) c.p = 1;
+      campos.push(c);
+    });
+    if (!campos.length) return null;
+    E.f = campos.slice(0, 60); if (campos.length > 60) E.fMas = campos.length - 60;
+    E.r = resumenDe(g, E);
+    return E;
+  }
+
   // ---------------------------------------------------------------- cuántas escrituras (cupo del plan gratis: 20.000 por día)
   const KC = "ema.rc.cuenta";
   let CC = null;
@@ -515,7 +559,10 @@
     await esperarQuieto();
     const resumir = modoResumen();
     const porQuien = new Map();
-    for (const g of gs) {
+    for (let i = 0; i < gs.length; i++) {
+      const g = gs[i];
+      if (camAbierta()) { const now = Date.now(); gs.slice(i).forEach((x) => { const y = BUF.get(x.key); if (y) { y.ops = x.ops.concat(y.ops); y.t0 = x.t0; } else { x.t1 = now; BUF.set(x.key, x); } }); programar(); break; }   // se abrió la cámara: lo que falta, después
+      if (i) await esperarQuieto();
       let E = null; try { E = await armarGrupo(g, resumir); } catch (e) { E = null; }
       if (!E) continue;
       const k = g.email + "|" + g.origen; if (!porQuien.has(k)) porQuien.set(k, { email: g.email, uid: g.uid, origen: g.origen, l: [] }); porQuien.get(k).l.push(E);
