@@ -26,12 +26,17 @@
 //    sin el archivo; If-None-Match → 304. Cache-Control privado (nada de cachés compartidas: la URL puede llevar el token).
 //  · Errores siempre en castellano: {ok:false, error:"…"}.
 //
-// Lo que tiene que estar en Cloudflare (Settings › Bindings): el bucket R2 «s3fotos» ligado al Worker. El nombre de la
-// ligadura puede ser cualquiera (FOTOS, BUCKET, R2…): el Worker la busca sola. No usa claves ni secretos.
+// Cómo llega al bucket (una de dos; si están las dos, usa la ligadura):
+//  a) Ligadura (Settings › Bindings): el bucket R2 «s3fotos» ligado al Worker. El nombre puede ser cualquiera (FOTOS,
+//     BUCKET, R2…): el Worker la busca sola.
+//  b) Sin ligadura (cuenta sin la suscripción de R2 en el panel), como el Worker v1: por la API compatible con S3, con
+//     4 Secrets que ya están cargados en Cloudflare: R2_BUCKET, R2_ENDPOINT, R2_KEY_ID, R2_SECRET. Firma cada pedido
+//     (AWS SigV4, región «auto», servicio «s3») con Web Crypto. Los valores nunca se muestran ni se devuelven.
+//     R2_ENDPOINT puede venir con o sin «https://», con barra al final o con el bucket ya puesto.
 // Variable opcional (Text): FOTOS_ORIGENES = otros sitios permitidos, separados por coma.
 // Sin SDK ni dependencias: se pega a mano en el panel de Cloudflare.
 
-const VERSION = "v2-fotos";
+const VERSION = "v2-fotos"; // la app reconoce /^v2…-fotos/: no cambiar el formato
 
 const PROYECTO = "alumbrado-stock";
 const CLAVES_URL = "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
@@ -118,13 +123,172 @@ function tokenDe(request, url, permitirT) {
   return "";
 }
 
-// ---------- El bucket: la ligadura puede tener cualquier nombre
+// ---------- El bucket: la ligadura (cualquier nombre) o, si no hay, la API S3 con los 4 Secrets
 function bucket(env) {
   if (!env) return null;
   const es = (b) => b && typeof b === "object" && typeof b.put === "function" && typeof b.get === "function" && typeof b.head === "function";
   for (const n of ["FOTOS", "BUCKET", "R2", "S3FOTOS", "s3fotos", "FOTOS_R2"]) if (es(env[n])) return { b: env[n], nombre: n };
   for (const n of Object.keys(env)) if (es(env[n])) return { b: env[n], nombre: n };
+  const cfg = s3Conf(env);
+  if (cfg) return { b: s3Bucket(cfg), nombre: "s3", s3: cfg };
   return null;
+}
+
+// ---------- API S3 de R2 (sin ligadura). Arma un objeto con la misma forma que la ligadura (head, get, put, delete,
+// createMultipartUpload, resumeMultipartUpload), así el resto del Worker no cambia.
+const limpioS = (v) => String(v == null ? "" : v).trim();
+let s3Cache = { k: "", cfg: null };
+function s3Conf(env) {
+  const id = limpioS(env.R2_KEY_ID), sec = limpioS(env.R2_SECRET), ep = limpioS(env.R2_ENDPOINT);
+  if (!id || !sec || !ep) return null;
+  const k = ep + "|" + limpioS(env.R2_BUCKET) + "|" + id.length + "|" + sec.length;
+  if (s3Cache.k === k && s3Cache.cfg && s3Cache.cfg.id === id && s3Cache.cfg.sec === sec) return s3Cache.cfg;
+  let u;
+  try { u = new URL(/^https?:\/\//i.test(ep) ? ep : "https://" + ep); } catch (e) { return null; }
+  let bkt = limpioS(env.R2_BUCKET).replace(/^\/+|\/+$/g, "");
+  const camino = u.pathname.replace(/^\/+|\/+$/g, "");
+  if (!bkt && camino) bkt = camino.split("/")[0];          // el bucket venía en el endpoint
+  let host = u.host;
+  if (bkt && host.toLowerCase().startsWith(bkt.toLowerCase() + ".") && /\.r2\.cloudflarestorage\.com$/i.test(u.hostname)) host = host.slice(bkt.length + 1); // «bucket.cuenta.r2…» → ruta
+  if (!bkt || !host) return null;
+  const cfg = { base: u.protocol + "//" + host, host, bucket: bkt, id, sec };
+  s3Cache = { k, cfg };
+  return cfg;
+}
+const hexDe = (u) => Array.from(u, (b) => b.toString(16).padStart(2, "0")).join("");
+async function sha256Hex(datos) { return hexDe(new Uint8Array(await crypto.subtle.digest("SHA-256", typeof datos === "string" ? enc.encode(datos) : datos))); }
+async function hmacS(clave, texto) {
+  const k = await crypto.subtle.importKey("raw", typeof clave === "string" ? enc.encode(clave) : clave, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return new Uint8Array(await crypto.subtle.sign("HMAC", k, enc.encode(texto)));
+}
+const uriS3 = (s) => encodeURIComponent(s).replace(/[!'()*]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase());
+const VACIO_SHA = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+let firmaCache = { dia: "", sec: "", k: null };
+// Firma SigV4. Devuelve {url, headers} (sin «host»: lo pone fetch con la URL).
+async function firmarS3(cfg, metodo, key, query, cab, hashCuerpo) {
+  const amz = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, ""); // AAAAMMDDTHHMMSSZ
+  const dia = amz.slice(0, 8);
+  const ruta = "/" + uriS3(cfg.bucket) + (key ? "/" + key.split("/").map(uriS3).join("/") : "");
+  const qs = Object.keys(query || {}).map((k) => [uriS3(k), uriS3(query[k] == null ? "" : String(query[k]))]).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0)).map((p) => p[0] + "=" + p[1]).join("&");
+  const h = {};
+  for (const n of Object.keys(cab || {})) if (cab[n] != null && cab[n] !== "") h[n.toLowerCase()] = String(cab[n]);
+  h["x-amz-date"] = amz;
+  h["x-amz-content-sha256"] = hashCuerpo || "UNSIGNED-PAYLOAD";
+  const firmados = ["host"].concat(Object.keys(h).filter((n) => n.startsWith("x-amz-") || n === "content-type" || n === "content-md5")).sort();
+  const valor = (n) => (n === "host" ? cfg.host : h[n]).trim().replace(/\s+/g, " ");
+  const canonica = [metodo, ruta, qs, firmados.map((n) => n + ":" + valor(n) + "\n").join(""), firmados.join(";"), h["x-amz-content-sha256"]].join("\n");
+  const alcance = dia + "/auto/s3/aws4_request";
+  const aFirmar = ["AWS4-HMAC-SHA256", amz, alcance, await sha256Hex(canonica)].join("\n");
+  if (firmaCache.dia !== dia || firmaCache.sec !== cfg.sec || !firmaCache.k) {
+    let k = await hmacS("AWS4" + cfg.sec, dia);
+    k = await hmacS(k, "auto"); k = await hmacS(k, "s3"); k = await hmacS(k, "aws4_request");
+    firmaCache = { dia, sec: cfg.sec, k };
+  }
+  const firma = hexDe(await hmacS(firmaCache.k, aFirmar));
+  h["authorization"] = "AWS4-HMAC-SHA256 Credential=" + cfg.id + "/" + alcance + ", SignedHeaders=" + firmados.join(";") + ", Signature=" + firma;
+  return { url: cfg.base + ruta + (qs ? "?" + qs : ""), headers: h };
+}
+// Error de S3 sin datos de la cuenta (nunca lleva las claves)
+function errS3(r, que) { const e = new Error("S3 " + que + ": " + r.status); e.status = r.status; return e; }
+const descartar = (r) => { try { if (r && r.body) r.body.cancel(); } catch (e) { } };
+function s3Bucket(cfg) {
+  async function pedir(metodo, key, query, cab, cuerpo, hash) {
+    const f = await firmarS3(cfg, metodo, key, query || {}, cab || {}, hash);
+    const init = { method: metodo, headers: f.headers };
+    if (cuerpo != null) init.body = cuerpo;
+    return fetch(f.url, init);
+  }
+  const metaDe = (r, key) => {
+    const et = r.headers.get("etag") || "";
+    return { key, size: parseInt(r.headers.get("content-length") || "0", 10) || 0, httpEtag: et, etag: et.replace(/"/g, ""), httpMetadata: { contentType: r.headers.get("content-type") || "" } };
+  };
+  const cabPut = (op) => {
+    const c = {};
+    const hm = (op && op.httpMetadata) || {}, cm = (op && op.customMetadata) || {};
+    if (hm.contentType) c["Content-Type"] = hm.contentType;
+    if (hm.cacheControl) c["Cache-Control"] = hm.cacheControl;
+    for (const n of Object.keys(cm)) c["x-amz-meta-" + n.toLowerCase()] = String(cm[n]);
+    return c;
+  };
+  const xmlDe = (t, etq) => { const m = new RegExp("<" + etq + ">([^<]*)</" + etq + ">").exec(t || ""); return m ? m[1] : ""; };
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const B = {
+    async head(key) {
+      const r = await pedir("HEAD", key, null, null, null, VACIO_SHA);
+      descartar(r);
+      if (r.status === 404) return null;
+      if (!r.ok) throw errS3(r, "head");
+      return metaDe(r, key);
+    },
+    async get(key, op) {
+      const cab = {};
+      if (op && op.range) { const o = op.range.offset || 0, l = op.range.length; cab["Range"] = "bytes=" + o + "-" + (l != null ? o + l - 1 : ""); }
+      const r = await pedir("GET", key, null, cab, null, VACIO_SHA);
+      if (r.status === 404) { descartar(r); return null; }
+      if (!r.ok) { descartar(r); throw errS3(r, "get"); }
+      return { ...metaDe(r, key), body: r.body };
+    },
+    async put(key, cuerpo, op) {
+      const r = await pedir("PUT", key, null, cabPut(op), cuerpo);
+      descartar(r);
+      if (!r.ok) throw errS3(r, "put");
+      return { key, httpEtag: r.headers.get("etag") || "" };
+    },
+    async delete(key) {
+      const r = await pedir("DELETE", key, null, null, null, VACIO_SHA);
+      descartar(r);
+      if (!r.ok && r.status !== 404) throw errS3(r, "delete");
+    },
+    async createMultipartUpload(key, op) {
+      const r = await pedir("POST", key, { uploads: "" }, cabPut(op), null, VACIO_SHA);
+      const t = await r.text();
+      if (!r.ok) throw errS3(r, "iniciar");
+      const id = xmlDe(t, "UploadId");
+      if (!id) throw errS3(r, "iniciar sin id");
+      return { key, uploadId: id };
+    },
+    resumeMultipartUpload(key, id) {
+      return {
+        key, uploadId: id,
+        async uploadPart(n, cuerpo) {
+          const r = await pedir("PUT", key, { partNumber: String(n), uploadId: id }, null, cuerpo);
+          descartar(r);
+          if (!r.ok) throw errS3(r, "parte");
+          return { partNumber: n, etag: r.headers.get("etag") || "" };
+        },
+        async complete(partes) {
+          const xml = "<CompleteMultipartUpload>" + partes.map((p) => "<Part><PartNumber>" + p.partNumber + "</PartNumber><ETag>" + esc(p.etag) + "</ETag></Part>").join("") + "</CompleteMultipartUpload>";
+          const u = enc.encode(xml);
+          const r = await pedir("POST", key, { uploadId: id }, { "Content-Type": "application/xml" }, u, await sha256Hex(u));
+          const t = await r.text();
+          if (!r.ok || /<Error>/.test(t)) throw errS3(r, "terminar");
+          const m = await B.head(key);
+          if (!m) throw errS3(r, "terminar sin archivo");
+          return m;
+        },
+        async abort() {
+          const r = await pedir("DELETE", key, { uploadId: id }, null, null, VACIO_SHA);
+          descartar(r);
+          if (!r.ok && r.status !== 404) throw errS3(r, "cancelar");
+        },
+      };
+    },
+  };
+  return B;
+}
+// /salud con las claves: prueba que anden (un HEAD de algo que no existe: 404 = bien). Se guarda 5 min.
+let s3Prueba = { k: "", hasta: 0, res: null };
+async function probarS3(r2) {
+  const k = r2.s3.base + "/" + r2.s3.bucket + "|" + r2.s3.id.length;
+  if (s3Prueba.k === k && s3Prueba.hasta > Date.now() && s3Prueba.res) return s3Prueba.res;
+  let res;
+  try { await r2.b.head("fotos/__salud_ema__"); res = { ok: true }; }
+  catch (e) {
+    const st = e && e.status;
+    res = { ok: false, error: st === 403 || st === 401 ? "Las claves de R2 (Secrets R2_KEY_ID / R2_SECRET) no tienen permiso sobre el bucket R2_BUCKET." : st === 404 || st === 400 ? "No se encontró el bucket: revisá los Secrets R2_BUCKET y R2_ENDPOINT." : "No se pudo llegar a R2 con las claves (Secrets R2_*). Probá de nuevo en un rato." };
+  }
+  s3Prueba = { k, hasta: Date.now() + (res.ok ? 5 * 60000 : 30000), res };
+  return res;
 }
 
 // ---------- Clave (ruta del archivo en el bucket)
@@ -374,8 +538,9 @@ export default {
       const tipos = [].concat(TIPOS.fotos, TIPOS.docs, TIPOS.videos);
       const o = { ok: !!r2, version: VERSION, tipos, multipart: !!(r2 && typeof r2.b.createMultipartUpload === "function"), rango: true,
         topes: { fotos: TOPE_PUT.fotos, docs: TOPE_PUT.docs, videos: TOPE_PUT.videos }, topesPartes: TOPE_TOTAL, r2: !!r2, enlace: r2 ? r2.nombre : null };
-      if (!r2) o.error = "El Worker no tiene ligado el bucket R2 (Settings › Bindings).";
-      return json(o, r2 ? 200 : 503, ctx);
+      if (!r2) o.error = "El Worker no tiene ligado el bucket R2 (Settings › Bindings) ni las 4 claves (Secrets R2_BUCKET, R2_ENDPOINT, R2_KEY_ID, R2_SECRET).";
+      if (r2 && r2.s3) { const p = await probarS3(r2); if (!p.ok) { o.ok = false; o.error = p.error; } }
+      return json(o, o.ok ? 200 : 503, ctx);
     }
     const esF = ruta.startsWith("/f/"), esM = ruta.startsWith("/m/");
     if (!esF && !esM) return mal("No existe esa dirección.", 404, ctx);
