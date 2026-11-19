@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v177 — 19/11/2026 (armada, sin publicar) · El Inicio prolijo (el logo de EMA en su lugar)
+## v177 — 19/11/2026 (publicada en GitHub 19/11) · El Inicio prolijo (el logo de EMA en su lugar)
 **Pedido (Ángel, 19/11, mirando el Inicio de admin en la compu):** «la ubicación del cartel de EMA… no se está respetando la prolijidad y la belleza de la interfaz que veníamos manejando, ¿qué pasó?».
 
 **Qué pasó:** la portada de Dirección (v155, maqueta con el logo al centro entre el menú y la campanita) pasó a ser el Inicio de Administración y Oficina en la v161 (`inicioUnico`). En la compu esa portada pone «El número del día» en la mitad derecha, pegada a la barra de arriba (0 px), así que el logo centrado quedaba encima de la caja, como un rótulo de ella. Hasta la v160 (Inicio Ejecutivo) el logo iba a la izquierda junto al menú, como en el encabezado de todas las pantallas. Igual en v161, v166, v172, v175 y v176. De paso: el `#iniDir button{padding:0}` de la v155 les sacaba la forma a «Ver la de mañana ›» y «Ajustes» de la orden sugerida (quedaban de 23 px, sin relleno) y el chip elegido de Obras sin el degradé; en 1280–1440 el rótulo «todavía no hay ritmo suficiente para estimar» se cortaba con «…».
