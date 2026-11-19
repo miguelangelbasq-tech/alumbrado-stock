@@ -257,7 +257,7 @@
     if (k && PRIVADO.test(String(k).replace(/\s/g, ""))) { if (st.x !== "secreto") st.p = 1; return MARCA_PRIV; }
     if (v === null || typeof v == "number" || typeof v == "boolean") return v;
     if (typeof v == "string") {
-      if (/^data:[a-z]+\/[\w.+-]+;base64,/i.test(v) || (v.length > 600 && /^[A-Za-z0-9+/=\s]+$/.test(v.slice(0, 600)))) { st.x = "imagen"; return "[imagen]"; }
+      if (/^data:[a-z]+\/[\w.+-]+;base64,/i.test(v) || (v.length > 600 && /^[A-Za-z0-9+/=\s]+$/.test(v.slice(0, 600)) && new Set(v.slice(0, 600)).size > 20)) { st.x = "imagen"; return "[imagen]"; }
       if (v.length > 500) { st.x = st.x || "cortado"; return v.slice(0, 500) + "… (" + v.length + " letras)"; }
       return v;
     }
@@ -327,6 +327,7 @@
       (op.cands || []).forEach((q) => { if (q.t > ts) { const x = buscarEn(q.s, op.idBuscado); if (x) { s = x; ts = q.t; } } });
       if (s) return { d: s.exists === false ? undefined : (typeof s.data == "function" ? s.data() : undefined), sabe: true };
       if (op.cacheSnap) return { d: op.cacheSnap.exists ? op.cacheSnap.data() : undefined, sabe: true };
+      if ((op.cands || []).length) return { d: undefined, sabe: true };   // la app tiene la colección en memoria y ese documento no está: es nuevo
       return { d: undefined, sabe: false };
     } catch (e) { return { d: undefined, sabe: false }; }
   }
@@ -396,8 +397,9 @@
     if (!f.length) return "Tocó " + doc + " (sin cambios a la vista)";
     if (g.clase === "cuadrilla" && f.length > 2) { const cs = Array.from(new Set(f.map((x) => x.k.split(".")[1]))).slice(0, 4).map((x) => (FL[x] || x).replace(/^(el|la|los|las) /, "")); return `Cargó en ${doc}: ${cs.join(", ")} (${f.length} datos)`; }
     if (f.length <= 3) { const fr = f.map((c) => frase(g, E, c, doc)); return fr.join(" · "); }
-    const ls = Array.from(new Set(f.map((x) => lbl(x.k)))); return `Cambió ${f.length} datos de ${doc} (${ls.slice(0, 4).join(", ")}${ls.length > 4 ? "…" : ""})`;
+    const ls = Array.from(new Set(f.map((x) => lbl(x.k)))); return `Cambió ${f.length} datos ${deD(doc)} (${ls.slice(0, 4).join(", ")}${ls.length > 4 ? "…" : ""})`;
   }
+  const deD = (doc) => (/^el /.test(doc) ? "del " + doc.slice(3) : "de " + doc);
   function frase(g, E, c, doc) {
     const k = c.k, A = c.an || c.ad ? undefined : parse(c.aj), D = c.dn ? undefined : parse(c.dj), u = k.split(".").pop();
     const obra = String(E.obn || doc).toUpperCase();
@@ -406,15 +408,15 @@
     if (k === "mapaIcono") return `Cambió el ícono del pin de ${obra} de ${c.an ? "automático" : vTxt(A)} a ${c.dn ? "automático" : vTxt(D)}`;
     if (k === "estado") return `Pasó ${doc} de ${vTxt(A)} a ${vTxt(D)}`;
     if (k === "costo" || k === "precioUnit") return `Cambió el precio de ${doc.replace(/^el producto /, "")} de ${vTxt(A, "costo")} a ${vTxt(D, "costo")}`;
-    if (k === "fotosBorradas") { const n = arr(D).length - arr(A).length; return n > 0 ? `Borró ${n} foto${n === 1 ? "" : "s"} de ${obra}` : `Cambió las fotos borradas de ${doc}`; }
-    if (/^campo\.fotos\.[^.]+\.borrada$/.test(k) && D === true) return `Borró una foto de ${doc}`;
-    if (/^campo\.marcas\./.test(k)) return `Marcó en ${doc}: ${k.split(".").slice(2).join(" › ")} ${vTxt(A, u)} → ${vTxt(D, u)}`;
-    if (Array.isArray(A) || Array.isArray(D)) { const dl = difLista(A, D); if (dl.length) return `Cambió ${lbl(k)} de ${doc}: ${dl.slice(0, 3).join(" · ")}${dl.length > 3 ? " · y " + (dl.length - 3) + " más" : ""}`; }
-    if ((A === undefined || A === null || typeof A != "object") && (D === undefined || D === null || typeof D != "object")) return `Cambió ${lbl(k)} de ${doc}: ${c.ad ? "(?)" : c.an ? "(vacío)" : vTxt(A, u)} → ${c.dn ? "(borrado)" : vTxt(D, u)}`;
-    return `Cambió ${lbl(k)} de ${doc}`;
+    if (k === "fotosBorradas") { const n = arr(D).length - arr(A).length; return n > 0 ? `Borró ${n} foto${n === 1 ? "" : "s"} de ${obra}` : `Cambió las fotos borradas ${deD(doc)}`; }
+    if (/^campo\.fotos\.[^.]+\.borrada$/.test(k) && D === true) return `Borró una foto ${deD(doc)}`;
+    if (/^campo\.marcas\./.test(k)) { const m = (v) => (v && typeof v == "object" ? (v.hecha === true || v.si === true ? "hecha" : v.hecha === false || v.no ? "no se hizo" : "") + (v.cant != null ? " " + fN(v.cant) : "") || vTxt(v) : vTxt(v, u)); return `Marcó en ${doc}: ${k.split(".").slice(2).join(" › ")} ${c.an ? "(sin marcar)" : m(A)} → ${m(D)}`; }
+    if (Array.isArray(A) || Array.isArray(D)) { const dl = difLista(A, D); if (dl.length) return `Cambió ${lbl(k)} ${deD(doc)}: ${dl.slice(0, 3).join(" · ")}${dl.length > 3 ? " · y " + (dl.length - 3) + " más" : ""}`; }
+    if ((A === undefined || A === null || typeof A != "object") && (D === undefined || D === null || typeof D != "object")) return `Cambió ${lbl(k)} ${deD(doc)}: ${c.ad ? "(?)" : c.an ? "(vacío)" : vTxt(A, u)} → ${c.dn ? "(borrado)" : vTxt(D, u)}`;
+    return `Cambió ${lbl(k)} ${deD(doc)}`;
   }
   const parse = (j) => { if (j === undefined) return undefined; try { return JSON.parse(j); } catch (e) { return j; } };
-  const json = (v, st) => { const l = limpio(v, "", 0, st); const s = JSON.stringify(l === undefined ? null : l); if (s.length > MAX_VAL) { st.x = st.x || "cortado"; return { s: JSON.stringify(Array.isArray(l) ? "[lista de " + l.length + "]" : typeof l == "object" ? "[" + Object.keys(l || {}).length + " datos]" : String(l).slice(0, 300)), corto: true }; } return { s }; };
+  const json = (v, st, k) => { const l = limpio(v, k || "", 0, st); const s = JSON.stringify(l === undefined ? null : l); if (s.length > MAX_VAL) { st.x = st.x || "cortado"; return { s: JSON.stringify(Array.isArray(l) ? "[lista de " + l.length + "]" : typeof l == "object" ? "[" + Object.keys(l || {}).length + " datos]" : String(l).slice(0, 300)), corto: true }; } return { s }; };
   async function armarGrupo(g, resumir) {
     const op0 = g.ops[0];
     if (op0.cache && !op0.cacheSnap) { try { op0.cacheSnap = await op0.cache; } catch (e) { } }
@@ -459,8 +461,9 @@
       const c = { k: p }; if (x.vol) c.vol = 1;
       if (resumir) { campos.push(c); return; }
       const st = { x: "" };
-      if (!V.sabe) c.ad = 1; else if (x.an) c.an = 1; else c.aj = json(x.a, st).s;
-      if (x.dn) c.dn = 1; else c.dj = json(x.d, st).s;
+      const kk = p.split(".").pop();
+      if (!V.sabe) c.ad = 1; else if (x.an) c.an = 1; else c.aj = json(x.a, st, kk).s;
+      if (x.dn) c.dn = 1; else c.dj = json(x.d, st, kk).s;
       if (st.x) c.x = st.x; if (st.p) c.p = 1;
       campos.push(c);
     });
@@ -783,7 +786,7 @@
   });
   document.addEventListener("click", (e) => { const ov = $("rcOv"); if (ov && e.target === ov) cerrar(); });
   // en el Guardián: el botón de arriba (lo pone la hoja del Guardián)
-  const botonGuardian = () => (esAdmin() ? `<div class="gd-acc rc-gdb"><button type="button" class="btn-primary" data-rc="abrir">📜 Historial de cambios</button></div>` : "");
+  const botonGuardian = () => (esAdmin() ? `<div class="gd-acc rc-gdb"><button type="button" class="btn-primary" data-rc="abrir">📜 Historial de cambios</button></div><div class="hint rc-costo">Cada cambio queda anotado (quién, cuándo, antes → después). ${esc(costoTxt())}</div>` : "");
 
   // para el asistente: corto, sin imágenes
   function paraIa(E) {
