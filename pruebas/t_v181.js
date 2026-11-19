@@ -104,7 +104,7 @@ const ANTES = () => { window.__rcEspera = 400; window.__rcTope = 3000; window.__
       await ev(p, async () => { try { await window.fbPresenciaMarcar(); } catch (e) { } try { await window.fbSaludGuardar({ prueba181: 1 }); } catch (e) { } const f = firebase.firestore(); await f.collection('ubicacionVivo').doc('uAdmin').set({ lat: 1, lng: 2, ts: Date.now() }); await f.collection('avisosPush').add({ enviado: false, email: 'x@y', titulo: 'hola' }); });
       await p.waitForTimeout(900); await flush(p);
       const docs = (await audDocs(p)).filter((d) => d.accion === 'cambios_app');
-      c(docs.length - n0 === 1, `una ráfaga de 15 escrituras → ${docs.length - n0} documento de auditoria`);
+      c(docs.length - n0 >= 1 && docs.length - n0 <= 2, `una ráfaga de 15 escrituras → ${docs.length - n0} documento(s) de auditoria (1; 2 si la ráfaga pasa los 3 s del tope de la prueba)`);
       const L = await cambios(p);
       c(L.filter((x) => x.c === 'gastosObra' && x.t === 'alta' && /Arena/.test(x.r)).length === 10, '10 altas de gasto adentro');
       const b = L.find((x) => x.c === 'avanceObras' && x.id === 'p2');
