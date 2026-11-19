@@ -214,12 +214,12 @@ const BAJADOS = () => { window.__bajados = []; const f = () => { if (window.resp
 
   // ============================================================================ 4) equipos habituales
   if (corre(4)) {
-    const A = await sesion('admin', null, { demora: { 'configEquipo/personal': 5000 }, v145: true });
+    const A = await sesion('admin', null, { demora: { 'configEquipo/personal': 12000 }, v145: true });
     const p = A.page;
     await p.evaluate(() => { window.mostrarVista('produccion'); }); await p.waitForTimeout(400);
     await p.evaluate(() => { const b = document.querySelector('#subtabsProd [data-sub="personal"]'); b && b.click(); }); await p.waitForTimeout(800);
     const t0 = await p.evaluate(() => ((document.getElementById('ehCard') || {}).innerText || '').replace(/\s+/g, ' '));
-    await p.waitForTimeout(7000);
+    await p.waitForTimeout(13000);
     const t1 = await p.evaluate(() => ((document.getElementById('ehCard') || {}).innerText || '').replace(/\s+/g, ' '));
     c(/Propuesta de Ángel/.test(t0) || !t0, 'antes de que llegue la base la tarjeta muestra la propuesta (o nada) · ' + t0.slice(0, 120));
     c(!/Propuesta de Ángel sin guardar/.test(t1) && /Zanjeo/.test(await p.evaluate(() => JSON.stringify([...document.querySelectorAll('#ehCard input')].map((x) => x.value)))), 'cuando llega la base, la tarjeta se vuelve a armar con los equipos guardados (no se queda con la propuesta) · ' + t1.slice(0, 160));
@@ -229,12 +229,12 @@ const BAJADOS = () => { window.__bajados = []; const f = () => { if (window.resp
 
   // ============================================================================ 5) ⚙ Límites antes de que llegue la base
   if (corre(5)) {
-    const A = await sesion('admin', null, { demora: { 'configEquipo/personal': 6000 }, iaPro: true, https: true });
+    const A = await sesion('admin', null, { demora: { 'configEquipo/personal': 15000 }, iaPro: true, https: true });
     const p = A.page;
     await p.evaluate(() => window.__asistenteAbrir()); await p.waitForTimeout(1200);
     await p.click('#iaPanel [data-ia="cfg"]'); await p.waitForTimeout(900);
     const v0 = await p.evaluate(() => (document.querySelector('#iaCfg [data-ialim="mes.tope"]') || {}).value);
-    await p.waitForTimeout(6500);   // llegó la base; la hoja quedó como se armó
+    await p.waitForTimeout(13000);   // llegó la base; la hoja quedó como se armó
     await p.fill('#iaCfg [data-ialim="cuadrilla.preguntas"]', '6');
     await p.click('#iaCfg [data-ia="cfgguardar"]'); await p.waitForTimeout(1200);
     let b = await db(p), a = b.configEquipo.personal.asistente || {};
@@ -268,8 +268,9 @@ const BAJADOS = () => { window.__bajados = []; const f = () => { if (window.resp
     if (q) { await p.evaluate(() => { document.querySelector('#cdCfgCard [data-cdc="guardar"]').click(); }); await p.waitForTimeout(700); await p.click('#psConf [data-psc="si"]'); await p.waitForTimeout(900); }
     b = await db(p);
     c(b.configEquipo.personal.contactos.length === 1 && b.configEquipo.personal.contactos[0].nombre === 'Lucía Oficina' && (b.configEquipo.personal.respaldos || []).length >= 1, '«Sí, sacarlos» lo saca y queda la copia de antes · ' + JSON.stringify(b.configEquipo.personal.contactos));
-    const g = await p.evaluate(async () => { try { await window.__cfgGuardia('personal', { seguridadCuadrilla: { casco: 'oblig' } }, { sinPreguntar: false }); return 'sin preguntar'; } catch (e) { return e.code; } });
-    await p.waitForTimeout(300); const g2 = await p.evaluate(() => { const d = document.getElementById('psConf'); const t = d ? d.innerText : ''; d && d.querySelector('[data-psc="no"]').click(); return t; });
+    await p.evaluate(() => { window.__g182 = window.__cfgGuardia('personal', { seguridadCuadrilla: { casco: 'oblig' } }, {}).then(() => 'sin preguntar', (e) => e.code); });
+    await p.waitForTimeout(600); const g2 = await p.evaluate(() => { const d = document.getElementById('psConf'); const t = d ? d.innerText : ''; d && d.querySelector('[data-psc="no"]').click(); return t; });
+    const g = await p.evaluate(() => window.__g182);
     c(/seguridadCuadrilla: conos/.test(g2), 'sacar un ítem de la seguridad también pregunta · ' + g2.replace(/\s+/g, ' ').slice(0, 120) + ' · ' + g);
     c(A.errores.length === 0, 'sin errores de JavaScript · ' + JSON.stringify(A.errores).slice(0, 300));
     await p.close();

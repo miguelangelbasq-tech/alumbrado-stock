@@ -344,7 +344,7 @@ Usá solo las órdenes de la lista (son las de esa persona). «hoy» = la orden 
     escribirMsg(sis, hiloPatchDe(sis), -1);
     const dest = m.email ? { email: m.email } : P.personaClave ? { clave: P.personaClave } : null;
     if (dest && window.__pushAvisos) { try { await window.__pushAvisos.dejarAviso(Object.assign({ titulo: aprobar ? `✅ ${quien} aprobó tu pedido` : `${quien} revisó tu pedido: no corresponde`, cuerpo: aprobar ? resultado : motivo, tipo: "chat", tag: "ema-chat-" + m.hilo, ref: id, url: "./?chat=" + encodeURIComponent(m.hilo) }, dest)); } catch (e) { } }
-    audit("chat_pedido", `${aprobar ? "aprobado" : "no corresponde"}: ${P.persona || m.nombre} · ${P.resumen || ""}${motivo ? " · " + motivo : ""}`, { ref: id, otId: P.otId || "", accion: P.accion || "" });
+    audit("chat_pedido", `${aprobar ? "aprobado" : "no corresponde"}: ${P.persona || m.nombre} · ${P.resumen || ""}${motivo ? " · " + motivo : ""}`, { ref: id, otId: P.otId || "", pedidoAccion: P.accion || "" });
     return { ok: true, resultado };
   }
 
