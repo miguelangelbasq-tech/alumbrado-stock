@@ -213,12 +213,26 @@ function s3Bucket(cfg) {
   const xmlDe = (t, etq) => { const m = new RegExp("<" + etq + ">([^<]*)</" + etq + ">").exec(t || ""); return m ? m[1] : ""; };
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const B = {
+    // Para /salud: un GET de algo que no existe. 404 NoSuchKey = las claves andan y el bucket existe.
+    async probar() {
+      const r = await pedir("GET", "fotos/__salud_ema__", null, null, null, VACIO_SHA);
+      const t = await r.text().catch(() => "");
+      if (r.ok || (r.status === 404 && !/NoSuchBucket/.test(t))) return { ok: true };
+      const e = errS3(r, "probar"); if (/NoSuchBucket/.test(t)) e.status = 404; else if (r.status === 404) e.status = 400; throw e;
+    },
     async head(key) {
       const r = await pedir("HEAD", key, null, null, null, VACIO_SHA);
       descartar(r);
       if (r.status === 404) return null;
       if (!r.ok) throw errS3(r, "head");
-      return metaDe(r, key);
+      const m = metaDe(r, key);
+      if (r.headers.get("content-length") == null) { // por las dudas: si el HEAD no trae el tamaño, se lo pide al primer byte
+        const g = await pedir("GET", key, null, { Range: "bytes=0-0" }, null, VACIO_SHA);
+        descartar(g);
+        const cr = /\/(\d+)\s*$/.exec(g.headers.get("content-range") || "");
+        if (cr) m.size = parseInt(cr[1], 10); else if (g.status === 200) m.size = parseInt(g.headers.get("content-length") || "0", 10) || 0;
+      }
+      return m;
     },
     async get(key, op) {
       const cab = {};
@@ -279,10 +293,10 @@ function s3Bucket(cfg) {
 // /salud con las claves: prueba que anden (un HEAD de algo que no existe: 404 = bien). Se guarda 5 min.
 let s3Prueba = { k: "", hasta: 0, res: null };
 async function probarS3(r2) {
-  const k = r2.s3.base + "/" + r2.s3.bucket + "|" + r2.s3.id.length;
+  const k = r2.s3.base + "/" + r2.s3.bucket + "|" + r2.s3.id + "|" + r2.s3.sec; // solo en memoria, nunca sale
   if (s3Prueba.k === k && s3Prueba.hasta > Date.now() && s3Prueba.res) return s3Prueba.res;
   let res;
-  try { await r2.b.head("fotos/__salud_ema__"); res = { ok: true }; }
+  try { await r2.b.probar(); res = { ok: true }; }
   catch (e) {
     const st = e && e.status;
     res = { ok: false, error: st === 403 || st === 401 ? "Las claves de R2 (Secrets R2_KEY_ID / R2_SECRET) no tienen permiso sobre el bucket R2_BUCKET." : st === 404 || st === 400 ? "No se encontró el bucket: revisá los Secrets R2_BUCKET y R2_ENDPOINT." : "No se pudo llegar a R2 con las claves (Secrets R2_*). Probá de nuevo en un rato." };

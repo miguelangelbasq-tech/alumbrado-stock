@@ -1,12 +1,15 @@
 // Prueba del Worker «ema-fotos» v2 en Node (sin internet): simula las claves de Google y el bucket R2 (en memoria, con
-// subida por partes). Correr:  node workers/probar_ema_fotos.mjs
+// subida por partes). Corre todo dos veces: con la ligadura (binding) y con las 4 claves por la API S3 (un S3 de mentira
+// que revisa la firma SigV4 con su propia cuenta). Correr:  node workers/probar_ema_fotos.mjs
 import worker, { claveDe, rangoDe } from "./ema-fotos.js";
 import { readFileSync } from "node:fs";
+import { createHmac, createHash } from "node:crypto";
 
 const ORIGEN = "https://miguelangelbasq-tech.github.io";
 const MB = 1024 * 1024;
 let ok = 0, malas = 0;
-const prueba = (nombre, cond) => { if (cond) ok++; else malas++; console.log((cond ? "  ok  " : "  MAL ") + nombre); };
+let MODO = "";
+const prueba = (nombre, cond) => { if (cond) ok++; else malas++; console.log((cond ? "  ok  " : "  MAL ") + (MODO ? "[" + MODO + "] " : "") + nombre); };
 
 // ---------- par de claves RSA como las de Google
 const b64u = (b) => Buffer.from(b).toString("base64url");
@@ -23,9 +26,10 @@ const ahora = () => Math.floor(Date.now() / 1000);
 const cuerpoToken = (uid, extra = {}) => ({ iss: "https://securetoken.google.com/alumbrado-stock", aud: "alumbrado-stock", sub: uid, user_id: uid, iat: ahora() - 10, exp: ahora() + 3600, auth_time: ahora() - 100, ...extra });
 
 let pedidosGoogle = 0;
-globalThis.fetch = async (url) => {
+globalThis.fetch = async (url, init) => {
   url = String(url);
   if (url.startsWith("https://www.googleapis.com/")) { pedidosGoogle++; return new Response(JSON.stringify({ keys: [{ ...jwkPub, kid: KID, alg: "RS256", use: "sig" }] }), { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=20000" } }); }
+  if (url.startsWith("https://" + S3.host + "/")) return await falsoS3(url, init || {});
   throw new Error("fetch no esperado: " + url);
 };
 
@@ -73,6 +77,70 @@ class R2Mem {
   }
 }
 
+// ---------- S3 de R2 de mentira (lo que usa el Worker sin ligadura). Revisa la firma SigV4 por su cuenta (node:crypto) y
+// guarda en el mismo R2Mem, así las pruebas de abajo miran lo mismo en los dos modos.
+const S3 = { host: "cuenta0123456789abcdef.r2.cloudflarestorage.com", bucket: "s3fotos", id: "id-de-prueba-0001", sec: "SECRETO-DE-PRUEBA-no-va-a-ningun-lado-9f8e7d", firmasOk: 0, firmasMal: 0, conBearer: 0, store: null, pedidos: [] };
+const rfc = (x) => encodeURIComponent(x).replace(/[!'()*]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase());
+const xmlErr = (st, cod) => new Response("<?xml version=\"1.0\"?><Error><Code>" + cod + "</Code></Error>", { status: st, headers: { "Content-Type": "application/xml" } });
+function firmaEsperada(metodo, u, h, firmados, hashCuerpo, amz, sec) {
+  const qs = u.search ? u.search.slice(1).split("&").filter(Boolean).map((p) => { const i = p.indexOf("="); const k = decodeURIComponent(i < 0 ? p : p.slice(0, i)), v = i < 0 ? "" : decodeURIComponent(p.slice(i + 1)); return [rfc(k), rfc(v)]; }).sort((a, b) => (a[0] + "=" + a[1] < b[0] + "=" + b[1] ? -1 : 1)).map((x) => x[0] + "=" + x[1]).join("&") : "";
+  const ruta = u.pathname.split("/").map((s) => rfc(decodeURIComponent(s))).join("/");
+  const can = [metodo, ruta, qs, firmados.map((n) => n + ":" + String(n === "host" ? u.host : h.get(n) || "").trim().replace(/\s+/g, " ") + "\n").join(""), firmados.join(";"), hashCuerpo].join("\n");
+  const dia = amz.slice(0, 8);
+  const sts = ["AWS4-HMAC-SHA256", amz, dia + "/auto/s3/aws4_request", createHash("sha256").update(can).digest("hex")].join("\n");
+  let k = createHmac("sha256", "AWS4" + sec).update(dia).digest();
+  for (const x of ["auto", "s3", "aws4_request"]) k = createHmac("sha256", k).update(x).digest();
+  return createHmac("sha256", k).update(sts).digest("hex");
+}
+async function falsoS3(url, init) {
+  const u = new URL(url), metodo = (init.method || "GET").toUpperCase(), h = new Headers(init.headers || {});
+  S3.pedidos.push(metodo + " " + u.pathname + u.search);
+  for (const [, v] of h) if (/Bearer/i.test(v)) S3.conBearer++;
+  const cuerpo = init.body != null ? await aBytes(init.body) : new Uint8Array(0);
+  // firma
+  const m = /^AWS4-HMAC-SHA256 Credential=([^/]+)\/(\d{8})\/auto\/s3\/aws4_request, SignedHeaders=([a-z0-9;-]+), Signature=([0-9a-f]{64})$/.exec(h.get("authorization") || "");
+  const amz = h.get("x-amz-date") || "";
+  if (!m || m[1] !== S3.id) { S3.firmasMal++; return xmlErr(403, "InvalidAccessKeyId"); }
+  const firmados = m[3].split(";");
+  const hp = h.get("x-amz-content-sha256") || "";
+  const t = Date.UTC(+amz.slice(0, 4), +amz.slice(4, 6) - 1, +amz.slice(6, 8), +amz.slice(9, 11), +amz.slice(11, 13), +amz.slice(13, 15));
+  const bienArmada = /^\d{8}T\d{6}Z$/.test(amz) && amz.startsWith(m[2]) && Math.abs(Date.now() - t) < 15 * 60000 && ["host", "x-amz-date", "x-amz-content-sha256"].every((n) => firmados.includes(n)) && [...h.keys()].filter((n) => n.startsWith("x-amz-")).every((n) => firmados.includes(n)) && firmados.join(";") === firmados.slice().sort().join(";");
+  const hashOk = hp === "UNSIGNED-PAYLOAD" || hp === createHash("sha256").update(cuerpo).digest("hex");
+  if (!bienArmada || !hashOk || firmaEsperada(metodo, u, h, firmados, hp, amz, S3.sec) !== m[4]) { S3.firmasMal++; return xmlErr(403, "SignatureDoesNotMatch"); }
+  S3.firmasOk++;
+  // ruta: /<bucket>/<clave>
+  const seg = u.pathname.split("/").slice(1).map(decodeURIComponent);
+  if (seg[0] !== S3.bucket) return xmlErr(404, "NoSuchBucket");
+  const key = seg.slice(1).join("/"), q = u.searchParams, R = S3.store;
+  const metaPut = () => { const cm = {}; for (const [n, v] of h) if (n.startsWith("x-amz-meta-")) cm[n.slice(11)] = v; const hm = {}; if (h.get("content-type")) hm.contentType = h.get("content-type"); if (h.get("cache-control")) hm.cacheControl = h.get("cache-control"); return { httpMetadata: hm, customMetadata: cm }; };
+  const cabObj = (o) => ({ "content-type": o.httpMetadata.contentType || "application/octet-stream", etag: o.httpEtag, "last-modified": new Date().toUTCString(), "accept-ranges": "bytes" });
+  if (metodo === "HEAD") { const o = await R.head(key); return o ? new Response(null, { status: 200, headers: { ...cabObj(o), "content-length": String(o.size) } }) : new Response(null, { status: 404 }); }
+  if (metodo === "GET") {
+    const o = await R.head(key); if (!o) return xmlErr(404, "NoSuchKey");
+    const rg = /^bytes=(\d+)-(\d*)$/.exec(h.get("range") || "");
+    if (rg) { const ini = +rg[1], fin = rg[2] === "" ? o.size - 1 : Math.min(+rg[2], o.size - 1); const g = await R.get(key, { range: { offset: ini, length: fin - ini + 1 } }); return new Response(g.body, { status: 206, headers: { ...cabObj(o), "content-length": String(fin - ini + 1), "content-range": "bytes " + ini + "-" + fin + "/" + o.size } }); }
+    const g = await R.get(key); return new Response(g.body, { status: 200, headers: { ...cabObj(o), "content-length": String(o.size) } });
+  }
+  if (metodo === "PUT" && q.has("partNumber")) {
+    try { const p = await R.resumeMultipartUpload(key, q.get("uploadId")).uploadPart(+q.get("partNumber"), cuerpo); return new Response(null, { status: 200, headers: { etag: '"' + p.etag + '"' } }); }
+    catch (e) { return xmlErr(404, "NoSuchUpload"); }
+  }
+  if (metodo === "PUT") { if (!h.get("content-type")) return xmlErr(400, "SinTipo"); const o = await R.put(key, cuerpo, metaPut()); return new Response(null, { status: 200, headers: { etag: o.httpEtag } }); }
+  if (metodo === "POST" && q.has("uploads")) { const s = await R.createMultipartUpload(key, metaPut()); return new Response("<?xml version=\"1.0\"?><InitiateMultipartUploadResult><Bucket>" + S3.bucket + "</Bucket><Key>" + key + "</Key><UploadId>" + s.uploadId + "</UploadId></InitiateMultipartUploadResult>", { status: 200, headers: { "content-type": "application/xml" } }); }
+  if (metodo === "POST" && q.has("uploadId")) {
+    const xml = new TextDecoder().decode(cuerpo), partes = [];
+    const re = /<Part><PartNumber>(\d+)<\/PartNumber><ETag>([^<]*)<\/ETag><\/Part>/g; let x;
+    while ((x = re.exec(xml))) partes.push({ partNumber: +x[1], etag: x[2].replace(/&quot;/g, '"').replace(/"/g, "") });
+    if (!partes.length) return xmlErr(400, "MalformedXML");
+    try { await R.resumeMultipartUpload(key, q.get("uploadId")).complete(partes); } catch (e) { return xmlErr(400, "InvalidPart"); }
+    return new Response("<CompleteMultipartUploadResult><Key>" + key + "</Key></CompleteMultipartUploadResult>", { status: 200, headers: { "content-type": "application/xml" } });
+  }
+  if (metodo === "DELETE" && q.has("uploadId")) { await R.resumeMultipartUpload(key, q.get("uploadId")).abort(); return new Response(null, { status: 204 }); }
+  if (metodo === "DELETE") { await R.delete(key); return new Response(null, { status: 204 }); }
+  return xmlErr(400, "NoSoportado");
+}
+const ENV_S3 = { R2_BUCKET: S3.bucket, R2_ENDPOINT: "https://" + S3.host, R2_KEY_ID: S3.id, R2_SECRET: S3.sec };
+
 // ---------- archivos de prueba (con los primeros bytes correctos)
 function archivo(tipo, n, semilla = 7) {
   const u = new Uint8Array(n); let x = semilla; for (let i = 0; i < n; i++) { x = (x * 1103515245 + 12345) >>> 0; u[i] = x >>> 24; }
@@ -87,9 +155,8 @@ function archivo(tipo, n, semilla = 7) {
 }
 const iguales = (a, b) => a.byteLength === b.byteLength && Buffer.compare(Buffer.from(a), Buffer.from(b)) === 0;
 
-const R2 = new R2Mem();
-const env = { MIS_FOTOS: R2 }; // nombre de ligadura cualquiera: el Worker la busca sola
 const BASE = "https://ema-fotos.mdiaz-60f.workers.dev";
+let env;
 async function pedir(ruta, { metodo = "GET", token, cuerpo, tipo, origen = ORIGEN, h = {}, e = env, largo = true } = {}) {
   const hh = { ...h }; if (token) hh.Authorization = "Bearer " + token; if (origen) hh.Origin = origen; if (tipo) hh["Content-Type"] = tipo;
   if (cuerpo instanceof Uint8Array && largo && !("Content-Length" in hh)) hh["Content-Length"] = String(cuerpo.byteLength);
@@ -100,16 +167,22 @@ async function pedir(ruta, { metodo = "GET", token, cuerpo, tipo, origen = ORIGE
 }
 const T = await firmar(cuerpoToken("uid-juan"));
 
+for (MODO of ["ligadura", "s3"]) {
+const R2 = new R2Mem();
+S3.store = R2;
+env = MODO === "s3" ? { ...ENV_S3 } : { MIS_FOTOS: R2 }; // ligadura con un nombre cualquiera: el Worker la busca sola
+
 // ---------- /salud
 {
   const { r, j } = await pedir("/salud");
   prueba("/salud → 200 {ok, version v2-fotos, multipart:true}", r.status === 200 && j.ok === true && j.version === "v2-fotos" && j.multipart === true);
   prueba("/salud lista los 6 tipos", ["image/jpeg", "image/png", "image/webp", "application/pdf", "video/mp4", "video/webm"].every((t) => j.tipos.includes(t)) && j.tipos.length === 6);
-  prueba("/salud encuentra la ligadura aunque se llame distinto (MIS_FOTOS)", j.r2 === true && j.enlace === "MIS_FOTOS");
+  if (MODO === "s3") prueba("/salud con las 4 claves: r2:true, enlace «s3», rango", j.r2 === true && j.enlace === "s3" && j.rango === true);
+  else prueba("/salud encuentra la ligadura aunque se llame distinto (MIS_FOTOS)", j.r2 === true && j.enlace === "MIS_FOTOS");
   const s2 = await pedir("/salud", { e: {} });
   prueba("/salud sin el bucket ligado → 503 ok:false con el porqué", s2.r.status === 503 && s2.j.ok === false && /Bindings/.test(s2.j.error));
-  const s3 = await pedir("/salud", { e: { FOTOS: R2, OTRA: "x" } });
-  prueba("/salud con la ligadura FOTOS la usa", s3.j.enlace === "FOTOS");
+  const s3 = await pedir("/salud", { e: { ...(MODO === "s3" ? ENV_S3 : {}), FOTOS: R2, OTRA: "x" } });
+  prueba("/salud con la ligadura FOTOS la usa (aunque también estén las claves)", s3.j.enlace === "FOTOS");
   const s4 = await pedir("/salud", { origen: "" });
   prueba("/salud sin Origin (sonda de la app / navegador) → 200", s4.r.status === 200);
   const f = await pedir("/f/fotos/2026/11/x/a.jpg", { token: T, e: {} });
@@ -355,10 +428,50 @@ const KM = "videos/2026/11/plaza_los_alamos/recorrido.mp4";
   prueba("las claves de Google se bajan pocas veces (quedan guardadas)", pedidosGoogle - g0 <= 2);
 }
 
+} // fin de los dos modos
+MODO = "";
+
+// ---------- solo con las claves (S3)
+{
+  prueba("S3: todas las firmas que llegaron al S3 de mentira estaban bien (" + S3.firmasOk + ")", S3.firmasOk > 50 && S3.firmasMal === 0);
+  prueba("S3: el token de Firebase de la persona nunca va a R2", S3.conBearer === 0);
+  prueba("S3: usa la dirección por ruta /s3fotos/<clave> y las operaciones de partes", S3.pedidos.some((p) => p.startsWith("PUT /s3fotos/fotos/2026/11/plaza_los_alamos/")) && S3.pedidos.some((p) => /^POST \/s3fotos\/videos\/.*\?uploads=$/.test(p)) && S3.pedidos.some((p) => /^PUT .*partNumber=2&uploadId=/.test(p)) && S3.pedidos.some((p) => /^DELETE .*\?uploadId=/.test(p)));
+  const R2 = new R2Mem(); S3.store = R2;
+  const vari = [["https://" + S3.host, "con https"], [S3.host, "sin https"], ["https://" + S3.host + "/", "con barra al final"], ["https://" + S3.host + "/" + S3.bucket, "con el bucket en la ruta"], ["https://" + S3.host + "/" + S3.bucket + "/", "con el bucket y barra"], ["https://" + S3.bucket + "." + S3.host, "bucket adelante del host"], ["  https://" + S3.host + " \n", "con espacios"]];
+  for (const [ep, nombre] of vari) {
+    const e = { ...ENV_S3, R2_ENDPOINT: ep };
+    const s = await pedir("/salud", { e });
+    const p = await pedir("/f/fotos/2026/11/x/ep_" + nombre.replace(/\W+/g, "_") + ".jpg", { metodo: "PUT", token: T, tipo: "image/jpeg", cuerpo: archivo("jpg", 2000), e });
+    prueba("R2_ENDPOINT " + nombre + " → /salud ok y sube", s.r.status === 200 && s.j.ok === true && p.j && p.j.ok === true);
+  }
+  const sinB = await pedir("/salud", { e: { ...ENV_S3, R2_BUCKET: undefined, R2_ENDPOINT: "https://" + S3.host + "/" + S3.bucket } });
+  prueba("sin R2_BUCKET pero con el bucket en el endpoint → anda", sinB.j.ok === true);
+  const falta = await pedir("/salud", { e: { R2_BUCKET: S3.bucket, R2_ENDPOINT: "https://" + S3.host, R2_KEY_ID: S3.id } });
+  prueba("falta un Secret → 503 sin bucket", falta.r.status === 503 && falta.j.r2 === false);
+  const m0 = S3.firmasMal;
+  const malS = { ...ENV_S3, R2_SECRET: "otra-clave-equivocada-123" };
+  const sm = await pedir("/salud", { e: malS });
+  const txt = JSON.stringify(sm.j);
+  prueba("clave equivocada → el S3 rechaza la firma y /salud dice ok:false con el porqué", S3.firmasMal > m0 && sm.r.status === 503 && sm.j.ok === false && sm.j.r2 === true && /R2_KEY_ID/.test(sm.j.error));
+  prueba("/salud nunca muestra los valores de las claves", !txt.includes("otra-clave-equivocada") && !txt.includes(S3.id) && !txt.includes(S3.sec) && !txt.includes(S3.host));
+  const pm = await pedir("/f/fotos/2026/11/x/clave_mala.jpg", { metodo: "PUT", token: T, tipo: "image/jpeg", cuerpo: archivo("jpg", 2000), e: malS });
+  const gm = await pedir("/f/fotos/2026/11/x/clave_mala.jpg", { token: T, e: malS });
+  const tt = JSON.stringify(pm.j) + JSON.stringify(gm.j);
+  prueba("con clave equivocada subir/bajar falla en castellano, sin mostrar las claves", pm.j.ok === false && gm.j.ok === false && pm.r.status >= 500 && !tt.includes("otra-clave") && !tt.includes(S3.id) && !R2.objs.has("fotos/2026/11/x/clave_mala.jpg"));
+  const otroB = await pedir("/salud", { e: { ...ENV_S3, R2_BUCKET: "otro-bucket" } });
+  prueba("bucket que no existe → /salud ok:false «revisá R2_BUCKET»", otroB.j.ok === false && /R2_BUCKET/.test(otroB.j.error));
+  // la foto subida por S3 se baja igual y con Range
+  const F2 = archivo("jpg", 50000, 5);
+  await pedir("/f/fotos/2026/11/x/ida_vuelta.jpg", { metodo: "PUT", token: T, tipo: "image/jpeg", cuerpo: F2, e: ENV_S3 });
+  const g2 = await pedir("/f/fotos/2026/11/x/ida_vuelta.jpg", { token: T, e: ENV_S3, h: { Range: "bytes=10-19" } });
+  prueba("S3: ida y vuelta con Range", g2.r.status === 206 && iguales(g2.ab, F2.subarray(10, 20)) && g2.r.headers.get("Content-Type") === "image/jpeg");
+}
+
 // ---------- sin secretos en el código
 {
   const src = readFileSync(new URL("./ema-fotos.js", import.meta.url), "utf8");
-  prueba("el código no tiene claves ni secretos (R2 va por la ligadura)", !/sk-ant-|AKIA[0-9A-Z]{8}|secret_?access|accessKeyId|-----BEGIN/i.test(src) && !/env\.[A-Z_]*(KEY|SECRET|TOKEN)/.test(src));
+  prueba("el código no tiene claves ni secretos escritos (las de R2 se leen de los Secrets)", !/sk-ant-|AKIA[0-9A-Z]{8}|secret_?access|accessKeyId|-----BEGIN/i.test(src) && !/R2_(SECRET|KEY_ID)\s*[:=]\s*["'`]/.test(src) && !/env\.[A-Z_]*(KEY|SECRET|TOKEN)\b(?!_ID)/.test(src.replace(/env\.R2_(SECRET|KEY_ID|BUCKET|ENDPOINT)/g, "")));
+  prueba("el código no escribe nada en el registro (console)", !/console\./.test(src));
 }
 
 console.log("\nRESULTADO ema-fotos v2: " + ok + "/" + (ok + malas) + " OK");

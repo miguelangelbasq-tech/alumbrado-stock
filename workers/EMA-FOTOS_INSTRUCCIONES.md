@@ -2,7 +2,25 @@
 
 El Worker `ema-fotos` es el que guarda las fotos de la app en la nube de Cloudflare (el «bucket» `s3fotos`). La app le manda cada foto con el usuario de la persona; el Worker revisa que la sesión sea válida y la guarda.
 
-No tiene claves adentro: entra al bucket por un **enlace** (Cloudflare lo llama «Binding»).
+No tiene claves adentro: entra al bucket por un **enlace** (Cloudflare lo llama «Binding») o, si tu cuenta no deja hacer el enlace, con las **4 claves que ya cargaste** como «Secret» (como el Worker de antes).
+
+---
+
+## ✅ Actualizar el Worker para la v160 (sin vinculación, con las 4 claves) — 5 minutos
+
+Tu cuenta no deja agregar el enlace de R2 («Disponible en suscripción R2»). No hace falta: este código nuevo entra al bucket con las 4 claves que ya están cargadas (`R2_BUCKET`, `R2_ENDPOINT`, `R2_KEY_ID`, `R2_SECRET`), igual que el de antes.
+
+1. **dash.cloudflare.com** › **Workers & Pages** › **`ema-fotos`** › **Edit code** («Editar código»).
+2. Borrá todo y pegá el contenido completo del archivo **`ema-fotos.js`** nuevo (el que te pasé; es el mismo que `workers/ema-fotos.js` en GitHub).
+3. Tocá **Deploy** («Implementar»).
+4. **No toques las claves** (Settings › Variables and Secrets): quedan como están. No agregues ningún enlace.
+5. Abrí en el navegador `https://ema-fotos.mdiaz-60f.workers.dev/salud`. Tiene que decir **`"ok":true`**, **`"r2":true`**, `"enlace":"s3"`, `"multipart":true` y `"version":"v2-fotos"`.
+   - Si dice `"ok":false`, leé el `"error"`: dice si una clave no tiene permiso o si el bucket no se encuentra. Volvé atrás (abajo) y avisame qué dice.
+6. Abrí la app, sacá una foto de prueba y fijate que aparezca en el legajo. Listo.
+
+**Para volver atrás** (si algo no anda): Worker `ema-fotos` › **Deployments** («Implementaciones») › en la versión **`1fb474cc`** tocá **⋯** › **Rollback** («Revertir» / «Volver a esta versión»). Las fotos siguen andando como antes.
+
+> Lo de abajo (pasos con el enlace) queda para cuando la cuenta tenga el enlace de R2. Con las claves no hace falta.
 
 ---
 
