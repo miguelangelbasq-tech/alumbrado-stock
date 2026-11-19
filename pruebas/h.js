@@ -114,6 +114,7 @@ async function abrir(op = {}) {
   if (!op.v173) await page.addInitScript(() => { window.__v173No = true; });   // v173: las pruebas viejas siguen sin el horario de cada uno en la orden ni «cada uno lo suyo» en las tareas repartidas; v173:true lo prueba
   if (!op.v175) await page.addInitScript(() => { window.__v175No = true; });   // v175: las pruebas viejas siguen sin las herramientas del asistente para cargar el personal; v175:true lo prueba
   if (!op.v176) await page.addInitScript(() => { window.__v176No = true; });   // v176: las pruebas viejas siguen sin el Guardián de datos (copia diaria, alertas, hoja, asistente, auditoría con cuentas); v176:true lo prueba
+  if (!op.v177) await page.addInitScript(() => { window.__v177No = true; });   // v177: las pruebas viejas siguen con el Inicio de antes (logo al centro de la portada); v177:true prueba el Inicio prolijo
   if (op.antes) await page.addInitScript(op.antes, op.antesArg === undefined ? null : op.antesArg);   // v109: preparar la página (p. ej. simular la app de Android)
   if (op.sesion) await page.addInitScript(e => { if (!sessionStorage.getItem('stub.sesion0')) { sessionStorage.setItem('stub.sesion', e); sessionStorage.setItem('stub.sesion0', '1'); } }, op.sesion + '@' + DOM);
   const errores = [];

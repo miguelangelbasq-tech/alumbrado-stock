@@ -2,6 +2,21 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v177 — 19/11/2026 (armada, sin publicar) · El Inicio prolijo (el logo de EMA en su lugar)
+**Pedido (Ángel, 19/11, mirando el Inicio de admin en la compu):** «la ubicación del cartel de EMA… no se está respetando la prolijidad y la belleza de la interfaz que veníamos manejando, ¿qué pasó?».
+
+**Qué pasó:** la portada de Dirección (v155, maqueta con el logo al centro entre el menú y la campanita) pasó a ser el Inicio de Administración y Oficina en la v161 (`inicioUnico`). En la compu esa portada pone «El número del día» en la mitad derecha, pegada a la barra de arriba (0 px), así que el logo centrado quedaba encima de la caja, como un rótulo de ella. Hasta la v160 (Inicio Ejecutivo) el logo iba a la izquierda junto al menú, como en el encabezado de todas las pantallas. Igual en v161, v166, v172, v175 y v176. De paso: el `#iniDir button{padding:0}` de la v155 les sacaba la forma a «Ver la de mañana ›» y «Ajustes» de la orden sugerida (quedaban de 23 px, sin relleno) y el chip elegido de Obras sin el degradé; en 1280–1440 el rótulo «todavía no hay ritmo suficiente para estimar» se cortaba con «…».
+
+**Qué cambia (solo CSS `ordenInicio177Css` + la clase `html.v177`, bandera `__v177No`; admin/oficina y Dirección):** el logo a la izquierda junto al menú, a 20 px y de 34 px como el encabezado de las otras pantallas (celu: a 12 px, 30 px); la campanita a la derecha; «El número del día» 16 px más abajo (aire con la barra); los rótulos de los 6 números en hasta 2 renglones; los botones de la sugerida con relleno y 44 px; el chip elegido con el degradé. No toca JS ni otras pantallas.
+
+**Visto y no tocado:** en la curva S, «Hoy 0,0%» se encima con la etiqueta del mes (lo dibuja el gráfico, no es CSS); en el celu la lengüeta del asistente (se arrastra) puede tapar la punta del botón «Asistente».
+
+**Cómo se arma:** `herramientas/v177/patch_v177.py` sobre el ORIGINAL 176 (`f3dc5b3e…`): el estilo y la clase justo después de `inicioDirCss` (antes de que se dibuje el Inicio). Sin reglas nuevas.
+
+**Pruebas:** `t_v177` (nueva) PC 52/52 · celu 16/16 (contra la v176: falla, reproduce lo de Ángel); `t_v161` 38/38 · 40/40 (también con `v177:true`); `t_v155` grupo 0 (Inicio de Dirección) 16/16 · 17/17 (también con `v177:true`); `t_v136` 45/45 · 55/55. Capturas antes/después: 1916×1000, 1440×900, 1280×800 y celu, admin y Dirección.
+
+**Sello:** `2026-11-19 09:56 · bd9160` · ORIGINAL `d7367b93589c928e59875ca89a177afe51342033bb84f31920d46ff24b437440` · index `a4d46d8e031d2eec07960725302175f64f79034256a09bee558a3fbbd6556b0b`.
+
 ## v176 — 19/11/2026 (publicada en GitHub 19/11) · 🛡 Guardián de datos (solo Administración)
 **Pedido (Ángel, 19/11, después de que el 18/11 a las 12:36 se pisó la nómina —10 de 15 personas, legajos, valor hora—, se vaciaron los vehículos y faltan datos de precios):** «hay que tener algo controlador, o que la IA tenga eso, porque no pueden pasar cosas así; es muy grave». Después: «el Guardián es solo para Administración».
 
