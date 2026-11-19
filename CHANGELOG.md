@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v182 — 19/11/2026 (armada, sin publicar) · Datos seguros: los agujeros de la auditoría del 19/11
+## v182 — 19/11/2026 (publicada en GitHub 19/11) · Datos seguros: los agujeros de la auditoría del 19/11
 **Pedido:** arreglar lo que encontró la auditoría del 19/11 sobre la v176 («¿pasó algo más?», `INFORME.md`): lugares donde se podían pisar o borrar datos de verdad.
 
 **Qué cambia (sin bandera: son arreglos; módulo `datosSeguros` + `datosSegurosCss` + reemplazos chicos):**
