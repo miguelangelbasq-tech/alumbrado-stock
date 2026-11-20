@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v186 — 19/11/2026 (armada, sin publicar) · El Inicio nuevo (contador del contrato), Órdenes › «Mañana», 📋 Itemizado y 📅 Gantt
+## v186 — 19/11/2026 (publicada en GitHub 20/11) · El Inicio nuevo (contador del contrato), Órdenes › «Mañana», 📋 Itemizado y 📅 Gantt
 **Pedido (Ángel, 20/11):** aprobó las maquetas del Inicio: «usemos la A que vos decías» = la opción A con la recomendación (el contador grande, sin segundos en el celu; de la B, el mapa y «las plazas de hoy» en UNA tarjeta, con el mismo número en el pin y en la fila). Y: «El tema del Gantt tiene que estar en un nuevo ítem del menú, como Gantt».
 
 **Qué cambia (módulos `inicio186` —temprano, justo después de `inicioUnico`— y `plan186` —antes de `revisarAppDiag`—, bandera `__v186No`; sin reglas nuevas):**
