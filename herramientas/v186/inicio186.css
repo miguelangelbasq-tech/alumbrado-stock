@@ -141,3 +141,5 @@
 .mn6 .mn6-st em{font:700 13px var(--mono);font-style:normal;color:#9A5B00}
 .mn6 .mn6-eb{font:600 11px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:#1E6F91}
 .mn6 h2{margin:2px 0 4px;font-size:19px}
+
+html.v186 #sgTab{display:none !important}   /* la línea de la sugerida del tablero: ahora está la subpestaña «Mañana» */

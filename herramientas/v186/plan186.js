@@ -132,7 +132,7 @@ ${F.length ? `<table class="g6-tab"><thead><tr><th>Ítem</th><th>Contr.</th><th>
     const o = SI.obra ? obraDe(SI.obra) : null; if (SI.obra && !o) SI.obra = "";
     const h = chipsHtml("iz", SI.obra) + (o ? izObraHtml(o) : izZonaHtml());
     const b = ov.querySelector(".g6-body"); if (b.__h !== h) { b.innerHTML = h; b.__h = h; }
-    if (SI.acta) { SI.acta = false; setTimeout(() => { const i = $("zcInicio"); if (i) { i.scrollIntoView({ block: "center" }); try { i.focus(); } catch (e) { } } }, 60); }
+    if (SI.acta) { SI.acta = false; setTimeout(() => { const i = ov.querySelector("#zcInicio"); if (i) { i.scrollIntoView({ block: "center" }); try { i.focus(); } catch (e) { } } }, 60); }
   }
   function izAbrir(op) {
     op = op || {};
@@ -203,7 +203,7 @@ ${F.length ? `<table class="g6-tab"><thead><tr><th>Ítem</th><th>Contr.</th><th>
     return out;
   }
   function filaG(o, k) {   // lo que tiene el buffer (editado) o lo guardado
-    const b = obj(obj(SG.buf[o.id])[k]); const g = k === "obra" ? (() => { const e = arr(o.planGantt).find((x) => x && x.g186 === "obra"); return e ? { desde: String(e.desde).slice(0, 10), hasta: String(e.hasta || e.desde).slice(0, 10) } : { desde: "", hasta: "" }; })() : previstaRubro(o, k);
+    const b = obj(obj(SG.buf[o.id])[k]); const g = k === "obra" ? (() => { const p = previstaObra(o); return p.de === "obra" || p.de === "plan" ? { desde: p.desde, hasta: p.hasta } : { desde: "", hasta: "" }; })() : previstaRubro(o, k);
     return { desde: b.desde != null ? b.desde : g.desde, hasta: b.hasta != null ? b.hasta : g.hasta, antes: g, mod: b.desde != null || b.hasta != null };
   }
   function escala(fechas) {
@@ -215,7 +215,7 @@ ${F.length ? `<table class="g6-tab"><thead><tr><th>Ítem</th><th>Contr.</th><th>
   function escHtml(S) {
     let s = ""; const d0 = dia0(S.lo); for (let d = new Date(d0.getFullYear(), d0.getMonth() + 1, 1, 12), i = 0; i < 24 && iso(d) <= S.hi; i++, d.setMonth(d.getMonth() + 1)) s += `<span style="left:${S.x(iso(d)).toFixed(1)}%">${MESES[d.getMonth()]}</span>`;
     s += `<em class="h" style="left:${S.x(hoy()).toFixed(1)}%">hoy</em>`;
-    if (okF(S.C.plazo) && S.C.plazo <= S.hi) s += `<em class="f" style="left:${Math.min(88, S.x(S.C.plazo)).toFixed(1)}%">fin contrato ${dm(S.C.plazo)}</em>`;
+    if (okF(S.C.plazo) && S.C.plazo <= S.hi) s += `<em class="f" style="left:${S.x(S.C.plazo).toFixed(1)}%;transform:translateX(-100%)">fin contrato ${dm(S.C.plazo)} →</em>`;
     return `<div class="g6-esc" aria-hidden="true">${s}</div>`;
   }
   function trk(S, pv, re, ri, tarde) {
@@ -398,6 +398,8 @@ ${l.length ? escHtml(S) + `<div class="g6-gt">${filas}</div>` + ley : '<div clas
     menuItem("menuGantt186", "📅", "Gantt", gtAbrir, () => $("menuItemizado186"));
   }
   setInterval(() => { try { menu(); } catch (e) { } }, 2500);
+  { const am = window.abrirMenuLateral;   // el menú se rearma al abrirlo: los dos ítems se ponen enseguida
+    if (typeof am == "function" && !am.__g6) { const n = function () { const r = am.apply(this, arguments); try { menu(); } catch (e) { } setTimeout(() => { try { menu(); } catch (e) { } }, 0); return r; }; window.__heredar && window.__heredar(n, am); n.__g6 = 1; window.abrirMenuLateral = n; } }
   document.addEventListener("permisos-listos", () => setTimeout(() => { try { menu(); } catch (e) { } }, 80));
 
   // ================================================================== Órdenes › «🗓 Mañana» (la orden sugerida)
@@ -411,7 +413,7 @@ ${l.length ? escHtml(S) + `<div class="g6-gt">${filas}</div>` + ley : '<div clas
     if (d.noSeTrabaja) return `<div class="card mn6"><div class="mn6-eb">Sugerida · ${esc(fc)}</div><h2>Ese día no se trabaja</h2><button type="button" class="btn-ghost" data-sg="abrir" data-f="${esc(f)}" data-cfg="1">Ajustes</button></div>`;
     const sinT = intentar(() => (window.__sinTarea && !window.__v145No ? window.__sinTarea.sinTarea(f) : []), []) || [];
     const libres = arr(d.libres).map((p) => p.nombre).concat(sinT.map((p) => String(p.nombre || p))).filter((x, i, a) => x && a.indexOf(x) === i);
-    const ob = l.map((o) => `<div class="mn6-ob"><div class="mn6-h"><b>${esc(String(o.obra).toUpperCase())}</b><em>${o.pts ? esc(fN(o.pts.total)) + " pts" : ""}</em></div><small>${esc(arr(o.gente).map((p) => p.nombre.split(" ")[0]).join(", ") || "sin gente")} · ${esc(arr(o.vehiculos).map((v) => v.nombre).join(", ") || "sin vehículo")}</small><div class="mn6-ch">${arr(o.tareas).map((t) => `<span>${esc(t.label)} × ${esc(fN(t.cant))}${t.colsTxt ? " (" + esc(t.colsTxt) + ")" : ""}</span>`).join("")}</div>${arr(o.avisos).filter((a) => a.n === "rojo").slice(0, 2).map((a) => `<div class="sg-av rojo">⚠ ${esc(a.t)}</div>`).join("")}</div>`).join("");
+    const ob = l.map((o) => `<div class="mn6-ob"><div class="mn6-h"><b>${esc(String(o.obra).toUpperCase())}</b><em>${o.pts ? esc(fN(o.pts.total, 1)) + " pts" : ""}</em></div><small>${esc(arr(o.gente).map((p) => p.nombre.split(" ")[0]).join(", ") || "sin gente")} · ${esc(arr(o.vehiculos).map((v) => v.nombre).join(", ") || "sin vehículo")}</small><div class="mn6-ch">${arr(o.tareas).map((t) => `<span>${esc(t.label)} × ${esc(fN(t.cant))}${t.colsTxt ? " (" + esc(t.colsTxt) + ")" : ""}</span>`).join("")}</div>${arr(o.avisos).filter((a) => a.n === "rojo").slice(0, 2).map((a) => `<div class="sg-av rojo">⚠ ${esc(a.t)}</div>`).join("")}</div>`).join("");
     const em = arr(d.emitidas).map((o) => `<div class="mn6-ob"><div class="mn6-h"><b>${esc(String(o.obra).toUpperCase())}</b><em>✅ ${esc((o.emitida || {}).numero || "emitida")}</em></div><small>${esc(arr(o.gente).map((p) => p.nombre.split(" ")[0]).join(", "))}</small></div>`).join("");
     const C = intentar(() => s.cfg(), {}) || {};
     return `<div class="card mn6"><div class="mn6-eb">Sugerida · ${esc(fc)}</div><h2>Lo que la app armó para mañana</h2><small>Con lo que queda de cada obra y la gente libre. Nada sale sin «Emitir». Antes estaba en el Inicio.</small>

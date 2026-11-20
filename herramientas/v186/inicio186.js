@@ -15,7 +15,8 @@
   //  Pruebas viejas: window.__v186No.
   const V = window.__v135;
   if (window.__v186No || !V) { window.__ini186 = { on: () => false, pintar() { } }; return; }
-  window.__ini186Hoja = true;   // «Ver todos los indicadores»: la hoja de Dirección se arma con las piezas del Ejecutivo (admin/oficina)
+  window.__ini186Hoja = true;
+  try { document.documentElement.classList.add("v186"); } catch (e) { }   // «Ver todos los indicadores»: la hoja de Dirección se arma con las piezas del Ejecutivo (admin/oficina)
   const $ = (id) => document.getElementById(id);
   const esc = V.esc, intentar = V.intentar;
   const num = (v) => { const x = parseFloat(String(v == null ? "" : v).replace(",", ".")); return isFinite(x) ? x : 0; };
@@ -125,11 +126,11 @@
     if (esDir()) return { n: dl.length, txt: dl.map((a) => a.t), dl, el: [] };
     const b = window.__inicioPro && window.__inicioPro.bloques, d = b ? intentar(() => b.datos(), null) : null, el = b && d ? intentar(() => b.atender(d, true), []) || [] : [];
     const hayAtras = el.some((x) => x.ir === "atras" || x.ir === "cerrar"), dl2 = dl.filter((a) => !(hayAtras && a.ir === "ordenes"));
-    return { n: dl2.length + el.reduce((s, x) => s + (x.n || 1), 0), txt: el.map((x) => (x.n > 1 && !/^\d/.test(String(x.t)) ? x.n + " · " : "") + x.t).concat(dl2.map((a) => a.t)), dl: dl2, el, d };
+    return { n: dl2.length + el.reduce((s, x) => s + (x.n || 1), 0), txt: el.map((x) => String(x.t).replace(/^[^\wÁÉÍÓÚÑáéíóúñ¿]+/, "") + (x.n > 1 ? " (" + x.n + ")" : "")).concat(dl2.map((a) => a.t)), dl: dl2, el, d };
   }
   function atLinea(D) {
     const A = atDatos(); st.at = A;
-    return `<button type="button" class="i6-at" data-i186="at" aria-expanded="${st.atAb}">⚠ Para atender <i class="${A.n ? "" : "cero"}">${A.n}</i><span>${A.n ? esc(A.txt.slice(0, 3).join(" · ")) : "Nada urgente: todo en orden 👌"}</span><em>${st.atAb ? "▴" : "›"}</em></button>`;
+    return `<button type="button" class="i6-at" data-i186="at" aria-expanded="${st.atAb}"><b style="white-space:nowrap;flex:none">⚠ Para atender</b><i class="${A.n ? "" : "cero"}">${A.n}</i><span>${A.n ? esc(A.txt.slice(0, 3).join(" · ")) : "Nada urgente: todo en orden 👌"}</span><em>${st.atAb ? "▴" : "›"}</em></button>`;
   }
   function atListaHtml() {
     if (!st.atAb) return "";
@@ -183,7 +184,7 @@
       L.forEach((p) => {
         const o = p.o; if (!o || o.lat == null || !isFinite(+o.lat) || !isFinite(+o.lng)) return;
         const ll = [+o.lat, +o.lng]; pts.push(ll);
-        window.L.marker(ll, { icon: window.L.divIcon({ className: "i6-pin", html: `<span class="p${p.sinCerrar ? "" : " gris"}"></span><span class="n">${p.n}</span><span class="l">${esc(p.nom.replace(/^PLAZA\s+/, ""))} · ${p.ahora}%</span>`, iconSize: [28, 28], iconAnchor: [14, 28] }), keyboard: false }).addTo(st.capa).on("click", () => irObra(p.id));
+        window.L.marker(ll, { icon: window.L.divIcon({ className: "i6-pin", html: `<span class="p${p.antes != null && p.ahora <= p.antes ? " gris" : ""}"></span><span class="n">${p.n}</span><span class="l">${esc(p.nom.replace(/^PLAZA\s+/, ""))} · ${p.ahora}%</span>`, iconSize: [28, 28], iconAnchor: [14, 28] }), keyboard: false }).addTo(st.capa).on("click", () => irObra(p.id));
         if (p.pos && isFinite(+p.pos.lat)) { window.L.circleMarker([+p.pos.lat, +p.pos.lng], { radius: 7, color: "#fff", weight: 2, fillColor: "#34C759", fillOpacity: 1 }).addTo(st.capa); pts.push([+p.pos.lat, +p.pos.lng]); }
       });
       if (pts.length > 1) st.mapa.fitBounds(pts, { padding: [36, 36], maxZoom: 15 }); else if (pts.length === 1) st.mapa.setView(pts[0], 15);
