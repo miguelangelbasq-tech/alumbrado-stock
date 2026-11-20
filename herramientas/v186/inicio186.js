@@ -82,7 +82,7 @@
     const k = o.id + "|" + hoy(), c = cAntes[k];
     if (c && ahora() - c.t < 30000) return c.v;
     const v = intentar(() => (window.__av2 && window.__av2.pctHasta ? window.__av2.pctHasta(o, hoy()) : null), null);
-    cAntes[k] = { t: ahora(), v }; return v;
+    if (v != null) cAntes[k] = { t: ahora(), v }; return v;
   }
   // lo previsto por las fechas del Gantt (v186): % que tendríamos que ir hoy, sobre los módulos de la zona
   function planPct(D) {
