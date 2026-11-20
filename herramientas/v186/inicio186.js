@@ -120,7 +120,8 @@
   }
 
   // ================================================================ «Para atender» en una línea
-  const st = { atAb: false, iz: "rub", mapa: null, capa: null, h: {}, firmaMapa: "", t: null };
+  const st = { atAb: false, iz: "rub", mapa: null, capa: null, h: {}, firmaMapa: "", t: null, atHtml: "" };
+  let M = null;   // lo calculado (caro): se rehace solo cuando cambian los datos (v186, chequeo de rendimiento)
   function atDatos() {
     const dl = intentar(() => ID().atencion(), []) || [];
     if (esDir()) return { n: dl.length, txt: dl.map((a) => a.t), dl, el: [] };
@@ -129,12 +130,13 @@
     return { n: dl2.length + el.reduce((s, x) => s + (x.n || 1), 0), txt: el.map((x) => String(x.t).replace(/^[^\wÁÉÍÓÚÑáéíóúñ¿]+/, "") + (x.n > 1 ? " (" + x.n + ")" : "")).concat(dl2.map((a) => a.t)), dl: dl2, el, d };
   }
   function atLinea(D) {
-    const A = atDatos(); st.at = A;
+    const A = M && M.A;
+    if (!A) return `<button type="button" class="i6-at" data-i186="at" aria-expanded="${st.atAb}"><b style="white-space:nowrap;flex:none">⚠ Para atender</b><span style="margin-left:8px">revisando…</span><em>›</em></button>`;
     return `<button type="button" class="i6-at" data-i186="at" aria-expanded="${st.atAb}"><b style="white-space:nowrap;flex:none">⚠ Para atender</b><i class="${A.n ? "" : "cero"}">${A.n}</i><span>${A.n ? esc(A.txt.slice(0, 3).join(" · ")) : "Nada urgente: todo en orden 👌"}</span><em>${st.atAb ? "▴" : "›"}</em></button>`;
   }
-  function atListaHtml() {
+  function atListaHtml() {   // caro: solo al desplegarla o al recalcular con ella desplegada
     if (!st.atAb) return "";
-    const A = st.at || atDatos();
+    const A = (M && M.A) || atDatos();
     if (!esDir() && window.__iniUnico && A.d) { intentar(() => window.__iniUnico.clonarCss(), null); return `<div class="i6-card ie-dentro i6-atl" style="padding:0">${intentar(() => window.__iniUnico.atenderHtml(A.d), "")}</div>`; }
     const filas = A.dl.map((a, i) => `<button type="button" class="ie-fila" data-dr="at:${i}"><span class="ie-tx"><b>${esc(a.t)}</b><small>${esc(a.s || "")}</small></span></button>`).join("");
     return `<div class="i6-card i6-atl"><div class="i6-eb">Para atender</div>${filas || '<div class="i6-nada">Nada urgente: todo en orden. 👌</div>'}</div>`;
@@ -195,7 +197,7 @@
 
   // ================================================================ el avance del contrato (itemizado de la zona)
   function izHtml(D) {
-    const Z = zonaRub(), z = D.z, pct = num(z.pct), C = 2 * Math.PI * 40;
+    const Z = M.Z, z = D.z, pctObra = (o) => num(M.pcts[o.id]), pct = num(z.pct), C = 2 * Math.PI * 40;
     const enObra = Z.ob.filter((o) => { const a = pctObra(o); return a > 0 && a < 100; }).length, sinEmp = Math.max(0, num(z.plazas) - num(z.terminadas) - enObra);
     const seg = `<div class="i6-seg" role="tablist"><button type="button" role="tab" class="${st.iz === "rub" ? "on" : ""}" aria-selected="${st.iz === "rub"}" data-i186="iz:rub">Por rubro</button><button type="button" role="tab" class="${st.iz === "pla" ? "on" : ""}" aria-selected="${st.iz === "pla"}" data-i186="iz:pla">Por plaza</button></div>`;
     let cuerpo = "";
@@ -222,24 +224,74 @@
     return r;
   }
   function poner(id, h) { const e = $(id); if (!e || st.h[id] === h) return false; e.innerHTML = h; st.h[id] = h; return true; }
-  let cacheD = null;
-  function pintar() {
+  // ---- los datos del Inicio, livianos (sin la programación de cada obra que arma inicioDir.datos)
+  const habil = (d) => d.getDay() !== 0 && d.getDay() !== 6;
+  function habilesHasta(f) { const b = dia0(f); if (!b) return 0; let n = 0; const d = dia0(hoy()); for (let i = 0; i < 1500 && d < b; i++) { if (habil(d)) n++; d.setDate(d.getDate() + 1); } return n; }
+  function datosLivianos() {
+    const h = hoy(), z = intentar(() => ZC().resumen(), null) || { pct: 0, k: 0, modulos: 0, terminadas: 0, plazas: 0, label: "Nuestra zona" };
+    const C = intentar(() => ID().contrato(), null) || { ini: "", plazo: "", meses: 4, estimada: true, sinDato: true };
+    const falta = Math.max(0, num(z.modulos) - num(z.k)), quedan = C.plazo ? Math.max(1, habilesHasta(C.plazo)) : 0;
+    return { h, z, C, ritmo: C.plazo ? falta / quedan : 0, hoyOts: ots().filter((o) => String(o.fecha || "").slice(0, 10) === h) };
+  }
+  // ---- la firma de los datos: si no cambió, no se recalcula nada (las escuchas reemplazan las listas cuando llega algo)
+  const IDS = typeof WeakMap == "function" ? new WeakMap() : null; let idN = 0;
+  const idDe = (x) => { if (!x || typeof x != "object" || !IDS) return 0; let v = IDS.get(x); if (!v) { v = ++idN; IDS.set(x, v); } return v; };
+  function firma() {
+    let a = null, b = null; try { a = ordenesTrabajo; } catch (e) { } try { b = avanceObras; } catch (e) { }
+    return [idDe(a), a && a.length, idDe(b), b && b.length, (() => { const P = window.__preciosNube || {}; return [P.contratoInicio, P.contratoPlazoMeses, P.zonaContrato].join("/"); })(), intentar(() => V.avisosSinLeer(), 0), hoy(), [window.__av2, window.__zonaContrato, window.__mapaControl, window.__supervisor, window.__sugerida, window.__iniUnico].map((x) => (x ? 1 : 0)).join(""), on() ? 1 : 0, esDir() ? 1 : 0, Math.floor(Date.now() / 6e5)].join("|");
+  }
+  const stats = { calc: [], render: [], ticks: 0, pintar: 0, saltos: 0 };
+  function calcular() {
+    const t0 = performance.now(), D = datosLivianos(), A = M && M.A, L = plazasHoy(D), Z = zonaRub(), pcts = {};
+    Z.ob.forEach((o) => { const k = kObra(o); pcts[o.id] = k.c > 0 ? Math.min(100, (k.h / k.c) * 100) : 0; });   // el % del itemizado (barato; el avance de obra nuevo solo para las plazas de hoy)
+    M = { D, A, L, Z, pcts, ts: Date.now(), firma: firma() };
+    pedirAtender(false);
+    st.sucio = false; stats.calc.push(Math.round(performance.now() - t0)); if (stats.calc.length > 40) stats.calc.shift();
+  }
+  // «Para atender» junta el Supervisor, las alertas del Mapa de guerra, la sugerida… (caro): aparte, después de dibujar, y como
+  // mucho una vez por minuto aunque cambien los datos
+  function pedirAtender(forzar) {
+    if (st.atTm) return;
+    const falta = forzar || !M || !M.A ? 40 : Math.max(40, 60000 - (Date.now() - (st.atTs || 0)));   // solo después de un cambio de datos
+    st.atTm = setTimeout(() => {
+      st.atTm = 0; if (!M || !on() || !visible()) return;
+      const t0 = performance.now(); M.A = atDatos(); st.atTs = Date.now(); stats.at = (stats.at || []).concat([Math.round(performance.now() - t0)]).slice(-20);
+      st.atHtml = st.atAb ? atListaHtml() : ""; render();
+    }, falta);
+  }
+  function render() {
+    if (!M) return; const t0 = performance.now(), D = M.D;
+    poner("i186Hero", heroHtml(D));
+    poner("i186AtL", st.atAb ? st.atHtml : "");
+    const H = hoyHtml(D, M.L); poner("i186HoyCab", H.cab); poner("i186HoyL", H.lista);
+    poner("i186Iz", izHtml(D));
+    mapa(M.L);
+    stats.render.push(Math.round(performance.now() - t0)); if (stats.render.length > 40) stats.render.shift();
+  }
+  const visible = () => { if (document.hidden) return false; const v = $("viewInicio"); return !!v && v.style.display !== "none" && document.body.dataset.vista !== "plaza"; };
+  function preparar() {
+    const v = $("viewInicio"); if (!v) return null;
+    const rd = $("iniDir"); if (rd && rd.parentNode === v && rd.style.display !== "none") rd.style.display = "none";
+    const ej = $("iniEje"); if (ej && ej.style.display !== "none") ej.style.display = "none";
+    const r = asegurar(); if (r && r.style.display === "none") r.style.display = "";
+    return r;
+  }
+  // lo llaman el relojito de 2,5 s de inicioPro y el de inicioDir: barato (compara la firma); recalcula solo si cambió algo,
+  // juntando los cambios (1,5 s quieto) y como mucho una vez cada 15 s; con el Inicio escondido, nada
+  function pintar(forzar) {
+    stats.pintar++;
     if (!on()) return;
-    const v = $("viewInicio"); if (!v || v.style.display === "none") return;
-    const t0 = performance.now();
-    const rd = $("iniDir"); if (rd && rd.parentNode === v) rd.style.display = "none";
-    const ej = $("iniEje"); if (ej) ej.style.display = "none";
-    const r = asegurar(); if (!r) return; r.style.display = "";
+    if (!visible()) { st.vis = false; return; }
+    const r = preparar(); if (!r) return;
+    const volvio = !st.vis; st.vis = true;
     try {
-      const D = intentar(() => ID().datos(), null); if (!D) return;
-      cacheD = D;
-      poner("i186Hero", heroHtml(D));
-      poner("i186AtL", atListaHtml());
-      const L = plazasHoy(D), H = hoyHtml(D, L);
-      poner("i186HoyCab", H.cab); poner("i186HoyL", H.lista);
-      poner("i186Iz", izHtml(D));
-      mapa(L);
-      if (!st.t) st.t = { primera: Math.round(performance.now() - t0) };
+      if (forzar || !M) { const t0 = performance.now(); calcular(); render(); if (!st.t) st.t = { primera: Math.round(performance.now() - t0) }; return; }
+      const f = firma(); if (f !== M.firma && !st.sucio) { st.sucio = true; stats.cambios = (stats.cambios || []).concat([[M.firma, f]]).slice(-6); }
+      if (!st.sucio) { stats.saltos++; return; }
+      if (volvio && Date.now() - M.ts > 15000) { calcular(); render(); return; }
+      if (st.tm) return;
+      const espera = Math.max(1500, 15000 - (Date.now() - M.ts));
+      st.tm = setTimeout(() => { st.tm = 0; if (!on() || !visible()) return; calcular(); render(); }, espera);
     } catch (e) { console.warn("[inicio186]", e); }
   }
   function irObra(id) {
@@ -247,24 +299,29 @@
     if (V.ve("avance") && typeof window.irADetalleDesdeMapa == "function") { try { window.irADetalleDesdeMapa(id); return; } catch (e) { } }
     if (typeof window.abrirLegajo == "function" && V.ve("obras")) { V.ir("obras"); setTimeout(() => window.abrirLegajo(id), 120); }
   }
-  // el reloj: cada segundo (solo con el Inicio a la vista; en el celu cambia cada minuto)
-  setInterval(() => {
+  // el reloj: solo el texto de los números; cada 1 s en la compu (con segundos) y al cambiar el minuto en el celu
+  function tic() {
     try {
-      const r = $("ini186"); if (!r || r.style.display === "none" || !r.offsetHeight || !cacheD) return;
-      const T = tiempo(cacheD.C); if (!T) return;
+      stats.ticks++;
+      const r = $("ini186"); if (!r || !M || !visible() || r.style.display === "none") return;
+      const T = tiempo(M.D.C); if (!T) return;
       const set = (k, v) => { const e = r.querySelector('[data-cd="' + k + '"]'); if (e && e.textContent !== v) e.textContent = v; };
       set("d", String(T.d)); set("h", pad(T.h)); set("m", pad(T.m)); set("s", pad(T.s)); set("van", T.van + " " + (T.van === 1 ? "día" : "días"));
-      const cd = $("i186Cd"); if (cd && cd.classList.contains("seg") !== compu()) { st.h.i186Hero = ""; pintar(); }
+      const cd = $("i186Cd"); if (cd && cd.classList.contains("seg") !== compu()) { st.h.i186Hero = ""; render(); }
     } catch (e) { }
-  }, 1000);
-  window.addEventListener("resize", () => { clearTimeout(st.rz); st.rz = setTimeout(() => { st.h = {}; pintar(); try { st.mapa && st.mapa.invalidateSize(); } catch (e) { } }, 250); });
+  }
+  // al terminar de leer la página (los módulos de más abajo ya están: avance de obra, zona, Supervisor…), una vez completo
+  const alFinal = () => setTimeout(() => { try { if (on() && visible()) pintar(true); } catch (e) { } }, 120);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", alFinal); else alFinal();
+  (function reloj() { tic(); setTimeout(reloj, compu() ? 1000 - (ahora() % 1000) + 20 : 60000 - (ahora() % 60000) + 50); })();
+  window.addEventListener("resize", () => { clearTimeout(st.rz); st.rz = setTimeout(() => { st.h = {}; if (M && visible()) render(); try { st.mapa && st.mapa.invalidateSize(); } catch (e) { } }, 250); });
   document.addEventListener("click", (e) => {
     const b = e.target && e.target.closest && e.target.closest("#ini186 [data-i186]"); if (!b) return;
     const a = b.dataset.i186, x = a.indexOf(":") > 0 ? a.slice(a.indexOf(":") + 1) : "";
     e.preventDefault();
-    if (a === "at") { st.atAb = !st.atAb; st.h.i186Hero = ""; return pintar(); }
+    if (a === "at") { st.atAb = !st.atAb; st.atHtml = st.atAb ? atListaHtml() : ""; st.h.i186Hero = ""; return render(); }
     if (a.indexOf("obra:") === 0) return irObra(x);
-    if (a.indexOf("iz:") === 0) { st.iz = x; return pintar(); }
+    if (a.indexOf("iz:") === 0) { st.iz = x; return render(); }
     if (a === "mapa") return V.ir("mapa");
     if (a === "itemizado") return window.__iz186 && window.__iz186.abrir({});
     if (a.indexOf("izobra:") === 0) return window.__iz186 && window.__iz186.abrir({ obra: x });
@@ -272,5 +329,5 @@
     if (a === "todos") return ID() && ID().abrir();
   });
   document.addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && e.target && e.target.classList && e.target.classList.contains("i6-pl")) { e.preventDefault(); e.target.click(); } });
-  window.__ini186 = { on, pintar: () => { cacheD = null; pintar(); }, tiempo, plazasHoy: () => plazasHoy(ID().datos()), zonaRub, kObra, filasObra, rubDeItem, RUBZ, pctObra, pctAntes, planPct: () => planPct(ID().datos()), enZona, nombre, dia0, dmy, iso, ahora, hoy, atDatos, estado: () => ({ on: on(), atAb: st.atAb, iz: st.iz, mapa: !!st.mapa, t: st.t }) };
+  window.__ini186 = { on, pintar: () => pintar(false), forzar: () => pintar(true), tic, tiempo, plazasHoy: () => plazasHoy(datosLivianos()), datos: datosLivianos, zonaRub, kObra, filasObra, rubDeItem, RUBZ, pctObra, pctAntes, planPct: () => planPct(datosLivianos()), enZona, nombre, dia0, dmy, iso, ahora, hoy, atDatos, estado: () => ({ on: on(), atAb: st.atAb, iz: st.iz, mapa: !!st.mapa, t: st.t, sucio: !!st.sucio, calculado: M ? M.ts : 0, stats: JSON.parse(JSON.stringify(stats)) }) };
 })();

@@ -22,6 +22,13 @@ R('e.target.closest("#iniEje [data-ie], #iniPan [data-ie], #iniDir [data-ie]")',
 R('["iniEje", "iniPan", "iniDir"].forEach((id) => { const e = $(id); e && (e.style.display = "none"); });', '["iniEje", "iniPan", "iniDir", "ini186"].forEach((id) => { const e = $(id); e && (e.style.display = "none"); });')
 R('if (m === "dir") { const rd = $("iniDir");', 'if (m === "dir" && window.__ini186 && window.__ini186.on()) { try { window.__ini186.pintar(); } catch (e) { console.warn("[inicio186]", e); } return; }   // v186\n    if (m === "dir") { const rd = $("iniDir");')
 R('#viewInicio.ie-on > :not(#iniEje):not(#iniPan):not(#iniDir){display:none !important}', '#viewInicio.ie-on > :not(#iniEje):not(#iniPan):not(#iniDir):not(#ini186){display:none !important}')
+# --- el Inicio viejo (el de «solo mirar»): con la portada nueva a la vista estaba escondido y cada 4 s calculaba el % de TODAS las
+#     obras para su firma (≈ 2 s de CPU por minuto con 250 obras, chequeo de rendimiento del 19/11): escondido, no hace nada
+R("""    const e = document.getElementById("viewInicio");
+    if (!e || e.style.display === "none") return;
+    const t = K();""", """    const e = document.getElementById("viewInicio");
+    if (!e || e.style.display === "none" || (!window.__v186No && e.classList.contains("ie-on"))) return;   // v186
+    const t = K();""")
 # --- inicioDir: el Inicio lo pinta el módulo nuevo; «Ver todos los indicadores» abre la pantalla de antes en la hoja (con las piezas del Ejecutivo para admin/oficina)
 R('try { pintarEn(v, false); }', 'if (window.__ini186 && window.__ini186.on()) { try { window.__ini186.pintar(); } catch (e) { console.warn("[inicio186]", e); } return; }   // v186\n    try { pintarEn(v, false); }')
 R('if (esDir() || uniAct()) { try { uniAct() && window.__iniUnico.nuevo(); window.mostrarVista("inicio"); } catch (e) { } return true; }', 'if (!(window.__ini186 && window.__ini186.on()) && (esDir() || uniAct())) { try { uniAct() && window.__iniUnico.nuevo(); window.mostrarVista("inicio"); } catch (e) { } return true; }   // v186: con el Inicio nuevo, la pantalla de antes va en la hoja')

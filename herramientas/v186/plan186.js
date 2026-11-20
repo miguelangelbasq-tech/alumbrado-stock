@@ -346,7 +346,7 @@ ${l.length ? escHtml(S) + `<div class="g6-gt">${filas}</div>` + ley : '<div clas
   }
   function refrescarTodo() {
     intentar(() => window.__inicioDir && window.__inicioDir.pintar(), null);
-    intentar(() => window.__ini186 && window.__ini186.pintar(), null);
+    intentar(() => window.__ini186 && window.__ini186.forzar(), null);
     const a = $("iz186Ov"); if (a && !a.hidden) { a.querySelector(".g6-body").__h = ""; izPintar(); }
     const b = $("gt186Ov"); if (b && !b.hidden) { b.querySelector(".g6-body").__h = ""; gtPintar(); }
   }

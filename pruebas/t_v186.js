@@ -13,6 +13,8 @@
 //     contratado sin motivo no deja, con motivo sí (la base, avanceHist, la nota en la fila); Dirección mira sin ✎.
 //  5) 📅 Gantt: fechas de la obra y de un rubro con «Sí» (planGantt con g186, lo de antes se conserva, la «prevista» de
 //     Dirección y el plan del contador las leen); «Repartir» muestra la propuesta sin escribir nada y con «Sí» las pone.
+//  7) (celu) rendimiento: quieto 60 s con CPU ×4 y 250 obras (datosGrande): el Inicio no recalcula ni redibuja; tareas largas
+//     contra el Inicio de antes.
 //  6) roles: oficina igual que admin; Dirección el mismo Inicio sin botones que cambien nada; pañol, cuadrilla y «solo mirar»
 //     sin cambios (mirar ve el Itemizado y el Gantt en el menú, sin editar); con __v186No todo como la v185.
 const { abrir, prueba } = require('./h');
@@ -24,10 +26,10 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
   const c = prueba('v186' + (cel ? ' cel' : ''));
   const MOD = { cel, espera: 5000, v145: true, v146: true, v147: true, v150: true, v151: true, v152: true, v153: true, v154: true, v155: true, v156: true, v157: true, v158: true, v159: true, v160: true, v161: true, v163: true, v165: true, v186: true, ofPasos: true, sugerida: true, inicio: true, nav: true, iaPro: true, leaflet: true, https: true, antes: () => { window.__pmPausa = true; window.__cvSinMic = true; window.__hvPausa = true; window.__isNoAuto = true; } };
   let browser = null;
-  const sesion = async (quien, op, datos) => { const A = await abrir(Object.assign({ sesion: quien, datos: datos || datos155(), browser }, MOD, op || {})); browser = A.browser; A.page.on('dialog', (x) => x.accept()); await A.page.waitForTimeout(2500); await A.page.evaluate(() => { const a = document.getElementById('avisoApp'); if (a) a.style.display = 'none'; }); return A; };
+  const sesion = async (quien, op, datos) => { const A = await abrir(Object.assign({ sesion: quien, datos: datos || datos155(), browser }, MOD, op || {})); browser = A.browser; A.page.on('dialog', (x) => x.accept()); await A.page.waitForTimeout(2500); await A.page.evaluate(() => { ['avisoApp', 'avToast'].forEach((k) => { const a = document.getElementById(k); if (a) a.style.display = 'none'; }); }); return A; };
   const db = (p) => p.evaluate(() => JSON.parse(localStorage.getItem('stub.db') || '{}'));
   const scrollX = (p) => p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  const foto = async (p, nombre, full) => { if (!CAP) return; await p.waitForTimeout(400); await p.evaluate(() => { const a = document.getElementById('avisoApp'); if (a) a.style.display = 'none'; }); await p.screenshot({ path: CAP + '/' + nombre + '_' + (cel ? 'cel' : 'pc') + '.png', fullPage: !!full }); };
+  const foto = async (p, nombre, full) => { if (!CAP) return; await p.waitForTimeout(400); await p.evaluate(() => { ['avisoApp', 'avToast'].forEach((k) => { const a = document.getElementById(k); if (a) a.style.display = 'none'; }); }); await p.screenshot({ path: CAP + '/' + nombre + '_' + (cel ? 'cel' : 'pc') + '.png', fullPage: !!full }); };
   const errsJs = (A) => (A.errores || []).filter((e) => !/Missing or insufficient permissions|permission-denied|ERR_|Failed to fetch|aborted|fetching the script|prueba|sin permiso|Sin permiso|tile|open-meteo/i.test(e));
   const ver = (p, s) => p.evaluate((s) => { const e = document.querySelector(s); if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== 'hidden'; }, s);
   const alInicio = async (p) => { await p.evaluate(() => mostrarVista('inicio')); await p.waitForTimeout(900); };
@@ -84,8 +86,9 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     c(/Termina el martes 09\/03\/2027/.test(r.hero) && /van 11 días de 120 días/.test(r.hero) && /09\/11\/2026/.test(r.hero) && !/estimada/i.test(r.hero) && !r.acta, '«Termina el martes 09/03/2027 · van 11 días de 120 días desde el acta (09/11/2026)», sin «estimada» ni el botón');
     const tp = await p.evaluate(() => window.__ini186.tiempo(window.__inicioDir.contrato()).pct);
     c(Math.abs(tp - (11 * 864e5 + 10 * 36e5 + 42 * 6e4 + 20e3) / (120 * 864e5) * 100) < 0.01 && new RegExp(String(Math.round(tp * 10) / 10).replace('.', ',') + '%').test(r.hero), 'la barra del tiempo: ' + tp.toFixed(2) + ' % (días corridos)');
-    await p.evaluate(() => { window.__i186Ahora += 61000; }); await p.waitForTimeout(1300);
-    r = await ini(p); c(r.cd[2] === '16' && r.cd[0] === '108', 'el contador corre (un minuto después faltan 16 min) · ' + JSON.stringify(r.cd));
+    await p.evaluate(() => { window.__i186Ahora += 61000; if (window.innerWidth <= 900) window.__ini186.tic(); }); await p.waitForTimeout(1300);   // en el celu el reloj cambia al minuto: con la hora de mentira se le da un toque
+    r = await ini(p); if (r.cd[2] !== '16') { await p.evaluate(() => window.__ini186.tic()); await p.waitForTimeout(300); r = await ini(p); }
+    c(r.cd[2] === '16' && r.cd[0] === '108', 'el contador corre (un minuto después faltan 16 min) · ' + JSON.stringify(r.cd));
     await foto(p, 'contador_acta');
     await p.close();
     // sin acta: estimada + el botón de Administración
@@ -99,7 +102,7 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     await p.fill('#iz186Ov #zcInicio', '2026-11-05'); await p.dispatchEvent('#iz186Ov #zcInicio', 'change'); await p.waitForTimeout(800);
     const pr = (await db(p)).configEquipo.precios || {};
     c(pr.contratoInicio === '2026-11-05', 'cargarla la guarda en la base (configEquipo/precios.contratoInicio) · ' + pr.contratoInicio);
-    await p.evaluate(() => window.__iz186.cerrar()); await alInicio(p); await p.evaluate(() => window.__ini186.pintar()); await p.waitForTimeout(400);
+    await p.evaluate(() => window.__iz186.cerrar()); await alInicio(p); await p.evaluate(() => window.__ini186.forzar()); await p.waitForTimeout(400);
     r = await ini(p); c(/Termina el .* 05\/03\/2027/.test(r.hero) && !/Fecha estimada/.test(r.hero), 'y el contador cuenta desde el acta: termina el 05/03/2027');
     await p.close();
     A = await sesion('lucia'); p = A.page; r = await ini(p);
@@ -116,7 +119,7 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     c(await p.evaluate((a) => document.querySelector('#i186HoyL .i6-pl').innerText.indexOf('+' + (a.ahora - a.antes) + ' hoy') >= 0, al), 'la fila dice «▲ +N hoy»');
     // la oficina cierra la de LOS ÁLAMOS con 6 sellados: sube el «ahora», el «antes» queda
     await p.evaluate(() => firebase.firestore().collection('ordenesTrabajo').doc('h130').update({ estado: 'Terminada', cierre: { cerradoTs: Date.now(), fecha: window.__ini186.hoy(), cantidades: { sellado_base: 6 }, horas: 8, avanceItems: [] } }));
-    await p.waitForTimeout(1500); await p.evaluate(() => window.__ini186.pintar()); await p.waitForTimeout(400);
+    await p.waitForTimeout(1500); await p.evaluate(() => window.__ini186.forzar()); await p.waitForTimeout(400);
     const al2 = await p.evaluate(() => window.__ini186.plazasHoy().find((x) => /ÁLAMOS/.test(x.nom)));
     c(al2.ahora > al.ahora && al2.antes === al.antes, 'cerrada con 6: el «ahora» sube (' + al.ahora + ' → ' + al2.ahora + ' %) y el «antes» sigue ' + al2.antes + ' %');
     const m = await p.evaluate(() => ({ pins: [...document.querySelectorAll('#i186Mapa .i6-pin .n')].map((e) => e.textContent), lab: [...document.querySelectorAll('#i186Mapa .i6-pin .l')].map((e) => e.textContent), filas: [...document.querySelectorAll('#i186HoyL .i6-n')].map((e) => e.textContent), leaf: !!document.querySelector('#i186Mapa.leaflet-container') }));
@@ -262,6 +265,27 @@ const SOLO = (x) => !process.env.SOLO || process.env.SOLO.indexOf(x) >= 0;
     await p.waitForTimeout(600);
     const man = await p.evaluate(() => !!document.querySelector('#otTablero [data-tbs="manana"]'));
     c(!r.n && r.iu && !r.menu && !man, 'con __v186No todo como la v185 (#iniDir.iu, sin menús nuevos ni «Mañana») · ' + JSON.stringify(r)); await p.close();
+  }
+  // ================================================================= 7) rendimiento: quieto 60 s en el Inicio, celu con CPU ×4, 250 obras
+  //  (chequeo de rendimiento del 19/11: el Inicio de la v161 se rearmaba entero cada 2,5 s y congelaba ≈ 0,8 s cada vez)
+  if (SOLO('7') && cel) {
+    const { datosGrande } = require('./datosGrande');
+    const quieto = async (op) => {
+      const A = await abrir(Object.assign({ sesion: 'admin', datos: datosGrande({}), browser }, MOD, { espera: 9000, leaflet: false, antes: () => { window.__stubPorColeccion = true; window.__pmPausa = true; window.__cvSinMic = true; window.__hvPausa = true; window.__isNoAuto = true; window.__lt186 = []; try { new PerformanceObserver((l) => l.getEntries().forEach((e) => window.__lt186.push([Math.round(e.startTime), Math.round(e.duration)]))).observe({ type: 'longtask', buffered: true }); } catch (e) { } } }, op || {}));
+      browser = A.browser; const p = A.page;
+      const cdp = await A.ctx.newCDPSession(p); await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+      await p.waitForTimeout(op && op.v186 === false ? 20000 : 75000);   // que termine de arrancar (y que pase el minuto del primer «Para atender»)
+      const t0 = await p.evaluate(() => { const s = window.__ini186 && window.__ini186.estado ? window.__ini186.estado().stats : null; return { t: performance.now(), calc: s ? s.calc.length : 0, render: s ? s.render.length : 0, at: s && s.at ? s.at.length : 0, calcs: s ? s.calc.slice() : [] }; });
+      await p.waitForTimeout(60000);
+      const r = await p.evaluate((t0) => { const lt = window.__lt186.filter((x) => x[0] >= t0.t); const s = window.__ini186 && window.__ini186.estado ? window.__ini186.estado().stats : null; const e = document.getElementById('ini186');
+        return { ms: lt.reduce((a, x) => a + x[1], 0), max: Math.max(0, ...lt.map((x) => x[1])), n: lt.length, calc: s ? s.calc.length - t0.calc : -1, render: s ? s.render.length - t0.render : -1, maxCalc: s ? Math.max(0, ...s.calc.slice(t0.calcs.length)) : 0, at: s && s.at ? s.at.length - t0.at : 0, atMs: s && s.at ? s.at : [], cambios: s ? s.cambios : null, ticks: s ? s.ticks : 0, saltos: s ? s.saltos : 0, vis: !!e && e.offsetHeight > 0 }; }, t0);
+      await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 }); await p.close(); return r;
+    };
+    const nuevo = await quieto({}), viejo = await quieto({ v186: false });
+    console.log('    reposo 60 s · v186 ' + JSON.stringify(nuevo) + ' · antes (v185) ' + JSON.stringify(viejo));
+    c(nuevo.vis && nuevo.calc <= 2 && nuevo.maxCalc < 200 && nuevo.at === 0 && nuevo.saltos > 10, 'quieto 60 s en el Inicio: no rearma nada caro (compara la firma de los datos ' + nuevo.saltos + ' veces; ' + nuevo.calc + ' repintado(s) liviano(s) de ' + nuevo.maxCalc + ' ms; «Para atender» ' + nuevo.at + ' veces) · ' + JSON.stringify({ calc: nuevo.calc, at: nuevo.at }));
+    c(nuevo.ticks <= 4, 'el contador del celu se actualiza al cambiar el minuto (' + nuevo.ticks + ' toques del reloj desde que abrió), no cada segundo');
+    c(nuevo.ms < viejo.ms * 0.6, 'tiempo ocupado en tareas largas en 60 s: ' + nuevo.ms + ' ms con el Inicio nuevo contra ' + viejo.ms + ' ms con el de antes (lo que queda es de otros módulos: carpetas de obra, verificación…)');
   }
   if (browser) await browser.close();
   process.exit(c.fin() ? 1 : 0);
