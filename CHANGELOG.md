@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v187 — 25/11/2026 (armada, sin publicar) · Revisión de la cuadrilla: fotos, planos y ubicaciones
+## v187 — 25/11/2026 (publicada en GitHub 25/11) · Revisión de la cuadrilla: fotos, planos y ubicaciones
 **Pedido (Ángel, 25/11):** «revisá que los de cuadrilla puedan sacar fotos rapidito y que se suban rápido; y que puedan abrir los planos y las ubicaciones; fijate si hay algún error».
 
 **Qué se revisó:** todos los caminos de fotos de la cuadrilla (Modo obra con «Voy a iniciar» y la cámara de la tarea, Mis tareas con el 📷 de cada fila y «＋ Otra foto», la cámara de la barra, la cámara del teléfono / APK), con y sin señal, con el servidor de fotos rápido, lento y caído, con las reglas reales y en el modo liviano; los planos y las ubicaciones. Las pruebas de siempre (`t_v164`, `t_v165`, `t_v166`, `t_v167`, `t_v171`, `t_v172`, `t_v149b`, `t_v157`, `t_v142`, `t_circuito`, `t_v022`, `t_v086`) pasan con la v186. Medidas en `herramientas/v187/medidas.txt`.
