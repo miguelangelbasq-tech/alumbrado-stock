@@ -1,0 +1,28 @@
+v187 · Medidas de la cuadrilla (25/11/2026). Celu 390×844, Juan (cuadrilla) en modo liviano. Máquina de pruebas, Chromium.
+Los «ms» son con la CPU frenada por CDP (×4 ≈ un Moto g24; ×6 más lento). Datos «grandes» = datos147 + 250 obras,
+3000 movimientos, etc. de datosGrande.js (el tamaño estimado de la base real).
+
+1) Fotos (medir187.js: 5 toques reales a ~1 por segundo; toque → destello en pantalla y toque → foto guardada en la orden)
+   v186, datos chicos, CPU ×4: Modo obra destello 11–27 ms, foto 96–193 ms · cámara de la barra 4–94 ms, foto 110–239 ms
+   v186, datos chicos, CPU ×6: Modo obra 15–36 ms, foto 163–399 ms · cámara de la barra 7–334 ms (uno), foto 119–602 ms
+   v186, datos grandes, CPU ×4, base de prueba SIN retener las escuchas (la copia de las pruebas desde la v165):
+        Modo obra 28–507 ms, foto 0,5–3,8 s · cámara de la barra 17–573 ms, foto 0,1–5,2 s; tareas largas hasta 1,1 s
+   v186, datos grandes, CPU ×4, base de prueba CON la retención de la v164 (como el SDK real envuelto por la app):
+        Modo obra 9–149 ms, foto 79–481 ms · cámara de la barra 5–494 ms, foto 110–1269 ms
+   v187, datos grandes, CPU ×4, con retención: Modo obra 7–88 ms, foto 69–358 ms · cámara de la barra 8–386 ms, foto 114–784 ms
+   (con la cámara abierta la v164 ya frena los redibujos; lo que queda son picos sueltos, en parte de la base de prueba,
+    que guarda toda la base en el navegador con cada escritura)
+
+2) Con la cámara cerrada (x187_post.js: lo que trabaja la página después de UNA escritura en su orden, y quieta 20 s)
+   v186, datos grandes, CPU ×4: quieta 20 s en «Hoy» 5,5 s de tareas largas (la más larga 1,4 s: el Inicio viejo calculando
+        el % de las 253 obras cada 4 s); cada cambio de su orden (una foto, una marca) 2,1–2,4 s (la más larga 1,5–1,8 s):
+        el Inicio viejo (% de todas las obras, plazaYaRegistrada) + renderPlanGrid ≈ 0,2 s + renderRegistros ≈ 0,5 s
+   v187: quieta 20 s 0,27 s · cada cambio 0,06–0,13 s
+   Es lo que la cuadrilla nota en Mis tareas con la cámara del teléfono / APK (cada foto escribe en la orden 2–3 veces), en
+   Modo obra entre fotos y al cerrar la cámara (se sueltan las escuchas retenidas), y la batería.
+
+3) «Enviar» de Mis tareas: con «Voy a iniciar» 08:20:05 y las fotos 08:20:40 / 08:20:50 / 08:20:58 la v186 no manda
+   («La hora de fin tiene que ser después de la de inicio», con las horas escondidas); la v187 manda 08:20 a 08:21.
+
+4) Planos y ubicaciones (t_v187 grupos 1 y 2, también con las reglas reales): la cuadrilla lee planosObra / planosImg; el
+   visor abre la imagen; «Cómo llegar» con mapa, pin, distancia y Google Maps, también sin señal; el Mapa con las obras.

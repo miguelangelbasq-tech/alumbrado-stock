@@ -2,6 +2,26 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v187 — 25/11/2026 (armada, sin publicar) · Revisión de la cuadrilla: fotos, planos y ubicaciones
+**Pedido (Ángel, 25/11):** «revisá que los de cuadrilla puedan sacar fotos rapidito y que se suban rápido; y que puedan abrir los planos y las ubicaciones; fijate si hay algún error».
+
+**Qué se revisó:** todos los caminos de fotos de la cuadrilla (Modo obra con «Voy a iniciar» y la cámara de la tarea, Mis tareas con el 📷 de cada fila y «＋ Otra foto», la cámara de la barra, la cámara del teléfono / APK), con y sin señal, con el servidor de fotos rápido, lento y caído, con las reglas reales y en el modo liviano; los planos y las ubicaciones. Las pruebas de siempre (`t_v164`, `t_v165`, `t_v166`, `t_v167`, `t_v171`, `t_v172`, `t_v149b`, `t_v157`, `t_v142`, `t_circuito`, `t_v022`, `t_v086`) pasan con la v186. Medidas en `herramientas/v187/medidas.txt`.
+
+**Errores encontrados y arreglados (módulo `cuadrilla187` + reemplazos chicos, bandera `__v187No`; sin reglas nuevas):**
+- **«Enviar» trabado en Mis tareas:** con «▶ Voy a iniciar» (v166) y las fotos en el mismo minuto, el cartelito «📤 Listo, enviar esta tarea» llevaba las horas escondidas con inicio = fin y la app decía «La hora de fin tiene que ser después de la de inicio» sin nada para corregir (había que adivinar tocar «−5»). Ahora el fin escondido es un minuto después del inicio (`tiempoCol`, `hmFin`).
+- **Los planos en la pantalla nueva de la cuadrilla:** solo se veían en «Ver lista completa» (Mis tareas clásica). Ahora «Orden de trabajo» muestra «📐 Planos de la obra» (la misma lista, abre el visor de siempre) y Modo obra tiene «📐 Ver plano» (con varios, lleva a la orden). Sin lecturas nuevas.
+- **El celu de la cuadrilla recalculaba pantallas que no ve:** el Inicio viejo (escondido detrás de «Hoy») calculaba el % de TODAS las obras cada 4 s y con cada cambio de la orden, y Planificación y lo de la oficina (informe, balance, etapas, Órdenes) se redibujaban escondidos con cada foto o marca. Con 250 obras y el celu lento (CPU ×4): quieto, ≈ 5,5 s de trabajo cada 20 s → 0,3 s; cada foto / marca ≈ 2,3 s de pantalla congelada → 0,1 s. Lo escondido se dibuja cuando la persona abre esa pantalla.
+
+**Lo que se descartó de la auditoría del 19/11:** la app NO toma el servidor de fotos viejo como el nuevo: con `{"ok":true,"bucket":true,"forma":"claves"}`, `{"ok":false}` o `r2:false` sin `version` queda «v1» (las fotos siguen yendo a la nube por `/f/`, como siempre; los videos y PDF grandes esperan el Worker v2); `planCalendario` (0,8 s) y las duplicadas de `carpetasObra` (1,5 s) no trabajan en el celu de la cuadrilla (pantalla escondida / sin permiso). Con la cámara abierta la v164 ya frena los redibujos (los picos que quedan son sueltos).
+
+**Cómo se arma:** `herramientas/v187/patch_v187.py` sobre el ORIGINAL 186 publicado (`BASE_SHA` 5b7d3f2d…): reemplazos en `tiempoCol` (`hmFin`, `etHtml`, el − / + del cartelito), `cuadrillaDia` (`PANT.orden`, `.cd-links` de Modo obra), el Inicio viejo de la base (`renderInicio` y su relojito) + el módulo `cuadrilla187` antes de `revisarAppDiag`.
+
+**Pruebas:** `t_v187` (nueva; Juan en el celu, CPU ×4; `SOLO=0..4`): 30/30 en el celu y con `REGLAS=1`; con `ANTES=1` contra la v186 el grupo 0 reproduce el «Enviar» trabado. Con la v187: `t_v164` 66/70 en la tanda con la máquina cargada (grupo 4 «cerrar la app a mitad» y un umbral de tiempo del 5); repetido solo, el 4 da 8/8 dos veces; el 5 falla también con la v186 en esta máquina (picos sueltos con CPU ×6, ver medidas), `t_v165` 59/59, `t_v166` 38/38 (y `REGLAS=1`), `t_v167` 76/76, `t_v171` 36/36, `t_v172` 74/74, `t_v149b` 37/37, `t_v157` 43/43, `t_v142` 49/49 (con la carpeta `guias/`), `t_circuito` 16/16 · 16/16, `t_v022` 33/33, `t_v086` 19/19, `t_v186` 67/67 · 70/70, `t_v161` 38/38, `t_v124` 10/10, `t_v119` 12/12. Ojo: la copia de `firebase_stub.js` de las pruebas perdió (desde la v165) la parte de la v164 que llama a `__snapRetener`; con ella las medidas de la cámara se parecen más a la app real.
+
+**Huellas:** ORIGINAL `187_2026-11-25_app-EMA_ORIGINAL.html` `c6c8201972fc06395d563065e07741fd15672b068ac53a85246425de57cc09a3` · `index.html` `f63540de22d955042a9cf1164414ffa71fdd2eab7b566d95f19c8c7b416956bc` (sello `2026-11-25 08:48 · 57966c`).
+
+**Qué tiene que hacer Ángel:** subir `index.html` a GitHub. Sin reglas nuevas ni APK.
+
 ## v186 — 19/11/2026 (publicada en GitHub 20/11) · El Inicio nuevo (contador del contrato), Órdenes › «Mañana», 📋 Itemizado y 📅 Gantt
 **Pedido (Ángel, 20/11):** aprobó las maquetas del Inicio: «usemos la A que vos decías» = la opción A con la recomendación (el contador grande, sin segundos en el celu; de la B, el mapa y «las plazas de hoy» en UNA tarjeta, con el mismo número en el pin y en la fila). Y: «El tema del Gantt tiene que estar en un nuevo ítem del menú, como Gantt».
 
