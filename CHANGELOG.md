@@ -2,6 +2,24 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
+## v188 — 27/11/2026 (armada, sin publicar) · Reserva nueva desde el celu: las sugerencias de «Para quién» y del material
+**Pedido (Ángel, 27/11, desde el celu):** «quiero hacer una nueva reserva del celular, pongo la obra y no me sale para buscar al personal ni el material ni nada».
+
+**La causa:** desde la **v119** (04/11), en el celu y en la app de Android los campos con lista de sugerencias (`<datalist>`) no usan la lista del teclado: el módulo `sugerencias` les saca el `list` y muestra su caja blanca `#sugCaja`, pegada al `body` con **z-index 9500**. La ventana de la reserva (`#rsModal`, clase `.pf-modal`) va en **z 9600**: la caja salía, pero **debajo** de la ventana, invisible y sin poder tocarse. Así «Para quién» (la nómina) y cada renglón de material (el catálogo del pañol) no mostraban nada (y como el campo ya no tiene `list`, tampoco la lista del teclado). En la compu no pasa (queda la lista del navegador). Pasa con todos los roles que hacen reservas (Administración, Oficina, Pañol, quien edita Órdenes) y en cualquier otra ventana fija con un campo con lista. Comprobado contra la v118 (lista del navegador, anda) y la v119 (ya queda debajo).
+
+**Qué cambia (solo `sugerencias`, bandera `__v188No`; sin reglas nuevas):**
+- La caja se pone arriba de la capa donde está el campo: el z-index más alto de los antepasados posicionados del campo + 1 (si es menor que 9500, queda el 9500 de siempre). En las pantallas comunes no cambia nada.
+- Al tocar una sugerencia la caja se saca en el `pointerdown` y el clic que venía después caía en lo que quedaba debajo (con la caja ya visible, en la reserva era «＋ Agregar material» o «Reservar»): ese clic se descarta (700 ms).
+- Un renglón recién agregado con «＋ Agregar material» se prepara al recibir el foco o la primera letra: antes esperaba hasta 1 s al relojito que le saca la lista del teclado y, si la persona ya lo tocaba y escribía, no salía nada (se vio en las pruebas, una de cada pocas veces).
+
+**Cómo se arma:** `herramientas/v188/patch_v188.py` sobre el ORIGINAL 187 publicado (`BASE_SHA` c6c82019…): cuatro reemplazos en `sugerencias` + el sello.
+
+**Pruebas:** `t_v188` (nueva; `datos178`; Administración, Oficina, Pañol y Pedro): PC 32/32 · celu 50/50 · `REGLAS=1` 32/32 · 50/50; con `ANTES=1` contra la v187 el celu da 33/49 (la lista queda debajo de la ventana en los 4 roles). Viejas con la v188 (con `__v188No`, PC · celu): `t_v023` 21/21 · 21/21, `t_v038` 26/26 · 26/26, `t_v052` 18/18 · 18/18, `t_v053` 8/8 · 8/8, `t_v056` 14/14 · 14/14, `t_v059` 17/17 · 17/17, `t_v061` 15/15 · 15/15, `t_v081` 16/16 · 16/16, `t_v102c` 11/11 · 12/12, `t_v119` 12/12 · 13/13, `t_v137` 62/62 · 63/63, `t_v142` 49/49 · 49/49, `t_v168` 83/83 · 83/83, `t_v178` 86/86 · 86/86, `t_v182` 45/45 · 44/45 (la misma falla con la v187: «Equipos habituales antes de que llegue la base», tiempos), `t_circuito` 16/16 · 16/16, `t_v187` 30/30 · 30/30. Con el arreglo prendido en las viejas (`V188=1`, build final): `t_v119` 12/12 · 13/13, `t_v056` 14/14 · 14/14, `t_v102c` 11/11 · 12/12, `t_circuito` 16/16 · 16/16 (con el build anterior también `t_v137` 61/62 · 63/63: la onda del micrófono, tiempos, en la corrida normal 62/62). Repetidas con el build final (con `__v188No`): `t_v119`, `t_v056`, `t_circuito`, `t_v187`, igual que arriba. La prueba toca el renglón nuevo a los 150 ms (sin el arreglo del relojito fallaba una de cada pocas corridas).
+
+**Huellas:** ORIGINAL `188_2026-11-27_app-EMA_ORIGINAL.html` `7482940b86a50a66028e14279008f048fb37dfad152c7925924aa15a026cd411` · `index.html` `999e04249dc0b174f4ec81a3fd57676e440de5591ec40c42d6344a273d84384c` (sello `2026-11-27 11:00 · babe09`).
+
+**Qué tiene que hacer Ángel:** subir `index.html` a GitHub. Sin reglas nuevas ni APK.
+
 ## v187 — 25/11/2026 (publicada en GitHub 25/11) · Revisión de la cuadrilla: fotos, planos y ubicaciones
 **Pedido (Ángel, 25/11):** «revisá que los de cuadrilla puedan sacar fotos rapidito y que se suban rápido; y que puedan abrir los planos y las ubicaciones; fijate si hay algún error».
 
