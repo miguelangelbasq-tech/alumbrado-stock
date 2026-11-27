@@ -2,7 +2,7 @@
 
 Autor: Miguel Ángel Díaz © 2026
 
-## v188 — 27/11/2026 (armada, sin publicar) · Reserva nueva desde el celu: las sugerencias de «Para quién» y del material
+## v188 — 27/11/2026 (publicada en GitHub 27/11) · Reserva nueva desde el celu: las sugerencias de «Para quién» y del material
 **Pedido (Ángel, 27/11, desde el celu):** «quiero hacer una nueva reserva del celular, pongo la obra y no me sale para buscar al personal ni el material ni nada».
 
 **La causa:** desde la **v119** (04/11), en el celu y en la app de Android los campos con lista de sugerencias (`<datalist>`) no usan la lista del teclado: el módulo `sugerencias` les saca el `list` y muestra su caja blanca `#sugCaja`, pegada al `body` con **z-index 9500**. La ventana de la reserva (`#rsModal`, clase `.pf-modal`) va en **z 9600**: la caja salía, pero **debajo** de la ventana, invisible y sin poder tocarse. Así «Para quién» (la nómina) y cada renglón de material (el catálogo del pañol) no mostraban nada (y como el campo ya no tiene `list`, tampoco la lista del teclado). En la compu no pasa (queda la lista del navegador). Pasa con todos los roles que hacen reservas (Administración, Oficina, Pañol, quien edita Órdenes) y en cualquier otra ventana fija con un campo con lista. Comprobado contra la v118 (lista del navegador, anda) y la v119 (ya queda debajo).
